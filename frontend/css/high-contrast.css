@@ -1,0 +1,19 @@
+/* internet.nl
+   high-contrast.css
+   v1.0 | 20161028
+*/
+
+/* images for test result descriptions */
+.meter { 
+  height: 40px;
+  background-color: #fff;
+}
+.meter > span {
+  box-sizing: border-box !important;
+  top: 5px;
+  height: 0 !important;
+  min-height: 1px;
+  background-color: #000;
+  background-image: none;
+  border: 10px solid #000;
+}

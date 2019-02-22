@@ -17,5 +17,3 @@ celerybeat-schedule.db
 celerybeat.pid
 /batch_results/
 /locale_files/
-/translations/
-/frontend/
