@@ -1,0 +1,20 @@
+<div class="tech-details-table">
+  <table>
+    <thead>
+      <tr>
+      {% for header in details_table_headers %}
+        <th>{{header}}</th>
+      {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in details_table_rows %}
+      <tr>
+      {% for cell in row %}
+        <td>{{cell}}</td>
+      {% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

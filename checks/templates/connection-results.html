@@ -1,0 +1,43 @@
+{% extends "base-results.html" %}
+{% load staticfiles %}
+
+{% block testheadcontent %}
+  <h1>
+    {% include "string.html" with name="connection title" %}
+  </h1>
+  {{block.super}}
+{% endblock %}
+
+{% block perfectscore %}
+{% endblock %}
+
+{% block testmiddlecontent %}
+    <div class="timestamp">
+    <a href="{% url "faqs_report" %}" class="icon-testinfo">{% include "string.html" with name="results test-info" %}</a>
+    </div>
+{% endblock %}
+
+{% block testdetailitems%}
+  {% if probe.name == 'connipv6' %}
+    {% include "details-test-item.html" with testitem=details.resolver_conn %}
+    {% include "details-test-item.html" with testitem=details.dns_conn %}
+    {% include "details-test-item.html" with testitem=details.connection %}
+    {% include "details-test-item.html" with testitem=details.privacy %}
+    {% include "details-test-item.html" with testitem=details.ipv4_conn %}
+  {% elif probe.name == 'connresolver' %}
+    {% include "details-test-item.html" with testitem=details.validation %}
+  {% endif %}
+{% endblock %}
+
+{% block furthertesting %}
+  <div class="block">
+    <section class="further-testing">
+        <h2>{% include "string.html" with name="results further-testing connection label" %}</h2>
+        {% include "content.html" with name="results further-testing connection content" %}
+    </section>
+  </div>
+{% endblock %}
+
+{% block testtailcontent %}
+  {{block.super}}
+{% endblock %}

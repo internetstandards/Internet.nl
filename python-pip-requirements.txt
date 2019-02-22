@@ -1,0 +1,22 @@
+# Newer versions of amqp do not work on all systems because of newer TCP settings.
+amqp==2.2.2
+celery==4.2
+kombu==4.2.1
+Django==1.11
+django-hosts
+django-redis
+django-enumfields
+django-markdown_deux
+psycopg2-binary
+django-bleach
+django-csp
+eventlet
+gevent
+requests
+cryptography
+pyparsing
+pyrabbit
+polib
+rjsmin
+libsass
+markdown

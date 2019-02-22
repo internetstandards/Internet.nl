@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block maincontent %}
+  <article class="block wide">
+    <section>
+    <h2>Database statistics</h2>
+    <h3>Completed tests</h2>
+    <table>
+      <thead>
+        <tr>
+        {% for header in table_headers %}
+          <th>{{header}}</th>
+        {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table_content %}
+          <tr>
+            {% for cell in row %}
+              <td>{{cell}}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </section>
+  </article>
+{% endblock %}

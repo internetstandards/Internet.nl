@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block maincontent %}
+  <article class="block wide">
+    <section>
+      <h1>{% include "string.html" with name="faqs title" %}</h1>
+      {% include "content.html" with name="faqs content" %}
+    </section>
+  </article>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load translate %}
+
+{% block maincontent %}
+  <article class="block wide">
+    <section>
+    {% if author %}
+      {% expand "author {{author}} name" as authorname %}
+      <h1>Blog {% include "string.html" with name=authorname %}: {% include "string.html" with name=title %}</h1>
+      <div class="nicedate">{% include "content.html" with name=date %}</div>
+      <img src="{% static '/author/' %}/{{author}}/picture.jpg" class="blogphoto" alt="[{{authorname}}]" />
+    {% else %}
+      <h1>{% include "string.html" with name=title %}</h1>
+      <div class="nicedate">{% include "content.html" with name=date %}</div>
+    {% endif %}
+      <div class="intro">
+        {% include "content.html" with name=lead %}
+      </div>
+      <div>{% translate body %}&nbsp;</div>
+    {% if author %}
+      {% expand "author {{author}} name" as authorname %}
+      {% expand "author {{author}} bio" as authorbio %}
+      <div>
+        <h2>{% include "string.html" with name=authorname %}</h2>
+        {% include "content.html" with name=authorbio %}
+      </div>
+    {% endif %}
+    </section>
+  </article>
+  <aside>
+    <section class="block news">
+      <h2>{% include "string.html" with name="base news" %}</h2>
+      <ul>
+      {% for article in articles %}
+        {% expand "article {{article}} title" as articletitle %}
+        <li><a href="/article/{{article}}">{% include "string.html" with name=articletitle %}</a></li>
+      {% endfor %}
+      </ul>
+      <p class="read-more"><a href="/articles/">{% include "string.html" with name="base newslink" %}</a></p>
+    </section>
+  </aside>
+{% endblock %}

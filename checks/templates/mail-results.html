@@ -1,0 +1,98 @@
+{% extends "base-results.html" %}
+{% load translate %}
+
+{% block testheadcontent %}
+  <h1>
+    {% include "string.html" with name="mail title" %}
+  </h1>
+  {{block.super}}
+{% endblock %}
+
+{% block perfectscore %}
+{% endblock %}
+
+{% block testmiddlecontent %}
+    {% expand "mail tweetmessage" as tweetmessage %}
+    {{block.super}}
+{% endblock %}
+
+{% block testdetailitems%}
+  {% if probe.name == 'mailipv6' %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results domain-mail ipv6 name-servers label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.ns_aaaa %}
+    {% include "details-test-item.html" with testitem=details.ns_reach %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail ipv6 mail-servers label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.mx_aaaa %}
+    {% include "details-test-item.html" with testitem=details.mx_reach %}
+
+  {% elif probe.name == 'maildnssec' %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail dnssec domain label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.dnssec_exists %}
+    {% include "details-test-item.html" with testitem=details.dnssec_valid %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail dnssec mail-servers label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.dnssec_mx_exists %}
+    {% include "details-test-item.html" with testitem=details.dnssec_mx_valid %}
+
+  {% elif probe.name == 'mailauth' %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail auth dmarc label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.dmarc %}
+    {% include "details-test-item.html" with testitem=details.dmarc_policy %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail auth dkim label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.dkim %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail auth spf label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.spf %}
+    {% include "details-test-item.html" with testitem=details.spf_policy %}
+
+  {% elif probe.name == 'mailtls' %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail tls starttls label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.starttls_exists %}
+    {% include "details-test-item.html" with testitem=details.tls_version %}
+    {% include "details-test-item.html" with testitem=details.tls_ciphers %}
+    {% include "details-test-item.html" with testitem=details.fs_params %}
+    {% include "details-test-item.html" with testitem=details.tls_compression %}
+    {% include "details-test-item.html" with testitem=details.renegotiation_secure %}
+    {% include "details-test-item.html" with testitem=details.renegotiation_client %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results domain-mail tls certificate label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.cert_trust %}
+    {% include "details-test-item.html" with testitem=details.cert_pubkey %}
+    {% include "details-test-item.html" with testitem=details.cert_signature %}
+    {% include "details-test-item.html" with testitem=details.cert_hostmatch %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results domain-mail tls dane label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.dane_exists %}
+    {% include "details-test-item.html" with testitem=details.dane_valid %}
+    {% include "details-test-item.html" with testitem=details.dane_rollover %}
+  {% endif %}
+{% endblock %}
+
+{% block furthertesting %}
+  <div class="block">
+    <section class="further-testing">
+        <h2>{% include "string.html" with name="results further-testing mail label" %}</h2>
+        {% include "content.html" with name="results further-testing mail content" %}
+    </section>
+  </div>
+{% endblock %}
+
+{% block testtailcontent %}
+{{block.super}}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block maincontent %}
+   <article class="block fullwidth center">
+     <section>
+       <div class="wrap">
+         <div class="inner">
+           <h1>404 {{pagetitle}}</h1>
+           <img src="{% static '404-cat-not-found.png' %}" alt="" width="600" height="293">
+         </div>
+         {% include "content.html" with name="page404 content" %}
+       </div>
+     </section>
+   </article>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block maincontent %}
+  <article class="block wide">
+    <section>
+      {% include "content.html" with name="about content" %}
+    </section>
+  </article>
+  <aside>
+    <section class="block">
+      {% include "content.html" with name="about contact" %}
+    </section>
+  </aside>
+{% endblock %}

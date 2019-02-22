@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block maincontent %}
+  <article class="block wide">
+    {% include "content.html" with name="copyright content" %}
+  </article>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "faqarticle.html" %}
+
+{% block faqarticlecontent %}
+    <div class="title-and-explanation">
+      <h1>{% include "string.html" with name="base test connection title" %}</h1>
+      {% include "content.html" with name="base test connection explain" %}
+    </div>
+    <form action="/connection/" method="POST">
+      <div class="contains-button">
+        <button>{% include "string.html" with name="base test start" %}</button>
+      </div>
+    </form>
+{% endblock %}

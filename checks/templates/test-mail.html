@@ -1,0 +1,22 @@
+{% extends "faqarticle.html" %}
+
+{% block faqarticlecontent %}
+    <div class="title-and-explanation">
+      <h1>{% include "string.html" with name="base test mail title" %}</h1>
+      {% include "content.html" with name="base test mail explain" %}
+    </div>
+    <form action="/mail/" method="POST">
+      <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
+        <span class="emailfield before"><input id="mail-url" class="email" type="text" name="url" placeholder="example.nl"></span>
+      </label>
+      {% if request.GET.invalid != None %}
+      <div class="invalid-domain">
+        {% include "string.html" with name="base test prechecks invalid domain" %}
+      </div>
+      {% endif %}
+      <div class="contains-button">
+        <button>{% include "string.html" with name="base test start" %}</button>
+      </div>
+    </form>
+  </article>
+{% endblock %}
