@@ -2,7 +2,7 @@
 amqp==2.2.2
 celery==4.2
 kombu==4.2.1
-Django==1.11
+Django==1.11.20
 django-hosts
 django-redis
 django-enumfields
