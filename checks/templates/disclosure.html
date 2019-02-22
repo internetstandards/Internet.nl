@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block maincontent %}
+  <article class="block wide">
+    {% include "content.html" with name="disclosure content" %}
+  </article>
+  <aside>
+    <section class="block">
+      {% include "content.html" with name="about contact" %}
+    </section>
+  </aside>
+{% endblock %}

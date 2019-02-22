@@ -1,0 +1,35 @@
+{% load staticfiles %}
+{% load translate %}
+
+{% if testitem %}
+  {% with set=testitem|get_testitem_div_class_and_text_status %}
+    <div class="testresult {{set.0}}">
+        <h3 class="panel-title" >
+          <a href="" aria-expanded="false">
+            <span class="visuallyhidden">{{set.1}}:</span>
+            {% translate testitem.label %}
+            <span class="pre-icon visuallyhidden"></span>
+            <span class="icon"><img src="{% static "push-open.png" %}" alt=""></span>
+          </a>
+      </h3>
+      <div class="panel-content">
+        <h4>
+          {% include "string.html" with name="results verdict label" %}
+        </h4>
+        <p>{% include "string.html" with name=testitem.verdict %}</p>
+        <h4>
+          {% include "string.html" with name="results explanation label" %}
+        </h4>
+          {% include "content.html" with name=testitem.exp %}
+        {% if testitem.tech_type and testitem.tech_data %}
+        <h4>
+          {% include "string.html" with name="results tech-details label" %}
+        </h4>
+          {% if testitem.tech_type == 'table' %}
+            {% render_details_table testitem.tech_string testitem.tech_data %}
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  {% endwith %}
+{% endif %}

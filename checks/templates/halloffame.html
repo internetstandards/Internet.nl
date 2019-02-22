@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load translate %}
+
+{% block maincontent %}
+  <article class="block fullwidth">
+    {% include "content.html" with name="halloffame teaser" %}
+    <ul>
+      {% for member in halloffame %}
+      <li><a href="{{member.permalink}}">{{member.name|idna|truncatechars:36}}</a></li>
+      {% endfor %}
+    </ul>
+  </article>
+{% endblock %}

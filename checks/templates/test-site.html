@@ -1,0 +1,21 @@
+{% extends "faqarticle.html" %}
+
+{% block faqarticlecontent %}
+    <div class="title-and-explanation">
+      <h1>{% include "string.html" with name="base test website title" %}</h1>
+      {% include "content.html" with name="base test website explain" %}
+    </div>
+    <form action="/site/" method="POST">
+      <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
+        <input id="web-url" type="text" name="url" placeholder="www.example.nl">
+      </label>
+      {% if request.GET.invalid != None %}
+      <div class="invalid-domain">
+        {% include "string.html" with name="base test prechecks invalid domain" %}
+      </div>
+      {% endif %}
+      <div class="contains-button">
+        <button>{% include "string.html" with name="base test start" %}</button>
+      </div>
+    </form>
+{% endblock %}
