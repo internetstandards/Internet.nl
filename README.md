@@ -67,7 +67,7 @@ relevant to the deployment of your installation and steps you need to run
 before starting/updating your installation.
 
 Example configuration files for the internet.nl ecosystem can be found
-[here](documentation/example_configurations).
+[here](documentation/example_configuration).
 
 
 ## Building blocks
