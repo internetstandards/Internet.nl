@@ -1430,6 +1430,8 @@ class MailAuthDmarc(Subtest):
             worst_status=scoring.MAIL_AUTH_DMARC_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DMARC_PASS,
             model_score_field="dmarc_score")
+        # Fix for one line, one value data.
+        self.tech_data = [[self.tech_data]]
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -1457,6 +1459,8 @@ class MailAuthDmarcPolicy(Subtest):
             worst_status=scoring.MAIL_AUTH_DMARC_POLICY_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DMARC_POLICY_PASS,
             model_score_field="dmarc_policy_score")
+        # Fix for one line, one value data.
+        self.tech_data = [[self.tech_data]]
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1489,6 +1493,8 @@ class MailAuthSpf(Subtest):
             worst_status=scoring.MAIL_AUTH_SPF_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_SPF_PASS,
             model_score_field="spf_score")
+        # Fix for one line, one value data.
+        self.tech_data = [[self.tech_data]]
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
