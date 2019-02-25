@@ -164,21 +164,21 @@ for PostgreSQL.
   python manage.py migrate checks
   ```
 - Copy distributed config and edit:
- * `cp internetnl/settings.py-dist internetnl/settings.py`
- * Review the settings and make sure to at least change secret, database
-   settings, redis settings, celery settings, ldns-dane location
+  * `cp internetnl/settings.py-dist internetnl/settings.py`
+  * Review the settings and make sure to at least change secret, database
+    settings, redis settings, celery settings, ldns-dane location
 
 
 ## Running services
 
-Make sure the following services are installed and runnig on your system:
-- Redis
+Make sure the following services are installed and running on your system:
+- Redis  
   _should be installed by the previous steps_
-- RabbitMQ
+- RabbitMQ  
   _should be installed by the previous steps_
 - Unbound
 
-- Celery and celery beat
+- Celery and celery beat  
   These services need to be setup manually. You can follow [these](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html)
   instructions and consult the [example configuration files](example_configuration/).
 
@@ -187,19 +187,18 @@ Make sure the following services are installed and runnig on your system:
 
 The `<base-domain>` should contain the following domain names pointing to the
 IP addresses of the webserver (the default `<base-domain>` is `internet.nl`):
-`<base-domain>`
-`en`.`<base-domain>`
-`nl`.`<base-domain>`
-`www`.`<base-domain>`
-`conn`.`<base-domain>`
-`en`.`conn`.`<base-domain>`
-`nl`.`conn`.`<base-domain>`
+ - `<base-domain>`
+ - `en`.`<base-domain>`
+ - `nl`.`<base-domain>`
+ - `www`.`<base-domain>`
+ - `conn`.`<base-domain>`
+ - `en`.`conn`.`<base-domain>`
+ - `nl`.`conn`.`<base-domain>`
 
 The `<base-domain>` should contain delegations and DS records for the following
 names (see the Unbound section for more information):
-
-test-ns-signed.`<base-domain>`
-test-ns6-signed.`<base-domain>`
+ - test-ns-signed.`<base-domain>`
+ - test-ns6-signed.`<base-domain>`
 
 ### I18N consideration
 
@@ -208,11 +207,9 @@ information (e.g. cookies). This leads to the below convention when an option
 for different languages is required.
 
 *All* available languages should come as different DNS records, pointing to the
-same host, in the format:
-    <language_code>.<host>
+same host, in the format `<language_code>`.`<host>`
 
-For example, for the english site of internet.nl it would be:
-    en.internet.nl
+For example, for the english site of internet.nl it would be: `en.internet.nl`
 
 The available languages should also be included as LANGUAGES in django's
 settings.py file.
