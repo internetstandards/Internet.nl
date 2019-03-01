@@ -55,11 +55,10 @@ There are three ways to customize the deployment:
 2. Pass environment variables to Docker Compose by creating a `.env` file containing NAME=VALUE key pairs to override the any of the environment variables that are passed by the `docker-compose.yml` file. See the [Docker Compose documentation](https://docs.docker.com/compose/environment-variables/#pass-environment-variables-to-containers).
 3. Create your own Dockerfile using the nlnetlabs/internetnl image as a base, `export DJANGO_SETTINGS_MODULE=/path/to/your/settings.py` and base your `settings.py` file on [`settings.py-dist`](https://github.com/NLnetLabs/Internet.nl/blob/master/internetnl/settings.py-dist). You can also go even further and override the Docker entrypoint to take complete control.
 
-For further customisation edit `Dockerfile.compose` before running `docker-compose build`.
+For further customisation edit `Dockerfile` before running `docker-compose build`.
 
 ## Known issues
-- Base image is not yet published on Docker Hub so all users have to build the base image first.
-- Connection and email testing is not yet possible because they rely upon a specific deployment of Unbound configured as master for subdomains of a test domain that you own.
+- Connection testing is not yet possible because they rely upon a specific deployment of Unbound configured as master for subdomains of a test domain that you own.
 - Building of Unbound needs to be moved from the base image to the compose image and the (Change #defines on top of internetnl/internetnl.c to match test environment)[https://github.com/ralphdolmans/unbound/tree/internetnl] build step should be done with user specific domain name details.
 
 ## Development
