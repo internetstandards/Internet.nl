@@ -52,11 +52,19 @@ based application.
 Current install base is Django 1.11 with Python 3.5+
 (Python 3.7+ is not currently supported).
 
+
+### Quick start
+
 Although the first open source release of the project is aimed to provide
 transparency on the tool and the way the tests are run, there is (currently) no
-trivial way to install the software.
+trivial way to install the software. Nonetheless, you could easily spin up a
+ready to use local dockerized environment for local development and testing
+purposes by following the [docker instructions](docker/README.md)
 
-However if you feel brave enough you can follow the
+
+### Slow start
+
+If you feel brave enough for a system install you can follow the
 [installation instructions](documentation/Installation.md).
 
 The [customize instructions](documentation/Customize.md) describe how you could
