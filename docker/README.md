@@ -58,7 +58,7 @@ There are three ways to customize the deployment:
 For further customisation edit `Dockerfile` before running `docker-compose build`.
 
 ## Known issues
-- Connection testing is not yet possible because they rely upon a specific deployment of Unbound configured as master for subdomains of a test domain that you own.
+- Connection testing is not yet possible because it relies upon a specific deployment of Unbound configured as master for subdomains of a test domain that you own.
 - Building of Unbound needs to be moved from the base image to the compose image and the ["Change #defines on top of internetnl/internetnl.c to match test environment"](https://github.com/ralphdolmans/unbound/tree/internetnl) build step should be done with user specific domain name details.
 
 ## Development
