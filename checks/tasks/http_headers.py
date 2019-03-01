@@ -7,6 +7,17 @@ from .shared import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
 from .. import scoring
 
 
+def get_multiple_values_from_header(header):
+    """
+    Get all the values for the header.
+
+    Multiple values of the same header are in a comma separated list; make sure
+    to ignore white space when splitting the values.
+
+    """
+    return [value.strip() for value in header.split(',')]
+
+
 class HeaderCheckerContentEncoding(object):
     """
     Class for checking the Content-Encoding HTTP header.
@@ -56,7 +67,7 @@ class HeaderCheckerContentSecurityPolicy(object):
             score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
             results['content_security_policy_score'] = score
         else:
-            values = value.split(",")
+            values = get_multiple_values_from_header(value)
             results['content_security_policy_values'].extend(values)
 
     def get_positive_values(self):
@@ -95,7 +106,7 @@ class HeaderCheckerStrictTransportSecurity(object):
             results['hsts_score'] = scoring.WEB_TLS_HSTS_BAD
             self.first_time_seen = False
         elif value:
-            header_values = value.split(",")
+            header_values = get_multiple_values_from_header(value)
             try:
                 max_age = header_values[0].lower().split(
                     'max-age=')[1].split(';')[0]
@@ -143,7 +154,7 @@ class HeaderCheckerXFrameOptions(object):
             results['x_frame_options_score'] = score
             results['x_frame_options_enabled'] = False
         else:
-            values = value.split(",")
+            values = get_multiple_values_from_header(value)
             first_header = values[0].upper()
             if not (first_header == "DENY"
                     or first_header == "SAMEORIGIN"
@@ -188,7 +199,7 @@ class HeaderCheckerXContentTypeOptions(object):
             results['x_content_type_options_score'] = score
             results['x_content_type_options_enabled'] = False
         else:
-            values = value.split(",")
+            values = get_multiple_values_from_header(value)
             if not values[0].lower() == "nosniff":
                 score = scoring.WEB_APPSECPRIV_X_CONTENT_TYPE_OPTIONS_BAD
                 results['x_content_type_options_score'] = score
@@ -230,7 +241,7 @@ class HeaderCheckerXXssProtection(object):
             results['x_xss_protection_score'] = score
             results['x_xss_protection_enabled'] = False
         else:
-            values = value.split(",")
+            values = get_multiple_values_from_header(value)
             enabled = values[0].split(";")[0]
             if enabled == "0":
                 score = scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_BAD
@@ -278,7 +289,7 @@ class HeaderCheckerReferrerPolicy(object):
             results['referrer_policy_enabled'] = False
 
         else:
-            values = value.split(",")
+            values = get_multiple_values_from_header(value)
             for value in values:
                 if value.lower() not in [
                         'no-referrer',

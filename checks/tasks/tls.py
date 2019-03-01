@@ -696,10 +696,14 @@ def get_common_name(cert):
     Get the commonName of the certificate.
 
     """
-    common_name = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0]
     value = "-"
-    if common_name:
-        value = common_name.value
+    try:
+        common_name = (
+            cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0])
+        if common_name:
+            value = common_name.value
+    except IndexError:
+        pass
     return value
 
 

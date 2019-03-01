@@ -13,7 +13,7 @@ pushthe changes to the server:
    make frontend js
    ```
 
-2. Periodically update needed remote data with:
+2. _Periodically_ update needed remote data with:
    ```
    make update_cert_fingerprints
    make update_padded_macs
@@ -21,8 +21,9 @@ pushthe changes to the server:
    ```
 On the server you need to:
 
-1. Make sure that you have the latest translation files compiled:
+1. Create the latest translation files and compile them:
    ```
+   make translations
    cd checks; python ../manage.py compilemessages; cd ..
    ```
 

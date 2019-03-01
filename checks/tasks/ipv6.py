@@ -248,6 +248,8 @@ def callback(results, addr, parent, parent_name, category):
                         category.subtests['web_ipv46'].result_good()
                     elif web_simhash_distance >= 0:
                         category.subtests['web_ipv46'].result_bad()
+                    else:
+                        category.subtests['web_ipv46'].result_no_v4()
 
     parent.report = category.gen_report()
     parent.save()

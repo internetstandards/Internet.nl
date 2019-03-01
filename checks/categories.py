@@ -330,6 +330,9 @@ class WebIpv6WsIpv46(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web ipv6 web-ipv46 verdict good"
 
+    def result_no_v4(self):
+        self.worst_status = STATUS_NOT_TESTED
+
 
 class MailIpv6MxAaaa(Subtest):
     def __init__(self):
@@ -1318,7 +1321,9 @@ class MailTlsDaneExists(Subtest):
             label="detail mail tls dane-exists label",
             explanation="detail mail tls dane-exists exp",
             tech_string="detail mail tls dane-exists tech table",
-            worst_status=STATUS_NOTICE)
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_DANE_VALIDATED,
+            model_score_field="dane_score")
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_DANE_EXISTS_WORST_STATUS

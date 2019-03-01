@@ -307,22 +307,22 @@ def http_fetch(
                 conn.close()
             break
         # If we could not connect we can try again.
-        except socket.error as e:
+        except socket.error:
             try:
                 conn.close()
-            except Exception:
+            except (socket.error, http.client.HTTPException):
                 pass
             tries_left -= 1
             if tries_left <= 0:
-                raise e
+                raise
             time.sleep(1)
         # If we got another exception just raise it.
-        except Exception as e:
+        except http.client.HTTPException:
             try:
                 conn.close()
-            except Exception:
+            except (socket.error, http.client.HTTPException):
                 pass
-            raise e
+            raise
 
     if not ret_headers:
         ret_headers = {}

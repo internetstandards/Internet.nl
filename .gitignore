@@ -9,11 +9,10 @@
 /openssl/
 /build/
 /static/
-.htpasswd
+/.htpasswd
 /nbproject
 /dump.rdb
-celerybeat-schedule
-celerybeat-schedule.db
-celerybeat.pid
+/celerybeat-schedule*
+/celerybeat.pid
 /batch_results/
 /locale_files/
