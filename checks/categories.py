@@ -330,6 +330,9 @@ class WebIpv6WsIpv46(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web ipv6 web-ipv46 verdict good"
 
+    def result_no_v4(self):
+        self.worst_status = STATUS_NOT_TESTED
+
 
 class MailIpv6MxAaaa(Subtest):
     def __init__(self):
