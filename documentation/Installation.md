@@ -91,8 +91,9 @@ Unbound (and pylibunbound) is used as a DNS resolver/nameserver for the various
 tests performed.
 
 Use the fork at https://github.com/ralphdolmans/unbound.
-Make sure to use the `internetnl` branch and follow the README instructions for
-installation.
+Make sure to use the `internetnl` branch and follow the
+[README.md](https://github.com/ralphdolmans/unbound/blob/internetnl/README.md)
+instructions for installation.
 
 If you setup a python virtual environment you should enable it for unbound's
 installation.
@@ -106,6 +107,10 @@ ldns-dane is an example application from the ldns library that validates a
 domain's DANE record(s) and is used for validating the DANE records in the
 website and mail tests.
 
+_Note that ldns-dane will use your locally configured DNS resolver to get
+and validate the TLSA records. This means that your locally configured DNS
+resolver needs to have DNSSEC enabled._
+
 If your system has ldns >= 1.7.0 **and** openssl >= 1.1.0 you are good to go.
 
 If not:
@@ -117,7 +122,7 @@ If not:
   - Get an ldns version >= 1.7.0 from [here](https://www.nlnetlabs.nl/projects/ldns/download/)
   - `./configure --with-examples --with-ssl=/path/to/above/ssl/build/dir`
   - `make`
-- Create a wrapper file for using the compiled ldns-dane binary
+- Create a wrapper file for using the compiled ldns-dane binary  
   `cat ldns-dane-wrapper`
   ```
   #!/bin/sh
@@ -147,10 +152,6 @@ PostgreSQL is used as the database.
 - Create postgres user and database:
   * `sudo -u postgres createuser <username> -P`
   * `sudo -u postgres createdb -O <username> <db_name>`
-
-Copy distributed config and edit:
- * `cp internetnl/settings.py-dist internetnl/setting.py`
- * change secret, database setting, redis settings, ldns-dane location
 
 If you expect high DB traffic the use of
 [PgBouncer](https://pgbouncer.github.io/) is recommended as a connection pooler

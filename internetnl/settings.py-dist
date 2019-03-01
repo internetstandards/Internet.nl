@@ -85,11 +85,11 @@ if ENABLE_BATCH:
 
 # --- Application definition
 #
+IPV6_TEST_ADDR = "::1"
 ALLOWED_HOSTS = [".internet.nl", "internet.nl", IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
 ADMINS = (('Administrator', 'django@internet.nl'))
 SERVER_EMAIL = 'django@internet.nl'
 INTERNAL_IPS = [ "localhost", "127.0.0.1" ]
-IPV6_TEST_ADDR = "::1"
 CONN_TEST_DOMAIN = "internet.nl"
 
 INSTALLED_APPS = [
