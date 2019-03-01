@@ -1,0 +1,32 @@
+version: '2.0'
+
+services:  
+  app:
+    image: nlnetlabs/internetnl:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host
+    dns: 127.0.0.1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - rabbitmq
+      - postgres
+
+  redis:
+    network_mode: host
+    image: redis:alpine
+
+  rabbitmq:
+    network_mode: host
+    image: rabbitmq:alpine
+
+  postgres:
+    network_mode: host
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=internetnl
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=internetnl_db1
