@@ -59,7 +59,7 @@ For further customisation edit `Dockerfile` before running `docker-compose build
 
 ## Known issues
 - Connection testing is not yet possible because they rely upon a specific deployment of Unbound configured as master for subdomains of a test domain that you own.
-- Building of Unbound needs to be moved from the base image to the compose image and the (Change #defines on top of internetnl/internetnl.c to match test environment)[https://github.com/ralphdolmans/unbound/tree/internetnl] build step should be done with user specific domain name details.
+- Building of Unbound needs to be moved from the base image to the compose image and the ["Change #defines on top of internetnl/internetnl.c to match test environment"](https://github.com/ralphdolmans/unbound/tree/internetnl) build step should be done with user specific domain name details.
 
 ## Development
 The experimental [squash](https://docs.docker.com/engine/reference/commandline/build/#squash-an-images-layers---squash-experimental) feature is used to reduce the image size from ~2 GiB to ~1.2 GiB. See `--squash` in the [official Docker Build documentation](https://docs.docker.com/engine/reference/commandline/image_build/).
