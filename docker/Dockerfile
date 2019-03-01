@@ -8,7 +8,7 @@ ENV APP_PATH /app
 ENV DEBIAN_FRONTEND noninteractive
 ENV BRANCH ${BRANCH:-master}
 
-# Make port 80 available to the world outside this container
+# Make port 8080 available to the world outside this container
 EXPOSE 8080
 
 # Install required dependencies
