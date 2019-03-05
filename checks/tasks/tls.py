@@ -1,5 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from binascii import hexlify
 import errno
 import http.client
 import socket
@@ -688,6 +689,7 @@ def is_root_cert(cert):
 
     """
     digest = cert.fingerprint(hashes.SHA1())
+    digest = hexlify(digest).decode('ascii')
     return digest.upper() in root_fingerprints
 
 
