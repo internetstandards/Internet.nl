@@ -1,6 +1,6 @@
 *This document is historic. It has outdated information for the score
-calculation and/or the actual tests but still could server as an overview for
-the tests and the though process behind them.*
+calculation and/or the actual tests but still could serve as an overview for
+the tests and the thought process behind them.*
 
 # Connectivity test.
 
