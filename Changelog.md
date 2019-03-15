@@ -1,8 +1,8 @@
 # Change Log
 
-## Unreleased next version
+## 1.0.2
 
-New
+Hotfix release.
 
 Bug Fixes
 - Report unusable TLSA records as non-valid. [(#372)]
