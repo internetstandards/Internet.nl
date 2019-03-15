@@ -59,7 +59,7 @@ Although the first open source release of the project is aimed to provide
 transparency on the tool and the way the tests are run, there is (currently) no
 trivial way to install the software. Nonetheless, you could easily spin up a
 ready to use local dockerized environment for local development and testing
-purposes by following the [docker instructions](docker/README.md)
+purposes by following the [docker instructions](docker/README.md).
 
 
 ### Slow start
