@@ -661,7 +661,11 @@ def dane(
     if res:
         stdout, stderr = res
 
-        if ("No TLSA records" not in stdout
+        if ("No usable TLSA records" in stdout
+                or "No usable TLSA records" in stderr):
+            score = score_failed
+            status = DaneStatus.failed
+        elif ("No TLSA records" not in stdout
                 and "No TLSA records" not in stderr):
             if proc.returncode == 0:
                 score = score_validated

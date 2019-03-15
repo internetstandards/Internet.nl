@@ -5,6 +5,9 @@
 New
 
 Bug Fixes
+- Report unusable TLSA records as non-valid. [(#372)]
+
+[(#372)]: https://github.com/NLnetLabs/Internet.nl/issues/372
 
 ## 1.0.1
 
