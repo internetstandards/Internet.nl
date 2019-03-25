@@ -1263,10 +1263,10 @@ msgid "detail web appsecpriv http-x-frame tech table"
 msgstr "Webserver-IP-adres|X-Frame-Options waarde"
 
 msgid "detail web appsecpriv http-x-frame verdict bad"
-msgstr "Je webserver biedt *geen* veilig ingestelde X-XSS-Protection aan."
+msgstr "Je webserver biedt *geen* veilig ingestelde X-Frame-Options aan."
 
 msgid "detail web appsecpriv http-x-frame verdict good"
-msgstr "Je webserver biedt veilig ingestelde X-XSS-Protection aan."
+msgstr "Je webserver biedt veilig ingestelde X-Frame-Options aan."
 
 msgid "detail web appsecpriv http-x-xss exp"
 msgstr ""

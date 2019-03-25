@@ -101,9 +101,6 @@ msgstr ""
 "get modern Internet Standards. The redesign makes the website better "
 "accessible on mobile devices and for users with disabilities."
 
-msgid "article improved-internetnl-test-for-modern-internet-standards teaser"
-msgstr " "
-
 msgid "article improved-internetnl-test-for-modern-internet-standards title"
 msgstr "Improved Internet.nl test for modern Internet Standards"
 
@@ -194,11 +191,6 @@ msgstr ""
 "carrying traffic from other networks, and in solving problems that may have\n"
 "originated several hops away."
 
-msgid "article internet-draait-om-samenwerking teaser"
-msgstr ""
-"&quot;Every participant is a contributor; that comes with a collaborative\n"
-"responsibility.&quot;"
-
 msgid "article internet-draait-om-samenwerking title"
 msgstr "Internet is all about collaboration"
 
@@ -235,10 +227,6 @@ msgstr ""
 "in 2017. From now on the test tool does not only check if standards against "
 "mail spoofing are in place for a given domain, but also checks if these "
 "standards are configured sufficiently strict to prevent abuse of the domain."
-
-msgid ""
-"article internetnl-checks-strictness-anti-mail-spoofing-standards teaser"
-msgstr " "
 
 msgid ""
 "article internetnl-checks-strictness-anti-mail-spoofing-standards title"
@@ -283,10 +271,6 @@ msgstr ""
 "https-test/). In addition to this change, the new version of \n"
 "[Internet.nl](/) includes several improvements that make testing faster and \n"
 "more stable."
-
-msgid ""
-"article internetnl-vernieuwd-hsts-en-afgedwongen-https-tellen-mee teaser"
-msgstr " "
 
 msgid ""
 "article internetnl-vernieuwd-hsts-en-afgedwongen-https-tellen-mee title"
@@ -374,9 +358,6 @@ msgstr ""
 "\n"
 "Since April last year users executed 80,000 tests on [Internet.nl](https://en.Internet.nl). Hopefully you like this new version and you keep on testing and improving your Internet. Happy testing!!!"
 
-msgid "article nieuwe-versie-internetnl-met-aanvullingen-https-test teaser"
-msgstr " "
-
 msgid "article nieuwe-versie-internetnl-met-aanvullingen-https-test title"
 msgstr "New version Internet.nl with extended HTTPS test"
 
@@ -420,9 +401,6 @@ msgstr ""
 "instance. Furthermore we added a new test category for application security "
 "options or security headers."
 
-msgid "article open-source-release teaser"
-msgstr " "
-
 msgid "article open-source-release title"
 msgstr "Open source release Internet.nl including 'security headers'"
 
@@ -447,9 +425,6 @@ msgid "article uitnodiging-masterclass-DMARC lead"
 msgstr ""
 "On Tuesday April 21st the Platform Internetstandards organises\n"
 "a Masterclass on the topic of [DMARC](/faqs/mail/#DMARC)."
-
-msgid "article uitnodiging-masterclass-DMARC teaser"
-msgstr "Tim Draegen on the ins and outs of the DMARC security standard."
 
 msgid "article uitnodiging-masterclass-DMARC title"
 msgstr "Invitation Masterclass DMARC"

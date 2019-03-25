@@ -121,12 +121,6 @@ msgstr ""
 "noodzaak is geworden."
 
 msgid ""
-"article DMARC-masterclass-authenticatie-afzender-noodzaak-geworden teaser"
-msgstr ""
-"\"Als je geen DMARC doet, dan concurreer je met de slechterikken om er zelf\n"
-"niet als een slechterik uit te zien. Waarom zou je?\""
-
-msgid ""
 "article DMARC-masterclass-authenticatie-afzender-noodzaak-geworden title"
 msgstr "DMARC masterclass: authenticatie afzender is noodzaak"
 
@@ -239,12 +233,6 @@ msgstr ""
 "processen en werkwijzen achter het Internet. Deze portal gaat daar verandering\n"
 "in brengen."
 
-msgid "article het-internet-is-van-ons-allemaal teaser"
-msgstr ""
-"\"Voor overheid, financiële instellingen en winkels wordt het Internet\n"
-"steeds meer het primaire kanaal waarlangs zij hun klanten informeren en van\n"
-"dienstverlening voorzien.\""
-
 msgid "article het-internet-is-van-ons-allemaal title"
 msgstr "Het internet is van ons allemaal"
 
@@ -288,9 +276,6 @@ msgstr ""
 "verbeterde testwebsite geeft gebruikers meer ondersteuning om aan moderne "
 "internetstandaarden te voldoen. Het herontwerp maakt de website beter "
 "toegankelijk op mobiele apparaten en voor gebruikers met een beperking."
-
-msgid "article improved-internetnl-test-for-modern-internet-standards teaser"
-msgstr " "
 
 msgid "article improved-internetnl-test-for-modern-internet-standards title"
 msgstr "Verbeterde Internet.nl-test voor moderne Internetstandaarden"
@@ -389,11 +374,6 @@ msgstr ""
 "als wanneer het gaat om het oplossen van problemen die mogelijk verschillende\n"
 "stappen eerder veroorzaakt werden."
 
-msgid "article internet-draait-om-samenwerking teaser"
-msgstr ""
-"&quot;Elke deelnemer is iemand die bijdraagt. Daar is wel een gezamenlijke\n"
-"verantwoordelijkheid aan verbonden&quot;"
-
 msgid "article internet-draait-om-samenwerking title"
 msgstr "Internet draait om samenwerking"
 
@@ -430,10 +410,6 @@ msgstr ""
 "uitvoerden. Vanaf nu controleert de testtool niet alleen of standaarden "
 "tegen mailspoofing op een domeinnaam aanwezig zijn, maar ook of ze voldoende"
 " strikt zijn ingesteld zodat misbruik van een domein echt wordt tegengegaan."
-
-msgid ""
-"article internetnl-checks-strictness-anti-mail-spoofing-standards teaser"
-msgstr " "
 
 msgid ""
 "article internetnl-checks-strictness-anti-mail-spoofing-standards title"
@@ -478,10 +454,6 @@ msgstr ""
 "test/) aangekondigd. Naast deze wijziging bevat de nieuwe versie van \n"
 "[Internet.nl](/) diverse verbeteringen die het testen sneller en stabieler \n"
 "maken."
-
-msgid ""
-"article internetnl-vernieuwd-hsts-en-afgedwongen-https-tellen-mee teaser"
-msgstr " "
 
 msgid ""
 "article internetnl-vernieuwd-hsts-en-afgedwongen-https-tellen-mee title"
@@ -544,9 +516,6 @@ msgstr ""
 "internetstandaarden absolute noodzaak. SURFnet maakt zich daar dan ook sterk\n"
 "voor &mdash; bijvoorbeeld voor de IPv6-standaard."
 
-msgid "article ipv6-vergt-de-medewerking-van-iedereen-in-de-wereld teaser"
-msgstr "&quot;Internet-adressen zijn een schaars goed geworden.&quot;"
-
 msgid "article ipv6-vergt-de-medewerking-van-iedereen-in-de-wereld title"
 msgstr "IPv6 vergt de medewerking van iedereen in de wereld"
 
@@ -601,9 +570,6 @@ msgstr ""
 "internetverbinding, e-mail en website wel moderne, veilige\n"
 "internetstandaarden? En als dat niet zo is, wat kan je daaraan doen?"
 
-msgid "article lancering-internet-nl-tijdens-cyber-week-2015 teaser"
-msgstr " "
-
 msgid "article lancering-internet-nl-tijdens-cyber-week-2015 title"
 msgstr "Lancering Internet.nl tijdens Cyber Week 2015"
 
@@ -652,9 +618,6 @@ msgstr ""
 "zoals Gmail, Office365, TransIP, BIT en Internet.nl zelf, doen dat ook al. \n"
 "Toch zijn er een paar zaken waar je op moet letten om te zorgen dat je mail \n"
 "zonder problemen afgeleverd wordt. "
-
-msgid "article mail-over-ipv6-waar-moet-ik-op-letten teaser"
-msgstr " "
 
 msgid "article mail-over-ipv6-waar-moet-ik-op-letten title"
 msgstr "Mail over IPv6: waar moet ik op letten?"
@@ -723,14 +686,6 @@ msgstr ""
 "Coalitie' opgericht.  Dit is vandaag bekend gemaakt tijdens het symposium\n"
 "van het Forum Standaardisatie."
 
-msgid "article nederland-voor-veilig-emailverkeer teaser"
-msgstr ""
-"Bedrijfsleven, brancheorganisaties en overheid gaan gezamenlijk misbruik\n"
-"zoals phishing en het afluisteren van e-mail aanpakken.  Daartoe hebben\n"
-"zij met steun van het ministerie van Economische Zaken de 'Veilige E-mail\n"
-"Coalitie' opgericht.  Dit is vandaag bekend gemaakt tijdens het symposium\n"
-"van het Forum Standaardisatie."
-
 msgid "article nederland-voor-veilig-emailverkeer title"
 msgstr "Nederland zorgt voor veilig e-mailverkeer"
 
@@ -765,9 +720,6 @@ msgstr ""
 "Vanaf vandaag staat er een nieuwe versie van [Internet.nl](https://Internet.nl) online. Deze versie bevat verbeteringen en uitbreidingen, met name voor het HTTPS/TLS-onderdeel van de websitetest.\n"
 "\n"
 "Sinds april 2015 hebben bezoekers 80.000 tests uitgevoerd op [Internet.nl](https://Internet.nl). Hopelijk vind je de nieuwe functionaliteit nuttig en blijf je testen en jouw internet verbeteren. Happy testing!!!"
-
-msgid "article nieuwe-versie-internetnl-met-aanvullingen-https-test teaser"
-msgstr " "
 
 msgid "article nieuwe-versie-internetnl-met-aanvullingen-https-test title"
 msgstr "Nieuwe versie Internet.nl met uitgebreidere HTTPS-test"
@@ -812,9 +764,6 @@ msgstr ""
 "verifiëren en om een eigen lokale versie te draaien. Bovendien hebben we een"
 " nieuwe testcategorie voor applicatie-beveiligingsopties oftewel security "
 "headers toegevoegd."
-
-msgid "article open-source-release teaser"
-msgstr " "
 
 msgid "article open-source-release title"
 msgstr "Open source vrijgave Internet.nl inclusief 'security headers'"
@@ -892,11 +841,6 @@ msgstr ""
 
 msgid ""
 "article rol-IPv6-task-force-ondergebracht-bij-platform-internetstandaarden "
-"teaser"
-msgstr " "
-
-msgid ""
-"article rol-IPv6-task-force-ondergebracht-bij-platform-internetstandaarden "
 "title"
 msgstr "Rol IPv6 Task Force ondergebracht bij Platform Internetstandaarden"
 
@@ -968,12 +912,6 @@ msgstr ""
 "aan de wetenschap of om het ontdekken van de ongekende mogelijkheden van het\n"
 "Internet, we hebben beslist een goede naam hoog te houden."
 
-msgid "article stilstand-is-achteruitgang teaser"
-msgstr ""
-"&quot;Nieuwe uitdagingen op het gebied van digitale veiligheid,\n"
-"betrouwbaarheid en schaalbaarheid dienen zich aan en vragen om een\n"
-"oplossing.&quot;"
-
 msgid "article stilstand-is-achteruitgang title"
 msgstr "Stilstand is achteruitgang"
 
@@ -999,9 +937,6 @@ msgid "article uitnodiging-masterclass-DMARC lead"
 msgstr ""
 "Op dinsdag 21 april organiseert het Platform Internetstandaarden een\n"
 "Masterclass over DMARC. Graag nodigen wij u hiervoor uit."
-
-msgid "article uitnodiging-masterclass-DMARC teaser"
-msgstr "Tim Draegen over de ins en outs van de DMARC beveiligingsstandaard."
 
 msgid "article uitnodiging-masterclass-DMARC title"
 msgstr "Uitnodiging Masterclass DMARC"
