@@ -1,10 +1,18 @@
 # Change Log
 
-## Unreleased next version
+## 1.0.3
 
-New
+Hotfix release.
+
+Dependencies
+- The [python-whois fork](https://github.com/ralphdolmans/python-whois) was
+  updated. Make sure to pull the latest version and reinstall.
 
 Bug Fixes
+- Uncaught exception from python-whois. [(#374)]
+- Typos.
+
+[(#374)]: https://github.com/NLnetLabs/Internet.nl/issues/374
 
 ## 1.0.2
 
