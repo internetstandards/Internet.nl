@@ -59,23 +59,23 @@ Although the first open source release of the project is aimed to provide
 transparency on the tool and the way the tests are run, there is (currently) no
 trivial way to install the software. Nonetheless, you could easily spin up a
 ready to use local dockerized environment for local development and testing
-purposes by following the [docker instructions](docker/README.md).
+purposes by following the [docker instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/docker/README.md).
 
 
 ### Slow start
 
 If you feel brave enough for a system install you can follow the
-[installation instructions](documentation/Installation.md).
+[installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/Installation.md).
 
-The [customize instructions](documentation/Customize.md) describe how you could
+The [customize instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/Customize.md) describe how you could
 customize your installation.
 
-The [deployment instructions](documentation/Deployment.md) provide information
+The [deployment instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/Deployment.md) provide information
 relevant to the deployment of your installation and steps you need to run
 before starting/updating your installation.
 
 Example configuration files for the internet.nl ecosystem can be found
-[here](documentation/example_configuration).
+[here](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/example_configuration).
 
 
 ## Building blocks
