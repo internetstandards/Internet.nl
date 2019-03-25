@@ -135,7 +135,7 @@ def registrar_lookup(addr):
                     res = ", ".join(whois["registrar"])[:250]
             except (
                     socket.error, pythonwhois.shared.WhoisException,
-                    UnicodeDecodeError):
+                    UnicodeDecodeError, IndexError):
                 pass
 
             cache.set(cache_id, res, cache_ttl)
