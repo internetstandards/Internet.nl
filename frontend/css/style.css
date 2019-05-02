@@ -913,9 +913,13 @@ aside .further-testing li p,
   max-width: 40%;
   margin-right:.5em;
 }
-.intro {
-  font-size:110%;
-  line-height:1.4em;
+.newsitem article .intro {
+  font-size: 110%;
+  line-height: 1.4em;
+  margin-bottom: 1em;
+}
+.newsitem article .nicedate {
+  margin-bottom: .5em;
 }
 
 /* Hall Of Fame, show some room on the left side of the image */
