@@ -4,6 +4,7 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"next-major-release-will-use-new-TLS-guidelines\n"
 "open-source-release\n"
 "email-test-on-internetnl-extended\n"
 "internetnl-checks-strictness-anti-mail-spoofing-standards\n"
@@ -326,6 +327,28 @@ msgstr ""
 
 msgid "article lancering-internet-nl-tijdens-cyber-week-2015 title"
 msgstr "Internet.nl launched during Dutch Cyber Week 2015"
+
+msgid "article next-major-release-will-use-new-TLS-guidelines body"
+msgstr ""
+"On April 23rd the NCSC published new [IT Security Guidelines for TLS](https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html) (version 2.0). The Dutch Internet Standards Platform was happy to provide feedback during the reviewing phase of the document. The next major release of Internet.nl will use the new TLS guidelines to check TLS connections. Internet.nl currently uses the previous version of the IT Security Guidelines for TLS (version 1.0 from 2014) for checking whether TLS settings are at least “Sufficient”.\n"
+"\n"
+"When using the new TLS guidelines organizations can achieve secure TLS connections for their internet connections. The advised settings are future proof; as expected TLS connections which are secured according to the new guidelines will not require any modifications in the near future. At the same time the guidelines also ensure that systems remain interoperable and prevent TLS settings to be incompatible. \n"
+"\n"
+"TLS is an open standard and forms the basis for other standards like HTTPS (secure website connections) and STARTTLS (secure mail server connections). The new TLS guidelines include TLS version 1.3 which was added to the [‘comply-or-explain’ list](https://www.forumstandaardisatie.nl/open-standaarden/lijst/verplicht?f%5B0%5D=field_standard_domain%3A4) of the Dutch Standardisation Forum at the end of 2018. Besides the addition of TLS 1.3, the new TLS guidelines contain some other changes like the new security level “Phase out” for TLS versions 1.0 and 1.1. The Dutch Data Protection Authority [stated](https://autoriteitpersoonsgegevens.nl/nl/nieuws/nieuwe-ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls) that organizations which are still using ‘phased out’ TLS configuration settings, need to replace them in the near future since these settings might not meet the security requirements resulting from the GDPR. "
+
+msgid "article next-major-release-will-use-new-TLS-guidelines date"
+msgstr "May 2, 2019"
+
+msgid "article next-major-release-will-use-new-TLS-guidelines lead"
+msgstr ""
+"The next major release of Internet.nl will use the new IT Security "
+"Guidelines for TLS (version 2.0) from the NCSC to check TLS connections. At "
+"this moment Internet.nl still uses the previous version of the IT Security "
+"Guidelines for TLS (version 1.0 from 2014) for checking whether TLS settings"
+" are at least “Sufficient”."
+
+msgid "article next-major-release-will-use-new-TLS-guidelines title"
+msgstr "Next major release of Internet.nl will use the new TLS guidelines"
 
 msgid "article nieuwe-versie-internetnl-met-aanvullingen-https-test body"
 msgstr ""

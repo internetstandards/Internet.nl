@@ -4,6 +4,7 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"next-major-release-will-use-new-TLS-guidelines\n"
 "open-source-release\n"
 "email-test-on-internetnl-extended\n"
 "rol-IPv6-task-force-ondergebracht-bij-platform-internetstandaarden\n"
@@ -688,6 +689,29 @@ msgstr ""
 
 msgid "article nederland-voor-veilig-emailverkeer title"
 msgstr "Nederland zorgt voor veilig e-mailverkeer"
+
+msgid "article next-major-release-will-use-new-TLS-guidelines body"
+msgstr ""
+"Op 23 april, heeft het NCSC een nieuwe [ICT-beveiligingsrichtlijn voor TLS](https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html) gepubliceerd (versie 2.0). Platform Internetstandaarden heeft aan de nieuwe versie van de TLS-richtlijnen bijgedragen door feedback te leveren tijdens de review fase. Bij de eerstvolgende grote release zal Internet.nl TLS-verbindingen gaan beoordelen op basis van deze nieuwe richtlijnen. Op dit moment gaat Internet.nl uit van de vorige versie van de ICT-beveiligingsrichtlijnen voor TLS (versie 1.0 uit 2014) en test of TLS-instellingen tenminste de status “Voldoende” hebben.\n"
+"\n"
+"Op basis van de vernieuwde richtlijnen kunnen organisaties hun internetverbindingen goed beveiligen. De geadviseerde instellingen zijn toekomstvast; naar verwachting behoeven TLS-configuraties die op basis van de nieuwe richtlijnen zijn ingesteld de komende tijd weinig tot geen aanpassing. Bovendien zorgen de richtlijnen ervoor dat systemen interoperabel blijven en wordt voorkomen dat TLS-instellingen incompatibel zijn met elkaar. \n"
+"\n"
+"De open standaard TLS vormt de basis voor onder andere HTTPS (beveiligde websiteverbindingen) en STARTTLS (beveiligde mailserver-verbindingen). De update van de TLS-richtlijnen omvat ook TLS versie 1.3 die sinds eind 2018 op de [‘pas toe of leg uit’-lijst](https://www.forumstandaardisatie.nl/open-standaarden/lijst/verplicht?f%5B0%5D=field_standard_domain%3A4) van Forum Standaardisatie staat. Naast de toevoeging van TLS versie 1.3 zijn er in de nieuwe richtlijnen nog wat andere wijzigingen doorgevoerd. Zo krijgen TLS 1.0 en 1.1 de nieuwe status “Uitfaseren”. De Autoriteit Persoonsgegevens heeft [aangegeven](https://autoriteitpersoonsgegevens.nl/nl/nieuws/nieuwe-ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls) dat organisaties die gebruik maken van een ‘uit te faseren’ TLS-configuratie, deze op termijn moeten vervangen omdat er anders mogelijk niet wordt voldaan aan de beveiligingseisen die volgen uit de AVG."
+
+msgid "article next-major-release-will-use-new-TLS-guidelines date"
+msgstr "2 mei 2019"
+
+msgid "article next-major-release-will-use-new-TLS-guidelines lead"
+msgstr ""
+"Bij de eerstvolgende grote release zal Internet.nl TLS-verbindingen gaan "
+"beoordelen op basis van de nieuwe ICT-beveiligingsrichtlijnen voor TLS "
+"(versie 2.0) van het NCSC. Op dit moment gaat Internet.nl nog uit van de "
+"vorige versie van de ICT-beveiligingsrichtlijnen voor TLS (versie 1.0 uit "
+"2014) en test of TLS-instellingen tenminste de status “Voldoende” hebben."
+
+msgid "article next-major-release-will-use-new-TLS-guidelines title"
+msgstr ""
+"Volgende grote release van Internet.nl gebruikt nieuwe TLS-richtlijnen"
 
 msgid "article nieuwe-versie-internetnl-met-aanvullingen-https-test body"
 msgstr ""
