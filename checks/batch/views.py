@@ -22,8 +22,10 @@ from ..models import BatchDomain, BatchDomainStatus
 @check_valid_user
 def documentation(request, *args, **kwargs):
     return HttpResponseRedirect(
-        'https://github.com/NLnetLabs/Internet.nl/blob/master/'
-        'documentation/batch_http_api.md')
+        'https://github.com/NLnetLabs/Internet.nl/blob/'
+        'new_forumstandaardisatie_custom_view/documentation/batch_http_api.md')
+    # 'https://github.com/NLnetLabs/Internet.nl/blob/master/'
+    # 'documentation/batch_http_api.md')
 
 
 @require_http_methods(['POST'])
