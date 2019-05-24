@@ -565,7 +565,7 @@ class ForumStandaardisatieNewView(ForumStandaardisatieView):
         if dmarc_policy_status == DmarcPolicyStatus.valid:
             ext_dest = True
         view_data.append(dict(
-            name='mail_auth_dmarc_ext_destination_verification',
+            name='mail_auth_dmarc_ext_destination',
             result=ext_dest))
 
     def _get_starttls_extra_info(self, batch_domain, view_data):
