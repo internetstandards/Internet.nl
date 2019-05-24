@@ -16,12 +16,14 @@ from django.utils import timezone
 
 from . import BATCH_API_VERSION
 from .custom_views import get_applicable_views, gather_views_results
+from .custom_views import ForumStandaardisatieView
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchCustomView, BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus
-from ..views.shared import validate_dname, pretty_domain_name
+from ..views.shared import pretty_domain_name
+from ..views.shared import get_valid_domain_web, get_valid_domain_mail
 
 
 def get_site_url(request):
@@ -201,11 +203,19 @@ def gather_batch_results(user, batch_request, site_url):
         views = gather_views_results(
             custom_views, batch_domain, batch_request.type)
         if views:
+            views = sorted(views, key=lambda view: view['name'])
             result['views'] = views
 
         dom_results.append(result)
 
     results['domains'] = dom_results
+
+    # Add a temporary identifier for the new custom view.
+    # Will be replaced in a later release with a universal default output.
+    if (len(custom_views) == 1
+            and isinstance(custom_views[0], ForumStandaardisatieView)
+            and custom_views[0].view_id):
+        results['api-view-id'] = custom_views[0].view_id
     return results
 
 
@@ -245,15 +255,17 @@ def batch_async_register(self, batch_request, test_type, domains):
     if test_type is BatchRequestType.web:
         batch_test_model = BatchWebTest
         keys = ('domain', 'batch_request', 'webtest')
+        get_valid_domain = get_valid_domain_web
     else:
         batch_test_model = BatchMailTest
         keys = ('domain', 'batch_request', 'mailtest')
+        get_valid_domain = get_valid_domain_mail
 
     for domain in domains:
         # Ignore leading/trailing whitespace.
         domain = domain.strip()
         # Only register valid domain names like vanilla internet.nl
-        domain = validate_dname(domain)
+        domain = get_valid_domain(domain)
         if not domain:
             continue
 

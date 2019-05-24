@@ -193,7 +193,7 @@ def find_result(batch_domain, model):
         else:
             result = model.objects.filter(
                 domain=batch_domain.domain,
-                timestamp__gte=submit_date).latest('timestamp')
+                timestamp__gte=submit_date).latest('id')
     except model.DoesNotExist:
         result = None
     return result

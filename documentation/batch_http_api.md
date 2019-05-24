@@ -87,7 +87,7 @@ Other possible answers could be:
 
    { "success": false,
      "message": "Problem parsing domains",
-     "data": []
+     "data": {}
    }
 
    ```
@@ -219,14 +219,26 @@ Other possible answers could be:
    Batch testing has finished and the results are being generated in JSON
    format.
 
-4. Error while registering the domains (batch request will not run):
+4. Results could not be generated:
+   ```
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+
+   { "success": false,
+     "message": "Results could not be generated",
+     "data": {}
+   }
+   ```
+   Batch testing has finished but the results could not be generated.
+
+5. Error while registering the domains (batch request will not run):
    ```
    HTTP/1.1 200 OK
    Content-Type: application/json
 
    { "success": false,
      "message": "Error while registering the domains",
-     "data": []
+     "data": {}
    }
    ```
 
@@ -270,7 +282,7 @@ with the API:
 
    { "success": false,
      "message": "Unknown user",
-     "data": []
+     "data": {}
    }
    ```
    This could happen when there is a misconfiguration with the user's
@@ -283,7 +295,7 @@ with the API:
 
    { "success": false,
      "message": "Make sure you are using a valid URL with the current batch API version (1.0)",
-     "data": []
+     "data": {}
    }
    ```
    This could happen when the URL used was invalid or the API version number

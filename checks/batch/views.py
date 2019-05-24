@@ -52,7 +52,7 @@ def register_batch_request(request, user, test_type):
             dict(
                 success=False,
                 message="Problem parsing domains",
-                data=[]))
+                data={}))
 
     batch_request = BatchRequest(user=user, name=name, type=test_type)
     batch_request.save()
@@ -88,7 +88,7 @@ def get_results(request, testid, *args, **kwargs):
             dict(
                 success=False,
                 message="Unknown batch request",
-                data=[]))
+                data={}))
 
     if batch_request.status in (BatchRequestStatus.live,
                                 BatchRequestStatus.running):
@@ -116,19 +116,27 @@ def get_results(request, testid, *args, **kwargs):
     elif batch_request.status == BatchRequestStatus.cancelled:
         success = False
         message = "Batch request was cancelled by user"
-        resp = []
+        resp = {}
 
     elif batch_request.status == BatchRequestStatus.error:
         success = False
         message = "Error while registering the domains"
-        resp = []
+        resp = {}
 
     else:
         if (batch_request.report_file
                 and os.path.isfile(batch_request.report_file.path)):
-            success = True
-            message = "OK"
-            resp = json.loads(batch_request.report_file.read())
+            try:
+                batch_request.report_file.open('r')
+                resp = json.load(batch_request.report_file)
+                success = True
+                message = "OK"
+            except Exception:
+                success = False
+                message = "Results could not be generated"
+                resp = {}
+            finally:
+                batch_request.report_file.close()
         else:
             batch_async_generate_results.delay(
                 user=user,
@@ -204,7 +212,7 @@ def cancel_test(request, testid, *args, **kwargs):
             dict(
                 success=False,
                 message="Unknown batch request",
-                data=[]))
+                data={}))
 
     batch_request.status = BatchRequestStatus.cancelled
     batch_request.save()
@@ -214,7 +222,7 @@ def cancel_test(request, testid, *args, **kwargs):
         dict(
             success=True,
             message="OK",
-            data=[]))
+            data={}))
 
 
 @check_valid_user
@@ -226,4 +234,4 @@ def old_url(request, *args, **kwargs):
         dict(
             success=False,
             message=message,
-            data=[]))
+            data={}))
