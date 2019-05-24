@@ -543,7 +543,7 @@ class ForumStandaardisatieNewView(ForumStandaardisatieView):
             'http_csp': 'web_appsecpriv_csp',
             'http_referrer_policy': 'web_appsecpriv_referrer_policy',
         }
-        self.view_id = '201905_FS'
+        self.view_id = '20190524_FS'
 
     def _get_dmarc_extra_info(self, batch_domain, view_data):
         """
