@@ -63,7 +63,9 @@ def get_user_from_request(request):
     """
     user = None
     try:
-        username = request.META.get('REMOTE_USER')
+        username = (
+            request.META.get('REMOTE_USER')
+            or request.META.get('HTTP_REMOTE_USER'))
         if not username:
             username = getattr(settings, 'BATCH_TEST_USER', None)
         user = BatchUser.objects.get(username=username)
