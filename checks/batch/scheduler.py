@@ -30,7 +30,7 @@ from ..models import BatchDomainStatus, BatchTestStatus
 from ..models import BatchWebTest
 from ..models import WebTestTls, WebTestAppsecpriv
 from ..models import DomainTestReport, MailTestReport, MailTestTls
-from ..models import MailTestDnssec
+from ..models import MailTestDnssec, DomainTestDnssec
 
 logger = get_task_logger(__name__)
 
@@ -190,6 +190,11 @@ def find_result(batch_domain, model):
             result = model.objects.filter(
                 domain=batch_domain.domain,
                 webtestset__timestamp__gte=submit_date).latest('id')
+        elif model is DomainTestDnssec:
+            result = model.objects.filter(
+                domain=batch_domain.domain,
+                maildomain_id=None,
+                timestamp__gte=submit_date).latest('id')
         else:
             result = model.objects.filter(
                 domain=batch_domain.domain,
