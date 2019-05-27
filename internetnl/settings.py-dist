@@ -20,6 +20,7 @@ SECRET_KEY = 'secret'
 DEBUG = False
 
 # If Django is proxied (eg. webserver proxying to django/gunicorn) enable this setting.
+# This also assumes that the connection to the webserver is via HTTPS.
 DJANGO_IS_PROXIED = False
 
 # --- Batch configuration

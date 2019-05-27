@@ -31,7 +31,7 @@ def get_site_url(request):
     Compose the url that the user used to connect to the API.
 
     """
-    if settings.get('DJANGO_IS_PROXIED'):
+    if getattr(settings, 'DJANGO_IS_PROXIED', None):
         scheme = 'https'
     else:
         scheme = request.scheme
