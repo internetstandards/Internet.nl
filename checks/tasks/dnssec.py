@@ -121,7 +121,7 @@ def registrar_lookup(addr):
 
     """
     res = ""
-    if not settings.ENABLE_BATCH:
+    if not settings.ENABLE_BATCH and not settings.ENABLE_INTEGRATION_TEST:
         cache_id = redis_id.whois.id.format(addr)
         cache_ttl = redis_id.whois.ttl
         cached = cache.get(cache_id)

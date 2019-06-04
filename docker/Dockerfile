@@ -35,7 +35,7 @@ RUN useradd -ms /bin/bash -G sudo internetnl && echo "internetnl ALL=(ALL) NOPAS
 # Install forked pythonwhois
 RUN git clone -b timeout https://github.com/ralphdolmans/python-whois.git /tmp/python-whois
 WORKDIR /tmp/python-whois
-RUN python setup.py install
+RUN python setup.py --verbose install
 
 # Build nassl from sources for deprecated protocol support and "extra features" compared to the stock package
 RUN git clone -b free_bsd https://github.com/gthess/nassl.git /tmp/nassl_freebsd
@@ -47,6 +47,7 @@ RUN curl https://zlib.net/zlib-1.2.11.tar.gz | tar zx && \
     cd openssl-master && \
     git checkout 1f5878b8e25a785dde330bf485e6ed5a6ae09a1a && \
     cd .. && \
+    perl -pi -e 's|(perform_build_task\(.NASSL Tests.+)|#\1|' build_from_scratch.py && \
     python build_from_scratch.py && \
     python setup.py install
 
@@ -78,12 +79,16 @@ RUN useradd unbound && \
     chown -R unbound: .
 
 WORKDIR ${APP_PATH}
-#RUN chown -R internetnl:internetnl ${APP_PATH}
 
 # Fetch the Internet.nl web application files and install Python dependencies
+COPY --chown=internetnl:internetnl python-pip-requirements.txt ${APP_PATH}/
+RUN pip install --trusted-host pypi.python.org -r ./python-pip-requirements.txt
+
+# Cleanup
+RUN rm -rf ${APP_PATH}/.git /tmp/unbound /tmp/nassl_freebsd /tmp/python-whois
+
 COPY --chown=internetnl:internetnl . ${APP_PATH}
 RUN chown -R internetnl: ${APP_PATH}
-RUN pip install --trusted-host pypi.python.org -r ./python-pip-requirements.txt
 
 USER internetnl
 
@@ -92,9 +97,6 @@ RUN sed -i -e "s|LDNS_DANE = .*|LDNS_DANE = '/usr/bin/ldns-dane'|g" ${APP_PATH}/
 
 # Prepare translations
 RUN make translations
-
-# Cleanup
-RUN sudo rm -rf ${APP_PATH}/.git /tmp/unbound /tmp/nassl_freebsd /tmp/python-whois
 
 # Setup the entrypoint command which will be executed when a container built from this image is run
 ENTRYPOINT ${APP_PATH}/docker/entrypoint.sh

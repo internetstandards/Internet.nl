@@ -1,0 +1,22 @@
+#!/bin/bash
+perl -pi -e 's|\{\{ROOT_IP\}\}|'${ROOT_IP}'|g' ${APP_PATH}/docker/it/dns/resolver/unbound/root.hints
+perl -pi -e 's|\{\{ROOT_IPV6\}\}|'${ROOT_IPV6}'|g' ${APP_PATH}/docker/it/dns/resolver/unbound/root.hints
+
+cat >>${APP_PATH}/internetnl/settings.py-dist <<EOF
+ENABLE_INTEGRATION_TEST = True
+IT_UNBOUND_CONFIG_PATH = '/app/docker/it/app/unbound.conf.it'
+IT_UNBOUND_FORWARD_IP = '${RESOLVER_IP}'
+EOF
+
+# Don't start the Internet.NL app yet as we have to first acquire the ZSK used to
+# sign our custom root zone. The testrunner container will start the Internet.nl
+# app once the DNS chain is correctly set up and the root trust anchor has been
+# acquired.
+
+while ! test -f /tmp/root_zsk.key; do   
+  sleep 1s
+done
+
+sudo chown internetnl: /tmp/root_zsk.key
+
+${APP_PATH}/docker/entrypoint.sh

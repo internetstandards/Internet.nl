@@ -1,0 +1,16 @@
+$ORIGIN .
+@         IN SOA    myroot.nl. admin.nlnetlabs.nl. (
+			 1      ; serial
+			 5S     ; refresh (5 seconds)
+			 1S     ; retry (1 seconds)
+			 15S    ; expire (15 seconds)
+			 5S     ; minimum (5 seconds)
+		  )
+@          IN    NS   myroot.nl.
+myroot.nl  IN    A    {{OWN_IP}}
+myroot.nl  IN    AAAA {{OWN_IPV6}}
+nl         IN    NS   ns1.nl.
+ns1.nl     IN    A    {{MASTER_IP}}
+ns1.nl     IN    AAAA {{MASTER_IPV6}}
+ns1.nl     IN    A    {{MASTER2_IP}}
+ns1.nl     IN    AAAA {{MASTER2_IPV6}}

@@ -1,0 +1,20 @@
+$ORIGIN nl.
+$TTL 60
+@         IN SOA    ns1.nl. admin.nlnetlabs.nl. (
+			 1      ; serial
+			 5S     ; refresh (5 seconds)
+			 1S     ; retry (1 seconds)
+			 15S    ; expire (15 seconds)
+			 5S     ; minimum (5 seconds)
+		  )
+@         IN  NS    ns1.nl.
+myroot    IN  A     {{ROOT_IP}}
+myroot    IN  AAAA  {{ROOT_IPV6}}
+nlnetlabs IN  NS    ns2a.nl.
+nlnetlabs IN  NS    ns2b.nl.
+ns2a      IN  A     {{SUB_MASTER_IP}}
+ns2a      IN  AAAA  {{SUB_MASTER_IPV6}}
+ns2b      IN  A     {{SUB_MASTER2_IP}}
+ns2b      IN  AAAA  {{SUB_MASTER2_IPV6}}
+internet  IN  A     {{APP_IP}}
+internet  IN  AAAA  {{APP_IPV6}}

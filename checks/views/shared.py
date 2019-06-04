@@ -20,6 +20,10 @@ from checks import redis_id
 
 
 ub_ctx = unbound.ub_ctx()
+if settings.ENABLE_INTEGRATION_TEST:
+    ub_ctx.debuglevel(2)
+    ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
+    ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
 ub_ctx.set_async(True)
 if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
     ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))

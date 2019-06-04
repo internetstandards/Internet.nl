@@ -29,7 +29,7 @@ sed \
     -e "s|localhost:15672|${RABBITMQ_HOST}:15672|g" \
     -e "s|localhost:6379|${REDIS_HOST}:6379|g" \
     -e "s|BROKER_URL = 'amqp://guest@localhost//'|BROKER_URL = 'amqp://guest@${RABBITMQ_HOST}//'|g" \
-    -e "s|ALLOWED_HOSTS = .*|ALLOWED_HOSTS = [\"localhost\"]|g" \
+    -e "s|ALLOWED_HOSTS = .*|ALLOWED_HOSTS = [\"*\"]|g" \
     -e "s|django@internet.nl|"${ADMIN_EMAIL}"|g" \
     -e "s|'HOST': '127.0.0.1'|'HOST': '${POSTGRES_HOST}'|g" \
     -e "s|'NAME': '<db_name>'|'NAME': '${POSTGRES_DB}'|g" \
@@ -50,10 +50,12 @@ cd ${APP_PATH}
 celery -A internetnl multi start \
     worker db_worker slow_db_worker \
     -c:1 250 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
-    -l info --without-gossip --time-limit=300 -P eventlet &
+    -l info --without-gossip --time-limit=300 -P solo &
 
 # Start Celery Beat
 celery -A internetnl beat &
+
+( sleep 10s ; tail -F -n 1000 *.log ) &
 
 # Start the Django web server
 ./manage.py runserver 0.0.0.0:8080

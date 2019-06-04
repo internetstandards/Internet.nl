@@ -1,0 +1,425 @@
+# This Docker Compose file deploys the Internet.nl application on a private
+# closed network, runs a suite of integration tests against it by driving a
+# browser as an end user would, produces a test report and shuts down.
+#
+# It works by creating a mini closed Internet clone to test against including
+# DNS root, TLD and domain servers and target servers to test. The network is
+# closed to ensure that tests do not run against any external dependencies and
+# so that the conditions of the test can be completely controlled.
+#
+# Tested on Ubuntu 19.04 with Docker 18.09.l5 and docker-compose 1.24.0.
+# You will need to add "ipv6" and "fixed-cidr-v6" entries to your Docker
+# daemon.json file and restart the Docker daemon, e.g.:
+#   $ cat /etc/docker/daemon.json
+#   {
+#       "ipv6": true,
+#       "fixed-cidr-v6": "2001:3984:3989::/64"
+#   }
+#   $ sudo service docker restart
+#
+# To build everything in advance:
+#   docker-compose build --parallel
+#
+# To deploy with no prior volume state:
+#   docker-compose up -V
+#
+# To teardown everything when the tests complete:
+#   docker-compose up -V --exit-code-from testrunner
+#
+# To log only the testrunner output:
+#   docker-compose up -V -d && echo waiting ... && docker logs -t -f testrunner && echo tearing down ... && docker-compose kill
+
+# 2.1 required for 'enable_ipv6'
+# 2.2 required for 'build: network:'
+# 2.3 required for 'healthcheck: start_period'
+version: '2.3'
+
+services:
+  testrunner:
+    container_name: testrunner
+    build:
+      context: testrunner
+      network: host
+    tmpfs: /tmp
+    volumes:
+      # Allow the testrunner to execute Docker commands on the other containers
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TEST_RUNNER_IP}
+        ipv6_address: ${TEST_RUNNER_IPV6}
+    depends_on:
+      - resolver
+      - app
+    environment:
+      - ROOT_IP
+      - MASTER_IP
+      - RESOLVER_IP
+
+  app:
+    container_name: app
+    build:
+      context: ../..
+      dockerfile: docker/it/app/Dockerfile
+      network: host
+    volumes:
+      # Allow the developer to launch a browser in the container using the host X server
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
+      # Allow the test run report to be written to the host machine
+      - "/tmp/it-report:/tmp/it-report"
+    # Prevent crashes when running a browser in the container using the host X server
+    shm_size: 2G
+    # Note: /etc/resolv.conf will show nameserver 127.0.0.11. This is the Docker embedded DNS
+    # server, which in turn will use the value provided by dns: ${RESOLVER_IP} here.
+    # See: https://docs.docker.com/v17.09/engine/userguide/networking/configure-dns/
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${APP_IP}
+        ipv6_address: ${APP_IPV6}
+    depends_on:
+      - appbase
+      - redis
+      - rabbitmq
+      - postgres
+      - resolver
+      - targetnossl
+      - targettls1213
+      - targettls12only
+      - targettls11only
+    environment:
+      # setting CACHE_TTL (seconds) too low (e.g. to 1) causes test failures because the
+      # Javascript retries run out before the probes complete.
+      - CACHE_TTL=30
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
+      - RESOLVER_IP
+      - ROOT_IP
+      - ROOT_IPV6
+      # Allow the developer to launch a browser in teh container using the host X server
+      - DISPLAY
+      # Environment variables that influence integration test behaviour
+      - IT_BROWSER_WIDTH
+      - IT_BROWSER_HEIGHT
+
+  selenium:
+    container_name: selenium
+    image: selenium/standalone-firefox
+    # Prevent crashes when running a browser in the container.
+    # See: https://github.com/SeleniumHQ/docker-selenium
+    shm_size: 2G
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${SELEMIUM_IP}
+        ipv6_address: ${SELENIUM_IPV6}
+    depends_on:
+      - app
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${REDIS_IP}
+        ipv6_address: ${REDIS_IPV6}
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:alpine
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${RABBITMQ_IP}
+        ipv6_address: ${RABBITMQ_IPV6}
+
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${POSTGRES_IP}
+        ipv6_address: ${POSTGRES_IPV6}
+    environment:
+      - POSTGRES_USER=internetnl
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=internetnl_db1
+
+  # TODO: find a way to reduce this boiler plate/copy-paste for different test targets
+  targettls1213:
+    container_name: targettls1213
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect tls1213
+        APACHE_MODULES: ssl
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS1213_IP}
+        ipv6_address: ${TARGET_TLS1213_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls11only:
+    container_name: targettls11only
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect tls11only
+        APACHE_MODULES: ssl
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS11ONLY_IP}
+        ipv6_address: ${TARGET_TLS11ONLY_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls12only:
+    container_name: targettls12only
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect tls12only
+        APACHE_MODULES: ssl
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLY_IP}
+        ipv6_address: ${TARGET_TLS12ONLY_IPV6}
+    depends_on:
+      - targetbase
+
+  targetnossl:
+    container_name: targetnossl
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-only
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_NOSSL_IP}
+        ipv6_address: ${TARGET_NOSSL_IPV6}
+    depends_on:
+      - targetbase
+
+  # An unbound DNS resolver container that is configured to get root hints from 'root' (defined below).
+  resolver:
+    container_name: resolver
+    build:
+      context: dns/resolver
+      network: host
+    tmpfs: /tmp
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${RESOLVER_IP}
+        ipv6_address: ${RESOLVER_IPV6}
+    depends_on:
+      - submaster
+      - master
+      - root
+      - devbase
+    environment:
+      - OWN_IP=${RESOLVER_IP}
+      - ROOT_IPV6
+      - ROOT_IP
+      - SUBNETV4
+
+  # An NSD authoratitive container responsible for the nlnetlabs.nl. zone
+  submaster:
+    container_name: submaster
+    build:
+      context: dns/submaster
+      network: host
+    tmpfs: /tmp
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    volumes:
+      # Allow the container to execute Docker commands on the parent container to publish a DS record
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      test_net:
+        ipv4_address: ${SUB_MASTER_IP}
+        ipv6_address: ${SUB_MASTER_IPV6}
+    depends_on:
+      - nsdbase
+      - master
+    environment:
+      - OWN_IP=${SUB_MASTER_IP}
+      - TARGET_TLS11ONLY_IP
+      - TARGET_TLS11ONLY_IPV6
+      - TARGET_TLS12ONLY_IP
+      - TARGET_TLS12ONLY_IPV6
+      - TARGET_TLS1213_IP
+      - TARGET_TLS1213_IPV6
+      - TARGET_NOSSL_IP
+      - TARGET_NOSSL_IPV6
+
+  # An NSD authoratitive container responsible for the nl. TLD zone
+  master:
+    container_name: master
+    build:
+      context: dns/master
+      network: host
+    tmpfs: /tmp
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    volumes:
+      # Allow the container to execute Docker commands on the parent container to publish a DS record
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      test_net:
+        ipv4_address: ${MASTER_IP}
+        ipv6_address: ${MASTER_IPV6}
+    depends_on:
+      - nsdbase
+      - root
+    environment:
+      - OWN_IP=${MASTER_IP}
+      - ROOT_IP=${ROOT_IP}
+      - ROOT_IPV6=${ROOT_IPV6}
+      - SUB_MASTER_IP=${SUB_MASTER_IP}
+      - SUB_MASTER_IPV6=${SUB_MASTER_IPV6}
+      - SUB_MASTER2_IP=${SUB_MASTER2_IP}
+      - SUB_MASTER2_IPV6=${SUB_MASTER2_IPV6}
+      - APP_IP=${APP_IP}
+      - APP_IPV6=${APP_IPV6}
+      - ROLE=master
+      - OTHER_IP=${MASTER2_IP}
+  master2:
+    container_name: master2
+    build:
+      context: dns/master
+      network: host
+    tmpfs: /tmp
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${MASTER2_IP}
+        ipv6_address: ${MASTER2_IPV6}
+    depends_on:
+      - nsdbase
+      - root
+    environment:
+      - OWN_IP=${MASTER2_IP}
+      - ROOT_IP=${ROOT_IP}
+      - ROOT_IPV6=${ROOT_IPV6}
+      - SUB_MASTER_IP=${SUB_MASTER_IP}
+      - SUB_MASTER_IPV6=${SUB_MASTER_IPV6}
+      - SUB_MASTER2_IP=${SUB_MASTER2_IP}
+      - SUB_MASTER2_IPV6=${SUB_MASTER2_IPV6}
+      - APP_IP=${APP_IP}
+      - APP_IPV6=${APP_IPV6}
+      - ROLE=slave
+      - OTHER_IP=${MASTER_IP}
+
+  # An NSD root container that serves the root (.) zone an delegates the nl. zone to 'master'
+  root:
+    container_name: root
+    build:
+      context: dns/root
+      network: host
+    tmpfs: /tmp
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${ROOT_IP}
+        ipv6_address: ${ROOT_IPV6}
+    depends_on:
+      - nsdbase
+    environment:
+      - OWN_IP=${ROOT_IP}
+      - OWN_IPV6=${ROOT_IPV6}
+      - MASTER_IP=${MASTER_IP}
+      - MASTER_IPV6=${MASTER_IPV6}
+      - MASTER2_IP=${MASTER2_IP}
+      - MASTER2_IPV6=${MASTER2_IPV6}
+
+  # A base image with handy tools
+  devbase:
+    container_name: devbase
+    image: devbase
+    build:
+      context: devbase
+      network: host
+    # The entrypoint overrides nsd -d in the Dockerfile because
+    # we want this container to quit immediately and just be used as
+    # a base image for the actual NSD containers. This is a bit of a hack
+    # to make docker-compose pre-create a common image to be used by
+    # containers that it will deploy.
+    entrypoint: /bin/sleep infinity
+
+  # A base image for the NSD containers
+  nsdbase:
+    container_name: nsdbase
+    image: nsdbase
+    build:
+      context: dns/nsdbase
+      network: host
+    # The entrypoint overrides nsd -d in the Dockerfile because
+    # we want this container to quit immediately and just be used as
+    # a base image for the actual NSD containers. This is a bit of a hack
+    # to make docker-compose pre-create a common image to be used by
+    # containers that it will deploy.
+    entrypoint: /bin/sleep infinity
+    depends_on:
+      - devbase
+
+  # A base image for the app
+  appbase:
+    container_name: appbase
+    image: nlnetlabs/internetnl:devel
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile
+      network: host
+    # The entrypoint overrides nsd -d in the Dockerfile because
+    # we want this container to quit immediately and just be used as
+    # a base image for the actual NSD containers. This is a bit of a hack
+    # to make docker-compose pre-create a common image to be used by
+    # containers that it will deploy.
+    entrypoint: /bin/sleep infinity
+
+    # A base image for target servers
+  targetbase:
+    container_name: targetbase
+    image: targetbase
+    build:
+      context: targetbase
+      network: host
+    entrypoint: /bin/sleep infinity
+
+networks:
+  test_net:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+      - subnet: ${SUBNETV4}
+      - subnet: ${SUBNETV6}
+    internal: true

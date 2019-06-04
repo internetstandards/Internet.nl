@@ -22,8 +22,13 @@ class SetupUnboundContext(Task):
     def ub_ctx(self):
         if self._ub_ctx is None:
             self._ub_ctx = unbound.ub_ctx()
-            self._ub_ctx.add_ta_file(
-                os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
+            if settings.ENABLE_INTEGRATION_TEST:
+                self._ub_ctx.debuglevel(2)
+                self._ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
+                self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
+            else:
+                self._ub_ctx.add_ta_file(
+                    os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
             self._ub_ctx.set_option(
                 "cache-max-ttl:", str(settings.CACHE_TTL*0.9))
             self._ub_ctx.set_async(True)
