@@ -9,11 +9,16 @@ RUN sudo mv /tmp/geckodriver /usr/local/bin
 
 RUN sudo pip install --upgrade pip && \
     sudo pip install \
+        coverage \
         pytest-progress \
         pytest-selenium \
         gitpython
 
 COPY docker/it/app/entrypoint.sh.it ${APP_PATH}/docker/entrypoint.sh.it
+COPY docker/it/app/coverage/coverage-finalize.sh /opt/
+COPY docker/it/app/coverage/.coveragerc /app/
+COPY docker/it/app/coverage/sitecustomize.py /tmp/
+RUN sudo mv /tmp/sitecustomize.py $(python -c "import site; print(site.getsitepackages()[0])")/
 
 WORKDIR /tmp/it-report
 RUN sudo chown -R internetnl: . && \

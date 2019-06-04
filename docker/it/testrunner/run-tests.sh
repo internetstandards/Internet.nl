@@ -13,7 +13,7 @@ wait_for_container_up() {
         sleep 1s
         let "SECONDS_TO_WAIT=SECONDS_TO_WAIT-1"
     done
-    echo Up
+    echo '. up'
 }
 
 echo
@@ -48,7 +48,7 @@ docker exec resolver perl -pi -e 's|^#   auto-trust-anchor-file:.+|   auto-trust
 docker exec resolver unbound-control reload
 
 echo
-echo ':: Verify DNS lookup from resolver -> master -> root, now with DNSSEC'
+echo ':: Verify DNS lookup from resolver -> master -> root with DNSSEC'
 dig +dnssec @${RESOLVER_IP} tls1213.test.nlnetlabs.nl
 
 echo
@@ -59,12 +59,12 @@ echo
 echo ':: Installing root trust anchor in the app..'
 docker cp /tmp/root_zsk.key app:/tmp/root_zsk.key
 
-echo
-echo ':: Dumping NGINX SSL cert to hostname mappings'
 PROTOCOLS="tls1 tls1_1 tls1_2"
 TARGETS="nossl tls1213 tls1213sni tls1213wrongcertname tls1213nohsts tls12only tls11only"
 SUFFIX=".test.nlnetlabs.nl"
 
+echo
+echo ':: Dumping target domain SSL cert to hostname mappings'
 for N in ${TARGETS}; do
     echo -n -e "$N:\t"
     FQDN="${N}${SUFFIX}"
@@ -72,7 +72,7 @@ for N in ${TARGETS}; do
 done | column -t
 
 echo
-echo ':: Dumping NGINX SSL version support'
+echo ':: Dumping target domain SSL version support'
 for N in $TARGETS; do
     FQDN="${N}${SUFFIX}"
     echo -n "${N}: "
@@ -107,8 +107,11 @@ PYTEST_PROGRESS_ARGS="--show-progress"
 PYTEST_SELENIUM_ARGS="--driver Remote --host selenium --port 4444 --capability browserName firefox"
 PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"
 
+docker exec app sudo mkdir -p /tmp/it-report/coverage-data
 docker exec app sudo chmod -R a+w /tmp/it-report
 docker exec app pytest \
     ${PYTEST_PROGRESS_ARGS} \
     ${PYTEST_HTML_ARGS} \
-    ${PYTEST_SELENIUM_ARGS}
+    ${PYTEST_SELENIUM_ARGS} || true
+
+docker exec app /opt/coverage-finalize.sh

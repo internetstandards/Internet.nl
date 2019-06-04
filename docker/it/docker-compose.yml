@@ -107,6 +107,7 @@ services:
       # Environment variables that influence integration test behaviour
       - IT_BROWSER_WIDTH
       - IT_BROWSER_HEIGHT
+      - ENABLE_COVERAGE
 
   selenium:
     container_name: selenium

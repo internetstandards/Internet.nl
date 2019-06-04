@@ -1,10 +1,19 @@
 #!/bin/bash
-perl -pi -e 's|\{\{ROOT_IP\}\}|'${ROOT_IP}'|g' ${APP_PATH}/docker/it/dns/resolver/unbound/root.hints
-perl -pi -e 's|\{\{ROOT_IPV6\}\}|'${ROOT_IPV6}'|g' ${APP_PATH}/docker/it/dns/resolver/unbound/root.hints
+ENABLE_COVERAGE=${ENABLE_COVERAGE:-0}
+TRUST_ANCHOR_PATH="/tmp/root_zsk.key"
+ROOT_HINTS_PATH="${APP_PATH}/docker/it/dns/resolver/unbound/root.hints"
+UNBOUND_CONF_PATH="/app/docker/it/app/unbound.conf.it"
 
+echo ":: Configuring Internet.nl app to use Unbound root hints file '${ROOT_HINTS_PATH}'.."
+perl -pi -e 's|\{\{ROOT_IP\}\}|'${ROOT_IP}'|g' ${ROOT_HINTS_PATH}
+perl -pi -e 's|\{\{ROOT_IPV6\}\}|'${ROOT_IPV6}'|g' ${ROOT_HINTS_PATH}
+
+echo
+echo ":: Configuring Internet.nl app to use Unbound config file '${UNBOUND_CONF_PATH}'"
+echo "   and forward resolver at ${RESOLVER_IP}.."
 cat >>${APP_PATH}/internetnl/settings.py-dist <<EOF
 ENABLE_INTEGRATION_TEST = True
-IT_UNBOUND_CONFIG_PATH = '/app/docker/it/app/unbound.conf.it'
+IT_UNBOUND_CONFIG_PATH = '${UNBOUND_CONF_PATH}'
 IT_UNBOUND_FORWARD_IP = '${RESOLVER_IP}'
 EOF
 
@@ -13,10 +22,22 @@ EOF
 # app once the DNS chain is correctly set up and the root trust anchor has been
 # acquired.
 
-while ! test -f /tmp/root_zsk.key; do   
+echo
+echo ":: Waiting for root trust anchor file to be written to "
+while ! test -f ${TRUST_ANCHOR_PATH}; do   
   sleep 1s
 done
 
-sudo chown internetnl: /tmp/root_zsk.key
+echo "Received"
+sudo chown internetnl: ${TRUST_ANCHOR_PATH}
 
-${APP_PATH}/docker/entrypoint.sh
+echo
+echo ":: Launching Internet.nl app.."
+if [ ${ENABLE_COVERAGE} -eq 1 ]; then
+    export COVERAGE_PROCESS_START=/app/.coveragerc
+    export RUN_SERVER_CMD="runserver --noreload --nothreading"
+fi
+${APP_PATH}/docker/entrypoint.sh &
+
+# Don't exit, that might cause docker-compose up to terminate prematurely (before coverage data has been processed).
+sleep infinity

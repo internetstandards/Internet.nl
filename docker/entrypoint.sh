@@ -10,6 +10,7 @@ POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
 POSTGRES_DB=${POSTGRES_DB:-internetnl_db1}
 RABBITMQ_HOST=${RABBITMQ_HOST:-localhost}
 REDIS_HOST=${REDIS_HOST:-localhost}
+RUN_SERVER_CMD=${MANAGE_PY_CMD:-runserver}
 
 APP_PATH=/app
 
@@ -58,4 +59,4 @@ celery -A internetnl beat &
 ( sleep 10s ; tail -F -n 1000 *.log ) &
 
 # Start the Django web server
-./manage.py runserver 0.0.0.0:8080
+./manage.py ${RUN_SERVER_CMD} 0.0.0.0:8080

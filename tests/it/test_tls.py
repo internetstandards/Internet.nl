@@ -127,7 +127,7 @@ def submit_website_test_form(selenium, domain):
 def wait_for_test_to_start(selenium, domain):
     # Wait for the test to start or the result page to show
     # Both have the same HTML title
-    WebDriverWait(selenium, 2).until(
+    WebDriverWait(selenium, 30).until(
         EC.title_contains('{}{}'.format(LOCATOR_PROGRESS_AND_RESULT_TITLE_PREFIX, domain)))
 
 
@@ -139,7 +139,7 @@ def wait_for_test_to_complete(selenium):
     # We should see the result page soon...
     # This will throw a TimeoutException if the element isn't
     # found within the time period specified.
-    WebDriverWait(selenium, 2).until(
+    WebDriverWait(selenium, 30).until(
         EC.presence_of_element_located((By.ID, LOCATOR_RESULTS_OVERVIEW_ID)))
 
 
