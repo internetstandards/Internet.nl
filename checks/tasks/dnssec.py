@@ -4,7 +4,9 @@ from collections import OrderedDict
 import socket
 import time
 
-import pythonwhois
+# TODO: resolve regex parsing failure when importing pythonwhois under Python 3.7+
+#import pythonwhois
+import sys
 import unbound
 
 from celery import shared_task
@@ -121,7 +123,7 @@ def registrar_lookup(addr):
 
     """
     res = ""
-    if not settings.ENABLE_BATCH:
+    if 'pythonwhois' in sys.modules and not settings.ENABLE_BATCH:
         cache_id = redis_id.whois.id.format(addr)
         cache_ttl = redis_id.whois.ttl
         cached = cache.get(cache_id)
