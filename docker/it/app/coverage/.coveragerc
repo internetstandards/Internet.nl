@@ -6,3 +6,5 @@ timid = True
 concurrency =
     thread
     multiprocessing
+source =
+    /app/
