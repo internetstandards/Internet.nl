@@ -64,6 +64,8 @@ services:
       context: ../..
       dockerfile: docker/it/app/Dockerfile
       network: host
+      args:
+        - INSTALL_BROWSERS
     volumes:
       # Allow the developer to launch a browser in the container using the host X server
       - "/tmp/.X11-unix:/tmp/.X11-unix"
