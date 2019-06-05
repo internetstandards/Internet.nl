@@ -34,6 +34,7 @@ sudo chown internetnl: ${TRUST_ANCHOR_PATH}
 echo
 echo ":: Launching Internet.nl app.."
 if [ ${ENABLE_COVERAGE} -eq 1 ]; then
+    echo "Activating code coverage mode"
     export COVERAGE_PROCESS_START=/app/.coveragerc
     export RUN_SERVER_CMD="runserver --noreload --nothreading"
 fi

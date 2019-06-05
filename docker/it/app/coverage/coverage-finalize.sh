@@ -1,5 +1,6 @@
 #!/bin/bash
 # Coverage setup based on: https://github.com/celery/celery/issues/3422
+ENABLE_COVERAGE=${ENABLE_COVERAGE:-0}
 if [ ${ENABLE_COVERAGE} -eq 1 ]; then
     echo
     echo ":: Terminating the Internet.nl app to trigger writing of coverage data to disk.."
