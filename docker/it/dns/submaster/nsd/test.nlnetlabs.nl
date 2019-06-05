@@ -24,5 +24,7 @@ tls11only              IN  A      {{TARGET_TLS11ONLY_IP}}
 tls11only              IN  AAAA   {{TARGET_TLS11ONLY_IPV6}}
 tls12only              IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only              IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
+tls13only              IN  A      {{TARGET_TLS13ONLY_IP}}
+tls13only              IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
 nossl                  IN  A      {{TARGET_NOSSL_IP}}
 nossl                  IN  AAAA   {{TARGET_NOSSL_IPV6}}

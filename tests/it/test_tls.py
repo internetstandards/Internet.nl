@@ -163,7 +163,8 @@ websites_to_test = [
     DomainConfig('tls1213shorthsts.test.nlnetlabs.nl', [TEST_HSTS]),
     DomainConfig('nossl.test.nlnetlabs.nl', [TEST_HTTPS_AVAILABLE]),
     DomainConfig('tls11only.test.nlnetlabs.nl', []),
-    DomainConfig('tls12only.test.nlnetlabs.nl', [])
+    DomainConfig('tls12only.test.nlnetlabs.nl', []),
+    pytest.param(DomainConfig('tls13only.nlnetlabs.nl', []), marks=pytest.mark.xfail(reason='not yet supported'))
 ]
 
 
