@@ -1,7 +1,20 @@
-FROM nlnetlabs/internetnl:devel
-ARG INSTALL_BROWSERS=no
+ARG BASE_IMAGE=nlnetlabs/internetnl:devel
+FROM ${BASE_IMAGE}
 
-ENV DEBIAN_FRONTEND noninteractive
+# Capture the name of the base image we are extending in an environment
+# variable that will be available at runtime to the integration test suite and
+# can be included in the integration test report. ARG BASE_IMAGE has to be
+# specified twice due to the following Dockerfile technical detail:
+#
+#   "An ARG declared before a FROM is outside of a build stage, so it can’t be
+#   used in any instruction after a FROM. To use the default value of an ARG
+#   declared before the first FROM use an ARG instruction without a value
+#   inside of a build stage:"
+#
+# From: https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
+ARG BASE_IMAGE
+ENV INTERNETNL_BASE_IMAGE=${BASE_IMAGE}
+RUN echo "Base image: nlnetlabs/internetnl:${INTERNETNL_BASE_IMAGE}"
 
 WORKDIR /tmp
 RUN curl -fsSLo- 'https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz' | tar zx

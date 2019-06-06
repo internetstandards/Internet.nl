@@ -4,6 +4,12 @@ TRUST_ANCHOR_PATH="/tmp/root_zsk.key"
 ROOT_HINTS_PATH="${APP_PATH}/docker/it/dns/resolver/unbound/root.hints"
 UNBOUND_CONF_PATH="/app/docker/it/app/unbound.conf.it"
 
+# Output the environment variable set by the Dockerfile used to build our image
+# so that we have some confirmation of which base Internet.nl base Docker image
+# we were built against.
+echo ":: Internet.nl code to be tested is taken from Docker image: ${INTERNETNL_BASE_IMAGE}"
+
+echo
 echo ":: Configuring Internet.nl app to use Unbound root hints file '${ROOT_HINTS_PATH}'.."
 perl -pi -e 's|\{\{ROOT_IP\}\}|'${ROOT_IP}'|g' ${ROOT_HINTS_PATH}
 perl -pi -e 's|\{\{ROOT_IPV6\}\}|'${ROOT_IPV6}'|g' ${ROOT_HINTS_PATH}

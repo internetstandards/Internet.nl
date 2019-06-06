@@ -31,3 +31,4 @@ def pytest_configure(config):
 
     config._metadata['Internet.NL Git Describe'] = git_describe_out
     config._metadata['Internet.NL Pip List'] = pip_list_out.decode('utf-8')
+    config._metadata['Internet.NL Base Image'] = os.environ.get('INTERNETNL_BASE_IMAGE', 'Unknown')

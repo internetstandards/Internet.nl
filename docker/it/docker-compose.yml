@@ -66,6 +66,7 @@ services:
       network: host
       args:
         - INSTALL_BROWSERS
+        - BASE_IMAGE
     volumes:
       # Allow the developer to launch a browser in the container using the host X server
       - "/tmp/.X11-unix:/tmp/.X11-unix"
@@ -395,7 +396,7 @@ services:
   # A base image for the app
   appbase:
     container_name: appbase
-    image: nlnetlabs/internetnl:devel
+    image: ${BASE_IMAGE}
     build:
       context: ../..
       dockerfile: docker/Dockerfile
