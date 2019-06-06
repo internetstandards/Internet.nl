@@ -1,22 +1,24 @@
 # Newer versions of amqp do not work on all systems because of newer TCP settings.
+# Celery upgraded to 4.3 due to bug https://github.com/celery/celery/pull/4852 hit with Python 3.7
+# Kombu upgraded to 4.4 to meet Celery 4.3 minimum requirements
 amqp==2.2.2
-celery==4.2
-kombu==4.2.1
-Django==1.11.20
-django-hosts
-django-redis
-django-enumfields
-django-markdown_deux
-psycopg2-binary
+celery==4.3
+cryptography
 django-bleach
 django-csp
+django-enumfields
+django-hosts
+django-markdown_deux
+django-redis
+Django==1.11.20
 eventlet
 gevent
-requests
-cryptography
-pyparsing
-pyrabbit
-polib
-rjsmin
+kombu==4.4
 libsass
 markdown
+polib
+psycopg2-binary
+pyparsing
+pyrabbit
+requests
+rjsmin
