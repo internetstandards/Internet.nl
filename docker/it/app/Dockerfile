@@ -24,6 +24,6 @@ WORKDIR /tmp/it-report
 WORKDIR ${APP_PATH}/tests/it
 COPY tests/it .
 
-RUN if [ "${INSTALL_BROWSERS}" == "yes" ]; then apt-get update && apt-get install --no-install-recommends -y chromium-browser firefox; fi
+RUN bash -c "if [ '${INSTALL_BROWSERS}' == 'yes' ]; then apt-get update && apt-get install --no-install-recommends -y chromium-browser firefox; fi"
 
 ENTRYPOINT ["/app/docker/entrypoint.sh.it"]
