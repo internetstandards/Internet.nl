@@ -4,6 +4,7 @@ import subprocess
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from git import Repo
+from git.exc import InvalidGitRepositoryError
 
 
 DEFAULT_BROWSER_WIDTH = 1280
@@ -21,5 +22,12 @@ def firefox_options(firefox_options):
 
 def pytest_configure(config):
     pip_list_out, unused_err = subprocess.Popen(['pip','list'], stdout=subprocess.PIPE).communicate()
-    config._metadata['Internet.NL Version'] = Repo('/app').git.describe(tags=True)
-    config._metadata['Internet.NL Dependencies'] = pip_list_out.decode('utf-8')
+
+    try:
+        # Assumes that the tests are being run from the tests/it subdirectory.
+        git_describe_out = Repo('../..').git.describe(tags=True)
+    except InvalidGitRepositoryError:
+        git_describe_out = 'Unknown'
+
+    config._metadata['Internet.NL Git Describe'] = git_describe_out
+    config._metadata['Internet.NL Pip List'] = pip_list_out.decode('utf-8')
