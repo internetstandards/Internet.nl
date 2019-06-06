@@ -25,10 +25,14 @@ def pytest_configure(config):
 
     try:
         # Assumes that the tests are being run from the tests/it subdirectory.
-        git_describe_out = Repo('/app').git.describe(tags=True)
+        r = Repo('/app')
+        git_describe_tags_out = r.git.describe(tags=True)
+        git_describe_branch_out = r.git.describe(all=True)
     except InvalidGitRepositoryError:
-        git_describe_out = 'Unknown'
+        git_describe_tags_out = 'Unknown'
+        git_describe_branch_out = 'Unknown'
 
-    config._metadata['Internet.NL Git Describe'] = git_describe_out
+    config._metadata['Internet.NL Git Describe Tags'] = git_describe_tags_out
+    config._metadata['Internet.NL Git Describe Branch'] = git_describe_branch_out
     config._metadata['Internet.NL Pip List'] = pip_list_out.decode('utf-8')
     config._metadata['Internet.NL Base Image'] = os.environ.get('INTERNETNL_BASE_IMAGE', 'Unknown')

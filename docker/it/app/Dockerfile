@@ -13,6 +13,7 @@ FROM ${BASE_IMAGE}
 #
 # From: https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 ARG BASE_IMAGE
+ARG INSTALL_BROWSERS=no
 ENV INTERNETNL_BASE_IMAGE=${BASE_IMAGE}
 RUN echo "Base image: ${INTERNETNL_BASE_IMAGE}"
 
@@ -22,8 +23,8 @@ RUN curl -fsSLo- 'https://github.com/mozilla/geckodriver/releases/download/v0.24
 RUN sudo mv /tmp/geckodriver /usr/local/bin
 
 # Install test suite dependencies
-RUN sudo pip install --upgrade pip && \
-    sudo pip install \
+RUN sudo -H pip install --upgrade pip && \
+    sudo -H pip install \
         coverage \
         coverage-enable-subprocess \
         pytest-progress \
@@ -45,7 +46,9 @@ COPY tests/it ${APP_PATH}/tests/it/
 # annoying if you have no intention of using them but instead only intend to
 # consume the integration test report that is generated and written to the host
 # via a bind volume mount.
-RUN bash -c "if [ '${INSTALL_BROWSERS}' == 'yes' ]; then apt-get update && apt-get install --no-install-recommends -y chromium-browser firefox; fi"
+RUN bash -c "if [ '${INSTALL_BROWSERS}' == 'yes' ]; then sudo apt-get update && sudo apt-get install --no-install-recommends -y chromium-browser firefox; fi"
 
 WORKDIR ${APP_PATH}
 ENTRYPOINT ["/app/docker/entrypoint.sh.it"]
+
+USER root

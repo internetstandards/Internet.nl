@@ -156,14 +156,14 @@ def id_generator(val):
 
 websites_to_test = [
     DomainConfig('tls1213.test.nlnetlabs.nl', []),
-    DomainConfig('tls1213ipv4only.test.nlnetlabs.nl', [TEST_IPV6_ADDRESS_FOR_WEB_SERVER]),
-    DomainConfig('tls1213wrongcertname.test.nlnetlabs.nl', [TEST_DOMAIN_NAME_ON_CERT]),
-    DomainConfig('tls1213sni.test.nlnetlabs.nl', []),
-    DomainConfig('tls1213nohsts.test.nlnetlabs.nl', [TEST_HSTS]),
-    DomainConfig('tls1213shorthsts.test.nlnetlabs.nl', [TEST_HSTS]),
-    DomainConfig('nossl.test.nlnetlabs.nl', [TEST_HTTPS_AVAILABLE]),
-    DomainConfig('tls11only.test.nlnetlabs.nl', []),
-    DomainConfig('tls12only.test.nlnetlabs.nl', []),
+    # DomainConfig('tls1213ipv4only.test.nlnetlabs.nl', [TEST_IPV6_ADDRESS_FOR_WEB_SERVER]),
+    # DomainConfig('tls1213wrongcertname.test.nlnetlabs.nl', [TEST_DOMAIN_NAME_ON_CERT]),
+    # DomainConfig('tls1213sni.test.nlnetlabs.nl', []),
+    # DomainConfig('tls1213nohsts.test.nlnetlabs.nl', [TEST_HSTS]),
+    # DomainConfig('tls1213shorthsts.test.nlnetlabs.nl', [TEST_HSTS]),
+    # DomainConfig('nossl.test.nlnetlabs.nl', [TEST_HTTPS_AVAILABLE]),
+    # DomainConfig('tls11only.test.nlnetlabs.nl', []),
+    # DomainConfig('tls12only.test.nlnetlabs.nl', []),
     pytest.param(DomainConfig('tls13only.test.nlnetlabs.nl', []), marks=pytest.mark.xfail(reason='not yet supported'))
 ]
 

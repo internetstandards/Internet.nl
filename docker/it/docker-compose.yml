@@ -107,6 +107,8 @@ services:
       # Environment variables that influence integration test behaviour
       - IT_BROWSER_WIDTH
       - IT_BROWSER_HEIGHT
+    ports:
+      - "8080:8080"
 
   selenium:
     image: selenium/standalone-firefox
@@ -426,4 +428,4 @@ networks:
       config:
       - subnet: ${SUBNETV4}
       - subnet: ${SUBNETV6}
-    internal: true
+    #internal: true

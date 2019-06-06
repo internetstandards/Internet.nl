@@ -255,7 +255,7 @@ class SetSockTLSConnection(SetSockConnection):
         self.key_file = key_file
         self.cert_file = cert_file
         try:
-            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             # Connect with all ciphers (except eNULL) for HTTPS checks.
             # Proper TLS checks are not using this class.
             self.ssl_context.set_ciphers("ALL")
