@@ -47,4 +47,5 @@ COPY tests/it ${APP_PATH}/tests/it/
 # via a bind volume mount.
 RUN bash -c "if [ '${INSTALL_BROWSERS}' == 'yes' ]; then apt-get update && apt-get install --no-install-recommends -y chromium-browser firefox; fi"
 
+WORKDIR ${APP_PATH}
 ENTRYPOINT ["/app/docker/entrypoint.sh.it"]
