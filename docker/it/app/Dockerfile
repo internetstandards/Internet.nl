@@ -14,7 +14,7 @@ FROM ${BASE_IMAGE}
 # From: https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 ARG BASE_IMAGE
 ENV INTERNETNL_BASE_IMAGE=${BASE_IMAGE}
-RUN echo "Base image: nlnetlabs/internetnl:${INTERNETNL_BASE_IMAGE}"
+RUN echo "Base image: ${INTERNETNL_BASE_IMAGE}"
 
 # Install the Gecko driver required by Selenium
 WORKDIR /tmp
