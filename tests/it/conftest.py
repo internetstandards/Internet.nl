@@ -25,7 +25,7 @@ def pytest_configure(config):
 
     try:
         # Assumes that the tests are being run from the tests/it subdirectory.
-        git_describe_out = Repo('../..').git.describe(tags=True)
+        git_describe_out = Repo('/app').git.describe(tags=True)
     except InvalidGitRepositoryError:
         git_describe_out = 'Unknown'
 
