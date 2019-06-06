@@ -36,7 +36,6 @@ version: '2.3'
 
 services:
   testrunner:
-    container_name: testrunner
     build:
       context: testrunner
       network: host
@@ -54,12 +53,12 @@ services:
       - resolver
       - app
     environment:
+      - COMPOSE_PROJECT_NAME
       - ROOT_IP
       - MASTER_IP
       - RESOLVER_IP
 
   app:
-    container_name: app
     build:
       context: ../..
       dockerfile: docker/it/app/Dockerfile
@@ -111,7 +110,6 @@ services:
       - ENABLE_COVERAGE
 
   selenium:
-    container_name: selenium
     image: selenium/standalone-firefox
     # Prevent crashes when running a browser in the container.
     # See: https://github.com/SeleniumHQ/docker-selenium
@@ -126,7 +124,6 @@ services:
       - app
 
   redis:
-    container_name: redis
     image: redis:alpine
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
@@ -136,7 +133,6 @@ services:
         ipv6_address: ${REDIS_IPV6}
 
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:alpine
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
@@ -146,7 +142,6 @@ services:
         ipv6_address: ${RABBITMQ_IPV6}
 
   postgres:
-    container_name: postgres
     image: postgres:alpine
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
@@ -161,7 +156,6 @@ services:
 
   # TODO: find a way to reduce this boiler plate/copy-paste for different test targets
   targettls1213:
-    container_name: targettls1213
     build:
       context: target
       network: host
@@ -178,7 +172,6 @@ services:
       - targetbase
 
   targettls11only:
-    container_name: targettls11only
     build:
       context: target
       network: host
@@ -195,7 +188,6 @@ services:
       - targetbase
 
   targettls12only:
-    container_name: targettls12only
     build:
       context: target
       network: host
@@ -212,7 +204,6 @@ services:
       - targetbase
 
   targetnossl:
-    container_name: targetnossl
     build:
       context: target
       network: host
@@ -229,7 +220,6 @@ services:
 
   # An unbound DNS resolver container that is configured to get root hints from 'root' (defined below).
   resolver:
-    container_name: resolver
     build:
       context: dns/resolver
       network: host
@@ -253,7 +243,6 @@ services:
 
   # An NSD authoratitive container responsible for the nlnetlabs.nl. zone
   submaster:
-    container_name: submaster
     build:
       context: dns/submaster
       network: host
@@ -283,7 +272,6 @@ services:
 
   # An NSD authoratitive container responsible for the nl. TLD zone
   master:
-    container_name: master
     build:
       context: dns/master
       network: host
@@ -313,7 +301,6 @@ services:
       - ROLE=master
       - OTHER_IP=${MASTER2_IP}
   master2:
-    container_name: master2
     build:
       context: dns/master
       network: host
@@ -342,7 +329,6 @@ services:
 
   # An NSD root container that serves the root (.) zone an delegates the nl. zone to 'master'
   root:
-    container_name: root
     build:
       context: dns/root
       network: host
@@ -365,7 +351,6 @@ services:
 
   # A base image with handy tools
   devbase:
-    container_name: devbase
     image: devbase
     build:
       context: devbase
@@ -379,7 +364,6 @@ services:
 
   # A base image for the NSD containers
   nsdbase:
-    container_name: nsdbase
     image: nsdbase
     build:
       context: dns/nsdbase
@@ -395,7 +379,6 @@ services:
 
   # A base image for the app
   appbase:
-    container_name: appbase
     image: ${BASE_IMAGE}
     build:
       context: ../..
@@ -410,7 +393,6 @@ services:
 
     # A base image for target servers
   targetbase:
-    container_name: targetbase
     image: targetbase
     build:
       context: targetbase
