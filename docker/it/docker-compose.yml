@@ -35,6 +35,10 @@
 version: '2.3'
 
 services:
+  # --------------------------------------------------------------------------
+  #      A CONTAINER FOR ORCHESTRATING THE CONFIGURATION OF THE DEPLOYED
+  #           INFRASTRUCTURE AND FOR EXECUTING THE TEST SUITE.
+  # --------------------------------------------------------------------------
   testrunner:
     build:
       context: testrunner
@@ -58,6 +62,11 @@ services:
       - MASTER_IP
       - RESOLVER_IP
 
+
+  # --------------------------------------------------------------------------
+  #      THE INTERNET.NL APPLICATION WEB SERVER AGAINST WHICH TESTS WILL
+  #                                  BE EXECUTED
+  # --------------------------------------------------------------------------
   app:
     build:
       context: ../..
@@ -113,6 +122,11 @@ services:
     ports:
       - "8080:8080"
 
+
+  # --------------------------------------------------------------------------
+  #   A SELENIUM SERVER TO SUPPORT BROWSER BASED TESTING OF THE INTERNET.NL
+  #                             CONTAINER ABOVE.
+  # --------------------------------------------------------------------------
   selenium:
     image: selenium/standalone-firefox
     # Prevent crashes when running a browser in the container.
@@ -127,6 +141,10 @@ services:
     depends_on:
       - app
 
+
+  # --------------------------------------------------------------------------
+  #   REDIS, RABBITMQ, AND POSTGRES SUPPORT SERVERS NEEDED BY INTERNET.NL.
+  # --------------------------------------------------------------------------
   redis:
     image: redis:alpine
     dns: ${RESOLVER_IP}
@@ -157,6 +175,13 @@ services:
       - POSTGRES_USER=internetnl
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=internetnl_db1
+
+
+  # --------------------------------------------------------------------------
+  #   TARGET SERVERS OF VARIOUS FLAVOURS AND CONFIGURATION FOR CONNECTING
+  #   TO FROM THE INTERNET.NL APPLICATION.
+  # --------------------------------------------------------------------------
+
 
   # TODO: find a way to reduce this boiler plate/copy-paste for different test targets
   targettls1213:
@@ -285,7 +310,15 @@ services:
     depends_on:
       - targetbase
 
-  # An unbound DNS resolver container that is configured to get root hints from 'root' (defined below).
+
+  # --------------------------------------------------------------------------
+  #    DNS INFRASTRUCTURE: ROOT, NL, NLNETLABS.NL AND TEST.NLNETLABS.NL
+  #    AND AN UNBOUND RESOLVER WITH MODIFIED ROOT HINTS AND DNSSEC ROOT KEY.
+  # --------------------------------------------------------------------------
+
+
+  # An unbound DNS resolver container that is configured to get root hints
+  # from 'root' (defined below).
   resolver:
     build:
       context: dns/resolver
@@ -424,6 +457,13 @@ services:
       - MASTER2_IP=${MASTER2_IP}
       - MASTER2_IPV6=${MASTER2_IPV6}
 
+
+  # --------------------------------------------------------------------------
+  #    CONTAINERS THAT SERVE ONLY TO PRODUCE BASE DOCKER IMAGES FOR USE
+  #    BY CONTAINERS DEFINED ABOVE THIS POINT.
+  # --------------------------------------------------------------------------
+
+
   # A base image with handy tools
   devbase:
     image: devbase
@@ -473,6 +513,7 @@ services:
       context: targetbase
       network: host
     entrypoint: /bin/sleep infinity
+
 
 networks:
   test_net:
