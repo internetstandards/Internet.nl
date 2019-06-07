@@ -26,8 +26,6 @@
     // "Remove this line if you want to keep your containers running after VS Code shuts down."
     "shutdownAction": "stopCompose",
 
-    "runArgs": [ "-u", "internetnl" ]
-
     // "Other notes:"
     // "- The 'appPorts' property is not supported in the Docker Compose case. Add the ports into"
     // "  the docker-compose.yml in the .devcontainer folder instead." 

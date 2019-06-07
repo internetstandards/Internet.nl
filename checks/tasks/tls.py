@@ -8,7 +8,7 @@ import ssl
 import subprocess
 import time
 from timeit import default_timer as timer
-
+ 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from cryptography.x509 import load_pem_x509_certificate, NameOID, ExtensionOID
@@ -24,6 +24,7 @@ from django.core.cache import cache
 from nassl import _nassl
 from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
 from nassl.legacy_ssl_client import LegacySslClient
+from nassl.ssl_client import SslClient
 from nassl.ssl_client import ClientCertificateRequested
 
 from . import SetupUnboundContext, shared
@@ -38,6 +39,10 @@ from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus
 
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 try:
     from ssl import OP_NO_SSLv2, OP_NO_SSLv3
 except ImportError as e:
@@ -48,9 +53,13 @@ except ImportError as e:
     else:
         raise e
 
-SSLV2 = OpenSslVersionEnum.SSLV2
 SSLV23 = OpenSslVersionEnum.SSLV23
+SSLV2 = OpenSslVersionEnum.SSLV2
 SSLV3 = OpenSslVersionEnum.SSLV3
+TLSV1 = OpenSslVersionEnum.TLSV1
+TLSV1_1 = OpenSslVersionEnum.TLSV1_1
+TLSV1_2 = OpenSslVersionEnum.TLSV1_2
+TLSV1_3 = OpenSslVersionEnum.TLSV1_3  # causes Exception 'Invalid value for ssl version'
 SSL_VERIFY_NONE = OpenSslVerifyEnum.NONE
 
 
@@ -897,30 +906,8 @@ class DebugSMTPConnectionCouldNotTestException(Exception):
     pass
 
 
-class DebugConnection(LegacySslClient):
-    def __init__(
-            self, url, addr=None, version=SSLV23, shutdown=True,
-            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
-        self.url = url
-        self.version = version
-        self.must_shutdown = shutdown
-        self.ciphers = ciphers
-        self.addr = addr
-        self.options = options
-        self.send_SNI = send_SNI
-
-        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
-        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
-        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
-        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
-        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
-        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
-        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
-
-        self.sock_setup()
-        self.connect()
-
+class ConnectionHelper:
+    # Almost identical to SetSockConnection::_create_conn()
     def sock_setup(self):
         self.port = 443
         self.sock_timeout = 10
@@ -946,7 +933,7 @@ class DebugConnection(LegacySslClient):
     def connect(self):
         try:
             # TODO force ipv4 or ipv6
-            super(DebugConnection, self).__init__(
+            super().__init__(
                 ssl_version=self.version,
                 underlying_socket=self.sock,
                 ssl_verify=SSL_VERIFY_NONE,
@@ -973,19 +960,6 @@ class DebugConnection(LegacySslClient):
             if self.must_shutdown:
                 self.safe_shutdown()
 
-    def get_peer_certificate_chain(self):
-        """
-        Wrap nassl's method in order to catch ValueError when there is an error
-        getting the peer's certificate chain.
-
-        """
-        chain = None
-        try:
-            chain = self.get_peer_cert_chain()
-        except ValueError:
-            pass
-        return chain
-
     def safe_shutdown(self, tls=True):
         """
         Shutdown TLS and socket. Ignore any exceptions.
@@ -999,6 +973,94 @@ class DebugConnection(LegacySslClient):
             pass
         finally:
             self.sock.close()
+
+
+class ModernConnection(ConnectionHelper, SslClient):
+    """
+    A TLS 1.3 only client.
+
+    """
+    def __init__(
+            self, url, addr=None, version=TLSV1_3, shutdown=True,
+            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
+        self.url = url
+        self.version = version
+        self.must_shutdown = shutdown
+        self.ciphers = ciphers
+        self.addr = addr
+        self.options = options
+        self.send_SNI = send_SNI
+
+        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
+        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
+        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
+        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
+        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
+        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
+        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
+        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+
+        self.sock_setup()
+        self.connect()
+
+    def check_secure_reneg(self):
+        """
+        TLS 1.3 forbids renegotiaton.
+
+        """
+        return self.score_secure_reneg_good, 1
+
+    def check_client_reneg(self):
+        """
+        TLS 1.3 forbids renegotiaton.
+
+        """
+        return self.score_client_reneg_good, False
+
+    def check_compression(self):
+        """
+        TLS 1.3 forbids compression.
+
+        """
+        return self.score_compression_good, False
+
+
+class DebugConnection(ConnectionHelper, LegacySslClient):
+    def __init__(
+            self, url, addr=None, version=SSLV23, shutdown=True,
+            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
+        self.url = url
+        self.version = version
+        self.must_shutdown = shutdown
+        self.ciphers = ciphers
+        self.addr = addr
+        self.options = options
+        self.send_SNI = send_SNI
+
+        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
+        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
+        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
+        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
+        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
+        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
+        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
+        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+
+        self.sock_setup()
+        self.connect()
+
+    def get_peer_certificate_chain(self):
+        """
+        Wrap nassl's method in order to catch ValueError when there is an error
+        getting the peer's certificate chain.
+
+        """
+        chain = None
+        try:
+            chain = self.get_peer_cert_chain()
+        except ValueError:
+            pass
+        return chain
 
     def trusted_score(self):
         """
@@ -1276,7 +1338,7 @@ def do_web_conn(addrs, url, *args, **kwargs):
         results = {}
         for addr in addrs:
             results[addr[1]] = check_web_tls(
-                url, DebugConnection, addr, args, kwargs)
+                url, addr, args, kwargs)
     except SoftTimeLimitExceeded:
         for addr in addrs:
             if not results.get(addr[1]):
@@ -1514,7 +1576,17 @@ def has_daneTA(tlsa_records):
     return False
 
 
-def check_web_tls(url, conn_handler, addr=None, *args, **kwargs):
+# Current situation: we are called by do_web_conn with
+# conn_handler=DebugConnection. Nobody else calls us, and never do we get
+# given a different conn_handler. DebugConnection is implemented in terms of
+# NASSL LegacySslClient and does not support TLS 1.3. A newer NASSL SslClient
+# supports TLS 1.3, but only in a clean way, it doesn't support legacy things
+# that we need for legacy protocol connections. So we need both
+# LegacySslClient and SslClient. First attempt to connect with TLS 1.3 using
+# SslClient, if that fails fallback to LegacySslClient.
+#
+# TO DO: 0-rtt test aka 'early data'
+def check_web_tls(url, addr=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
 
@@ -1522,15 +1594,32 @@ def check_web_tls(url, conn_handler, addr=None, *args, **kwargs):
     try:
         # Make sure port 443 serves web content and then open the connection
         # for testing.
-        shared.http_fetch(
+        logger.error(f'XIMON: check_web_tls({url}: connecting..')
+        conn_handler = DebugConnection
+        tls_version = None
+
+        conn, *unused = shared.http_fetch(
             url, af=addr[0], path="", port=443, addr=addr[1],
-            depth=MAX_REDIRECT_DEPTH, task=web_conn)
-        conn = conn_handler(url, version=SSLV23, addr=addr, shutdown=False)
+            depth=MAX_REDIRECT_DEPTH, task=web_conn,
+            keep_conn_open=True)
+        logger.error(f'XIMON: check_web_tls({url}): connected: sock={type(conn.sock)}')
+
+        try:
+            tls_version = conn.sock.version()
+            logger.error(f'XIMON: check_web_tls({url}): TLS version = {tls_version}')
+            if tls_version == 'TLSv1.3':
+                logger.error(f'XIMON: check_web_tls({url}): selecting ModernConnection')
+                conn_handler = ModernConnection
+        finally:
+            conn.close()
+
+        conn = conn_handler(url, addr=addr, shutdown=False)
     except (socket.error, http.client.BadStatusLine, NoIpError,
             DebugConnectionHandshakeException,
             DebugConnectionSocketException):
         return dict(tls_enabled=False)
     else:
+        logger.error(f'XIMON: check_web_tls({url}: checking renegotiation and compression..')
         secure_reneg_score, secure_reneg = conn.check_secure_reneg()
         client_reneg_score, client_reneg = conn.check_client_reneg()
         compression_score, compression = conn.check_compression()
@@ -1545,18 +1634,23 @@ def check_web_tls(url, conn_handler, addr=None, *args, **kwargs):
         fs_bad = []
         fs_score = scoring.WEB_TLS_FS_BAD
 
+        logger.error(f'XIMON: check_web_tls({url}: closing the connection..')
         conn.safe_shutdown()
 
+        # TO DO: Test for TLS 1.1 and TLS 1.0 as these are now "phase out"
+
         # SSLv2 and SSLv3 should not be supported
+        logger.error(f'XIMON: check_web_tls({url}: testing SSLv2 support..')
         try:
-            conn_handler(url, addr=addr, version=SSLV2)
+            DebugConnection(url, addr=addr, version=SSLV2)
             prots_bad.append('SSLv2')
             prots_score = scoring.WEB_TLS_PROTOCOLS_BAD
         except (DebugConnectionHandshakeException,
                 DebugConnectionSocketException):
             pass
         try:
-            conn_handler(url, addr=addr, version=SSLV3)
+            logger.error(f'XIMON: check_web_tls({url}: testing SSLv3 support..')
+            DebugConnection(url, addr=addr, version=SSLV3)
             prots_bad.append('SSLv3')
             prots_score = scoring.WEB_TLS_PROTOCOLS_BAD
         except (DebugConnectionHandshakeException,
@@ -1564,50 +1658,61 @@ def check_web_tls(url, conn_handler, addr=None, *args, **kwargs):
             pass
 
         # Connect using bad cipher
-        ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
-        while True:
+        # TO DO: Review regarding TLS 1.3, for now skip this as otherwise we
+        # get stuck in an infinite loop
+        if tls_version != 'TLSv1.3':
+            logger.error(f'XIMON: check_web_tls({url}: testing for bad cipher support..')
+            ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
+            while True:
+                try:
+                    conn = conn_handler(
+                        url, addr=addr, ciphers=ncsc_bad_ciphers, shutdown=False)
+                except (DebugConnectionHandshakeException,
+                        DebugConnectionSocketException):
+                    break
+                else:
+                    ciphers_score = scoring.WEB_TLS_SUITES_BAD
+                    curr_cipher = conn.get_current_cipher_name()
+                    ncsc_bad_ciphers = "!{}:{}".format(
+                        curr_cipher, ncsc_bad_ciphers)
+                    ciphers_bad.append(curr_cipher)
+                    conn.safe_shutdown()
+
+            # Connect using DH(E) and ECDH(E) to get FS params
+            # TO DO: Review regarding TLS 1.3, for now skip because
+            # _openssl_str_to_dic() is not implemented in the TLS 1.3 capable
+            # SslClient.
             try:
+                logger.error(f'XIMON: check_web_tls({url}: testing DH(E) support..')
                 conn = conn_handler(
-                    url, addr=addr, ciphers=ncsc_bad_ciphers, shutdown=False)
+                    url, addr=addr, ciphers="DH:DHE:!aNULL", shutdown=False)
+                dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
+                dh_param = dh_param["DH_Parameters"].strip("( bit)")
+                conn.safe_shutdown()
             except (DebugConnectionHandshakeException,
                     DebugConnectionSocketException):
-                break
-            else:
-                ciphers_score = scoring.WEB_TLS_SUITES_BAD
-                curr_cipher = conn.get_current_cipher_name()
-                ncsc_bad_ciphers = "!{}:{}".format(
-                    curr_cipher, ncsc_bad_ciphers)
-                ciphers_bad.append(curr_cipher)
+                pass
+            try:
+                logger.error(f'XIMON: check_web_tls({url}: testing ECDH(E) support..')
+                conn = conn_handler(
+                    url, addr=addr, ciphers="ECDH:ECDHE:!aNULL", shutdown=False)
+                ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
+                ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
                 conn.safe_shutdown()
+            except (DebugConnectionHandshakeException,
+                    DebugConnectionSocketException):
+                pass
 
-        # Connect using DH(E) and ECDH(E) to get FS params
-        try:
-            conn = conn_handler(
-                url, addr=addr, ciphers="DH:DHE:!aNULL", shutdown=False)
-            dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
-            dh_param = dh_param["DH_Parameters"].strip("( bit)")
-            conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-        try:
-            conn = conn_handler(
-                url, addr=addr, ciphers="ECDH:ECDHE:!aNULL", shutdown=False)
-            ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
-            ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
-            conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-
-        if dh_param and int(dh_param) < 2048:
-            fs_bad.append("DH-{}".format(dh_param))
-        if ecdh_param and int(ecdh_param) < 224:
-            fs_bad.append("ECDH-{}".format(ecdh_param))
+            # UnboundLocalErro: local variable 'dh_param' referenced before assignment
+            if dh_param and int(dh_param) < 2048:
+                fs_bad.append("DH-{}".format(dh_param))
+            if ecdh_param and int(ecdh_param) < 224:
+                fs_bad.append("ECDH-{}".format(ecdh_param))
 
         if len(fs_bad) == 0:
             fs_score = scoring.WEB_TLS_FS_OK
 
+        logger.error(f'XIMON: check_web_tls({url}: done')
         return dict(
             tls_enabled=True,
             prots_bad=prots_bad,
@@ -1706,3 +1811,4 @@ def forced_http_check(addr, url, task):
                 break
 
     return forced_https, forced_https_score
+

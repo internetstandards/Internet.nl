@@ -64,8 +64,7 @@ services:
       dockerfile: docker/it/app/Dockerfile
       network: host
       args:
-        - INSTALL_BROWSERS
-        - BASE_IMAGE
+        - BASE_IMAGE        
     volumes:
       # Allow the developer to launch a browser in the container using the host X server
       - "/tmp/.X11-unix:/tmp/.X11-unix"
@@ -205,7 +204,6 @@ services:
       - targetbase
 
   targettls13only:
-    container_name: targettls13only
     build:
       context: target
       network: host

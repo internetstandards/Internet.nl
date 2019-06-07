@@ -13,7 +13,6 @@ FROM ${BASE_IMAGE}
 #
 # From: https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 ARG BASE_IMAGE
-ARG INSTALL_BROWSERS=no
 ENV INTERNETNL_BASE_IMAGE=${BASE_IMAGE}
 RUN echo "Base image: ${INTERNETNL_BASE_IMAGE}"
 
@@ -37,18 +36,8 @@ COPY docker/it/app/coverage/.coveragerc /app/
 
 COPY tests/it ${APP_PATH}/tests/it/
 
-# Install Chromium and Firefox browsers in order to be able to interact via a
-# browser with the deployed Internet.nl application. You may need to grant
-# access to your host X server, e.g. with a command like 'xhost +''. You can't
-# visit the app website from your host browser because the Internet.nl app is
-# deployed inside a closed Docker network and publishing ports has no effect.
-# Installing browsers is optional because it increases the build time which is
-# annoying if you have no intention of using them but instead only intend to
-# consume the integration test report that is generated and written to the host
-# via a bind volume mount.
-RUN bash -c "if [ '${INSTALL_BROWSERS}' == 'yes' ]; then sudo apt-get update && sudo apt-get install --no-install-recommends -y chromium-browser firefox; fi"
+USER root
+ENV C_FORCE_ROOT="true"
 
 WORKDIR ${APP_PATH}
-ENTRYPOINT ["/app/docker/entrypoint.sh.it"]
-
-USER root
+ENTRYPOINT ["/app/docker/it/app/entrypoint.sh.it"]
