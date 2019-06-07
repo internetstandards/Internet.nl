@@ -21,6 +21,8 @@ from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
 from cryptography.hazmat.primitives import hashes
 from django.conf import settings
 from django.core.cache import cache
+from django.utils.text import format_lazy
+from django.utils.translation import gettext_lazy
 from nassl import _nassl
 from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
 from nassl.legacy_ssl_client import LegacySslClient
@@ -39,10 +41,6 @@ from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus
 
 
-import logging
-logger = logging.getLogger(__name__)
-
-
 try:
     from ssl import OP_NO_SSLv2, OP_NO_SSLv3
 except ImportError as e:
@@ -59,7 +57,7 @@ SSLV3 = OpenSslVersionEnum.SSLV3
 TLSV1 = OpenSslVersionEnum.TLSV1
 TLSV1_1 = OpenSslVersionEnum.TLSV1_1
 TLSV1_2 = OpenSslVersionEnum.TLSV1_2
-TLSV1_3 = OpenSslVersionEnum.TLSV1_3  # causes Exception 'Invalid value for ssl version'
+TLSV1_3 = OpenSslVersionEnum.TLSV1_3
 SSL_VERIFY_NONE = OpenSslVerifyEnum.NONE
 
 
@@ -257,6 +255,7 @@ def save_results(model, results, addr, domain, category):
                     model.ciphers_bad = result.get("ciphers_bad")
                     model.ciphers_score = result.get("ciphers_score")
                     model.protocols_bad = result.get("prots_bad")
+                    model.protocols_phase_out = result.get("prots_phase_out")
                     model.protocols_score = result.get("prots_score")
                     model.compression = result.get("compression")
                     model.compression_score = result.get("compression_score")
@@ -383,9 +382,18 @@ def build_report(dttls, category):
             else:
                 category.subtests['tls_ciphers'].result_good()
 
+            status_insecure = gettext_lazy('results security-level insufficient')
+            status_phase_out = gettext_lazy('results security-level phase-out')
+            prots = []
+            prots.extend([format_lazy('{prot} ({status})',
+                    prot=prot, status=status_insecure) for prot in dttls.protocols_bad])
+            prots.extend([format_lazy('{prot} ({status})',
+                    prot=prot, status=status_phase_out) for prot in dttls.protocols_phase_out])
+
             if len(dttls.protocols_bad) > 0:
-                category.subtests['tls_version'].result_bad(
-                    dttls.protocols_bad)
+                category.subtests['tls_version'].result_bad(prots)
+            elif len(dttls.protocols_phase_out) > 0:
+                category.subtests['tls_version'].result_phase_out(prots)
             else:
                 category.subtests['tls_version'].result_good()
 
@@ -1585,7 +1593,7 @@ def has_daneTA(tlsa_records):
 # LegacySslClient and SslClient. First attempt to connect with TLS 1.3 using
 # SslClient, if that fails fallback to LegacySslClient.
 #
-# TO DO: 0-rtt test aka 'early data'
+# TO DO: 0-rtt test aka 'early d ata'
 def check_web_tls(url, addr=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
@@ -1594,7 +1602,6 @@ def check_web_tls(url, addr=None, *args, **kwargs):
     try:
         # Make sure port 443 serves web content and then open the connection
         # for testing.
-        logger.error(f'XIMON: check_web_tls({url}: connecting..')
         conn_handler = DebugConnection
         tls_version = None
 
@@ -1602,13 +1609,10 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             url, af=addr[0], path="", port=443, addr=addr[1],
             depth=MAX_REDIRECT_DEPTH, task=web_conn,
             keep_conn_open=True)
-        logger.error(f'XIMON: check_web_tls({url}): connected: sock={type(conn.sock)}')
 
         try:
             tls_version = conn.sock.version()
-            logger.error(f'XIMON: check_web_tls({url}): TLS version = {tls_version}')
             if tls_version == 'TLSv1.3':
-                logger.error(f'XIMON: check_web_tls({url}): selecting ModernConnection')
                 conn_handler = ModernConnection
         finally:
             conn.close()
@@ -1619,12 +1623,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             DebugConnectionSocketException):
         return dict(tls_enabled=False)
     else:
-        logger.error(f'XIMON: check_web_tls({url}: checking renegotiation and compression..')
         secure_reneg_score, secure_reneg = conn.check_secure_reneg()
         client_reneg_score, client_reneg = conn.check_client_reneg()
         compression_score, compression = conn.check_compression()
 
         prots_bad = []
+        prots_phase_out = []
         prots_score = scoring.WEB_TLS_PROTOCOLS_GOOD
 
         ciphers_bad = []
@@ -1634,34 +1638,28 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         fs_bad = []
         fs_score = scoring.WEB_TLS_FS_BAD
 
-        logger.error(f'XIMON: check_web_tls({url}: closing the connection..')
         conn.safe_shutdown()
 
-        # TO DO: Test for TLS 1.1 and TLS 1.0 as these are now "phase out"
-
-        # SSLv2 and SSLv3 should not be supported
-        logger.error(f'XIMON: check_web_tls({url}: testing SSLv2 support..')
-        try:
-            DebugConnection(url, addr=addr, version=SSLV2)
-            prots_bad.append('SSLv2')
-            prots_score = scoring.WEB_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-        try:
-            logger.error(f'XIMON: check_web_tls({url}: testing SSLv3 support..')
-            DebugConnection(url, addr=addr, version=SSLV3)
-            prots_bad.append('SSLv3')
-            prots_score = scoring.WEB_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
+        # Test for TLS 1.1 and TLS 1.0 as these are now "phase out"
+        prot_test_configs = [
+            ( TLSV1_2, 'TLS 1.1', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
+            ( TLSV1_1, 'TLS 1.0', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
+            ( SSLV3,   'SSL 3.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
+            ( SSLV2,   'SSL 2.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
+        ]
+        for version, name, collection, score in prot_test_configs:
+            try:
+                DebugConnection(url, addr=addr, version=version)
+                collection.append(name)
+                prots_score = score
+            except (DebugConnectionHandshakeException,
+                    DebugConnectionSocketException):
+                pass
 
         # Connect using bad cipher
         # TO DO: Review regarding TLS 1.3, for now skip this as otherwise we
         # get stuck in an infinite loop
         if tls_version != 'TLSv1.3':
-            logger.error(f'XIMON: check_web_tls({url}: testing for bad cipher support..')
             ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
             while True:
                 try:
@@ -1683,7 +1681,6 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             # _openssl_str_to_dic() is not implemented in the TLS 1.3 capable
             # SslClient.
             try:
-                logger.error(f'XIMON: check_web_tls({url}: testing DH(E) support..')
                 conn = conn_handler(
                     url, addr=addr, ciphers="DH:DHE:!aNULL", shutdown=False)
                 dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
@@ -1693,7 +1690,6 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     DebugConnectionSocketException):
                 pass
             try:
-                logger.error(f'XIMON: check_web_tls({url}: testing ECDH(E) support..')
                 conn = conn_handler(
                     url, addr=addr, ciphers="ECDH:ECDHE:!aNULL", shutdown=False)
                 ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
@@ -1712,10 +1708,10 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         if len(fs_bad) == 0:
             fs_score = scoring.WEB_TLS_FS_OK
 
-        logger.error(f'XIMON: check_web_tls({url}: done')
         return dict(
             tls_enabled=True,
             prots_bad=prots_bad,
+            prots_phase_out=prots_phase_out,
             prots_score=prots_score,
 
             ciphers_bad=ciphers_bad,

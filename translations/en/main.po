@@ -1823,10 +1823,13 @@ msgid "detail web tls version label"
 msgstr "TLS version"
 
 msgid "detail web tls version tech table"
-msgstr "Web server IP address|Insecure TLS versions"
+msgstr "Web server IP address|TLS versions"
 
 msgid "detail web tls version verdict bad"
 msgstr "Your web server supports *insufficiently* secure TLS versions."
+
+msgid "detail web tls version verdict phase-out"
+msgstr "Your web server supports TLS versions that are at risk of becoming *insufficiently* secure in the near future."
 
 msgid "detail web tls version verdict good"
 msgstr "Your web server supports sufficiently secure TLS versions only."
@@ -2621,6 +2624,18 @@ msgstr "Explanation of test report"
 
 msgid "results verdict label"
 msgstr "Verdict:"
+
+msgid "results security-level insufficient"
+msgstr "insufficient"
+
+msgid "results security-level phase-out"
+msgstr "at risk"
+
+msgid "results security-level sufficient"
+msgstr "sufficient"
+
+msgid "results security-level good"
+msgstr "good"
 
 msgid "test connipv6 failed description"
 msgstr ""
