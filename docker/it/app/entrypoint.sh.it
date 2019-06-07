@@ -29,7 +29,7 @@ EOF
 # acquired.
 
 echo
-echo ":: Waiting for root trust anchor file to be written to "
+echo ":: Waiting for root trust anchor file to appear.."
 while ! test -f ${TRUST_ANCHOR_PATH}; do   
   sleep 1s
 done
