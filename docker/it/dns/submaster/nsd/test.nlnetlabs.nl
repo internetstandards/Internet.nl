@@ -20,11 +20,17 @@ tls1213shorthsts       IN  A      {{TARGET_TLS1213_IP}}
 tls1213shorthsts       IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213wrongcertname   IN  A      {{TARGET_TLS1213_IP}}
 tls1213wrongcertname   IN  AAAA   {{TARGET_TLS1213_IPV6}}
+tls10only              IN  A      {{TARGET_TLS10ONLY_IP}}
+tls10only              IN  AAAA   {{TARGET_TLS10ONLY_IPV6}}
 tls11only              IN  A      {{TARGET_TLS11ONLY_IP}}
 tls11only              IN  AAAA   {{TARGET_TLS11ONLY_IPV6}}
 tls12only              IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only              IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls13only              IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only              IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
+ssl2only               IN  A      {{TARGET_SSL2ONLY_IP}}
+ssl2only               IN  AAAA   {{TARGET_SSL2ONLY_IPV6}}
+ssl3only               IN  A      {{TARGET_SSL3ONLY_IP}}
+ssl3only               IN  AAAA   {{TARGET_SSL3ONLY_IPV6}}
 nossl                  IN  A      {{TARGET_NOSSL_IP}}
 nossl                  IN  AAAA   {{TARGET_NOSSL_IPV6}}

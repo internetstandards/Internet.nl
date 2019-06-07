@@ -28,11 +28,12 @@ LOCATOR_RESULTS_OVERVIEW_ID = 'testresults-overview'
 LOCATOR_PROGRESS_AND_RESULT_TITLE_PREFIX = 'Website test: '
 
 TEST_CERT_TRUST = 'Trust chain of certificate'
-TEST_IPV6_ADDRESS_FOR_WEB_SERVER = 'IPv6 addresses for web server'
 TEST_DOMAIN_NAME_ON_CERT = 'Domain name on certificate'
+TEST_IPV6_ADDRESS_FOR_WEB_SERVER = 'IPv6 addresses for web server'
 TEST_HSTS = 'HSTS'
 TEST_HTTPS_AVAILABLE = 'HTTPS available'
 TEST_SAME_WEBSITE_ON_IPV4_AND_IPV6 = 'Same website on IPv6 and IPv4'
+TEST_TLS_VERSION = "TLS version"
 
 ALWAYS_EXPECTED_FAILURES = tuple([TEST_CERT_TRUST])
 
@@ -162,9 +163,12 @@ websites_to_test = [
     DomainConfig('tls1213nohsts.test.nlnetlabs.nl', [TEST_HSTS]),
     DomainConfig('tls1213shorthsts.test.nlnetlabs.nl', [TEST_HSTS]),
     DomainConfig('nossl.test.nlnetlabs.nl', [TEST_HTTPS_AVAILABLE]),
+    DomainConfig('tls10only.test.nlnetlabs.nl', []),
     DomainConfig('tls11only.test.nlnetlabs.nl', []),
     DomainConfig('tls12only.test.nlnetlabs.nl', []),
     DomainConfig('tls13only.test.nlnetlabs.nl', []),
+    DomainConfig('ssl2only.test.nlnetlabs.nl', [TEST_TLS_VERSION]),
+    DomainConfig('ssl3only.test.nlnetlabs.nl', [TEST_TLS_VERSION]),
 ]
 
 

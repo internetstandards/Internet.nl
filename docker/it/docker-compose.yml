@@ -88,9 +88,13 @@ services:
       - postgres
       - resolver
       - targetnossl
-      - targettls1213
-      - targettls12only
+      - targetssl2only
+      - targetssl3only
+      - targettls10only
       - targettls11only
+      - targettls12only
+      - targettls13only
+      - targettls1213
     environment:
       # setting CACHE_TTL (seconds) too low (e.g. to 1) causes test failures because the
       # Javascript retries run out before the probes complete.
@@ -171,6 +175,21 @@ services:
     depends_on:
       - targetbase
 
+  targettls10only:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS10ONLY_IP}
+        ipv6_address: ${TARGET_TLS10ONLY_IPV6}
+    depends_on:
+      - targetbase
+
   targettls11only:
     build:
       context: target
@@ -216,6 +235,38 @@ services:
       test_net:
         ipv4_address: ${TARGET_TLS13ONLY_IP}
         ipv6_address: ${TARGET_TLS13ONLY_IPV6}
+    depends_on:
+      - targetbase
+
+  targetssl2only:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    command: /opt/openssl-1.0.2e/bin/openssl s_server -accept 443 -ssl2 -key /etc/ssl/private/wildcard.key -cert /etc/ssl/certs/wildcard.crt -www
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_SSL2ONLY_IP}
+        ipv6_address: ${TARGET_SSL2ONLY_IPV6}
+    depends_on:
+      - targetbase
+
+  targetssl3only:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    command: /opt/openssl-1.0.2e/bin/openssl s_server -accept 443 -ssl3 -key /etc/ssl/private/wildcard.key -cert /etc/ssl/certs/wildcard.crt -www
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_SSL3ONLY_IP}
+        ipv6_address: ${TARGET_SSL3ONLY_IPV6}
     depends_on:
       - targetbase
 
@@ -277,6 +328,8 @@ services:
       - master
     environment:
       - OWN_IP=${SUB_MASTER_IP}
+      - TARGET_TLS10ONLY_IP
+      - TARGET_TLS10ONLY_IPV6
       - TARGET_TLS11ONLY_IP
       - TARGET_TLS11ONLY_IPV6
       - TARGET_TLS12ONLY_IP
@@ -285,6 +338,10 @@ services:
       - TARGET_TLS1213_IPV6
       - TARGET_TLS13ONLY_IP
       - TARGET_TLS13ONLY_IPV6
+      - TARGET_SSL2ONLY_IP
+      - TARGET_SSL2ONLY_IPV6
+      - TARGET_SSL3ONLY_IP
+      - TARGET_SSL3ONLY_IPV6
       - TARGET_NOSSL_IP
       - TARGET_NOSSL_IPV6
 
