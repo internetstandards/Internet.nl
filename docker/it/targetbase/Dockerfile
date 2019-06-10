@@ -17,6 +17,10 @@ RUN curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_0_2e.tar.
 
 RUN rm -Rf /tmp/build
 
+# Enable Apache modules
+RUN a2enmod headers
+RUN a2enmod rewrite
+
 # Install the certificate authority and linked OCSP server files:
 COPY run-server.sh /opt/
 COPY ca-ocsp /opt/ca-ocsp/
