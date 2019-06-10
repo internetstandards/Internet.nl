@@ -9,6 +9,8 @@ $TTL 60
                        )
 @                      IN  NS     ns2a.nl.
 @                      IN  NS     ns2b.nl.
+ca-ocsp                IN  A      {{TARGET_CA_OCSP_IP}}
+ca-ocsp                IN  AAAA   {{TARGET_CA_OCSP_IPV6}}
 tls1213                IN  A      {{TARGET_TLS1213_IP}}
 tls1213                IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213ipv4only        IN  A      {{TARGET_TLS1213_IP}}

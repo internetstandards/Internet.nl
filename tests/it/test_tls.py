@@ -35,7 +35,7 @@ TEST_HTTPS_AVAILABLE = 'HTTPS available'
 TEST_SAME_WEBSITE_ON_IPV4_AND_IPV6 = 'Same website on IPv6 and IPv4'
 TEST_TLS_VERSION = "TLS version"
 
-ALWAYS_EXPECTED_FAILURES = tuple([TEST_CERT_TRUST])
+ALWAYS_EXPECTED_FAILURES = tuple([ ])
 
 
 def get_failed_tests(pytest_test_id, selenium, expected_failures):

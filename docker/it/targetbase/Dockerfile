@@ -10,16 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         nginx \
         openssl
 
-RUN openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
-        -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=*.test.nlnetlabs.nl" \
-        -keyout /etc/ssl/private/wildcard.key -out /etc/ssl/certs/wildcard.crt
-RUN openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
-        -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=tls1213sni.test.nlnetlabs.nl" \
-        -keyout /etc/ssl/private/tls1213sni.key -out /etc/ssl/certs/tls1213sni.crt
-RUN openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
-        -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=default.test.nlnetlabs.nl" \
-        -keyout /etc/ssl/private/default.key -out /etc/ssl/certs/default.crt
-
 # Install OpenSSL 1.0.2e for serving SSL v2, SSL v3 and TLS 1.0
 WORKDIR /tmp/build/openssl-1.0.2e
 RUN curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_0_2e.tar.gz' | tar zx --strip-components 1 && \
@@ -27,10 +17,19 @@ RUN curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_0_2e.tar.
 
 RUN rm -Rf /tmp/build
 
+# Install the certificate authority and linked OCSP server files:
 COPY run-server.sh /opt/
+COPY ca-ocsp /opt/ca-ocsp/
 
-RUN a2enmod headers
-RUN a2enmod rewrite
+# Generate a self-signed certificate so that we can test that Internet.NL
+# detects and complains about it. Deliberately use a short RSA key length
+# so that Internet.NL also complains about that.
+RUN openssl req -new -newkey rsa:1024 -days 365 -nodes -x509 \
+        -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=default.test.nlnetlabs.nl" \
+        -keyout /etc/ssl/private/default.test.nlnetlabs.nl.key -out /etc/ssl/certs/default.test.nlnetlabs.nl.crt
+
+COPY certs/*.crt /etc/ssl/certs/
+COPY certs/*.key /etc/ssl/private/
 
 WORKDIR /root
 ENTRYPOINT ["/opt/run-server.sh"]

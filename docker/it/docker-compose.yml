@@ -178,8 +178,25 @@ services:
 
 
   # --------------------------------------------------------------------------
-  #   TARGET SERVERS OF VARIOUS FLAVOURS AND CONFIGURATION FOR CONNECTING
-  #   TO FROM THE INTERNET.NL APPLICATION.
+  #  A CERTIFICATE AUTHORITY AND OCSP SERVER FOR ISSUING SIGNED CERTIFICATES
+  #                      TO THE TARGET SERVERS BELOW
+  # --------------------------------------------------------------------------
+  ca_ocsp:
+    image: targetbase
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    entrypoint: /opt/ca-ocsp/run-server.sh
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_CA_OCSP_IP}
+        ipv6_address: ${TARGET_CA_OCSP_IPV6}
+    depends_on:
+      - targetbase
+
+
+  # --------------------------------------------------------------------------
+  #    TARGET SERVERS OF VARIOUS FLAVOURS AND CONFIGURATION FOR CONNECTING
+  #                   TO FROM THE INTERNET.NL APPLICATION.
   # --------------------------------------------------------------------------
 
 
@@ -361,6 +378,8 @@ services:
       - master
     environment:
       - OWN_IP=${SUB_MASTER_IP}
+      - TARGET_CA_OCSP_IP
+      - TARGET_CA_OCSP_IPV6
       - TARGET_TLS10ONLY_IP
       - TARGET_TLS10ONLY_IPV6
       - TARGET_TLS11ONLY_IP

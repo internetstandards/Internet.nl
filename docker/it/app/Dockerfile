@@ -39,5 +39,13 @@ COPY tests/it ${APP_PATH}/tests/it/
 USER root
 ENV C_FORCE_ROOT="true"
 
+# Install our custom certificate authority certificate in the operating system
+# store. The Internet.NL SSL connection code will use it automatically to verify
+# the certificates used by the target servers, as these are signed by our test CA.
+COPY docker/it/targetbase/ca-ocsp/ca/rootCA.crt /usr/local/share/ca-certificates/internetnl-test/
+RUN chmod 755 /usr/local/share/ca-certificates/internetnl-test/ && \
+    chmod 644 /usr/local/share/ca-certificates/internetnl-test/rootCA.crt
+RUN update-ca-certificates
+
 WORKDIR ${APP_PATH}
 ENTRYPOINT ["/app/docker/it/app/entrypoint.sh.it"]

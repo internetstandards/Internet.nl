@@ -23,6 +23,33 @@ IT_UNBOUND_CONFIG_PATH = '${UNBOUND_CONF_PATH}'
 IT_UNBOUND_FORWARD_IP = '${RESOLVER_IP}'
 EOF
 
+echo
+echo ":: Configuring Internet.nl app to use custom root CA cert and fingerprint.."
+# The cert bundle influences the behaviour of nassl SSL clients:
+#   tls.py::ConnectionHelper::connect() passes ssl_verify_locations with value
+#   settings.CA_CERTIFICATES to the (Legacy)SslClient init method which
+#   ultimately resuluts in SSL_CTX_load_verify_locations being given the
+#   root CA cert bundle that is pointed to by settings.CA_CERTIFICATES,
+#   where at the time of writing CA_CERTIFICATES points to our own file here:
+#     remote_data/certs/ca-bundle.crt
+#
+# The root fingerprints influence any checks that invoke:
+#   tls.py::save_results()::is_root_cert()
+#
+# The method of generating the root fingerprint is based on Bash script:
+#   remote_data/certs/update-certs.sh
+#
+# This all helps to ensure we can score positively on the
+# Trust Chain of certificate" Internet.nl test.
+CUSTOM_ROOT_CA_CERT=${APP_PATH}/docker/it/targetbase/ca-ocsp/ca/rootCA.crt
+APP_CERT_BUNDLE=${APP_PATH}/remote_data/certs/ca-bundle.crt
+APP_ROOT_FINGERPRINTS=${APP_PATH}/remote_data/certs/root_fingerprints
+cat ${CUSTOM_ROOT_CA_CERT} >>${APP_CERT_BUNDLE}
+openssl x509 -noout -fingerprint -sha1 -inform pem -in ${CUSTOM_ROOT_CA_CERT} \
+    | cut -d "=" -f 2 \
+    | sed 's/://g' \
+    >>${APP_ROOT_FINGERPRINTS}
+
 # Don't start the Internet.NL app yet as we have to first acquire the ZSK used to
 # sign our custom root zone. The testrunner container will start the Internet.nl
 # app once the DNS chain is correctly set up and the root trust anchor has been
