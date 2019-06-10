@@ -36,7 +36,12 @@ COPY docker/it/app/coverage/.coveragerc /app/
 
 COPY tests/it ${APP_PATH}/tests/it/
 
+# Run as root. Many if not most Docker containers run as root, and the Visual
+# Studio Code support for developing in a container requires that the container
+# user be root.
 USER root
+
+# Stop Celery complaining about running as root.
 ENV C_FORCE_ROOT="true"
 
 # Install our custom certificate authority certificate in the operating system

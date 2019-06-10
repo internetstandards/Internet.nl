@@ -1,7 +1,7 @@
 FROM devbase
 ENV DEBIAN_FRONTEND noninteractive
 
-# Install latest OpenSSL and Apache for serving TLS 1.1, 1.2 and 1.3 with support for SNI, redirects and HSTS headers
+# Install latest OpenSSL and Apache for serving TLS 1.1, 1.2 and 1.3 with support for SNI, redirects, HSTS headers, OCSP stapling, etc.
 # Install latest OpenSSL and NGINX for serving TLS 1.3 with 0-RTT (not supported by Apache). Alternatively use OpenSSL itself for 0-RTT.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         apache2 \

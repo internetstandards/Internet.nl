@@ -329,8 +329,8 @@ services:
 
 
   # --------------------------------------------------------------------------
-  #    DNS INFRASTRUCTURE: ROOT, NL, NLNETLABS.NL AND TEST.NLNETLABS.NL
-  #    AND AN UNBOUND RESOLVER WITH MODIFIED ROOT HINTS AND DNSSEC ROOT KEY.
+  #     DNS INFRASTRUCTURE: ROOT, NL, NLNETLABS.NL AND TEST.NLNETLABS.NL
+  #   AND AN UNBOUND RESOLVER WITH MODIFIED ROOT HINTS AND DNSSEC ROOT KEY
   # --------------------------------------------------------------------------
 
 
@@ -478,8 +478,8 @@ services:
 
 
   # --------------------------------------------------------------------------
-  #    CONTAINERS THAT SERVE ONLY TO PRODUCE BASE DOCKER IMAGES FOR USE
-  #    BY CONTAINERS DEFINED ABOVE THIS POINT.
+  #     CONTAINERS THAT SERVE ONLY TO PRODUCE BASE DOCKER IMAGES FOR USE
+  #                BY CONTAINERS DEFINED ABOVE THIS POINT
   # --------------------------------------------------------------------------
 
 

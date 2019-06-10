@@ -15,7 +15,7 @@ perl -pi -e 's|\{\{ROOT_IP\}\}|'${ROOT_IP}'|g' ${ROOT_HINTS_PATH}
 perl -pi -e 's|\{\{ROOT_IPV6\}\}|'${ROOT_IPV6}'|g' ${ROOT_HINTS_PATH}
 
 echo
-echo ":: Configuring Internet.nl app to use Unbound config file '${UNBOUND_CONF_PATH}'"
+echo ":: Configuring Internet.nl app to use Unbound config file '${UNBOUND_CONF_PATH}'.."
 echo "   and forward resolver at ${RESOLVER_IP}.."
 cat >>${APP_PATH}/internetnl/settings.py-dist <<EOF
 ENABLE_INTEGRATION_TEST = True
