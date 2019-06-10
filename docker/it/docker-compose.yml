@@ -136,7 +136,7 @@ services:
     dns_search: does.not.exist
     networks:
       test_net:
-        ipv4_address: ${SELEMIUM_IP}
+        ipv4_address: ${SELENIUM_IP}
         ipv6_address: ${SELENIUM_IPV6}
     depends_on:
       - app
