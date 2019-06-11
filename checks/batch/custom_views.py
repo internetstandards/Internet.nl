@@ -168,6 +168,7 @@ class TlsNcscWebView(CustomView):
                     'cert_signature',
                     'cert_hostmatch',
                     'zero_rtt',
+                    'ocsp_stapling',
                 ]
             },
             'report_model': 'tls',
@@ -466,7 +467,8 @@ class ForumStandaardisatieView(CustomView):
                     'cert_hostmatch': 'web_https_cert_domain',
                     'dane_exists': 'web_https_dane_exist',
                     'dane_valid': 'web_https_dane_valid',
-                    'zero_rtt': 'web_https_tls_zero_rtt'
+                    'zero_rtt': 'web_https_tls_zero_rtt',
+                    'ocsp_stapling': 'web_https_tls_ocsp_stapling',
                 },
             },
             BatchRequestType.mail: {

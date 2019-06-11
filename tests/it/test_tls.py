@@ -35,6 +35,7 @@ TEST_HTTPS_AVAILABLE = 'HTTPS available'
 TEST_SAME_WEBSITE_ON_IPV4_AND_IPV6 = 'Same website on IPv6 and IPv4'
 TEST_TLS_VERSION = "TLS version"
 TEST_ZERO_RTT = "0-RTT"
+TEST_OCSP_STAPLING = "OCSP Stapling"
 
 ALWAYS_EXPECTED_FAILURES = tuple([ ])
 
@@ -171,6 +172,7 @@ websites_to_test = [
     DomainConfig('ssl2only.test.nlnetlabs.nl', [TEST_TLS_VERSION]),
     DomainConfig('ssl3only.test.nlnetlabs.nl', [TEST_TLS_VERSION]),
     DomainConfig('tls130rtt.test.nlnetlabs.nl', [TEST_ZERO_RTT]),
+    DomainConfig('tls1213defaultvhost.test.nlnetlabs.nl', [TEST_OCSP_STAPLING])
 ]
 
 

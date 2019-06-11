@@ -28,6 +28,7 @@ from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum, OpenSslEarly
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 from nassl.ssl_client import ClientCertificateRequested
+from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from . import SetupUnboundContext, shared
 from .dispatcher import check_registry, post_callback_hook
@@ -264,6 +265,8 @@ def save_results(model, results, addr, domain, category):
                     model.client_reneg = result.get("client_reneg")
                     model.client_reneg_score = result.get("client_reneg_score")
                     model.zero_rtt_score = result.get("zero_rtt_score")
+                    model.ocsp_stapling = result.get("ocsp_stapling")
+                    model.ocsp_stapling_score = result.get("ocsp_stapling_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -469,6 +472,13 @@ def build_report(dttls, category):
                 category.subtests['zero_rtt'].result_na()
             else:
                 category.subtests['zero_rtt'].result_good()
+
+            if dttls.ocsp_stapling_score is None:
+                pass
+            elif dttls.ocsp_stapling_score == scoring.WEB_TLS_OCSP_STAPLING_BAD:
+                category.subtests['ocsp_stapling'].result_bad(dttls.ocsp_stapling)
+            elif dttls.ocsp_stapling_score == scoring.WEB_TLS_OCSP_STAPLING_GOOD:
+                category.subtests['ocsp_stapling'].result_good()
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -967,6 +977,10 @@ class ConnectionHelper:
                 server_name = self.url.rstrip(".")
                 self.set_tlsext_host_name(server_name)
 
+                # Enable the OCSP TLS extension
+                # This only works if set_tlsext_host_name() is also used
+                self.set_tlsext_status_ocsp()
+
             self.set_cipher_list(self.ciphers)
             if self.do_handshake_on_connect:
                 self.do_handshake()
@@ -992,6 +1006,23 @@ class ConnectionHelper:
             pass
         finally:
             self.sock.close()
+
+
+    def check_ocsp_stapling(self):
+        # This will only work if SNI is in use and the handshake has already
+        # been done.
+        ocsp_response = self.get_tlsext_status_ocsp_resp()
+        if ocsp_response is not None:
+            if ocsp_response.status == 0:
+                try:
+                    ocsp_response.verify(settings.CA_CERTIFICATES)
+                    return self.score_ocsp_staping_good, 0
+                except OcspResponseNotTrustedError:
+                    return self.score_ocsp_staping_ok, False
+            else:
+                return self.score_ocsp_staping_bad, ocsp_response.status
+        else:
+            return self.score_ocsp_staping_bad, False
 
 
 class ModernConnection(ConnectionHelper, SslClient):
@@ -1020,6 +1051,9 @@ class ModernConnection(ConnectionHelper, SslClient):
         self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
         self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
         self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+        self.score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
+        self.score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
+        self.score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
 
         self.sock_setup()
         self.connect()
@@ -1068,6 +1102,9 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
         self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
         self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
         self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+        self.score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
+        self.score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
+        self.score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
 
         self.sock_setup()
         self.connect()
@@ -1642,6 +1679,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         secure_reneg_score, secure_reneg = conn.check_secure_reneg()
         client_reneg_score, client_reneg = conn.check_client_reneg()
         compression_score, compression = conn.check_compression()
+        ocsp_stapling_score, oscp_stapling = conn.check_ocsp_stapling()
 
         prots_bad = []
         prots_phase_out = []
@@ -1789,6 +1827,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             fs_score=fs_score,
 
             zero_rtt_score=zero_rtt_score,
+            oscp_stapling=oscp_stapling,
+            ocsp_stapling_score=ocsp_stapling_score,
         )
 
 

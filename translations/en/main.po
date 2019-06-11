@@ -1867,6 +1867,34 @@ msgstr ""
 "0-RTT, or your web servers announced support for 0-RTT but we were unable to "
 "prove that 0-RTT is possible with your web server."
 
+msgid "detail web tls ocsp-stapling exp"
+msgstr ""
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN."
+
+msgid "detail web tls ocsp-stapling label"
+msgstr "OCSP Stapling"
+
+msgid "detail web tls ocsp-stapling tech table"
+msgstr "Web server IP address|TO BE WRITTEN"
+
+msgid "detail web tls ocsp-stapling verdict bad"
+msgstr "TO BE WRITTEN"
+
+msgid "detail web tls ocsp-stapling verdict good"
+msgstr "TO BE WRITTEN"
+
+msgid "detail web tls ocsp-stapling verdict other"
+msgstr "TO BE WRITTEN"
+
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""
 "We check if your domain name has at least two name servers with an IPv6 \n"

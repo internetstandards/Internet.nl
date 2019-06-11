@@ -399,6 +399,8 @@ class DomainTestTls(BaseTestModel):
     client_reneg_score = models.IntegerField(null=True)
 
     zero_rtt_score = models.IntegerField(null=True)
+    ocsp_stapling = models.IntegerField(null=True)
+    ocsp_stapling_score = models.IntegerField(null=True)
 
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
@@ -437,6 +439,7 @@ class DomainTestTls(BaseTestModel):
             'ciphers_bad', 'ciphers_score', 'protocols_bad', 'protocols_phase_out',
             'protocols_score', 'compression', 'compression_score', 'secure_reneg',
             'secure_reneg_score', 'client_reneg', 'client_reneg_score', 'zero_rtt_score',
+            'ocsp_stapling', 'ocsp_stapling_score',
             'forced_https', 'forced_https_score', 'http_compression_enabled',
             'http_compression_score', 'hsts_enabled', 'hsts_policies',
             'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
