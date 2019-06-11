@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
         nginx \
-        openssl
+        openssl \
+        socat
 
 # Install OpenSSL 1.0.2e for serving SSL v2, SSL v3 and TLS 1.0
 WORKDIR /tmp/build/openssl-1.0.2e
