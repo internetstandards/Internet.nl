@@ -1330,7 +1330,7 @@ def cert_checks(
                 depth=MAX_REDIRECT_DEPTH, task=web_cert, keep_conn_open=True)
             debug_cert_chain = DebugCertChain
 
-            # TO DO: how can conn.sock be None without an exception?
+            # TODO: how can conn.sock be None without an exception?
             if conn is not None and conn.sock is not None:
                 try:
                     if conn.sock.version() == 'TLSv1.3':
@@ -1651,8 +1651,6 @@ def has_daneTA(tlsa_records):
 # that we need for legacy protocol connections. So we need both
 # LegacySslClient and SslClient. First attempt to connect with TLS 1.3 using
 # SslClient, if that fails fallback to LegacySslClient.
-#
-# TO DO: 0-rtt test aka 'early d ata'
 def check_web_tls(url, addr=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
@@ -1669,15 +1667,15 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             depth=MAX_REDIRECT_DEPTH, task=web_conn,
             keep_conn_open=True)
 
-        # TO DO: how can conn.sock be None without an exception?
+        # TODO: how can conn.sock be None without an exception?
         if conn is not None and conn.sock is not None:
-        try:
-            tls_version = conn.sock.version()
-            # TODO: detect TLS >= TLS 1.3
-            if tls_version == 'TLSv1.3':
-                conn_handler = ModernConnection
-        finally:
-            conn.close()
+            try:
+                tls_version = conn.sock.version()
+                # TODO: detect TLS >= TLS 1.3
+                if tls_version == 'TLSv1.3':
+                    conn_handler = ModernConnection
+            finally:
+                conn.close()
 
         conn = conn_handler(url, addr=addr, shutdown=False)
     except (socket.error, http.client.BadStatusLine, NoIpError,
@@ -1697,6 +1695,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         ciphers_bad = []
         ciphers_score = scoring.WEB_TLS_SUITES_OK
 
+        # TODO: ideally: zero_rtt_score = conn.check_zero_rtt()
+        # but the check requires more than one conn. can this be solved? 
         zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_OK
 
         dh_param, ecdh_param = (False, False)
@@ -1723,9 +1723,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         # TODO: detect TLS >= TLS 1.3
         if tls_version == 'TLSv1.3':
+            # Test for 0-rtt support
             try:
-                # test for 0-rtt support
-                # TO DO: decide final scoring rules
+                # TODO: decide final scoring rules
                 # requires that we re-use an existing TLS session
                 conn = ModernConnection(url, addr=addr, shutdown=False)
                 # NGINX at least won't reply with max early data >0 if we don't write to it
@@ -1763,6 +1763,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     DebugConnectionSocketException):
                 pass
         else:
+            # TODO: test for finite-field groups
+
             # Connect using bad cipher
             # TODO: Review regarding TLS 1.3, for now skip this as otherwise we
             # get stuck in an infinite loop
@@ -1783,7 +1785,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     conn.safe_shutdown()
 
             # Connect using DH(E) and ECDH(E) to get FS params
-            # TO DO: Review regarding TLS 1.3, for now skip because
+            # TODO: Review regarding TLS 1.3, for now skip because
             # _openssl_str_to_dic() is not implemented in the TLS 1.3 capable
             # SslClient.
             try:
