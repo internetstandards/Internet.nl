@@ -64,7 +64,7 @@ the original article
 
 *********************************************************************************************
 NOTE: the article uses 1024 bit length keys, but Internet.nl complains that this is too short
-      so I used 4096 instead.
+      so I used 4096 instead. I made this and other corrections to the article text below.
 *********************************************************************************************
 
 Taken from: https://medium.com/@bhashineen/create-your-own-ocsp-server-ffb212df8e63
@@ -99,7 +99,7 @@ For this example, the OCSP server will be running on 127.0.0.1 on port 8080 as g
 
 5. Create a private key for root CA.
 
-openssl genrsa -out rootCA.key 1024
+openssl genrsa -out rootCA.key 4096
 
 6. Based on this key, generate a CA certificate which is valid for 10 years based on the root CA’ s private key.
 
@@ -107,7 +107,7 @@ openssl req -new -x509 -days 3650 -key rootCA.key -out rootCA.crt -config valida
 
 7. Create another private key to be used as the end user private key.
 
-openssl genrsa -out certKey.key 1024
+openssl genrsa -out certKey.key 4096
 
 8. Create an end user certificate based on the generated private key.
 
@@ -125,8 +125,8 @@ Creating the OCSP server
 
 In order to host an OCSP server, an OCSP signing certificate has to be generated. Run following 2 commands.
 
-openssl req -new -nodes -out ocspSigning.csr -keyout ocspSigning.key
-openssl ca -keyfile rootCA.key -cert rootCA.crt -in ocspSigning.csr -out ocspSigning.crt -config validation.cnf
+openssl req -new -nodes -out ocspSigning.csr -keyout ocspSigning.key -config validation.cnf -extensions v3_OCSP
+openssl ca -keyfile rootCA.key -cert rootCA.crt -in ocspSigning.csr -out ocspSigning.crt -config validation.cnf -extensions v3_OCSP
 
 2. Start OCSP Server. Switch to a new terminal and run,
 

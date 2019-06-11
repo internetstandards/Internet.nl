@@ -1,2 +1,3 @@
-V	250813090000Z		01	unknown	/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=*.test.nlnetlabs.nl
-V	250813090000Z		02	unknown	/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=tls1213sni.test.nlnetlabs.nl
+V	200609212220Z		01	unknown	/C=NL/ST=Noord Holland/O=NLnet Labs/OU=Internet.NL/CN=ca-ocsp.test.nlnetlabs.nl
+V	250813090000Z		02	unknown	/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=*.test.nlnetlabs.nl
+V	250813090000Z		03	unknown	/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=tls1213sni.test.nlnetlabs.nl
