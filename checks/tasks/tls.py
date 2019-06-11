@@ -1007,6 +1007,29 @@ class ConnectionHelper:
         finally:
             self.sock.close()
 
+    def get_peer_certificate_chain(self):
+        """
+        Wrap nassl's method in order to catch ValueError when there is an error
+        getting the peer's certificate chain.
+
+        """
+        chain = None
+        try:
+            chain = self.get_peer_cert_chain()
+        except ValueError:
+            pass
+        return chain
+
+    def trusted_score(self):
+        """
+        Verify the certificate chain,
+
+        """
+        verify_result, _ = self.get_certificate_chain_verify_result()
+        if verify_result != 0:
+            return verify_result, self.score_trusted_bad
+        else:
+            return verify_result, self.score_trusted_good
 
     def check_ocsp_stapling(self):
         # This will only work if SNI is in use and the handshake has already
@@ -1108,30 +1131,6 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
 
         self.sock_setup()
         self.connect()
-
-    def get_peer_certificate_chain(self):
-        """
-        Wrap nassl's method in order to catch ValueError when there is an error
-        getting the peer's certificate chain.
-
-        """
-        chain = None
-        try:
-            chain = self.get_peer_cert_chain()
-        except ValueError:
-            pass
-        return chain
-
-    def trusted_score(self):
-        """
-        Verify the certificate chain,
-
-        """
-        verify_result, _ = self.get_certificate_chain_verify_result()
-        if verify_result != 0:
-            return verify_result, self.score_trusted_bad
-        else:
-            return verify_result, self.score_trusted_good
 
     def check_compression(self):
         """
@@ -1326,10 +1325,18 @@ def cert_checks(
         if conn_handler is DebugConnection:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
-            shared.http_fetch(
+            conn, *unused = shared.http_fetch(
                 url, af=addr[0], path="", port=443, addr=addr[1],
-                depth=MAX_REDIRECT_DEPTH, task=web_cert)
+                depth=MAX_REDIRECT_DEPTH, task=web_cert, keep_conn_open=True)
             debug_cert_chain = DebugCertChain
+
+            # TO DO: how can conn.sock be None without an exception?
+            if conn is not None and conn.sock is not None:
+                try:
+                    if conn.sock.version() == 'TLSv1.3':
+                        conn_handler = ModernConnection
+                finally:
+                    conn.close()
         else:
             debug_cert_chain = DebugCertChainMail
 
@@ -1662,6 +1669,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             depth=MAX_REDIRECT_DEPTH, task=web_conn,
             keep_conn_open=True)
 
+        # TO DO: how can conn.sock be None without an exception?
+        if conn is not None and conn.sock is not None:
         try:
             tls_version = conn.sock.version()
             # TODO: detect TLS >= TLS 1.3
