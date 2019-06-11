@@ -32,6 +32,8 @@ tls12only              IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only              IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls13only              IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only              IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
+tls130rtt              IN  A      {{TARGET_TLS130RTT_IP}}
+tls130rtt              IN  AAAA   {{TARGET_TLS130RTT_IPV6}}
 ssl2only               IN  A      {{TARGET_SSL2ONLY_IP}}
 ssl2only               IN  AAAA   {{TARGET_SSL2ONLY_IPV6}}
 ssl3only               IN  A      {{TARGET_SSL3ONLY_IP}}

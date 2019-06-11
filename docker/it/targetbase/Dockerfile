@@ -22,7 +22,7 @@ RUN a2enmod headers
 RUN a2enmod rewrite
 
 # Install the certificate authority and linked OCSP server files:
-COPY run-server.sh /opt/
+COPY *.sh /opt/
 COPY ca-ocsp /opt/ca-ocsp/
 
 # Generate a self-signed certificate so that we can test that Internet.NL

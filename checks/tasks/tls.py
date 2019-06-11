@@ -24,7 +24,7 @@ from django.core.cache import cache
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy
 from nassl import _nassl
-from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
+from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum, OpenSslEarlyDataStatusEnum
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 from nassl.ssl_client import ClientCertificateRequested
@@ -263,6 +263,7 @@ def save_results(model, results, addr, domain, category):
                     model.secure_reneg_score = result.get("secure_reneg_score")
                     model.client_reneg = result.get("client_reneg")
                     model.client_reneg_score = result.get("client_reneg_score")
+                    model.zero_rtt_score = result.get("zero_rtt_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -459,6 +460,15 @@ def build_report(dttls, category):
                 #     category.subtests['dane_rollover'].result_good()
                 # else:
                 #     category.subtests['dane_rollover'].result_bad()
+
+            if dttls.zero_rtt_score is None:
+                pass
+            elif dttls.zero_rtt_score == scoring.WEB_TLS_ZERO_RTT_BAD:
+                category.subtests['zero_rtt'].result_bad()
+            elif dttls.zero_rtt_score == scoring.WEB_TLS_ZERO_RTT_OK:
+                category.subtests['zero_rtt'].result_na()
+            else:
+                category.subtests['zero_rtt'].result_good()
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -958,7 +968,8 @@ class ConnectionHelper:
                 self.set_tlsext_host_name(server_name)
 
             self.set_cipher_list(self.ciphers)
-            self.do_handshake()
+            if self.do_handshake_on_connect:
+                self.do_handshake()
 
         except (socket.gaierror, socket.error, IOError, _nassl.OpenSSLError,
                 ClientCertificateRequested):
@@ -990,7 +1001,8 @@ class ModernConnection(ConnectionHelper, SslClient):
     """
     def __init__(
             self, url, addr=None, version=TLSV1_3, shutdown=True,
-            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
+            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
+            do_handshake_on_connect=True):
         self.url = url
         self.version = version
         self.must_shutdown = shutdown
@@ -998,6 +1010,7 @@ class ModernConnection(ConnectionHelper, SslClient):
         self.addr = addr
         self.options = options
         self.send_SNI = send_SNI
+        self.do_handshake_on_connect = do_handshake_on_connect
 
         self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
         self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
@@ -1036,7 +1049,8 @@ class ModernConnection(ConnectionHelper, SslClient):
 class DebugConnection(ConnectionHelper, LegacySslClient):
     def __init__(
             self, url, addr=None, version=SSLV23, shutdown=True,
-            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
+            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
+            do_handshake_on_connect=True):
         self.url = url
         self.version = version
         self.must_shutdown = shutdown
@@ -1044,6 +1058,7 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
         self.addr = addr
         self.options = options
         self.send_SNI = send_SNI
+        self.do_handshake_on_connect = do_handshake_on_connect
 
         self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
         self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
@@ -1612,6 +1627,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         try:
             tls_version = conn.sock.version()
+            # TODO: detect TLS >= TLS 1.3
             if tls_version == 'TLSv1.3':
                 conn_handler = ModernConnection
         finally:
@@ -1633,6 +1649,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         ciphers_bad = []
         ciphers_score = scoring.WEB_TLS_SUITES_OK
+
+        zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_OK
 
         dh_param, ecdh_param = (False, False)
         fs_bad = []
@@ -1656,10 +1674,51 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     DebugConnectionSocketException):
                 pass
 
-        # Connect using bad cipher
-        # TO DO: Review regarding TLS 1.3, for now skip this as otherwise we
-        # get stuck in an infinite loop
-        if tls_version != 'TLSv1.3':
+        # TODO: detect TLS >= TLS 1.3
+        if tls_version == 'TLSv1.3':
+            try:
+                # test for 0-rtt support
+                # TO DO: decide final scoring rules
+                # requires that we re-use an existing TLS session
+                conn = ModernConnection(url, addr=addr, shutdown=False)
+                # NGINX at least won't reply with max early data >0 if we don't write to it
+                # in the previous connection. OpenSSL s_server doesn't have this restriction.
+                conn.write(b'GET / HTTP/1.0\r\n\r\n')
+                conn.read(2048)
+                previous_session = conn.get_session()
+                conn.safe_shutdown()
+
+                # does the server announce support for early data?
+                if previous_session.get_max_early_data() <= 0:
+                    zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_GOOD
+                else:
+                    # connect again using the same TLS session details
+                    # and try and write early data to the connection
+                    conn = ModernConnection(url, addr=addr, shutdown=False, do_handshake_on_connect=False)
+                    conn.set_session(previous_session)
+                    if conn._ssl.get_early_data_status() == 0:
+                        conn.write_early_data(b'GET / HTTP/1.0\r\n\r\n')
+                        if (conn._ssl.get_early_data_status() == 1 and
+                            not conn.is_handshake_completed()):
+                            conn.do_handshake()
+                            if conn._ssl.get_early_data_status() == 2:
+                                zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_BAD
+
+                                # See if the target responds with HTTP/N.N 425
+                                # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
+                                http_status = conn.read(13)
+                                if (http_status.startswith(b'HTTP/') and
+                                    http_status.startswith(b'425', 9)):
+                                    zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_OK
+
+                    conn.safe_shutdown()
+            except (DebugConnectionHandshakeException,
+                    DebugConnectionSocketException):
+                pass
+        else:
+            # Connect using bad cipher
+            # TODO: Review regarding TLS 1.3, for now skip this as otherwise we
+            # get stuck in an infinite loop
             ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
             while True:
                 try:
@@ -1728,6 +1787,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             ecdh_param=ecdh_param,
             fs_bad=fs_bad,
             fs_score=fs_score,
+
+            zero_rtt_score=zero_rtt_score,
         )
 
 

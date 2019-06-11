@@ -1834,6 +1834,39 @@ msgstr "Your web server supports TLS versions that are at risk of becoming *insu
 msgid "detail web tls version verdict good"
 msgstr "Your web server supports sufficiently secure TLS versions only."
 
+msgid "detail web tls zero-rtt exp"
+msgstr ""
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN\n"
+"TO BE WRITTEN."
+
+msgid "detail web tls zero-rtt label"
+msgstr "0-RTT"
+
+msgid "detail web tls zero-rtt tech table"
+msgstr "Web server IP address|Protected against 0-RTT"
+
+msgid "detail web tls zero-rtt verdict bad"
+msgstr ""
+"At least one of your web servers support TLS 0-RTT."
+
+msgid "detail web tls zero-rtt verdict good"
+msgstr ""
+"All of your web servers reject 0-RTT."
+
+msgid "detail web tls zero-rtt verdict other"
+msgstr ""
+"Either the TLS version supported by your web servers is too old to support "
+"0-RTT, or your web servers announced support for 0-RTT but we were unable to "
+"prove that 0-RTT is possible with your web server."
+
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""
 "We check if your domain name has at least two name servers with an IPv6 \n"

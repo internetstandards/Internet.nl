@@ -145,6 +145,7 @@ class WebTls(Category):
             WebTlsCertHostmatch,
             WebTlsDaneExists,
             WebTlsDaneValid,
+            WebTlsZeroRTT,
             # WebTlsDaneRollover,
         ]
         super(WebTls, self).__init__(name, subtests)
@@ -999,6 +1000,33 @@ class WebTlsDaneRollover(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls dane-rollover verdict bad"
         self.tech_data = "detail tech data no"
+
+
+class WebTlsZeroRTT(Subtest):
+    def __init__(self):
+        super(WebTlsZeroRTT, self).__init__(
+            name="zero_rtt",
+            label="detail web tls zero-rtt label",
+            explanation="detail web tls zero-rtt exp",
+            tech_string="detail web tls zero-rtt tech table",
+            worst_status=scoring.WEB_TLS_ZERO_RTT_WORST_STATUS,
+            full_score=scoring.WEB_TLS_ZERO_RTT_GOOD,
+            model_score_field="zero_rtt_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls zero-rtt verdict good"
+        self.tech_data = "detail tech data secure"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls zero-rtt verdict bad"
+        self.tech_data = "detail tech data insecure"
+
+    def result_na(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web tls zero-rtt verdict other"
+        self.tech_data = "detail tech data not-applicable"
 
 
 class MailTlsStarttlsExists(Subtest):
