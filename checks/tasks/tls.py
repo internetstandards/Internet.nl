@@ -1707,8 +1707,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         # Test for TLS 1.1 and TLS 1.0 as these are now "phase out"
         prot_test_configs = [
-            ( TLSV1_2, 'TLS 1.1', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
-            ( TLSV1_1, 'TLS 1.0', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
+            ( TLSV1_1, 'TLS 1.1', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
+            ( TLSV1,   'TLS 1.0', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
             ( SSLV3,   'SSL 3.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
             ( SSLV2,   'SSL 2.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
         ]
