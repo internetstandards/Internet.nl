@@ -133,26 +133,50 @@ echo ':: Installing root trust anchor in the app container..'
 docker cp /tmp/root_zsk.key $C_APP:/tmp/root_zsk.key
 
 PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
-TARGETS="nossl tls1213 tls1213sni tls1213wrongcertname tls1213nohsts tls10only tls11only tls12only tls13only ssl2only ssl3only"
+TARGETS="nossl ssl2only ssl3only tls1213 tls1213sni tls1213wrongcertname tls1213nohsts tls10only tls11only tls12only tls13only"
 SUFFIX=".test.nlnetlabs.nl"
 
 echo
 echo ':: Dumping target domain TLS cert to hostname mappings'
+set -o pipefail
 for N in ${TARGETS}; do
-    echo -n -e "$N:\t"
+    echo -n -e "${N}:\t"
     FQDN="${N}${SUFFIX}"
-    openssl s_client -showcerts -verify_return_error -brief ${FQDN}:443 2>&1 | grep -Eo "CN = .+" || echo ERROR
+    CERT=
+    for PROT in ${PROTOCOLS}; do
+        OPENSSL=openssl
+        SERVERNAME="-servername ${FQDN}"
+        [[ $PROT == "ssl"* ]] && OPENSSL=/opt/openssl-old/bin/openssl
+        [[ $PROT == "ssl2" ]] && SERVERNAME=
+        CERT=$(echo | ${OPENSSL} s_client \
+            -${PROT} \
+            -showcerts \
+            ${SERVERNAME} \
+            -connect ${FQDN}:443 \
+            2>&1 \
+            | grep -E '^subject=.+' \
+            | grep -Eo "CN.+" \
+            | cut -d '=' -f 2 \
+            || echo)
+        [ -n "${CERT}" ] && break
+    done
+    if [ -n "${CERT}" ]; then echo ${CERT}; else echo ERROR; fi
 done | column -t
+set +o pipefail
 
 echo
 echo ':: Dumping target domain TLS version support'
-for N in $TARGETS; do
+for N in ${TARGETS}; do
     FQDN="${N}${SUFFIX}"
-    echo -n "${N}: "
+    echo -n -e "${N}:\t"
     for PROT in ${PROTOCOLS}; do
         echo -n "${PROT}: "
         SUPPORTED='-'
-        echo GET / | openssl s_client -${PROT} -servername ${FQDN} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
+        OPENSSL=openssl
+        SERVERNAME="-servername ${FQDN}"
+        [[ $PROT == "ssl"* ]] && OPENSSL=/opt/openssl-old/bin/openssl
+        [[ $PROT == "ssl2" ]] && SERVERNAME=
+        echo | ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
         echo -n -e "${SUPPORTED}\t"
     done
     echo

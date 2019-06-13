@@ -1,22 +1,13 @@
 FROM devbase
 ENV DEBIAN_FRONTEND noninteractive
 
-# Install latest OpenSSL and Apache for serving TLS 1.1, 1.2 and 1.3 with support for SNI, redirects, HSTS headers, OCSP stapling, etc.
-# Install latest OpenSSL and NGINX for serving TLS 1.3 with 0-RTT (not supported by Apache). Alternatively use OpenSSL itself for 0-RTT.
+# Tip: We inherit latest (openssl in $PATH) and legacy OpenSSL
+# (/opt/openssl-old) installations from devbase
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         apache2 \
-        build-essential \
-        curl \
         nginx \
-        openssl \
         socat
-
-# Install OpenSSL 1.0.2e for serving SSL v2, SSL v3 and TLS 1.0
-WORKDIR /tmp/build/openssl-1.0.2e
-RUN curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_0_2e.tar.gz' | tar zx --strip-components 1 && \
-    ./config --prefix=/opt/openssl-1.0.2e && make && make install
-
-RUN rm -Rf /tmp/build
 
 # Enable Apache modules
 RUN a2enmod headers
