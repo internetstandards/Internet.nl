@@ -1823,7 +1823,7 @@ msgid "detail web tls version label"
 msgstr "TLS version"
 
 msgid "detail web tls version tech table"
-msgstr "Web server IP address|TLS versions"
+msgstr "Web server IP address|Insecure TLS versions"
 
 msgid "detail web tls version verdict bad"
 msgstr "Your web server supports *insufficiently* secure TLS versions."
