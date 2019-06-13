@@ -21,18 +21,24 @@ def firefox_options(firefox_options):
 
 
 def pytest_configure(config):
-    pip_list_out, unused_err = subprocess.Popen(['pip','list'], stdout=subprocess.PIPE).communicate()
+    pip_list_out, unused_err = subprocess.Popen(
+        ['pip', 'list'], stdout=subprocess.PIPE).communicate()
 
+    tags = 'Unknown'
+    branch = 'Unknown'
+    dependencies = 'Unknown'
+    base_image = 'Unknown'
     try:
         # Assumes that the tests are being run from the tests/it subdirectory.
         r = Repo('/app')
-        git_describe_tags_out = r.git.describe(tags=True)
-        git_describe_branch_out = r.git.describe(all=True)
-    except InvalidGitRepositoryError:
-        git_describe_tags_out = 'Unknown'
-        git_describe_branch_out = 'Unknown'
+        tags = r.git.describe(tags=True)
+        branch = r.git.describe(all=True)
+        dependencies = pip_list_out.decode('utf-8')
+        base_image = os.environ.get('INTERNETNL_BASE_IMAGE', 'Unknown')
+    except Exception:
+        pass
 
-    config._metadata['Internet.NL Git Describe Tags'] = git_describe_tags_out
-    config._metadata['Internet.NL Git Describe Branch'] = git_describe_branch_out
-    config._metadata['Internet.NL Pip List'] = pip_list_out.decode('utf-8')
-    config._metadata['Internet.NL Base Image'] = os.environ.get('INTERNETNL_BASE_IMAGE', 'Unknown')
+    config._metadata['Internet.NL Git Describe Tags'] = tags
+    config._metadata['Internet.NL Git Describe Branch'] = branch
+    config._metadata['Internet.NL Pip List'] = dependencies
+    config._metadata['Internet.NL Base Image'] = base_image
