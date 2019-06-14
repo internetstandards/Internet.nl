@@ -71,6 +71,14 @@ domains_configured_to_fail = [
             TESTS.HSTS
         }),
 
+    # This website virtual host configuration deliberately does not do OCSP
+    # stapling.
+    DomainConfig(
+        'tls1213noocspstaple.test.nlnetlabs.nl',
+        expected_failures={
+            TESTS.OCSP_STAPLING
+        }),
+
     # This website virtual host configuration deliberately supports 0-RTT
     DomainConfig(
         'tls130rtt.test.nlnetlabs.nl',

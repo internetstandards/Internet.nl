@@ -24,6 +24,8 @@ tls1213wrongcertname   IN  A      {{TARGET_TLS1213_IP}}
 tls1213wrongcertname   IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213defaultvhost    IN  A      {{TARGET_TLS1213_IP}}
 tls1213defaultvhost    IN  AAAA   {{TARGET_TLS1213_IPV6}}
+tls1213noocspstaple    IN  A      {{TARGET_TLS1213_IP}}
+tls1213noocspstaple    IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls10only              IN  A      {{TARGET_TLS10ONLY_IP}}
 tls10only              IN  AAAA   {{TARGET_TLS10ONLY_IPV6}}
 tls11only              IN  A      {{TARGET_TLS11ONLY_IP}}

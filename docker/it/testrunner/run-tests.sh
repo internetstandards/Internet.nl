@@ -133,7 +133,7 @@ echo ':: Installing root trust anchor in the app container..'
 docker cp /tmp/root_zsk.key $C_APP:/tmp/root_zsk.key
 
 PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
-TARGETS="nossl ssl2only ssl3only tls1213 tls1213sni tls1213wrongcertname tls1213nohsts tls10only tls11only tls12only tls13only"
+TARGETS="nossl ssl2only ssl3only tls1213 tls1213sni tls1213nohsts tls1213shorthsts tls1213wrongcertname tls1213noocspstaple tls10only tls11only tls12only tls13only"
 SUFFIX=".test.nlnetlabs.nl"
 
 echo
