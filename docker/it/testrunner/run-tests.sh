@@ -14,6 +14,7 @@
 set -e -u
 
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-it}
+TEST_SELECTOR=${TEST_SELECTOR:-}
 
 # assumes that scale=1 for the specified container
 container_name() {
@@ -200,10 +201,19 @@ PYTEST_XDIST_ARGS="--num ${NUM_SIMULTANEOUS_TESTS}"
 PYTEST_PROGRESS_ARGS="--show-progress"
 PYTEST_SELENIUM_ARGS="--driver Remote --host selenium --port 4444 --capability browserName firefox"
 PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"
+PYTEST_ARGS=
+
+if [ "${TEST_SELECTOR}" != "" ]; then
+    PYTEST_ARGS="${PYTEST_ARGS} -k ${TEST_SELECTOR}"
+fi
+
+echo
+echo ":: Execute the browser based integration test suite.. (TEST_SELECTOR: ${TEST_SELECTOR})"
 
 docker exec $C_APP sudo mkdir -p /tmp/it-report/coverage-data
 docker exec $C_APP sudo chmod -R a+w /tmp/it-report
 docker exec $C_APP pytest \
+    ${PYTEST_ARGS} \
     ${PYTEST_XDIST_ARGS} \
     ${PYTEST_PROGRESS_ARGS} \
     ${PYTEST_HTML_ARGS} \

@@ -57,6 +57,7 @@ services:
     environment:
       - COMPOSE_PROJECT_NAME
       - NUM_BROWSER_NODES
+      - TEST_SELECTOR
       - ROOT_IP
       - MASTER_IP
       - RESOLVER_IP
