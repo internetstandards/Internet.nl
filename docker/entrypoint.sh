@@ -19,7 +19,6 @@ sudo unbound-control start
 sudo unbound-control status
 
 # Sanity check our DNS configuration
-ldns-dane -r 127.0.0.1 -n -T verify internet.nl 443 || echo >&2 "ERROR: Unexpected LDNS-DANE problem."
 ldns-dane -n -T verify internet.nl 443 || echo >&2 "ERROR: Please run this container with --dns 127.0.0.1"
 
 # Configure the Internet.nl Django app, e.g. to know how to connect to RabbitMQ, Redis and PostgreSQL.
