@@ -193,9 +193,6 @@ echo
 echo ':: Wait 15 seconds to give the app time to settle, e.g. Celery worker startup etc..'
 sleep 15s
 
-echo
-echo ':: Execute the browser based integration test suite..'
-
 NUM_SIMULTANEOUS_TESTS=${NUM_BROWSER_NODES}
 PYTEST_XDIST_ARGS="--num ${NUM_SIMULTANEOUS_TESTS}"
 PYTEST_PROGRESS_ARGS="--show-progress"
