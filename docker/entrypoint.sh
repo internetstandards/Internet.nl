@@ -49,8 +49,8 @@ cd ${APP_PATH}
 # Start Celery
 celery -A internetnl multi start \
     worker db_worker slow_db_worker \
-    -c:1 250 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
-    -l info --without-gossip --time-limit=300 -P solo &
+    -c:1 5 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
+    -l debug --without-gossip --time-limit=300 -P prefork &
 
 # Start Celery Beat
 celery -A internetnl beat &

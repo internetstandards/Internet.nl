@@ -195,6 +195,8 @@ sleep 15s
 echo
 echo ':: Execute the browser based integration test suite..'
 
+NUM_SIMULTANEOUS_TESTS=${NUM_BROWSER_NODES}
+PYTEST_XDIST_ARGS="--num ${NUM_SIMULTANEOUS_TESTS}"
 PYTEST_PROGRESS_ARGS="--show-progress"
 PYTEST_SELENIUM_ARGS="--driver Remote --host selenium --port 4444 --capability browserName firefox"
 PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"
@@ -202,6 +204,7 @@ PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"
 docker exec $C_APP sudo mkdir -p /tmp/it-report/coverage-data
 docker exec $C_APP sudo chmod -R a+w /tmp/it-report
 docker exec $C_APP pytest \
+    ${PYTEST_XDIST_ARGS} \
     ${PYTEST_PROGRESS_ARGS} \
     ${PYTEST_HTML_ARGS} \
     ${PYTEST_SELENIUM_ARGS} || true

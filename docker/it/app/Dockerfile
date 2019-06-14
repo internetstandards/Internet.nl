@@ -26,6 +26,7 @@ RUN sudo -H pip install --upgrade pip && \
     sudo -H pip install \
         coverage \
         coverage-enable-subprocess \
+        pytest-xdist \
         pytest-progress \
         pytest-selenium \
         gitpython

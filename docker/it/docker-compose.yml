@@ -51,13 +51,12 @@ services:
     dns_search: does.not.exist
     networks:
       test_net:
-        ipv4_address: ${TEST_RUNNER_IP}
-        ipv6_address: ${TEST_RUNNER_IPV6}
     depends_on:
       - resolver
       - app
     environment:
       - COMPOSE_PROJECT_NAME
+      - NUM_BROWSER_NODES
       - ROOT_IP
       - MASTER_IP
       - RESOLVER_IP
@@ -124,11 +123,12 @@ services:
 
 
   # --------------------------------------------------------------------------
-  #   A SELENIUM SERVER TO SUPPORT BROWSER BASED TESTING OF THE INTERNET.NL
+  #   A SELENIUM GRID TO SUPPORT BROWSER BASED TESTING OF THE INTERNET.NL
   #                             CONTAINER ABOVE.
   # --------------------------------------------------------------------------
-  selenium:
-    image: selenium/standalone-firefox
+  selenium-firefox:
+    image: selenium/node-firefox:3.141.59-palladium
+    scale: ${NUM_BROWSER_NODES}
     # Prevent crashes when running a browser in the container.
     # See: https://github.com/SeleniumHQ/docker-selenium
     shm_size: 2G
@@ -136,11 +136,24 @@ services:
     dns_search: does.not.exist
     networks:
       test_net:
-        ipv4_address: ${SELENIUM_IP}
-        ipv6_address: ${SELENIUM_IPV6}
     depends_on:
-      - app
+      - selenium
+    environment:
+      - HUB_HOST=selenium
+      - NODE_MAX_INSTANCES=2
+      - NODE_MAX_SESSION=1
 
+  # Selenium Grid Hub: Browse to http://localhost:4444/grid/console
+  selenium:
+    image: selenium/hub:3.141.59-palladium
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+    depends_on:
+      - resolver
+    ports:
+      - "4444:4444"
 
   # --------------------------------------------------------------------------
   #   REDIS, RABBITMQ, AND POSTGRES SUPPORT SERVERS NEEDED BY INTERNET.NL.
