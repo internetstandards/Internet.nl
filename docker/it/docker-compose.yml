@@ -223,7 +223,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: eval 'socat TCP6-LISTEN:443,fork TCP4:127.0.0.1:4433 & openssl s_server -accept 4433 -tls1 -key /etc/ssl/private/wildcard.test.nlnetlabs.nl.key -cert /etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt -www -status -CAfile /opt/ca-ocsp/ca/rootCA.crt'
+    command: /opt/run-openssl-server.sh -tls1
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -239,7 +239,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: eval 'socat TCP6-LISTEN:443,fork TCP4:127.0.0.1:4433 & openssl s_server -accept 4433 -tls1_1 -key /etc/ssl/private/wildcard.test.nlnetlabs.nl.key -cert /etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt -www -status -CAfile /opt/ca-ocsp/ca/rootCA.crt'
+    command: /opt/run-openssl-server.sh -tls1_1
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -285,7 +285,7 @@ services:
     build:
       context: target
       network: host
-    entrypoint: /opt/run-nginx.sh
+    entrypoint: /opt/run-nginx-server.sh
     command: /etc/apache2/sites-available/nginx-0rtt.conf
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
@@ -302,7 +302,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: eval 'socat TCP6-LISTEN:443,fork TCP4:127.0.0.1:4433 & /opt/openssl-old/bin/openssl s_server -accept 4433 -ssl2 -key /etc/ssl/private/wildcard.test.nlnetlabs.nl.key -cert /etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt -www -status -CAfile /opt/ca-ocsp/ca/rootCA.crt'
+    command: /opt/run-openssl-server.sh -ssl2
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -318,7 +318,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect 
-    command: eval 'socat TCP6-LISTEN:443,fork TCP4:127.0.0.1:4433 & /opt/openssl-old/bin/openssl s_server -accept 4433 -ssl3 -key /etc/ssl/private/wildcard.test.nlnetlabs.nl.key -cert /etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt -www -status -CAfile /opt/ca-ocsp/ca/rootCA.crt'
+    command: /opt/run-openssl-server.sh -ssl3
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:

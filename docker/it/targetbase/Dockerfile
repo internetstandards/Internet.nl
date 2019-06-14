@@ -28,4 +28,4 @@ COPY certs/*.crt /etc/ssl/certs/
 COPY certs/*.key /etc/ssl/private/
 
 WORKDIR /root
-ENTRYPOINT ["/opt/run-server.sh"]
+ENTRYPOINT ["/opt/run-apache-server.sh"]

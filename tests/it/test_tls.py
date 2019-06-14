@@ -11,7 +11,6 @@ from helpers import DomainConfig, id_generator, TESTS, UX
 domains_configured_to_pass = [
     DomainConfig('tls1213.test.nlnetlabs.nl'),
     DomainConfig('tls1213sni.test.nlnetlabs.nl'),
-    DomainConfig('tls11only.test.nlnetlabs.nl'),
     DomainConfig('tls12only.test.nlnetlabs.nl'),
     DomainConfig('tls13only.test.nlnetlabs.nl'),
 ]
@@ -25,27 +24,32 @@ domains_configured_to_fail = [
             TESTS.HTTPS_AVAILABLE
         }),
 
-    # Our TLS 1.0 server uses a version of the OpenSSL server binary which
-    # cannot serve HSTS headers, should but fails to serve OCSP stapling
-    # responses, and suffers from weak ciphers and support for client
-    # renegotiation.
+    # Our TLS 1.0 server uses the OpenSSL server binary which does not serve
+    # HSTS response headers
+    # TODO: Extend this test to check that TLS 1.0 is flagged as phase out.
     DomainConfig(
         'tls10only.test.nlnetlabs.nl',
         expected_failures={
-            TESTS.HSTS,
-            TESTS.CIPHER_SUITES,
-            TESTS.CLIENT_RENEG,
-            TESTS.OCSP_STAPLING
+            TESTS.HSTS
         }),
 
-    # This website deliberately lacks an IPV6 AAAA record in DNS
+    # Our TLS 1.1 server uses the OpenSSL server binary which does not serve
+    # HSTS response headers
+    # TODO: Extend this test to check that TLS 1.1 is flagged as phase out.
+    DomainConfig(
+        'tls11only.test.nlnetlabs.nl',
+        expected_failures={
+            TESTS.HSTS
+        }),
+
+    # This domain deliberately lacks an IPV6 AAAA record in DNS
     DomainConfig(
         'tls1213ipv4only.test.nlnetlabs.nl',
         expected_failures={
             TESTS.IPV6_ADDRESS_FOR_WEB_SERVER
         }),
 
-    # This website deliberately has no matching virtual host configuration on
+    # This domain deliberately has no matching virtual host configuration on
     # the webserver that its DNS A and AAAA records resolve to.
     DomainConfig(
         'tls1213wrongcertname.test.nlnetlabs.nl',
