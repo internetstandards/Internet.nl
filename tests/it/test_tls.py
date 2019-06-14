@@ -84,6 +84,10 @@ domains_configured_to_fail = [
         }),
 
     # This website virtual host configuration deliberately supports 0-RTT
+    # Note: if NGINX hasn't already fetched the OCSP responder response it will
+    # not staple the OCSP responder data in the response to us and this test
+    # will fail. NGINX should be configured to serve OCSP responder data from
+    # a file to avoid this issue.
     DomainConfig(
         'tls130rtt.test.nlnetlabs.nl',
         expected_failures={

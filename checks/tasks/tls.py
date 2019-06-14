@@ -1686,7 +1686,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         secure_reneg_score, secure_reneg = conn.check_secure_reneg()
         client_reneg_score, client_reneg = conn.check_client_reneg()
         compression_score, compression = conn.check_compression()
-        ocsp_stapling_score, oscp_stapling = conn.check_ocsp_stapling()
+        ocsp_stapling_score, ocsp_stapling = conn.check_ocsp_stapling()
 
         prots_bad = []
         prots_phase_out = []
@@ -1838,7 +1838,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             fs_score=fs_score,
 
             zero_rtt_score=zero_rtt_score,
-            oscp_stapling=oscp_stapling,
+            ocsp_stapling=ocsp_stapling,
             ocsp_stapling_score=ocsp_stapling_score,
         )
 
