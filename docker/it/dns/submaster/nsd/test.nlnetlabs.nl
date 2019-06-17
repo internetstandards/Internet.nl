@@ -42,3 +42,21 @@ ssl3only               IN  A      {{TARGET_SSL3ONLY_IP}}
 ssl3only               IN  AAAA   {{TARGET_SSL3ONLY_IPV6}}
 nossl                  IN  A      {{TARGET_NOSSL_IP}}
 nossl                  IN  AAAA   {{TARGET_NOSSL_IPV6}}
+
+# TLSA records generated using https://www.huque.com/bin/gen_tlsa
+_443._tcp.tls1213             IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1213ipv4only     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1213sni          IN  TLSA   3 1 1 f2bcbc0e3af0628ad6f94b16d369c8bf741437977cc105c891e69edad0e21478
+_443._tcp.tls1213nohsts       IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1213shorthsts    IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1213noocspstaple IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1213ffdh3072     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1213ffdh2048     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls10only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls11only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls12only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls13only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls130rtt           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.ssl2only            IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.ssl3only            IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.nossl               IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
