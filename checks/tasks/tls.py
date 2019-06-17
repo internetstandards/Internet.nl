@@ -24,7 +24,7 @@ from django.core.cache import cache
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy
 from nassl import _nassl
-from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum, OpenSslEarlyDataStatusEnum
+from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 from nassl.ssl_client import ClientCertificateRequested
