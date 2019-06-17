@@ -39,7 +39,7 @@ from .shared import results_per_domain, aggregate_subreports
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus
+from ..models import ForcedHttpsStatus, ZeroRttStatus
 
 
 try:
@@ -325,6 +325,7 @@ def save_results(model, results, addr, domain, category):
                     model.secure_reneg_score = result.get("secure_reneg_score")
                     model.client_reneg = result.get("client_reneg")
                     model.client_reneg_score = result.get("client_reneg_score")
+                    model.zero_rtt = result.get("zero_rtt")
                     model.zero_rtt_score = result.get("zero_rtt_score")
                     model.ocsp_stapling = result.get("ocsp_stapling")
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
@@ -525,14 +526,12 @@ def build_report(dttls, category):
                 # else:
                 #     category.subtests['dane_rollover'].result_bad()
 
-            if dttls.zero_rtt_score is None:
-                pass
-            elif dttls.zero_rtt_score == scoring.WEB_TLS_ZERO_RTT_BAD:
-                category.subtests['zero_rtt'].result_bad()
-            elif dttls.zero_rtt_score == scoring.WEB_TLS_ZERO_RTT_OK:
-                category.subtests['zero_rtt'].result_na()
-            else:
+            if dttls.zero_rtt == ZeroRttStatus.good:
                 category.subtests['zero_rtt'].result_good()
+            elif dttls.zero_rtt == ZeroRttStatus.na:
+                category.subtests['zero_rtt'].result_na()
+            elif dttls.zero_rtt == ZeroRttStatus.bad:
+                category.subtests['zero_rtt'].result_bad()
 
             if dttls.ocsp_stapling_score is None:
                 pass
@@ -1757,8 +1756,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         ciphers_score = scoring.WEB_TLS_SUITES_OK
 
         # TODO: ideally: zero_rtt_score = conn.check_zero_rtt()
-        # but the check requires more than one conn. can this be solved? 
-        zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_OK
+        # but the check requires more than one conn. can this be solved?
+        zero_rtt = ZeroRttStatus.bad
+        zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_BAD
 
         dh_param, ecdh_param = (False, False)
         fs_bad = []
@@ -1819,6 +1819,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                                 http_status = conn.read(13)
                                 if (http_status.startswith(b'HTTP/') and
                                     http_status.startswith(b'425', 9)):
+                                    zero_rtt = ZeroRttStatus.ok
                                     zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_OK
 
                     conn.safe_shutdown()
@@ -1826,6 +1827,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     DebugConnectionSocketException):
                 pass
         else:
+            zero_rtt = ZeroRttStatus.na
+            zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_NA
+
             # Connect using bad cipher
             # TODO: Review regarding TLS 1.3, for now skip this as otherwise we
             # get stuck in an infinite loop
@@ -1911,6 +1915,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             fs_score=fs_score,
 
             zero_rtt_score=zero_rtt_score,
+            zero_rtt=zero_rtt,
+
             ocsp_stapling=ocsp_stapling,
             ocsp_stapling_score=ocsp_stapling_score,
         )

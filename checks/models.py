@@ -32,6 +32,12 @@ class ForcedHttpsStatus(Enum):
     no_http = 2
 
 
+class ZeroRttStatus(Enum):
+    bad = 0
+    good = 1
+    na = 2
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -398,7 +404,9 @@ class DomainTestTls(BaseTestModel):
     client_reneg = models.NullBooleanField(default=False)
     client_reneg_score = models.IntegerField(null=True)
 
+    zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
     zero_rtt_score = models.IntegerField(null=True)
+
     ocsp_stapling = models.IntegerField(null=True)
     ocsp_stapling_score = models.IntegerField(null=True)
 
@@ -436,11 +444,12 @@ class DomainTestTls(BaseTestModel):
             'server_reachable', 'tls_enabled', 'tls_enabled_score',
             'could_not_test_smtp_starttls', 'dane_log', 'dane_score',
             'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_score',
-            'ciphers_bad', 'ciphers_score', 'protocols_bad', 'protocols_phase_out',
-            'protocols_score', 'compression', 'compression_score', 'secure_reneg',
-            'secure_reneg_score', 'client_reneg', 'client_reneg_score', 'zero_rtt_score',
-            'ocsp_stapling', 'ocsp_stapling_score',
-            'forced_https', 'forced_https_score', 'http_compression_enabled',
+            'ciphers_bad', 'ciphers_score', 'protocols_bad',
+            'protocols_phase_out', 'protocols_score', 'compression',
+            'compression_score', 'secure_reneg', 'secure_reneg_score',
+            'client_reneg', 'client_reneg_score', 'zero_rtt', 'zero_rtt_score',
+            'ocsp_stapling', 'ocsp_stapling_score', 'forced_https',
+            'forced_https_score', 'http_compression_enabled',
             'http_compression_score', 'hsts_enabled', 'hsts_policies',
             'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
             'cert_pubkey_bad', 'cert_pubkey_score', 'cert_signature_bad',
