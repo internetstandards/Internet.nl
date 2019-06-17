@@ -1643,6 +1643,11 @@ msgstr ""
 "Your web server supports *insufficiently* secure Diffie-Hellman parameters \n"
 "for key exchange."
 
+msgid "detail web tls fs-params verdict phase-out"
+msgstr ""
+"Your web server supports secure Diffie-Hellman parameters that are at risk \n"
+"of becoming *insufficiently* for key exchange."
+
 msgid "detail web tls fs-params verdict good"
 msgstr ""
 "Your web server supports sufficiently secure Diffie-Hellman parameters for \n"

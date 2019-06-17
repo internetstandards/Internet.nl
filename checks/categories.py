@@ -718,6 +718,11 @@ class WebTlsFsParams(Subtest):
         self.verdict = "detail web tls fs-params verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls fs-params verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls fs-params verdict bad"

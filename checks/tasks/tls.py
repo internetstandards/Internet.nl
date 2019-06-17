@@ -313,6 +313,7 @@ def save_results(model, results, addr, domain, category):
                     model.dh_param = result.get("dh_param")
                     model.ecdh_param = result.get("ecdh_param")
                     model.fs_bad = result.get("fs_bad")
+                    model.fs_phase_out = result.get("fs_phase_out")
                     model.fs_score = result.get("fs_score")
                     model.ciphers_bad = result.get("ciphers_bad")
                     model.ciphers_score = result.get("ciphers_score")
@@ -438,8 +439,11 @@ def build_report(dttls, category):
             if not dttls.dh_param and not dttls.ecdh_param:
                 category.subtests['fs_params'].result_no_dh_params()
             else:
+                fs_all = dttls.fs_bad + dttls.fs_phase_out
                 if len(dttls.fs_bad) > 0:
-                    category.subtests['fs_params'].result_bad(dttls.fs_bad)
+                    category.subtests['fs_params'].result_bad(fs_all)
+                elif len(dttls.fs_phase_out) > 0:
+                    category.subtests['fs_params'].result_phase_out(fs_all)
                 else:
                     category.subtests['fs_params'].result_good()
 
@@ -1761,7 +1765,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_BAD
 
         dh_param, ecdh_param = (False, False)
-        fs_bad = []
+        fs_bad, fs_phase_out = [], []
         fs_score = scoring.WEB_TLS_FS_BAD
 
         dh_ff_p, dh_ff_g = (False, False)
@@ -1875,16 +1879,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                 fs_bad.append("DH-{}".format(dh_param))
             elif dh_ff_p and dh_ff_g:
                 if dh_ff_g == 2 and dh_ff_p == FFDHE4096_PRIME:
-                    dh_ff_score = scoring.WEB_TLS_FS_SUFFICIENT
-                    # fs_bad.append("DH-FFDHE4096 (RFC 7919)")
+                    pass
                 elif dh_ff_g == 2 and dh_ff_p == FFDHE3072_PRIME:
-                    dh_ff_score = scoring.WEB_TLS_FS_SUFFICIENT
-                    # fs_bad.append("DH-FFDHE3072 (RFC 7919)")
+                    pass
                 elif dh_ff_g == 2 and dh_ff_p == FFDHE2048_PRIME:
-                    dh_ff_score = scoring.WEB_TLS_FS_PHASE_OUT
-                    fs_bad.append("DH-FFDHE2048 (RFC 7919)")
+                    fs_phase_out.append("DH-FFDHE2048 (RFC 7919)")
                 else:
-                    dh_ff_score = scoring.WEB_TLS_FS_INSUFFICIENT
                     fs_bad.append("DH-{}".format(dh_param))
 
             if ecdh_param and int(ecdh_param) < 224:
@@ -1912,6 +1912,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             dh_param=dh_param,
             ecdh_param=ecdh_param,
             fs_bad=fs_bad,
+            fs_phase_out=fs_phase_out,
             fs_score=fs_score,
 
             zero_rtt_score=zero_rtt_score,
