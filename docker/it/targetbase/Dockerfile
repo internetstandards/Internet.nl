@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         socat
 
 # Enable Apache modules
+RUN a2enmod env
 RUN a2enmod headers
 RUN a2enmod rewrite
 
