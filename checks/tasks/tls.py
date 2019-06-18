@@ -406,6 +406,9 @@ def save_results(model, results, addr, domain, category):
 
 
 def build_report(dttls, category):
+    status_insecure = gettext_lazy('results security-level insufficient')
+    status_phase_out = gettext_lazy('results security-level phase-out')
+
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:
             category.subtests['https_exists'].result_unreachable()
@@ -439,7 +442,11 @@ def build_report(dttls, category):
             if not dttls.dh_param and not dttls.ecdh_param:
                 category.subtests['fs_params'].result_no_dh_params()
             else:
-                fs_all = dttls.fs_bad + dttls.fs_phase_out
+                fs_all = []
+                fs_all.extend([format_lazy('{fs} ({status})',
+                        fs=fs, status=status_insecure) for fs in dttls.fs_bad])
+                fs_all.extend([format_lazy('{prot} ({status})',
+                        prot=fs, status=status_phase_out) for fs in dttls.fs_phase_out])
                 if len(dttls.fs_bad) > 0:
                     category.subtests['fs_params'].result_bad(fs_all)
                 elif len(dttls.fs_phase_out) > 0:
@@ -452,8 +459,6 @@ def build_report(dttls, category):
             else:
                 category.subtests['tls_ciphers'].result_good()
 
-            status_insecure = gettext_lazy('results security-level insufficient')
-            status_phase_out = gettext_lazy('results security-level phase-out')
             prots = []
             prots.extend([format_lazy('{prot} ({status})',
                     prot=prot, status=status_insecure) for prot in dttls.protocols_bad])
@@ -1884,7 +1889,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                 elif dh_ff_g == 2 and dh_ff_p == FFDHE3072_PRIME:
                     pass
                 elif dh_ff_g == 2 and dh_ff_p == FFDHE2048_PRIME:
-                    fs_phase_out.append("DH-FFDHE2048 (RFC 7919)")
+                    fs_phase_out.append("DH-FFDHE2048")
                 else:
                     fs_bad.append("DH-{}".format(dh_param))
 
