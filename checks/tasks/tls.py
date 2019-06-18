@@ -1777,7 +1777,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         conn.safe_shutdown()
 
-        # Test for TLS 1.1 and TLS 1.0 as these are now "phase out"
+        # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0
+        # Test for SSL v2 and v3 as these are "insecure" per NCSC 2.0
         prot_test_configs = [
             ( TLSV1_1, 'TLS 1.1', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
             ( TLSV1,   'TLS 1.0', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
