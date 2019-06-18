@@ -91,7 +91,6 @@ domains_configured_to_fail = [
 domains_with_phase_out_warnings = [
     # Our TLS 1.0 server uses the OpenSSL server binary which does not serve
     # HSTS response headers
-    # TODO: Extend this test to check that TLS 1.0 is flagged as phase out.
     DomainConfig(
         'tls10only.test.nlnetlabs.nl',
         expected_failures={
@@ -109,7 +108,6 @@ domains_with_phase_out_warnings = [
 
     # Our TLS 1.1 server uses the OpenSSL server binary which does not serve
     # HSTS response headers
-    # TODO: Extend this test to check that TLS 1.1 is flagged as phase out.
     DomainConfig(
         'tls11only.test.nlnetlabs.nl',
         expected_failures={
