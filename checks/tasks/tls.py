@@ -1804,6 +1804,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
                 # does the server announce support for early data?
                 if previous_session.get_max_early_data() <= 0:
+                    zero_rtt = ZeroRttStatus.good
                     zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_GOOD
                 else:
                     # connect again using the same TLS session details
@@ -1816,15 +1817,15 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                             not conn.is_handshake_completed()):
                             conn.do_handshake()
                             if conn._ssl.get_early_data_status() == 2:
-                                zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_BAD
+                                # 0-RTT status is bad unless...
 
                                 # See if the target responds with HTTP/N.N 425
                                 # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
                                 http_status = conn.read(13)
                                 if (http_status.startswith(b'HTTP/') and
                                     http_status.startswith(b'425', 9)):
-                                    zero_rtt = ZeroRttStatus.ok
-                                    zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_OK
+                                    zero_rtt = ZeroRttStatus.good
+                                    zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_GOOD
 
                     conn.safe_shutdown()
             except (DebugConnectionHandshakeException,
