@@ -237,7 +237,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -tls1
+    command: /opt/run-openssl-server.sh -tls1 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -253,7 +253,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -tls1_1
+    command: /opt/run-openssl-server.sh -tls1_1 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
