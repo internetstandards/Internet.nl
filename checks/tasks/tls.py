@@ -1833,10 +1833,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                                     zero_rtt = ZeroRttStatus.good
                                     zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_GOOD
 
-                    conn.safe_shutdown()
             except (DebugConnectionHandshakeException,
-                    DebugConnectionSocketException):
+                    DebugConnectionSocketException,
+                    IOError):
                 pass
+            finally:
+                conn.safe_shutdown()
         else:
             zero_rtt = ZeroRttStatus.na
             zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_NA
