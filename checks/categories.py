@@ -773,7 +773,7 @@ class WebTlsVersion(Subtest):
         self.tech_data = ""
 
     def result_phase_out(self, tech_data):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_NOTICE)
         self.verdict = "detail web tls version verdict phase-out"
         self.tech_data = tech_data
 
