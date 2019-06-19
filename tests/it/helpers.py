@@ -1,4 +1,5 @@
 # TODO: Use Selenium Page Objects
+import copy
 import re
 import time
 from selenium.webdriver.common.by import By
@@ -219,26 +220,45 @@ class UX:
 
 
 class DomainConfig:
-    def __init__(self, domain, expected_failures={}, expected_warnings={},
-                 expected_not_tested={}, expected_score=None):
+    def __init__(self,
+                 test_id,
+                 domain,
+                 expected_failures=dict(),
+                 expected_warnings=dict(),
+                 expected_not_tested=dict(),
+                 expected_score=None):
+        self.test_id = test_id
         self.domain = domain
-        self.expected_failures = set(expected_failures)
-        self.expected_warnings = set(expected_warnings)
-        self.expected_not_tested = set(expected_not_tested)
+        self.expected_failures = self.get_as_dict(expected_failures)
+        self.expected_warnings = self.get_as_dict(expected_warnings)
+        self.expected_not_tested = self.get_as_dict(expected_not_tested)
         self.expected_score = expected_score
+        self.override_defaults()
+
+    def get_as_dict(self, dict_or_set):
+        if isinstance(dict_or_set, dict):
+            return copy.deepcopy(dict_or_set)
+        elif isinstance(dict_or_set, set):
+            return copy.deepcopy(dict.fromkeys(dict_or_set, None))
+        else:
+            raise ValueError()
+
+    def override_defaults(self):
+        pass
 
 
 class GoodDomain(DomainConfig):
-    def __init__(self, domain, not_tested={}):
-        super().__init__(domain, expected_not_tested=not_tested,
+    def __init__(self, testid, domain, not_tested=dict()):
+        super().__init__(testid, domain, expected_not_tested=not_tested,
             expected_score='100%')
 
 
 class BadDomain(DomainConfig):
-    def __init__(self, domain, failures={}):
-        super().__init__(domain, expected_failures=failures)
+    def __init__(self, testid, domain, failures=dict()):
+        super().__init__(testid, domain, expected_failures=failures)
 
 
 def id_generator(val):
     if isinstance(val, DomainConfig):
-        return val.domain.split('.')[0]
+        return '{}-{}'.format(
+            val.test_id, val.domain.split('.')[0])

@@ -195,10 +195,10 @@ sleep 15s
 
 NUM_SIMULTANEOUS_TESTS=${NUM_BROWSER_NODES}
 PYTEST_XDIST_ARGS="--num ${NUM_SIMULTANEOUS_TESTS}"
-PYTEST_PROGRESS_ARGS="--show-progress"
+PYTEST_PROGRESS_ARGS="" #"--show-progress"
 PYTEST_SELENIUM_ARGS="--driver Remote --host selenium --port 4444 --capability browserName firefox"
 PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"
-PYTEST_ARGS=
+PYTEST_ARGS="-vv" # to get the full diff in case of failed assertions
 
 if [ "${TEST_SELECTOR}" != "" ]; then
     PYTEST_ARGS="${PYTEST_ARGS} -k ${TEST_SELECTOR}"

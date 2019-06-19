@@ -263,6 +263,38 @@ services:
     depends_on:
       - targetbase
 
+  targettls1011:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    command: /opt/run-openssl-server.sh -no_tls1_2 -no_tls1_3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS1011_IP}
+        ipv6_address: ${TARGET_TLS1011_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls1112:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    command: /opt/run-openssl-server.sh -no_tls1 -no_tls1_3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS1112_IP}
+        ipv6_address: ${TARGET_TLS1112_IPV6}
+    depends_on:
+      - targetbase
+
   targettls12only:
     build:
       context: target
@@ -414,6 +446,10 @@ services:
       - TARGET_TLS10ONLY_IPV6
       - TARGET_TLS11ONLY_IP
       - TARGET_TLS11ONLY_IPV6
+      - TARGET_TLS1011_IP
+      - TARGET_TLS1011_IPV6
+      - TARGET_TLS1112_IP
+      - TARGET_TLS1112_IPV6
       - TARGET_TLS12ONLY_IP
       - TARGET_TLS12ONLY_IPV6
       - TARGET_TLS1213_IP

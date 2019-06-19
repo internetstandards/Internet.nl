@@ -30,6 +30,10 @@ tls10only              IN  A      {{TARGET_TLS10ONLY_IP}}
 tls10only              IN  AAAA   {{TARGET_TLS10ONLY_IPV6}}
 tls11only              IN  A      {{TARGET_TLS11ONLY_IP}}
 tls11only              IN  AAAA   {{TARGET_TLS11ONLY_IPV6}}
+tls1011                IN  A      {{TARGET_TLS1011_IP}}
+tls1011                IN  AAAA   {{TARGET_TLS1011_IPV6}}
+tls1112                IN  A      {{TARGET_TLS1112_IP}}
+tls1112                IN  AAAA   {{TARGET_TLS1112_IPV6}}
 tls12only              IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only              IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffdhe2048     IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -58,6 +62,8 @@ _443._tcp.tls1213shorthsts    IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa
 _443._tcp.tls1213noocspstaple IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls10only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls11only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1011             IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls1112             IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12onlyffdhe3072  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12onlyffdhe2048  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
