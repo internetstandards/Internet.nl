@@ -106,7 +106,9 @@ ncsc_20_tests = [
             TESTS.DANE_VALID
         }),
 
-    GoodDomain('NCSC20-Table1:TLS13-Table14:Off',
+    GoodDomain('NCSC20'
+        '-Table1:TLS13'
+        '-Table14:Off',
         'tls13only.test.nlnetlabs.nl'),
 
     DomainConfig('NCSC20-Table1:None',
