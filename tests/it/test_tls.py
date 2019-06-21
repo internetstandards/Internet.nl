@@ -23,7 +23,7 @@ class OpenSSLServerDomainConfig(DomainConfig):
 ncsc_20_tests = [
     # internet.nl cannot make SSLv2 connections so instead of failing because
     # of the insecure TLS version it fails because it cannot detect HTTPS
-    # support at al.
+    # support at all.
     pytest.param(
         BadDomain('NCSC20-Table1:SSL20',
             'ssl2only.test.nlnetlabs.nl', {TESTS.HTTPS_TLS_VERSION}),
@@ -31,7 +31,7 @@ ncsc_20_tests = [
 
     # internet.nl cannot make SSLv3 connections so instead of failing because
     # of the insecure TLS version it fails because it cannot detect HTTPS
-    # support at al.
+    # support at all.
     pytest.param(
         BadDomain('NCSC20-Table1:SSL30',
             'ssl3only.test.nlnetlabs.nl', {TESTS.HTTPS_TLS_VERSION}),
@@ -106,7 +106,9 @@ ncsc_20_tests = [
             TESTS.DANE_VALID
         }),
 
-    GoodDomain('NCSC20-Table1:TLS13-Table14:Off',
+    GoodDomain('NCSC20'
+        '-Table1:TLS13'
+        '-Table14:Off',
         'tls13only.test.nlnetlabs.nl'),
 
     DomainConfig('NCSC20-Table1:None',
