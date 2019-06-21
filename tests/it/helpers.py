@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 BASE_URL = 'http://internet.nl:8080/'
 IMPERFECT_SCORE = 'IMPERFECT'
+PERFECT_SCORE = '100%'
 
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'
 LOCATOR_PASSED_TEST_CLASS = 'testresult passed'

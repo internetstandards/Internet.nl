@@ -1,6 +1,6 @@
 import pytest
 from helpers import DomainConfig, GoodDomain, BadDomain
-from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE
+from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE, PERFECT_SCORE
 
 
 # Some of the "mock" target servers are powered by OpenSSL server which cannot
@@ -184,8 +184,7 @@ ncsc_20_tests = [
         {TESTS.HTTPS_TLS_ZERO_RTT}),
 
     # This website virtual host configuration deliberately does not do OCSP
-    # stapling. Lack of OCSP stapling is graded as 'SUFFICIENT' according to
-    # NCSC 2.0, which being less than 'GOOD' we score less than 100%.
+    # stapling.
     DomainConfig('NCSC20-Table15:Off',
         'tls1213noocspstaple.test.nlnetlabs.nl',
         expected_passes={
@@ -194,7 +193,7 @@ ncsc_20_tests = [
                 ['no'],  # IPv4
             ]
         },
-        expected_score=IMPERFECT_SCORE),
+        expected_score=PERFECT_SCORE),
 
     # This website virtual host configuration deliberately serves an OCSP
     # response that was obtained for a different domain/cert and so is invalid
@@ -203,8 +202,8 @@ ncsc_20_tests = [
         'tls13invalidocsp.test.nlnetlabs.nl',
         expected_failures={
             TESTS.HTTPS_TLS_OCSP_STAPLING: [
-                ['insecure'],  # IPv6
-                ['insecure'],  # IPv4
+                ['no'],  # IPv6
+                ['no'],  # IPv4
             ]
         }),
 
