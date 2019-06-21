@@ -342,6 +342,21 @@ services:
     depends_on:
       - targetbase
 
+  targettls13invalidocsp:
+    build:
+      context: target
+      network: host
+    entrypoint: /opt/run-nginx-server.sh
+    command: /etc/apache2/sites-available/nginx-invalidocsp.conf
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS13INVALIDOCSP_IP}
+        ipv6_address: ${TARGET_TLS13INVALIDOCSP_IPV6}
+    depends_on:
+      - targetbase
+
   targetssl2only:
     build:
       context: target
@@ -458,6 +473,8 @@ services:
       - TARGET_TLS13ONLY_IPV6
       - TARGET_TLS130RTT_IP
       - TARGET_TLS130RTT_IPV6
+      - TARGET_TLS13INVALIDOCSP_IP
+      - TARGET_TLS13INVALIDOCSP_IPV6
       - TARGET_SSL2ONLY_IP
       - TARGET_SSL2ONLY_IPV6
       - TARGET_SSL3ONLY_IP

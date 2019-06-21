@@ -39,7 +39,7 @@ from .shared import results_per_domain, aggregate_subreports
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, ZeroRttStatus
+from ..models import ForcedHttpsStatus, ZeroRttStatus, OcspStatus
 
 
 try:
@@ -542,12 +542,12 @@ def build_report(dttls, category):
             elif dttls.zero_rtt == ZeroRttStatus.bad:
                 category.subtests['zero_rtt'].result_bad()
 
-            if dttls.ocsp_stapling_score is None:
-                pass
-            elif dttls.ocsp_stapling_score == scoring.WEB_TLS_OCSP_STAPLING_BAD:
-                category.subtests['ocsp_stapling'].result_bad(dttls.ocsp_stapling)
-            elif dttls.ocsp_stapling_score == scoring.WEB_TLS_OCSP_STAPLING_GOOD:
+            if dttls.ocsp_stapling == OcspStatus.good:
                 category.subtests['ocsp_stapling'].result_good()
+            elif dttls.ocsp_stapling == OcspStatus.not_trusted:
+                category.subtests['ocsp_stapling'].result_not_trusted()
+            elif dttls.ocsp_stapling == OcspStatus.ok:
+                category.subtests['ocsp_stapling'].result_ok()
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -1104,17 +1104,14 @@ class ConnectionHelper:
         # This will only work if SNI is in use and the handshake has already
         # been done.
         ocsp_response = self.get_tlsext_status_ocsp_resp()
-        if ocsp_response is not None:
-            if ocsp_response.status == 0:
-                try:
-                    ocsp_response.verify(settings.CA_CERTIFICATES)
-                    return self.score_ocsp_staping_good, 0
-                except OcspResponseNotTrustedError:
-                    return self.score_ocsp_staping_ok, False
-            else:
-                return self.score_ocsp_staping_bad, ocsp_response.status
+        if ocsp_response is not None and ocsp_response.status == 0:
+            try:
+                ocsp_response.verify(settings.CA_CERTIFICATES)
+                return self.score_ocsp_staping_good, OcspStatus.good
+            except OcspResponseNotTrustedError:
+                return self.score_ocsp_staping_bad, OcspStatus.not_trusted
         else:
-            return self.score_ocsp_staping_bad, False
+            return self.score_ocsp_staping_ok, OcspStatus.ok
 
 
 class ModernConnection(ConnectionHelper, SslClient):

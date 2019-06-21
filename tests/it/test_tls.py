@@ -1,6 +1,6 @@
 import pytest
 from helpers import DomainConfig, GoodDomain, BadDomain
-from helpers import id_generator, TESTS, UX
+from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE
 
 
 # Some of the "mock" target servers are powered by OpenSSL server which cannot
@@ -182,10 +182,42 @@ ncsc_20_tests = [
         {TESTS.HTTPS_TLS_ZERO_RTT}),
 
     # This website virtual host configuration deliberately does not do OCSP
-    # stapling.
-    BadDomain('NCSC20-Table15:Off',
+    # stapling. Lack of OCSP stapling is graded as 'SUFFICIENT' according to
+    # NCSC 2.0, which being less than 'GOOD' we score less than 100%.
+    DomainConfig('NCSC20-Table15:Off',
         'tls1213noocspstaple.test.nlnetlabs.nl',
-        {TESTS.HTTPS_TLS_OCSP_STAPLING}),
+        expected_passes={
+            TESTS.HTTPS_TLS_OCSP_STAPLING: [
+                ['no'],  # IPv6
+                ['no'],  # IPv4
+            ]
+        },
+        expected_score=IMPERFECT_SCORE),
+
+    # This website virtual host configuration deliberately serves an OCSP
+    # response that was obtained for a different domain/cert and so is invalid
+    # for this domain/cert.
+    BadDomain('NCSC20-Table15:OnInvalid',
+        'tls13invalidocsp.test.nlnetlabs.nl',
+        expected_failures={
+            TESTS.HTTPS_TLS_OCSP_STAPLING: [
+                ['insecure'],  # IPv6
+                ['insecure'],  # IPv4
+            ]
+        }),
+
+    DomainConfig('NCSC20-Table5:No',
+        'tls12onlynosha2.test.nlnetlabs.nl',
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                ['TBD (at risk)'],  # IPv6
+                ['TBD (at risk)'],  # IPv4
+            ]
+        },
+        expected_not_tested={
+            TESTS.HTTPS_TLS_ZERO_RTT
+        },
+        expected_score='100%'),
 ]
 
 other_tests = [
@@ -236,9 +268,15 @@ def assess_website(selenium, domain_config):
     check_table(selenium, domain_config.expected_failures)
     check_table(selenium, domain_config.expected_not_tested)
     check_table(selenium, domain_config.expected_warnings)
+    check_table(selenium, domain_config.expected_passes)
 
     if domain_config.expected_score:
-        assert UX.get_score(selenium) == domain_config.expected_score
+        score_as_percentage_str = UX.get_score(selenium)
+        if domain_config.expected_score == IMPERFECT_SCORE:
+            score_as_int = int(score_as_percentage_str.strip('%'))
+            assert score_as_int > 0 and score_as_int < 100
+        else:
+            assert score_as_percentage_str == domain_config.expected_score
 
 
 @pytest.mark.parametrize(

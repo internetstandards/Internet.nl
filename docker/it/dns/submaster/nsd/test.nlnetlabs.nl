@@ -46,6 +46,8 @@ tls13only              IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only              IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
 tls130rtt              IN  A      {{TARGET_TLS130RTT_IP}}
 tls130rtt              IN  AAAA   {{TARGET_TLS130RTT_IPV6}}
+tls13invalidocsp       IN  A      {{TARGET_TLS13INVALIDOCSP_IP}}
+tls13invalidocsp       IN  AAAA   {{TARGET_TLS13INVALIDOCSP_IPV6}}
 ssl2only               IN  A      {{TARGET_SSL2ONLY_IP}}
 ssl2only               IN  AAAA   {{TARGET_SSL2ONLY_IPV6}}
 ssl3only               IN  A      {{TARGET_SSL3ONLY_IP}}
@@ -68,8 +70,10 @@ _443._tcp.tls12only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa
 _443._tcp.tls12onlyffdhe3072  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12onlyffdhe2048  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12onlyffother    IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls12onlynosha2     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls13only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls130rtt           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls13invalidocsp    IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.ssl2only            IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.ssl3only            IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.nossl               IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705

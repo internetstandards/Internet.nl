@@ -8,8 +8,9 @@ fi
 
 perl -pi -e 's|error_log /var/log/nginx/error.log|error_log /var/log/nginx/error.log debug|' /etc/nginx/nginx.conf
 
-rm /etc/nginx/sites-enabled/default
-mv $1 /etc/nginx/sites-enabled/
+cd /etc/nginx/sites-enabled
+rm -f default
+ln -s $1
 
 # Work around error: "ssl_stapling" ignored, host not found in OCSP responder
 # "ca-ocsp.test.nlnetlabs.nl:8080" in the certificate "/etc/ssl/certs/xxx.crt"
@@ -29,7 +30,7 @@ openssl ocsp \
     -CAfile /opt/ca-ocsp/ca/rootCA.crt \
     -cert /etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt \
     -url ${OCSP_RESPONDER_URI} \
-    -respout /etc/ssl/certs/ocsp_responder.der
+    -respout /etc/ssl/certs/ocsp_responses/wildcard.test.nlnetlabs.nl.der
 
 # The NGINX config references the above created .der file.
 service nginx restart

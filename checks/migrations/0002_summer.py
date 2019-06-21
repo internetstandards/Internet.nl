@@ -31,14 +31,15 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='domaintesttls',
-            name='zero_rtt',
+            name='ocsp_stapling',
             field=enumfields.fields.EnumField(
-                default=0, enum=checks.models.ZeroRttStatus, max_length=10),
+                default=0, enum=checks.models.OcspStatus, max_length=10),
         ),
         migrations.AddField(
             model_name='domaintesttls',
-            name='ocsp_stapling',
-            field=models.IntegerField(null=True),
+            name='zero_rtt',
+            field=enumfields.fields.EnumField(
+                default=0, enum=checks.models.ZeroRttStatus, max_length=10),
         ),
         migrations.AddField(
             model_name='domaintesttls',

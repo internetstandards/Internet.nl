@@ -1049,12 +1049,17 @@ class WebTlsOCSPStapling(Subtest):
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls ocsp-stapling verdict good"
-        self.tech_data = "detail tech data secure"
+        self.tech_data = "detail tech data yes"
 
-    def result_bad(self, tech_data):
+    def result_ok(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls ocsp-stapling verdict ok"
+        self.tech_data = "detail tech data no"
+
+    def result_not_trusted(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls ocsp-stapling verdict bad"
-        self.tech_data = tech_data
+        self.tech_data = "detail tech data insecure"
 
 
 class MailTlsStarttlsExists(Subtest):

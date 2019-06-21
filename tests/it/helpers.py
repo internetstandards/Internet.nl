@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 BASE_URL = 'http://internet.nl:8080/'
+IMPERFECT_SCORE = 'IMPERFECT'
 
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'
 LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
@@ -226,12 +227,14 @@ class DomainConfig:
                  expected_failures=dict(),
                  expected_warnings=dict(),
                  expected_not_tested=dict(),
+                 expected_passes=dict(),
                  expected_score=None):
         self.test_id = test_id
         self.domain = domain
         self.expected_failures = self.get_as_dict(expected_failures)
         self.expected_warnings = self.get_as_dict(expected_warnings)
         self.expected_not_tested = self.get_as_dict(expected_not_tested)
+        self.expected_passes = self.get_as_dict(expected_passes)
         self.expected_score = expected_score
         self.override_defaults()
 
@@ -248,14 +251,15 @@ class DomainConfig:
 
 
 class GoodDomain(DomainConfig):
-    def __init__(self, testid, domain, not_tested=dict()):
-        super().__init__(testid, domain, expected_not_tested=not_tested,
+    def __init__(self, testid, domain, expected_not_tested=dict()):
+        super().__init__(testid, domain, expected_not_tested=expected_not_tested,
             expected_score='100%')
 
 
 class BadDomain(DomainConfig):
-    def __init__(self, testid, domain, failures=dict()):
-        super().__init__(testid, domain, expected_failures=failures)
+    def __init__(self, testid, domain, expected_failures=dict()):
+        super().__init__(testid, domain, expected_failures=expected_failures,
+        expected_score=IMPERFECT_SCORE)
 
 
 def id_generator(val):
