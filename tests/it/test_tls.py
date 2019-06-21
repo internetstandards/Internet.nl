@@ -230,10 +230,13 @@ other_tests = [
 
     # This website virtual host configuration deliberately serves a 'short'
     # HSTS response header.
-    # TODO: Extend this test to detect that the report complains specifically
-    # about a 'short' HSTS.
     BadDomain('HSTS:SHORT', 'tls1213shorthsts.test.nlnetlabs.nl',
-        {TESTS.HTTPS_HTTP_HSTS}),
+        {
+            TESTS.HTTPS_HTTP_HSTS: [
+                ['max-age=1000; includeSubdomains;'],  # IPv6
+                ['max-age=1000; includeSubdomains;']   # IPv4
+            ]
+        }),
 
     # This domain deliberately lacks an IPV6 AAAA record in DNS
     DomainConfig('IPV6:NONE',
