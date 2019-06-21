@@ -1022,16 +1022,16 @@ class WebTlsZeroRTT(Subtest):
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls zero-rtt verdict good"
-        self.tech_data = "detail tech data secure"
+        self.tech_data = "detail tech data no"
 
     def result_bad(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls zero-rtt verdict bad"
-        self.tech_data = "detail tech data insecure"
+        self.tech_data = "detail tech data yes"
 
     def result_na(self):
         self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web tls zero-rtt verdict other"
+        self.verdict = "detail web tls zero-rtt verdict na"
         self.tech_data = "detail tech data not-applicable"
 
 
