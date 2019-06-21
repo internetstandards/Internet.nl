@@ -22,8 +22,7 @@ from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchCustomView, BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus
-from ..views.shared import pretty_domain_name
-from ..views.shared import get_valid_domain_web, get_valid_domain_mail
+from ..views.shared import pretty_domain_name, validate_dname
 
 
 def get_site_url(request):
@@ -261,11 +260,15 @@ def batch_async_register(self, batch_request, test_type, domains):
     if test_type is BatchRequestType.web:
         batch_test_model = BatchWebTest
         keys = ('domain', 'batch_request', 'webtest')
-        get_valid_domain = get_valid_domain_web
+        # Unused because of latency while registering the domains.
+        # get_valid_domain = get_valid_domain_web
+        get_valid_domain = validate_dname
     else:
         batch_test_model = BatchMailTest
         keys = ('domain', 'batch_request', 'mailtest')
-        get_valid_domain = get_valid_domain_mail
+        # Unused because of latency while registering the domains.
+        # get_valid_domain = get_valid_domain_mail
+        get_valid_domain = validate_dname
 
     for domain in domains:
         # Ignore leading/trailing whitespace.
