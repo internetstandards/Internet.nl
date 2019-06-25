@@ -207,18 +207,14 @@ ncsc_20_tests = [
             ]
         }),
 
-    DomainConfig('NCSC20-Table5:No',
+    OpenSSLServerDomainConfig('NCSC20-Table5:No',
         'tls12onlynosha2.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                ['TBD (at risk)'],  # IPv6
-                ['TBD (at risk)'],  # IPv4
+                ['SHA1 (at risk)'],  # IPv6
+                ['SHA1 (at risk)'],  # IPv4
             ]
-        },
-        expected_not_tested={
-            TESTS.HTTPS_TLS_ZERO_RTT
-        },
-        expected_score='100%'),
+        }),
 ]
 
 other_tests = [

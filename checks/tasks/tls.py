@@ -3,6 +3,7 @@
 from binascii import hexlify
 import errno
 import http.client
+import re
 import socket
 import ssl
 import subprocess
@@ -23,6 +24,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy
+from itertools import product
 from nassl import _nassl
 from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
 from nassl.legacy_ssl_client import LegacySslClient
@@ -60,6 +62,63 @@ TLSV1_1 = OpenSslVersionEnum.TLSV1_1
 TLSV1_2 = OpenSslVersionEnum.TLSV1_2
 TLSV1_3 = OpenSslVersionEnum.TLSV1_3
 SSL_VERIFY_NONE = OpenSslVerifyEnum.NONE
+
+
+# Based on:
+# https://tools.ietf.org/html/rfc5246#page-45 (7.4.1.4.1 Signature Algorithms)
+# https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set1_sigalgs_list.html
+# https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
+# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-16
+# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-18
+# openssl list -1 -digest-commands
+# NCSC 2.0 Table 2 - Algorithms for certificate verification
+# NCSC 2.0 Table 4 - Algorithms for key exchange
+# NCSC 2.0 Table 5 - Hash functions for key exchange
+KEX_TLS12_HASHALG_PREFERRED_ORDER = [
+    'SHA512',
+    'SHA384',
+    'SHA256',
+    'SHA224',
+    'SHA1',
+    'MD5'
+]
+KEX_TLS12_SIGALG_PREFERRED_ORDER = [
+    'ECDSA',
+    'RSA',
+    'DSA',
+]
+KEX_TLS12_SORTED_ALG_COMBINATIONS = map('+'.join, product(
+    KEX_TLS12_SIGALG_PREFERRED_ORDER, KEX_TLS12_HASHALG_PREFERRED_ORDER))
+KEX_TLS12_SIGALG_PREFERENCE = ':'.join(KEX_TLS12_SORTED_ALG_COMBINATIONS)
+
+# Based on:
+# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-signaturescheme
+# https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
+# NCSC 2.0 Table 2 - Algorithms for certificate verification
+# NCSC 2.0 Table 4 - Algorithms for key exchange
+# NCSC 2.0 Table 5 - Hash functions for key exchange
+KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER = [
+    'ecdsa_secp521r1_sha512',
+    'ecdsa_secp384r1_sha384',
+    'ecdsa_secp256r1_sha256',
+    'rsa_pss_pss_sha512',
+    'rsa_pss_pss_sha384',
+    'rsa_pss_pss_sha256',
+    'rsa_pss_rsae_sha512',
+    'rsa_pss_rsae_sha384',
+    'rsa_pss_rsae_sha256',
+    'rsa_pkcs1_sha512',
+    'rsa_pkcs1_sha384',
+    'rsa_pkcs1_sha256',
+    'ed25519',
+    'ed448',
+    'rsa_pkcs1_sha1',
+    'ecdsa_sha1'
+]
+KEX_TLS13_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER)
+
+KEX_REGEX = re.compile(r'SHA(256|384|512)', re.IGNORECASE)
+
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = int(
@@ -1035,7 +1094,8 @@ class ConnectionHelper:
                 underlying_socket=self.sock,
                 ssl_verify=SSL_VERIFY_NONE,
                 ssl_verify_locations=settings.CA_CERTIFICATES,
-                ignore_client_authentication_requests=True)
+                ignore_client_authentication_requests=True,
+                signature_algorithms=self.signature_algorithms)
             if self.options:
                 self.set_options(self.options)
 
@@ -1122,7 +1182,7 @@ class ModernConnection(ConnectionHelper, SslClient):
     def __init__(
             self, url, addr=None, version=TLSV1_3, shutdown=True,
             ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
-            do_handshake_on_connect=True):
+            do_handshake_on_connect=True, signature_algorithms=None):
         self.url = url
         self.version = version
         self.must_shutdown = shutdown
@@ -1131,6 +1191,7 @@ class ModernConnection(ConnectionHelper, SslClient):
         self.options = options
         self.send_SNI = send_SNI
         self.do_handshake_on_connect = do_handshake_on_connect
+        self.signature_algorithms = signature_algorithms
 
         self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
         self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
@@ -1173,7 +1234,7 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
     def __init__(
             self, url, addr=None, version=SSLV23, shutdown=True,
             ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
-            do_handshake_on_connect=True):
+            do_handshake_on_connect=True, signature_algorithms=None):
         self.url = url
         self.version = version
         self.must_shutdown = shutdown
@@ -1182,6 +1243,7 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
         self.options = options
         self.send_SNI = send_SNI
         self.do_handshake_on_connect = do_handshake_on_connect
+        self.signature_algorithms = signature_algorithms
 
         self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
         self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
@@ -1727,6 +1789,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         # for testing.
         conn_handler = DebugConnection
         tls_version = None
+        sig_algs = None
 
         conn, *unused = shared.http_fetch(
             url, af=addr[0], path="", port=443, addr=addr[1],
@@ -1740,10 +1803,14 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                 # TODO: detect TLS >= TLS 1.3
                 if tls_version == 'TLSv1.3':
                     conn_handler = ModernConnection
+                    sig_algs = KEX_TLS13_SIGALG_PREFERENCE
+                elif tls_version == 'TLSv1.2':
+                    sig_algs = KEX_TLS12_SIGALG_PREFERENCE
             finally:
                 conn.close()
 
-        conn = conn_handler(url, addr=addr, shutdown=False)
+        conn = conn_handler(url, addr=addr, shutdown=False,
+            signature_algorithms=sig_algs)
     except (socket.error, http.client.BadStatusLine, NoIpError,
             DebugConnectionHandshakeException,
             DebugConnectionSocketException):
@@ -1771,6 +1838,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         fs_score = scoring.WEB_TLS_FS_BAD
 
         dh_ff_p, dh_ff_g = (False, False)
+
+        kex_hash_func = conn.get_peer_signature_digest()
 
         conn.safe_shutdown()
 
@@ -1895,6 +1964,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
             if ecdh_param and int(ecdh_param) < 224:
                 fs_bad.append("ECDH-{}".format(ecdh_param))
+
+        if kex_hash_func and not KEX_REGEX.search(kex_hash_func):
+            fs_phase_out.append(kex_hash_func)
 
         if len(fs_bad) == 0:
             fs_score = scoring.WEB_TLS_FS_OK

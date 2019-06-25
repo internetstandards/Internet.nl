@@ -311,6 +311,22 @@ services:
     depends_on:
       - targetbase
 
+  targettls12onlynosha2:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    command: /opt/run-openssl-server.sh -tls1_2 -cipher ECDHE-RSA-AES256-SHA -sigalgs RSA+SHA1
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLYNOSHA2_IP}
+        ipv6_address: ${TARGET_TLS12ONLYNOSHA2_IPV6}
+    depends_on:
+      - targetbase
+
   targettls13only:
     build:
       context: target
@@ -467,6 +483,8 @@ services:
       - TARGET_TLS1112_IPV6
       - TARGET_TLS12ONLY_IP
       - TARGET_TLS12ONLY_IPV6
+      - TARGET_TLS12ONLYNOSHA2_IP
+      - TARGET_TLS12ONLYNOSHA2_IPV6
       - TARGET_TLS1213_IP
       - TARGET_TLS1213_IPV6
       - TARGET_TLS13ONLY_IP

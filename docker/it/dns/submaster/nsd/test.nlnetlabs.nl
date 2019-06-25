@@ -42,6 +42,8 @@ tls12onlyffdhe3072     IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffdhe3072     IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffother       IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffother       IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
+tls12onlynosha2        IN  A      {{TARGET_TLS12ONLYNOSHA2_IP}}
+tls12onlynosha2        IN  AAAA   {{TARGET_TLS12ONLYNOSHA2_IPV6}}
 tls13only              IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only              IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
 tls130rtt              IN  A      {{TARGET_TLS130RTT_IP}}
