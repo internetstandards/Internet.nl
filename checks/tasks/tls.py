@@ -1910,8 +1910,6 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_NA
 
             # Connect using bad cipher
-            # TODO: Review regarding TLS 1.3, for now skip this as otherwise we
-            # get stuck in an infinite loop
             ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
             while True:
                 try:
