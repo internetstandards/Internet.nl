@@ -28,6 +28,7 @@ RUN openssl req -new -newkey rsa:1024 -days 365 -nodes -x509 \
 COPY certs/*.crt /etc/ssl/certs/
 COPY certs/*.key /etc/ssl/private/
 COPY dh_param_infiles/*.txt /etc/ssl/certs/dh_params/
+COPY certs/some.other.domain.der /etc/ssl/certs/ocsp_responses/
 
 WORKDIR /root
 ENTRYPOINT ["/opt/run-apache-server.sh"]
