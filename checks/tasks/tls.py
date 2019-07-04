@@ -708,7 +708,7 @@ def get_common_name(cert):
             cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0])
         if common_name:
             value = common_name.value
-    except IndexError:
+    except (IndexError, ValueError):
         pass
     return value
 
