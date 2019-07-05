@@ -51,7 +51,7 @@ RUN pip install setuptools
 
 # Install forked pythonwhois
 WORKDIR /tmp/build/python-whois
-RUN curl -fsSLo- 'https://github.com/ralphdolmans/python-whois/tarball/timeout' | tar zx --strip-components 1
+RUN curl -fsSLo- 'https://github.com/ralphdolmans/python-whois/tarball/ee546f4' | tar zx --strip-components 1
 RUN python setup.py install
 
 # Build nassl from sources for deprecated protocol support and "extra features" compared to the stock package

@@ -4,8 +4,7 @@ from collections import OrderedDict
 import socket
 import time
 
-# TODO: resolve regex parsing failure when importing pythonwhois under Python 3.7+
-#import pythonwhois
+import pythonwhois
 import sys
 import unbound
 
