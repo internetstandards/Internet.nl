@@ -133,21 +133,21 @@ echo
 echo ':: Installing root trust anchor in the app container..'
 docker cp /tmp/root_zsk.key $C_APP:/tmp/root_zsk.key
 
+echo
+echo ':: Identifying target servers to verify'
 PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
-TARGETS="nossl ssl2only ssl3only tls1213 tls1213sni tls1213nohsts tls1213shorthsts tls1213wrongcertname tls1213noocspstaple tls10only tls11only tls12only tls13only"
-SUFFIX=".test.nlnetlabs.nl"
+TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.nl | awk '{print $1}' | sed -e 's/\.$//')"
 
 echo
 echo ':: Dumping target domain TLS cert to hostname mappings'
 set -o pipefail
-for N in ${TARGETS}; do
-    echo -n -e "${N}:\t"
-    FQDN="${N}${SUFFIX}"
+for FQDN in ${TARGETS}; do
+    echo -n -e "${FQDN}:\t"
     CERT=
     for PROT in ${PROTOCOLS}; do
-        OPENSSL=openssl
+        OPENSSL=/opt/openssl-old/bin/openssl
         SERVERNAME="-servername ${FQDN}"
-        [[ $PROT == "ssl"* ]] && OPENSSL=/opt/openssl-old/bin/openssl
+        [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
         [[ $PROT == "ssl2" ]] && SERVERNAME=
         CERT=$(echo | ${OPENSSL} s_client \
             -${PROT} \
@@ -167,15 +167,14 @@ set +o pipefail
 
 echo
 echo ':: Dumping target domain TLS version support'
-for N in ${TARGETS}; do
-    FQDN="${N}${SUFFIX}"
-    echo -n -e "${N}:\t"
+for FQDN in ${TARGETS}; do
+    echo -n -e "${FQDN}:\t"
     for PROT in ${PROTOCOLS}; do
         echo -n "${PROT}: "
         SUPPORTED='-'
-        OPENSSL=openssl
+        OPENSSL=/opt/openssl-old/bin/openssl
         SERVERNAME="-servername ${FQDN}"
-        [[ $PROT == "ssl"* ]] && OPENSSL=/opt/openssl-old/bin/openssl
+        [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
         [[ $PROT == "ssl2" ]] && SERVERNAME=
         echo | ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
         echo -n -e "${SUPPORTED}\t"
@@ -194,7 +193,7 @@ echo ':: Wait 15 seconds to give the app time to settle, e.g. Celery worker star
 sleep 15s
 
 NUM_SIMULTANEOUS_TESTS=${NUM_BROWSER_NODES}
-PYTEST_XDIST_ARGS="--num ${NUM_SIMULTANEOUS_TESTS}"
+PYTEST_XDIST_ARGS="-n ${NUM_SIMULTANEOUS_TESTS}"
 PYTEST_PROGRESS_ARGS="" #"--show-progress"
 PYTEST_SELENIUM_ARGS="--driver Remote --host selenium --port 4444 --capability browserName firefox"
 PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"

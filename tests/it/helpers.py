@@ -81,7 +81,7 @@ class UX:
     @staticmethod
     def _get_test_names(testresult_anchors):
         test_titles = set()
-        for title_anchor_of_failed_test in testresult_anchors:
+        for test_title_anchor in testresult_anchors:
             # This element should be an anchor ('<a>') child of a <div>
             # structure like so:
             # <div class='testresult_failed'>
@@ -102,7 +102,7 @@ class UX:
             # appear to be in the same order so we can't just use the 2nd text
             # node as sometimes that isn't TEST TITLE but instead is 'open'.
             test_title = re.sub(r'(open|close|[A-Za-z ]+:)', '',
-                title_anchor_of_failed_test.text).strip()
+                test_title_anchor.text).strip()
             test_titles.add(test_title)
 
         return test_titles

@@ -214,23 +214,6 @@ services:
   # --------------------------------------------------------------------------
 
 
-  # TODO: find a way to reduce this boiler plate/copy-paste for different test targets
-  targettls1213:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls1213
-        APACHE_MODULES: ssl
-    dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
-    networks:
-      test_net:
-        ipv4_address: ${TARGET_TLS1213_IP}
-        ipv6_address: ${TARGET_TLS1213_IPV6}
-    depends_on:
-      - targetbase
-
   targettls10only:
     build:
       context: target
@@ -324,6 +307,154 @@ services:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYNOSHA2_IP}
         ipv6_address: ${TARGET_TLS12ONLYNOSHA2_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls12onlylegacybadciphers:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    # Tested with:
+    #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.nl.key
+    #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
+    #   CAFILE=/opt/ca-ocsp/ca/rootCA.crt
+    #   OPENSSL=/opt/openssl-old/bin/openssl
+    # Where:
+    #   $ $OPENSSL version
+    #   OpenSSL 1.0.2e 3 Dec 2015
+    #
+    # NULL:
+    #   $ $OPENSSL s_server -accept 4433 -key $KEY -cert $CERT -CAfile $CAFILE -cipher NULL
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : ECDHE-RSA-NULL-SHA
+    #
+    # RC4:
+    #   $ $OPENSSL s_server -accept 4433 -key $KEY -cert $CERT -CAfile $CAFILE -cipher RC4
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : ECDHE-RSA-RC4-SHA
+    #
+    # DES:
+    #   $ $OPENSSL s_server -accept 4433 -key $KEY -cert $CERT -CAfile $CAFILE -cipher DES
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : EDH-RSA-DES-CBC-SHA
+    #
+    # IDEA:
+    #   $ $OPENSSL s_server -accept 4433 -key $KEY -cert $CERT -CAfile $CAFILE -cipher IDEA
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : IDEA-CBC-SHA
+    #
+    # 3DES-CBC:
+    #   $ $OPENSSL s_server -accept 4433 -key $KEY -cert $CERT -CAfile $CAFILE -cipher 3DES
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : ECDHE-RSA-DES-CBC3-SHA
+    command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'NULL:RC4:DES:IDEA:DH:ECDH:KRB5:PSK:SRP!3DES'
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}
+        ipv6_address: ${TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls12onlymodernbadciphers:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    # Tested with:
+    #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.nl.key
+    #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
+    #   CAFILE=/opt/ca-ocsp/ca/rootCA.crt
+    #   OPENSSL=openssl
+    # Where:
+    #   $ $OPENSSL version
+    #   OpenSSL 1.1.1b  26 Feb 2019
+    #
+    # AESCCM8: (note: only works if -cipher is passed to s_client)
+    #   $ $OPENSSL s_server -accept 4433 -key $KEY -cert $CERT -CAfile $CAFILE -cipher AESCCM8
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433 -cipher DHE-RSA-AES256-CCM8
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : DHE-RSA-AES256-CCM8
+    #   $ $OPENSSL s_client </dev/null -connect localhost:4433 -cipher DHE-RSA-AES128-CCM8
+    #   SSL-Session:
+    #       Protocol  : TLSv1.2
+    #       Cipher    : DHE-RSA-AES128-CCM8
+    command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AESCCM8'
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLYMODERNBADCIPHERS_IP}
+        ipv6_address: ${TARGET_TLS12ONLYMODERNBADCIPHERS_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls12onlylegacyphaseoutciphers:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    # Also offer support for the "Good" cipher ECDHE-ECDSA-AES256-SHA384 so
+    # that the initial checks based on Python 3.7 (OpenSSL 1.1.1b) will succed,
+    # otherwise we don't get as far as testing the cipher suites.
+    command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-ECDSA-AES256-SHA384'
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IP}
+        ipv6_address: ${TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls12onlymodernphaseoutciphers:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    # Also offer support for the "Good" cipher ECDHE-ECDSA-AES256-SHA384 so
+    # that the initial checks based on Python 3.7 (OpenSSL 1.1.1b) will succed,
+    # otherwise we don't get as far as testing the cipher suites.
+    command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES256-SHA:AES128-SHA256:AES128-SHA:ECDHE-ECDSA-AES256-SHA384'
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP}
+        ipv6_address: ${TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls1213:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect tls1213
+        APACHE_MODULES: ssl
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS1213_IP}
+        ipv6_address: ${TARGET_TLS1213_IPV6}
     depends_on:
       - targetbase
 
@@ -485,6 +616,14 @@ services:
       - TARGET_TLS12ONLY_IPV6
       - TARGET_TLS12ONLYNOSHA2_IP
       - TARGET_TLS12ONLYNOSHA2_IPV6
+      - TARGET_TLS12ONLYLEGACYBADCIPHERS_IP
+      - TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6
+      - TARGET_TLS12ONLYMODERNBADCIPHERS_IP
+      - TARGET_TLS12ONLYMODERNBADCIPHERS_IPV6
+      - TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IP
+      - TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6
+      - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP
+      - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6
       - TARGET_TLS1213_IP
       - TARGET_TLS1213_IPV6
       - TARGET_TLS13ONLY_IP
