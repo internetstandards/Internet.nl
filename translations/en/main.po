@@ -1442,6 +1442,11 @@ msgid "detail web tls cert-pubkey verdict bad"
 msgstr ""
 "Your website certificate contains a public key with an *insecure* length."
 
+msgid "detail web tls cert-pubkey verdict phase-out"
+msgstr ""
+"Your website certificate contains a public key with an *insecure* length/ \n"
+"elliptic curve type or which is at risk of becoming insecure."
+
 msgid "detail web tls cert-pubkey verdict good"
 msgstr "Your website certificate contains a public key with a secure length."
 

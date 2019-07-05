@@ -395,6 +395,7 @@ def save_results(model, results, addr, domain, category):
                 model.cert_trusted = result.get("trusted")
                 model.cert_trusted_score = result.get("trusted_score")
                 model.cert_pubkey_bad = result.get("pubkey_bad")
+                model.cert_pubkey_phase_out = result.get("pubkey_phase_out")
                 model.cert_pubkey_score = result.get("pubkey_score")
                 model.cert_signature_bad = result.get("sigalg_bad")
                 model.cert_signature_score = result.get("sigalg_score")
@@ -551,11 +552,19 @@ def build_report(dttls, category):
             else:
                 category.subtests['cert_trust'].result_bad(dttls.cert_chain)
 
+            pubkey_all = []
+            pubkey_all.extend([format_lazy('{pubkey} ({status})',
+                    pubkey=pubkey, status=status_insecure) for pubkey in dttls.cert_pubkey_bad])
+            pubkey_all.extend([format_lazy('{pubkey} ({status})',
+                    pubkey=pubkey, status=status_phase_out) for pubkey in dttls.cert_pubkey_phase_out])
             if dttls.cert_pubkey_score is None:
                 pass
             elif len(dttls.cert_pubkey_bad) > 0:
                 category.subtests['cert_pubkey'].result_bad(
-                    dttls.cert_pubkey_bad)
+                    dttls.cert_pubkey_all)
+            elif len(dttls.cert_pubkey_phase_out) > 0:
+                category.subtests['cert_pubkey'].result_phase_out(
+                    dttls.cert_pubkey_all)
             else:
                 category.subtests['cert_pubkey'].result_good()
 
@@ -942,6 +951,7 @@ class DebugCertChain(object):
     # NCSC guidelines B3-3, B3-4, B3-5
     def check_pubkey(self):
         bad_pubkey = []
+        phase_out_pubkey = []
         pubkey_score = self.score_pubkey_good
         for cert in self.chain:
             common_name = get_common_name(cert)
@@ -967,7 +977,6 @@ class DebugCertChain(object):
                         "secp384r1",
                         "secp256r1",
                         "prime256v1",
-                        "secp224r1",
                         ] or bits < 224):
                     failed_key_type = "EllipticCurvePublicKey"
             if failed_key_type:
@@ -975,9 +984,12 @@ class DebugCertChain(object):
                     common_name, failed_key_type, bits)
                 if curve:
                     message += ", curve: {}".format(curve)
-                bad_pubkey.append(message)
-                pubkey_score = self.score_pubkey_bad
-        return pubkey_score, bad_pubkey
+                if curve == "secp224r1":
+                    phase_out_pubkey.append(message)
+                else:
+                    bad_pubkey.append(message)
+                    pubkey_score = self.score_pubkey_bad
+        return pubkey_score, bad_pubkey, phase_out_pubkey
 
     def check_sigalg(self):
         """
@@ -1495,7 +1507,7 @@ def cert_checks(
 
     else:
         hostmatch_score, hostmatch_bad = debug_chain.check_hostname(url)
-        pubkey_score, pubkey_bad = debug_chain.check_pubkey()
+        pubkey_score, pubkey_bad, pubkey_phase_out = debug_chain.check_pubkey()
         sigalg_score, sigalg_bad = debug_chain.check_sigalg()
         chain_str = debug_chain.chain_str()
 
@@ -1513,6 +1525,7 @@ def cert_checks(
             trusted=verify_result,
             trusted_score=verify_score,
             pubkey_bad=pubkey_bad,
+            pubkey_phase_out=pubkey_phase_out,
             pubkey_score=pubkey_score,
             sigalg_bad=sigalg_bad,
             sigalg_score=sigalg_score,

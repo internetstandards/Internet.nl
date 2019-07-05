@@ -435,6 +435,7 @@ class DomainTestTls(BaseTestModel):
     cert_trusted_score = models.IntegerField(null=True)
 
     cert_pubkey_bad = ListField(null=True)
+    cert_pubkey_phase_out = ListField(null=True)
     cert_pubkey_score = models.IntegerField(null=True)
 
     cert_signature_bad = ListField(null=True)
@@ -451,15 +452,16 @@ class DomainTestTls(BaseTestModel):
             'server_reachable', 'tls_enabled', 'tls_enabled_score',
             'could_not_test_smtp_starttls', 'dane_log', 'dane_score',
             'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_phase_out',
-            'fs_score', 'ciphers_bad', 'ciphers_score', 'protocols_bad',
-            'protocols_phase_out', 'protocols_score', 'compression',
-            'compression_score', 'secure_reneg', 'secure_reneg_score',
-            'client_reneg', 'client_reneg_score', 'zero_rtt', 'zero_rtt_score',
-            'ocsp_stapling', 'ocsp_stapling_score', 'forced_https',
-            'forced_https_score', 'http_compression_enabled',
-            'http_compression_score', 'hsts_enabled', 'hsts_policies',
-            'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
-            'cert_pubkey_bad', 'cert_pubkey_score', 'cert_signature_bad',
+            'fs_score', 'ciphers_bad', 'ciphers_score',
+            'protocols_bad', 'protocols_phase_out', 'protocols_score',
+            'compression', 'compression_score', 'secure_reneg',
+            'secure_reneg_score', 'client_reneg', 'client_reneg_score',
+            'zero_rtt', 'zero_rtt_score', 'ocsp_stapling',
+            'ocsp_stapling_score', 'forced_https', 'forced_https_score',
+            'http_compression_enabled', 'http_compression_score',
+            'hsts_enabled', 'hsts_policies', 'hsts_score', 'cert_chain',
+            'cert_trusted', 'cert_trusted_score', 'cert_pubkey_bad',
+            'cert_pubkey_phase_out', 'cert_pubkey_score', 'cert_signature_bad',
             'cert_signature_score', 'cert_hostmatch_bad',
             'cert_hostmatch_score', 'score',
         ]

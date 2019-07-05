@@ -46,4 +46,10 @@ class Migration(migrations.Migration):
             name='ocsp_stapling_score',
             field=models.IntegerField(null=True),
         ),
+        migrations.AddField(
+            model_name='domaintesttls',
+            name='cert_pubkey_phase_out',
+            field=checks.models.ListField(null=True),
+        ),
+        migrations.AddField(
     ]
