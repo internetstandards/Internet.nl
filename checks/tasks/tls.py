@@ -115,7 +115,12 @@ KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER = [
 ]
 KEX_TLS13_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER)
 
-KEX_HASHFUNC_PHASEOUT_REGEX = re.compile(r'SHA(256|384|512)', re.IGNORECASE)
+KEX_HASHFUNC_GOOD_REGEX_RAW = r'SHA(256|384|512)'
+KEX_HASHFUNC_SUFFICIENT_REGEX_RAW = r'SHA224'
+KEX_HASHFUNC_ACCEPTABLE_REGEX = re.compile(r'({}|{})'.format(
+    KEX_HASHFUNC_GOOD_REGEX_RAW,
+    KEX_HASHFUNC_SUFFICIENT_REGEX_RAW
+), re.IGNORECASE)
 
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
@@ -1800,7 +1805,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             if ecdh_param and int(ecdh_param) < 224:
                 fs_bad.append("ECDH-{}".format(ecdh_param))
 
-        if kex_hash_func and not KEX_HASHFUNC_PHASEOUT_REGEX.search(kex_hash_func):
+        if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
             fs_phase_out.append(kex_hash_func)
 
         if len(fs_bad) == 0:
