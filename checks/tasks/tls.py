@@ -1,8 +1,11 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from binascii import hexlify
+from collections import namedtuple
+import csv
 import errno
 import http.client
+import logging
 import re
 import socket
 import ssl
@@ -44,6 +47,9 @@ from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, ZeroRttStatus, OcspStatus
 
 
+logger = logging.getLogger(__name__)
+
+
 try:
     from ssl import OP_NO_SSLv2, OP_NO_SSLv3
 except ImportError as e:
@@ -54,6 +60,30 @@ except ImportError as e:
     else:
         raise e
 
+
+# Load OpenSSL data about cipher suites
+cipher_infos = dict()
+logger.error(f'XIMON: reading cipher data from {settings.TLS_CIPHERS}..')
+with open(settings.TLS_CIPHERS) as f:
+    # Create a dictionary of CipherInfo objects, keyed by OpenSSL cipher name
+    # with each CipherInfo object having fields named after the columns in the
+    # input CSV file. The expected CSV header row results in the following
+    # CipherInfo fields:
+    #   - major                - RFC cipher code (first part, e.g. 0x00)
+    #     minor                - RFC cipher code (second part, e.g. 0x0D)
+    #     name                 - OpenSSL cipher name (e.g. DH-DSS-DES-CBC3-SHA)
+    #     tls_version          - SSL/TLS version that the cipher can be used with (e.g. SSLv3)
+    #     kex_algs             - forward slash separated set of key exchange algorithm names (e.g. DH/DSS)
+    #     auth_alg             - authentication algorithm name (e.g. DH)
+    #     bulk_enc_alg         - bulk encryption algorithm name (e.g. 3DES)
+    #     bulk_enc_alg_sec_len - bulk encryption algorithm secret key bit length (e.g. 168)
+    #     mac_alg              - message authentication code algorithm name (e.g. SHA1)
+    # Later rows with the same cipher name as an earlier row will replace the
+    # earlier entry.
+    cipher_infos = {
+        r["name"]: namedtuple(
+            "CipherInfo", r.keys())(*r.values()) for r in csv.DictReader(f)}
+logger.error(f'XIMON: read data on {len(cipher_infos)} ciphers')
 
 
 # Based on:
@@ -66,6 +96,7 @@ except ImportError as e:
 # NCSC 2.0 Table 2 - Algorithms for certificate verification
 # NCSC 2.0 Table 4 - Algorithms for key exchange
 # NCSC 2.0 Table 5 - Hash functions for key exchange
+# Put SHA-512|384|256 first because NCSC 2.0 says anything else is phase out.
 KEX_TLS12_HASHALG_PREFERRED_ORDER = [
     'SHA512',
     'SHA384',
@@ -123,6 +154,21 @@ KEX_HASHFUNC_ACCEPTABLE_REGEX = re.compile(r'({}|{})'.format(
     KEX_HASHFUNC_SUFFICIENT_REGEX_RAW
 ), re.IGNORECASE)
 
+# TODO: Do NOT use sets because they do not preserve the order!
+BULK_ENC_CIPHERS_PHASEOUT = ['3DES']
+BULK_ENC_CIPHERS_OTHER_PHASEOUT = ['SEED', 'ARIA']
+BULK_ENC_CIPHERS_INSUFFICIENT = ['EXP', 'eNULL', 'RC4', 'DES', 'IDEA']
+KEX_CIPHERS_PHASEOUT = ['RSA']
+KEX_CIPHERS_INSUFFICIENT = ['DH', 'ECDH', 'eNULL', 'aNULL', 'PSK', 'SRP', 'MD5']
+KEX_CIPHERS_INSUFFICIENT_AS_SET = set(KEX_CIPHERS_INSUFFICIENT)
+
+PHASE_OUT_CIPHERS = ':'.join(BULK_ENC_CIPHERS_PHASEOUT + BULK_ENC_CIPHERS_OTHER_PHASEOUT + KEX_CIPHERS_PHASEOUT)
+INSUFFICIENT_CIPHERS = ':'.join(BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSUFFICIENT)
+
+# Some ciphers are not supported by LegacySslClient, only by SslClient which is
+# based on more modern OpenSSL.
+BULK_ENC_CIPHERS_INSUFFICIENT_MODERN = ['AESCCM8']
+INSUFFICIENT_CIPHERS_MODERN = ':'.join(BULK_ENC_CIPHERS_INSUFFICIENT_MODERN)
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = int(
@@ -467,6 +513,7 @@ def save_results(model, results, addr, domain, category):
                     model.fs_phase_out = result.get("fs_phase_out")
                     model.fs_score = result.get("fs_score")
                     model.ciphers_bad = result.get("ciphers_bad")
+                    model.ciphers_phase_out = result.get("ciphers_phase_out")
                     model.ciphers_score = result.get("ciphers_score")
                     model.protocols_bad = result.get("prots_bad")
                     model.protocols_phase_out = result.get("prots_phase_out")
@@ -606,8 +653,15 @@ def build_report(dttls, category):
                 else:
                     category.subtests['fs_params'].result_good()
 
+            ciphers_all = []
+            ciphers_all.extend([format_lazy('{cipher} ({status})',
+                    cipher=cipher, status=status_insecure) for cipher in dttls.ciphers_bad])
+            ciphers_all.extend([format_lazy('{cipher} ({status})',
+                    cipher=cipher, status=status_phase_out) for cipher in dttls.ciphers_phase_out])
             if len(dttls.ciphers_bad) > 0:
-                category.subtests['tls_ciphers'].result_bad(dttls.ciphers_bad)
+                category.subtests['tls_ciphers'].result_bad(ciphers_all)
+            elif len(dttls.ciphers_phase_out) > 0:
+                category.subtests['tls_ciphers'].result_phase_out(ciphers_all)
             else:
                 category.subtests['tls_ciphers'].result_good()
 
@@ -1632,9 +1686,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
     try:
         # Make sure port 443 serves web content and then open the connection
         # for testing.
-        conn_handler = DebugConnection
-        tls_version = None
         sig_algs = None
+        conn_handler = DebugConnection
+        http_fetch_conn_handler = None
         http_fetch_ssl_version = None
 
         http_client, *unused = shared.http_fetch(
@@ -1643,7 +1697,10 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             keep_conn_open=True)
 
         try:
+            http_fetch_conn_handler = type(http_client.conn)
             http_fetch_ssl_version = http_client.conn.get_ssl_version()
+
+            logger.error(f'XIMON: check_web_tls({url}): connected with {http_fetch_conn_handler} using {http_fetch_ssl_version.name}.')
 
             if http_fetch_ssl_version == TLSV1_3:
                 conn_handler = ModernConnection
@@ -1653,11 +1710,29 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         finally:
             http_client.close()
 
-        conn = conn_handler(url, addr=addr, shutdown=False,
-            signature_algorithms=sig_algs)
+        try:
+            # For the tests that we perform next, we want to control the key
+            # exchange algorithm preference, and we prefer to use
+            # DebugConnection instead of ModernConnection as it has support for
+            # older and weaker algorithms than ModernConnection.
+            # However, for TLS 1.3 and for some TLS 1.2 ciphers, we can only
+            # connect using ModerConnection (see the exception handler just
+            # below which retries the connection using a different connection
+            # handler)
+            logger.error(f'XIMON: check_web_tls({url}): connecting with {conn_handler} using handler default SSL version.')
+            conn = conn_handler(url, addr=addr, shutdown=False,
+                signature_algorithms=sig_algs)
+        except DebugConnectionHandshakeException:
+            # We were able to connect with http_fetch, try again using the
+            # same connection handler and protocol version as http_fetch used.
+            logger.error(f'XIMON: check_web_tls({url}): handshake error with {conn_handler}, retrying with {http_fetch_conn_handler} and {http_fetch_ssl_version.name}.')
+            conn_handler = http_fetch_conn_handler
+            conn = conn_handler(url, addr=addr, shutdown=False,
+                version=http_fetch_ssl_version, signature_algorithms=sig_algs)
     except (socket.error, http.client.BadStatusLine, NoIpError,
             DebugConnectionHandshakeException,
             DebugConnectionSocketException):
+        logger.error(f'XIMON: check_web_tls({url}): connection failure')
         return dict(tls_enabled=False)
     else:
         secure_reneg_score, secure_reneg = conn.check_secure_reneg()
@@ -1669,8 +1744,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         prots_phase_out = []
         prots_score = scoring.WEB_TLS_PROTOCOLS_GOOD
 
-        ciphers_bad = []
-        ciphers_score = scoring.WEB_TLS_SUITES_OK
+        ciphers_bad = set()
+        ciphers_phase_out = set()
+        ciphers_score = scoring.WEB_TLS_SUITES_GOOD
 
         # TODO: ideally: zero_rtt_score = conn.check_zero_rtt()
         # but the check requires more than one conn. can this be solved?
@@ -1698,10 +1774,10 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             ( SSLV3,   'SSL 3.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
             ( SSLV2,   'SSL 2.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
         ]
-        for version, name, collection, score in prot_test_configs:
+        for version, name, prot_set, score in prot_test_configs:
             try:
                 DebugConnection(url, addr=addr, version=version)
-                collection.append(name)
+                prot_set.append(name)
                 prots_score = score
             except (DebugConnectionHandshakeException,
                     DebugConnectionSocketException):
@@ -1756,22 +1832,200 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             zero_rtt = ZeroRttStatus.na
             zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_NA
 
-            # Connect using bad cipher
-            ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
-            while True:
-                try:
-                    conn = conn_handler(
-                        url, addr=addr, ciphers=ncsc_bad_ciphers, shutdown=False)
-                except (DebugConnectionHandshakeException,
-                        DebugConnectionSocketException):
-                    break
-                else:
-                    ciphers_score = scoring.WEB_TLS_SUITES_BAD
-                    curr_cipher = conn.get_current_cipher_name()
-                    ncsc_bad_ciphers = "!{}:{}".format(
-                        curr_cipher, ncsc_bad_ciphers)
-                    ciphers_bad.append(curr_cipher)
-                    conn.safe_shutdown()
+            # 1. Cipher name string based matching is fragile, e.g. OpenSSL
+            #    cipher names do not always indicate all algorithms in use nor
+            #    is it clear to me that the presence of RSA for example means
+            #    RSA for authentication and/or RSA for key exchange.
+            # 2. It's also not clear to me if letting OpenSSL do the matching
+            #    is sufficient because, again using RSA as an example, the
+            #    OpenSSL documentation says that "RSA" as a cipher string
+            #    matches "Cipher suites using RSA key exchange or
+            #    authentication", but NCSC 2.0 only classifies the cipher as
+            #    "phase out" IFF the cipher uses RSA for key exchange (it's
+            #    okay for the cipher to use RSA for authentication aka
+            #    certificate verification).
+            # 3. There appears to be an issue with DH/ECDH matching by OpenSSL
+            #    because it matches ECDHE/DHE ciphers too.
+            # 4. Even if OpenSSL matches yields the correct results, by
+            #    doing explicit cipher property checks we make the test logic
+            #    less magic, more transparent and less dependent on OpenSSL.
+            # 5. This all raises the question can we even trust that when asked
+            #    to select a particular cipher (suite) can the server be
+            #    trusted to honour the request? Do we have to validate that
+            #    when asked to match a cipher of a particular type that such a
+            #    cipher is actually negotiated (assuming that both client and
+            #    server support such a cipher)?
+            #
+            # An example from the OpenSSL ciphers command output:
+            #    0xC0,0x30 - ECDHE-RSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH \
+            #                Au=RSA  Enc=AESGCM(256) Mac=AEAD
+            #
+            # This cipher uses RSA for authentication but NOT for key exchange.
+            # You cannot tell that from the OpenSSL cipher name alone, nor per
+            # the OpenSSL documentation can rely on OpenSSL to exclude the
+            # cipher when you request RSA ciphers (e.g. to test for ciphers to
+            # mark as "phase out").
+            #
+            # For ciphers that we don't have any information about, fallback to
+            # trusting OpenSSL cipher matching.
+            #
+            # HOWEVER:
+            #
+            # - This is more complicated than just telling OpenSSL the cipher
+            #   groups we want.
+            # - Parsing the openssl ciphers -V output is a pain because use of
+            #   slash separators doesn't appear to be consistent.
+            # - The OpenSSL docs about RSA as a cipher do not appear to be
+            #   correct, or at least in the context of connection establishment
+            #   rather than certificate signing it seems that RSA does what we
+            #   want, i.e. filters only ciphers using RSA for key exchange, not
+            #   ciphers using RSA for authentication.
+            # - The key exchange algorithm data from openssl ciphers -V doesn't
+            #   appear to be accurate/granular enough for our use because for
+            #   example NCSC 2.0 says only ECDHE key exchange is "Good" and
+            #   that the following cipher is "Good": (output from ciphers -V)
+            #     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 - \
+            #       ECDHE-ECDSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH \
+            #       Au=ECDSA Enc=AESGCM(256) Mac=AEAD
+            #   Note that it says that Kx=ECDH, _NOT_ ECDHE. Either the ciphers
+            #   command output is incorrect, or ECDHE is not distinguishable in
+            #   this way from ECDH and so we cannot use the ciphers -V output
+            #   to check cipher properties...
+            #   However, also odd is that ciphers that _DO_ have ECDHE or DHE
+            #   key exchange algorithms always seem to be pre-shared key (PSK)
+            #   as well.
+
+            # Connect using bad or phase out ciphers. To detect if a cipher
+            # we can connect with is a phase out cipher we need to match it by
+            # name to a cipher from out the phase out set. However, not all
+            # cipher names include the name contained in the set, e.g. an RSA
+            # based cipher may not include the word RSA in the cipher name. To
+            # match these ciphers we test phase out ciphers first, any cipher
+            # we can connect with must be a phase out cipher, then we try after
+            # that to connect with the "insufficient" ciphers. If somehow a
+            # cipher is present in both sets we treat it as "insufficient" as
+            # this is more negative for the customer than the "phase out"
+            # classification. For example OpenSSL cipher 'AES256-SHA' is an RSA
+            # based cipher with IANA name 'TLS_RSA_WITH_AES_256_CBC_SHA'. More
+            # https://testssl.sh/openssl-iana.mapping.html for more examples.
+            logger.error(f'XIMON: cc: start [url={url}]')
+            cipher_test_configs = [
+                ( 'phase out',    DebugConnection,  PHASE_OUT_CIPHERS,           ciphers_phase_out ),
+                ( 'insufficient', DebugConnection,  INSUFFICIENT_CIPHERS,        ciphers_bad       ),
+                ( 'insufficient', ModernConnection, INSUFFICIENT_CIPHERS_MODERN, ciphers_bad       ),
+            ]
+            for description, this_conn_handler, all_ciphers_to_test, cipher_set in cipher_test_configs:
+                logger.error(f'XIMON: cc: ciphers_to_test={all_ciphers_to_test} [url={url}]')
+                for cipher_suite in all_ciphers_to_test.split(':'):
+                    ciphers_to_test = cipher_suite
+                    while True:
+                        try:
+                            conn = this_conn_handler(
+                                url, addr=addr, ciphers=ciphers_to_test,
+                                shutdown=False, version=SSLV23)
+                        except (DebugConnectionHandshakeException,
+                                DebugConnectionSocketException):
+                            break
+                        else:
+                            curr_cipher = conn.get_current_cipher_name()
+                            # curr_cipher is likely not exactly the same as any
+                            # of the active cipher suites in the cipher string,
+                            # e.g. if the cipher string contains 'RSA' then
+                            # curr_cipher could be the name of an actual cipher
+                            # that uses RSA.
+
+                            # Update the cipher string to exclude the current
+                            # cipher (not cipher suite) from the cipher suite
+                            # negotiation on the next connection.
+                            ciphers_to_test = "!{}:{}".format(
+                                curr_cipher, ciphers_to_test)
+
+                            # Try and classify the cipher based on what we know
+                            # about it.
+                            ci = cipher_infos.get(curr_cipher)
+                            if ci:
+                                ci_kex_algs = set(ci.kex_algs.split('/'))
+                                # TODO: sometimes ci_kex_algs is not slash
+                                # separated but still contains more than one
+                                # algorithm, e.g. DHEPSK, ECDHEPSK, RSAPSK
+                                # Make the gen script insert a forward
+                                # slash in these cases?
+                                # TODO: sometimes bulk_enc_alg is also
+                                # slash separated, e.g. CHACH20/POLY1305.
+                                # TODO: ci_kex_algs can also be 'any'.
+                                if (
+                                    not ci_kex_algs.isdisjoint(KEX_CIPHERS_INSUFFICIENT_AS_SET)
+                                    and (
+                                        (ci_kex_algs == 'DH' and 'DHE' not in curr_cipher) or
+                                        (ci_kex_algs == 'ECDH' and 'ECDHE' not in curr_cipher)
+                                    )
+                                ):
+                                    # At least one key exchange algorithm used
+                                    # by this cipher is "insufficient"
+                                    ciphers_bad.add(curr_cipher)
+                                    logger.error(f'XIMON: cc: {curr_cipher} is kex insufficient [url={url}]')
+                                elif (ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT or
+                                      ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT_MODERN):
+                                    # The cipher bulk encryption algorithm is
+                                    # "insufficient"
+                                    ciphers_bad.add(curr_cipher)
+                                    logger.error(f'XIMON: cc: {curr_cipher} is bulk enc insufficient [url={url}]')
+                                elif not ci_kex_algs.isdisjoint(KEX_CIPHERS_PHASEOUT):
+                                    # At least one key exchange algorithm used
+                                    # by this cipher is "phase out"
+                                    ciphers_phase_out.add(curr_cipher)
+                                    logger.error(f'XIMON: cc: {curr_cipher} is kex phase out [url={url}]')
+                                elif ci.bulk_enc_alg in BULK_ENC_CIPHERS_PHASEOUT:
+                                    # The cipher bulk encryption algorithm is
+                                    # "phase out"
+                                    ciphers_phase_out.add(curr_cipher)
+                                    logger.error(f'XIMON: cc: {curr_cipher} is bulk enc phase out [url={url}]')
+                                else:
+                                    # This cipher is actually okay. Perhaps
+                                    # OpenSSL matched it based on the cipher
+                                    # string we gave it, but actually we didn't
+                                    # mean for it to be matched (i.e. there is
+                                    # a problem with our cipher string). This
+                                    # happens for ECDHE-RSA-AES256-GCM-SHA384
+                                    # when the cipher string given to OpenSSL
+                                    # contains ECDH. ECDH according to NCSC 2.0
+                                    # is "insufficient" because it cannot
+                                    # provide forward secrecy, while ECDHE can
+                                    # and so is "good". Currently we catch this
+                                    # particular case above by checking the 
+                                    # cipher name for DHE/ECDHE. I'd prefer a
+                                    # way to test for the kex algorithm being
+                                    # ephemeral but I don't know how to do that
+                                    # at the moment, if it's even possible.
+                                    # TODO: Warn somewhere that this happened?
+                                    logger.error(f'XIMON: cc: {curr_cipher} is known but okay??? set={description}, cipher_suite={cipher_suite} [url={url}]')
+                                    pass
+                            else:
+                                # TODO: I know of at least two ciphers that are
+                                # missing: (both 3DES)
+                                #   - ADH-DES-CBC3-SHA
+                                #   - AECDH-DES-CBC3-SHA
+                                # We don't know anything about these ciphers.
+                                # Fall back to trusting that OpenSSL has only
+                                # agreed a cipher with the remote that matches
+                                # our cipher specification, and that our cipher
+                                # specification doesn't accidentally match
+                                # something we didn't expect or intend to match
+                                # (e.g. a cipher that authenticates with RSA
+                                # but doesn't use RSA for key exchange).
+                                logger.error(f'XIMON: cc: {curr_cipher} of {cipher_suite} is unknown, adding to {description} set [url={url}]')
+                                cipher_set.add(curr_cipher)
+                        finally:
+                            conn.safe_shutdown()
+            logger.error(f'XIMON: cc: end [url={url}]')
+
+            # If in both sets, only keep the cipher in the bad set.
+            ciphers_phase_out -= ciphers_bad
+
+            if len(ciphers_bad) > 0:
+                ciphers_score = scoring.WEB_TLS_SUITES_BAD
+            elif len(ciphers_phase_out) > 0:
+                ciphers_score = scoring.WEB_TLS_SUITES_OK
 
             # Connect using DH(E) and ECDH(E) to get FS params.
             # Note: ModernConnection doesn't have the _openssl_str_to_dic()
@@ -1827,7 +2081,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             prots_phase_out=prots_phase_out,
             prots_score=prots_score,
 
-            ciphers_bad=ciphers_bad,
+            ciphers_bad=list(ciphers_bad),
+            ciphers_phase_out=list(ciphers_phase_out),
             ciphers_score=ciphers_score,
 
             compression=compression,

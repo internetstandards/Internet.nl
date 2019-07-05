@@ -398,6 +398,7 @@ class DomainTestTls(BaseTestModel):
     fs_score = models.IntegerField(null=True)
 
     ciphers_bad = ListField(null=True)
+    ciphers_phase_out = ListField(null=True)
     ciphers_score = models.IntegerField(null=True)
 
     protocols_bad = ListField(null=True)
@@ -452,7 +453,7 @@ class DomainTestTls(BaseTestModel):
             'server_reachable', 'tls_enabled', 'tls_enabled_score',
             'could_not_test_smtp_starttls', 'dane_log', 'dane_score',
             'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_phase_out',
-            'fs_score', 'ciphers_bad', 'ciphers_score',
+            'fs_score', 'ciphers_bad', 'ciphers_phase_out', 'ciphers_score',
             'protocols_bad', 'protocols_phase_out', 'protocols_score',
             'compression', 'compression_score', 'secure_reneg',
             'secure_reneg_score', 'client_reneg', 'client_reneg_score',

@@ -266,7 +266,7 @@ SHARED_TASK_TIME_LIMIT_LOW = 15
 LDNS_DANE = './ldns-dane-wrapper'
 CA_CERTIFICATES = os.path.join(BASE_DIR, 'remote_data/certs/ca-bundle.crt')
 CA_FINGERPRINTS = os.path.join(BASE_DIR, 'remote_data/certs/root_fingerprints')
-
+TLS_CIPHERS = os.path.join(BASE_DIR, 'remote_data/ciphers/cipher_info.csv')
 
 # --- Markdown/HTML settings
 #

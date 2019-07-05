@@ -52,4 +52,8 @@ class Migration(migrations.Migration):
             field=checks.models.ListField(null=True),
         ),
         migrations.AddField(
+            model_name='domaintesttls',
+            name='ciphers_phase_out',
+            field=checks.models.ListField(null=True),
+        ),
     ]

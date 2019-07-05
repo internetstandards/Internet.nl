@@ -1518,6 +1518,11 @@ msgstr "Web server IP address|Insecure cipher suites"
 msgid "detail web tls ciphers verdict bad"
 msgstr "Your web server supports *insufficiently* secure cipher suites."
 
+msgid "detail web tls ciphers verdict phase-out"
+msgstr ""
+"Your web server supports *insufficiently* secure cipher suites \n"
+"and/or cipher suites that are at risk of becoming insecure."
+
 msgid "detail web tls ciphers verdict good"
 msgstr "Your web server supports sufficiently secure cipher suites only."
 
