@@ -1773,9 +1773,13 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     ciphers_bad.append(curr_cipher)
                     conn.safe_shutdown()
 
-            # Connect using DH(E) and ECDH(E) to get FS params
+            # Connect using DH(E) and ECDH(E) to get FS params.
+            # Note: ModernConnection doesn't have the _openssl_str_to_dic()
+            # function so we cannot yet inspect DH params if the connection
+            # was made using ModernConnection (either TLS 1.3, or in some
+            # cases TLS 1.2 with a cipher not supported by DebugConnection)
             try:
-                conn = conn_handler(
+                conn = DebugConnection(
                     url, addr=addr, ciphers="DH:DHE:!aNULL", shutdown=False)
                 dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
                 dh_ff_p = int(dh_param["prime"], 16) # '0x...'
@@ -1786,7 +1790,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     DebugConnectionSocketException):
                 pass
             try:
-                conn = conn_handler(
+                conn = DebugConnection(
                     url, addr=addr, ciphers="ECDH:ECDHE:!aNULL", shutdown=False)
                 ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
                 ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
