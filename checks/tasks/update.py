@@ -82,11 +82,12 @@ def _update_hof():
         cached_data['data'].append({
             'permalink': ranking.permalink, 'name': ranking.name,
             'timestamp': ranking.timestamp})
-    cached_data['date'] = cached_data['data'][0]['timestamp']
-    cached_data['count'] = len(cached_data['data'])
-    cache_id = redis_id.hof_data.id
-    cache_ttl = redis_id.hof_data.ttl
-    cache.set(cache_id, cached_data, cache_ttl)
+    if cached_data['data']:
+        cached_data['date'] = cached_data['data'][0]['timestamp']
+        cached_data['count'] = len(cached_data['data'])
+        cache_id = redis_id.hof_data.id
+        cache_ttl = redis_id.hof_data.ttl
+        cache.set(cache_id, cached_data, cache_ttl)
 
 
 @periodic_task(run_every=(crontab(hour="*", minute="*/10", day_of_week="*")))
