@@ -114,6 +114,7 @@ KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER = [
     'ecdsa_sha1'
 ]
 KEX_TLS13_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER)
+KEX_SIGALG_PHASEOUT_REGEX = re.compile(r'RSA', re.IGNORECASE)
 
 KEX_HASHFUNC_GOOD_REGEX_RAW = r'SHA(256|384|512)'
 KEX_HASHFUNC_SUFFICIENT_REGEX_RAW = r'SHA224'
@@ -1684,6 +1685,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         kex_hash_func = conn.get_peer_signature_digest()
 
+        kex_sig_type = conn.get_peer_signature_type()
+
         conn_ssl_version = conn.get_ssl_version()
         conn.safe_shutdown()
 
@@ -1807,6 +1810,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
             fs_phase_out.append(kex_hash_func)
+
+        if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
+            fs_phase_out.append(kex_sig_type)
 
         if len(fs_bad) == 0:
             fs_score = scoring.WEB_TLS_FS_OK
