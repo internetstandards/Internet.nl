@@ -1639,9 +1639,10 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
                                 # See if the target responds with HTTP/N.N 425
                                 # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
-                                http_status = conn.read(13)
-                                if (http_status.startswith(b'HTTP/') and
-                                    http_status.startswith(b'425', 9)):
+                                http_client = HTTPSConnection.fromconn(conn)
+                                response = http_client.getresponse()
+
+                                if response.status == 425:
                                     zero_rtt = ZeroRttStatus.good
                                     zero_rtt_score = scoring.WEB_TLS_ZERO_RTT_GOOD
 
