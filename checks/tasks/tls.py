@@ -8,6 +8,7 @@ import socket
 import ssl
 import subprocess
 import time
+from enum import Enum
 from timeit import default_timer as timer
  
 from celery import shared_task
@@ -284,6 +285,11 @@ test_map = {
         'port': 25,
     },
 }
+
+
+class CertChecksMode(Enum):
+    WEB = 0,
+    MAIL = 1
 
 
 @shared_task(bind=True)
@@ -1268,7 +1274,7 @@ def do_web_cert(addrs, url, task, *args, **kwargs):
         results = {}
         for addr in addrs:
             results[addr[1]] = cert_checks(
-                url, DebugConnection, task, addr, *args, **kwargs)
+                url, CertChecksMode.WEB, task, addr, *args, **kwargs)
     except SoftTimeLimitExceeded:
         for addr in addrs:
             if not results.get(addr[1]):
@@ -1278,14 +1284,14 @@ def do_web_cert(addrs, url, task, *args, **kwargs):
 
 
 def cert_checks(
-        url, conn_handler, task, addr=None, starttls_details=None,
+        url, mode, task, addr=None, starttls_details=None,
         *args, **kwargs):
     """
     Perform certificate checks.
 
     """
     try:
-        if conn_handler is DebugConnection:
+        if mode == CertChecksMode.WEB:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
             http_client, *unused = shared.http_fetch(
@@ -1294,8 +1300,11 @@ def cert_checks(
             debug_cert_chain = DebugCertChain
             conn_handler = type(http_client.conn)
             http_client.close()
-        else:
+        elif mode == CertChecksMode.MAIL:
+            conn_handler = DebugSMTPConnection
             debug_cert_chain = DebugCertChainMail
+        else:
+            raise ValueError
 
         if (not starttls_details or starttls_details.debug_chain is None
                 or starttls_details.trusted_score is None
@@ -1547,7 +1556,7 @@ def check_mail_tls(server, dane_cb_data, task):
 
         # Check the certificates.
         cert_results = cert_checks(
-            server, DebugSMTPConnection, task,
+            server, CertChecksMode.MAIL, task,
             starttls_details=starttls_details)
 
         # Number of connections: {6, 7}
