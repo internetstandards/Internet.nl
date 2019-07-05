@@ -1288,18 +1288,12 @@ def cert_checks(
         if conn_handler is DebugConnection:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
-            conn, *unused = shared.http_fetch(
+            http_client, *unused = shared.http_fetch(
                 url, af=addr[0], path="", port=443, addr=addr[1],
                 depth=MAX_REDIRECT_DEPTH, task=web_cert, keep_conn_open=True)
             debug_cert_chain = DebugCertChain
-
-            # TODO: how can conn.sock be None without an exception?
-            if conn is not None and conn.sock is not None:
-                try:
-                    if conn.sock.version() == 'TLSv1.3':
-                        conn_handler = ModernConnection
-                finally:
-                    conn.close()
+            conn_handler = type(http_client.conn)
+            http_client.close()
         else:
             debug_cert_chain = DebugCertChainMail
 
