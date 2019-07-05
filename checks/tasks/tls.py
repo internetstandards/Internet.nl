@@ -73,10 +73,16 @@ KEX_TLS12_HASHALG_PREFERRED_ORDER = [
     'SHA1',
     'MD5'
 ]
+# Put the key exchange signature algorithms in reverse order compared to those
+# preferred by NCSC 2.0 so that we can report the worst csae, connection wtih an
+# insufficient algorithm, and if that fails we can detect connection wtih a phase
+# out algorithm. The alternative is to connect separately with each separate
+# algorithm which is a lot of TLS connections, and more connections can result in
+# being blocked when performing mail TLS tests.
 KEX_TLS12_SIGALG_PREFERRED_ORDER = [
-    'ECDSA',
     'RSA',
     'DSA',
+    'ECDSA',
 ]
 KEX_TLS12_SORTED_ALG_COMBINATIONS = map('+'.join, product(
     KEX_TLS12_SIGALG_PREFERRED_ORDER, KEX_TLS12_HASHALG_PREFERRED_ORDER))
