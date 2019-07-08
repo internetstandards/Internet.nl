@@ -680,20 +680,26 @@ def build_report(dttls, category):
             else:
                 category.subtests['tls_version'].result_good()
 
-            if dttls.compression:
+            if dttls.compression == 1:
                 category.subtests['tls_compression'].result_bad()
-            else:
+            elif dttls.compression == 0:
                 category.subtests['tls_compression'].result_good()
+            else:
+                category.subtests['tls_compression'].result_na()
 
-            if dttls.secure_reneg:
+            if dttls.secure_reneg == 1:
                 category.subtests['renegotiation_secure'].result_good()
-            else:
+            elif dttls.secure_reneg == 0:
                 category.subtests['renegotiation_secure'].result_bad()
-
-            if dttls.client_reneg:
-                category.subtests['renegotiation_client'].result_bad()
             else:
+                category.subtests['renegotiation_secure'].result_na()
+
+            if dttls.client_reneg == 1:
+                category.subtests['renegotiation_client'].result_bad()
+            elif dttls.client_reneg == 0:
                 category.subtests['renegotiation_client'].result_good()
+            else:
+                category.subtests['renegotiation_client'].result_na()
 
             if dttls.cert_trusted == 0:
                 category.subtests['cert_trust'].result_good()
@@ -2216,7 +2222,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     results = check_legacy_features(checker)
             except (DebugConnectionSocketException,
                     DebugConnectionHandshakeException):
-                results = (None, None, None, None, None, None)
+                results = (-1, None, -1, None, -1, None)
 
         return results
 
