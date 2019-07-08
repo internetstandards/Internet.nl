@@ -2200,53 +2200,59 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         return result_dict, ciphers_score
 
+    def check_legacy_features(checker):
+        # If we connected with ModernConnection using TLS 1.2 with a cipher
+        # that isn't supported by DebugConnection then we are unable to run
+        # these checks because the functions only exist in DebugConnection.
+        # For example this can happen with a TLS 1.2 server that requires
+        # a CCM8 cipher to connect, which isn't supported by DebugConnection
+        # but is supported by ModernConnection.
+        if (checker.conn.get_ssl_version() == TLSV1_3 or
+            isinstance(checker.conn, DebugConnection)):
+            # This checker can be used, run the checks
+            secure_reneg_score, secure_reneg = checker.check_secure_reneg()
+            client_reneg_score, client_reneg = checker.check_client_reneg()
+            compression_score, compression = checker.check_compression()
+            results = (secure_reneg_score, secure_reneg,
+                       client_reneg_score, client_reneg,
+                       compression_score, compression)
+        else:
+            # Get a DebugConnection then try again...
+            try:
+                with DebugConnection(url, addr=addr) as conn:
+                    checker = get_connection_checker(conn)
+                    results = check_legacy_features(checker)
+            except (DebugConnectionSocketException,
+                    DebugConnectionHandshakeException):
+                results = (None, None, None, None, None, None)
+
+        return results
+
     try:
         # connect with the higest possible TLS version assuming that the server
         # responds to HTTP requests, then check some interesting properties of
         # this 'best possible' connection.
+        legacy_feature_check_results = None
         with connect_to_web_server() as conn:
             # save some details about the connection for later
             conn_handler = type(conn)
             conn_ssl_version = conn.get_ssl_version()
             logger.error(f'XIMON: check_web_tls({url}): initial: {conn_handler}, {conn_ssl_version.name}')
 
-            # some checks can be done on this initial connection irrespective
-            # of the SSL/TLS client that made the connection
             checker = get_connection_checker(conn)
 
-            legacy_checks_done = False
-            if conn_ssl_version == TLSV1_3 or isinstance(conn_handler, DebugConnection):
-                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
-                client_reneg_score, client_reneg = checker.check_client_reneg()
-                compression_score, compression = checker.check_compression()
-                legacy_checks_done = True
-
+            legacy_feature_check_results = check_legacy_features(checker)
             ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
             zero_rtt, zero_rtt_score = checker.check_zero_rtt()
-
     except (socket.error, http.client.BadStatusLine, NoIpError,
             DebugConnectionHandshakeException,
             DebugConnectionSocketException):
         logger.error(f'XIMON: check_web_tls({url}): connection failure')
         return dict(tls_enabled=False)
 
-    # some checks are only possible using the LegacySslClient wrapped by
-    # DebugConnection:
-    if not legacy_checks_done:
-        try:
-            with DebugConnection(url, addr=addr) as conn:
-                checker = get_connection_checker(conn)
-                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
-                client_reneg_score, client_reneg = checker.check_client_reneg()
-                compression_score, compression = checker.check_compression()
-                legacy_checks_done = True
-        except (DebugConnectionSocketException,
-                DebugConnectionHandshakeException):
-            pass
-
-    # other checks require SSL clients and settings specifically
-    # tailored to each check and so cannot be performed in the context of the
-    # initial connection.
+    # some checks require SSL clients and settings specifically tailored to 
+    # each check and so cannot be performed in the context of the initial
+    # connection.
     prots_result, prots_score = check_protocol_versions()
     fs_result, fs_score = check_forward_secrecy()
     ciphers_result, ciphers_score = check_ciphers()
@@ -2261,12 +2267,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         ciphers_phase_out=ciphers_result['phase_out'],
         ciphers_score=ciphers_score,
 
-        compression=compression,
-        compression_score=compression_score,
-        secure_reneg=secure_reneg,
-        secure_reneg_score=secure_reneg_score,
-        client_reneg=client_reneg,
-        client_reneg_score=client_reneg_score,
+        secure_reneg=legacy_feature_check_results[0],
+        secure_reneg_score=legacy_feature_check_results[1],
+        client_reneg=legacy_feature_check_results[2],
+        client_reneg_score=legacy_feature_check_results[3],
+        compression=legacy_feature_check_results[4],
+        compression_score=legacy_feature_check_results[5],
 
         dh_param=fs_result['dh_param'],
         ecdh_param=fs_result['ecdh_param'],
