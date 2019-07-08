@@ -16,14 +16,11 @@ from .. import batch_shared_task
 from ..scoring import STATUS_MAX, ORDERED_STATUSES, STATUS_NOT_TESTED
 from ..scoring import STATUS_SUCCESS, STATUS_GOOD_NOT_TESTED
 
-from .. import scoring
 from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
 from nassl import _nassl
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 from nassl.ssl_client import ClientCertificateRequested
-from nassl.ocsp_response import OcspResponseNotTrustedError
-from ..models import OcspStatus
 from io import BytesIO
 
 
@@ -235,10 +232,15 @@ class DebugConnectionSocketException(socket.error):
 
 
 class ConnectionHelper:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.safe_shutdown()
+
     # Almost identical to HTTPConnection::_create_conn()
-    def sock_setup(self, timeout):
+    def sock_setup(self):
         self.port = 443
-        self.sock_timeout = timeout
         self.sock = None
 
         tries_left = self.tries
@@ -246,7 +248,7 @@ class ConnectionHelper:
             try:
                 if self.addr:
                     self.sock = socket.socket(self.addr[0], socket.SOCK_STREAM)
-                    self.sock.settimeout(self.sock_timeout)
+                    self.sock.settimeout(self.timeout)
                     self.sock.connect((self.addr[1], self.port))
                 else:
                     # TODO: question: why is it acceptable to delegate DNS
@@ -254,17 +256,19 @@ class ConnectionHelper:
                     # places we use task.resolve, e.g. via the socket_af()
                     # function in this file?
                     self.sock = socket.create_connection(
-                        (self.url, 443), timeout=self.sock_timeout)
+                        (self.url, 443), timeout=self.timeout)
                 break
             except (socket.gaierror, socket.error, IOError, ConnectionRefusedError):
-                self.safe_shutdown(tls=False)
+                self.safe_shutdown()
                 tries_left -= 1
                 if tries_left <= 0:
                     raise DebugConnectionSocketException()
                 time.sleep(1)
 
-    def connect(self):
+    def connect(self, do_handshake_on_connect):
         try:
+            self.sock_setup()
+
             # TODO force ipv4 or ipv6
             super().__init__(
                 ssl_version=self.version,
@@ -288,9 +292,8 @@ class ConnectionHelper:
                 self.set_tlsext_status_ocsp()
 
             self.set_cipher_list(self.ciphers)
-            if self.do_handshake_on_connect:
+            if do_handshake_on_connect:
                 self.do_handshake()
-
         except (socket.gaierror, socket.error, IOError, _nassl.OpenSSLError,
                 ClientCertificateRequested):
             # Not able to connect to port 443
@@ -300,17 +303,17 @@ class ConnectionHelper:
             if self.must_shutdown:
                 self.safe_shutdown()
 
-    def safe_shutdown(self, tls=True):
+    def safe_shutdown(self):
         """
         Shutdown TLS and socket. Ignore any exceptions.
 
         """
         try:
-            if tls:
+            if self.get_underlying_socket():
                 self.shutdown()
             if self.sock:
                 self.sock.shutdown(2)
-        except (IOError, _nassl.OpenSSLError):
+        except (IOError, _nassl.OpenSSLError, AttributeError):
             pass
         finally:
             if self.sock:
@@ -330,37 +333,13 @@ class ConnectionHelper:
             pass
         return chain
 
-    def trusted_score(self):
-        """
-        Verify the certificate chain,
-
-        """
-        verify_result, _ = self.get_certificate_chain_verify_result()
-        if verify_result != 0:
-            return verify_result, self.score_trusted_bad
-        else:
-            return verify_result, self.score_trusted_good
-
-    def check_ocsp_stapling(self):
-        # This will only work if SNI is in use and the handshake has already
-        # been done.
-        ocsp_response = self.get_tlsext_status_ocsp_resp()
-        if ocsp_response is not None and ocsp_response.status == 0:
-            try:
-                ocsp_response.verify(settings.CA_CERTIFICATES)
-                return self.score_ocsp_staping_good, OcspStatus.good
-            except OcspResponseNotTrustedError:
-                return self.score_ocsp_staping_bad, OcspStatus.not_trusted
-        else:
-            return self.score_ocsp_staping_ok, OcspStatus.ok
-
 
 class ModernConnection(ConnectionHelper, SslClient):
     """
     A modern OpenSSL based TLS client. Defaults to TLS 1.3 only.
     """
     def __init__(
-            self, url, addr=None, version=TLSV1_3, shutdown=True,
+            self, url, addr=None, version=TLSV1_3, shutdown=False,
             ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
             do_handshake_on_connect=True, signature_algorithms=None,
             timeout=10, tries=MAX_TRIES):
@@ -371,45 +350,11 @@ class ModernConnection(ConnectionHelper, SslClient):
         self.addr = addr
         self.options = options
         self.send_SNI = send_SNI
-        self.do_handshake_on_connect = do_handshake_on_connect
         self.signature_algorithms = signature_algorithms
         self.tries = tries
+        self.timeout = timeout
 
-        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
-        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
-        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
-        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
-        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
-        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
-        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
-        self.score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
-        self.score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
-        self.score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
-
-        self.sock_setup(timeout=timeout)
-        self.connect()
-
-    def check_secure_reneg(self):
-        """
-        TLS 1.3 forbids renegotiaton.
-
-        """
-        return self.score_secure_reneg_good, 1
-
-    def check_client_reneg(self):
-        """
-        TLS 1.3 forbids renegotiaton.
-
-        """
-        return self.score_client_reneg_good, False
-
-    def check_compression(self):
-        """
-        TLS 1.3 forbids compression.
-
-        """
-        return self.score_compression_good, False
+        self.connect(do_handshake_on_connect)
 
 
 class DebugConnection(ConnectionHelper, LegacySslClient):
@@ -418,7 +363,7 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
     protocol version.
     """
     def __init__(
-            self, url, addr=None, version=SSLV23, shutdown=True,
+            self, url, addr=None, version=SSLV23, shutdown=False,
             ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
             do_handshake_on_connect=True, signature_algorithms=None,
             timeout=10, tries=MAX_TRIES):
@@ -429,74 +374,11 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
         self.addr = addr
         self.options = options
         self.send_SNI = send_SNI
-        self.do_handshake_on_connect = do_handshake_on_connect
         self.signature_algorithms = signature_algorithms
         self.tries = tries
+        self.timeout = timeout
 
-        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
-        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
-        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
-        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
-        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
-        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
-        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
-        self.score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
-        self.score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
-        self.score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
-
-        self.sock_setup(timeout=timeout)
-        self.connect()
-
-    def check_compression(self):
-        """
-        Check if TLS compression is enabled.
-
-        TLS compression should not be enabled.
-
-        """
-        compression = self.get_current_compression_method() is not None
-        if compression:
-            compression_score = self.score_compression_bad
-        else:
-            compression_score = self.score_compression_good
-        return compression_score, compression
-
-    def check_secure_reneg(self):
-        """
-        Check if secure renegotiation is supported.
-
-        Secure renegotiation should be supported.
-
-        """
-        secure_reneg = self.get_secure_renegotiation_support()
-        if secure_reneg:
-            secure_reneg_score = self.score_secure_reneg_good
-        else:
-            secure_reneg_score = self.score_secure_reneg_bad
-        return secure_reneg_score, secure_reneg
-
-    def check_client_reneg(self):
-        """
-        Check if client renegotiation is possible.
-
-        Client renegotiation should not be possible.
-
-        """
-        try:
-            # Step 1.
-            # Send reneg on open connection
-            self.do_renegotiate()
-            # Step 2.
-            # Connection should now be closed, send 2nd reneg to verify
-            self.do_renegotiate()
-            # If we are still here, client reneg is supported
-            client_reneg_score = self.score_client_reneg_bad
-            client_reneg = True
-        except (socket.error, _nassl.OpenSSLError, IOError):
-            client_reneg_score = self.score_client_reneg_good
-            client_reneg = False
-        return client_reneg_score, client_reneg
+        self.connect(do_handshake_on_connect)
 
     def get_peer_signature_type(self):
         """
@@ -536,23 +418,26 @@ class HTTPSConnection:
             # connecting. For example AESCCM with TLS 1.2 is only supported by
             # ModernConnection, not by DebugConnection.
             try:
-                self.conn = ModernConnection(url=host, shutdown=False,
-                    version=SSLV23, timeout=timeout, tries=tries)
+                self.conn = ModernConnection(url=host, version=SSLV23,
+                    timeout=timeout, tries=tries)
             except DebugConnectionHandshakeException:
-                self.conn = DebugConnection(url=host, shutdown=False,
-                    version=SSLV23, timeout=timeout, tries=tries)
+                self.conn = DebugConnection(url=host, version=SSLV23,
+                    timeout=timeout, tries=tries)
 
     @classmethod
     def fromconn(cls, conn):
         return cls(conn=conn)
 
     def write(self, data):
-        self.conn.write(data)
+        if self.conn.is_handshake_completed():
+            self.conn.write(data)
+        elif self.conn.get_ssl_version() == TLSV1_3:
+            self.conn.write_early_data(data)
 
     def writestr(self, str, encoding='ascii'):
         self.write(str.encode(encoding))
 
-    def putrequest(self, method, path, skip_accept_encoding):
+    def putrequest(self, method, path, skip_accept_encoding=True):
         self.writestr('{} {} HTTP/1.1\r\n'.format(method, path))
         self.putheader('Host', self.host)
         self.putheader('Connection', 'close')
