@@ -1967,8 +1967,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
             phase_out.append(kex_hash_func)
 
-        if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
-            phase_out.append(kex_sig_type)
+        # if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
+        #     phase_out.append(kex_sig_type)
 
         return bad, phase_out
 
