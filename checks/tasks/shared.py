@@ -295,7 +295,7 @@ class ConnectionHelper:
             if do_handshake_on_connect:
                 self.do_handshake()
         except (socket.gaierror, socket.error, IOError, _nassl.OpenSSLError,
-                ClientCertificateRequested):
+                ClientCertificateRequested, NotImplementedError):
             # Not able to connect to port 443
             self.safe_shutdown()
             raise DebugConnectionHandshakeException()
