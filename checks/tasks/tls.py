@@ -1833,14 +1833,6 @@ class ConnectionChecker:
         return ZeroRttStatus.bad, scoring.WEB_TLS_ZERO_RTT_BAD
 
 
-# Current situation: we are called by do_web_conn with
-# conn_handler=DebugConnection. Nobody else calls us, and never do we get
-# given a different conn_handler. DebugConnection is implemented in terms of
-# NASSL LegacySslClient and does not support TLS 1.3. A newer NASSL SslClient
-# supports TLS 1.3, but only in a clean way, it doesn't support legacy things
-# that we need for legacy protocol connections. So we need both
-# LegacySslClient and SslClient. First attempt to connect with TLS 1.3 using
-# SslClient, if that fails fallback to LegacySslClient.
 def check_web_tls(url, addr=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
