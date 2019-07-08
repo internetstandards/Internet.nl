@@ -2259,12 +2259,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         ciphers_phase_out=ciphers_result['phase_out'],
         ciphers_score=ciphers_score,
 
-        secure_reneg=legacy_feature_check_results[0],
-        secure_reneg_score=legacy_feature_check_results[1],
-        client_reneg=legacy_feature_check_results[2],
-        client_reneg_score=legacy_feature_check_results[3],
-        compression=legacy_feature_check_results[4],
-        compression_score=legacy_feature_check_results[5],
+        secure_reneg_score=legacy_feature_check_results[0],
+        secure_reneg=legacy_feature_check_results[1],
+        client_reneg_score=legacy_feature_check_results[2],
+        client_reneg=legacy_feature_check_results[3],
+        compression_score=legacy_feature_check_results[4],
+        compression=legacy_feature_check_results[5],
 
         dh_param=fs_result['dh_param'],
         ecdh_param=fs_result['ecdh_param'],
