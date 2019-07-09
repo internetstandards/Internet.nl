@@ -706,21 +706,22 @@ def build_report(dttls, category):
             else:
                 category.subtests['cert_trust'].result_bad(dttls.cert_chain)
 
-            pubkey_all = []
-            pubkey_all.extend([format_lazy('{pubkey} ({status})',
-                    pubkey=pubkey, status=status_insecure) for pubkey in dttls.cert_pubkey_bad])
-            pubkey_all.extend([format_lazy('{pubkey} ({status})',
-                    pubkey=pubkey, status=status_phase_out) for pubkey in dttls.cert_pubkey_phase_out])
             if dttls.cert_pubkey_score is None:
                 pass
-            elif len(dttls.cert_pubkey_bad) > 0:
-                category.subtests['cert_pubkey'].result_bad(
-                    dttls.cert_pubkey_all)
-            elif len(dttls.cert_pubkey_phase_out) > 0:
-                category.subtests['cert_pubkey'].result_phase_out(
-                    dttls.cert_pubkey_all)
             else:
-                category.subtests['cert_pubkey'].result_good()
+                pubkey_all = []
+                pubkey_all.extend([format_lazy('{pubkey} ({status})',
+                        pubkey=pubkey, status=status_insecure) for pubkey in dttls.cert_pubkey_bad])
+                pubkey_all.extend([format_lazy('{pubkey} ({status})',
+                        pubkey=pubkey, status=status_phase_out) for pubkey in dttls.cert_pubkey_phase_out])
+                if len(dttls.cert_pubkey_bad) > 0:
+                    category.subtests['cert_pubkey'].result_bad(
+                        dttls.cert_pubkey_all)
+                elif len(dttls.cert_pubkey_phase_out) > 0:
+                    category.subtests['cert_pubkey'].result_phase_out(
+                        dttls.cert_pubkey_all)
+                else:
+                    category.subtests['cert_pubkey'].result_good()
 
             if dttls.cert_signature_score is None:
                 pass
