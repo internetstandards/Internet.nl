@@ -7,10 +7,9 @@ environment of one's installation._
 When deploying make sure to follow these steps on your local environment and
 pushthe changes to the server:
 
-1. If there was a change in the frontend run the following where applicable:
+1. If there was a change in the frontend (CSS or javascript) run the following:
    ```
-   make frontend css
-   make frontend js
+   make frontend
    ```
 
 2. _Periodically_ update needed remote data with:

@@ -126,7 +126,7 @@ def callback(results, addr, category):
             mtauth.dmarc_available = dmarc_available
             mtauth.dmarc_record = dmarc_record
             mtauth.dmarc_score = dmarc_score
-            mtauth.dmarc_policy = dmarc_policy_status
+            mtauth.dmarc_policy_status = dmarc_policy_status
             mtauth.dmarc_policy_score = dmarc_policy_score
             if dmarc_available:
                 subtests['dmarc'].result_good(dmarc_record)

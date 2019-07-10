@@ -3,7 +3,9 @@
 This document provides general documentation and lists the available API
 requests and their possible replies for the batch testing.
 
+
 ## General information
+
 
 ### Access
 
@@ -21,6 +23,7 @@ base64 encoded and used in a header like:
 Authorization: Basic (base64-encoded-string)
 `
 
+
 ### Versioning
 
 The batch API uses a version number. A change in the version number means that
@@ -34,6 +37,14 @@ call.
 
 The version number's purpose is to only indicate changes in the API. No support
 for previous versions will be provided.
+
+**Versions**
+- 1.0
+  - Initial version
+- 1.1
+  - Addition of the new security options for web tests; new category
+    `appsecpriv` under `categories`.
+
 
 ## Registering a web batch request
 
@@ -52,7 +63,7 @@ www-version of a domain requires both domain names to be present in the
 domains' list).*
 
 ```
-POST /api/batch/v1.0/web/ HTTP/1.1
+POST /api/batch/v1.1/web/ HTTP/1.1
 
 { "name": "My web test",
   "domains": [ "nlnetlabs.nl",
@@ -60,6 +71,7 @@ POST /api/batch/v1.0/web/ HTTP/1.1
                "opennetlabs.nl",
                "www.opennetlabs.nl" ]}
 ```
+
 
 ### Expected answer
 
@@ -70,11 +82,12 @@ Content-Type: application/json
 { "success": true,
   "message": "OK",
   "data": {
-            "results": "https://<batch_domain>/api/batch/v1.0/results/01c70c7972d143ffb0c5b45d5b8116cb/"
+            "results": "https://<batch_domain>/api/batch/v1.1/results/01c70c7972d143ffb0c5b45d5b8116cb/"
           }
 }
 ```
 where we can poll the `results` url for the batch's results.
+
 
 ### Other answers
 
@@ -87,15 +100,16 @@ Other possible answers could be:
 
    { "success": false,
      "message": "Problem parsing domains",
-     "data": []
+     "data": {}
    }
 
    ```
 
+
 ## Registering a mail batch request
 
 ```
-POST /api/batch/v1.0/mail/ HTTP/1.1
+POST /api/batch/v1.1/mail/ HTTP/1.1
 
 { "name": "My mail test",
   "domains": [ "nlnetlabs.nl",
@@ -104,14 +118,16 @@ POST /api/batch/v1.0/mail/ HTTP/1.1
 Apart from the difference in the request path, the web and mail register
 requests have the same expected answers.
 
+
 ## Getting results
 
 We can get/poll the results by using the `results` url provided when
 registering a batch request.
 
 ```
-GET /api/batch/v1.0/results/01c70c7972d143ffb0c5b45d5b8116cb/ HTTP/1.1
+GET /api/batch/v1.1/results/01c70c7972d143ffb0c5b45d5b8116cb/ HTTP/1.1
 ```
+
 
 ### Expected answer
 
@@ -126,7 +142,7 @@ Content-Type: application/json
     "finished-date": "2017-10-05T10:26:19.316626+00:00",
     "name": "My web test"
     "identifier", "01c70c7972d143ffb0c5b45d5b8116cb",
-    "api-version", "1.0",
+    "api-version", "1.1",
     "domains": [
       { "domain": "www.nlnetlabs.nl",
         "status": "failed" },
@@ -171,6 +187,7 @@ Notes on return values:
 - `views` include custom views that return a desired result per domain. These
   views are per user and made available on demand.
 
+
 ### Other answers
 
 Other possible answers could be:
@@ -184,7 +201,7 @@ Other possible answers could be:
    { "success": false,
      "message": "Batch request is registering domains",
      "data": {
-         "results": "https://<batch_domain>/api/batch/v1.0/results/01c70c7972d143ffb0c5b45d5b8116cb/"
+         "results": "https://<batch_domain>/api/batch/v1.1/results/01c70c7972d143ffb0c5b45d5b8116cb/"
      }
    }
    ```
@@ -198,7 +215,7 @@ Other possible answers could be:
    { "success": false,
      "message": "Batch request is running",
      "data": {
-         "results": "https://<batch_domain>/api/batch/v1.0/results/01c70c7972d143ffb0c5b45d5b8116cb/"
+         "results": "https://<batch_domain>/api/batch/v1.1/results/01c70c7972d143ffb0c5b45d5b8116cb/"
      }
    }
    ```
@@ -212,23 +229,36 @@ Other possible answers could be:
    { "success": false,
      "message": "Results are being generated",
      "data": {
-         "results": "https://<batch_domain>/api/batch/v1.0/results/01c70c7972d143ffb0c5b45d5b8116cb/"
+         "results": "https://<batch_domain>/api/batch/v1.1/results/01c70c7972d143ffb0c5b45d5b8116cb/"
      }
    }
    ```
    Batch testing has finished and the results are being generated in JSON
    format.
 
-4. Error while registering the domains (batch request will not run):
+4. Results could not be generated:
+   ```
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+
+   { "success": false,
+     "message": "Results could not be generated",
+     "data": {}
+   }
+   ```
+   Batch testing has finished but the results could not be generated.
+
+5. Error while registering the domains (batch request will not run):
    ```
    HTTP/1.1 200 OK
    Content-Type: application/json
 
    { "success": false,
      "message": "Error while registering the domains",
-     "data": []
+     "data": {}
    }
    ```
+
 
 ## Custom views
 
@@ -251,6 +281,7 @@ What custom views are mainly trying to accomplish is that given a firm
 description by the user they can guarantee the same conceptual result even if
 tests change between releases.
 
+
 ## General error responses
 
 There are two types of error responses that may be encountered when interfacing
@@ -270,7 +301,7 @@ with the API:
 
    { "success": false,
      "message": "Unknown user",
-     "data": []
+     "data": {}
    }
    ```
    This could happen when there is a misconfiguration with the user's
@@ -282,8 +313,8 @@ with the API:
    Content-Type: application/json
 
    { "success": false,
-     "message": "Make sure you are using a valid URL with the current batch API version (1.0)",
-     "data": []
+     "message": "Make sure you are using a valid URL with the current batch API version (1.1)",
+     "data": {}
    }
    ```
    This could happen when the URL used was invalid or the API version number

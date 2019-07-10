@@ -375,7 +375,7 @@ class DomainTestTls(BaseTestModel):
     dane_log = models.TextField(default="", null=True)
     dane_score = models.IntegerField(null=True)
     dane_status = EnumField(DaneStatus, default=DaneStatus.none)
-    dane_records = models.TextField(default=[])
+    dane_records = ListField(default=[])
     dane_rollover = models.BooleanField(default=False)
 
     # TLS connection
@@ -405,7 +405,7 @@ class DomainTestTls(BaseTestModel):
     http_compression_score = models.IntegerField(null=True)
 
     hsts_enabled = models.NullBooleanField(default=False)
-    hsts_policies = models.TextField(default="")
+    hsts_policies = ListField(default=[])
     hsts_score = models.IntegerField(null=True)
 
     # Cert-chain
@@ -464,23 +464,23 @@ class DomainTestAppsecpriv(BaseTestModel):
     score = models.IntegerField(null=True)
 
     x_frame_options_enabled = models.NullBooleanField(default=False)
-    x_frame_options_values = models.TextField(default="")
+    x_frame_options_values = ListField(default=[])
     x_frame_options_score = models.IntegerField(null=True)
 
     x_xss_protection_enabled = models.NullBooleanField(default=False)
-    x_xss_protection_values = models.TextField(default="")
+    x_xss_protection_values = ListField(default=[])
     x_xss_protection_score = models.IntegerField(null=True)
 
     referrer_policy_enabled = models.NullBooleanField(default=False)
-    referrer_policy_values = models.TextField(default="")
+    referrer_policy_values = ListField(default=[])
     referrer_policy_score = models.IntegerField(null=True)
 
     content_security_policy_enabled = models.NullBooleanField(default=False)
-    content_security_policy_values = models.TextField(default="")
+    content_security_policy_values = ListField(default=[])
     content_security_policy_score = models.IntegerField(null=True)
 
     x_content_type_options_enabled = models.NullBooleanField(default=False)
-    x_content_type_options_values = models.TextField(default="")
+    x_content_type_options_values = ListField(default=[])
     x_content_type_options_score = models.IntegerField(null=True)
 
     def __dir__(self):
@@ -581,12 +581,12 @@ class MailTestAuth(BaseTestModel):
     dkim_available = models.BooleanField(default=False)
     dmarc_score = models.IntegerField(null=True)
     dmarc_available = models.BooleanField(default=False)
-    dmarc_record = models.TextField(default="")
+    dmarc_record = ListField(default=[])
     dmarc_policy_status = EnumIntegerField(DmarcPolicyStatus, null=True)
     dmarc_policy_score = models.IntegerField(null=True)
     spf_score = models.IntegerField(null=True)
     spf_available = models.BooleanField(default=False)
-    spf_record = models.TextField(default="")
+    spf_record = ListField(default=[])
     spf_policy_status = EnumIntegerField(SpfPolicyStatus, null=True)
     spf_policy_score = models.IntegerField(null=True)
     spf_policy_records = ListField(null=True)
