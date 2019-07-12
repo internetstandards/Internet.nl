@@ -364,6 +364,10 @@ class ModernConnection(ConnectionHelper, SslClient):
 
         self.connect(do_handshake_on_connect)
 
+    @staticmethod
+    def from_conn(conn, *args, **kwargs):
+        return ModernConnection(url=conn.url, addr=conn.addr, *args, **kwargs)
+
 
 class DebugConnection(ConnectionHelper, LegacySslClient):
     """
@@ -387,6 +391,10 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
         self.timeout = timeout
 
         self.connect(do_handshake_on_connect)
+
+    @staticmethod
+    def from_conn(conn, *args, **kwargs):
+        return DebugConnection(url=conn.url, addr=conn.addr, *args, **kwargs)
 
     def get_peer_signature_type(self):
         """

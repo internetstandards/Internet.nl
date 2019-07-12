@@ -1691,42 +1691,80 @@ def get_connection_checker(conn):
 
 class ConnectionChecker:
     def __init__(self, conn):
-        self.conn = conn
-        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
-        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
-        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
-        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
-        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
-        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
-        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
-        self.score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
-        self.score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
-        self.score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
+        self._conn = conn
+        self._debug_conn = None
+        self._seen_versions = set([conn.get_ssl_version()])
+        self._score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
+        self._score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
+        self._score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
+        self._score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
+        self._score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
+        self._score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
+        self._score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
+        self._score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+        self._score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
+        self._score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
+        self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.close()
+
+    @property
+    def debug_conn(self):
+        # Lazily create a DebugConnection on first access, if needed. The client
+        # of this class should use 'with' or .close() when finished with this
+        # checker instance in order to clean up any specially created debug
+        # connection.
+        if self._debug_conn is None:
+            if self._is_conn_good_for_legacy_checks():
+                self._debug_conn = self._conn
+            else:
+                self._debug_conn = DebugConnection.from_conn(self._conn)
+        return self._debug_conn
+
+    @debug_conn.setter
+    def debug_conn(self, value):
+        self._debug_conn = value
+        self._note_ssl_version(self._debug_conn)
+
+    def close(self):
+        if self._debug_conn and self._debug_conn is not self._conn:
+            self._debug_conn.safe_shutdown()
+            self._debug_conn = None
+
+    def _is_conn_good_for_legacy_checks(self):
+        return (self._conn.get_ssl_version() == TLSV1_3
+            or isinstance(self._conn, DebugConnection))
+
+    def _note_ssl_version(self, conn):
+        self._seen_versions.add(conn.get_ssl_version())
 
     def check_cert_trust(self):
         """
         Verify the certificate chain,
 
         """
-        verify_result, _ = self.conn.get_certificate_chain_verify_result()
+        verify_result, _ = self._conn.get_certificate_chain_verify_result()
         if verify_result != 0:
-            return self.score_trusted_bad, verify_result
+            return self._score_trusted_bad, verify_result
         else:
-            return self.score_trusted_good, verify_result
+            return self._score_trusted_good, verify_result
 
     def check_ocsp_stapling(self):
         # This will only work if SNI is in use and the handshake has already
         # been done.
-        ocsp_response = self.conn.get_tlsext_status_ocsp_resp()
+        ocsp_response = self._conn.get_tlsext_status_ocsp_resp()
         if ocsp_response is not None and ocsp_response.status == 0:
             try:
                 ocsp_response.verify(settings.CA_CERTIFICATES)
-                return self.score_ocsp_staping_good, OcspStatus.good
+                return self._score_ocsp_staping_good, OcspStatus.good
             except OcspResponseNotTrustedError:
-                return self.score_ocsp_staping_bad, OcspStatus.not_trusted
+                return self._score_ocsp_staping_bad, OcspStatus.not_trusted
         else:
-            return self.score_ocsp_staping_ok, OcspStatus.ok
+            return self._score_ocsp_staping_ok, OcspStatus.ok
 
     def check_secure_reneg(self):
         """
@@ -1735,14 +1773,14 @@ class ConnectionChecker:
         Secure renegotiation should be supported, except in TLS 1.3.
 
         """
-        if self.conn.get_ssl_version() == TLSV1_3:
-            return self.score_secure_reneg_good, 1
+        if self._conn.get_ssl_version() == TLSV1_3:
+            return self._score_secure_reneg_good, 1
         else:
-            secure_reneg = self.conn.get_secure_renegotiation_support()
+            secure_reneg = self.debug_conn.get_secure_renegotiation_support()
             if secure_reneg:
-                secure_reneg_score = self.score_secure_reneg_good
+                secure_reneg_score = self._score_secure_reneg_good
             else:
-                secure_reneg_score = self.score_secure_reneg_bad
+                secure_reneg_score = self._score_secure_reneg_bad
             return secure_reneg_score, secure_reneg
 
         # TLS 1.3 forbids renegotiaton.
@@ -1754,21 +1792,25 @@ class ConnectionChecker:
         Client renegotiation should not be possible.
 
         """
-        if self.conn.get_ssl_version() == TLSV1_3:
-            return self.score_client_reneg_good, False
+        if self._conn.get_ssl_version() == TLSV1_3:
+            return self._score_client_reneg_good, False
         else:
             try:
-                # Step 1.
-                # Send reneg on open connection
-                self.conn.do_renegotiate()
-                # Step 2.
-                # Connection should now be closed, send 2nd reneg to verify
-                self.conn.do_renegotiate()
-                # If we are still here, client reneg is supported
-                client_reneg_score = self.score_client_reneg_bad
-                client_reneg = True
+                # this check requires a new connection, otherwise we encounter:
+                # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
+                with DebugConnection.from_conn(self.debug_conn, version=SSLV23) as new_conn:
+                    self._note_ssl_version(new_conn)
+                    # Step 1.
+                    # Send reneg on open connection
+                    new_conn.do_renegotiate()
+                    # Step 2.
+                    # Connection should now be closed, send 2nd reneg to verify
+                    new_conn.do_renegotiate()
+                    # If we are still here, client reneg is supported
+                    client_reneg_score = self._score_client_reneg_bad
+                    client_reneg = True
             except (socket.error, _nassl.OpenSSLError, IOError):
-                client_reneg_score = self.score_client_reneg_good
+                client_reneg_score = self._score_client_reneg_good
                 client_reneg = False
             return client_reneg_score, client_reneg
 
@@ -1779,29 +1821,35 @@ class ConnectionChecker:
         TLS compression should not be enabled.
 
         """
-        if self.conn.get_ssl_version() == TLSV1_3:
-            return self.score_compression_good, False
+        if self._conn.get_ssl_version() == TLSV1_3:
+            return self._score_compression_good, False
         else:
-            compression = self.conn.get_current_compression_method() is not None
+            compression = self.debug_conn.get_current_compression_method() is not None
             if compression:
-                compression_score = self.score_compression_bad
+                compression_score = self._score_compression_bad
             else:
-                compression_score = self.score_compression_good
+                compression_score = self._score_compression_good
             return compression_score, compression
 
-    def check_zero_rtt(self):
+    def check_zero_rtt(self, explicit_conn=None):
+        test_conn = self._conn if not explicit_conn else explicit_conn
+
         # This check isn't relevant to anything less than TLS 1.3.
+        if not explicit_conn and test_conn.get_ssl_version() < TLSV1_3:
+            # If we connected with ModernConnection it would have been with
+            # version negotiation (SSLV23) and not explicitly with TLSV1_3, so
         if self.conn.get_ssl_version() < TLSV1_3:
+
             return scoring.WEB_TLS_ZERO_RTT_NA, ZeroRttStatus.na
 
         # we require an existing connection, as 0-RTT is only possible with
         # connections after the first so that the SSL session can be re-used.
         # is_handshake_completed() will be false if we didn't complete the
         # connection handshake yet or we subsequently shutdown the connection.
-        if not self.conn.is_handshake_completed():
+        if not test_conn.is_handshake_completed():
             raise ValueError()
 
-        session = self.conn.get_session()
+        session = test_conn.get_session()
 
         # does the server announce support for early data?
         # assumes that at least some data was already exchanged because, with
@@ -1813,18 +1861,20 @@ class ConnectionChecker:
 
         # terminate the current connection and re-connect using the previous
         # SSL session details then try and write early data to the connection
+        test_conn.safe_shutdown()
+
         try:
-            self.conn.safe_shutdown()
-            self.conn.connect(do_handshake_on_connect=False)
-            self.conn.set_session(session)
-            if self.conn._ssl.get_early_data_status() == 0:
-                http_client = HTTPSConnection.fromconn(self.conn)
+            test_conn.connect(do_handshake_on_connect=False)
+            test_conn.set_session(session)
+            if test_conn._ssl.get_early_data_status() == 0:
+                http_client = HTTPSConnection.fromconn(test_conn)
                 http_client.putrequest('GET', '/')
                 http_client.endheaders()
-                if (self.conn._ssl.get_early_data_status() == 1 and
-                    not self.conn.is_handshake_completed()):
-                    self.conn.do_handshake()
-                    if self.conn._ssl.get_early_data_status() == 2:
+                if (test_conn._ssl.get_early_data_status() == 1 and
+                    not test_conn.is_handshake_completed()):
+                    test_conn.do_handshake()
+                    self._note_ssl_version(test_conn)
+                    if test_conn._ssl.get_early_data_status() == 2:
                         # 0-RTT status is bad unless the target responds with
                         # HTTP status code 425 Too Early. See:
                         # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
@@ -1835,44 +1885,38 @@ class ConnectionChecker:
                 IOError):
             pass
 
+        # todo: ensure the handshake is completed ready for the next check that
+        # uses this connection?
+
         return scoring.WEB_TLS_ZERO_RTT_BAD, ZeroRttStatus.bad
 
-
-def check_web_tls(url, addr=None, *args, **kwargs):
-    """
-    Check the webserver's TLS configuration.
-
-    """
-
-    def connect_to_web_server():
-        http_client, *unused = shared.http_fetch(
-            url, af=addr[0], path="", port=443, addr=addr[1],
-            depth=MAX_REDIRECT_DEPTH, task=web_conn,
-            keep_conn_open=True)
-        return http_client.conn
-
-    def check_protocol_versions():
+    def check_protocol_versions(self):
         # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0
         # Test for SSL v2 and v3 as these are "insecure" per NCSC 2.0
         prots_bad = []
         prots_phase_out = []
         prots_score = scoring.WEB_TLS_PROTOCOLS_GOOD
+
         prot_test_configs = [
             ( TLSV1_1, 'TLS 1.1', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
             ( TLSV1,   'TLS 1.0', prots_phase_out, scoring.WEB_TLS_PROTOCOLS_OK  ),
             ( SSLV3,   'SSL 3.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
             ( SSLV2,   'SSL 2.0', prots_bad,       scoring.WEB_TLS_PROTOCOLS_BAD ),
         ]
+
         for version, name, prot_set, score in prot_test_configs:
-            if version == conn_ssl_version:
+            if version in self._seen_versions:
+                # No need to test for this protocol version as we already
+                # connected with it.
                 connected = True
             else:
                 # DebugConnection is capable of connecting with older
-                # SSL/TLS protocol versions than ModernConnection so we
+                # SSL/TLS protocol versions/ciphers than ModernConnection so we
                 # attempt the connections using DebugConnection.
                 try:
-                    with DebugConnection(url, addr=addr, version=version):
+                    with DebugConnection.from_conn(self._conn, version=version):
                         connected = True
+                        self._note_ssl_version(self._conn)
                 except (DebugConnectionSocketException,
                         DebugConnectionHandshakeException):
                     connected = False
@@ -1888,15 +1932,16 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         return prots_score, result_dict
 
-    def check_dh_params():
+    def _check_dh_params(self):
         dh_param, ecdh_param = False, False
         dh_ff_p, dh_ff_g = False, False
 
         try:
             # We have to use DebugConnection because ModernConnection doesn't
             # have the _openssl_str_to_dic() method.
-            with DebugConnection(url, addr=addr, ciphers="DH:DHE:!aNULL") as conn:
-                dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
+            with DebugConnection.from_conn(self._conn, ciphers="DH:DHE:!aNULL") as new_conn:
+                self._note_ssl_version(new_conn)
+                dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
                 dh_ff_p = int(dh_param["prime"], 16) # '0x...'
                 dh_ff_g = int(dh_param["generator"].partition(' ')[0]) # 'n (0xn)'
                 dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
@@ -1907,8 +1952,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         try:
             # We have to use DebugConnection because ModernConnection doesn't
             # have the _openssl_str_to_dic() method.
-            with DebugConnection(url, addr=addr, ciphers="ECDH:ECDHE:!aNULL") as conn:
-                ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
+            with DebugConnection.from_conn(self._conn, ciphers="ECDH:ECDHE:!aNULL") as new_conn:
+                self._note_ssl_version(new_conn)
+                ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
                 ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
         except (DebugConnectionSocketException,
                 DebugConnectionHandshakeException):
@@ -1932,46 +1978,51 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         return fs_bad, fs_phase_out, dh_param, ecdh_param
 
-    def check_key_exchange_signature_algorithm_and_hash_func():
-        # reconnect with explicit signature algorithm preferences and determine
-        # signature related properties of the connection
-        if conn_ssl_version == TLSV1_3:
-            sig_algs = KEX_TLS13_SIGALG_PREFERENCE
-        elif conn_ssl_version == TLSV1_2:
-            sig_algs = KEX_TLS12_SIGALG_PREFERENCE
-        else:
-            sig_algs = None
-
-        kex_hash_func, kex_sig_type = None, None
-        try:
-            # Only OpenSSL 1.1.1 has the necessary functions for determining
-            # the key exchange signature algorithm and hash function, so use
-            # ModernConnection (based on OpenSSL 1.1.1) to connect.
-            with ModernConnection(url, addr=addr,
-                    version=conn_ssl_version,
-                    signature_algorithms=sig_algs) as conn:
-                kex_hash_func = conn.get_peer_signature_digest()
-                kex_sig_type = conn.get_peer_signature_type()
-        except (DebugConnectionSocketException,
-                DebugConnectionHandshakeException):
-            pass
-
-        logger.error(f'XIMON: check_web_tls({url}): cs: POST: {kex_hash_func}, {kex_sig_type}')
-
+    def _check_key_exchange_signature_algorithm_and_hash_func(self):
         bad = []
         phase_out = []
 
-        if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
-            phase_out.append(kex_hash_func)
+        # If we could have been a ModernConnection we would have been, so don't
+        # waste time failing to connect using ModernConnection.
+        # TODO: in this case show somehow that neither key exchange algorithm
+        # nor key exchange hash function properties were tested.
+        if isinstance(self._conn, ModernConnection):
+            # reconnect with explicit signature algorithm preferences and determine
+            # signature related properties of the connection
+            if self._conn.get_ssl_version() == TLSV1_3:
+                sig_algs = KEX_TLS13_SIGALG_PREFERENCE
+            elif self._conn.get_ssl_version() == TLSV1_2:
+                sig_algs = KEX_TLS12_SIGALG_PREFERENCE
+            else:
+                sig_algs = None
 
-        # if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
-        #     phase_out.append(kex_sig_type)
+            kex_hash_func, kex_sig_type = None, None
+            try:
+                # Only OpenSSL 1.1.1 has the necessary functions for determining
+                # the key exchange signature algorithm and hash function, so use
+                # ModernConnection (based on OpenSSL 1.1.1) to connect.
+                with ModernConnection.from_conn(self._conn, 
+                        signature_algorithms=sig_algs) as new_conn:
+                    self._note_ssl_version(new_conn)
+                    kex_hash_func = new_conn.get_peer_signature_digest()
+                    kex_sig_type = new_conn.get_peer_signature_type()
+            except (DebugConnectionSocketException,
+                    DebugConnectionHandshakeException):
+                pass
+
+            logger.error(f'XIMON: check_web_tls({self._conn.url}): cs: POST: {kex_hash_func}, {kex_sig_type}')
+
+            if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
+                phase_out.append(kex_hash_func)
+
+            # if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
+            #     phase_out.append(kex_sig_type)
 
         return bad, phase_out
 
-    def check_forward_secrecy():
-        fs_bad, fs_phase_out, dh_param, ecdh_param = check_dh_params()
-        kex_bad, kex_phase_out = check_key_exchange_signature_algorithm_and_hash_func()
+    def check_forward_secrecy(self):
+        fs_bad, fs_phase_out, dh_param, ecdh_param = self._check_dh_params()
+        kex_bad, kex_phase_out = self._check_key_exchange_signature_algorithm_and_hash_func()
 
         fs_bad.extend(kex_bad)
         fs_phase_out.extend(kex_phase_out)
@@ -1990,12 +2041,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
         return fs_score, result_dict
 
-    def check_ciphers():
+    def check_ciphers(self):
         ciphers_bad = set()
         ciphers_phase_out = set()
         ciphers_score = scoring.WEB_TLS_SUITES_OK
 
-        if conn_ssl_version < TLSV1_3:
+        if self._conn.get_ssl_version() < TLSV1_3:
             # 1. Cipher name string based matching is fragile, e.g. OpenSSL
             #    cipher names do not always indicate all algorithms in use nor
             #    is it clear to me that the presence of RSA for example means
@@ -2072,22 +2123,24 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             # classification. For example OpenSSL cipher 'AES256-SHA' is an RSA
             # based cipher with IANA name 'TLS_RSA_WITH_AES_256_CBC_SHA'. More
             # https://testssl.sh/openssl-iana.mapping.html for more examples.
-            logger.error(f'XIMON: cc: start [url={url}]')
+            logger.error(f'XIMON: cc: start [url={self._conn.url}]')
             cipher_test_configs = [
                 ( 'phase out',    DebugConnection,  PHASE_OUT_CIPHERS,           ciphers_phase_out ),
                 ( 'insufficient', DebugConnection,  INSUFFICIENT_CIPHERS,        ciphers_bad       ),
                 ( 'insufficient', ModernConnection, INSUFFICIENT_CIPHERS_MODERN, ciphers_bad       ),
             ]
             for description, this_conn_handler, all_ciphers_to_test, cipher_set in cipher_test_configs:
-                logger.error(f'XIMON: cc: ciphers_to_test={all_ciphers_to_test} [url={url}]')
+                logger.error(f'XIMON: cc: ciphers_to_test={all_ciphers_to_test} [url={self._conn.url}]')
                 for cipher_suite in all_ciphers_to_test.split(':'):
                     ciphers_to_test = cipher_suite
                     while True:
                         try:
-                            with this_conn_handler(
-                                    url, addr=addr, ciphers=ciphers_to_test,
-                                    version=SSLV23) as conn:
-                                curr_cipher = conn.get_current_cipher_name()
+                            with this_conn_handler.from_conn(
+                                self._conn, ciphers=ciphers_to_test,
+                                version=SSLV23
+                            ) as new_conn:
+                                self._note_ssl_version(new_conn)
+                                curr_cipher = new_conn.get_current_cipher_name()
                                 # curr_cipher is likely not exactly the same as any
                                 # of the active cipher suites in the cipher string,
                                 # e.g. if the cipher string contains 'RSA' then
@@ -2104,7 +2157,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                                 # about it.
                                 ci = cipher_infos.get(curr_cipher)
                                 if ci:
-                                    ci_kex_algs = set(ci.kex_algs.split('/'))
+                                    ci_kex_algs = frozenset(ci.kex_algs.split('/'))
                                     # TODO: sometimes ci_kex_algs is not slash
                                     # separated but still contains more than one
                                     # algorithm, e.g. DHEPSK, ECDHEPSK, RSAPSK
@@ -2123,23 +2176,23 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                                         # At least one key exchange algorithm used
                                         # by this cipher is "insufficient"
                                         ciphers_bad.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is kex insufficient [url={url}]')
+                                        logger.error(f'XIMON: cc: {curr_cipher} is kex insufficient [url={self._conn.url}]')
                                     elif (ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT or
                                         ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT_MODERN):
                                         # The cipher bulk encryption algorithm is
                                         # "insufficient"
                                         ciphers_bad.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is bulk enc insufficient [url={url}]')
+                                        logger.error(f'XIMON: cc: {curr_cipher} is bulk enc insufficient [url={self._conn.url}]')
                                     elif not ci_kex_algs.isdisjoint(KEX_CIPHERS_PHASEOUT):
                                         # At least one key exchange algorithm used
                                         # by this cipher is "phase out"
                                         ciphers_phase_out.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is kex phase out [url={url}]')
+                                        logger.error(f'XIMON: cc: {curr_cipher} is kex phase out [url={self._conn.url}]')
                                     elif ci.bulk_enc_alg in BULK_ENC_CIPHERS_PHASEOUT:
                                         # The cipher bulk encryption algorithm is
                                         # "phase out"
                                         ciphers_phase_out.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is bulk enc phase out [url={url}]')
+                                        logger.error(f'XIMON: cc: {curr_cipher} is bulk enc phase out [url={self._conn.url}]')
                                     else:
                                         # This cipher is actually okay. Perhaps
                                         # OpenSSL matched it based on the cipher
@@ -2160,7 +2213,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                                         # ephemeral but I don't know how to do that
                                         # at the moment, if it's even possible.
                                         # TODO: Warn somewhere that this happened?
-                                        logger.error(f'XIMON: cc: {curr_cipher} is known but okay??? set={description}, cipher_suite={cipher_suite} [url={url}]')
+                                        logger.error(f'XIMON: cc: {curr_cipher} is known but okay??? set={description}, cipher_suite={cipher_suite} [url={self._conn.url}]')
                                         pass
                                 else:
                                     # TODO: I know of at least two ciphers that are
@@ -2175,12 +2228,12 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                                     # something we didn't expect or intend to match
                                     # (e.g. a cipher that authenticates with RSA
                                     # but doesn't use RSA for key exchange).
-                                    logger.error(f'XIMON: cc: {curr_cipher} of {cipher_suite} is unknown, adding to {description} set [url={url}]')
+                                    logger.error(f'XIMON: cc: {curr_cipher} of {cipher_suite} is unknown, adding to {description} set [url={self._conn.url}]')
                                     cipher_set.add(curr_cipher)
                         except (DebugConnectionSocketException,
                                 DebugConnectionHandshakeException):
                             break
-            logger.error(f'XIMON: cc: end [url={url}]')
+            logger.error(f'XIMON: cc: end [url={self._conn.url}]')
 
             # If in both sets, only keep the cipher in the bad set.
             ciphers_phase_out -= ciphers_bad
@@ -2198,92 +2251,72 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         return ciphers_score, result_dict
 
 
-    def check_legacy_features(checker):
-        # If we connected with ModernConnection using TLS 1.2 with a cipher
-        # that isn't supported by DebugConnection then we are unable to run
-        # these checks because the functions only exist in DebugConnection.
-        # For example this can happen with a TLS 1.2 server that requires
-        # a CCM8 cipher to connect, which isn't supported by DebugConnection
-        # but is supported by ModernConnection.
-        if (checker.conn.get_ssl_version() == TLSV1_3 or
-            isinstance(checker.conn, DebugConnection)):
-            # This checker can be used, run the checks
-            secure_reneg_score, secure_reneg = checker.check_secure_reneg()
-            client_reneg_score, client_reneg = checker.check_client_reneg()
-            compression_score, compression = checker.check_compression()
-            results = (secure_reneg_score, secure_reneg,
-                       client_reneg_score, client_reneg,
-                       compression_score, compression)
-        else:
-            # Get a DebugConnection then try again...
-            try:
-                with DebugConnection(url, addr=addr) as conn:
-                    checker = get_connection_checker(conn)
-                    results = check_legacy_features(checker)
-            except (DebugConnectionSocketException,
-                    DebugConnectionHandshakeException):
-                results = (-1, None, -1, None, -1, None)
+def check_web_tls(url, addr=None, *args, **kwargs):
+    """
+    Check the webserver's TLS configuration.
 
-        return results
+    """
+
+    def connect_to_web_server():
+        http_client, *unused = shared.http_fetch(
+            url, af=addr[0], path="", port=443, addr=addr[1],
+            depth=MAX_REDIRECT_DEPTH, task=web_conn,
+            keep_conn_open=True)
+        return http_client.conn
 
     try:
         # connect with the higest possible TLS version assuming that the server
         # responds to HTTP requests, then check some interesting properties of
         # this 'best possible' connection.
-        legacy_feature_check_results = None
         with connect_to_web_server() as conn:
             # save some details about the connection for later
             conn_handler = type(conn)
             conn_ssl_version = conn.get_ssl_version()
             logger.error(f'XIMON: check_web_tls({url}): initial: {conn_handler}, {conn_ssl_version.name}')
 
-            checker = get_connection_checker(conn)
+            with get_connection_checker(conn) as checker:
+                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
+                client_reneg_score, client_reneg = checker.check_client_reneg()
+                compression_score, compression = checker.check_compression()
+                ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
+                fs_score, fs_result = checker.check_forward_secrecy()
+                ciphers_score, ciphers_result = checker.check_ciphers()
+                zero_rtt_score, zero_rtt = checker.check_zero_rtt()
+                prots_score, prots_result = checker.check_protocol_versions()
 
-            legacy_feature_check_results = check_legacy_features(checker)
-            ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
-            zero_rtt, zero_rtt_score = checker.check_zero_rtt()
+                return dict(
+                    tls_enabled=True,
+                    prots_bad=prots_result['bad'],
+                    prots_phase_out=prots_result['phase_out'],
+                    prots_score=prots_score,
+
+                    ciphers_bad=ciphers_result['bad'],
+                    ciphers_phase_out=ciphers_result['phase_out'],
+                    ciphers_score=ciphers_score,
+
+                    secure_reneg=secure_reneg,
+                    secure_reneg_score=secure_reneg_score,
+                    client_reneg=client_reneg,
+                    client_reneg_score=client_reneg_score,
+                    compression=compression,
+                    compression_score=compression_score,
+
+                    dh_param=fs_result['dh_param'],
+                    ecdh_param=fs_result['ecdh_param'],
+                    fs_bad=fs_result['bad'],
+                    fs_phase_out=fs_result['phase_out'],
+                    fs_score=fs_score,
+
+                    zero_rtt_score=zero_rtt_score,
+                    zero_rtt=zero_rtt,
+
+                    ocsp_stapling=ocsp_stapling,
+                    ocsp_stapling_score=ocsp_stapling_score,
+                )
     except (socket.error, http.client.BadStatusLine, NoIpError,
             DebugConnectionHandshakeException,
             DebugConnectionSocketException):
-        logger.error(f'XIMON: check_web_tls({url}): connection failure')
         return dict(tls_enabled=False)
-
-    # some checks require SSL clients and settings specifically tailored to 
-    # each check and so cannot be performed in the context of the initial
-    # connection.
-    prots_result, prots_score = check_protocol_versions()
-    fs_result, fs_score = check_forward_secrecy()
-    ciphers_result, ciphers_score = check_ciphers()
-
-    return dict(
-        tls_enabled=True,
-        prots_bad=prots_result['bad'],
-        prots_phase_out=prots_result['phase_out'],
-        prots_score=prots_score,
-
-        ciphers_bad=ciphers_result['bad'],
-        ciphers_phase_out=ciphers_result['phase_out'],
-        ciphers_score=ciphers_score,
-
-        secure_reneg_score=legacy_feature_check_results[0],
-        secure_reneg=legacy_feature_check_results[1],
-        client_reneg_score=legacy_feature_check_results[2],
-        client_reneg=legacy_feature_check_results[3],
-        compression_score=legacy_feature_check_results[4],
-        compression=legacy_feature_check_results[5],
-
-        dh_param=fs_result['dh_param'],
-        ecdh_param=fs_result['ecdh_param'],
-        fs_bad=fs_result['bad'],
-        fs_phase_out=fs_result['phase_out'],
-        fs_score=fs_score,
-
-        zero_rtt_score=zero_rtt_score,
-        zero_rtt=zero_rtt,
-
-        ocsp_stapling=ocsp_stapling,
-        ocsp_stapling_score=ocsp_stapling_score,
-    )
 
 
 def do_web_http(addrs, url, task, *args, **kwargs):
