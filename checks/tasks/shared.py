@@ -266,9 +266,17 @@ class ConnectionHelper:
                 time.sleep(1)
 
     def connect(self, do_handshake_on_connect):
-        try:
-            self.sock_setup()
+        if self.url and not self.addr:
+            self.addr[0] = socket.AF_INET
+            self.addr[1] = self.url
+        elif self.addr and not self.url:
+            self.url = self.addr[1]
+        elif not self.url and not self.addr:
+            raise ValueError()
 
+        self.sock_setup()
+
+        try:
             # TODO force ipv4 or ipv6
             super().__init__(
                 ssl_version=self.version,
@@ -403,7 +411,8 @@ class HTTPSConnection:
     HTTP responses are truncated at a maximum of 8192 bytes. This class is NOT
     intended to be a general purpose rich HTTP client.
     """
-    def __init__(self, host=None, timeout=10, conn=None, tries=MAX_TRIES):
+    def __init__(self, host=None, socket_af=socket.AF_INET, timeout=10,
+        conn=None, tries=MAX_TRIES):
         self.port = 443
         if conn:
             # Use an existing connection
@@ -417,12 +426,13 @@ class HTTPSConnection:
             # ciphers and so trying both gives the greatest chance of
             # connecting. For example AESCCM with TLS 1.2 is only supported by
             # ModernConnection, not by DebugConnection.
+            addr = (socket_af, self.host)
             try:
-                self.conn = ModernConnection(url=host, version=SSLV23,
-                    timeout=timeout, tries=tries)
+                self.conn = ModernConnection(addr=addr,
+                    version=SSLV23, timeout=timeout, tries=tries)
             except DebugConnectionHandshakeException:
-                self.conn = DebugConnection(url=host, version=SSLV23,
-                    timeout=timeout, tries=tries)
+                self.conn = DebugConnection(addr=addr,
+                    version=SSLV23, timeout=timeout, tries=tries)
 
     @classmethod
     def fromconn(cls, conn):
@@ -528,7 +538,8 @@ def http_fetch(
                 # resolution via the task instead of Python native name
                 # resolution mechanisms?
                 # TODO: pass the address family (af) through as well?
-                conn = HTTPSConnection(host=host, timeout=timeout, tries=1)
+                conn = HTTPSConnection(
+                    host=host, socket_af=af, timeout=timeout, tries=1)
             else:
                 conn = HTTPConnection(
                     host, port=port, socket_af=af, task=task, timeout=timeout)
