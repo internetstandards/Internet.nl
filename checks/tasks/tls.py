@@ -66,7 +66,6 @@ except ImportError as e:
 
 # Load OpenSSL data about cipher suites
 cipher_infos = dict()
-logger.error(f'XIMON: reading cipher data from {settings.TLS_CIPHERS}..')
 with open(settings.TLS_CIPHERS) as f:
     # Create a dictionary of CipherInfo objects, keyed by OpenSSL cipher name
     # with each CipherInfo object having fields named after the columns in the
@@ -86,7 +85,7 @@ with open(settings.TLS_CIPHERS) as f:
     cipher_infos = {
         r["name"]: namedtuple(
             "CipherInfo", r.keys())(*r.values()) for r in csv.DictReader(f)}
-logger.error(f'XIMON: read data on {len(cipher_infos)} ciphers')
+logger.debug(f'Read data on {len(cipher_infos)} ciphers from "{settings.TLS_CIPHERS}."')
 
 
 # Based on:
@@ -1742,7 +1741,11 @@ class ConnectionChecker:
         self._seen_versions.add(conn.get_ssl_version())
 
     def _debug_info(self, info):
-        return ' [reason: {}] '.format(info) if settings.DEBUG else ''
+        if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
+                and settings.ENABLE_INTEGRATION_TEST):
+            return ' [reason: {}] '.format(info)
+        else:
+            return ''
 
     def check_cert_trust(self):
         """
@@ -2141,14 +2144,12 @@ class ConnectionChecker:
             # classification. For example OpenSSL cipher 'AES256-SHA' is an RSA
             # based cipher with IANA name 'TLS_RSA_WITH_AES_256_CBC_SHA'. More
             # https://testssl.sh/openssl-iana.mapping.html for more examples.
-            logger.error(f'XIMON: cc: start [url={self._conn.url}]')
             cipher_test_configs = [
                 ( 'phase out',    DebugConnection,  PHASE_OUT_CIPHERS,           ciphers_phase_out ),
                 ( 'insufficient', DebugConnection,  INSUFFICIENT_CIPHERS,        ciphers_bad       ),
                 ( 'insufficient', ModernConnection, INSUFFICIENT_CIPHERS_MODERN, ciphers_bad       ),
             ]
             for description, this_conn_handler, all_ciphers_to_test, cipher_set in cipher_test_configs:
-                logger.error(f'XIMON: cc: ciphers_to_test={all_ciphers_to_test} [url={self._conn.url}]')
                 for cipher_suite in all_ciphers_to_test.split(':'):
                     ciphers_to_test = cipher_suite
                     while True:
@@ -2191,26 +2192,14 @@ class ConnectionChecker:
                                             (ci_kex_algs == 'ECDH' and 'ECDHE' not in curr_cipher)
                                         )
                                     ):
-                                        # At least one key exchange algorithm used
-                                        # by this cipher is "insufficient"
-                                        ciphers_bad.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is kex insufficient [url={self._conn.url}]')
+                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info("key exchange algorithm")))
                                     elif (ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT or
                                         ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT_MODERN):
-                                        # The cipher bulk encryption algorithm is
-                                        # "insufficient"
-                                        ciphers_bad.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is bulk enc insufficient [url={self._conn.url}]')
+                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info("bulk encryption algorithm")))
                                     elif not ci_kex_algs.isdisjoint(KEX_CIPHERS_PHASEOUT):
-                                        # At least one key exchange algorithm used
-                                        # by this cipher is "phase out"
-                                        ciphers_phase_out.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is kex phase out [url={self._conn.url}]')
+                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info("key exchange algorithm")))
                                     elif ci.bulk_enc_alg in BULK_ENC_CIPHERS_PHASEOUT:
-                                        # The cipher bulk encryption algorithm is
-                                        # "phase out"
-                                        ciphers_phase_out.add(curr_cipher)
-                                        logger.error(f'XIMON: cc: {curr_cipher} is bulk enc phase out [url={self._conn.url}]')
+                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info("bulk encryption algorithm")))
                                     else:
                                         # This cipher is actually okay. Perhaps
                                         # OpenSSL matched it based on the cipher
@@ -2224,14 +2213,12 @@ class ConnectionChecker:
                                         # provide forward secrecy, while ECDHE can
                                         # and so is "good". Currently we catch this
                                         # particular case above by checking the 
-                                    # particular case above by checking the 
-                                        # particular case above by checking the 
                                         # cipher name for DHE/ECDHE. I'd prefer a
                                         # way to test for the kex algorithm being
                                         # ephemeral but I don't know how to do that
                                         # at the moment, if it's even possible.
                                         # TODO: Warn somewhere that this happened?
-                                        logger.error(f'XIMON: cc: {curr_cipher} is known but okay??? set={description}, cipher_suite={cipher_suite} [url={self._conn.url}]')
+                                        logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is ephemeral by name.')
                                         pass
                                 else:
                                     # TODO: I know of at least two ciphers that are
@@ -2246,12 +2233,11 @@ class ConnectionChecker:
                                     # something we didn't expect or intend to match
                                     # (e.g. a cipher that authenticates with RSA
                                     # but doesn't use RSA for key exchange).
-                                    logger.error(f'XIMON: cc: {curr_cipher} of {cipher_suite} is unknown, adding to {description} set [url={self._conn.url}]')
+                                    logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is not in our database."')
                                     cipher_set.add(curr_cipher)
                         except (DebugConnectionSocketException,
                                 DebugConnectionHandshakeException):
                             break
-            logger.error(f'XIMON: cc: end [url={self._conn.url}]')
 
             # If in both sets, only keep the cipher in the bad set.
             ciphers_phase_out -= ciphers_bad
@@ -2290,7 +2276,6 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             # save some details about the connection for later
             conn_handler = type(conn)
             conn_ssl_version = conn.get_ssl_version()
-            logger.error(f'XIMON: check_web_tls({url}): initial: {conn_handler}, {conn_ssl_version.name}')
 
             with get_connection_checker(conn) as checker:
                 # note: additional connections will be created by the checker
