@@ -31,7 +31,7 @@ RUN sudo -H pip install --upgrade pip && \
         pytest-selenium \
         gitpython
 
-COPY docker/it/app/entrypoint.sh.it ${APP_PATH}/docker/entrypoint.sh.it
+COPY docker/it/app/entrypoint.sh.it ${APP_PATH}/docker/it/app/entrypoint.sh.it
 COPY docker/it/app/coverage/coverage-finalize.sh /opt/
 COPY docker/it/app/coverage/.coveragerc /app/
 

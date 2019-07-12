@@ -100,14 +100,20 @@ class OpenSSLServerDomainConfig(DomainConfig):
         self.expected_score = IMPERFECT_SCORE
 
 
-class TLS12DomainConfig(DomainConfig):
+class PreTLS13DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=dict(),
-            expected_failures=dict()):
-        super().__init__(test_id, domain, expected_warnings=expected_warnings,
-            expected_failures=expected_failures)
+            expected_failures=dict(), expected_not_tested=dict()):
+        super().__init__(test_id, domain,
+            expected_warnings=expected_warnings,
+            expected_failures=expected_failures,
+            expected_not_tested=expected_not_tested)
 
         # Only TLS 1.3 servers support 0-RTT
         self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
+
+        # Our TLS 1.0, 1.1, 1.2 servers warn due to RSA or RSASSA-PSS signature
+        # algorithms and key exchange hash functions other than SHA(256|384|512)
+        self.expected_warnings.setdefault(TESTS.HTTPS_TLS_KEY_EXCHANGE, None)
 
         # No expected issues? Should be a perfect score then!
         if not self.expected_failures and not self.expected_warnings:
@@ -147,7 +153,7 @@ ncsc_20_tests = [
             TESTS.HTTPS_TLS_CLIENT_RENEG
         }),
 
-    OpenSSLServerDomainConfig('NCSC20-Table1:TLS10',
+    PreTLS13DomainConfig('NCSC20-Table1:TLS10',
         'tls10only.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
@@ -156,7 +162,7 @@ ncsc_20_tests = [
             ]
         }),
 
-    OpenSSLServerDomainConfig('NCSC20-Table1:TLS11',
+    PreTLS13DomainConfig('NCSC20-Table1:TLS11',
         'tls11only.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
@@ -165,7 +171,7 @@ ncsc_20_tests = [
             ]
         }),
 
-    OpenSSLServerDomainConfig('NCSC20-Table1:TLS1011',
+    PreTLS13DomainConfig('NCSC20-Table1:TLS1011',
         'tls1011.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
@@ -176,7 +182,7 @@ ncsc_20_tests = [
             ]
         }),
 
-    OpenSSLServerDomainConfig('NCSC20-Table1:TLS1112',
+    PreTLS13DomainConfig('NCSC20-Table1:TLS1112',
         'tls1112.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
@@ -185,12 +191,12 @@ ncsc_20_tests = [
             ]
         }),
 
-    TLS12DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE4096',
         'tls12only.test.nlnetlabs.nl'),
 
-    GoodDomain('NCSC20'
+    DomainConfig('NCSC20'
         '-Table1:TLS1213'
         '-Table2:RSAEXPPSK'
         '-Table3:MD5'
@@ -199,10 +205,16 @@ ncsc_20_tests = [
         '-Table13:Off'
         '-Table14:NA'
         '-Table15:On',
-        'tls1213.test.nlnetlabs.nl'),
+        'tls1213.test.nlnetlabs.nl',
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
+        }),
 
-    GoodDomain('NCSC20-Table1:TLS1213SNI',
-        'tls1213sni.test.nlnetlabs.nl'),
+    DomainConfig('NCSC20-Table1:TLS1213SNI',
+        'tls1213sni.test.nlnetlabs.nl',
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
+        }),
 
     # This domain deliberately has no matching virtual host configuration on
     # the webserver that its DNS A and AAAA records resolve to.
@@ -210,6 +222,9 @@ ncsc_20_tests = [
         'tls1213wrongcertname.test.nlnetlabs.nl',
         expected_failures={
             TESTS.HTTPS_CERT_DOMAIN,
+        },
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
         },
         expected_not_tested={
             TESTS.DANE_VALID
@@ -256,51 +271,43 @@ ncsc_20_tests = [
     # support so we have to expect the client renegotiation test to fail in
     # addition to the usual tests that fail when testing against an OpenSSL
     # server.
-    OpenSSLServerDomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyBadCiphers',
         'tls12onlylegacybadciphers.test.nlnetlabs.nl',
-        manual_cipher_checks=True,
         expected_failures={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_LEGACY_BAD_CIPHERS],  # matches all rows
-            ],
-            TESTS.HTTPS_TLS_CLIENT_RENEG: [
-                ['yes'],  # IPv6
-                ['yes']   # IPv4
             ]
+        },
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
         }),
-    OpenSSLServerDomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyPhaseOutCiphers',
         'tls12onlylegacyphaseoutciphers.test.nlnetlabs.nl',
-        manual_cipher_checks=True,
+        expected_warnings={
+            TESTS.HTTPS_TLS_CIPHER_SUITES: [
+                [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
+            ],
+        }),
+    DomainConfig('NCSC20'
+        '-Table1:TLS12'
+        '-Table6:ModernPhaseOutCiphers',
+        'tls12onlymodernphaseoutciphers.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
             ],
         },
-        expected_failures={
-            TESTS.HTTPS_TLS_CLIENT_RENEG: [
-                ['yes'],  # IPv6
-                ['yes']   # IPv4
-            ]
+        expected_not_tested={
+            TESTS.HTTPS_TLS_ZERO_RTT
         }),
-    OpenSSLServerDomainConfig('NCSC20'
-        '-Table1:TLS12'
-        '-Table6:ModernPhaseOutCiphers',
-        'tls12onlymodernphaseoutciphers.test.nlnetlabs.nl',
-        manual_cipher_checks=True,
-        expected_warnings={
-            TESTS.HTTPS_TLS_CIPHER_SUITES: [
-                [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
-            ],
-        }),
-    OpenSSLServerDomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:ModernBadCiphers',
         'tls12onlymodernbadciphers.test.nlnetlabs.nl',
-        manual_cipher_checks=True,
         expected_failures={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_MODERN_BAD_CIPHERS],  # matches all rows
@@ -310,31 +317,31 @@ ncsc_20_tests = [
     # 0-RTT is a TLS 1.3 feature so should not be tested.
     # Finite-field group ffdhe2048 is listed as 'phase out' by NCSC 2.0 and
     # so should result in a perfect score and a warning about the ff group.
-    TLS12DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE2048',
         'tls12onlyffdhe2048.test.nlnetlabs.nl',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                ['DH-FFDHE2048 (at risk)'],  # IPv6
-                ['DH-FFDHE2048 (at risk)'],  # IPv4
+                [r'DH-FFDHE2048.+\(at risk\)'],  # IPv6
+                [r'DH-FFDHE2048.+\(at risk\)'],  # IPv4
             ]
         }),
 
-    TLS12DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE3072',
         'tls12onlyffdhe3072.test.nlnetlabs.nl'),
 
     # This domain doesn't use an NCSC 2.0 approved DH finite-field group.
-    TLS12DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:OtherGroups',
         'tls12onlyffother.test.nlnetlabs.nl',
         expected_failures={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                ['DH-4096 (insufficient)'],  # IPv6
-                ['DH-4096 (insufficient)'],  # IPv4
+                [r'DH-4096.+\(insufficient\)'],  # IPv6
+                [r'DH-4096.+\(insufficient\)'],  # IPv4
             ]
         }),
 
@@ -345,8 +352,8 @@ ncsc_20_tests = [
         manual_cipher_checks=True,
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                ['SHA1 (at risk)'],  # IPv6
-                ['SHA1 (at risk)'],  # IPv4
+                [r'SHA1.+\(at risk\)'],  # IPv6
+                [r'SHA1.+\(at risk\)'],  # IPv4
             ]
         }),
 
@@ -361,6 +368,9 @@ ncsc_20_tests = [
                 ['no'],  # IPv6
                 ['no'],  # IPv4
             ]
+        },
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
         },
         expected_score=PERFECT_SCORE),
 
@@ -393,19 +403,27 @@ ncsc_20_tests = [
 other_tests = [
     # This website virtual host configuration deliberately fails to serve a
     # HSTS response header
-    BadDomain('HSTS:NONE',
+    DomainConfig('HSTS:NONE',
         'tls1213nohsts.test.nlnetlabs.nl',
-        {TESTS.HTTPS_HTTP_HSTS}),
+        expected_failures={
+            TESTS.HTTPS_HTTP_HSTS
+        },
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
+        }),
 
     # This website virtual host configuration deliberately serves a 'short'
     # HSTS response header.
-    BadDomain('HSTS:SHORT',
+    DomainConfig('HSTS:SHORT',
         'tls1213shorthsts.test.nlnetlabs.nl',
-        {
+        expected_failures={
             TESTS.HTTPS_HTTP_HSTS: [
                 ['max-age=1000; includeSubdomains;'],  # IPv6
                 ['max-age=1000; includeSubdomains;']   # IPv4
             ]
+        },
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
         }),
 
     # This domain deliberately lacks an IPV6 AAAA record in DNS
@@ -413,6 +431,9 @@ other_tests = [
         'tls1213ipv4only.test.nlnetlabs.nl',
         expected_failures={
             TESTS.IPV6_WEB_ADDRESS
+        },
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
         },
         expected_not_tested={
             TESTS.IPV6_WEB_REACHABILITY,

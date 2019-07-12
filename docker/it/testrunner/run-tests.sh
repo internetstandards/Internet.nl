@@ -134,7 +134,17 @@ echo ':: Installing root trust anchor in the app container..'
 docker cp /tmp/root_zsk.key $C_APP:/tmp/root_zsk.key
 
 echo
-echo ':: Identifying target servers to verify'
+echo ':: Identifying target Docker containers'
+TARGET_CONTAINERS="$(docker network inspect --format '{{range .Containers}}{{println .Name}}{{end}}' it_test_net | fgrep target | paste -sd ' ' -)"
+
+echo
+echo ':: Waiting for target Docker containers to be up..'
+for C in $TARGET_CONTAINERS; do
+    wait_for_container_up $C
+done
+
+echo
+echo ':: Identifying target FQDNs to verify'
 PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
 TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.nl | awk '{print $1}' | sed -e 's/\.$//')"
 

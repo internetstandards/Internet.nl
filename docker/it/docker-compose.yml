@@ -96,14 +96,6 @@ services:
       - rabbitmq
       - postgres
       - resolver
-      - targetnossl
-      - targetssl2only
-      - targetssl3only
-      - targettls10only
-      - targettls11only
-      - targettls12only
-      - targettls13only
-      - targettls1213
     environment:
       # setting CACHE_TTL (seconds) too low (e.g. to 1) causes test failures because the
       # Javascript retries run out before the probes complete.
@@ -119,6 +111,7 @@ services:
       # Environment variables that influence integration test behaviour
       - IT_BROWSER_WIDTH
       - IT_BROWSER_HEIGHT
+      - TEST_SELECTOR
     ports:
       - "8080:8080"
 
@@ -219,8 +212,8 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -tls1 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
+        APACHE_SITES: http-with-ssl-redirect tls10only
+        APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -235,8 +228,8 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -tls1_1 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
+        APACHE_SITES: http-with-ssl-redirect tls11only
+        APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -251,8 +244,8 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -no_tls1_2 -no_tls1_3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
+        APACHE_SITES: http-with-ssl-redirect tls1011
+        APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -267,8 +260,8 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -no_tls1 -no_tls1_3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
+        APACHE_SITES: http-with-ssl-redirect tls1112
+        APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -300,7 +293,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -tls1_2 -cipher ECDHE-RSA-AES256-SHA -sigalgs RSA+SHA1
+    command: /opt/run-openssl-server.sh -tls1_2 -cipher 'ECDHE-RSA-AES256-SHA' -sigalgs RSA+SHA1
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -315,7 +308,7 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
+        APACHE_SITES: http-with-ssl-redirect tls12onlylegacybadciphers
     # Tested with:
     #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.nl.key
     #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
@@ -359,7 +352,6 @@ services:
     #   SSL-Session:
     #       Protocol  : TLSv1.2
     #       Cipher    : ECDHE-RSA-DES-CBC3-SHA
-    command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'NULL:RC4:DES:IDEA:DH:ECDH:KRB5:PSK:SRP!3DES'
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -368,13 +360,16 @@ services:
         ipv6_address: ${TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_WITH_LEGACY_OPENSSL=yes
 
   targettls12onlymodernbadciphers:
     build:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
+        APACHE_SITES: http-with-ssl-redirect tls12onlymodernbadciphers
+        APACHE_MODULES: ssl
     # Tested with:
     #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.nl.key
     #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
@@ -394,7 +389,6 @@ services:
     #   SSL-Session:
     #       Protocol  : TLSv1.2
     #       Cipher    : DHE-RSA-AES128-CCM8
-    command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AESCCM8'
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -409,11 +403,12 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
+        APACHE_SITES: http-with-ssl-redirect tls12onlylegacyphaseoutciphers
+        APACHE_MODULES: ssl
     # Also offer support for the "Good" cipher ECDHE-ECDSA-AES256-SHA384 so
     # that the initial checks based on Python 3.7 (OpenSSL 1.1.1b) will succed,
     # otherwise we don't get as far as testing the cipher suites.
-    command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-ECDSA-AES256-SHA384'
+    #command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-ECDSA-AES256-SHA384'
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -422,23 +417,42 @@ services:
         ipv6_address: ${TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_WITH_LEGACY_OPENSSL=yes
 
   targettls12onlymodernphaseoutciphers:
     build:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
+        APACHE_SITES: http-with-ssl-redirect tls12onlymodernphaseoutciphers
+        APACHE_MODULES: ssl
     # Also offer support for the "Good" cipher ECDHE-ECDSA-AES256-SHA384 so
     # that the initial checks based on Python 3.7 (OpenSSL 1.1.1b) will succed,
     # otherwise we don't get as far as testing the cipher suites.
-    command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES256-SHA:AES128-SHA256:AES128-SHA:ECDHE-ECDSA-AES256-SHA384'
+    #command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES256-SHA:AES128-SHA256:AES128-SHA:ECDHE-ECDSA-AES256-SHA384'
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP}
         ipv6_address: ${TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}
+    depends_on:
+      - targetbase
+
+  targettls12onlydiffipv4ipv6:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect
+    command: /opt/run-different-servers-on-ipv4-and-ipv6.sh
+    dns: ${RESOLVER_IP}
+    dns_search: does.not.exist
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS12ONLYDIFFIPV4IPV6_IP}
+        ipv6_address: ${TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6}
     depends_on:
       - targetbase
 
@@ -510,7 +524,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -ssl2
+    command: /opt/run-openssl-server.sh -ssl2 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -526,7 +540,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect 
-    command: /opt/run-openssl-server.sh -ssl3
+    command: /opt/run-openssl-server.sh -ssl3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -624,6 +638,8 @@ services:
       - TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6
       - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP
       - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6
+      - TARGET_TLS12ONLYDIFFIPV4IPV6_IP
+      - TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6
       - TARGET_TLS1213_IP
       - TARGET_TLS1213_IPV6
       - TARGET_TLS13ONLY_IP

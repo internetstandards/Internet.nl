@@ -36,6 +36,7 @@ tls1112                     IN  A      {{TARGET_TLS1112_IP}}
 tls1112                     IN  AAAA   {{TARGET_TLS1112_IPV6}}
 tls12only                   IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only                   IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
+tls12only                   IN  MX     10   mailtest
 tls12onlyffdhe2048          IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffdhe2048          IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffdhe3072          IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -52,6 +53,8 @@ tls12onlylegacyphaseoutciphers    IN  A      {{TARGET_TLS12ONLYLEGACYPHASEOUTCIP
 tls12onlylegacyphaseoutciphers    IN  AAAA   {{TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6}}
 tls12onlymodernphaseoutciphers    IN  A      {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP}}
 tls12onlymodernphaseoutciphers    IN  AAAA   {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}}
+tls12onlydiffipv4ipv6       IN  A      {{TARGET_TLS12ONLYDIFFIPV4IPV6_IP}}
+tls12onlydiffipv4ipv6       IN  AAAA   {{TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6}}
 tls13only                   IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only                   IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
 tls130rtt                   IN  A      {{TARGET_TLS130RTT_IP}}
@@ -64,6 +67,8 @@ ssl3only                    IN  A      {{TARGET_SSL3ONLY_IP}}
 ssl3only                    IN  AAAA   {{TARGET_SSL3ONLY_IPV6}}
 nossl                       IN  A      {{TARGET_NOSSL_IP}}
 nossl                       IN  AAAA   {{TARGET_NOSSL_IPV6}}
+mailtest                    IN  A      {{TARGET_TLS12ONLY_IP}}
+mailtest                    IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 
 ; TLSA records generated using https://www.huque.com/bin/gen_tlsa
 _443._tcp.tls1213                   IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
@@ -85,6 +90,7 @@ _443._tcp.tls12onlylegacybadciphers IN  TLSA   3 1 1 298c4f48edf1215157792a1433d
 _443._tcp.tls12onlymodernbadciphers IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12onlylegacyphaseoutciphers  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls12onlymodernphaseoutciphers  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+_443._tcp.tls12onlydiffipv4ipv6     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls13only                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls130rtt                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
 _443._tcp.tls13invalidocsp          IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705

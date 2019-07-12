@@ -20,7 +20,22 @@ def firefox_options(firefox_options):
     return firefox_options
 
 
+# See: https://docs.pytest.org/en/latest/_modules/_pytest/hookspec.html
 def pytest_configure(config):
+    """
+    Allows plugins and conftest files to perform initial configuration.
+
+    This hook is called for every plugin and initial conftest file
+    after command line options have been parsed.
+
+    After that, the hook is called for other conftest files as they are
+    imported.
+
+    .. note::
+        This hook is incompatible with ``hookwrapper=True``.
+
+    :arg _pytest.config.Config config: pytest config object
+    """
     pip_list_out, unused_err = subprocess.Popen(
         ['pip', 'list'], stdout=subprocess.PIPE).communicate()
 
@@ -28,6 +43,7 @@ def pytest_configure(config):
     branch = 'Unknown'
     dependencies = 'Unknown'
     base_image = 'Unknown'
+    test_filter = 'Unknown'
     try:
         # Assumes that the tests are being run from the tests/it subdirectory.
         r = Repo('/app')
@@ -35,6 +51,7 @@ def pytest_configure(config):
         branch = r.git.describe(all=True)
         dependencies = pip_list_out.decode('utf-8')
         base_image = os.environ.get('INTERNETNL_BASE_IMAGE', 'Unknown')
+        test_filter = config.getoption('-k', 'Unknown')
     except Exception:
         pass
 
@@ -42,3 +59,4 @@ def pytest_configure(config):
     config._metadata['Internet.NL Git Describe Branch'] = branch
     config._metadata['Internet.NL Pip List'] = dependencies
     config._metadata['Internet.NL Base Image'] = base_image
+    config._metadata['Internet.NL Test Filter'] = test_filter
