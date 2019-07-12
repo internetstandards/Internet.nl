@@ -1294,7 +1294,6 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 
     """
     results = {server: False for server, _ in mailservers}
-    server_count = len(results)
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.
@@ -1302,10 +1301,9 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # concurrent connection per IP.
         time.sleep(5)
         cache_ttl = redis_id.mail_starttls.ttl
-        while timer() - start < cache_ttl and server_count > 0:
+        while timer() - start < cache_ttl and not all(results.values()) > 0:
             for server, dane_cb_data in mailservers:
                 if results[server]:
-                    server_count -= 1
                     continue
                 # Check if we already have cached results.
                 cache_id = redis_id.mail_starttls.id.format(server)
