@@ -1989,9 +1989,11 @@ class ConnectionChecker:
         if dh_param and int(dh_param) < 2048:
             fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("short bit len")))
         elif dh_ff_p and dh_ff_g:
-            if dh_ff_g == 2 and dh_ff_p in FFDHE_SUFFICIENT_PRIMES:
+            if (dh_ff_g == FFDHE_GENERATOR and
+                dh_ff_p in FFDHE_SUFFICIENT_PRIMES):
                 pass
-            elif dh_ff_g == 2 and dh_ff_p == FFDHE2048_PRIME:
+            elif (dh_ff_g == FFDHE_GENERATOR and
+                  dh_ff_p == FFDHE2048_PRIME):
                 fs_phase_out.append("DH-FFDHE2048{}".format(self._debug_info("weak ff group")))
             else:
                 fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
