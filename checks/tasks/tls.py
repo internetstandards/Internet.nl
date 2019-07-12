@@ -1838,7 +1838,17 @@ class ConnectionChecker:
         if not explicit_conn and test_conn.get_ssl_version() < TLSV1_3:
             # If we connected with ModernConnection it would have been with
             # version negotiation (SSLV23) and not explicitly with TLSV1_3, so
-        if self.conn.get_ssl_version() < TLSV1_3:
+            # it could be that the server does actually support TLS 1.3 but
+            # for some reason prefers a lower versoon when negotiation is
+            # possible. Thus, if we connected with ModernConnection but not 
+            # with TLS 1.3, try and force TLS 1.3:
+            if isinstance(self._conn, ModernConnection):
+                try:
+                    with ModernConnection.from_conn(self._conn, version=TLSV1_3) as new_conn:
+                        return self.check_zero_rtt(new_conn)
+                except (DebugConnectionHandshakeException,
+                        DebugConnectionSocketException):
+                    pass
 
             return scoring.WEB_TLS_ZERO_RTT_NA, ZeroRttStatus.na
 
