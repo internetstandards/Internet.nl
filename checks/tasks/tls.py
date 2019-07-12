@@ -2012,7 +2012,7 @@ class ConnectionChecker:
                 # the key exchange signature algorithm and hash function, so use
                 # ModernConnection (based on OpenSSL 1.1.1) to connect.
                 with ModernConnection.from_conn(self._conn, 
-                        signature_algorithms=sig_algs) as new_conn:
+                        signature_algorithms=sig_algs, version=SSLV23) as new_conn:
                     self._note_ssl_version(new_conn)
                     kex_hash_func = new_conn.get_peer_signature_digest()
                     kex_sig_type = new_conn.get_peer_signature_type()
