@@ -715,11 +715,9 @@ def build_report(dttls, category):
                 pubkey_all.extend([format_lazy('{pubkey} ({status})',
                         pubkey=pubkey, status=status_phase_out) for pubkey in dttls.cert_pubkey_phase_out])
                 if len(dttls.cert_pubkey_bad) > 0:
-                    category.subtests['cert_pubkey'].result_bad(
-                        dttls.cert_pubkey_all)
+                    category.subtests['cert_pubkey'].result_bad(pubkey_all)
                 elif len(dttls.cert_pubkey_phase_out) > 0:
-                    category.subtests['cert_pubkey'].result_phase_out(
-                        dttls.cert_pubkey_all)
+                    category.subtests['cert_pubkey'].result_phase_out(pubkey_all)
                 else:
                     category.subtests['cert_pubkey'].result_good()
 
