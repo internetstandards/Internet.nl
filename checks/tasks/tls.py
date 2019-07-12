@@ -2192,14 +2192,14 @@ class ConnectionChecker:
                                             (ci_kex_algs == 'ECDH' and 'ECDHE' not in curr_cipher)
                                         )
                                     ):
-                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info("key exchange algorithm")))
+                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info(f'kex alg "{ci.kex_algs}"')))
                                     elif (ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT or
                                         ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT_MODERN):
-                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info("bulk encryption algorithm")))
+                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info(f'bulk enc alg "{ci.bulk_enc_alg}"')))
                                     elif not ci_kex_algs.isdisjoint(KEX_CIPHERS_PHASEOUT):
-                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info("key exchange algorithm")))
+                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info(f'kex alg matches "{ci.kex_algs}"')))
                                     elif ci.bulk_enc_alg in BULK_ENC_CIPHERS_PHASEOUT:
-                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info("bulk encryption algorithm")))
+                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info(f'bulk enc alg matches "{ci.bulk_enc_alg}"')))
                                     else:
                                         # This cipher is actually okay. Perhaps
                                         # OpenSSL matched it based on the cipher
@@ -2234,7 +2234,7 @@ class ConnectionChecker:
                                     # (e.g. a cipher that authenticates with RSA
                                     # but doesn't use RSA for key exchange).
                                     logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is not in our database."')
-                                    cipher_set.add(curr_cipher)
+                                    cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
                         except (DebugConnectionSocketException,
                                 DebugConnectionHandshakeException):
                             break
