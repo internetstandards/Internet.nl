@@ -1742,6 +1742,9 @@ class ConnectionChecker:
     def _note_ssl_version(self, conn):
         self._seen_versions.add(conn.get_ssl_version())
 
+    def _debug_info(self, info):
+        return ' [reason: {}] '.format(info) if settings.DEBUG else ''
+
     def check_cert_trust(self):
         """
         Verify the certificate chain,
@@ -1974,17 +1977,17 @@ class ConnectionChecker:
         fs_phase_out = []
 
         if dh_param and int(dh_param) < 2048:
-            fs_bad.append("DH-{}".format(dh_param))
+            fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("short bit len")))
         elif dh_ff_p and dh_ff_g:
             if dh_ff_g == 2 and dh_ff_p in FFDHE_SUFFICIENT_PRIMES:
                 pass
             elif dh_ff_g == 2 and dh_ff_p == FFDHE2048_PRIME:
-                fs_phase_out.append("DH-FFDHE2048")
+                fs_phase_out.append("DH-FFDHE2048{}".format(self._debug_info("weak ff group")))
             else:
-                fs_bad.append("DH-{}".format(dh_param))
+                fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
 
         if ecdh_param and int(ecdh_param) < 224:
-            fs_bad.append("ECDH-{}".format(ecdh_param))
+            fs_bad.append("ECDH-{}{}".format(ecdh_param, self._debug_info("short bit len")))
 
         return fs_bad, fs_phase_out, dh_param, ecdh_param
 
@@ -2020,13 +2023,11 @@ class ConnectionChecker:
                     DebugConnectionHandshakeException):
                 pass
 
-            logger.error(f'XIMON: check_web_tls({self._conn.url}): cs: POST: {kex_hash_func}, {kex_sig_type}')
-
             if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
-                phase_out.append(kex_hash_func)
+                phase_out.append("{}{}".format(kex_hash_func, self._debug_info("weak hash function")))
 
-            # if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
-            #     phase_out.append(kex_sig_type)
+            if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
+                phase_out.append("{}{}".format(kex_sig_type, self._debug_info("weak signature algorithm")))
 
         return bad, phase_out
 
