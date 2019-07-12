@@ -436,10 +436,10 @@ class HTTPSConnection:
             # ModernConnection, not by DebugConnection.
             addr = (socket_af, self.host)
             try:
-                self.conn = ModernConnection(addr=addr,
+                self.conn = ModernConnection(url=self.host, addr=addr,
                     version=SSLV23, timeout=timeout, tries=tries)
             except DebugConnectionHandshakeException:
-                self.conn = DebugConnection(addr=addr,
+                self.conn = DebugConnection(url=self.host, addr=addr,
                     version=SSLV23, timeout=timeout, tries=tries)
 
     @classmethod
