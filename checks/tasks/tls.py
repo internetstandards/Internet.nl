@@ -2235,8 +2235,18 @@ class ConnectionChecker:
                                     # something we didn't expect or intend to match
                                     # (e.g. a cipher that authenticates with RSA
                                     # but doesn't use RSA for key exchange).
-                                    logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is not in our database."')
-                                    cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
+                                    # However, watch out for cases like cipher suite
+                                    # 'DH' matching 'DHE-RSA-CHACHA20-POLY1305-OLD'
+                                    # which looks like it is ephemeral (DH_E_) and
+                                    # thus actually okay. This is the same as the
+                                    # case above, but above we know the cipher in our
+                                    # cipher_info "database", here we don't know the
+                                    # cipher and have to use the cipher suite as a
+                                    # hint as to why the cipher was matched.
+                                    if ((cipher_suite == 'ECDH' and not 'ECDHE' in curr_cipher) or
+                                        (cipher_suite == 'DH' and not 'DHE' in curr_cipher)):
+                                        logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is not in our database."')
+                                        cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
                         except (DebugConnectionSocketException,
                                 DebugConnectionHandshakeException):
                             break
