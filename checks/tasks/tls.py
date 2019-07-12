@@ -162,7 +162,7 @@ BULK_ENC_CIPHERS_OTHER_PHASEOUT = ['SEED', 'ARIA']
 BULK_ENC_CIPHERS_INSUFFICIENT = ['EXP', 'eNULL', 'RC4', 'DES', 'IDEA']
 KEX_CIPHERS_PHASEOUT = ['RSA']
 KEX_CIPHERS_INSUFFICIENT = ['DH', 'ECDH', 'eNULL', 'aNULL', 'PSK', 'SRP', 'MD5']
-KEX_CIPHERS_INSUFFICIENT_AS_SET = set(KEX_CIPHERS_INSUFFICIENT)
+KEX_CIPHERS_INSUFFICIENT_AS_SET = frozenset(KEX_CIPHERS_INSUFFICIENT)
 
 PHASE_OUT_CIPHERS = ':'.join(BULK_ENC_CIPHERS_PHASEOUT + BULK_ENC_CIPHERS_OTHER_PHASEOUT + KEX_CIPHERS_PHASEOUT)
 INSUFFICIENT_CIPHERS = ':'.join(BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSUFFICIENT)
@@ -672,7 +672,6 @@ def build_report(dttls, category):
                     prot=prot, status=status_insecure) for prot in dttls.protocols_bad])
             prots.extend([format_lazy('{prot} ({status})',
                     prot=prot, status=status_phase_out) for prot in dttls.protocols_phase_out])
-
             if len(dttls.protocols_bad) > 0:
                 category.subtests['tls_version'].result_bad(prots)
             elif len(dttls.protocols_phase_out) > 0:
@@ -2300,7 +2299,6 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                 secure_reneg_score, secure_reneg = checker.check_secure_reneg()
                 client_reneg_score, client_reneg = checker.check_client_reneg()
                 compression_score, compression = checker.check_compression()
-                ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
                 fs_score, fs_result = checker.check_forward_secrecy()
                 ciphers_score, ciphers_result = checker.check_ciphers()
                 zero_rtt_score, zero_rtt = checker.check_zero_rtt()
