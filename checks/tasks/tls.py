@@ -1804,7 +1804,7 @@ class ConnectionChecker:
             try:
                 # this check requires a new connection, otherwise we encounter:
                 # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
-                with DebugConnection.from_conn(self.conn, version=SSLV23) as new_conn:
+                with DebugConnection.from_conn(self._conn, version=SSLV23) as new_conn:
                     self._note_ssl_version(new_conn)
                     # Step 1.
                     # Send reneg on open connection
