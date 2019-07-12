@@ -1779,12 +1779,16 @@ class ConnectionChecker:
         if self._conn.get_ssl_version() == TLSV1_3:
             return self._score_secure_reneg_good, 1
         else:
-            secure_reneg = self.debug_conn.get_secure_renegotiation_support()
-            if secure_reneg:
-                secure_reneg_score = self._score_secure_reneg_good
-            else:
-                secure_reneg_score = self._score_secure_reneg_bad
-            return secure_reneg_score, secure_reneg
+            try:
+                secure_reneg = self.debug_conn.get_secure_renegotiation_support()
+                if secure_reneg:
+                    secure_reneg_score = self._score_secure_reneg_good
+                else:
+                    secure_reneg_score = self._score_secure_reneg_bad
+                return secure_reneg_score, secure_reneg
+            except (DebugConnectionSocketException,
+                    DebugConnectionHandshakeException):
+                return self._score_secure_reneg_good, 0
 
         # TLS 1.3 forbids renegotiaton.
 
@@ -1801,7 +1805,7 @@ class ConnectionChecker:
             try:
                 # this check requires a new connection, otherwise we encounter:
                 # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
-                with DebugConnection.from_conn(self.debug_conn, version=SSLV23) as new_conn:
+                with DebugConnection.from_conn(self.conn, version=SSLV23) as new_conn:
                     self._note_ssl_version(new_conn)
                     # Step 1.
                     # Send reneg on open connection
@@ -1827,12 +1831,16 @@ class ConnectionChecker:
         if self._conn.get_ssl_version() == TLSV1_3:
             return self._score_compression_good, False
         else:
-            compression = self.debug_conn.get_current_compression_method() is not None
-            if compression:
-                compression_score = self._score_compression_bad
-            else:
-                compression_score = self._score_compression_good
-            return compression_score, compression
+            try:
+                compression = self.debug_conn.get_current_compression_method() is not None
+                if compression:
+                    compression_score = self._score_compression_bad
+                else:
+                    compression_score = self._score_compression_good
+                return compression_score, compression
+            except (DebugConnectionSocketException,
+                    DebugConnectionHandshakeException):
+                return self._score_compression_good, 0
 
     def check_zero_rtt(self, explicit_conn=None):
         test_conn = self._conn if not explicit_conn else explicit_conn
@@ -2286,6 +2294,9 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             logger.error(f'XIMON: check_web_tls({url}): initial: {conn_handler}, {conn_ssl_version.name}')
 
             with get_connection_checker(conn) as checker:
+                # note: additional connections will be created by the checker
+                # as needed
+                ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
                 secure_reneg_score, secure_reneg = checker.check_secure_reneg()
                 client_reneg_score, client_reneg = checker.check_client_reneg()
                 compression_score, compression = checker.check_compression()
