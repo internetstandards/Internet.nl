@@ -1384,12 +1384,12 @@ def cert_checks(
                 ciphers="!aNULL:ALL:COMPLEMENTOFALL")
             # check chain validity (sort of NCSC guideline B3-6)
             checker = get_connection_checker(conn)
-            verify_result, verify_score = checker.check_cert_trust()
+            verify_score, verify_result = checker.check_cert_trust()
             debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
             conn_port = conn.port
             conn.safe_shutdown()
         else:
-            verify_result, verify_score = starttls_details.trusted_score
+            verify_score, verify_result = starttls_details.trusted_score
             debug_chain = starttls_details.debug_chain
             conn_port = starttls_details.conn_port
     except (socket.error, http.client.BadStatusLine, NoIpError,
@@ -1711,9 +1711,9 @@ class ConnectionChecker:
         """
         verify_result, _ = self.conn.get_certificate_chain_verify_result()
         if verify_result != 0:
-            return verify_result, self.score_trusted_bad
+            return self.score_trusted_bad, verify_result
         else:
-            return verify_result, self.score_trusted_good
+            return self.score_trusted_good, verify_result
 
     def check_ocsp_stapling(self):
         # This will only work if SNI is in use and the handshake has already
@@ -1792,7 +1792,7 @@ class ConnectionChecker:
     def check_zero_rtt(self):
         # This check isn't relevant to anything less than TLS 1.3.
         if self.conn.get_ssl_version() < TLSV1_3:
-            return ZeroRttStatus.na, scoring.WEB_TLS_ZERO_RTT_NA
+            return scoring.WEB_TLS_ZERO_RTT_NA, ZeroRttStatus.na
 
         # we require an existing connection, as 0-RTT is only possible with
         # connections after the first so that the SSL session can be re-used.
@@ -1809,7 +1809,7 @@ class ConnectionChecker:
         # has been written to and read from the connection even if early data
         # is actually supported.
         if session.get_max_early_data() <= 0:
-            return ZeroRttStatus.good, scoring.WEB_TLS_ZERO_RTT_GOOD
+            return scoring.WEB_TLS_ZERO_RTT_GOOD, ZeroRttStatus.good
 
         # terminate the current connection and re-connect using the previous
         # SSL session details then try and write early data to the connection
@@ -1835,7 +1835,7 @@ class ConnectionChecker:
                 IOError):
             pass
 
-        return ZeroRttStatus.bad, scoring.WEB_TLS_ZERO_RTT_BAD
+        return scoring.WEB_TLS_ZERO_RTT_BAD, ZeroRttStatus.bad
 
 
 def check_web_tls(url, addr=None, *args, **kwargs):
@@ -1886,7 +1886,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             'phase_out': prots_phase_out,
         }
 
-        return result_dict, prots_score
+        return prots_score, result_dict
 
     def check_dh_params():
         dh_param, ecdh_param = False, False
@@ -1988,7 +1988,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             'ecdh_param': ecdh_param
         }
 
-        return result_dict, fs_score
+        return fs_score, result_dict
 
     def check_ciphers():
         ciphers_bad = set()
@@ -2195,7 +2195,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             'phase_out': list(ciphers_phase_out)
         }
 
-        return result_dict, ciphers_score
+        return ciphers_score, result_dict
+
 
     def check_legacy_features(checker):
         # If we connected with ModernConnection using TLS 1.2 with a cipher
@@ -2317,7 +2318,7 @@ def http_checks(addr, url, task):
     Perform the HTTP header and HTTPS redirection checks for this webserver.
 
     """
-    forced_https, forced_https_score = forced_http_check(addr, url, task)
+    forced_https_score, forced_https = forced_http_check(addr, url, task)
     header_checkers = [
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
@@ -2345,7 +2346,7 @@ def forced_http_check(addr, url, task):
     except (socket.error, http.client.BadStatusLine, NoIpError):
         # If we got refused on port 80 the first time
         # return the FORCED_HTTPS_NO_HTTP status and score
-        return ForcedHttpsStatus.no_http, scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP
+        return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
 
     # Valid if same domain, or *higher* domain. Use case:
     # www.example.com:80 -> example.com:443. Example.com:443 can set HSTS
@@ -2360,5 +2361,5 @@ def forced_http_check(addr, url, task):
                 forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
                 break
 
-    return forced_https, forced_https_score
+    return forced_https_score, forced_https
 
