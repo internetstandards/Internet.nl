@@ -475,17 +475,58 @@ class HTTPSConnection:
             def makefile(self, mode):
                 return self.handle
 
+        class AutoUpdatingHTTPResponse(http.client.HTTPResponse):
+            def __init__(self, conn):
+                self.conn = conn
+                self.bytesio = BytesIOSocket(self._fetch_headers())
+                super().__init__(self.bytesio)
+
+            # TODO: push this fix upstream to the NaSSL project
+            def _fixed_nassl_read(self, size):
+                try:
+                    try:
+                        data = self.conn.read(size)
+                    except IOError:
+                        # NaSSL might have left data in the decrypt buffer and
+                        # instead tried to read from the already closed
+                        # underlying network socket. Try reading from the
+                        # underlying decryption buffer directly to obtain any
+                        # data skipped by NaSSL.
+                        data = self.conn._ssl.read(size)
+                except _nassl.SslError as e:
+                    raise IOError(e)
+                return data
+
+            def _fetch_headers(self):
+                # read all HTTP headers (i.e. until \r\n\r\n or EOF)
+                data = bytearray()
+                while b'\r\n\r\n' not in data:
+                    data.extend(self._fixed_nassl_read(1024))
+                return data
+
+            def _update(self, size):
+                pos = self.bytesio.handle.tell()
+                chunk_size = size if size < 8192 else 8192
+                try:
+                    while self.bytesio.handle.tell() - pos < size:
+                        self.bytesio.handle.write(self._fixed_nassl_read(chunk_size))
+                except IOError:
+                    pass
+                self.bytesio.handle.seek(pos, 0)
+
+            def read(self, amt):
+                data = bytearray(self.bytesio.handle.read(amt))
+                if len(data) < amt:
+                    self._update(amt)
+                    data.extend(self.bytesio.handle.read(amt))
+                return data
+
         def response_from_bytes(data):
-            sock = BytesIOSocket(data)
-            response = http.client.HTTPResponse(sock)
+            response = AutoUpdatingHTTPResponse(self.conn)
             response.begin()
             return response
 
-        # 8192 is an arbitrary number. Current client code doesn't actually
-        # care about having the full response, it just compares what it gets,
-        # but really we should keep reading until EOF or the expected number
-        # of bytes have been read.
-        return response_from_bytes(self.conn.read(8192))
+        return response_from_bytes(None)
 
     def close(self):
         self.conn.safe_shutdown()
