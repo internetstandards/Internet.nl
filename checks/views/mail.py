@@ -15,7 +15,7 @@ from checks.views.shared import proberesults, process, pretty_domain_name
 from checks.views.shared import redirect_invalid_domain, add_score_to_report
 from checks.views.shared import get_valid_domain_mail, add_registrar_to_report
 from checks.views.shared import get_valid_domain_web, get_retest_time
-from checks.views.shared import probestatuses, build_absolute_uri
+from checks.views.shared import probestatuses
 
 regex_mailaddr = (
     r'([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+'
@@ -101,11 +101,11 @@ def resultsrender(addr, report, request):
                 _("mail pagetitle"), prettyaddr),
             addr=addr,
             prettyaddr=prettyaddr,
-            permalink=build_absolute_uri(
-                request, "/mail/{}/{}/".format(addr, str(report.id))),
+            permalink=request.build_absolute_uri(
+                "/mail/{}/{}/".format(addr, str(report.id))),
             permadate=report.timestamp,
             retest_time=retest_time,
-            retest_link=build_absolute_uri(request, "/mail/{}/".format(addr)),
+            retest_link=request.build_absolute_uri("/mail/{}/".format(addr)),
             webtest_direct=webtest_direct,
             mailtest_direct=mailtest_direct,
             probes=probe_reports,
