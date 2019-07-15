@@ -84,6 +84,7 @@
     </Location>
 
     RemoteIPHeader X-Forwarded-For
+    RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}
     ProxyPass /static/ !
     ProxyPass /favicon.ico !
     ProxyPreserveHost on
