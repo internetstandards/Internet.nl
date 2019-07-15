@@ -44,24 +44,6 @@ def execsql(sql):
     return row[0]
 
 
-def build_absolute_uri(request, location=None):
-    """
-    Build absolute URI based on the request.
-
-    This is a wrapper for Django's request.build_absolute_uri() that enforces
-    HTTPS when Django is proxied.
-
-    """
-    if getattr(settings, 'DJANGO_IS_PROXIED', None):
-        host = request.get_host()
-        scheme = request.META.get('HTTP_X_FORWARDED_PROTO', 'http')
-        if not location:
-            location = request.get_full_path()
-        return "{}://{}{}".format(scheme, host, location)
-    else:
-        return request.build_absolute_uri(location)
-
-
 def validate_dname(dname):
     """
     Validates a domain name and return canonical version.
