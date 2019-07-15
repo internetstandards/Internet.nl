@@ -12,7 +12,6 @@ from django.utils.translation import ugettext as _
 from checks import redis_id, simple_cache_page
 from checks.views.shared import gethalloffamecache
 from checks.views.shared import update_base_stats
-from checks.views.shared import build_absolute_uri
 
 
 def page404(request):
@@ -265,7 +264,7 @@ def change_language(request):
         new_language = request.POST.get('language')
         if new_language and translation.check_for_language(new_language):
             url_regex = re.compile("^(?P<protocol>http[s]?://).*$")
-            uri = build_absolute_uri(request)
+            uri = request.build_absolute_uri()
             protocol = url_regex.match(uri).group('protocol')
 
             # If the previous language is in the host remove it.
