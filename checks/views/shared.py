@@ -54,7 +54,7 @@ def build_absolute_uri(request, location=None):
     """
     if getattr(settings, 'DJANGO_IS_PROXIED', None):
         host = request.get_host()
-        scheme = request.meta.get('HTTP_X_FORWARDED_PROTO', 'http')
+        scheme = request.META.get('HTTP_X_FORWARDED_PROTO', 'http')
         if not location:
             location = request.get_full_path()
         return "{}://{}{}".format(scheme, host, location)
