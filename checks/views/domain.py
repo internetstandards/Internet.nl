@@ -17,6 +17,7 @@ from checks.views.shared import proberesults, add_registrar_to_report
 from checks.views.shared import add_score_to_report, process, probestatuses
 from checks.views.shared import get_valid_domain_web, get_valid_domain_mail
 from checks.views.shared import get_retest_time, pretty_domain_name
+from checks.views.shared import build_absolute_uri
 
 
 # Entrance after form submission.
@@ -100,11 +101,11 @@ def resultsrender(addr, report, request):
                 _("domain pagetitle"), prettyaddr),
             addr=addr,
             prettyaddr=prettyaddr,
-            permalink=request.build_absolute_uri(
-                "/site/{}/{}/".format(addr, str(report.id))),
+            permalink=build_absolute_uri(
+                request, "/site/{}/{}/".format(addr, str(report.id))),
             permadate=report.timestamp,
             retest_time=retest_time,
-            retest_link=request.build_absolute_uri("/site/{}/".format(addr)),
+            retest_link=build_absolute_uri(request, "/site/{}/".format(addr)),
             webtest_direct=webtest_direct,
             mailtest_direct=mailtest_direct,
             probes=probe_reports,
