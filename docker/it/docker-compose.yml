@@ -616,6 +616,8 @@ services:
       - master
     environment:
       - OWN_IP=${SUB_MASTER_IP}
+      - APP_IP=${APP_IP}
+      - APP_IPV6=${APP_IPV6}
       - TARGET_CA_OCSP_IP
       - TARGET_CA_OCSP_IPV6
       - TARGET_TLS10ONLY_IP
@@ -681,8 +683,6 @@ services:
       - SUB_MASTER_IPV6=${SUB_MASTER_IPV6}
       - SUB_MASTER2_IP=${SUB_MASTER2_IP}
       - SUB_MASTER2_IPV6=${SUB_MASTER2_IPV6}
-      - APP_IP=${APP_IP}
-      - APP_IPV6=${APP_IPV6}
       - ROLE=master
       - OTHER_IP=${MASTER2_IP}
   master2:
@@ -707,8 +707,6 @@ services:
       - SUB_MASTER_IPV6=${SUB_MASTER_IPV6}
       - SUB_MASTER2_IP=${SUB_MASTER2_IP}
       - SUB_MASTER2_IPV6=${SUB_MASTER2_IPV6}
-      - APP_IP=${APP_IP}
-      - APP_IPV6=${APP_IPV6}
       - ROLE=slave
       - OTHER_IP=${MASTER_IP}
 
