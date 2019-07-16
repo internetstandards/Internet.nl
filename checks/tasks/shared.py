@@ -406,14 +406,19 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
 class HTTPSConnection:
     """
     A NASSL based HTTPS connection with an http.client.HTTPConnection like
-    interface. Makes a TLS connection using ModernConnection for the highest
-    possible TLS protocol version with the newest ciphers. Falls back to
-    DebugConnection for target servers that do not support newer protocols and
-    ciphers.
+    interface. Makes a TLS connection using ModernConnection for TLS 1.3,
+    otherwise connecting with the highest possible SSL/TLS version supported
+    by DebugConnection for target servers that do not support newer protocols
+    and ciphers.
+
+    NOTE: Will FAIL to connect to TLS 1.2 servers that support AESCCM8 but no
+    other cipher supported by DebugConnection/LegacySslClient/OpenSSL 1.0.2,
+    because only ModernConnection/SslClient/OpenSSL 1.1.1 seems to support
+    AESCCM8.
     
     This class should be used instead of native Python SSL/TLS connectivity
-    because the native functionality does not support legacy protocols, protocol
-    features and ciphers.
+    because the native functionality does not support legacy protocols,
+    protocol features and ciphers.
 
     HTTP requests are simple HTTP/1.1 one-shot (connection: close) requests.
     HTTP responses are truncated at a maximum of 8192 bytes. This class is NOT
@@ -428,16 +433,10 @@ class HTTPSConnection:
             self.conn = conn
         else:
             self.host = host
-            # first try ModernConnection, fallback to DebugConnection (for
-            # SSL2/3) there is some protocol overlap between the two, e.g. both
-            # can connect to TLS 1.2 servers, but they support different
-            # ciphers and so trying both gives the greatest chance of
-            # connecting. For example AESCCM with TLS 1.2 is only supported by
-            # ModernConnection, not by DebugConnection.
             addr = (socket_af, self.host)
             try:
                 self.conn = ModernConnection(url=self.host, addr=addr,
-                    version=SSLV23, timeout=timeout, tries=tries)
+                    version=TLSV1_3, timeout=timeout, tries=tries)
             except DebugConnectionHandshakeException:
                 self.conn = DebugConnection(url=self.host, addr=addr,
                     version=SSLV23, timeout=timeout, tries=tries)

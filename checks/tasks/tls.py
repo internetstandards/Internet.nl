@@ -1849,20 +1849,6 @@ class ConnectionChecker:
 
         # This check isn't relevant to anything less than TLS 1.3.
         if not explicit_conn and test_conn.get_ssl_version() < TLSV1_3:
-            # If we connected with ModernConnection it would have been with
-            # version negotiation (SSLV23) and not explicitly with TLSV1_3, so
-            # it could be that the server does actually support TLS 1.3 but
-            # for some reason prefers a lower versoon when negotiation is
-            # possible. Thus, if we connected with ModernConnection but not 
-            # with TLS 1.3, try and force TLS 1.3:
-            if isinstance(self._conn, ModernConnection):
-                try:
-                    with ModernConnection.from_conn(self._conn, version=TLSV1_3) as new_conn:
-                        return self.check_zero_rtt(new_conn)
-                except (DebugConnectionHandshakeException,
-                        DebugConnectionSocketException):
-                    pass
-
             return scoring.WEB_TLS_ZERO_RTT_NA, ZeroRttStatus.na
 
         # we require an existing connection, as 0-RTT is only possible with
@@ -1933,9 +1919,9 @@ class ConnectionChecker:
                 # connected with it.
                 connected = True
             else:
-                # DebugConnection is capable of connecting with older
-                # SSL/TLS protocol versions/ciphers than ModernConnection so we
-                # attempt the connections using DebugConnection.
+                # We already tested TLS 1.3 at the beginning when calling
+                # http_fetch(), so we only need to use DebugConnection as it
+                # can handle the older protocol versions.
                 try:
                     with DebugConnection.from_conn(self._conn, version=version):
                         connected = True
@@ -1961,7 +1947,8 @@ class ConnectionChecker:
 
         try:
             # We have to use DebugConnection because ModernConnection doesn't
-            # have the _openssl_str_to_dic() method.
+            # have the _openssl_str_to_dic() method, but use of custom DH FF
+            # groups is not relevant for TLS 1.3/ModernConnection anyway.
             with DebugConnection.from_conn(self._conn, ciphers="DH:DHE:!aNULL") as new_conn:
                 self._note_ssl_version(new_conn)
                 dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
@@ -1973,8 +1960,6 @@ class ConnectionChecker:
             pass
 
         try:
-            # We have to use DebugConnection because ModernConnection doesn't
-            # have the _openssl_str_to_dic() method.
             with DebugConnection.from_conn(self._conn, ciphers="ECDH:ECDHE:!aNULL") as new_conn:
                 self._note_ssl_version(new_conn)
                 ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
@@ -2007,28 +1992,36 @@ class ConnectionChecker:
         bad = []
         phase_out = []
 
-        # If we could have been a ModernConnection we would have been, so don't
-        # waste time failing to connect using ModernConnection.
-        # TODO: in this case show somehow that neither key exchange algorithm
-        # nor key exchange hash function properties were tested.
-        if isinstance(self._conn, ModernConnection):
-            # reconnect with explicit signature algorithm preferences and determine
-            # signature related properties of the connection
+        # Re-connect with explicit signature algorithm preferences and
+        # determine signature related properties of the connection. Only
+        # TLS >= 1.2 support specifying the preferred signature algorithms as
+        # ClientHello extensions (of which SignatureAlgorithm is one) were only
+        # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
+        # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
+        # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
+        if self._conn.get_ssl_version() >= TLSV1_2:
             if self._conn.get_ssl_version() == TLSV1_3:
                 sig_algs = KEX_TLS13_SIGALG_PREFERENCE
             elif self._conn.get_ssl_version() == TLSV1_2:
                 sig_algs = KEX_TLS12_SIGALG_PREFERENCE
-            else:
-                sig_algs = None
 
             kex_hash_func, kex_sig_type = None, None
             try:
-                # Only OpenSSL 1.1.1 has the necessary functions for determining
-                # the key exchange signature algorithm and hash function, so use
-                # ModernConnection (based on OpenSSL 1.1.1) to connect.
-                with ModernConnection.from_conn(self._conn, 
-                        signature_algorithms=sig_algs, version=SSLV23) as new_conn:
-                    self._note_ssl_version(new_conn)
+                # Only OpenSSL 1.1.1 has the necessary functions for
+                # determining the key exchange signature algorithm and hash
+                # function in use, so use ModernConnection (which is based on
+                # OpenSSL 1.1.1). Additionally, only ModernConnection supports
+                # passing the signature algorithm preference to the server.
+                with ModernConnection.from_conn(self._conn,
+                        signature_algorithms=sig_algs,
+                        version=self._conn.get_ssl_version()) as new_conn:
+                    # Ensure that the requirement in the OpenSSL docs that the
+                    # peer has signed a message is satisfied by exchanging data
+                    # with the server.
+                    http_client = HTTPSConnection.fromconn(new_conn)
+                    http_client.putrequest('GET', '/')
+                    http_client.endheaders()
+                    http_client.getresponse()
                     kex_hash_func = new_conn.get_peer_signature_digest()
                     kex_sig_type = new_conn.get_peer_signature_type()
             except (DebugConnectionSocketException,

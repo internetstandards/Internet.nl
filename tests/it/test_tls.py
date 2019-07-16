@@ -4,15 +4,11 @@ from helpers import DomainConfig, GoodDomain, BadDomain
 from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE, PERFECT_SCORE
 
 
-# TODO: Refactor legacy and modern cipher tests into a single test type as old
-# OpenSSL supports all of the ciphers that need to be tested for NCSC 2.0.
 # TODO: Refactor cipher tests to explicitly test for the expected ciphers in
 # the right order (overlaps with testing of cipher preference order checking,
 # which is not implemented yet).
 # TODO: Report and test for IANA/RFC cipher names instead of OpenSSL cipher
 # names?
-# TODO: What to do about CCM cipher testing? Neither OpenSSL 1.0.2e nor 1.1.1b
-# support the cipher.
 
 
 # Cipher testing
@@ -111,10 +107,6 @@ class PreTLS13DomainConfig(DomainConfig):
         # Only TLS 1.3 servers support 0-RTT
         self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
 
-        # Our TLS 1.0, 1.1, 1.2 servers warn due to RSA or RSASSA-PSS signature
-        # algorithms and key exchange hash functions other than SHA(256|384|512)
-        self.expected_warnings.setdefault(TESTS.HTTPS_TLS_KEY_EXCHANGE, None)
-
         # No expected issues? Should be a perfect score then!
         if not self.expected_failures and not self.expected_warnings:
             self.expected_score = PERFECT_SCORE
@@ -188,6 +180,9 @@ ncsc_20_tests = [
             TESTS.HTTPS_TLS_VERSION: [
                 ['TLS 1.1 (at risk)'],  # IPv6
                 ['TLS 1.1 (at risk)'],  # IPv4
+            ],
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                [re.compile(r'RSASSA-PSS.+')]
             ]
         }),
 
@@ -195,6 +190,11 @@ ncsc_20_tests = [
         '-Table1:TLS12'
         '-Table10:FFDHE4096',
         'tls12only.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                [re.compile(r'RSASSA-PSS.+')]
+            ]
+        }),
 
     DomainConfig('NCSC20'
         '-Table1:TLS1213'
@@ -291,6 +291,9 @@ ncsc_20_tests = [
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
             ],
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                [re.compile(r'rsaEncryption.+')]
+            ]
         }),
     DomainConfig('NCSC20'
         '-Table1:TLS12'
@@ -323,8 +326,7 @@ ncsc_20_tests = [
         'tls12onlyffdhe2048.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [r'DH-FFDHE2048.+\(at risk\)'],  # IPv6
-                [r'DH-FFDHE2048.+\(at risk\)'],  # IPv4
+                [re.compile(r'(RSASSA-PSS|DH-FFDHE2048).+')]
             ]
         }),
 
@@ -332,6 +334,11 @@ ncsc_20_tests = [
         '-Table1:TLS12'
         '-Table10:FFDHE3072',
         'tls12onlyffdhe3072.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                [re.compile(r'RSASSA-PSS.+')]
+            ]
+        }),
 
     # This domain doesn't use an NCSC 2.0 approved DH finite-field group.
     PreTLS13DomainConfig('NCSC20'
@@ -340,8 +347,7 @@ ncsc_20_tests = [
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [r'DH-4096.+\(insufficient\)'],  # IPv6
-                [r'DH-4096.+\(insufficient\)'],  # IPv4
+                [re.compile(r'(RSASSA-PSS.+\(at risk\)|DH-4096.+\(insufficient\))')],
             ]
         }),
 
@@ -352,8 +358,7 @@ ncsc_20_tests = [
         manual_cipher_checks=True,
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [r'SHA1.+\(at risk\)'],  # IPv6
-                [r'SHA1.+\(at risk\)'],  # IPv4
+                [re.compile(r'(SHA1|rsaEncryption).+')]
             ]
         }),
 
