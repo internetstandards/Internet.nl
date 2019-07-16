@@ -99,7 +99,7 @@ services:
     environment:
       # setting CACHE_TTL (seconds) too low (e.g. to 1) causes test failures because the
       # Javascript retries run out before the probes complete.
-      - CACHE_TTL=30
+      - CACHE_TTL=200
       - REDIS_HOST=redis
       - RABBITMQ_HOST=rabbitmq
       - POSTGRES_HOST=postgres
