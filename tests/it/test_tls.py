@@ -108,7 +108,7 @@ class PreTLS13DomainConfig(DomainConfig):
         self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
 
         # No expected issues? Should be a perfect score then!
-        if not self.expected_failures and not self.expected_warnings:
+        if not self.expected_failures:
             self.expected_score = PERFECT_SCORE
 
 
