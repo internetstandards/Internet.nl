@@ -54,6 +54,7 @@ Links:
 - https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce
 - https://docs.docker.com/compose/install/
 
+
 ### Running the automated integration test suite
 
 Run the following commands (assumes that you have Docker and Docker-Compose
@@ -223,4 +224,30 @@ $ cat /etc/docker/daemon.json
 	"ipv6": true,
 	"fixed-cidr-v6": "2001:3984:3989::/64"
 }
+```
+
+
+
+### Appendix: Deploying in Digital Ocean
+```
+export DIGITALOCEAN_ACCESS_TOKEN=<YOUR API KEY>
+
+# the doctl command can be useful for determining values to pass to docker-machine:
+# doctl compute region ls
+# doctl compute size ls
+# doctl compute image list-distribution
+
+docker-machine create \
+    --driver digitalocean \
+    --digitalocean-region ams3 \
+    --digitalocean-ipv6 \
+    --digitalocean-image ubuntu-18-04-x64 \
+    --digitalocean-size g-4vcpu-16gb \
+    --digitalocean-tags SOME,TAGS \
+    YOURMACHINENAME
+
+eval $(docker-machine env YOURMACHINENAME)
+
+cd <internetnl src dir>docker/it
+docker-compose up --build
 ```
