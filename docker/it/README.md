@@ -251,3 +251,9 @@ eval $(docker-machine env YOURMACHINENAME)
 cd <internetnl src dir>docker/it
 docker-compose up --build
 ```
+
+
+### Appendix: Connecting to the database
+```
+docker-compose exec postgres psql -U internetnl internetnl_db
+```
