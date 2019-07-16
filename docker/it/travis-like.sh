@@ -8,13 +8,15 @@ docker --version
 docker-compose --version
 docker-compose kill
 docker-compose down -v --remove-orphans
+# docker-compose build --parallel would be nice but doesn't seem to always
+# build correctly, thus we are forced to use the slow serial build instead:
 docker-compose build
 docker-compose create --force-recreate
 
 echo
 echo script
 echo
-docker-compose up --no-recreate --no-build --abort-on-container-exit --exit-code-from testrunner --no-color | grep -E '^(testrunner|app)'
+docker-compose up --no-recreate --no-build --abort-on-container-exit --exit-code-from testrunner --no-color | grep -E '^testrunner'
 
 echo
 echo after_script
