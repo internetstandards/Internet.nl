@@ -439,6 +439,17 @@ other_tests = [
             TESTS.IPV6_WEB_REACHABILITY,
             TESTS.IPV6_WEB_SAME_WEBSITE
         }),
+
+    # This domain deliberately serves different response content on IPv4
+    # than on IPv6
+    DomainConfig('IPV6:DIFFTOIPV4',
+        'tls12onlydiffipv4ipv6.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.IPV6_WEB_SAME_WEBSITE
+        },
+        expected_not_tested={
+            TESTS.HTTPS_TLS_ZERO_RTT
+        }),
 ]
 
 

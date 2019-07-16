@@ -6,6 +6,7 @@ ARG APACHE_MODULES=
 RUN a2dissite -q 000-default
 
 COPY sites-available/* /etc/apache2/sites-available/
+COPY html /var/www/html/
 
 # Enable Apache modules and website configurations as directed by the user invoking Docker build
 RUN bash -c 'if [ "${APACHE_MODULES}" != "" ]; then for M in "${APACHE_MODULES}"; do a2enmod -q $M; done; fi'

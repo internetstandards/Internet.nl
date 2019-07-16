@@ -445,8 +445,9 @@ services:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-different-servers-on-ipv4-and-ipv6.sh
+        APACHE_SITES: http-with-ssl-redirect tls12onlydiffipv4ipv6
+        APACHE_MODULES: ssl
+    command: /opt/jinjify.sh /etc/apache2/sites-enabled/
     dns: ${RESOLVER_IP}
     dns_search: does.not.exist
     networks:
@@ -455,6 +456,10 @@ services:
         ipv6_address: ${TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - TARGET_TLS12ONLYDIFFIPV4IPV6_IP=${TARGET_TLS12ONLYDIFFIPV4IPV6_IP}
+      - TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6=${TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6}
+      - WAIT_FOR_CUSTOM_COMMAND=yes
 
   targettls1213:
     build:
