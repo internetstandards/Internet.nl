@@ -1,0 +1,18 @@
+$ORIGIN tk.
+$TTL 60
+@         IN SOA    ns1.tk. admin.nlnetlabs.tk. (
+			 1      ; serial
+			 60S    ; refresh (60 seconds)
+			 10S    ; retry (10 seconds)
+			 180S   ; expire (180 seconds)
+			 5S     ; minimum (5 seconds)
+		  )
+@         IN  NS    ns1.tk.
+myroot    IN  A     {{ROOT_IP}}
+myroot    IN  AAAA  {{ROOT_IPV6}}
+nlnetlabs IN  NS    ns2a.tk.
+nlnetlabs IN  NS    ns2b.tk.
+ns2a      IN  A     {{SUB_MASTER_IP}}
+ns2a      IN  AAAA  {{SUB_MASTER_IPV6}}
+ns2b      IN  A     {{SUB_MASTER2_IP}}
+ns2b      IN  AAAA  {{SUB_MASTER2_IPV6}}
