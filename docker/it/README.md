@@ -46,7 +46,13 @@ manually via your browser.
 
 To run the integration test suite you will need Docker and Docker Compose
 installed locally on your computer and a git clone copy of the Internet.NL
-source code including the integration test framework and tests. See the appendices for details on versions known to work.
+source code including the integration test framework and tests.
+
+> See the appendices for details on versions known to work.
+
+Links:
+- https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce
+- https://docs.docker.com/compose/install/
 
 ### Running the automated integration test suite
 
