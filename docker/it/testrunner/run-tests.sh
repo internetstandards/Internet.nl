@@ -28,16 +28,16 @@ wait_for_container_up() {
 
     UP=0
     while [ ${SECONDS_TO_WAIT} -ge 1 ]; do
-        echo -n "Waiting ${SECONDS_TO_WAIT} seconds for Docker container ${CONTAINER_NAME} to be up: "
+        echo -n "Waiting ${SECONDS_TO_WAIT} seconds for Docker container ${CONTAINER_NAME} to be up:"
         STATE=$(docker inspect --format "{{.State.Running}}" ${CONTAINER_NAME} || true)
-        echo ${STATE}
+        echo -n " ${STATE}"
         [ "${STATE}" == "true" ] && UP=1 && break
         sleep 1s
         let "SECONDS_TO_WAIT=SECONDS_TO_WAIT-1"
     done
 
     if [ $UP -eq 1 ]; then
-        echo "Docker container ${CONTAINER_NAME} is up"
+        echo
         return 0
     else
         echo >&2 "Docker container ${CONTAINER_NAME} is still NOT Up"
@@ -45,15 +45,16 @@ wait_for_container_up() {
     fi
 }
 
-wait_for_port_connect() {
-    FQDN="$1"
-    PORT="$2"
+wait_for_http_connect() {
+    FROM_CONTAINER="$1"
+    FQDN="$2"
+    PORT="$3"
     SECONDS_TO_WAIT=${3:-15}
 
     CONNECTED=0
     while [ ${SECONDS_TO_WAIT} -ge 1 ]; do
-        echo "Waiting ${SECONDS_TO_WAIT} seconds to connect to ${FQDN}:${PORT}.."
-        nc -z ${FQDN} ${PORT} && CONNECTED=1 && break
+        echo "Waiting ${SECONDS_TO_WAIT} seconds to connect from ${FROM_CONTAINER} to http://${FQDN}:${PORT}/.."
+        docker exec ${FROM_CONTAINER} curl -4 http://${FQDN}:${PORT}/ && CONNECTED=1 && break
         sleep 1s
         let "SECONDS_TO_WAIT=SECONDS_TO_WAIT-1"
     done
@@ -159,7 +160,7 @@ for FQDN in ${TARGETS}; do
         SERVERNAME="-servername ${FQDN}"
         [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
         [[ $PROT == "ssl2" ]] && SERVERNAME=
-        CERT=$(echo | ${OPENSSL} s_client \
+        CERT=$(echo | timeout -k 1 2s ${OPENSSL} s_client \
             -${PROT} \
             -showcerts \
             ${SERVERNAME} \
@@ -186,7 +187,7 @@ for FQDN in ${TARGETS}; do
         SERVERNAME="-servername ${FQDN}"
         [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
         [[ $PROT == "ssl2" ]] && SERVERNAME=
-        echo | ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
+        echo | timeout -k 1 2s ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
         echo -n -e "${SUPPORTED}\t"
     done
     echo
@@ -195,7 +196,17 @@ done | column -t
 echo
 echo ':: Waiting for Internet.nl app to become available..'
 wait_for_container_up $C_APP
-wait_for_port_connect app 8080 60
+
+host -t A internetnl.test.nlnetlabs.tk
+host -t AAAA internetnl.test.nlnetlabs.tk
+
+wait_for_http_connect $C_APP internetnl.test.nlnetlabs.tk 8080 20 || {
+    echo >&2 'Unable to connect to the Internet.NL app: dumping netstat output'
+    docker cp /opt/netstat.sh $C_APP:/tmp/
+    docker exec $C_APP /tmp/netstat.sh
+    echo >&2 'Aborting.'
+    exit 2
+}
 
 # TODO: sleeps are brittle, replace this with a deterministic check
 echo

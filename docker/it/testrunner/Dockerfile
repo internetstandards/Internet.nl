@@ -1,3 +1,3 @@
 FROM devbase
-COPY run-tests.sh /opt/
+COPY *.sh /opt/
 ENTRYPOINT ["/opt/run-tests.sh"]
