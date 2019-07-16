@@ -1741,8 +1741,8 @@ class ConnectionChecker:
         self._seen_versions.add(conn.get_ssl_version())
 
     def _debug_info(self, info):
-        if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
-                and settings.ENABLE_INTEGRATION_TEST):
+        if (hasattr(settings, 'ENABLE_VERBOSE_TECHNICAL_DETAILS')
+                and settings.ENABLE_VERBOSE_TECHNICAL_DETAILS):
             return ' [reason: {}] '.format(info)
         else:
             return ''
