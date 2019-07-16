@@ -165,7 +165,7 @@ unstructuredName		= An optional company name
 [ usr_cert ]
 
 # For CA/OCSP server
-authorityInfoAccess = OCSP;URI:http://ca-ocsp.test.nlnetlabs.nl:8080
+authorityInfoAccess = OCSP;URI:http://ca-ocsp.test.nlnetlabs.tk:8080
 # End CA/OCSP server
 
 # These extensions are added when 'ca' signs a request.

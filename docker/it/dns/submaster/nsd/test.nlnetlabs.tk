@@ -1,14 +1,16 @@
-$ORIGIN test.nlnetlabs.nl.
+$ORIGIN test.nlnetlabs.tk.
 $TTL 60
-@                           IN	 SOA    ns2a.nl. admin.nlnetlabs.nl. (
+@                           IN	 SOA    ns2a.tk. admin.nlnetlabs.tk. (
                                 1      ; serial
                                 5S     ; refresh (5 seconds)
                                 1S     ; retry (1 seconds)
                                 15S    ; expire (15 seconds)
                                 5S     ; minimum (5 seconds)
                             )
-@                           IN  NS     ns2a.nl.
-@                           IN  NS     ns2b.nl.
+@                           IN  NS     ns2a.tk.
+@                           IN  NS     ns2b.tk.
+internetnl                  IN  A      {{APP_IP}}
+internetnl                  IN  AAAA   {{APP_IPV6}}
 ca-ocsp                     IN  A      {{TARGET_CA_OCSP_IP}}
 ca-ocsp                     IN  AAAA   {{TARGET_CA_OCSP_IPV6}}
 tls1213                     IN  A      {{TARGET_TLS1213_IP}}
@@ -71,29 +73,31 @@ mailtest                    IN  A      {{TARGET_TLS12ONLY_IP}}
 mailtest                    IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 
 ; TLSA records generated using https://www.huque.com/bin/gen_tlsa
-_443._tcp.tls1213                   IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls1213ipv4only           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls1213sni                IN  TLSA   3 1 1 f2bcbc0e3af0628ad6f94b16d369c8bf741437977cc105c891e69edad0e21478
-_443._tcp.tls1213nohsts             IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls1213shorthsts          IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls1213noocspstaple       IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls10only                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls11only                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls1011                   IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls1112                   IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12only                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlyffdhe3072        IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlyffdhe2048        IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlyffother          IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlynosha2           IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlylegacybadciphers IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlymodernbadciphers IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlylegacyphaseoutciphers  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlymodernphaseoutciphers  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls12onlydiffipv4ipv6     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls13only                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls130rtt                 IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.tls13invalidocsp          IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.ssl2only                  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.ssl3only                  IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
-_443._tcp.nossl                     IN  TLSA   3 1 1 298c4f48edf1215157792a1433dbe31fa83f269bc63dccba2a83ed03aed9f705
+; using options: port=443 transport=tcp domain=tls1213
+; pem=docker/it/targetbase/certs/wildcard.test.nlnetlabs.tk.crt (for example)
+_443._tcp.tls1213                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213ipv4only           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213sni                IN  TLSA   3 1 1 8d0b8af3cfe3dc53375b632b65b1f8864c7afbea15a85622f7a8aa1386d2048d
+_443._tcp.tls1213nohsts             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213shorthsts          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213noocspstaple       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls10only                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls11only                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1011                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1112                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12only                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlyffdhe3072        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlyffdhe2048        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlyffother          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlynosha2           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlylegacybadciphers IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlymodernbadciphers IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlylegacyphaseoutciphers  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlymodernphaseoutciphers  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlydiffipv4ipv6     IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls13only                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls130rtt                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls13invalidocsp          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.ssl2only                  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.ssl3only                  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.nossl                     IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c

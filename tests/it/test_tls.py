@@ -135,7 +135,7 @@ ncsc_20_tests = [
     # protocol version it also fails the "HTTPS available" test.
     pytest.param(
         OpenSSLServerDomainConfig('NCSC20-Table1:SSL20',
-            'ssl2only.test.nlnetlabs.nl',
+            'ssl2only.test.nlnetlabs.tk',
             expected_failures={
                 TESTS.HTTPS_TLS_VERSION,
             }),
@@ -145,7 +145,7 @@ ncsc_20_tests = [
     # of the insecure TLS version it fails because it cannot detect HTTPS
     # support at all.
     OpenSSLServerDomainConfig('NCSC20-Table1:SSL30',
-        'ssl3only.test.nlnetlabs.nl',
+        'ssl3only.test.nlnetlabs.tk',
         manual_cipher_checks=True,
         expected_failures={
             TESTS.HTTPS_TLS_VERSION,
@@ -154,7 +154,7 @@ ncsc_20_tests = [
         }),
 
     PreTLS13DomainConfig('NCSC20-Table1:TLS10',
-        'tls10only.test.nlnetlabs.nl',
+        'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
                 ['TLS 1.0 (at risk)'],  # IPv6
@@ -163,7 +163,7 @@ ncsc_20_tests = [
         }),
 
     PreTLS13DomainConfig('NCSC20-Table1:TLS11',
-        'tls11only.test.nlnetlabs.nl',
+        'tls11only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
                 ['TLS 1.1 (at risk)'],  # IPv6
@@ -172,7 +172,7 @@ ncsc_20_tests = [
         }),
 
     PreTLS13DomainConfig('NCSC20-Table1:TLS1011',
-        'tls1011.test.nlnetlabs.nl',
+        'tls1011.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
                 ['TLS 1.1 (at risk)'],  # IPv6
@@ -183,7 +183,7 @@ ncsc_20_tests = [
         }),
 
     PreTLS13DomainConfig('NCSC20-Table1:TLS1112',
-        'tls1112.test.nlnetlabs.nl',
+        'tls1112.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
                 ['TLS 1.1 (at risk)'],  # IPv6
@@ -194,7 +194,7 @@ ncsc_20_tests = [
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE4096',
-        'tls12only.test.nlnetlabs.nl'),
+        'tls12only.test.nlnetlabs.tk',
 
     DomainConfig('NCSC20'
         '-Table1:TLS1213'
@@ -205,13 +205,13 @@ ncsc_20_tests = [
         '-Table13:Off'
         '-Table14:NA'
         '-Table15:On',
-        'tls1213.test.nlnetlabs.nl',
+        'tls1213.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE,
         }),
 
     DomainConfig('NCSC20-Table1:TLS1213SNI',
-        'tls1213sni.test.nlnetlabs.nl',
+        'tls1213sni.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE,
         }),
@@ -219,7 +219,7 @@ ncsc_20_tests = [
     # This domain deliberately has no matching virtual host configuration on
     # the webserver that its DNS A and AAAA records resolve to.
     DomainConfig('NCSC20-Table1:TLS1213SNIWRONGCERT',
-        'tls1213wrongcertname.test.nlnetlabs.nl',
+        'tls1213wrongcertname.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_CERT_DOMAIN,
         },
@@ -233,10 +233,10 @@ ncsc_20_tests = [
     GoodDomain('NCSC20'
         '-Table1:TLS13'
         '-Table14:Off',
-        'tls13only.test.nlnetlabs.nl'),
+        'tls13only.test.nlnetlabs.tk'),
 
     DomainConfig('NCSC20-Table1:None',
-        'nossl.test.nlnetlabs.nl',
+        'nossl.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_HTTP_HTTPS_AVAILABLE
         },
@@ -274,7 +274,7 @@ ncsc_20_tests = [
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyBadCiphers',
-        'tls12onlylegacybadciphers.test.nlnetlabs.nl',
+        'tls12onlylegacybadciphers.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_LEGACY_BAD_CIPHERS],  # matches all rows
@@ -286,7 +286,7 @@ ncsc_20_tests = [
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyPhaseOutCiphers',
-        'tls12onlylegacyphaseoutciphers.test.nlnetlabs.nl',
+        'tls12onlylegacyphaseoutciphers.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
@@ -295,7 +295,7 @@ ncsc_20_tests = [
     DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:ModernPhaseOutCiphers',
-        'tls12onlymodernphaseoutciphers.test.nlnetlabs.nl',
+        'tls12onlymodernphaseoutciphers.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
@@ -307,7 +307,7 @@ ncsc_20_tests = [
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:ModernBadCiphers',
-        'tls12onlymodernbadciphers.test.nlnetlabs.nl',
+        'tls12onlymodernbadciphers.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_MODERN_BAD_CIPHERS],  # matches all rows
@@ -320,7 +320,7 @@ ncsc_20_tests = [
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE2048',
-        'tls12onlyffdhe2048.test.nlnetlabs.nl',
+        'tls12onlyffdhe2048.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
                 [r'DH-FFDHE2048.+\(at risk\)'],  # IPv6
@@ -331,13 +331,13 @@ ncsc_20_tests = [
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE3072',
-        'tls12onlyffdhe3072.test.nlnetlabs.nl'),
+        'tls12onlyffdhe3072.test.nlnetlabs.tk',
 
     # This domain doesn't use an NCSC 2.0 approved DH finite-field group.
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:OtherGroups',
-        'tls12onlyffother.test.nlnetlabs.nl',
+        'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
                 [r'DH-4096.+\(insufficient\)'],  # IPv6
@@ -348,7 +348,7 @@ ncsc_20_tests = [
     OpenSSLServerDomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table5:No',
-        'tls12onlynosha2.test.nlnetlabs.nl',
+        'tls12onlynosha2.test.nlnetlabs.tk',
         manual_cipher_checks=True,
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
@@ -362,7 +362,7 @@ ncsc_20_tests = [
     DomainConfig('NCSC20'
         '-Table1:TLS1213'
         '-Table15:Off',
-        'tls1213noocspstaple.test.nlnetlabs.nl',
+        'tls1213noocspstaple.test.nlnetlabs.tk',
         expected_passes={
             TESTS.HTTPS_TLS_OCSP_STAPLING: [
                 ['no'],  # IPv6
@@ -382,7 +382,7 @@ ncsc_20_tests = [
     BadDomain('NCSC20'
         '-Table1:TLS13'
         '-Table14:On',
-        'tls130rtt.test.nlnetlabs.nl',
+        'tls130rtt.test.nlnetlabs.tk',
         {TESTS.HTTPS_TLS_ZERO_RTT}),
 
     # This website virtual host configuration deliberately serves an OCSP
@@ -391,7 +391,7 @@ ncsc_20_tests = [
     BadDomain('NCSC20'
         '-Table1:TLS13'
         '-Table15:OnInvalid',
-        'tls13invalidocsp.test.nlnetlabs.nl',
+        'tls13invalidocsp.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_OCSP_STAPLING: [
                 ['no'],  # IPv6
@@ -404,7 +404,7 @@ other_tests = [
     # This website virtual host configuration deliberately fails to serve a
     # HSTS response header
     DomainConfig('HSTS:NONE',
-        'tls1213nohsts.test.nlnetlabs.nl',
+        'tls1213nohsts.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_HTTP_HSTS
         },
@@ -415,7 +415,7 @@ other_tests = [
     # This website virtual host configuration deliberately serves a 'short'
     # HSTS response header.
     DomainConfig('HSTS:SHORT',
-        'tls1213shorthsts.test.nlnetlabs.nl',
+        'tls1213shorthsts.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_HTTP_HSTS: [
                 ['max-age=1000; includeSubdomains;'],  # IPv6
@@ -428,7 +428,7 @@ other_tests = [
 
     # This domain deliberately lacks an IPV6 AAAA record in DNS
     DomainConfig('IPV6:NONE',
-        'tls1213ipv4only.test.nlnetlabs.nl',
+        'tls1213ipv4only.test.nlnetlabs.tk',
         expected_failures={
             TESTS.IPV6_WEB_ADDRESS
         },

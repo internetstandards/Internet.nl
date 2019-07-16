@@ -57,8 +57,8 @@ COPY ca-ocsp /opt/ca-ocsp/
 # detects and complains about it. Deliberately use a short RSA key length
 # so that Internet.NL also complains about that.
 RUN openssl req -new -newkey rsa:1024 -days 365 -nodes -x509 \
-        -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=default.test.nlnetlabs.nl" \
-        -keyout /etc/ssl/private/default.test.nlnetlabs.nl.key -out /etc/ssl/certs/default.test.nlnetlabs.nl.crt
+        -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=default.test.nlnetlabs.tk" \
+        -keyout /etc/ssl/private/default.test.nlnetlabs.tk.key -out /etc/ssl/certs/default.test.nlnetlabs.tk.crt
 
 COPY certs/*.crt /etc/ssl/certs/
 COPY certs/*.key /etc/ssl/private/

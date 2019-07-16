@@ -683,7 +683,7 @@ inet_protocols = ipv4, ipv6
 meta_directory = /etc/postfix
 shlib_directory = no
 
-smtpd_tls_cert_file = /etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
-smtpd_tls_key_file = /etc/ssl/private/wildcard.test.nlnetlabs.nl.key
+smtpd_tls_cert_file = /etc/ssl/certs/wildcard.test.nlnetlabs.tk.crt
+smtpd_tls_key_file = /etc/ssl/private/wildcard.test.nlnetlabs.tk.key
 smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3
 smtpd_tls_security_level = may

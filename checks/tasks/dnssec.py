@@ -125,8 +125,6 @@ def registrar_lookup(addr):
     if (
         'pythonwhois' in sys.modules
         and not settings.ENABLE_BATCH
-        and not (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
-                 and settings.ENABLE_INTEGRATION_TEST)
     ):
         cache_id = redis_id.whois.id.format(addr)
         cache_ttl = redis_id.whois.ttl

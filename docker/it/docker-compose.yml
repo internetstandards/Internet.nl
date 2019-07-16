@@ -310,8 +310,8 @@ services:
       args:
         APACHE_SITES: http-with-ssl-redirect tls12onlylegacybadciphers
     # Tested with:
-    #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.nl.key
-    #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
+    #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.tk.key
+    #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.tk.crt
     #   CAFILE=/opt/ca-ocsp/ca/rootCA.crt
     #   OPENSSL=/opt/openssl-old/bin/openssl
     # Where:
@@ -371,8 +371,8 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls12onlymodernbadciphers
         APACHE_MODULES: ssl
     # Tested with:
-    #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.nl.key
-    #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt
+    #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.tk.key
+    #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.tk.crt
     #   CAFILE=/opt/ca-ocsp/ca/rootCA.crt
     #   OPENSSL=openssl
     # Where:
@@ -567,7 +567,7 @@ services:
 
 
   # --------------------------------------------------------------------------
-  #     DNS INFRASTRUCTURE: ROOT, NL, NLNETLABS.NL AND TEST.NLNETLABS.NL
+  #     DNS INFRASTRUCTURE: ROOT, TK, NLNETLABS.NL AND TEST.NLNETLABS.TK
   #   AND AN UNBOUND RESOLVER WITH MODIFIED ROOT HINTS AND DNSSEC ROOT KEY
   # --------------------------------------------------------------------------
 
@@ -596,7 +596,7 @@ services:
       - ROOT_IP
       - SUBNETV4
 
-  # An NSD authoratitive container responsible for the nlnetlabs.nl. zone
+  # An NSD authoratitive container responsible for the nlnetlabs.tk. zone
   submaster:
     build:
       context: dns/submaster
@@ -655,7 +655,7 @@ services:
       - TARGET_NOSSL_IP
       - TARGET_NOSSL_IPV6
 
-  # An NSD authoratitive container responsible for the nl. TLD zone
+  # An NSD authoratitive container responsible for the tk. TLD zone
   master:
     build:
       context: dns/master
@@ -712,7 +712,7 @@ services:
       - ROLE=slave
       - OTHER_IP=${MASTER_IP}
 
-  # An NSD root container that serves the root (.) zone an delegates the nl. zone to 'master'
+  # An NSD root container that serves the root (.) zone an delegates the tk. zone to 'master'
   root:
     build:
       context: dns/root

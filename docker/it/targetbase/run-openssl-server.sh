@@ -11,8 +11,8 @@ if [[ $# -ge 1 && "$1" == "--use-old-openssl" ]]; then
 fi
 
 # Keys and certificates used to secure communication
-KEY="/etc/ssl/private/wildcard.test.nlnetlabs.nl.key"
-CERT="/etc/ssl/certs/wildcard.test.nlnetlabs.nl.crt"
+KEY="/etc/ssl/private/wildcard.test.nlnetlabs.tk.key"
+CERT="/etc/ssl/certs/wildcard.test.nlnetlabs.tk.crt"
 CA_CERT="/opt/ca-ocsp/ca/rootCA.crt"
 
 # Old OpenSSL s_server cannot listen on IPv6 at all. New OpenSSL can listen on

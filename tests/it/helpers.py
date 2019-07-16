@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-BASE_URL = 'http://internet.nl:8080/'
+BASE_URL = 'http://internetnl.test.nlnetlabs.tk:8080/'
 IMPERFECT_SCORE = 'IMPERFECT'
 PERFECT_SCORE = '100%'
 
