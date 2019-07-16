@@ -71,6 +71,12 @@ if [ ${ENABLE_COVERAGE} -eq 1 ]; then
     export COVERAGE_PROCESS_START=/app/.coveragerc
     export RUN_SERVER_CMD="runserver --noreload --nothreading"
 fi
+
+# ldns-dane to external domains (those forwarded by our Unbound resolver
+# container to 8.8.8.8) fails, something to do with the fake DNS root using a
+# different DNSSEC ZSK than the public internet uses.
+perl -pi -e 's/^(ldns-dane.+)/# \1/g' ${APP_PATH}/docker/entrypoint.sh
+
 ${APP_PATH}/docker/entrypoint.sh &
 
 # Don't exit, that might cause docker-compose up to terminate prematurely (before coverage data has been processed).
