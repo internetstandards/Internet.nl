@@ -229,6 +229,11 @@ $ cat /etc/docker/daemon.json
 
 
 ### Appendix: Deploying in Digital Ocean
+Links:
+  - https://docs.docker.com/machine/install-machine/
+  - https://github.com/digitalocean/doctl
+  - https://cloud.digitalocean.com
+
 ```
 export DIGITALOCEAN_ACCESS_TOKEN=<YOUR API KEY>
 
