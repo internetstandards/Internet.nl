@@ -104,9 +104,9 @@ C_SUBMASTER=$(container_name submaster)
 C_RESOLVER=$(container_name resolver)
 C_APP=$(container_name app)
 
-sign_zone test.nlnetlabs.nl $C_SUBMASTER $C_SUBMASTER
-sign_zone nlnetlabs.nl $C_SUBMASTER $C_MASTER
-sign_zone nl $C_MASTER $C_ROOT
+sign_zone test.nlnetlabs.tk $C_SUBMASTER $C_SUBMASTER
+sign_zone nlnetlabs.tk $C_SUBMASTER $C_MASTER
+sign_zone tk $C_MASTER $C_ROOT
 sign_zone . $C_ROOT
 
 echo
@@ -123,11 +123,11 @@ docker exec $C_RESOLVER unbound-control reload
 
 echo
 echo ':: Verify DNS lookup from resolver -> master -> root with DNSSEC'
-dig +dnssec @${RESOLVER_IP} tls1213.test.nlnetlabs.nl
+dig +dnssec @${RESOLVER_IP} tls1213.test.nlnetlabs.tk
 
 echo
 echo ':: Checking DNSSEC trust tree'
-docker exec $C_RESOLVER drill @127.0.0.1 SOA IN -DSk /var/lib/unbound/my-root.key -r /etc/unbound/root.hints tls1213.test.nlnetlabs.nl
+docker exec $C_RESOLVER drill @127.0.0.1 SOA IN -DSk /var/lib/unbound/my-root.key -r /etc/unbound/root.hints tls1213.test.nlnetlabs.tk
 
 echo
 echo ':: Installing root trust anchor in the app container..'
@@ -146,7 +146,7 @@ done
 echo
 echo ':: Identifying target FQDNs to verify'
 PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
-TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.nl | awk '{print $1}' | sed -e 's/\.$//')"
+TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.tk | awk '{print $1}' | sed -e 's/\.$//')"
 
 echo
 echo ':: Dumping target domain TLS cert to hostname mappings'
