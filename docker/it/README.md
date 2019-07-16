@@ -254,7 +254,7 @@ docker-machine create \
 eval $(docker-machine env YOURMACHINENAME)
 
 cd <internetnl src dir>docker/it
-docker-compose up --build
+docker-compose up --build -d
 ```
 
 
