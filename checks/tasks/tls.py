@@ -2095,7 +2095,9 @@ class ConnectionChecker:
             # You cannot tell that from the OpenSSL cipher name alone, nor per
             # the OpenSSL documentation can you rely on OpenSSL to exclude the
             # cipher when you request RSA ciphers (e.g. to test for ciphers to
-            # mark as "phase out").
+            # mark as "phase out"). UPDATE: It might be possible to exclude
+            # ciphers that use RSA for authentication by including !aRSA in the
+            # cipher string.
             #
             # For ciphers that we don't have any information about, fallback to
             # trusting OpenSSL cipher matching.
