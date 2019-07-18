@@ -5,7 +5,7 @@ import errno
 import http.client
 import socket
 import ssl
-import subprocess
+
 import time
 from timeit import default_timer as timer
 
@@ -37,6 +37,15 @@ from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus
 
+# Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
+# while monkey patching. That way we can still catch subprocess.TimeoutExpired
+# instead of just Exception which may intervene with Celery's own exceptions.
+# Gevent does not have the same issue.
+import eventlet
+if eventlet.patcher.is_monkey_patched('subprocess'):
+    subprocess = eventlet.import_patched('subprocess')
+else:
+    import subprocess
 
 try:
     from ssl import OP_NO_SSLv2, OP_NO_SSLv3
@@ -633,31 +642,32 @@ def dane(
     # Remove the trailing dot if any.
     hostname = url.rstrip(".")
 
-    # status 0: DANE validate
-    # status 1: ERROR
-    # status 2: PKIX ok, no TLSA
-    proc = subprocess.Popen(
-        [
-            settings.LDNS_DANE,
-            '-c', '/dev/stdin',  # Read certificate chain from stdin
-            '-n',  # Do not validate hostname
-            '-T',  # Exit status 2 for PKIX without (secure) TLSA records
-            '-f', settings.CA_CERTIFICATES,  # CA file
-            'verify', hostname, str(port),
-        ],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE,
-        universal_newlines=True)
-
     chain_pem = []
     for cert in chain:
         chain_pem.append(cert.as_pem())
     chain_txt = "\n".join(chain_pem)
-    try:
-        res = proc.communicate(input=chain_txt, timeout=10)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        res = proc.communicate()
+    res = None
+    with subprocess.Popen(
+            [
+                settings.LDNS_DANE,
+                '-c', '/dev/stdin',  # Read certificate chain from stdin
+                '-n',  # Do not validate hostname
+                '-T',  # Exit status 2 for PKIX without (secure) TLSA records
+                '-f', settings.CA_CERTIFICATES,  # CA file
+                'verify', hostname, str(port),
+            ],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE, universal_newlines=True) as proc:
 
+        try:
+            res = proc.communicate(input=chain_txt, timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            res = proc.communicate()
+
+    # status 0: DANE validate
+    # status 1: ERROR
+    # status 2: PKIX ok, no TLSA
     if res:
         stdout, stderr = res
 
