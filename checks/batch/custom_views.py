@@ -612,7 +612,7 @@ class ForumStandaardisatieNewView(ForumStandaardisatieView):
             result=starttls_dane_ta))
 
         non_sending_domain = False
-        dmarc_re = re.compile(r'v=DMARC1;\ +p=reject;?')
+        dmarc_re = re.compile(r'v=DMARC1;\ *p=reject;?')
         spf_re = re.compile(r'v=spf1\ +-all;?')
         dmarc_available = batch_test.auth.dmarc_available
         dmarc_record = batch_test.auth.dmarc_record
@@ -620,7 +620,7 @@ class ForumStandaardisatieNewView(ForumStandaardisatieView):
         spf_record = batch_test.auth.spf_record
         if (dmarc_available and spf_available
                 and len(dmarc_record) == 1 and len(spf_record) == 1
-                and dmarc_re.fullmatch(dmarc_record[0])
+                and dmarc_re.match(dmarc_record[0])
                 and spf_re.fullmatch(spf_record[0])):
             non_sending_domain = True
         view_data.append(dict(
