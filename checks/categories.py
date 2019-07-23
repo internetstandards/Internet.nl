@@ -1040,7 +1040,7 @@ class WebTlsZeroRTT(Subtest):
         self.tech_data = "detail tech data yes"
 
     def result_na(self):
-        self._status(STATUS_NOT_TESTED)
+        self.worst_status = STATUS_NOT_TESTED
         self.verdict = "detail web tls zero-rtt verdict na"
         self.tech_data = "detail tech data not-applicable"
 
