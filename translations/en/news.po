@@ -330,7 +330,7 @@ msgstr "Internet.nl launched during Dutch Cyber Week 2015"
 
 msgid "article next-major-release-will-use-new-TLS-guidelines body"
 msgstr ""
-"On April 23rd the NCSC published new [IT Security Guidelines for TLS](https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html) (version 2.0). The Dutch Internet Standards Platform was happy to provide feedback during the reviewing phase of the document. The next major release of Internet.nl will use the new TLS guidelines to check TLS connections. Internet.nl currently uses the previous version of the IT Security Guidelines for TLS (version 1.0 from 2014) for checking whether TLS settings are at least “Sufficient”.\n"
+"On April 23rd the NCSC published new [IT Security Guidelines for TLS](https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls) (version 2.0). The Dutch Internet Standards Platform was happy to provide feedback during the reviewing phase of the document. The next major release of Internet.nl will use the new TLS guidelines to check TLS connections. Internet.nl currently uses the previous version of the IT Security Guidelines for TLS (version 1.0 from 2014) for checking whether TLS settings are at least “Sufficient”.\n"
 "\n"
 "When using the new TLS guidelines organizations can achieve secure TLS connections for their internet connections. The advised settings are future proof; as expected TLS connections which are secured according to the new guidelines will not require any modifications in the near future. At the same time the guidelines also ensure that systems remain interoperable and prevent TLS settings to be incompatible. \n"
 "\n"
