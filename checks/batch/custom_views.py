@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 import re
 
-from ..models import BatchRequestType
+from ..models import BatchRequestType, DmarcPolicyStatus
 from ..scoring import STATUS_SUCCESS
+from ..tasks.tls import has_daneTA
 
 
 def get_applicable_views(user, batch_request):
@@ -57,6 +58,7 @@ class CustomView(object):
 
     """
     def __init__(self):
+        self.view_id = None
         self.name = self._class_name_to_snake()
         self.setup()
 
@@ -416,7 +418,7 @@ class RawReportsView(CustomView):
     def setup(self):
         self.settings = {
             BatchRequestType.web: {
-                'test_categories': ['ipv6', 'dnssec', 'tls']
+                'test_categories': ['ipv6', 'dnssec', 'tls', 'appsecpriv']
             },
             BatchRequestType.mail: {
                 'test_categories': ['ipv6', 'dnssec', 'auth', 'tls']
@@ -437,6 +439,7 @@ class ForumStandaardisatieView(CustomView):
 
     """
     def setup(self):
+        self.view_id = 'old_view'
         self.settings = {
             BatchRequestType.web: {
                 'ipv6': {
@@ -529,6 +532,113 @@ class ForumStandaardisatieView(CustomView):
         return view_data
 
 
+class ForumStandaardisatieNewView(ForumStandaardisatieView):
+    """
+    This new view will eventually replace the older view.
+
+    """
+    def setup(self):
+        super().setup()
+        # Add the new security header tests
+        self.settings[BatchRequestType.web]['appsecpriv'] = {
+            'http_x_frame': 'web_appsecpriv_x_frame_options',
+            'http_x_content_type': 'web_appsecpriv_x_content_type_options',
+            'http_x_xss': 'web_appsecpriv_x_xss_protection',
+            'http_csp': 'web_appsecpriv_csp',
+            'http_referrer_policy': 'web_appsecpriv_referrer_policy',
+        }
+        self.view_id = '20190524_FS'
+
+    def _get_dmarc_extra_info(self, batch_domain, view_data):
+        """
+        Extra information on the DMARC test.
+
+        """
+        batch_test = batch_domain.get_batch_test()
+        dmarc_policy_status = batch_test.auth.dmarc_policy_status
+
+        policy_only = False
+        if dmarc_policy_status in (
+                DmarcPolicyStatus.valid, DmarcPolicyStatus.invalid_external):
+            policy_only = True
+        view_data.append(dict(
+            name='mail_auth_dmarc_policy_only',
+            result=policy_only))
+
+        ext_dest = False
+        if dmarc_policy_status == DmarcPolicyStatus.valid:
+            ext_dest = True
+        view_data.append(dict(
+            name='mail_auth_dmarc_ext_destination',
+            result=ext_dest))
+
+    def _get_starttls_extra_info(self, batch_domain, view_data):
+        """
+        Extra information on the STARTTLS test.
+
+        """
+        batch_test = batch_domain.get_batch_test()
+        report = batch_test.tls.report
+
+        server_configured = True
+        if report['starttls_exists']['verdict'] == 'detail mail tls starttls-exists verdict other-2':
+            server_configured = False
+        view_data.append(dict(
+            name='mail_server_configured',
+            result=server_configured))
+
+        servers_testable = True
+        servers_data = report['starttls_exists']['tech_data']
+        if isinstance(servers_data, list):
+            for server_name, verdict in servers_data:
+                if verdict == 'detail tech data not-tested':
+                    servers_testable = False
+                    break
+        else:
+            verdict = servers_data
+            if verdict == 'detail tech data not-tested':
+                servers_testable = False
+        view_data.append(dict(
+            name='mail_servers_testable',
+            result=servers_testable))
+
+        starttls_dane_ta = False
+        if (report['dane_exists']['status'] == STATUS_SUCCESS
+                and report['dane_valid']['status'] == STATUS_SUCCESS):
+            starttls_dane_ta = True
+            tech_data = report['dane_exists']['tech_data']
+            for domain, tlsa_records in tech_data:
+                if not has_daneTA(tlsa_records):
+                    starttls_dane_ta = False
+                    break
+        view_data.append(dict(
+            name='mail_starttls_dane_ta',
+            result=starttls_dane_ta))
+
+        non_sending_domain = False
+        dmarc_re = re.compile(r'v=DMARC1;\ *p=reject;?')
+        spf_re = re.compile(r'v=spf1\ +-all;?')
+        dmarc_available = batch_test.auth.dmarc_available
+        dmarc_record = batch_test.auth.dmarc_record
+        spf_available = batch_test.auth.spf_available
+        spf_record = batch_test.auth.spf_record
+        if (dmarc_available and spf_available
+                and len(dmarc_record) == 1 and len(spf_record) == 1
+                and dmarc_re.match(dmarc_record[0])
+                and spf_re.fullmatch(spf_record[0])):
+            non_sending_domain = True
+        view_data.append(dict(
+            name='mail_non_sending_domain',
+            result=non_sending_domain))
+
+    def get_view_data(self, batch_request_type, batch_domain):
+        view_data = super().get_view_data(batch_request_type, batch_domain)
+        if batch_request_type == BatchRequestType.mail:
+            self._get_dmarc_extra_info(batch_domain, view_data)
+            self._get_starttls_extra_info(batch_domain, view_data)
+        return view_data
+
+
 def _create_views_map(view_instances):
     views_map = dict()
     for view in view_instances:
@@ -553,4 +663,5 @@ VIEWS_MAP = _create_views_map([
     HstsView(),
     RawReportsView(),
     ForumStandaardisatieView(),
+    ForumStandaardisatieNewView(),
 ])

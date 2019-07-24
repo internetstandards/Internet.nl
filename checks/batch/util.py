@@ -16,12 +16,13 @@ from django.utils import timezone
 
 from . import BATCH_API_VERSION
 from .custom_views import get_applicable_views, gather_views_results
+from .custom_views import ForumStandaardisatieView
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchCustomView, BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus
-from ..views.shared import validate_dname, pretty_domain_name
+from ..views.shared import pretty_domain_name, validate_dname
 
 
 def get_site_url(request):
@@ -61,7 +62,9 @@ def get_user_from_request(request):
     """
     user = None
     try:
-        username = request.META.get('REMOTE_USER')
+        username = (
+            request.META.get('REMOTE_USER')
+            or request.META.get('HTTP_REMOTE_USER'))
         if not username:
             username = getattr(settings, 'BATCH_TEST_USER', None)
         user = BatchUser.objects.get(username=username)
@@ -201,11 +204,19 @@ def gather_batch_results(user, batch_request, site_url):
         views = gather_views_results(
             custom_views, batch_domain, batch_request.type)
         if views:
+            views = sorted(views, key=lambda view: view['name'])
             result['views'] = views
 
         dom_results.append(result)
 
     results['domains'] = dom_results
+
+    # Add a temporary identifier for the new custom view.
+    # Will be replaced in a later release with a universal default output.
+    if (len(custom_views) == 1
+            and isinstance(custom_views[0], ForumStandaardisatieView)
+            and custom_views[0].view_id):
+        results['api-view-id'] = custom_views[0].view_id
     return results
 
 
@@ -245,15 +256,21 @@ def batch_async_register(self, batch_request, test_type, domains):
     if test_type is BatchRequestType.web:
         batch_test_model = BatchWebTest
         keys = ('domain', 'batch_request', 'webtest')
+        # Unused because of latency while registering the domains.
+        # get_valid_domain = get_valid_domain_web
+        get_valid_domain = validate_dname
     else:
         batch_test_model = BatchMailTest
         keys = ('domain', 'batch_request', 'mailtest')
+        # Unused because of latency while registering the domains.
+        # get_valid_domain = get_valid_domain_mail
+        get_valid_domain = validate_dname
 
     for domain in domains:
         # Ignore leading/trailing whitespace.
         domain = domain.strip()
         # Only register valid domain names like vanilla internet.nl
-        domain = validate_dname(domain)
+        domain = get_valid_domain(domain)
         if not domain:
             continue
 

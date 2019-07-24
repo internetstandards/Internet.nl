@@ -9,7 +9,7 @@ import logging
 import re
 import socket
 import ssl
-import subprocess
+
 import time
 from enum import Enum
 from timeit import default_timer as timer
@@ -52,6 +52,15 @@ from nassl.ocsp_response import OcspResponseNotTrustedError
 
 logger = logging.getLogger(__name__)
 
+# Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
+# while monkey patching. That way we can still catch subprocess.TimeoutExpired
+# instead of just Exception which may intervene with Celery's own exceptions.
+# Gevent does not have the same issue.
+import eventlet
+if eventlet.patcher.is_monkey_patched('subprocess'):
+    subprocess = eventlet.import_patched('subprocess')
+else:
+    import subprocess
 
 try:
     from ssl import OP_NO_SSLv2, OP_NO_SSLv3
@@ -958,31 +967,32 @@ def dane(
     # Remove the trailing dot if any.
     hostname = url.rstrip(".")
 
-    # status 0: DANE validate
-    # status 1: ERROR
-    # status 2: PKIX ok, no TLSA
-    proc = subprocess.Popen(
-        [
-            settings.LDNS_DANE,
-            '-c', '/dev/stdin',  # Read certificate chain from stdin
-            '-n',  # Do not validate hostname
-            '-T',  # Exit status 2 for PKIX without (secure) TLSA records
-            '-f', settings.CA_CERTIFICATES,  # CA file
-            'verify', hostname, str(port),
-        ],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE,
-        universal_newlines=True)
-
     chain_pem = []
     for cert in chain:
         chain_pem.append(cert.as_pem())
     chain_txt = "\n".join(chain_pem)
-    try:
-        res = proc.communicate(input=chain_txt, timeout=10)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        res = proc.communicate()
+    res = None
+    with subprocess.Popen(
+            [
+                settings.LDNS_DANE,
+                '-c', '/dev/stdin',  # Read certificate chain from stdin
+                '-n',  # Do not validate hostname
+                '-T',  # Exit status 2 for PKIX without (secure) TLSA records
+                '-f', settings.CA_CERTIFICATES,  # CA file
+                'verify', hostname, str(port),
+            ],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE, universal_newlines=True) as proc:
 
+        try:
+            res = proc.communicate(input=chain_txt, timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            res = proc.communicate()
+
+    # status 0: DANE validate
+    # status 1: ERROR
+    # status 2: PKIX ok, no TLSA
     if res:
         stdout, stderr = res
 
@@ -1033,7 +1043,7 @@ def get_common_name(cert):
             cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0])
         if common_name:
             value = common_name.value
-    except IndexError:
+    except (IndexError, ValueError):
         pass
     return value
 
@@ -1456,7 +1466,6 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 
     """
     results = {server: False for server, _ in mailservers}
-    server_count = len(results)
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.
@@ -1464,10 +1473,9 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # concurrent connection per IP.
         time.sleep(5)
         cache_ttl = redis_id.mail_starttls.ttl
-        while timer() - start < cache_ttl and server_count > 0:
+        while timer() - start < cache_ttl and not all(results.values()) > 0:
             for server, dane_cb_data in mailservers:
                 if results[server]:
-                    server_count -= 1
                     continue
                 # Check if we already have cached results.
                 cache_id = redis_id.mail_starttls.id.format(server)
