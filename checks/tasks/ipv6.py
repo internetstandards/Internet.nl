@@ -10,6 +10,7 @@ from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
+from django.db import transaction
 
 from . import dispatcher
 from . import SetupUnboundContext
@@ -137,6 +138,7 @@ def batch_web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
 
 
+@transaction.atomic
 def callback(results, addr, parent, parent_name, category):
     parent.report = {}
     parent.save()
