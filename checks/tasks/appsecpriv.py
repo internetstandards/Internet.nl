@@ -3,6 +3,7 @@
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+from django.db import transaction
 
 from . import SetupUnboundContext, shared
 from .dispatcher import check_registry, post_callback_hook
@@ -47,6 +48,7 @@ def batch_web_callback(self, results, domain):
     batch.scheduler.batch_callback_hook(webdomain, self.request.id)
 
 
+@transaction.atomic
 def callback(results, domain, category):
     """
     Get the results, create the necessary tables and commit in the DB.

@@ -26,6 +26,7 @@ from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
 from cryptography.hazmat.primitives import hashes
 from django.conf import settings
 from django.core.cache import cache
+from django.db import transaction
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy
 from itertools import product
@@ -396,6 +397,7 @@ def batch_mail_callback(self, results, domain):
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 
 
+@transaction.atomic
 def callback(results, domain, test_type):
     results = results_per_domain(results)
     testdomain = test_map[test_type]['model'](domain=domain)

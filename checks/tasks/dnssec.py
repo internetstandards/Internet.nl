@@ -12,6 +12,7 @@ from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
+from django.db import transaction
 
 from . import SetupUnboundContext
 from . import shared
@@ -146,6 +147,7 @@ def registrar_lookup(addr):
     return res
 
 
+@transaction.atomic
 def save_results_mail(addr, results, category):
     """
     Save results in the DB for the mail test.
