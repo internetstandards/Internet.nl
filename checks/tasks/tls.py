@@ -9,7 +9,6 @@ import logging
 import re
 import socket
 import ssl
-
 import time
 from enum import Enum
 from timeit import default_timer as timer
@@ -27,9 +26,9 @@ from cryptography.hazmat.primitives import hashes
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.utils.text import format_lazy
-from django.utils.translation import gettext_lazy
 from itertools import product
+from nassl import _nassl
+from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from . import SetupUnboundContext, shared
 from .dispatcher import check_registry, post_callback_hook
@@ -46,9 +45,8 @@ from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, ZeroRttStatus, OcspStatus
-
-from nassl import _nassl
-from nassl.ocsp_response import OcspResponseNotTrustedError
+from ..templatetags.translate import INJECTED_TRANSLATION_START
+from ..templatetags.translate import INJECTED_TRANSLATION_END
 
 
 logger = logging.getLogger(__name__)
@@ -617,8 +615,14 @@ def save_results(model, results, addr, domain, category):
 
 
 def build_report(dttls, category):
-    status_insecure = gettext_lazy('results security-level insufficient')
-    status_phase_out = gettext_lazy('results security-level phase-out')
+    status_insecure = (
+        INJECTED_TRANSLATION_START
+        + 'results security-level insufficient'
+        + INJECTED_TRANSLATION_END)
+    status_phase_out = (
+        INJECTED_TRANSLATION_START
+        + 'results security-level phase-out'
+        + INJECTED_TRANSLATION_END)
 
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:
@@ -654,10 +658,12 @@ def build_report(dttls, category):
                 category.subtests['fs_params'].result_no_dh_params()
             else:
                 fs_all = []
-                fs_all.extend([format_lazy('{fs} ({status})',
-                        fs=fs, status=status_insecure) for fs in dttls.fs_bad])
-                fs_all.extend([format_lazy('{prot} ({status})',
-                        prot=fs, status=status_phase_out) for fs in dttls.fs_phase_out])
+                fs_all.extend([
+                    '{fs} ({status})'.format(fs=fs, status=status_insecure)
+                    for fs in dttls.fs_bad])
+                fs_all.extend([
+                    '{prot} ({status})'.format(prot=fs, status=status_phase_out)
+                    for fs in dttls.fs_phase_out])
                 if len(dttls.fs_bad) > 0:
                     category.subtests['fs_params'].result_bad(fs_all)
                 elif len(dttls.fs_phase_out) > 0:
@@ -666,10 +672,12 @@ def build_report(dttls, category):
                     category.subtests['fs_params'].result_good()
 
             ciphers_all = []
-            ciphers_all.extend([format_lazy('{cipher} ({status})',
-                    cipher=cipher, status=status_insecure) for cipher in dttls.ciphers_bad])
-            ciphers_all.extend([format_lazy('{cipher} ({status})',
-                    cipher=cipher, status=status_phase_out) for cipher in dttls.ciphers_phase_out])
+            ciphers_all.extend([
+                '{cipher} ({status})'.format(cipher=cipher, status=status_insecure)
+                for cipher in dttls.ciphers_bad])
+            ciphers_all.extend([
+                '{cipher} ({status})'.format(cipher=cipher, status=status_phase_out)
+                for cipher in dttls.ciphers_phase_out])
             if len(dttls.ciphers_bad) > 0:
                 category.subtests['tls_ciphers'].result_bad(ciphers_all)
             elif len(dttls.ciphers_phase_out) > 0:
@@ -678,10 +686,12 @@ def build_report(dttls, category):
                 category.subtests['tls_ciphers'].result_good()
 
             prots = []
-            prots.extend([format_lazy('{prot} ({status})',
-                    prot=prot, status=status_insecure) for prot in dttls.protocols_bad])
-            prots.extend([format_lazy('{prot} ({status})',
-                    prot=prot, status=status_phase_out) for prot in dttls.protocols_phase_out])
+            prots.extend([
+                '{prot} ({status})'.format(prot=prot, status=status_insecure)
+                for prot in dttls.protocols_bad])
+            prots.extend([
+                '{prot} ({status})'.format(prot=prot, status=status_phase_out)
+                for prot in dttls.protocols_phase_out])
             if len(dttls.protocols_bad) > 0:
                 category.subtests['tls_version'].result_bad(prots)
             elif len(dttls.protocols_phase_out) > 0:
@@ -719,10 +729,12 @@ def build_report(dttls, category):
                 pass
             else:
                 pubkey_all = []
-                pubkey_all.extend([format_lazy('{pubkey} ({status})',
-                        pubkey=pubkey, status=status_insecure) for pubkey in dttls.cert_pubkey_bad])
-                pubkey_all.extend([format_lazy('{pubkey} ({status})',
-                        pubkey=pubkey, status=status_phase_out) for pubkey in dttls.cert_pubkey_phase_out])
+                pubkey_all.extend([
+                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_insecure)
+                    for pubkey in dttls.cert_pubkey_bad])
+                pubkey_all.extend([
+                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_phase_out)
+                    for pubkey in dttls.cert_pubkey_phase_out])
                 if len(dttls.cert_pubkey_bad) > 0:
                     category.subtests['cert_pubkey'].result_bad(pubkey_all)
                 elif len(dttls.cert_pubkey_phase_out) > 0:

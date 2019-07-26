@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
+import re
 
 from django import template
 from django.conf import settings
@@ -11,6 +12,19 @@ from ..scoring import STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED
 from ..scoring import STATUS_NOT_TESTED, STATUS_INFO
 
 register = template.Library()
+
+INJECTED_TRANSLATION_START = "🌜"
+INJECTED_TRANSLATION_END = "🌛"
+INJECTED_TRANSLATION_LABELS = [
+    'results security-level',
+]
+INJECTED_TRANSLATION_REGEX = re.compile(
+    r'|'.join([
+        '{}({}[^{}]*){}'.format(
+            INJECTED_TRANSLATION_START,
+            label,
+            INJECTED_TRANSLATION_END, INJECTED_TRANSLATION_END)
+        for label in INJECTED_TRANSLATION_LABELS]))
 
 
 @register.simple_tag(takes_context=True)
@@ -90,6 +104,7 @@ def render_details_table(headers, arguments):
             for column, cell_deque in enumerate(row_generator):
                 if cell_deque:
                     value = cell_deque.popleft()
+                    group_list = INJECTED_TRANSLATION_REGEX.findall(value)
                     if not value:
                         value = _('results empty-argument-alt-text')
                     elif value in [
@@ -101,6 +116,24 @@ def render_details_table(headers, arguments):
                             'detail tech data not-applicable',
                             'detail tech data not-tested']:
                         value = _(value)
+                    elif group_list:
+                        replacements = []
+                        for groups in group_list:
+                            if groups is tuple:
+                                # More than one group *used*.
+                                for group in groups:
+                                    # Only one of the groups may have a value.
+                                    if not group:
+                                        continue
+                                    replacements.append((group, _(group)))
+                                    break
+                            else:
+                                replacements.append((groups, _(groups)))
+                        for orig, new in replacements:
+                            value = (
+                                value.replace(orig, new)
+                                .replace(INJECTED_TRANSLATION_START, "")
+                                .replace(INJECTED_TRANSLATION_END, ""))
                     row.append(value)
                 else:
                     if column == 0 and table_length > 1:
