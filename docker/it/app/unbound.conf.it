@@ -6,4 +6,4 @@ server:
     log-servfail: yes
     val-log-level: 2
     root-hints: /app/docker/it/dns/resolver/unbound/root.hints
-    auto-trust-anchor-file: "/tmp/root_zsk.key"
+    trust-anchor-file: "/tmp/root_zsk.key"
