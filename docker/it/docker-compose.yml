@@ -572,7 +572,7 @@ services:
 
 
   # --------------------------------------------------------------------------
-  #     DNS INFRASTRUCTURE: ROOT, TK, NLNETLABS.NL AND TEST.NLNETLABS.TK
+  #     DNS INFRASTRUCTURE: ROOT, TK, NLNETLABS.TK AND TEST.NLNETLABS.TK
   #   AND AN UNBOUND RESOLVER WITH MODIFIED ROOT HINTS AND DNSSEC ROOT KEY
   # --------------------------------------------------------------------------
 
