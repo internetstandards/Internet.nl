@@ -312,7 +312,12 @@ ncsc_20_tests = [
         expected_not_tested={
             TESTS.HTTPS_TLS_ZERO_RTT
         }),
-    PreTLS13DomainConfig('NCSC20'
+    # This test is an expected failure because currently only ModernConnection
+    # can connect using the AESCCM8 cipher to TLS 1.2, yet we deliberately only
+    # use ModernConnection for TLS 1.3, not for TLS 1.2. This results in
+    # DebugConnection trying and failing to connect to the server with TLS 1.2
+    # due to the lack of shared ciphers.
+    pytest.param(PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:ModernBadCiphers',
         'tls12onlymodernbadciphers.test.nlnetlabs.tk',
@@ -320,7 +325,7 @@ ncsc_20_tests = [
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_MODERN_BAD_CIPHERS],  # matches all rows
             ],
-        }),
+        }), marks=pytest.mark.xfail),
 
     # 0-RTT is a TLS 1.3 feature so should not be tested.
     # Finite-field group ffdhe2048 is listed as 'phase out' by NCSC 2.0 and
