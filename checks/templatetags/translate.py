@@ -104,10 +104,12 @@ def render_details_table(headers, arguments):
             for column, cell_deque in enumerate(row_generator):
                 if cell_deque:
                     value = cell_deque.popleft()
-                    group_list = INJECTED_TRANSLATION_REGEX.findall(value)
                     if not value:
-                        value = _('results empty-argument-alt-text')
-                    elif value in [
+                        row.append(_('results empty-argument-alt-text'))
+                        continue
+
+                    group_list = INJECTED_TRANSLATION_REGEX.findall(value)
+                    if value in [
                             'detail tech data yes',
                             'detail tech data no',
                             'detail tech data secure',
