@@ -98,14 +98,19 @@ class OpenSSLServerDomainConfig(DomainConfig):
 
 class PreTLS13DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=dict(),
-            expected_failures=dict(), expected_not_tested=dict()):
+            expected_failures=dict(), expected_not_tested=dict(), lang='en'):
         super().__init__(test_id, domain,
             expected_warnings=expected_warnings,
             expected_failures=expected_failures,
             expected_not_tested=expected_not_tested)
 
         # Only TLS 1.3 servers support 0-RTT
-        self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
+        if lang == 'en':
+            self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
+        elif lang == 'nl':
+            self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT_NL, None)
+        else:
+            raise ValueError()
 
         # No expected issues? Should be a perfect score then!
         if not self.expected_failures:
@@ -458,6 +463,19 @@ other_tests = [
 ]
 
 
+nl_translation_tests = [
+    PreTLS13DomainConfig('NCSC20-Table1:TLS10',
+        'tls10only.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.HTTPS_TLS_VERSION_NL: [
+                ['TLS 1.0 (op risico)'],  # IPv6
+                ['TLS 1.0 (op risico)'],  # IPv4
+            ]
+        },
+        lang='nl'),
+]
+
+
 # Compare the test 'Technical details' table cells against expectations, if
 # defined.
 def check_table(selenium, expectation):
@@ -491,8 +509,8 @@ def check_table(selenium, expectation):
                         assert col == expected_col
 
 
-def assess_website(selenium, domain_config):
-    UX.submit_website_test_form(selenium, domain_config.domain)
+def assess_website(selenium, domain_config, lang='en'):
+    UX.submit_website_test_form(selenium, domain_config.domain, lang)
     UX.wait_for_test_to_start(selenium, domain_config.domain)
     UX.wait_for_test_to_complete(selenium)
     UX.open_report_detail_sections(selenium)
@@ -528,3 +546,9 @@ def test_ncsc_20(selenium, domain_config):
     'domain_config', other_tests, ids=id_generator)
 def test_others(selenium, domain_config):
     assess_website(selenium, domain_config)
+
+
+@pytest.mark.parametrize(
+    'domain_config', nl_translation_tests, ids=id_generator)
+def test_translations(selenium, domain_config):
+    assess_website(selenium, domain_config, 'nl')

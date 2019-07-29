@@ -197,10 +197,10 @@ echo
 echo ':: Waiting for Internet.nl app to become available..'
 wait_for_container_up $C_APP
 
-host -t A internetnl.test.nlnetlabs.tk
-host -t AAAA internetnl.test.nlnetlabs.tk
+host -t A nl.internetnl.test.nlnetlabs.tk
+host -t AAAA nl.internetnl.test.nlnetlabs.tk
 
-wait_for_http_connect $C_APP internetnl.test.nlnetlabs.tk 8080 20 || {
+wait_for_http_connect $C_APP nl.internetnl.test.nlnetlabs.tk 8080 20 || {
     echo >&2 'Unable to connect to the Internet.NL app: dumping netstat output'
     docker cp /opt/netstat.sh $C_APP:/tmp/
     docker exec $C_APP /tmp/netstat.sh

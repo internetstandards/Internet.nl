@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-BASE_URL = 'http://internetnl.test.nlnetlabs.tk:8080/'
+BASE_URL = 'http://{0}.internetnl.test.nlnetlabs.tk:8080/'
 IMPERFECT_SCORE = 'IMPERFECT'
 PERFECT_SCORE = '100%'
 
@@ -23,7 +23,6 @@ LOCATOR_PROBE_CATEGORY_SUFFIX = '-summary'
 LOCATOR_PROBE_RUNNING_TEXT = 'Running...'
 LOCATOR_WEBSITE_TEST_FORM_ID = 'web-url'
 LOCATOR_RESULTS_OVERVIEW_ID = 'testresults-overview'
-LOCATOR_PROGRESS_AND_RESULT_TITLE_PREFIX = 'Website test: '
 LOCATOR_SCORE = 'score'
 
 XPATH_PROBES = (
@@ -64,7 +63,9 @@ class TESTS:
     HTTPS_TLS_OCSP_STAPLING = 'OCSP Stapling'
     HTTPS_TLS_SECURE_RENEG = 'Secure renegotiation'
     HTTPS_TLS_VERSION = 'TLS version'
+    HTTPS_TLS_VERSION_NL = 'TLS-versie'
     HTTPS_TLS_ZERO_RTT = '0-RTT'
+    HTTPS_TLS_ZERO_RTT_NL = '0-RTT'
     IPV6_NS_ADDRESS = 'IPv6 addresses for name servers'
     IPV6_NS_REACHABILITY = 'IPv6 reachability of name servers'
     IPV6_WEB_ADDRESS = 'IPv6 addresses for web server'
@@ -100,8 +101,14 @@ class UX:
             # We are interested in the TEST TITLE. We hope that
             # WebElement.text() contains it. The DOM elements don't always
             # appear to be in the same order so we can't just use the 2nd text
-            # node as sometimes that isn't TEST TITLE but instead is 'open'.
-            test_title = re.sub(r'(open|close|[A-Za-z ]+:)', '',
+            # node as sometimes that isn't TEST TITLE but instead is 'open' (or
+            # 'close', or 'sluit' in Dutch). Strip off the success or failure
+            # status text (e.g. 'Failed:', 'Niet-testbaar:', etc) and the
+            # span open/close text, hopefully we are left with just the test
+            # title. This would be easier if each test report block had a
+            # language independent unique test idenfitier we could extract
+            # instead of a language dependent title plus nearby markup...
+            test_title = re.sub(r'(open|close|sluit|[A-Za-z- ]+:)', '',
                 test_title_anchor.text).strip()
             test_titles.add(test_title)
 
@@ -178,8 +185,8 @@ class UX:
             return False
 
     @staticmethod
-    def submit_website_test_form(selenium, domain):
-        selenium.get(BASE_URL)
+    def submit_website_test_form(selenium, domain, lang='en'):
+        selenium.get(BASE_URL.format(lang))
         website_test_url_input = selenium.find_element_by_id(
             LOCATOR_WEBSITE_TEST_FORM_ID)
         website_test_url_input.clear()
@@ -189,10 +196,9 @@ class UX:
     @staticmethod
     def wait_for_test_to_start(selenium, domain):
         # Wait for the test to start or the result page to show
-        # Both have the same HTML title
+        # Both contain the domain under test in the HTML page title
         WebDriverWait(selenium, 30).until(
-            EC.title_contains('{}{}'.format(
-                LOCATOR_PROGRESS_AND_RESULT_TITLE_PREFIX, domain)))
+            EC.title_contains('{}'.format(domain)))
 
     # Will raise TimeoutException on failure
     @staticmethod
@@ -232,14 +238,15 @@ class DomainConfig:
                  expected_score=None):
         self.test_id = test_id
         self.domain = domain
-        self.expected_failures = self.get_as_dict(expected_failures)
-        self.expected_warnings = self.get_as_dict(expected_warnings)
-        self.expected_not_tested = self.get_as_dict(expected_not_tested)
-        self.expected_passes = self.get_as_dict(expected_passes)
+        self.expected_failures = self.clone_as_dict(expected_failures)
+        self.expected_warnings = self.clone_as_dict(expected_warnings)
+        self.expected_not_tested = self.clone_as_dict(expected_not_tested)
+        self.expected_passes = self.clone_as_dict(expected_passes)
         self.expected_score = expected_score
         self.override_defaults()
 
-    def get_as_dict(self, dict_or_set):
+    @staticmethod
+    def clone_as_dict(dict_or_set):
         if isinstance(dict_or_set, dict):
             return copy.deepcopy(dict_or_set)
         elif isinstance(dict_or_set, set):

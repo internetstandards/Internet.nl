@@ -11,6 +11,10 @@ $TTL 60
 @                           IN  NS     ns2b.tk.
 internetnl                  IN  A      {{APP_IP}}
 internetnl                  IN  AAAA   {{APP_IPV6}}
+en.internetnl               IN  A      {{APP_IP}}
+en.internetnl               IN  AAAA   {{APP_IPV6}}
+nl.internetnl               IN  A      {{APP_IP}}
+nl.internetnl               IN  AAAA   {{APP_IPV6}}
 ca-ocsp                     IN  A      {{TARGET_CA_OCSP_IP}}
 ca-ocsp                     IN  AAAA   {{TARGET_CA_OCSP_IPV6}}
 tls1213                     IN  A      {{TARGET_TLS1213_IP}}

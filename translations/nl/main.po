@@ -2812,6 +2812,18 @@ msgstr "Toelichting op testrapport"
 msgid "results verdict label"
 msgstr "Uitslag:"
 
+msgid "results security-level insufficient"
+msgstr "onvoldoende"
+
+msgid "results security-level phase-out"
+msgstr "op risico"
+
+msgid "results security-level sufficient"
+msgstr "voldoende"
+
+msgid "results security-level good"
+msgstr "goed"
+
 msgid "test connipv6 failed description"
 msgstr ""
 "Helaas! Je internetprovider heeft je *geen* modern internetadres ([IPv6](/faqs/ipv6/)) gegeven, of\n"
