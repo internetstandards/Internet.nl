@@ -165,11 +165,12 @@ def aggregate_subreports(subreports, report):
                 subworststatus = subreport[test_item]['worst_status']
                 if ORDERED_STATUSES[substatus] <= ORDERED_STATUSES[status]:
                     status = substatus
-                    worst_status = subworststatus
                     verdict = subreport[test_item]['verdict']
                     report[test_item]['status'] = status
-                    report[test_item]['worst_status'] = worst_status
                     report[test_item]['verdict'] = verdict
+                if ORDERED_STATUSES[subworststatus] <= ORDERED_STATUSES[subworststatus]:
+                    worst_status = subworststatus
+                    report[test_item]['worst_status'] = worst_status
 
                 if (subreport[test_item]['tech_type'] and
                         not report[test_item]['tech_type']):

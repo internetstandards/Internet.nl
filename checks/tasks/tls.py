@@ -9,7 +9,6 @@ import logging
 import re
 import socket
 import ssl
-import subprocess
 import time
 from enum import Enum
 from timeit import default_timer as timer
@@ -26,9 +25,10 @@ from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
 from cryptography.hazmat.primitives import hashes
 from django.conf import settings
 from django.core.cache import cache
-from django.utils.text import format_lazy
-from django.utils.translation import gettext_lazy
+from django.db import transaction
 from itertools import product
+from nassl import _nassl
+from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from . import SetupUnboundContext, shared
 from .dispatcher import check_registry, post_callback_hook
@@ -45,13 +45,21 @@ from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, ZeroRttStatus, OcspStatus
-
-from nassl import _nassl
-from nassl.ocsp_response import OcspResponseNotTrustedError
+from ..templatetags.translate import INJECTED_TRANSLATION_START
+from ..templatetags.translate import INJECTED_TRANSLATION_END
 
 
 logger = logging.getLogger(__name__)
 
+# Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
+# while monkey patching. That way we can still catch subprocess.TimeoutExpired
+# instead of just Exception which may intervene with Celery's own exceptions.
+# Gevent does not have the same issue.
+import eventlet
+if eventlet.patcher.is_monkey_patched('subprocess'):
+    subprocess = eventlet.import_patched('subprocess')
+else:
+    import subprocess
 
 try:
     from ssl import OP_NO_SSLv2, OP_NO_SSLv3
@@ -387,6 +395,7 @@ def batch_mail_callback(self, results, domain):
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 
 
+@transaction.atomic
 def callback(results, domain, test_type):
     results = results_per_domain(results)
     testdomain = test_map[test_type]['model'](domain=domain)
@@ -606,8 +615,14 @@ def save_results(model, results, addr, domain, category):
 
 
 def build_report(dttls, category):
-    status_insecure = gettext_lazy('results security-level insufficient')
-    status_phase_out = gettext_lazy('results security-level phase-out')
+    status_insecure = (
+        INJECTED_TRANSLATION_START
+        + 'results security-level insufficient'
+        + INJECTED_TRANSLATION_END)
+    status_phase_out = (
+        INJECTED_TRANSLATION_START
+        + 'results security-level phase-out'
+        + INJECTED_TRANSLATION_END)
 
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:
@@ -643,10 +658,12 @@ def build_report(dttls, category):
                 category.subtests['fs_params'].result_no_dh_params()
             else:
                 fs_all = []
-                fs_all.extend([format_lazy('{fs} ({status})',
-                        fs=fs, status=status_insecure) for fs in dttls.fs_bad])
-                fs_all.extend([format_lazy('{prot} ({status})',
-                        prot=fs, status=status_phase_out) for fs in dttls.fs_phase_out])
+                fs_all.extend([
+                    '{fs} ({status})'.format(fs=fs, status=status_insecure)
+                    for fs in dttls.fs_bad])
+                fs_all.extend([
+                    '{prot} ({status})'.format(prot=fs, status=status_phase_out)
+                    for fs in dttls.fs_phase_out])
                 if len(dttls.fs_bad) > 0:
                     category.subtests['fs_params'].result_bad(fs_all)
                 elif len(dttls.fs_phase_out) > 0:
@@ -655,10 +672,12 @@ def build_report(dttls, category):
                     category.subtests['fs_params'].result_good()
 
             ciphers_all = []
-            ciphers_all.extend([format_lazy('{cipher} ({status})',
-                    cipher=cipher, status=status_insecure) for cipher in dttls.ciphers_bad])
-            ciphers_all.extend([format_lazy('{cipher} ({status})',
-                    cipher=cipher, status=status_phase_out) for cipher in dttls.ciphers_phase_out])
+            ciphers_all.extend([
+                '{cipher} ({status})'.format(cipher=cipher, status=status_insecure)
+                for cipher in dttls.ciphers_bad])
+            ciphers_all.extend([
+                '{cipher} ({status})'.format(cipher=cipher, status=status_phase_out)
+                for cipher in dttls.ciphers_phase_out])
             if len(dttls.ciphers_bad) > 0:
                 category.subtests['tls_ciphers'].result_bad(ciphers_all)
             elif len(dttls.ciphers_phase_out) > 0:
@@ -667,10 +686,12 @@ def build_report(dttls, category):
                 category.subtests['tls_ciphers'].result_good()
 
             prots = []
-            prots.extend([format_lazy('{prot} ({status})',
-                    prot=prot, status=status_insecure) for prot in dttls.protocols_bad])
-            prots.extend([format_lazy('{prot} ({status})',
-                    prot=prot, status=status_phase_out) for prot in dttls.protocols_phase_out])
+            prots.extend([
+                '{prot} ({status})'.format(prot=prot, status=status_insecure)
+                for prot in dttls.protocols_bad])
+            prots.extend([
+                '{prot} ({status})'.format(prot=prot, status=status_phase_out)
+                for prot in dttls.protocols_phase_out])
             if len(dttls.protocols_bad) > 0:
                 category.subtests['tls_version'].result_bad(prots)
             elif len(dttls.protocols_phase_out) > 0:
@@ -708,10 +729,12 @@ def build_report(dttls, category):
                 pass
             else:
                 pubkey_all = []
-                pubkey_all.extend([format_lazy('{pubkey} ({status})',
-                        pubkey=pubkey, status=status_insecure) for pubkey in dttls.cert_pubkey_bad])
-                pubkey_all.extend([format_lazy('{pubkey} ({status})',
-                        pubkey=pubkey, status=status_phase_out) for pubkey in dttls.cert_pubkey_phase_out])
+                pubkey_all.extend([
+                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_insecure)
+                    for pubkey in dttls.cert_pubkey_bad])
+                pubkey_all.extend([
+                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_phase_out)
+                    for pubkey in dttls.cert_pubkey_phase_out])
                 if len(dttls.cert_pubkey_bad) > 0:
                     category.subtests['cert_pubkey'].result_bad(pubkey_all)
                 elif len(dttls.cert_pubkey_phase_out) > 0:
@@ -958,31 +981,32 @@ def dane(
     # Remove the trailing dot if any.
     hostname = url.rstrip(".")
 
-    # status 0: DANE validate
-    # status 1: ERROR
-    # status 2: PKIX ok, no TLSA
-    proc = subprocess.Popen(
-        [
-            settings.LDNS_DANE,
-            '-c', '/dev/stdin',  # Read certificate chain from stdin
-            '-n',  # Do not validate hostname
-            '-T',  # Exit status 2 for PKIX without (secure) TLSA records
-            '-f', settings.CA_CERTIFICATES,  # CA file
-            'verify', hostname, str(port),
-        ],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE,
-        universal_newlines=True)
-
     chain_pem = []
     for cert in chain:
         chain_pem.append(cert.as_pem())
     chain_txt = "\n".join(chain_pem)
-    try:
-        res = proc.communicate(input=chain_txt, timeout=10)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        res = proc.communicate()
+    res = None
+    with subprocess.Popen(
+            [
+                settings.LDNS_DANE,
+                '-c', '/dev/stdin',  # Read certificate chain from stdin
+                '-n',  # Do not validate hostname
+                '-T',  # Exit status 2 for PKIX without (secure) TLSA records
+                '-f', settings.CA_CERTIFICATES,  # CA file
+                'verify', hostname, str(port),
+            ],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE, universal_newlines=True) as proc:
 
+        try:
+            res = proc.communicate(input=chain_txt, timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            res = proc.communicate()
+
+    # status 0: DANE validate
+    # status 1: ERROR
+    # status 2: PKIX ok, no TLSA
     if res:
         stdout, stderr = res
 
@@ -1033,7 +1057,7 @@ def get_common_name(cert):
             cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0])
         if common_name:
             value = common_name.value
-    except IndexError:
+    except (IndexError, ValueError):
         pass
     return value
 
@@ -1456,7 +1480,6 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 
     """
     results = {server: False for server, _ in mailservers}
-    server_count = len(results)
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.
@@ -1464,10 +1487,9 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # concurrent connection per IP.
         time.sleep(5)
         cache_ttl = redis_id.mail_starttls.ttl
-        while timer() - start < cache_ttl and server_count > 0:
+        while timer() - start < cache_ttl and not all(results.values()) > 0:
             for server, dane_cb_data in mailservers:
                 if results[server]:
-                    server_count -= 1
                     continue
                 # Check if we already have cached results.
                 cache_id = redis_id.mail_starttls.id.format(server)

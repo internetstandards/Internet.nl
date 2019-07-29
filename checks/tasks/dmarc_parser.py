@@ -66,7 +66,7 @@ def _check_dmarc_uri(tokens):
     return None
 
 
-dmarc_uri = Regex('[^ ,;]*').setParseAction(_check_dmarc_uri)
+dmarc_uri = Regex('[^ ,;]+').setParseAction(_check_dmarc_uri)
 percent = Combine(
     CaselessLiteral('pct') + equal + Word(nums, max=3))('percent')
 rfmt = Combine(

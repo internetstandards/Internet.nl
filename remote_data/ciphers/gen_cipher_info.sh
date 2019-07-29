@@ -18,7 +18,7 @@ fi
 # Where the columns are:
 #   0,1 - IANA/TLS RFC Client/ServerHello cipher codes
 #   2   - constant '-' which can be ignored
-#   3   - IANA cipher name
+#   3   - Openssl cipher name
 #   4   - TLS protocol version
 #   5   - Forward slash '/' separated key exchange algorithm(s) (e.g. DH, DH/DSS, DH/RSA)
 #   6   - Authentication algorithm

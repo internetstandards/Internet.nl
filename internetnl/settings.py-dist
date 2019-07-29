@@ -20,7 +20,11 @@ SECRET_KEY = 'secret'
 DEBUG = False
 
 # If Django is proxied (eg. webserver proxying to django/gunicorn) enable this setting.
+# Make sure that the `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers;
+# and the option to Preserve the Host are set by your proxy.
 DJANGO_IS_PROXIED = False
+if DJANGO_IS_PROXIED:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # --- Batch configuration
 #

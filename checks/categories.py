@@ -1,7 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
-from .scoring import STATUS_FAIL, STATUS_NOT_TESTED, STATUS_NOTICE
+from .scoring import STATUS_FAIL, STATUS_NOT_TESTED, STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
 
@@ -1040,7 +1040,7 @@ class WebTlsZeroRTT(Subtest):
         self.tech_data = "detail tech data yes"
 
     def result_na(self):
-        self._status(STATUS_NOT_TESTED)
+        self.worst_status = STATUS_NOT_TESTED
         self.verdict = "detail web tls zero-rtt verdict na"
         self.tech_data = "detail tech data not-applicable"
 
@@ -1062,7 +1062,7 @@ class WebTlsOCSPStapling(Subtest):
         self.tech_data = "detail tech data yes"
 
     def result_ok(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_INFO)
         self.verdict = "detail web tls ocsp-stapling verdict ok"
         self.tech_data = "detail tech data no"
 
