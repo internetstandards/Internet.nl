@@ -47,7 +47,7 @@ from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE, PERFECT_SCORE
 # AES256-GCM-SHA384         0x00,0x9D  TLSv1.2   RSA   RSA    AESGCM(256)  AEAD
 # AES128-GCM-SHA256         0x00,0x9C  TLSv1.2   RSA   RSA    AESGCM(128)  AEAD
 # AES256-SHA256             0x00,0x3D  TLSv1.2   RSA   RSA    AES(256)     SHA256
-# AES256-SHA                0x00,0x35  SSLv3     RSA   RSA    AES(256)     SHA1                
+# AES256-SHA                0x00,0x35  SSLv3     RSA   RSA    AES(256)     SHA1
 # AES128-SHA256             0x00,0x3C  TLSv1.2   RSA   RSA    AES(128)     SHA256
 # AES128-SHA                0x00,0x2F  SSLv3     RSA   RSA    AES(128)     SHA1
 # DES-CBC3-SHA              0x00,0x0A  SSLv3     RSA   RSA    3DES(168)    SHA1
