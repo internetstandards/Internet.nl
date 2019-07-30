@@ -429,24 +429,24 @@ services:
     depends_on:
       - targetbase
 
-  targettls12onlydiffipv4ipv6:
+  targettls13onlydiffipv4ipv6:
     build:
       context: target
       network: host
       args:
-        APACHE_SITES: http-with-ssl-redirect tls12onlydiffipv4ipv6
+        APACHE_SITES: http-with-ssl-redirect tls13onlydiffipv4ipv6
         APACHE_MODULES: ssl
     command: /opt/jinjify.sh /etc/apache2/sites-enabled/
     dns: ${RESOLVER_IP}
     networks:
       test_net:
-        ipv4_address: ${TARGET_TLS12ONLYDIFFIPV4IPV6_IP}
-        ipv6_address: ${TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6}
+        ipv4_address: ${TARGET_TLS13ONLYDIFFIPV4IPV6_IP}
+        ipv6_address: ${TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}
     depends_on:
       - targetbase
     environment:
-      - TARGET_TLS12ONLYDIFFIPV4IPV6_IP=${TARGET_TLS12ONLYDIFFIPV4IPV6_IP}
-      - TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6=${TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6}
+      - TARGET_TLS13ONLYDIFFIPV4IPV6_IP=${TARGET_TLS13ONLYDIFFIPV4IPV6_IP}
+      - TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6=${TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}
       - WAIT_FOR_CUSTOM_COMMAND=yes
 
   targettls1213:
@@ -624,8 +624,8 @@ services:
       - TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6
       - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP
       - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6
-      - TARGET_TLS12ONLYDIFFIPV4IPV6_IP
-      - TARGET_TLS12ONLYDIFFIPV4IPV6_IPV6
+      - TARGET_TLS13ONLYDIFFIPV4IPV6_IP
+      - TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6
       - TARGET_TLS1213_IP
       - TARGET_TLS1213_IPV6
       - TARGET_TLS13ONLY_IP
