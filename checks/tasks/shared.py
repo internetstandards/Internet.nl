@@ -416,7 +416,7 @@ class HTTPSConnection:
     other cipher supported by DebugConnection/LegacySslClient/OpenSSL 1.0.2,
     because only ModernConnection/SslClient/OpenSSL 1.1.1 seems to support
     AESCCM8.
-    
+
     This class should be used instead of native Python SSL/TLS connectivity
     because the native functionality does not support legacy protocols,
     protocol features and ciphers.
@@ -426,7 +426,7 @@ class HTTPSConnection:
     intended to be a general purpose rich HTTP client.
     """
     def __init__(self, host=None, socket_af=socket.AF_INET, timeout=10,
-        conn=None, tries=MAX_TRIES):
+            conn=None, tries=MAX_TRIES):
         self.port = 443
         if conn:
             # Use an existing connection
