@@ -48,7 +48,6 @@ services:
       # Allow the testrunner to execute Docker commands on the other containers
       - "/var/run/docker.sock:/var/run/docker.sock"
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
     depends_on:
@@ -85,7 +84,6 @@ services:
     # server, which in turn will use the value provided by dns: ${RESOLVER_IP} here.
     # See: https://docs.docker.com/v17.09/engine/userguide/networking/configure-dns/
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${APP_IP}
@@ -127,7 +125,6 @@ services:
     # See: https://github.com/SeleniumHQ/docker-selenium
     shm_size: 2G
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
     depends_on:
@@ -141,7 +138,6 @@ services:
   selenium:
     image: selenium/hub:3.141.59-palladium
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
     depends_on:
@@ -155,7 +151,6 @@ services:
   redis:
     image: redis:alpine
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${REDIS_IP}
@@ -164,7 +159,6 @@ services:
   rabbitmq:
     image: rabbitmq:alpine
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${RABBITMQ_IP}
@@ -173,7 +167,6 @@ services:
   postgres:
     image: postgres:alpine
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${POSTGRES_IP}
@@ -191,7 +184,6 @@ services:
   ca_ocsp:
     image: targetbase
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     entrypoint: /opt/ca-ocsp/run-server.sh
     networks:
       test_net:
@@ -215,7 +207,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls10only
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS10ONLY_IP}
@@ -231,7 +222,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls11only
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS11ONLY_IP}
@@ -247,7 +237,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls1011
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS1011_IP}
@@ -263,7 +252,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls1112
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS1112_IP}
@@ -279,7 +267,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls12only
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLY_IP}
@@ -295,7 +282,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect
     command: /opt/run-openssl-server.sh -tls1_2 -cipher 'ECDHE-RSA-AES256-SHA' -sigalgs RSA+SHA1
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYNOSHA2_IP}
@@ -353,7 +339,6 @@ services:
     #       Protocol  : TLSv1.2
     #       Cipher    : ECDHE-RSA-DES-CBC3-SHA
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}
@@ -390,7 +375,6 @@ services:
     #       Protocol  : TLSv1.2
     #       Cipher    : DHE-RSA-AES128-CCM8
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYMODERNBADCIPHERS_IP}
@@ -410,7 +394,6 @@ services:
     # otherwise we don't get as far as testing the cipher suites.
     #command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-ECDSA-AES256-SHA384'
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IP}
@@ -432,7 +415,6 @@ services:
     # otherwise we don't get as far as testing the cipher suites.
     #command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES256-SHA:AES128-SHA256:AES128-SHA:ECDHE-ECDSA-AES256-SHA384'
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP}
@@ -449,7 +431,6 @@ services:
         APACHE_MODULES: ssl
     command: /opt/jinjify.sh /etc/apache2/sites-enabled/
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS12ONLYDIFFIPV4IPV6_IP}
@@ -469,7 +450,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls1213
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS1213_IP}
@@ -485,7 +465,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect tls13only
         APACHE_MODULES: ssl
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS13ONLY_IP}
@@ -500,7 +479,6 @@ services:
     entrypoint: /opt/run-nginx-server.sh
     command: /etc/apache2/sites-available/nginx-0rtt.conf
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS130RTT_IP}
@@ -515,7 +493,6 @@ services:
     entrypoint: /opt/run-nginx-server.sh
     command: /etc/apache2/sites-available/nginx-invalidocsp.conf
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_TLS13INVALIDOCSP_IP}
@@ -531,7 +508,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect
     command: /opt/run-openssl-server.sh -ssl2 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_SSL2ONLY_IP}
@@ -547,7 +523,6 @@ services:
         APACHE_SITES: http-with-ssl-redirect 
     command: /opt/run-openssl-server.sh -ssl3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_SSL3ONLY_IP}
@@ -562,7 +537,6 @@ services:
       args:
         APACHE_SITES: http-only
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${TARGET_NOSSL_IP}
@@ -585,7 +559,6 @@ services:
       network: host
     tmpfs: /tmp
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${RESOLVER_IP}
@@ -608,7 +581,6 @@ services:
       network: host
     tmpfs: /tmp
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     volumes:
       # Allow the container to execute Docker commands on the parent container to publish a DS record
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -669,7 +641,6 @@ services:
       network: host
     tmpfs: /tmp
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     volumes:
       # Allow the container to execute Docker commands on the parent container to publish a DS record
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -696,7 +667,6 @@ services:
       network: host
     tmpfs: /tmp
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${MASTER2_IP}
@@ -722,7 +692,6 @@ services:
       network: host
     tmpfs: /tmp
     dns: ${RESOLVER_IP}
-    dns_search: does.not.exist
     networks:
       test_net:
         ipv4_address: ${ROOT_IP}

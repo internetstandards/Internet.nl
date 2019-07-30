@@ -50,12 +50,16 @@ cd ${APP_PATH}
 celery -A internetnl multi start \
     worker db_worker slow_db_worker \
     -c:1 5 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
-    -l info --without-gossip --time-limit=300 -P prefork &
+    -l info --without-gossip --time-limit=300 -P eventlet &
 
 # Start Celery Beat
 celery -A internetnl beat &
 
-( sleep 10s ; tail -F -n 1000 *.log ) &
+# Wait a little while for all 3 Celery worker groups to become ready
+docker/celery-ping.sh 3
+
+# Tail the Celery log files so that they appear in Docker logs output
+tail -F -n 1000 *.log &
 
 # Start the Django web server
 ./manage.py ${RUN_SERVER_CMD} 0.0.0.0:8080
