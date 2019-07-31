@@ -527,12 +527,12 @@ class HTTPSConnection:
                 # reset the read/write cursor to the original position
                 self.bytesio.handle.seek(pos, 0)
 
-            def read(self, amt):
-                data = bytearray(self.bytesio.handle.read(amt))
-                if len(data) < amt:
-                    self._update(amt)
-                    data.extend(self.bytesio.handle.read(amt))
-                return data
+            def read(self, amt=None):
+                # fetch additional response bytes on demand
+                self._update(amt)
+
+                # delegate actual response byte processing to the base class
+                return super().read(amt)
 
         def response_from_bytes(data):
             response = AutoUpdatingHTTPResponse(self.conn)
