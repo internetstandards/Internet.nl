@@ -481,51 +481,11 @@ class HTTPSConnection:
                 self.bytesio = BytesIOSocket(self._fetch_headers())
                 super().__init__(self.bytesio)
 
-            # TODO: push upstream
-            def _fixed_nassl_read(self, size, handshake_must_be_completed = True):
-                # type: (int, bool) -> bytes
-                if self.conn._sock is None:
-                    raise IOError('Internal socket set to None; cannot perform handshake.')
-                if handshake_must_be_completed and not self.conn._is_handshake_completed:
-                    raise IOError('SSL Handshake was not completed; cannot receive data.')
-
-                while True:
-                    try:
-                        # Try to read the decrypted data
-                        decrypted_data = self.conn._ssl.read(size)
-                        return decrypted_data
-                    except (_nassl.WantReadError, _nassl.SslError) as e:
-                        # A 'Connection shut down by peer' SslError is raised
-                        # when the previous call to _ssl.read() consumed all of
-                        # available data and left the buffer empty. As we
-                        # handle reading from the network socket ourself this
-                        # error does not actually mean that the peer shut down
-                        # the connection, if we try reading again from the
-                        # socket we might find there is new data waiting for
-                        # us. Any other SslError is unexpected however.
-                        # TODO: create a new dedicated exception type upstream
-                        # for this case.
-                        if (type(e) is _nassl.SslError and
-                                str(e) != 'Connection was shut down by peer'):
-                            raise
-
-                        # The SSL engine needs more data
-                        # before it can decrypt the whole message
-
-                        # Receive available encrypted data from the peer
-                        encrypted_data = self.conn._sock.recv(4096)
-
-                        if len(encrypted_data) <= 0:
-                            raise IOError('Could not read() - peer closed the connection.')
-                        else:
-                            # Pass it to the SSL engine
-                            self.conn._network_bio.write(encrypted_data)
-
             def _fetch_headers(self):
                 # read all HTTP headers (i.e. until \r\n\r\n or EOF)
                 data = bytearray()
                 while b'\r\n\r\n' not in data:
-                    data.extend(self._fixed_nassl_read(1024))
+                    data.extend(self.conn.read(1024))
                 return data
 
             def _update(self, amt):
@@ -544,7 +504,7 @@ class HTTPSConnection:
                 try:
                     while not amt or (self.bytesio.handle.tell() - pos) < amt:
                         self.bytesio.handle.write(
-                            self._fixed_nassl_read(chunk_size))
+                            self.conn.read(chunk_size))
                 except IOError:
                     pass
 
