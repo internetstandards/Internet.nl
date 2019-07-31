@@ -504,14 +504,27 @@ class HTTPSConnection:
                     data.extend(self._fixed_nassl_read(1024))
                 return data
 
-            def _update(self, size):
+            def _update(self, amt):
+                # save the current position in the underlying buffer, hope that
+                # no other code accesses the buffer while we are working with
+                # it.
                 pos = self.bytesio.handle.tell()
-                chunk_size = size if size < 8192 else 8192
+
+                # move the read/write cursor in the underlying buffer to the end
+                # so that we append to the existing data.
+                self.bytesio.handle.seek(0, 2)
+
+                # read and decrypt upto the number of requested bytes from the
+                # network and write them to the underlying buffer.
+                chunk_size = amt if amt and amt < 8192 else 8192
                 try:
-                    while self.bytesio.handle.tell() - pos < size:
-                        self.bytesio.handle.write(self._fixed_nassl_read(chunk_size))
+                    while not amt or (self.bytesio.handle.tell() - pos) < amt:
+                        self.bytesio.handle.write(
+                            self._fixed_nassl_read(chunk_size))
                 except IOError:
                     pass
+
+                # reset the read/write cursor to the original position
                 self.bytesio.handle.seek(pos, 0)
 
             def read(self, amt):
