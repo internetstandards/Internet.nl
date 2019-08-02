@@ -224,11 +224,11 @@ def socket_af(host, port, af, task, timeout=10):
 
 # TODO: factor out TLS test specific functionality (used in tls.py) from basic
 # connectivity (used here by http_fetch and also by tls.py).
-class DebugConnectionHandshakeException(socket.error):
+class ConnectionHandshakeException(socket.error):
     pass
 
 
-class DebugConnectionSocketException(socket.error):
+class ConnectionSocketException(socket.error):
     pass
 
 
@@ -263,7 +263,7 @@ class ConnectionHelper:
                 self.safe_shutdown()
                 tries_left -= 1
                 if tries_left <= 0:
-                    raise DebugConnectionSocketException()
+                    raise ConnectionSocketException()
                 time.sleep(1)
 
     def connect(self, do_handshake_on_connect):
@@ -307,7 +307,7 @@ class ConnectionHelper:
                 ClientCertificateRequested, NotImplementedError):
             # Not able to connect to port 443
             self.safe_shutdown()
-            raise DebugConnectionHandshakeException()
+            raise ConnectionHandshakeException()
         finally:
             if self.must_shutdown:
                 self.safe_shutdown()
@@ -438,7 +438,7 @@ class HTTPSConnection:
             try:
                 self.conn = ModernConnection(url=self.host, addr=addr,
                     version=TLSV1_3, timeout=timeout, tries=tries)
-            except DebugConnectionHandshakeException:
+            except ConnectionHandshakeException:
                 self.conn = DebugConnection(url=self.host, addr=addr,
                     version=SSLV23, timeout=timeout, tries=tries)
 
@@ -601,7 +601,7 @@ def http_fetch(
                 conn.close()
             break
         # If we could not connect we can try again.
-        except (socket.error, DebugConnectionSocketException):
+        except (socket.error, ConnectionSocketException):
             try:
                 if conn:
                     conn.close()
@@ -612,7 +612,7 @@ def http_fetch(
                 raise
             time.sleep(1)
         # If we got another exception just raise it.
-        except (http.client.HTTPException, DebugConnectionHandshakeException):
+        except (http.client.HTTPException, ConnectionHandshakeException):
             try:
                 if conn:
                     conn.close()

@@ -37,8 +37,8 @@ from .http_headers import HeaderCheckerStrictTransportSecurity
 from .shared import MAX_REDIRECT_DEPTH, NoIpError, resolve_dane
 from .shared import results_per_domain, aggregate_subreports
 from .shared import DebugConnection, ModernConnection
-from .shared import DebugConnectionHandshakeException
-from .shared import DebugConnectionSocketException
+from .shared import ConnectionHandshakeException
+from .shared import ConnectionSocketException
 from .shared import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2, TLSV1_3
 from .shared import HTTPSConnection
 from .. import scoring, categories
@@ -1309,7 +1309,7 @@ class DebugSMTPConnection(DebugConnection):
                     fd.close()
                 else:
                     fd.close()
-                    raise DebugConnectionHandshakeException()
+                    raise ConnectionHandshakeException()
 
             except (socket.error, socket.timeout, socket.gaierror):
                 # We didn't get a reply back, this means our packets
@@ -1403,7 +1403,7 @@ def cert_checks(
             debug_chain = starttls_details.debug_chain
             conn_port = starttls_details.conn_port
     except (socket.error, http.client.BadStatusLine, NoIpError,
-            DebugConnectionHandshakeException, DebugConnectionSocketException):
+            ConnectionHandshakeException, ConnectionSocketException):
         return dict(tls_cert=False)
 
     if debug_chain is None:
@@ -1534,9 +1534,9 @@ def check_mail_tls(server, dane_cb_data, task):
 
             conn.safe_shutdown()
             connected_with_secure_ciphers = True
-        except DebugConnectionSocketException:
+        except ConnectionSocketException:
             return dict(server_reachable=False)
-        except DebugConnectionHandshakeException:
+        except ConnectionHandshakeException:
             # If we cannot connect on the TLS layer try again including
             # weak ciphers.
             connected_with_secure_ciphers = False
@@ -1548,9 +1548,9 @@ def check_mail_tls(server, dane_cb_data, task):
             conn = DebugSMTPConnection(
                 server, ciphers=ncsc_bad_ciphers, shutdown=False,
                 send_SNI=send_SNI)
-        except DebugConnectionSocketException:
+        except ConnectionSocketException:
             return dict(server_reachable=False)
-        except DebugConnectionHandshakeException:
+        except ConnectionHandshakeException:
             # If we still cannot connect on the TLS layer, too bad.
             if not connected_with_secure_ciphers:
                 return dict(tls_enabled=False)
@@ -1582,16 +1582,16 @@ def check_mail_tls(server, dane_cb_data, task):
                 server, version=SSLV2, shutdown=True, send_SNI=send_SNI)
             prots_bad.append('SSLv2')
             prots_score = scoring.MAIL_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
+        except (ConnectionHandshakeException,
+                ConnectionSocketException):
             pass
         try:
             DebugSMTPConnection(
                 server, version=SSLV3, shutdown=True, send_SNI=send_SNI)
             prots_bad.append('SSLv3')
             prots_score = scoring.MAIL_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
+        except (ConnectionHandshakeException,
+                ConnectionSocketException):
             pass
 
         # Number of connections: 4
@@ -1605,8 +1605,8 @@ def check_mail_tls(server, dane_cb_data, task):
             dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
             dh_param = dh_param["DH_Parameters"].strip("( bit)")
             conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
+        except (ConnectionHandshakeException,
+                ConnectionSocketException):
             pass
         try:
             conn = DebugSMTPConnection(
@@ -1615,8 +1615,8 @@ def check_mail_tls(server, dane_cb_data, task):
             ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
             ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
             conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
+        except (ConnectionHandshakeException,
+                ConnectionSocketException):
             pass
 
         fs_bad = []
@@ -1798,8 +1798,8 @@ class ConnectionChecker:
                 else:
                     secure_reneg_score = self._score_secure_reneg_bad
                 return secure_reneg_score, secure_reneg
-            except (DebugConnectionSocketException,
-                    DebugConnectionHandshakeException):
+            except (ConnectionSocketException,
+                    ConnectionHandshakeException):
                 return self._score_secure_reneg_good, 0
 
         # TLS 1.3 forbids renegotiaton.
@@ -1850,8 +1850,8 @@ class ConnectionChecker:
                 else:
                     compression_score = self._score_compression_good
                 return compression_score, compression
-            except (DebugConnectionSocketException,
-                    DebugConnectionHandshakeException):
+            except (ConnectionSocketException,
+                    ConnectionHandshakeException):
                 return self._score_compression_good, 0
 
     def check_zero_rtt(self, explicit_conn=None):
@@ -1899,8 +1899,8 @@ class ConnectionChecker:
                         # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
                         if http_client.getresponse().status == 425:
                             return ZeroRttStatus.good, scoring.WEB_TLS_ZERO_RTT_GOOD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException,
+        except (ConnectionHandshakeException,
+                ConnectionSocketException,
                 IOError):
             pass
 
@@ -1936,8 +1936,8 @@ class ConnectionChecker:
                     with DebugConnection.from_conn(self._conn, version=version):
                         connected = True
                         self._note_ssl_version(self._conn)
-                except (DebugConnectionSocketException,
-                        DebugConnectionHandshakeException):
+                except (ConnectionSocketException,
+                        ConnectionHandshakeException):
                     connected = False
 
             if connected:
@@ -1965,8 +1965,8 @@ class ConnectionChecker:
                 dh_ff_p = int(dh_param["prime"], 16) # '0x...'
                 dh_ff_g = int(dh_param["generator"].partition(' ')[0]) # 'n (0xn)'
                 dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
-        except (DebugConnectionSocketException,
-                DebugConnectionHandshakeException):
+        except (ConnectionSocketException,
+                ConnectionHandshakeException):
             pass
 
         try:
@@ -1974,8 +1974,8 @@ class ConnectionChecker:
                 self._note_ssl_version(new_conn)
                 ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
                 ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
-        except (DebugConnectionSocketException,
-                DebugConnectionHandshakeException):
+        except (ConnectionSocketException,
+                ConnectionHandshakeException):
             pass
 
         fs_bad = []
@@ -2034,8 +2034,8 @@ class ConnectionChecker:
                     http_client.getresponse()
                     kex_hash_func = new_conn.get_peer_signature_digest()
                     kex_sig_type = new_conn.get_peer_signature_type()
-            except (DebugConnectionSocketException,
-                    DebugConnectionHandshakeException):
+            except (ConnectionSocketException,
+                    ConnectionHandshakeException):
                 pass
 
             if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
@@ -2252,8 +2252,8 @@ class ConnectionChecker:
                                         (cipher_suite == 'DH' and not 'DHE' in curr_cipher)):
                                         logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is not in our database."')
                                         cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
-                        except (DebugConnectionSocketException,
-                                DebugConnectionHandshakeException):
+                        except (ConnectionSocketException,
+                                ConnectionHandshakeException):
                             break
 
             # If in both sets, only keep the cipher in the bad set.
@@ -2336,8 +2336,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     ocsp_stapling_score=ocsp_stapling_score,
                 )
     except (socket.error, http.client.BadStatusLine, NoIpError,
-            DebugConnectionHandshakeException,
-            DebugConnectionSocketException):
+            ConnectionHandshakeException,
+            ConnectionSocketException):
         return dict(tls_enabled=False)
 
 
