@@ -51,8 +51,8 @@ from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE, PERFECT_SCORE
 # AES128-SHA256             0x00,0x3C  TLSv1.2   RSA   RSA    AES(128)     SHA256
 # AES128-SHA                0x00,0x2F  SSLv3     RSA   RSA    AES(128)     SHA1
 # DES-CBC3-SHA              0x00,0x0A  SSLv3     RSA   RSA    3DES(168)    SHA1
-REGEX_LEGACY_BAD_CIPHERS = re.compile(r'(IDEA|DES|RC4|NULL).* \(insufficient\)')
-REGEX_MODERN_BAD_CIPHERS = re.compile(r'AES(128|256)-CCM.* \(insufficient\)')
+REGEX_LEGACY_BAD_CIPHERS = re.compile(r'(IDEA|DES|RC4|NULL)')
+REGEX_MODERN_BAD_CIPHERS = re.compile(r'AES(128|256)-CCM')
 REGEX_PHASE_OUT_CIPHERS = re.compile(r'(DES.+CBC3|3DES.+CBC|AES(128|256)-(GCM-SHA(256|384)|SHA(256)?)).* \(at risk\)')
 
 
@@ -357,7 +357,7 @@ ncsc_20_tests = [
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [re.compile(r'(RSASSA-PSS.+\(at risk\)|DH-4096.+\(insufficient\))')],
+                [re.compile(r'(RSASSA-PSS.+\(at risk\)|DH-4096)')],
             ]
         }),
 

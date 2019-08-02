@@ -615,10 +615,6 @@ def save_results(model, results, addr, domain, category):
 
 
 def build_report(dttls, category):
-    status_insecure = (
-        INJECTED_TRANSLATION_START
-        + 'results security-level insufficient'
-        + INJECTED_TRANSLATION_END)
     status_phase_out = (
         INJECTED_TRANSLATION_START
         + 'results security-level phase-out'
@@ -658,9 +654,7 @@ def build_report(dttls, category):
                 category.subtests['fs_params'].result_no_dh_params()
             else:
                 fs_all = []
-                fs_all.extend([
-                    '{fs} ({status})'.format(fs=fs, status=status_insecure)
-                    for fs in dttls.fs_bad])
+                fs_all.extend(dttls.fs_bad)
                 fs_all.extend([
                     '{prot} ({status})'.format(prot=fs, status=status_phase_out)
                     for fs in dttls.fs_phase_out])
@@ -672,9 +666,7 @@ def build_report(dttls, category):
                     category.subtests['fs_params'].result_good()
 
             ciphers_all = []
-            ciphers_all.extend([
-                '{cipher} ({status})'.format(cipher=cipher, status=status_insecure)
-                for cipher in dttls.ciphers_bad])
+            ciphers_all.extend(dttls.ciphers_bad)
             ciphers_all.extend([
                 '{cipher} ({status})'.format(cipher=cipher, status=status_phase_out)
                 for cipher in dttls.ciphers_phase_out])
@@ -686,9 +678,7 @@ def build_report(dttls, category):
                 category.subtests['tls_ciphers'].result_good()
 
             prots = []
-            prots.extend([
-                '{prot} ({status})'.format(prot=prot, status=status_insecure)
-                for prot in dttls.protocols_bad])
+            prots.extend(dttls.protocols_bad)
             prots.extend([
                 '{prot} ({status})'.format(prot=prot, status=status_phase_out)
                 for prot in dttls.protocols_phase_out])
@@ -729,9 +719,7 @@ def build_report(dttls, category):
                 pass
             else:
                 pubkey_all = []
-                pubkey_all.extend([
-                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_insecure)
-                    for pubkey in dttls.cert_pubkey_bad])
+                pubkey_all.extend(dttls.cert_pubkey_bad)
                 pubkey_all.extend([
                     '{pubkey} ({status})'.format(pubkey=pubkey, status=status_phase_out)
                     for pubkey in dttls.cert_pubkey_phase_out])
