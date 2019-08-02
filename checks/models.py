@@ -401,6 +401,9 @@ class DomainTestTls(BaseTestModel):
     ciphers_phase_out = ListField(null=True)
     ciphers_score = models.IntegerField(null=True)
 
+    cipher_order = models.NullBooleanField(default=False)
+    cipher_order_score = models.IntegerField(null=True)
+
     protocols_bad = ListField(null=True)
     protocols_phase_out = ListField(null=True)
     protocols_score = models.IntegerField(null=True)

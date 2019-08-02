@@ -1526,6 +1526,26 @@ msgstr ""
 msgid "detail web tls ciphers verdict good"
 msgstr "Your web server supports sufficiently secure cipher suites only."
 
+msgid "detail web tls cipher_order exp"
+msgstr ""
+"We check if your web server negotiates a cipher with the client according\n"
+"its own preferences and not those of the client. See ['TLS guidelines from \n"
+"NCSC-EN|(), guideline B2-5).\n"
+"\n"
+"In the below table the OpenSSL naming convention is used for cipher suites. For a translation to the [IANA naming convention](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml) please see the [OpenSSL documentation](https://www.openssl.org/docs/apps/ciphers.html)."
+
+msgid "detail web tls cipher_order label"
+msgstr "Cipher order"
+
+msgid "detail web tls cipher_order tech table"
+msgstr "Web server IP address|Server cipher order enforced"
+
+msgid "detail web tls cipher_order verdict bad"
+msgstr "Your web server respects the client cipher order preference, which is *not* secure."
+
+msgid "detail web tls cipher_order verdict good"
+msgstr "Your web server enforces its own cipher order preference."
+
 msgid "detail web tls compression exp"
 msgstr ""
 "We check if your web server supports TLS compression. The use of compression\n"

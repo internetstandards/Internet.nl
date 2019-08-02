@@ -239,6 +239,9 @@ class ConnectionHelper:
     def __exit__(self, exception_type, exception_value, traceback):
         self.safe_shutdown()
 
+    def dup(self, *args, **kwargs):
+        return self.from_conn(self, *args, **kwargs)
+
     # Almost identical to HTTPConnection::_create_conn()
     def sock_setup(self):
         self.port = 443
@@ -300,7 +303,8 @@ class ConnectionHelper:
                 # This only works if set_tlsext_host_name() is also used
                 self.set_tlsext_status_ocsp()
 
-            self.set_cipher_list(self.ciphers)
+            self._set_ciphers()
+
             if do_handshake_on_connect:
                 self.do_handshake()
         except (socket.gaierror, socket.error, IOError, _nassl.OpenSSLError,
@@ -349,13 +353,14 @@ class ModernConnection(ConnectionHelper, SslClient):
     """
     def __init__(
             self, url, addr=None, version=TLSV1_3, shutdown=False,
-            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
-            do_handshake_on_connect=True, signature_algorithms=None,
-            timeout=10, tries=MAX_TRIES):
+            ciphers='ALL:COMPLEMENTOFALL', tls13ciphers=None, options=None,
+            send_SNI=True, do_handshake_on_connect=True,
+            signature_algorithms=None, timeout=10, tries=MAX_TRIES):
         self.url = url
         self.version = version
         self.must_shutdown = shutdown
         self.ciphers = ciphers
+        self.tls13ciphers = tls13ciphers
         self.addr = addr
         self.options = options
         self.send_SNI = send_SNI
@@ -368,6 +373,9 @@ class ModernConnection(ConnectionHelper, SslClient):
     @staticmethod
     def from_conn(conn, *args, **kwargs):
         return ModernConnection(url=conn.url, addr=conn.addr, *args, **kwargs)
+
+    def _set_ciphers(self):
+        self.set_cipher_list(self.ciphers, self.tls13ciphers)
 
 
 class DebugConnection(ConnectionHelper, LegacySslClient):
@@ -396,6 +404,9 @@ class DebugConnection(ConnectionHelper, LegacySslClient):
     @staticmethod
     def from_conn(conn, *args, **kwargs):
         return DebugConnection(url=conn.url, addr=conn.addr, *args, **kwargs)
+
+    def _set_ciphers(self):
+        self.set_cipher_list(self.ciphers)
 
     def get_peer_signature_type(self):
         """

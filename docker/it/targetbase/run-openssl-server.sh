@@ -45,6 +45,7 @@ OPENSSL_CMD="${OPENSSL_CMD} -cert ${CERT}"      # use this certificate
 OPENSSL_CMD="${OPENSSL_CMD} -CAfile ${CA_CERT}" # chain this root CA cert
 OPENSSL_CMD="${OPENSSL_CMD} -www"               # act as a simple HTTP server
 OPENSSL_CMD="${OPENSSL_CMD} -status"            # include OCSP in the response
+OPENSSL_CMD="${OPENSSL_CMD} -serverpref"        # use the servers cipher order preference
 OPENSSL_CMD="${OPENSSL_CMD}${RENEG_OPT}"        # try to disable renegotiation
 
 echo "Running OpenSSL with command: ${OPENSSL_CMD} $*"

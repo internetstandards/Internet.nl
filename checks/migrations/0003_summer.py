@@ -54,4 +54,14 @@ class Migration(migrations.Migration):
             name='zero_rtt_score',
             field=models.IntegerField(null=True),
         ),
+        migrations.AddField(
+            model_name='domaintesttls',
+            name='cipher_order',
+            field=models.NullBooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='domaintesttls',
+            name='cipher_order_score',
+            field=models.IntegerField(null=True),
+        ),
     ]

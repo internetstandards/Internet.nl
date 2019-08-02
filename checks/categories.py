@@ -135,6 +135,7 @@ class WebTls(Category):
             WebTlsHttpCompression,
             WebTlsFsParams,
             WebTlsCiphers,
+            WebTlsCipherOrder,
             WebTlsVersion,
             WebTlsCompression,
             WebTlsRenegotiationSecure,
@@ -759,6 +760,28 @@ class WebTlsCiphers(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls ciphers verdict bad"
         self.tech_data = tech_data
+
+
+class WebTlsCipherOrder(Subtest):
+    def __init__(self):
+        super(WebTlsCipherOrder, self).__init__(
+            name="tls_cipher_order",
+            label="detail web tls cipher_order label",
+            explanation="detail web tls cipher_order exp",
+            tech_string="detail web tls cipher_order tech table",
+            worst_status=scoring.WEB_TLS_CIPHER_ORDER_WORST_STATUS,
+            full_score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
+            model_score_field="cipher_order_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls cipher_order verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls cipher_order verdict bad"
+        self.tech_data = "detail tech data no"
 
 
 class WebTlsVersion(Subtest):

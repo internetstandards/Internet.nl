@@ -179,6 +179,15 @@ INSUFFICIENT_CIPHERS = ':'.join(BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSU
 BULK_ENC_CIPHERS_INSUFFICIENT_MODERN = ['AESCCM8']
 INSUFFICIENT_CIPHERS_MODERN = ':'.join(BULK_ENC_CIPHERS_INSUFFICIENT_MODERN)
 
+# Based on: https://tools.ietf.org/html/rfc8446#page-133 (B.4 Cipher suites)
+TLSV1_3_CIPHERS = frozenset([
+    'TLS_AES_128_GCM_SHA256',
+    'TLS_AES_256_GCM_SHA384',
+    'TLS_CHACHA20_POLY1305_SHA256',
+    'TLS_AES_128_CCM_SHA256',
+    'TLS_AES_128_CCM_8_SHA256',
+])
+
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = int(
     (
@@ -525,6 +534,8 @@ def save_results(model, results, addr, domain, category):
                     model.ciphers_bad = result.get("ciphers_bad")
                     model.ciphers_phase_out = result.get("ciphers_phase_out")
                     model.ciphers_score = result.get("ciphers_score")
+                    model.cipher_order = result.get("cipher_order")
+                    model.cipher_order_score = result.get("cipher_order_score")
                     model.protocols_bad = result.get("prots_bad")
                     model.protocols_phase_out = result.get("prots_phase_out")
                     model.protocols_score = result.get("prots_score")
@@ -676,6 +687,11 @@ def build_report(dttls, category):
                 category.subtests['tls_ciphers'].result_phase_out(ciphers_all)
             else:
                 category.subtests['tls_ciphers'].result_good()
+
+            if dttls.cipher_order:
+                category.subtests['tls_cipher_order'].result_good()
+            else:
+                category.subtests['tls_cipher_order'].result_bad()
 
             prots = []
             prots.extend(dttls.protocols_bad)
@@ -1701,7 +1717,8 @@ class ConnectionChecker:
     def __init__(self, conn):
         self._conn = conn
         self._debug_conn = None
-        self._seen_versions = set([conn.get_ssl_version()])
+        self._seen_versions = set()
+        self._seen_ciphers = dict()
         self._score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
         self._score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
         self._score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
@@ -1713,6 +1730,8 @@ class ConnectionChecker:
         self._score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
         self._score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
         self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
+
+        self._note_conn_details(conn)
 
     def __enter__(self):
         return self
@@ -1736,7 +1755,7 @@ class ConnectionChecker:
     @debug_conn.setter
     def debug_conn(self, value):
         self._debug_conn = value
-        self._note_ssl_version(self._debug_conn)
+        self._note_conn_details(self._debug_conn)
 
     def close(self):
         if self._debug_conn and self._debug_conn is not self._conn:
@@ -1747,8 +1766,22 @@ class ConnectionChecker:
         return (self._conn.get_ssl_version() == TLSV1_3
             or isinstance(self._conn, DebugConnection))
 
-    def _note_ssl_version(self, conn):
-        self._seen_versions.add(conn.get_ssl_version())
+    def _note_conn_details(self, conn):
+        ssl_version = conn.get_ssl_version()
+        cipher_name = conn.get_current_cipher_name()
+        conn_type = type(conn)
+
+        # create missing dict keys if needed
+        # don't use a set of ciphers because we care about the order in which
+        # the ciphers were encountered
+        self._seen_ciphers.setdefault(ssl_version, dict())
+        self._seen_ciphers[ssl_version].setdefault(conn_type, list())
+
+        # note the seen SSL version and cipher name
+        self._seen_versions.add(ssl_version)
+        ciphers = self._seen_ciphers[ssl_version][conn_type]
+        if cipher_name not in ciphers:
+            ciphers.append(cipher_name)
 
     def _debug_info(self, info):
         if (hasattr(settings, 'ENABLE_VERBOSE_TECHNICAL_DETAILS')
@@ -1818,7 +1851,7 @@ class ConnectionChecker:
                 # this check requires a new connection, otherwise we encounter:
                 # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
                 with DebugConnection.from_conn(self._conn, version=SSLV23) as new_conn:
-                    self._note_ssl_version(new_conn)
+                    self._note_conn_details(new_conn)
                     # Step 1.
                     # Send reneg on open connection
                     new_conn.do_renegotiate()
@@ -1892,7 +1925,7 @@ class ConnectionChecker:
                 if (test_conn._ssl.get_early_data_status() == 1 and
                     not test_conn.is_handshake_completed()):
                     test_conn.do_handshake()
-                    self._note_ssl_version(test_conn)
+                    self._note_conn_details(test_conn)
                     if test_conn._ssl.get_early_data_status() == 2:
                         # 0-RTT status is bad unless the target responds with
                         # HTTP status code 425 Too Early. See:
@@ -1935,7 +1968,7 @@ class ConnectionChecker:
                 try:
                     with DebugConnection.from_conn(self._conn, version=version):
                         connected = True
-                        self._note_ssl_version(self._conn)
+                        self._note_conn_details(self._conn)
                 except (ConnectionSocketException,
                         ConnectionHandshakeException):
                     connected = False
@@ -1960,7 +1993,7 @@ class ConnectionChecker:
             # have the _openssl_str_to_dic() method, but use of custom DH FF
             # groups is not relevant for TLS 1.3/ModernConnection anyway.
             with DebugConnection.from_conn(self._conn, ciphers="DH:DHE:!aNULL") as new_conn:
-                self._note_ssl_version(new_conn)
+                self._note_conn_details(new_conn)
                 dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
                 dh_ff_p = int(dh_param["prime"], 16) # '0x...'
                 dh_ff_g = int(dh_param["generator"].partition(' ')[0]) # 'n (0xn)'
@@ -1971,7 +2004,7 @@ class ConnectionChecker:
 
         try:
             with DebugConnection.from_conn(self._conn, ciphers="ECDH:ECDHE:!aNULL") as new_conn:
-                self._note_ssl_version(new_conn)
+                self._note_conn_details(new_conn)
                 ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
                 ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
         except (ConnectionSocketException,
@@ -2066,6 +2099,82 @@ class ConnectionChecker:
         }
 
         return fs_score, result_dict
+
+    def check_cipher_order(self):
+        """
+        Check whether the server respects its own cipher order or if that
+        order can be overriden by the client.
+
+        """
+
+        def _get_seen_ciphers_for_conn(conn):
+            ssl_version = conn.get_ssl_version()
+            conn_type = type(conn)
+            return self._seen_ciphers[ssl_version][conn_type]
+
+        def _get_nth_or_default(collection, index, default):
+            return collection[index] if index < len(collection) else default
+
+        cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_GOOD
+        cipher_order = True
+
+        # For this test we need two ciphers, one selected by the server and
+        # another selected by the server when the former was disallowed by the
+        # client. We then reverse the order of these two ciphers in the list of
+        # ciphers that the client tells the server it supports, and see if the
+        # server still selects the same cipher. We hope that the server doesn't
+        # consider both ciphers to be of equal weight and thus happy to use
+        # either irrespective of order. 
+
+        # Which ciphers seen so far during checks are relevant for self._conn?
+        relevant_ciphers = _get_seen_ciphers_for_conn(self._conn)
+
+        # Get the cipher name of at least one cipher that works with self._conn
+        first_cipher = relevant_ciphers[0]
+        second_cipher = _get_nth_or_default(relevant_ciphers, 1, None)
+
+        try:
+            # If we haven't yet connected with a second cipher, do so now.
+            if not second_cipher:
+                if self._conn.get_ssl_version() < TLSV1_3:
+                    cipher_string = f'!{first_cipher}:ALL:COMPLEMENTOFALL'
+                    with self._conn.dup(ciphers=cipher_string) as new_conn:
+                        second_cipher = new_conn.get_current_cipher_name()
+                else:
+                    # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
+                    # support '!' thus we must instead manually exclude the
+                    # current cipher using the known small set of allowed TLS
+                    # 1.3 ciphers. See '-ciphersuites' at:
+                    #   https://www.openssl.org/docs/man1.1.1/man1/ciphers.html
+                    remaining_ciphers = set(TLSV1_3_CIPHERS)
+                    remaining_ciphers.remove(first_cipher)
+                    cipher_string = ':'.join(remaining_ciphers)
+                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        second_cipher = new_conn.get_current_cipher_name()
+
+            if first_cipher != second_cipher:
+                # Now that we know of two ciphers that can be used to connect
+                # to the server, one of which was chosen in preference to the
+                # other, ask the server to use them in reverse order and
+                # confirm that the server instead continues to impose its own
+                # order preference on the cipher selection process:
+                cipher_string = f'{second_cipher}:{first_cipher}'
+                if self._conn.get_ssl_version() < TLSV1_3:
+                    with self._conn.dup(ciphers=cipher_string) as new_conn:
+                        newly_selected_cipher = new_conn.get_current_cipher_name()
+                else:
+                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        newly_selected_cipher = new_conn.get_current_cipher_name()
+
+                if newly_selected_cipher == second_cipher:
+                    cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_BAD
+                    cipher_order = False
+        except ConnectionHandshakeException:
+            # Unable to connect with a second cipher or with reversed cipher
+            # order.
+            pass
+
+        return cipher_order_score, cipher_order
 
     def check_ciphers(self):
         ciphers_bad = set()
@@ -2165,7 +2274,7 @@ class ConnectionChecker:
                                 self._conn, ciphers=ciphers_to_test,
                                 version=SSLV23
                             ) as new_conn:
-                                self._note_ssl_version(new_conn)
+                                self._note_conn_details(new_conn)
                                 curr_cipher = new_conn.get_current_cipher_name()
                                 # curr_cipher is likely not exactly the same as any
                                 # of the active cipher suites in the cipher string,
@@ -2293,6 +2402,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
             # save some details about the connection for later
             conn_handler = type(conn)
             conn_ssl_version = conn.get_ssl_version()
+            conn_cipher = conn.get_current_cipher_name()
 
             with get_connection_checker(conn) as checker:
                 # note: additional connections will be created by the checker
@@ -2305,6 +2415,7 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                 ciphers_score, ciphers_result = checker.check_ciphers()
                 zero_rtt_score, zero_rtt = checker.check_zero_rtt()
                 prots_score, prots_result = checker.check_protocol_versions()
+                cipher_order_score, cipher_order = checker.check_cipher_order()
 
                 return dict(
                     tls_enabled=True,
@@ -2315,6 +2426,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
                     ciphers_bad=ciphers_result['bad'],
                     ciphers_phase_out=ciphers_result['phase_out'],
                     ciphers_score=ciphers_score,
+                    cipher_order_score=cipher_order_score,
+                    cipher_order = cipher_order,
 
                     secure_reneg=secure_reneg,
                     secure_reneg_score=secure_reneg_score,

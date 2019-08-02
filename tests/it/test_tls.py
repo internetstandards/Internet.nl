@@ -159,6 +159,18 @@ ncsc_20_tests = [
             ]
         }),
 
+    PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
+        'tls10onlyhonorclientcipherorder.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.HTTPS_TLS_VERSION: [
+                ['TLS 1.0 (at risk)'],  # IPv6
+                ['TLS 1.0 (at risk)'],  # IPv4
+            ]
+        },
+        expected_failures={
+            TESTS.HTTPS_TLS_CIPHER_ORDER
+        }),
+
     PreTLS13DomainConfig('NCSC20-Table1:TLS11',
         'tls11only.test.nlnetlabs.tk',
         expected_warnings={
@@ -256,6 +268,7 @@ ncsc_20_tests = [
             TESTS.HTTPS_HTTP_HSTS,
             TESTS.HTTPS_HTTP_REDIRECT,
             TESTS.HTTPS_TLS_CIPHER_SUITES,
+            TESTS.HTTPS_TLS_CIPHER_ORDER,
             TESTS.HTTPS_TLS_CLIENT_RENEG,
             TESTS.HTTPS_TLS_COMPRESSION,
             TESTS.HTTPS_TLS_KEY_EXCHANGE,

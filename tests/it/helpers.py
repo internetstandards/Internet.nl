@@ -57,6 +57,7 @@ class TESTS:
     HTTPS_HTTP_HTTPS_AVAILABLE = 'HTTPS available'
     HTTPS_HTTP_REDIRECT = 'HTTPS redirect'
     HTTPS_TLS_CIPHER_SUITES = 'Cipher suites'
+    HTTPS_TLS_CIPHER_ORDER = 'Cipher order'
     HTTPS_TLS_CLIENT_RENEG = 'Client-initiated renegotiation'
     HTTPS_TLS_COMPRESSION = 'TLS compression'
     HTTPS_TLS_KEY_EXCHANGE = 'Key exchange parameters'

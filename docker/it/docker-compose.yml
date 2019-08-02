@@ -221,6 +221,21 @@ services:
     depends_on:
       - targetbase
 
+  targettls10onlyclientcipherorder:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect tls10onlyclientcipherorder
+        APACHE_MODULES: ssl
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS10ONLYCLIENTCIPHERORDER_IP}
+        ipv6_address: ${TARGET_TLS10ONLYCLIENTCIPHERORDER_IPV6}
+    depends_on:
+      - targetbase
+
   targettls11only:
     build:
       context: target
@@ -287,7 +302,7 @@ services:
       network: host
       args:
         APACHE_SITES: http-with-ssl-redirect
-    command: /opt/run-openssl-server.sh -tls1_2 -cipher 'ECDHE-RSA-AES256-SHA' -sigalgs RSA+SHA1
+    command: /opt/run-openssl-server.sh -tls1_2 -cipher 'ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA' -sigalgs RSA+SHA1
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -606,6 +621,8 @@ services:
       - TARGET_CA_OCSP_IPV6
       - TARGET_TLS10ONLY_IP
       - TARGET_TLS10ONLY_IPV6
+      - TARGET_TLS10ONLYCLIENTCIPHERORDER_IP
+      - TARGET_TLS10ONLYCLIENTCIPHERORDER_IPV6
       - TARGET_TLS11ONLY_IP
       - TARGET_TLS11ONLY_IPV6
       - TARGET_TLS1011_IP
