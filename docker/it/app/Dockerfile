@@ -22,6 +22,9 @@ RUN curl -fsSLo- 'https://github.com/mozilla/geckodriver/releases/download/v0.24
 RUN sudo mv /tmp/geckodriver /usr/local/bin
 
 # Install test suite dependencies
+# TODO: use Docker BuildKit local cache mount. See: https://stackoverflow.com/a/57282479
+# Blocked by: https://github.com/docker/docker-py/issues/2230
+# See also: https://github.com/docker/compose/pull/6584
 RUN sudo -H pip install --upgrade pip && \
     sudo -H pip install \
         coverage \
