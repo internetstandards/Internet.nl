@@ -61,14 +61,16 @@ tls12onlylegacyphaseoutciphers            IN  A      {{TARGET_TLS12ONLYLEGACYPHA
 tls12onlylegacyphaseoutciphers            IN  AAAA   {{TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6}}
 tls12onlymodernphaseoutciphers            IN  A      {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP}}
 tls12onlymodernphaseoutciphers            IN  AAAA   {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}}
-tls13onlydiffipv4ipv6                     IN  A      {{TARGET_TLS13ONLYDIFFIPV4IPV6_IP}}
-tls13onlydiffipv4ipv6                     IN  AAAA   {{TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}}
 tls13only                                 IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only                                 IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
+tls13onlydiffipv4ipv6                     IN  A      {{TARGET_TLS13ONLYDIFFIPV4IPV6_IP}}
+tls13onlydiffipv4ipv6                     IN  AAAA   {{TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}}
 tls130rtt                                 IN  A      {{TARGET_TLS130RTT_IP}}
 tls130rtt                                 IN  AAAA   {{TARGET_TLS130RTT_IPV6}}
 tls13invalidocsp                          IN  A      {{TARGET_TLS13INVALIDOCSP_IP}}
 tls13invalidocsp                          IN  AAAA   {{TARGET_TLS13INVALIDOCSP_IPV6}}
+tls13onlyhonorclientcipherorder           IN  A      {{TARGET_TLS13ONLYCLIENTCIPHERORDER_IP}}
+tls13onlyhonorclientcipherorder           IN  AAAA   {{TARGET_TLS13ONLYCLIENTCIPHERORDER_IPV6}}
 ssl2only                                  IN  A      {{TARGET_SSL2ONLY_IP}}
 ssl2only                                  IN  AAAA   {{TARGET_SSL2ONLY_IPV6}}
 ssl3only                                  IN  A      {{TARGET_SSL3ONLY_IP}}
@@ -105,6 +107,7 @@ _443._tcp.tls13onlydiffipv4ipv6           IN  TLSA   3 1 1 f58f7492351360e3855bc
 _443._tcp.tls13only                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls130rtt                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls13invalidocsp                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls13onlyhonorclientcipherorder IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.ssl2only                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.ssl3only                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.nossl                           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c

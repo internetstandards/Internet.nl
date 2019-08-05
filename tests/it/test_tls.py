@@ -426,6 +426,12 @@ ncsc_20_tests = [
                 ['no'],  # IPv4
             ]
         }),
+
+    BadDomain('NCSC20-GuidelineB2-5:TLS13',
+        'tls13onlyhonorclientcipherorder.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.HTTPS_TLS_CIPHER_ORDER
+        }),
 ]
 
 other_tests = [
