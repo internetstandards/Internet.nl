@@ -12,7 +12,7 @@ import ssl
 import time
 from enum import Enum
 from timeit import default_timer as timer
- 
+
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from cryptography.x509 import load_pem_x509_certificate, NameOID, ExtensionOID
