@@ -60,6 +60,7 @@ services:
       - ROOT_IP
       - MASTER_IP
       - RESOLVER_IP
+      - ENABLE_COVERAGE
 
 
   # --------------------------------------------------------------------------
@@ -104,6 +105,7 @@ services:
     environment:
       # setting CACHE_TTL (seconds) too low (e.g. to 1) causes test failures because the
       # Javascript retries run out before the probes complete.
+      - ENABLE_COVERAGE
       - CACHE_TTL=200
       - REDIS_HOST=redis
       - RABBITMQ_HOST=rabbitmq
