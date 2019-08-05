@@ -522,6 +522,21 @@ services:
     depends_on:
       - targetbase
 
+  targettls13onlyclientcipherorder:
+    build:
+      context: target
+      network: host
+      args:
+        APACHE_SITES: http-with-ssl-redirect tls13onlyclientcipherorder
+        APACHE_MODULES: ssl
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS13ONLYCLIENTCIPHERORDER_IP}
+        ipv6_address: ${TARGET_TLS13ONLYCLIENTCIPHERORDER_IPV6}
+    depends_on:
+      - targetbase
+
   targetssl2only:
     build:
       context: target
@@ -643,6 +658,8 @@ services:
       - TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6
       - TARGET_TLS13ONLYDIFFIPV4IPV6_IP
       - TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6
+      - TARGET_TLS13ONLYCLIENTCIPHERORDER_IP
+      - TARGET_TLS13ONLYCLIENTCIPHERORDER_IPV6
       - TARGET_TLS1213_IP
       - TARGET_TLS1213_IPV6
       - TARGET_TLS13ONLY_IP
