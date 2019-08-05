@@ -58,7 +58,7 @@ openssl x509 -noout -fingerprint -sha1 -inform pem -in ${CUSTOM_ROOT_CA_CERT} \
 echo
 echo ":: Waiting for root trust anchor file to appear.."
 while ! test -f ${TRUST_ANCHOR_PATH}; do   
-  sleep 1s
+  sleep 5s
 done
 
 echo "Received"

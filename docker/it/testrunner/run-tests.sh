@@ -49,14 +49,14 @@ wait_for_http_connect() {
     FROM_CONTAINER="$1"
     FQDN="$2"
     PORT="$3"
-    SECONDS_TO_WAIT=${3:-15}
+    SECONDS_TO_WAIT=${4:-15}
 
     CONNECTED=0
     while [ ${SECONDS_TO_WAIT} -ge 1 ]; do
         echo "Waiting ${SECONDS_TO_WAIT} seconds to connect from ${FROM_CONTAINER} to http://${FQDN}:${PORT}/.."
-        docker exec ${FROM_CONTAINER} curl -4 http://${FQDN}:${PORT}/ && CONNECTED=1 && break
-        sleep 1s
-        let "SECONDS_TO_WAIT=SECONDS_TO_WAIT-1"
+        docker exec ${FROM_CONTAINER} curl -4 -s http://${FQDN}:${PORT}/ && CONNECTED=1 && break
+        sleep 5s
+        let "SECONDS_TO_WAIT=SECONDS_TO_WAIT-5"
     done
 
     if [ $CONNECTED -eq 1 ]; then
@@ -200,18 +200,16 @@ wait_for_container_up $C_APP
 host -t A nl.internetnl.test.nlnetlabs.tk
 host -t AAAA nl.internetnl.test.nlnetlabs.tk
 
-wait_for_http_connect $C_APP nl.internetnl.test.nlnetlabs.tk 8080 20 || {
+MAX_APP_STARTUP_SECS=${ENABLE_COVERAGE:+180}
+MAX_APP_STARTUP_SECS=${MAX_APP_STARTUP_SECS:-30}
+
+wait_for_http_connect $C_APP nl.internetnl.test.nlnetlabs.tk 8080 ${MAX_APP_STARTUP_SECS} || {
     echo >&2 'Unable to connect to the Internet.NL app: dumping netstat output'
     docker cp /opt/netstat.sh $C_APP:/tmp/
     docker exec $C_APP /tmp/netstat.sh
     echo >&2 'Aborting.'
     exit 2
 }
-
-# TODO: sleeps are brittle, replace this with a deterministic check
-echo
-echo ':: Wait 15 seconds to give the app time to settle, e.g. Celery worker startup etc..'
-sleep 15s
 
 NUM_SIMULTANEOUS_TESTS=${NUM_BROWSER_NODES}
 PYTEST_XDIST_ARGS="-n ${NUM_SIMULTANEOUS_TESTS}"
