@@ -11,7 +11,7 @@ docker-compose down -v --remove-orphans
 # docker-compose build --parallel would be nice but doesn't seem to always
 # build correctly, thus we are forced to use the slow serial build instead:
 docker-compose build
-docker-compose create --force-recreate
+docker-compose up --force-recreate --no-start
 
 echo
 echo script
