@@ -1899,8 +1899,7 @@ msgid "detail web tls zero-rtt verdict bad"
 msgstr "Your web server supports 0-RTT, which could be a security risk."
 
 msgid "detail web tls zero-rtt verdict good"
-msgstr ""
-"Your web server supports does not support 0-RTT."
+msgstr "Your web server does not support 0-RTT."
 
 msgid "detail web tls zero-rtt verdict na"
 msgstr "Your web server does not support the TLS version required to use 0-RTT."
