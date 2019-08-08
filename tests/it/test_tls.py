@@ -379,7 +379,7 @@ ncsc_20_tests = [
             ]
         }),
 
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table5:No',
         'tls12onlynosha2.test.nlnetlabs.tk',
