@@ -77,9 +77,9 @@ class OpenSslBuildConfig(object):
         return openssl_target
 
     _OPENSSL_CONF_CMD = (
-        'perl Configure {target} no-shared enable-rc5 enable-md2 enable-gost '
-        'enable-cast enable-idea enable-ripemd enable-mdc2 '
-        'enable-weak-ssl-ciphers enable-ssl2 {extra_args}'
+        'perl Configure {target} zlib zlib-dynamic no-shared enable-rc5 enable-md2 enable-gost '
+        'enable-cast enable-idea enable-ripemd enable-mdc2 --with-zlib-include={zlib_include_path} '
+        '--with-zlib-lib={zlib_lib_path} enable-weak-ssl-ciphers enable-ssl2 {extra_args}'
     )
 
 
@@ -157,7 +157,7 @@ class ModernOpenSslBuildConfig(OpenSslBuildConfig):
     """
 
     _OPENSSL_CONF_CMD = (
-        'perl Configure {target} zlib no-zlib-dynamic no-shared enable-rc5 enable-md2 enable-gost '
+        'perl Configure {target} zlib zlib-dynamic no-shared enable-rc5 enable-md2 enable-gost '
         'enable-cast enable-idea enable-ripemd enable-mdc2 --with-zlib-include={zlib_include_path} '
         '--with-zlib-lib={zlib_lib_path} enable-weak-ssl-ciphers enable-tls1_3 {extra_args} no-async'
     )

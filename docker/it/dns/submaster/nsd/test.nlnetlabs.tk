@@ -32,10 +32,14 @@ tls1213defaultvhost                       IN  A      {{TARGET_TLS1213_IP}}
 tls1213defaultvhost                       IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213noocspstaple                       IN  A      {{TARGET_TLS1213_IP}}
 tls1213noocspstaple                       IN  AAAA   {{TARGET_TLS1213_IPV6}}
+tls1213tlscompression                           IN  A      {{TARGET_TLS1213TLSCOMPRESSION_IP}}
+tls1213tlscompression                           IN  AAAA   {{TARGET_TLS1213TLSCOMPRESSION_IPV6}}
 tls10only                                 IN  A      {{TARGET_TLS10ONLY_IP}}
 tls10only                                 IN  AAAA   {{TARGET_TLS10ONLY_IPV6}}
 tls10onlyhonorclientcipherorder           IN  A      {{TARGET_TLS10ONLYCLIENTCIPHERORDER_IP}}
 tls10onlyhonorclientcipherorder           IN  AAAA   {{TARGET_TLS10ONLYCLIENTCIPHERORDER_IPV6}}
+tls10onlyinsecurereneg                    IN  A      {{TARGET_TLS10ONLYINSECURERENEG_IP}}
+tls10onlyinsecurereneg                    IN  AAAA   {{TARGET_TLS10ONLYINSECURERENEG_IPV6}}
 tls11only                                 IN  A      {{TARGET_TLS11ONLY_IP}}
 tls11only                                 IN  AAAA   {{TARGET_TLS11ONLY_IPV6}}
 tls1011                                   IN  A      {{TARGET_TLS1011_IP}}
@@ -89,8 +93,10 @@ _443._tcp.tls1213sni                      IN  TLSA   3 1 1 8d0b8af3cfe3dc53375b6
 _443._tcp.tls1213nohsts                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213shorthsts                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213noocspstaple             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213tlscompression           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls10only                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls10onlyhonorclientcipherorder IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls10onlyinsecurereneg          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls11only                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1011                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1112                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c

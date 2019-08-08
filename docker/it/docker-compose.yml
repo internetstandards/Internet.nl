@@ -416,6 +416,23 @@ services:
       - APACHE_SITES=http-with-ssl-redirect tls12onlymodernphaseoutciphers
       - APACHE_MODULES=ssl
 
+  # To sanity check, exec on this container:
+  #   $ echo | openssl s_client -connect localhost:443 2>&1 | fgrep "Secure Renegotiation"
+  #   Secure Renegotiation IS NOT supported
+  targettls10onlyinsecurereneg:
+    image: targetbase
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS10ONLYINSECURERENEG_IP}
+        ipv6_address: ${TARGET_TLS10ONLYINSECURERENEG_IPV6}
+    depends_on:
+      - targetbase
+    environment:
+      - APACHE_VERSION=custom-ancient
+      - APACHE_SITES=http-with-ssl-redirect tls10onlyinsecurereneg
+      - APACHE_MODULES=ssl
+
   targettls13onlydiffipv4ipv6:
     image: targetbase
     command: /opt/jinjify.sh /etc/apache2/sites-enabled/
@@ -444,6 +461,24 @@ services:
       - targetbase
     environment:
       - APACHE_SITES=http-with-ssl-redirect tls1213
+      - APACHE_MODULES=ssl
+
+  # To sanity check, exec on this container:
+  #   $ echo | LD_LIBRARY_PATH=/opt/openssl-modern/lib /opt/openssl-modern/bin/openssl s_client -comp -tls1_2 -connect localhost:443 2>&1 | fgrep Compression
+  #   Compression: zlib compression
+  #       Compression: 1 (zlib compression)
+  targettls1213tlscompression:
+    image: targetbase
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS1213TLSCOMPRESSION_IP}
+        ipv6_address: ${TARGET_TLS1213TLSCOMPRESSION_IPV6}
+    depends_on:
+      - targetbase
+    environment:
+      - APACHE_VERSION=custom-modern
+      - APACHE_SITES=http-with-ssl-redirect tls1213tlscompression
       - APACHE_MODULES=ssl
 
   targettls13only:
@@ -591,6 +626,8 @@ services:
       - TARGET_TLS10ONLY_IPV6
       - TARGET_TLS10ONLYCLIENTCIPHERORDER_IP
       - TARGET_TLS10ONLYCLIENTCIPHERORDER_IPV6
+      - TARGET_TLS10ONLYINSECURERENEG_IP
+      - TARGET_TLS10ONLYINSECURERENEG_IPV6
       - TARGET_TLS11ONLY_IP
       - TARGET_TLS11ONLY_IPV6
       - TARGET_TLS1011_IP
@@ -615,6 +652,8 @@ services:
       - TARGET_TLS13ONLYCLIENTCIPHERORDER_IPV6
       - TARGET_TLS1213_IP
       - TARGET_TLS1213_IPV6
+      - TARGET_TLS1213TLSCOMPRESSION_IP
+      - TARGET_TLS1213TLSCOMPRESSION_IPV6
       - TARGET_TLS13ONLY_IP
       - TARGET_TLS13ONLY_IPV6
       - TARGET_TLS130RTT_IP

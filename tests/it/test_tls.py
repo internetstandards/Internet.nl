@@ -91,10 +91,6 @@ class OpenSSLServerDomainConfig(DomainConfig):
         ):
             self.expected_warnings.setdefault(test, None)
 
-        # We know tests will fail as the OpenSSL server does not respond well
-        # to all of the tests so we know the score will be less than perfect.
-        self.expected_score = IMPERFECT_SCORE
-
 
 class PreTLS13DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=dict(),
@@ -169,6 +165,18 @@ ncsc_20_tests = [
         },
         expected_failures={
             TESTS.HTTPS_TLS_CIPHER_ORDER
+        }),
+
+    PreTLS13DomainConfig('NCSC20'
+        '-Table12:TLS10',
+        'tls10onlyinsecurereneg.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.HTTPS_TLS_VERSION,
+            TESTS.HTTPS_TLS_KEY_EXCHANGE,
+            TESTS.HTTPS_TLS_CIPHER_ORDER,
+            TESTS.HTTPS_TLS_CIPHER_SUITES,
+            TESTS.HTTPS_TLS_CLIENT_RENEG,
+            TESTS.HTTPS_TLS_SECURE_RENEG,
         }),
 
     PreTLS13DomainConfig('NCSC20-Table1:TLS11',
@@ -383,6 +391,19 @@ ncsc_20_tests = [
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
                 [re.compile(r'(SHA1|rsaEncryption).+')]
             ]
+        }),
+
+    DomainConfig('NCSC20'
+        '-Table11:TLS12'
+        '-Table13:TLS12',
+        'tls1213tlscompression.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                [re.compile(r'RSASSA-PSS.+')]
+            ]
+        },
+        expected_failures={
+            TESTS.HTTPS_TLS_COMPRESSION
         }),
 
     # This website virtual host configuration deliberately does not do OCSP

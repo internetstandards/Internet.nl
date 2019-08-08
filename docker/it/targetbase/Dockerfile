@@ -1,6 +1,5 @@
 FROM devbase
 ENV DEBIAN_FRONTEND noninteractive
-ENV APACHE_WITH_LEGACY_OPENSSL no
 
 # Tip: We inherit latest (openssl in $PATH) and legacy OpenSSL
 # (/opt/openssl-old) installations from devbase
@@ -13,7 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpcre3-dev \
         m4 \
         nginx \
-        socat
+        socat \
+        zlib1g-dev
 
 # Build the Postfix SMTP server using legacy OpenSSL
 RUN useradd postfix && groupadd postdrop
@@ -28,7 +28,8 @@ RUN a2enmod env
 RUN a2enmod headers
 RUN a2enmod rewrite
 
-# Build Apache 2.4.39 with OpenSSL 1.0.2e (as used by Internet.nl):
+# Build Apache 2.4.39 with modified OpenSSL 1.0.2 with weak security features
+# First build OpenSSL
 WORKDIR /tmp/build/nassl
 RUN mkdir -p bin/openssl-legacy/freebsd64 \
              openssl-1.0.2e && \
@@ -37,16 +38,64 @@ RUN mkdir -p bin/openssl-legacy/freebsd64 \
     curl -fsSLo- 'https://github.com/PeterMosmans/openssl/tarball/1.0.2-chacha' | tar zx --strip-components 1 -C openssl-1.0.2e
 COPY custom-httpd/build_from_scratch.py .
 RUN python build_from_scratch.py
+# Create symlinks needed by the Apache build process for -lsso, -lcrypto and
+# -lz to resolve correctly.
 WORKDIR /tmp/build/nassl/bin/openssl-legacy
 RUN ln -s linux64 lib
-
-WORKDIR /tmp/build/custom-httpd
+# Then build Apache using our new OpenSSL
+ENV APACHE_SERVERROOT_OPENSSL_LEGACY /opt/apache-2.4-openssl-legacy
+WORKDIR /tmp/build/apache-2.4-openssl-legacy
 RUN curl -fsSLo- 'http://apache.hippo.nl//httpd/httpd-2.4.39.tar.bz2' | tar jx --strip-components 1 && \
-    ./configure --prefix=/opt/custom-httpd --with-ssl=/tmp/build/nassl/bin/openssl-legacy --enable-rewrite
+    ./configure --prefix=${APACHE_SERVERROOT_OPENSSL_LEGACY} \
+                --with-ssl=/tmp/build/nassl/bin/openssl-legacy \
+                --enable-rewrite
+# Build from sources up until the point that the Make fails, then hand fix the
+# failing make step by adding missing -L and -l arguments then finally resume
+# the build process... there must be a better way, but attempts to resolve the
+# issue via configure did not succeed.
 RUN make || true
-WORKDIR /tmp/build/custom-httpd/support
-RUN /usr/share/apr-1.0/build/libtool --silent --mode=link x86_64-linux-gnu-gcc  -pthread            -o ab  ab.lo       /usr/lib/x86_64-linux-gnu/libaprutil-1.la /usr/lib/x86_64-linux-gnu/libapr-1.la -lm -L/tmp/build/nassl/bin/openssl-legacy/lib -lssl -lcrypto -ldl
-WORKDIR /tmp/build/custom-httpd
+WORKDIR /tmp/build/apache-2.4-openssl-legacy/support
+RUN /usr/share/apr-1.0/build/libtool --silent --mode=link x86_64-linux-gnu-gcc -pthread -o ab \
+    ab.lo /usr/lib/x86_64-linux-gnu/libaprutil-1.la /usr/lib/x86_64-linux-gnu/libapr-1.la -lm \
+    -L/tmp/build/nassl/bin/openssl-legacy/lib -lssl -lcrypto -ldl
+WORKDIR /tmp/build/apache-2.4-openssl-legacy
+RUN make && make install
+
+# Build Apache 2.4.39 with OpenSSL 1.1.1 with support for ZLib compression
+# First build OpenSSL
+WORKDIR /tmp/build/openssl-modern
+RUN curl -fsSLo- 'https://www.openssl.org/source/openssl-1.1.1c.tar.gz' | tar zx --strip-components 1 && \
+    ./config --prefix=/opt/openssl-modern zlib && \
+    make && make install_sw
+# Then build Apache using our new OpenSSL
+ENV APACHE_SERVERROOT_OPENSSL_MODERN /opt/apache-2.4-openssl-modern
+WORKDIR /tmp/build/apache-2.4-openssl-modern
+RUN curl -fsSLo- 'http://apache.hippo.nl//httpd/httpd-2.4.39.tar.bz2' | tar jx --strip-components 1 && \
+    ./configure --prefix=${APACHE_SERVERROOT_OPENSSL_MODERN} \
+                --with-ssl=/opt/openssl-modern \
+                --enable-rewrite && \
+    make && make install
+
+# Build ancient OpenSSL 0.9.8k for a server that doesn't support secure
+# renegotiation (RFC-5746). Building that requires "./config no-asm" to work
+# around https://stackoverflow.com/a/14574746 and "make install_sw" to work
+# around https://askubuntu.com/a/742712. We also need an old Apache version as
+# modern versions reject client initiated renegotiation irrespective of how
+# OpenSSL is configured. See:
+# https://github.com/apache/httpd/commit/06f68fdc54c72573d4b520219b87a05abb098380
+WORKDIR /tmp/build/openssl-ancient
+RUN curl -fsSLo- 'https://www.openssl.org/source/openssl-0.9.8k.tar.gz' | tar zx --strip-components 1 && \
+    CFLAGS=-fPIC ./config --prefix=/opt/openssl-ancient shared no-asm && \
+    make && make install_sw
+# Then build Apache using our new OpenSSL
+ENV APACHE_SERVERROOT_OPENSSL_ANCIENT /opt/apache-2.2-openssl-ancient
+WORKDIR /tmp/build/apache-2.2-openssl-ancient
+RUN curl -fsSLo- 'https://archive.apache.org/dist/httpd/httpd-2.0.63.tar.bz2' | tar jx --strip-components 1 && \
+    ./configure --prefix=${APACHE_SERVERROOT_OPENSSL_ANCIENT} \
+                --with-ssl=/opt/openssl-ancient \
+                --enable-headers \
+                --enable-rewrite \
+                --enable-ssl
 RUN make && make install
 
 # Install the certificate authority and linked OCSP server files:
@@ -64,7 +113,14 @@ COPY certs/*.crt /etc/ssl/certs/
 COPY certs/*.key /etc/ssl/private/
 COPY dh_param_infiles/*.txt /etc/ssl/certs/dh_params/
 COPY certs/some.other.domain.der /etc/ssl/certs/ocsp_responses/
-COPY custom-httpd/custom-httpd.conf /opt/custom-httpd/
+COPY custom-httpd/custom-httpd24.conf ${APACHE_SERVERROOT_OPENSSL_LEGACY}/custom-httpd.conf
+COPY custom-httpd/custom-httpd24.conf ${APACHE_SERVERROOT_OPENSSL_MODERN}/custom-httpd.conf
+COPY custom-httpd/custom-httpd22.conf ${APACHE_SERVERROOT_OPENSSL_ANCIENT}/custom-httpd.conf
+COPY sites-available/* /etc/apache2/sites-available/
+COPY html /var/www/html/
+RUN SERVER_ROOT=${APACHE_SERVERROOT_OPENSSL_LEGACY} /opt/jinjify.sh ${APACHE_SERVERROOT_OPENSSL_LEGACY}/custom-httpd.conf
+RUN SERVER_ROOT=${APACHE_SERVERROOT_OPENSSL_MODERN} /opt/jinjify.sh ${APACHE_SERVERROOT_OPENSSL_MODERN}/custom-httpd.conf
+RUN SERVER_ROOT=${APACHE_SERVERROOT_OPENSSL_ANCIENT} /opt/jinjify.sh ${APACHE_SERVERROOT_OPENSSL_ANCIENT}/custom-httpd.conf
 
 WORKDIR /root
 ENTRYPOINT ["/opt/run-apache-server.sh"]

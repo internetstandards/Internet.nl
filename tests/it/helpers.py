@@ -246,6 +246,9 @@ class DomainConfig:
         self.expected_score = expected_score
         self.override_defaults()
 
+        if not expected_score and not self.expected_failures:
+            self.expected_score = PERFECT_SCORE
+
     @staticmethod
     def clone_as_dict(dict_or_set):
         if isinstance(dict_or_set, dict):

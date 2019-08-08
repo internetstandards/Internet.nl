@@ -1745,8 +1745,8 @@ class ConnectionChecker:
         # of this class should use 'with' or .close() when finished with this
         # checker instance in order to clean up any specially created debug
         # connection.
-        if self._debug_conn is None:
-            if self._is_conn_good_for_legacy_checks():
+        if not self._debug_conn:
+            if isinstance(self._conn, DebugConnection):
                 self._debug_conn = self._conn
             else:
                 self._debug_conn = DebugConnection.from_conn(self._conn)
@@ -1761,10 +1761,6 @@ class ConnectionChecker:
         if self._debug_conn and self._debug_conn is not self._conn:
             self._debug_conn.safe_shutdown()
             self._debug_conn = None
-
-    def _is_conn_good_for_legacy_checks(self):
-        return (self._conn.get_ssl_version() == TLSV1_3
-            or isinstance(self._conn, DebugConnection))
 
     def _note_conn_details(self, conn):
         ssl_version = conn.get_ssl_version()
@@ -1821,18 +1817,18 @@ class ConnectionChecker:
         Secure renegotiation should be supported, except in TLS 1.3.
 
         """
-        if self._conn.get_ssl_version() == TLSV1_3:
-            return self._score_secure_reneg_good, 1
-        else:
-            try:
-                secure_reneg = self.debug_conn.get_secure_renegotiation_support()
-                if secure_reneg:
-                    secure_reneg_score = self._score_secure_reneg_good
-                else:
-                    secure_reneg_score = self._score_secure_reneg_bad
-                return secure_reneg_score, secure_reneg
-            except (ConnectionSocketException,
-                    ConnectionHandshakeException):
+        # Although the test is not relevant for TLS 1.3, we're still interested
+        # in whether the server has this issue with an earlier TLS version, so
+        # we always check with DebugConnection.
+        try:
+            secure_reneg = self.debug_conn.get_secure_renegotiation_support()
+            if secure_reneg:
+                secure_reneg_score = self._score_secure_reneg_good
+            else:
+                secure_reneg_score = self._score_secure_reneg_bad
+            return secure_reneg_score, secure_reneg
+        except (ConnectionSocketException,
+                ConnectionHandshakeException):
             return self._score_secure_reneg_good, True
 
         # TLS 1.3 forbids renegotiaton.
@@ -1844,27 +1840,27 @@ class ConnectionChecker:
         Client renegotiation should not be possible.
 
         """
-        if self._conn.get_ssl_version() == TLSV1_3:
-            return self._score_client_reneg_good, False
-        else:
-            try:
-                # this check requires a new connection, otherwise we encounter:
-                # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
-                with DebugConnection.from_conn(self._conn, version=SSLV23) as new_conn:
-                    self._note_conn_details(new_conn)
-                    # Step 1.
-                    # Send reneg on open connection
-                    new_conn.do_renegotiate()
-                    # Step 2.
-                    # Connection should now be closed, send 2nd reneg to verify
-                    new_conn.do_renegotiate()
-                    # If we are still here, client reneg is supported
-                    client_reneg_score = self._score_client_reneg_bad
-                    client_reneg = True
-            except (socket.error, _nassl.OpenSSLError, IOError):
-                client_reneg_score = self._score_client_reneg_good
-                client_reneg = False
-            return client_reneg_score, client_reneg
+        # Although the test is not relevant for TLS 1.3, we're still interested
+        # in whether the server has this issue with an earlier TLS version, so
+        # we always check with DebugConnection.
+        try:
+            # this check requires a new connection, otherwise we encounter:
+            # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
+            with DebugConnection.from_conn(self._conn, version=SSLV23) as new_conn:
+                self._note_conn_details(new_conn)
+                # Step 1.
+                # Send reneg on open connection
+                new_conn.do_renegotiate()
+                # Step 2.
+                # Connection should now be closed, send 2nd reneg to verify
+                new_conn.do_renegotiate()
+                # If we are still here, client reneg is supported
+                client_reneg_score = self._score_client_reneg_bad
+                client_reneg = True
+        except (socket.error, _nassl.OpenSSLError, IOError):
+            client_reneg_score = self._score_client_reneg_good
+            client_reneg = False
+        return client_reneg_score, client_reneg
 
     def check_compression(self):
         """
@@ -1873,19 +1869,19 @@ class ConnectionChecker:
         TLS compression should not be enabled.
 
         """
-        if self._conn.get_ssl_version() == TLSV1_3:
+        # Although the test is not relevant for TLS 1.3, we're still interested
+        # in whether the server has this issue with an earlier TLS version, so
+        # we always check with DebugConnection.
+        try:
+            compression = self.debug_conn.get_current_compression_method() is not None
+            if compression:
+                compression_score = self._score_compression_bad
+            else:
+                compression_score = self._score_compression_good
+            return compression_score, compression
+        except (ConnectionSocketException,
+                ConnectionHandshakeException):
             return self._score_compression_good, False
-        else:
-            try:
-                compression = self.debug_conn.get_current_compression_method() is not None
-                if compression:
-                    compression_score = self._score_compression_bad
-                else:
-                    compression_score = self._score_compression_good
-                return compression_score, compression
-            except (ConnectionSocketException,
-                    ConnectionHandshakeException):
-                return self._score_compression_good, 0
 
     def check_zero_rtt(self, explicit_conn=None):
         test_conn = self._conn if not explicit_conn else explicit_conn
