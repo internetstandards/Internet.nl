@@ -1833,7 +1833,7 @@ class ConnectionChecker:
                 return secure_reneg_score, secure_reneg
             except (ConnectionSocketException,
                     ConnectionHandshakeException):
-                return self._score_secure_reneg_good, 0
+            return self._score_secure_reneg_good, True
 
         # TLS 1.3 forbids renegotiaton.
 
