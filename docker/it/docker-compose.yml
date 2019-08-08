@@ -209,12 +209,7 @@ services:
 
 
   targettls10only:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls10only
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -222,14 +217,12 @@ services:
         ipv6_address: ${TARGET_TLS10ONLY_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls10only
+      - APACHE_MODULES=ssl
 
   targettls10onlyclientcipherorder:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls10onlyclientcipherorder
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -237,14 +230,12 @@ services:
         ipv6_address: ${TARGET_TLS10ONLYCLIENTCIPHERORDER_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls10onlyclientcipherorder
+      - APACHE_MODULES=ssl
 
   targettls11only:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls11only
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -252,14 +243,12 @@ services:
         ipv6_address: ${TARGET_TLS11ONLY_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls11only
+      - APACHE_MODULES=ssl
 
   targettls1011:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls1011
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -267,14 +256,12 @@ services:
         ipv6_address: ${TARGET_TLS1011_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls1011
+      - APACHE_MODULES=ssl
 
   targettls1112:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls1112
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -282,14 +269,12 @@ services:
         ipv6_address: ${TARGET_TLS1112_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls1112
+      - APACHE_MODULES=ssl
 
   targettls12only:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls12only
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -297,13 +282,12 @@ services:
         ipv6_address: ${TARGET_TLS12ONLY_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls12only
+      - APACHE_MODULES=ssl
 
   targettls12onlynosha2:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect
+    image: targetbase
     command: /opt/run-openssl-server.sh -tls1_2 -cipher 'ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA' -sigalgs RSA+SHA1
     dns: ${RESOLVER_IP}
     networks:
@@ -312,13 +296,11 @@ services:
         ipv6_address: ${TARGET_TLS12ONLYNOSHA2_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect
 
   targettls12onlylegacybadciphers:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls12onlylegacybadciphers
+    image: targetbase
     # Tested with:
     #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.tk.key
     #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.tk.crt
@@ -370,15 +352,11 @@ services:
     depends_on:
       - targetbase
     environment:
-      - APACHE_WITH_LEGACY_OPENSSL=yes
+      - APACHE_VERSION=custom-legacy
+      - APACHE_SITES=http-with-ssl-redirect tls12onlylegacybadciphers
 
   targettls12onlymodernbadciphers:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls12onlymodernbadciphers
-        APACHE_MODULES: ssl
+    image: targetbase
     # Tested with:
     #   KEY=/etc/ssl/private/wildcard.test.nlnetlabs.tk.key
     #   CERT=/etc/ssl/certs/wildcard.test.nlnetlabs.tk.crt
@@ -405,18 +383,13 @@ services:
         ipv6_address: ${TARGET_TLS12ONLYMODERNBADCIPHERS_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls12onlymodernbadciphers
+      - APACHE_MODULES=ssl
 
+  # For use with DebugConnection/LegacySslClient (OpenSSL 1.1.1 based)
   targettls12onlylegacyphaseoutciphers:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls12onlylegacyphaseoutciphers
-        APACHE_MODULES: ssl
-    # Also offer support for the "Good" cipher ECDHE-ECDSA-AES256-SHA384 so
-    # that the initial checks based on Python 3.7 (OpenSSL 1.1.1b) will succed,
-    # otherwise we don't get as far as testing the cipher suites.
-    #command: /opt/run-openssl-server.sh --use-old-openssl -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-ECDSA-AES256-SHA384'
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -425,19 +398,13 @@ services:
     depends_on:
       - targetbase
     environment:
-      - APACHE_WITH_LEGACY_OPENSSL=yes
+      - APACHE_VERSION=custom-legacy
+      - APACHE_SITES=http-with-ssl-redirect tls12onlylegacyphaseoutciphers
+      - APACHE_MODULES=ssl
 
+  # For use with ModernConnection/SslClient (OpenSSL 1.1.1 based)
   targettls12onlymodernphaseoutciphers:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls12onlymodernphaseoutciphers
-        APACHE_MODULES: ssl
-    # Also offer support for the "Good" cipher ECDHE-ECDSA-AES256-SHA384 so
-    # that the initial checks based on Python 3.7 (OpenSSL 1.1.1b) will succed,
-    # otherwise we don't get as far as testing the cipher suites.
-    #command: /opt/run-openssl-server.sh -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt -tls1_2 -cipher 'AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES256-SHA:AES128-SHA256:AES128-SHA:ECDHE-ECDSA-AES256-SHA384'
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -445,14 +412,12 @@ services:
         ipv6_address: ${TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls12onlymodernphaseoutciphers
+      - APACHE_MODULES=ssl
 
   targettls13onlydiffipv4ipv6:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls13onlydiffipv4ipv6
-        APACHE_MODULES: ssl
+    image: targetbase
     command: /opt/jinjify.sh /etc/apache2/sites-enabled/
     dns: ${RESOLVER_IP}
     networks:
@@ -465,14 +430,11 @@ services:
       - TARGET_TLS13ONLYDIFFIPV4IPV6_IP=${TARGET_TLS13ONLYDIFFIPV4IPV6_IP}
       - TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6=${TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}
       - WAIT_FOR_CUSTOM_COMMAND=yes
+      - APACHE_SITES=http-with-ssl-redirect tls13onlydiffipv4ipv6
+      - APACHE_MODULES=ssl cgid
 
   targettls1213:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls1213
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -480,14 +442,12 @@ services:
         ipv6_address: ${TARGET_TLS1213_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls1213
+      - APACHE_MODULES=ssl
 
   targettls13only:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls13only
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -495,11 +455,12 @@ services:
         ipv6_address: ${TARGET_TLS13ONLY_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls13only
+      - APACHE_MODULES=ssl
 
   targettls130rtt:
-    build:
-      context: target
-      network: host
+    image: targetbase
     entrypoint: /opt/run-nginx-server.sh
     command: /etc/apache2/sites-available/nginx-0rtt.conf
     dns: ${RESOLVER_IP}
@@ -511,9 +472,7 @@ services:
       - targetbase
 
   targettls13invalidocsp:
-    build:
-      context: target
-      network: host
+    image: targetbase
     entrypoint: /opt/run-nginx-server.sh
     command: /etc/apache2/sites-available/nginx-invalidocsp.conf
     dns: ${RESOLVER_IP}
@@ -525,12 +484,7 @@ services:
       - targetbase
 
   targettls13onlyclientcipherorder:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect tls13onlyclientcipherorder
-        APACHE_MODULES: ssl
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -538,13 +492,12 @@ services:
         ipv6_address: ${TARGET_TLS13ONLYCLIENTCIPHERORDER_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls13onlyclientcipherorder
+      - APACHE_MODULES=ssl
 
   targetssl2only:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect
+    image: targetbase
     command: /opt/run-openssl-server.sh -ssl2 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     networks:
@@ -553,13 +506,11 @@ services:
         ipv6_address: ${TARGET_SSL2ONLY_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect
 
   targetssl3only:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-with-ssl-redirect 
+    image: targetbase
     command: /opt/run-openssl-server.sh -ssl3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     networks:
@@ -568,13 +519,11 @@ services:
         ipv6_address: ${TARGET_SSL3ONLY_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect 
 
   targetnossl:
-    build:
-      context: target
-      network: host
-      args:
-        APACHE_SITES: http-only
+    image: targetbase
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -582,6 +531,8 @@ services:
         ipv6_address: ${TARGET_NOSSL_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - APACHE_SITES=http-only
 
 
   # --------------------------------------------------------------------------
@@ -798,7 +749,7 @@ services:
     # containers that it will deploy.
     entrypoint: /bin/sleep infinity
 
-    # A base image for target servers
+  # A base image for target servers
   targetbase:
     image: targetbase
     build:
