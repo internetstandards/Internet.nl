@@ -63,6 +63,7 @@ REGEX_PHASE_OUT_CIPHERS = re.compile(r'(DES.+CBC3|3DES.+CBC|AES(128|256)-(GCM-SH
 class OpenSSLServerDomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=dict(),
             expected_failures=dict(), manual_cipher_checks=False):
+        self._manual_cipher_checks = manual_cipher_checks
         super().__init__(test_id, domain, expected_warnings=expected_warnings,
             expected_failures=expected_failures)
 
@@ -70,11 +71,12 @@ class OpenSSLServerDomainConfig(DomainConfig):
         # 0-RTT, so by default assume 0-RTT will not be tested.
         self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
 
+    def override_defaults(self):
         # This also means that the ciphers supported do not pass the Internet
         # NL tests, so unless the test is doing something specific with ciphers
         # we assume that the tests will warn that the server supports "phase
         # out" ciphers.
-        if not manual_cipher_checks:
+        if not self._manual_cipher_checks:
             self.expected_warnings.setdefault(
                 TESTS.HTTPS_TLS_CIPHER_SUITES, [[REGEX_PHASE_OUT_CIPHERS]])
 
@@ -107,11 +109,6 @@ class PreTLS13DomainConfig(DomainConfig):
             self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT_NL, None)
         else:
             raise ValueError()
-
-        # No expected issues? Should be a perfect score then!
-        if not self.expected_failures:
-            self.expected_score = PERFECT_SCORE
-
 
 # Tests specifically intended to show that Internet.NL tests for compliance
 # with the NCSC 2.0 guidelines.

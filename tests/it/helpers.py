@@ -244,6 +244,7 @@ class DomainConfig:
         self.expected_not_tested = self.clone_as_dict(expected_not_tested)
         self.expected_passes = self.clone_as_dict(expected_passes)
         self.expected_score = expected_score
+
         self.override_defaults()
 
         if not expected_score and not self.expected_failures:
