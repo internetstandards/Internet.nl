@@ -394,11 +394,6 @@ ncsc_20_tests = [
         '-Table11:TLS12'
         '-Table13:TLS12',
         'tls1213tlscompression.test.nlnetlabs.tk',
-        expected_warnings={
-            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [re.compile(r'RSASSA-PSS.+')]
-            ]
-        },
         expected_failures={
             TESTS.HTTPS_TLS_COMPRESSION
         }),
