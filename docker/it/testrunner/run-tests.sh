@@ -54,7 +54,7 @@ wait_for_http_connect() {
     CONNECTED=0
     while [ ${SECONDS_TO_WAIT} -ge 1 ]; do
         echo "Waiting ${SECONDS_TO_WAIT} seconds to connect from ${FROM_CONTAINER} to http://${FQDN}:${PORT}/.."
-        docker exec ${FROM_CONTAINER} curl -4 -s http://${FQDN}:${PORT}/ && CONNECTED=1 && break
+        docker exec ${FROM_CONTAINER} curl -4 -s -o/dev/null http://${FQDN}:${PORT}/ && CONNECTED=1 && break
         sleep 5s
         let "SECONDS_TO_WAIT=SECONDS_TO_WAIT-5"
     done
