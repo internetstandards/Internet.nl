@@ -244,6 +244,7 @@ class DomainConfig:
         self.expected_not_tested = self.clone_as_dict(expected_not_tested)
         self.expected_passes = self.clone_as_dict(expected_passes)
         self.expected_score = expected_score
+
         self.override_defaults()
 
         if not expected_score and not self.expected_failures:
@@ -264,14 +265,16 @@ class DomainConfig:
 
 class GoodDomain(DomainConfig):
     def __init__(self, testid, domain, expected_not_tested=dict()):
-        super().__init__(testid, domain, expected_not_tested=expected_not_tested,
-            expected_score='100%')
+        super().__init__(testid, domain,
+            expected_not_tested=expected_not_tested,
+            expected_score=PERFECT_SCORE)
 
 
 class BadDomain(DomainConfig):
     def __init__(self, testid, domain, expected_failures=dict()):
-        super().__init__(testid, domain, expected_failures=expected_failures,
-        expected_score=IMPERFECT_SCORE)
+        super().__init__(testid, domain,
+            expected_failures=expected_failures,
+            expected_score=IMPERFECT_SCORE)
 
 
 def id_generator(val):
