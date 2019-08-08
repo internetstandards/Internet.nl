@@ -3,7 +3,7 @@ set -e -u
 
 OPENSSL=openssl
 OLD_OPENSSL=/opt/openssl-old/bin/openssl
-USE_OLD_OPENSSL=0ALLOW_RENEGOTIATION=0
+USE_OLD_OPENSSL=0
 SSL_PORT=443
 
 if [[ $# -ge 1 && "$1" == "--use-old-openssl" ]]; then
