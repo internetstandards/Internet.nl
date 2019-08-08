@@ -288,7 +288,6 @@ services:
 
   targettls12onlynosha2:
     image: targetbase
-    command: /opt/run-openssl-server.sh -tls1_2 -cipher 'ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA' -sigalgs RSA+SHA1
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -297,7 +296,8 @@ services:
     depends_on:
       - targetbase
     environment:
-      - APACHE_SITES=http-with-ssl-redirect
+      - APACHE_SITES=http-with-ssl-redirect tls12onlynosha2
+      - APACHE_MODULES=ssl
 
   targettls12onlylegacybadciphers:
     image: targetbase

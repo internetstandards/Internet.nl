@@ -379,11 +379,10 @@ ncsc_20_tests = [
             ]
         }),
 
-    OpenSSLServerDomainConfig('NCSC20'
+    DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table5:No',
         'tls12onlynosha2.test.nlnetlabs.tk',
-        manual_cipher_checks=True,
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
                 [re.compile(r'(SHA1|rsaEncryption).+')]
