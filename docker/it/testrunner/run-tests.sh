@@ -150,6 +150,32 @@ PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
 TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.tk | awk '{print $1}' | sed -e 's/\.$//')"
 
 echo
+echo ':: Dumping target HTTP Server response header values'
+set -o pipefail
+for FQDN in ${TARGETS}; do
+    echo -n -e "${FQDN}:\t"
+    curl -s -I "http://${FQDN}/" | grep -E '^Server:' | sed -e 's/^Server: //' || echo
+done | column -t -s $'\t'
+set +o pipefail
+
+echo
+echo ':: Dumping target domain TLS version support'
+for FQDN in ${TARGETS}; do
+    echo -n -e "${FQDN}:\t"
+    for PROT in ${PROTOCOLS}; do
+        echo -n "${PROT}: "
+        SUPPORTED='-'
+        OPENSSL=/opt/openssl-old/bin/openssl
+        SERVERNAME="-servername ${FQDN}"
+        [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
+        [[ $PROT == "ssl2" ]] && SERVERNAME=
+        echo | timeout -k 1 2s ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
+        echo -n -e "${SUPPORTED}\t"
+    done
+    echo
+done | column -t
+
+echo
 echo ':: Dumping target domain TLS cert to hostname mappings'
 set -o pipefail
 for FQDN in ${TARGETS}; do
@@ -173,25 +199,8 @@ for FQDN in ${TARGETS}; do
         [ -n "${CERT}" ] && break
     done
     if [ -n "${CERT}" ]; then echo ${CERT}; else echo ERROR; fi
-done | column -t
+done | column -t -s $'\t'
 set +o pipefail
-
-echo
-echo ':: Dumping target domain TLS version support'
-for FQDN in ${TARGETS}; do
-    echo -n -e "${FQDN}:\t"
-    for PROT in ${PROTOCOLS}; do
-        echo -n "${PROT}: "
-        SUPPORTED='-'
-        OPENSSL=/opt/openssl-old/bin/openssl
-        SERVERNAME="-servername ${FQDN}"
-        [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
-        [[ $PROT == "ssl2" ]] && SERVERNAME=
-        echo | timeout -k 1 2s ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
-        echo -n -e "${SUPPORTED}\t"
-    done
-    echo
-done | column -t
 
 echo
 echo ':: Waiting for Internet.nl app to become available..'
