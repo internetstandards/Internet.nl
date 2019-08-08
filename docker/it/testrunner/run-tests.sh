@@ -150,20 +150,22 @@ PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
 TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.tk | awk '{print $1}' | sed -e 's/\.$//')"
 
 echo
-echo ':: Dumping target HTTP Server response header values'
+echo ':: Interrogating target servers..'
 set -o pipefail
+HEADER_ROW=1
 for FQDN in ${TARGETS}; do
-    echo -n -e "${FQDN}:\t"
-    curl -s -I "http://${FQDN}/" | grep -E '^Server:' | sed -e 's/^Server: //' || echo
-done | column -t -s $'\t'
-set +o pipefail
+    if [ "${HEADER_ROW}" -eq 1 ]; then
+        echo -e -n "FQDN"
+        for PROT in ${PROTOCOLS}; do echo -e -n "\t${PROT}"; done
+        echo -e -n "\tServer\tCertificate\n"
+        HEADER_ROW=0
+    fi
 
-echo
-echo ':: Dumping target domain TLS version support'
-for FQDN in ${TARGETS}; do
+    HTTP_REQUEST="GET / HTTP/1.1\nConnection: close\nHost: ${FQDN}\n\n"
+    SERVER_NAME=""
+    CERT=
     echo -n -e "${FQDN}:\t"
     for PROT in ${PROTOCOLS}; do
-        echo -n "${PROT}: "
         SUPPORTED='-'
         OPENSSL=/opt/openssl-old/bin/openssl
         SERVERNAME="-servername ${FQDN}"
@@ -171,34 +173,12 @@ for FQDN in ${TARGETS}; do
         [[ $PROT == "ssl2" ]] && SERVERNAME=
         echo | timeout -k 1 2s ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
         echo -n -e "${SUPPORTED}\t"
+        if [ "${SUPPORTED}" == "YES" ]; then
+            [ "${SERVER_NAME}" == "" ] && SERVER_NAME=$(echo -e "${HTTP_REQUEST}" | timeout -k 1 2s ${OPENSSL} s_client -quiet -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^Server:' | cut -c 9- | tr -d "\r\n" || echo)
+            [ "${CERT}" == "" ] && CERT=$(echo | timeout -k 1 2s ${OPENSSL} s_client -showcerts -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^subject=.+' | grep -Eo "CN.+" | cut -d '=' -f 2 | tr -d '[:space:]' || echo)
+        fi
     done
-    echo
-done | column -t
-
-echo
-echo ':: Dumping target domain TLS cert to hostname mappings'
-set -o pipefail
-for FQDN in ${TARGETS}; do
-    echo -n -e "${FQDN}:\t"
-    CERT=
-    for PROT in ${PROTOCOLS}; do
-        OPENSSL=/opt/openssl-old/bin/openssl
-        SERVERNAME="-servername ${FQDN}"
-        [[ $PROT == "tls1_3" ]] && OPENSSL=openssl
-        [[ $PROT == "ssl2" ]] && SERVERNAME=
-        CERT=$(echo | timeout -k 1 2s ${OPENSSL} s_client \
-            -${PROT} \
-            -showcerts \
-            ${SERVERNAME} \
-            -connect ${FQDN}:443 \
-            2>&1 \
-            | grep -E '^subject=.+' \
-            | grep -Eo "CN.+" \
-            | cut -d '=' -f 2 \
-            || echo)
-        [ -n "${CERT}" ] && break
-    done
-    if [ -n "${CERT}" ]; then echo ${CERT}; else echo ERROR; fi
+    echo -n -e "${SERVER_NAME}\t${CERT}\n"
 done | column -t -s $'\t'
 set +o pipefail
 
