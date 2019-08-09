@@ -162,8 +162,8 @@ for FQDN in ${TARGETS}; do
     fi
 
     HTTP_REQUEST="GET / HTTP/1.1\nConnection: close\nHost: ${FQDN}\n\n"
-    SERVER_NAME=""
-    CERT=
+    SERVER_NAME="Unknown"
+    CERT="Unknown"
     echo -n -e "${FQDN}:\t"
     for PROT in ${PROTOCOLS}; do
         SUPPORTED='-'
@@ -174,10 +174,12 @@ for FQDN in ${TARGETS}; do
         echo | timeout -k 1 2s ${OPENSSL} s_client -${PROT} ${SERVERNAME} -connect ${FQDN}:443 &>/dev/null && SUPPORTED='YES'
         echo -n -e "${SUPPORTED}\t"
         if [ "${SUPPORTED}" == "YES" ]; then
-            [ "${SERVER_NAME}" == "" ] && SERVER_NAME=$(echo -e "${HTTP_REQUEST}" | timeout -k 1 2s ${OPENSSL} s_client -quiet -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^Server:' | cut -c 9- | tr -d "\r\n" || echo)
-            [ "${CERT}" == "" ] && CERT=$(echo | timeout -k 1 2s ${OPENSSL} s_client -showcerts -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^subject=.+' | grep -Eo "CN.+" | cut -d '=' -f 2 | tr -d '[:space:]' || echo)
+            [ "${SERVER_NAME}" == "Unknown" ] && SERVER_NAME=$(echo -e "${HTTP_REQUEST}" | timeout -k 1 2s ${OPENSSL} s_client -quiet -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^Server:' | cut -c 9- | tr -d "\r\n" || echo)
+            [ "${CERT}" == "Unknown" ] && CERT=$(echo | timeout -k 1 2s ${OPENSSL} s_client -showcerts -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^subject=.+' | grep -Eo "CN.+" | cut -d '=' -f 2 | tr -d '[:space:]' || echo)
         fi
     done
+    [ "${SERVER_NAME}" == "" ] && SERVER_NAME="Unavailable"
+    [ "${CERT}" == "" ] && CERT="Unavailable"
     echo -n -e "${SERVER_NAME}\t${CERT}\n"
 done | column -t -s $'\t'
 set +o pipefail
