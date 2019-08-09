@@ -494,6 +494,19 @@ services:
       - APACHE_SITES=http-with-ssl-redirect tls13only
       - APACHE_MODULES=ssl
 
+  targettls13onlynosha2:
+    image: targetbase
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS13ONLYNOSHA2_IP}
+        ipv6_address: ${TARGET_TLS13ONLYNOSHA2_IPV6}
+    depends_on:
+      - targetbase
+    environment:
+      - APACHE_SITES=http-with-ssl-redirect tls13onlynosha2
+      - APACHE_MODULES=ssl
+
   targettls130rtt:
     image: targetbase
     entrypoint: /opt/run-nginx-server.sh
@@ -546,7 +559,6 @@ services:
 
   targetssl3only:
     image: targetbase
-    command: /opt/run-openssl-server.sh -ssl3 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -555,7 +567,9 @@ services:
     depends_on:
       - targetbase
     environment:
-      - APACHE_SITES=http-with-ssl-redirect 
+      - APACHE_SITES=http-with-ssl-redirect ssl3only
+      - APACHE_VERSION=custom-ancient
+      - APACHE_MODULES=ssl
 
   targetnossl:
     image: targetbase
@@ -656,6 +670,8 @@ services:
       - TARGET_TLS1213TLSCOMPRESSION_IPV6
       - TARGET_TLS13ONLY_IP
       - TARGET_TLS13ONLY_IPV6
+      - TARGET_TLS13ONLYNOSHA2_IP
+      - TARGET_TLS13ONLYNOSHA2_IPV6
       - TARGET_TLS130RTT_IP
       - TARGET_TLS130RTT_IPV6
       - TARGET_TLS13INVALIDOCSP_IP

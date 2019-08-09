@@ -61,6 +61,7 @@ class TESTS:
     HTTPS_TLS_CLIENT_RENEG = 'Client-initiated renegotiation'
     HTTPS_TLS_COMPRESSION = 'TLS compression'
     HTTPS_TLS_KEY_EXCHANGE = 'Key exchange parameters'
+    HTTPS_TLS_KEY_EXCHANGE_NL = 'Sleuteluitwisselingsparameters'
     HTTPS_TLS_OCSP_STAPLING = 'OCSP Stapling'
     HTTPS_TLS_SECURE_RENEG = 'Secure renegotiation'
     HTTPS_TLS_VERSION = 'TLS version'

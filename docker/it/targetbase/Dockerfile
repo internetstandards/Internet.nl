@@ -88,8 +88,8 @@ RUN curl -fsSLo- 'https://www.openssl.org/source/openssl-0.9.8k.tar.gz' | tar zx
     CFLAGS=-fPIC ./config --prefix=/opt/openssl-ancient shared no-asm && \
     make && make install_sw
 # Then build Apache using our new OpenSSL
-ENV APACHE_SERVERROOT_OPENSSL_ANCIENT /opt/apache-2.2-openssl-ancient
-WORKDIR /tmp/build/apache-2.2-openssl-ancient
+ENV APACHE_SERVERROOT_OPENSSL_ANCIENT /opt/apache-2.0-openssl-ancient
+WORKDIR /tmp/build/apache-2.0-openssl-ancient
 RUN curl -fsSLo- 'https://archive.apache.org/dist/httpd/httpd-2.0.63.tar.bz2' | tar jx --strip-components 1 && \
     ./configure --prefix=${APACHE_SERVERROOT_OPENSSL_ANCIENT} \
                 --with-ssl=/opt/openssl-ancient \

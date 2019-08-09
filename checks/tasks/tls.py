@@ -97,23 +97,18 @@ logger.debug(f'Read data on {len(cipher_infos)} ciphers from "{settings.TLS_CIPH
 
 
 # Based on:
-# https://tools.ietf.org/html/rfc5246#page-45 (7.4.1.4.1 Signature Algorithms)
+# hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"
 # https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set1_sigalgs_list.html
 # https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
 # https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-16
 # https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-18
 # openssl list -1 -digest-commands
-# NCSC 2.0 Table 2 - Algorithms for certificate verification
-# NCSC 2.0 Table 4 - Algorithms for key exchange
 # NCSC 2.0 Table 5 - Hash functions for key exchange
-# Put SHA-512|384|256 first because NCSC 2.0 says anything else is phase out.
+# The table only includes phase out or bad hash functions because we don't need
+# to report about support for good hash functions.
 KEX_TLS12_HASHALG_PREFERRED_ORDER = [
-    'SHA512',
-    'SHA384',
-    'SHA256',
-    'SHA224',
+    'MD5',
     'SHA1',
-    'MD5'
 ]
 # Put the key exchange signature algorithms in reverse order compared to those
 # preferred by NCSC 2.0 so that we can report the worst csae, connection wtih an
@@ -133,36 +128,22 @@ KEX_TLS12_SIGALG_PREFERENCE = ':'.join(KEX_TLS12_SORTED_ALG_COMBINATIONS)
 # Based on:
 # https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-signaturescheme
 # https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
-# NCSC 2.0 Table 2 - Algorithms for certificate verification
-# NCSC 2.0 Table 4 - Algorithms for key exchange
+# https://tools.ietf.org/html/rfc8032 "EdDSA"
 # NCSC 2.0 Table 5 - Hash functions for key exchange
+# The table only includes phase out or bad hash functions because we don't need
+# to report about support for good hash functions. ed25519 and ed448 are
+# excluded from the table because they are EdDSA based and NCSC 2.0 says "The
+# algorithm EdDSA is Good", and because RFC-8032 states that they are SHA-512
+# and SHAKE256 (SHA-3) based.
 KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER = [
-    'ecdsa_secp521r1_sha512',
-    'ecdsa_secp384r1_sha384',
-    'ecdsa_secp256r1_sha256',
-    'rsa_pss_pss_sha512',
-    'rsa_pss_pss_sha384',
-    'rsa_pss_pss_sha256',
-    'rsa_pss_rsae_sha512',
-    'rsa_pss_rsae_sha384',
-    'rsa_pss_rsae_sha256',
-    'rsa_pkcs1_sha512',
-    'rsa_pkcs1_sha384',
-    'rsa_pkcs1_sha256',
-    'ed25519',
-    'ed448',
     'rsa_pkcs1_sha1',
     'ecdsa_sha1'
 ]
 KEX_TLS13_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER)
-KEX_SIGALG_PHASEOUT_REGEX = re.compile(r'RSA', re.IGNORECASE)
 
-KEX_HASHFUNC_GOOD_REGEX_RAW = r'SHA(256|384|512)'
-KEX_HASHFUNC_SUFFICIENT_REGEX_RAW = r'SHA224'
-KEX_HASHFUNC_ACCEPTABLE_REGEX = re.compile(r'({}|{})'.format(
-    KEX_HASHFUNC_GOOD_REGEX_RAW,
-    KEX_HASHFUNC_SUFFICIENT_REGEX_RAW
-), re.IGNORECASE)
+KEX_PHASE_OUT_HASH_FUNCS = frozenset(
+    set(KEX_TLS12_HASHALG_PREFERRED_ORDER) |
+    set(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER))
 
 BULK_ENC_CIPHERS_PHASEOUT = ['3DES']
 BULK_ENC_CIPHERS_OTHER_PHASEOUT = ['SEED', 'ARIA']
@@ -1962,9 +1943,9 @@ class ConnectionChecker:
                 # http_fetch(), so we only need to use DebugConnection as it
                 # can handle the older protocol versions.
                 try:
-                    with DebugConnection.from_conn(self._conn, version=version):
+                    with DebugConnection.from_conn(self._conn, version=version) as new_conn:
                         connected = True
-                        self._note_conn_details(self._conn)
+                        self._note_conn_details(new_conn)
                 except (ConnectionSocketException,
                         ConnectionHandshakeException):
                     connected = False
@@ -2027,7 +2008,7 @@ class ConnectionChecker:
 
         return fs_bad, fs_phase_out, dh_param, ecdh_param
 
-    def _check_key_exchange_signature_algorithm_and_hash_func(self):
+    def _check_key_exchange_hash_func(self):
         bad = []
         phase_out = []
 
@@ -2038,22 +2019,25 @@ class ConnectionChecker:
         # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
         # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
         # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
-        if self._conn.get_ssl_version() >= TLSV1_2:
-            if self._conn.get_ssl_version() == TLSV1_3:
-                sig_algs = KEX_TLS13_SIGALG_PREFERENCE
-            elif self._conn.get_ssl_version() == TLSV1_2:
+        def discover_kex_hash_func(base_conn, tls_version):
+            if tls_version == TLSV1_2:
                 sig_algs = KEX_TLS12_SIGALG_PREFERENCE
+            elif tls_version == TLSV1_3:
+                sig_algs = KEX_TLS13_SIGALG_PREFERENCE
+            else:
+                raise ValueError()
 
-            kex_hash_func, kex_sig_type = None, None
             try:
                 # Only OpenSSL 1.1.1 has the necessary functions for
                 # determining the key exchange signature algorithm and hash
                 # function in use, so use ModernConnection (which is based on
                 # OpenSSL 1.1.1). Additionally, only ModernConnection supports
                 # passing the signature algorithm preference to the server.
-                with ModernConnection.from_conn(self._conn,
+                with ModernConnection.from_conn(base_conn,
                         signature_algorithms=sig_algs,
-                        version=self._conn.get_ssl_version()) as new_conn:
+                        version=tls_version) as new_conn:
+                    self._note_conn_details(new_conn)
+
                     # Ensure that the requirement in the OpenSSL docs that the
                     # peer has signed a message is satisfied by exchanging data
                     # with the server.
@@ -2061,23 +2045,45 @@ class ConnectionChecker:
                     http_client.putrequest('GET', '/')
                     http_client.endheaders()
                     http_client.getresponse()
-                    kex_hash_func = new_conn.get_peer_signature_digest()
-                    kex_sig_type = new_conn.get_peer_signature_type()
+
+                    return new_conn.get_peer_signature_digest()
             except (ConnectionSocketException,
                     ConnectionHandshakeException):
-                pass
+                return None
 
-            if kex_hash_func and not KEX_HASHFUNC_ACCEPTABLE_REGEX.search(kex_hash_func):
-                phase_out.append("{}{}".format(kex_hash_func, self._debug_info("weak hash function")))
+        hash_funcs = set()
+        oldest_seen_tls_version = sorted(self._seen_versions)[0]
+        if oldest_seen_tls_version < TLSV1_2:
+            # SSL/TLS protocol versions prior to TLS 1.2 only supported MD5
+            # and SHA1 key exchange hash functions which are both "phase
+            # out" according to NCSC 2.0
+            hash_funcs.add("MD5")
+            hash_funcs.add("SHA1")
+        else:
+            if TLSV1_2 in self._seen_versions:
+                hash_func = discover_kex_hash_func(self._conn, TLSV1_2)
+                if hash_func:
+                    hash_funcs.add(hash_func)
+            if TLSV1_3 in self._seen_versions:
+                hash_func = discover_kex_hash_func(self._conn, TLSV1_3)
+                if hash_func:
+                    hash_funcs.add(hash_func)
 
-            if kex_sig_type and KEX_SIGALG_PHASEOUT_REGEX.search(kex_sig_type):
-                phase_out.append("{}{}".format(kex_sig_type, self._debug_info("weak signature algorithm")))
+        for hash_func in hash_funcs:
+            # This next check shouldn't be necessary as we shouldn't get back a
+            # hash function other than one we indicated support for... however,
+            # integration involving TLS 1.2 return SHA256 as the hash function.
+            # We also use contains test to ignore "None" which can be returned
+            # by discover_kex_hash_func().
+            if hash_func in KEX_PHASE_OUT_HASH_FUNCS:
+                phase_out.append("{}{}".format(hash_func,
+                    self._debug_info("weak hash function")))
 
         return bad, phase_out
 
     def check_forward_secrecy(self):
         fs_bad, fs_phase_out, dh_param, ecdh_param = self._check_dh_params()
-        kex_bad, kex_phase_out = self._check_key_exchange_signature_algorithm_and_hash_func()
+        kex_bad, kex_phase_out = self._check_key_exchange_hash_func()
 
         fs_bad.extend(kex_bad)
         fs_phase_out.extend(kex_phase_out)
@@ -2135,6 +2141,7 @@ class ConnectionChecker:
                 if self._conn.get_ssl_version() < TLSV1_3:
                     cipher_string = f'!{first_cipher}:ALL:COMPLEMENTOFALL'
                     with self._conn.dup(ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
                         second_cipher = new_conn.get_current_cipher_name()
                 else:
                     # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
@@ -2146,6 +2153,7 @@ class ConnectionChecker:
                     remaining_ciphers.remove(first_cipher)
                     cipher_string = ':'.join(remaining_ciphers)
                     with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
                         second_cipher = new_conn.get_current_cipher_name()
 
             if first_cipher != second_cipher:
@@ -2157,9 +2165,11 @@ class ConnectionChecker:
                 cipher_string = f'{second_cipher}:{first_cipher}'
                 if self._conn.get_ssl_version() < TLSV1_3:
                     with self._conn.dup(ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
                         newly_selected_cipher = new_conn.get_current_cipher_name()
                 else:
                     with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
                         newly_selected_cipher = new_conn.get_current_cipher_name()
 
                 if newly_selected_cipher == second_cipher:
@@ -2395,55 +2405,51 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         # responds to HTTP requests, then check some interesting properties of
         # this 'best possible' connection.
         with connect_to_web_server() as conn:
-            # save some details about the connection for later
-            conn_handler = type(conn)
-            conn_ssl_version = conn.get_ssl_version()
-            conn_cipher = conn.get_current_cipher_name()
-
-            with get_connection_checker(conn) as checker:
-                # note: additional connections will be created by the checker
-                # as needed
+             with get_connection_checker(conn) as checker:
+                # Note: additional connections will be created by the checker
+                # as needed. The order of the checks attempts to benefit from
+                # data acquired during previous checks.
                 ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
                 secure_reneg_score, secure_reneg = checker.check_secure_reneg()
                 client_reneg_score, client_reneg = checker.check_client_reneg()
                 compression_score, compression = checker.check_compression()
-                fs_score, fs_result = checker.check_forward_secrecy()
                 ciphers_score, ciphers_result = checker.check_ciphers()
                 zero_rtt_score, zero_rtt = checker.check_zero_rtt()
                 prots_score, prots_result = checker.check_protocol_versions()
+                fs_score, fs_result = checker.check_forward_secrecy()
                 cipher_order_score, cipher_order = checker.check_cipher_order()
 
-                return dict(
-                    tls_enabled=True,
-                    prots_bad=prots_result['bad'],
-                    prots_phase_out=prots_result['phase_out'],
-                    prots_score=prots_score,
+        return dict(
+            tls_enabled=True,
+            prots_bad=prots_result['bad'],
+            prots_phase_out=prots_result['phase_out'],
+            prots_score=prots_score,
 
-                    ciphers_bad=ciphers_result['bad'],
-                    ciphers_phase_out=ciphers_result['phase_out'],
-                    ciphers_score=ciphers_score,
-                    cipher_order_score=cipher_order_score,
-                    cipher_order = cipher_order,
+            ciphers_bad=ciphers_result['bad'],
+            ciphers_phase_out=ciphers_result['phase_out'],
+            ciphers_score=ciphers_score,
+            cipher_order_score=cipher_order_score,
+            cipher_order = cipher_order,
 
-                    secure_reneg=secure_reneg,
-                    secure_reneg_score=secure_reneg_score,
-                    client_reneg=client_reneg,
-                    client_reneg_score=client_reneg_score,
-                    compression=compression,
-                    compression_score=compression_score,
+            secure_reneg=secure_reneg,
+            secure_reneg_score=secure_reneg_score,
+            client_reneg=client_reneg,
+            client_reneg_score=client_reneg_score,
+            compression=compression,
+            compression_score=compression_score,
 
-                    dh_param=fs_result['dh_param'],
-                    ecdh_param=fs_result['ecdh_param'],
-                    fs_bad=fs_result['bad'],
-                    fs_phase_out=fs_result['phase_out'],
-                    fs_score=fs_score,
+            dh_param=fs_result['dh_param'],
+            ecdh_param=fs_result['ecdh_param'],
+            fs_bad=fs_result['bad'],
+            fs_phase_out=fs_result['phase_out'],
+            fs_score=fs_score,
 
-                    zero_rtt_score=zero_rtt_score,
-                    zero_rtt=zero_rtt,
+            zero_rtt_score=zero_rtt_score,
+            zero_rtt=zero_rtt,
 
-                    ocsp_stapling=ocsp_stapling,
-                    ocsp_stapling_score=ocsp_stapling_score,
-                )
+            ocsp_stapling=ocsp_stapling,
+            ocsp_stapling_score=ocsp_stapling_score,
+        )
     except (socket.error, http.client.BadStatusLine, NoIpError,
             ConnectionHandshakeException,
             ConnectionSocketException):
