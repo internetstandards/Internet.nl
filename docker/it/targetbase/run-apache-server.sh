@@ -24,7 +24,7 @@ fi
 case ${APACHE_VERSION} in
     custom-ancient)
         set +u ; . /etc/apache2/envvars ; set -u
-        LD_LIBRARY_PATH=/opt/openssl-ancient/lib /opt/apache-2.2-openssl-ancient/bin/httpd -e debug -d /etc/apache2 -f /opt/apache-2.2-openssl-ancient/custom-httpd.conf
+        LD_LIBRARY_PATH=/opt/openssl-ancient/lib /opt/apache-2.0-openssl-ancient/bin/httpd -e debug -d /etc/apache2 -f /opt/apache-2.0-openssl-ancient/custom-httpd.conf
         ;;
     custom-legacy)
         set +u ; . /etc/apache2/envvars ; set -u
