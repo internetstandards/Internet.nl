@@ -686,26 +686,20 @@ def build_report(dttls, category):
             else:
                 category.subtests['tls_version'].result_good()
 
-            if dttls.compression == 1:
+            if dttls.compression:
                 category.subtests['tls_compression'].result_bad()
-            elif dttls.compression == 0:
+            else:
                 category.subtests['tls_compression'].result_good()
-            else:
-                category.subtests['tls_compression'].result_na()
 
-            if dttls.secure_reneg == 1:
+            if dttls.secure_reneg:
                 category.subtests['renegotiation_secure'].result_good()
-            elif dttls.secure_reneg == 0:
+            else:
                 category.subtests['renegotiation_secure'].result_bad()
-            else:
-                category.subtests['renegotiation_secure'].result_na()
 
-            if dttls.client_reneg == 1:
+            if dttls.client_reneg:
                 category.subtests['renegotiation_client'].result_bad()
-            elif dttls.client_reneg == 0:
-                category.subtests['renegotiation_client'].result_good()
             else:
-                category.subtests['renegotiation_client'].result_na()
+                category.subtests['renegotiation_client'].result_good()
 
             if dttls.cert_trusted == 0:
                 category.subtests['cert_trust'].result_good()
@@ -762,11 +756,9 @@ def build_report(dttls, category):
                 # else:
                 #     category.subtests['dane_rollover'].result_bad()
 
-            if dttls.zero_rtt == ZeroRttStatus.good:
+            if dttls.zero_rtt:
                 category.subtests['zero_rtt'].result_good()
-            elif dttls.zero_rtt == ZeroRttStatus.na:
-                category.subtests['zero_rtt'].result_na()
-            elif dttls.zero_rtt == ZeroRttStatus.bad:
+            else:
                 category.subtests['zero_rtt'].result_bad()
 
             if dttls.ocsp_stapling == OcspStatus.good:
@@ -1869,7 +1861,7 @@ class ConnectionChecker:
 
         # This check isn't relevant to anything less than TLS 1.3.
         if not explicit_conn and test_conn.get_ssl_version() < TLSV1_3:
-            return scoring.WEB_TLS_ZERO_RTT_NA, ZeroRttStatus.na
+            return scoring.WEB_TLS_ZERO_RTT_GOOD, True
 
         # we require an existing connection, as 0-RTT is only possible with
         # connections after the first so that the SSL session can be re-used.
@@ -1886,7 +1878,7 @@ class ConnectionChecker:
         # has been written to and read from the connection even if early data
         # is actually supported.
         if session.get_max_early_data() <= 0:
-            return scoring.WEB_TLS_ZERO_RTT_GOOD, ZeroRttStatus.good
+            return scoring.WEB_TLS_ZERO_RTT_GOOD, True
 
         # terminate the current connection and re-connect using the previous
         # SSL session details then try and write early data to the connection
@@ -1908,7 +1900,7 @@ class ConnectionChecker:
                         # HTTP status code 425 Too Early. See:
                         # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
                         if http_client.getresponse().status == 425:
-                            return ZeroRttStatus.good, scoring.WEB_TLS_ZERO_RTT_GOOD
+                            return scoring.WEB_TLS_ZERO_RTT_GOOD, True
         except (ConnectionHandshakeException,
                 ConnectionSocketException,
                 IOError):
@@ -1916,8 +1908,7 @@ class ConnectionChecker:
 
         # todo: ensure the handshake is completed ready for the next check that
         # uses this connection?
-
-        return scoring.WEB_TLS_ZERO_RTT_BAD, ZeroRttStatus.bad
+        return scoring.WEB_TLS_ZERO_RTT_BAD, False
 
     def check_protocol_versions(self):
         # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0

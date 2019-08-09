@@ -32,12 +32,6 @@ class ForcedHttpsStatus(Enum):
     no_http = 2
 
 
-class ZeroRttStatus(Enum):
-    bad = 0
-    good = 1
-    na = 2
-
-
 class OcspStatus(Enum):
     ok = 0
     good = 1
@@ -415,7 +409,7 @@ class DomainTestTls(BaseTestModel):
     client_reneg = models.NullBooleanField(default=False)
     client_reneg_score = models.IntegerField(null=True)
 
-    zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
+    zero_rtt = models.NullBooleanField(default=False)
     zero_rtt_score = models.IntegerField(null=True)
 
     ocsp_stapling = EnumField(OcspStatus, default=OcspStatus.ok)

@@ -1062,11 +1062,6 @@ class WebTlsZeroRTT(Subtest):
         self.verdict = "detail web tls zero-rtt verdict bad"
         self.tech_data = "detail tech data yes"
 
-    def result_na(self):
-        self.worst_status = STATUS_NOT_TESTED
-        self.verdict = "detail web tls zero-rtt verdict na"
-        self.tech_data = "detail tech data not-applicable"
-
 
 class WebTlsOCSPStapling(Subtest):
     def __init__(self):

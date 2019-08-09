@@ -1901,9 +1901,6 @@ msgstr "Your web server supports 0-RTT, which could be a security risk."
 msgid "detail web tls zero-rtt verdict good"
 msgstr "Your web server does not support 0-RTT."
 
-msgid "detail web tls zero-rtt verdict na"
-msgstr "Your web server does not support the TLS version required to use 0-RTT."
-
 msgid "detail web tls ocsp-stapling exp"
 msgstr ""
 "We check if your web server supports the [TLS Certificate Status extension](https://www.ietf.org/rfc/rfc6961.txt) \n"

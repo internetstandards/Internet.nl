@@ -67,10 +67,6 @@ class OpenSSLServerDomainConfig(DomainConfig):
         super().__init__(test_id, domain, expected_warnings=expected_warnings,
             expected_failures=expected_failures)
 
-        # Most of the tests use OpenSSL for <= TLS 1.2, which don't support
-        # 0-RTT, so by default assume 0-RTT will not be tested.
-        self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
-
     def override_defaults(self):
         # This also means that the ciphers supported do not pass the Internet
         # NL tests, so unless the test is doing something specific with ciphers
@@ -318,9 +314,6 @@ ncsc_20_tests = [
             TESTS.HTTPS_TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],   # matches all remaining rows
             ],
-        },
-        expected_not_tested={
-            TESTS.HTTPS_TLS_ZERO_RTT
         }),
     # This test is an expected failure because currently only ModernConnection
     # can connect using the AESCCM8 cipher to TLS 1.2, yet we deliberately only
