@@ -2061,13 +2061,9 @@ class ConnectionChecker:
             hash_funcs.add("SHA1")
         else:
             if TLSV1_2 in self._seen_versions:
-                hash_func = discover_kex_hash_func(self._conn, TLSV1_2)
-                if hash_func:
-                    hash_funcs.add(hash_func)
+                hash_funcs.add(discover_kex_hash_func(self._conn, TLSV1_2))
             if TLSV1_3 in self._seen_versions:
-                hash_func = discover_kex_hash_func(self._conn, TLSV1_3)
-                if hash_func:
-                    hash_funcs.add(hash_func)
+                hash_funcs.add(discover_kex_hash_func(self._conn, TLSV1_3))
 
         for hash_func in hash_funcs:
             # This next check shouldn't be necessary as we shouldn't get back a
