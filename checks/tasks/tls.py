@@ -44,7 +44,7 @@ from .shared import HTTPSConnection
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, ZeroRttStatus, OcspStatus
+from ..models import ForcedHttpsStatus, OcspStatus
 from ..templatetags.translate import INJECTED_TRANSLATION_START
 from ..templatetags.translate import INJECTED_TRANSLATION_END
 
