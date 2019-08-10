@@ -91,27 +91,26 @@ class OpenSSLServerDomainConfig(DomainConfig):
 
 
 class PreTLS12DomainConfig(DomainConfig):
-    def override_defaults(self):
-        self.expected_warnings.setdefault(TESTS.HTTPS_TLS_KEY_EXCHANGE, [
-            [re.compile(r'(MD5|SHA1) \(at risk\)')],  # matches all rows
-        ])
-
-
-class PreTLS13DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=dict(),
-            expected_failures=dict(), expected_not_tested=dict(), lang='en'):
+            expected_failures=dict(), lang='en'):
+        self._lang = lang
         super().__init__(test_id, domain,
             expected_warnings=expected_warnings,
-            expected_failures=expected_failures,
-            expected_not_tested=expected_not_tested)
+            expected_failures=expected_failures)
 
-        # Only TLS 1.3 servers support 0-RTT
-        if lang == 'en':
-            self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT, None)
-        elif lang == 'nl':
-            self.expected_not_tested.setdefault(TESTS.HTTPS_TLS_ZERO_RTT_NL, None)
+    def override_defaults(self):
+        if self._lang == 'en':
+            test_id = TESTS.HTTPS_TLS_KEY_EXCHANGE
+            phase_out_txt = 'at risk'
+        elif self._lang == 'nl':
+            test_id = TESTS.HTTPS_TLS_KEY_EXCHANGE_NL
+            phase_out_txt = 'op risico'
         else:
             raise ValueError()
+
+        self.expected_warnings.setdefault(test_id, [
+            [re.compile(r'(MD5|SHA1) \({}\)'.format(phase_out_txt))],  # matches all rows
+        ])
 
 
 # Tests specifically intended to show that Internet.NL tests for compliance
@@ -478,15 +477,12 @@ other_tests = [
 
 
 nl_translation_tests = [
-    PreTLS13DomainConfig('NCSC20-Table1:TLS10',
+    PreTLS12DomainConfig('NCSC20-Table1:TLS10',
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION_NL: [
                 ['TLS 1.0 (op risico)'],  # IPv6
                 ['TLS 1.0 (op risico)'],  # IPv4
-            ],
-            TESTS.HTTPS_TLS_KEY_EXCHANGE_NL: [
-                [r'(MD5|SHA1) \(op risico\)'],  # matches all rows
             ]
         },
         lang='nl'),
