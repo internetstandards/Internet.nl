@@ -286,19 +286,6 @@ services:
       - APACHE_SITES=http-with-ssl-redirect tls12only
       - APACHE_MODULES=ssl
 
-  targettls12onlynosha2:
-    image: targetbase
-    dns: ${RESOLVER_IP}
-    networks:
-      test_net:
-        ipv4_address: ${TARGET_TLS12ONLYNOSHA2_IP}
-        ipv6_address: ${TARGET_TLS12ONLYNOSHA2_IPV6}
-    depends_on:
-      - targetbase
-    environment:
-      - APACHE_SITES=http-with-ssl-redirect tls12onlynosha2
-      - APACHE_MODULES=ssl
-
   targettls12onlylegacybadciphers:
     image: targetbase
     # Tested with:
@@ -494,19 +481,6 @@ services:
       - APACHE_SITES=http-with-ssl-redirect tls13only
       - APACHE_MODULES=ssl
 
-  targettls13onlynosha2:
-    image: targetbase
-    dns: ${RESOLVER_IP}
-    networks:
-      test_net:
-        ipv4_address: ${TARGET_TLS13ONLYNOSHA2_IP}
-        ipv6_address: ${TARGET_TLS13ONLYNOSHA2_IPV6}
-    depends_on:
-      - targetbase
-    environment:
-      - APACHE_SITES=http-with-ssl-redirect tls13onlynosha2
-      - APACHE_MODULES=ssl
-
   targettls130rtt:
     image: targetbase
     entrypoint: /opt/run-nginx-server.sh
@@ -650,8 +624,6 @@ services:
       - TARGET_TLS1112_IPV6
       - TARGET_TLS12ONLY_IP
       - TARGET_TLS12ONLY_IPV6
-      - TARGET_TLS12ONLYNOSHA2_IP
-      - TARGET_TLS12ONLYNOSHA2_IPV6
       - TARGET_TLS12ONLYLEGACYBADCIPHERS_IP
       - TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6
       - TARGET_TLS12ONLYMODERNBADCIPHERS_IP
@@ -670,8 +642,6 @@ services:
       - TARGET_TLS1213TLSCOMPRESSION_IPV6
       - TARGET_TLS13ONLY_IP
       - TARGET_TLS13ONLY_IPV6
-      - TARGET_TLS13ONLYNOSHA2_IP
-      - TARGET_TLS13ONLYNOSHA2_IPV6
       - TARGET_TLS130RTT_IP
       - TARGET_TLS130RTT_IPV6
       - TARGET_TLS13INVALIDOCSP_IP

@@ -106,8 +106,10 @@ logger.debug(f'Read data on {len(cipher_infos)} ciphers from "{settings.TLS_CIPH
 # NCSC 2.0 Table 5 - Hash functions for key exchange
 # The table only includes phase out or bad hash functions because we don't need
 # to report about support for good hash functions.
+# MD5 is in the TLS 1.2 RFC-5246 but is not supported by OpenSSL 1.1.1.
+# Attempting to pass it in a signature algorithm string results in a
+# ValueError exception being raised by NaSSL::ssl_client::__init__(). 
 KEX_TLS12_HASHALG_PREFERRED_ORDER = [
-    'MD5',
     'SHA1',
 ]
 # Put the key exchange signature algorithms in reverse order compared to those
@@ -2010,14 +2012,7 @@ class ConnectionChecker:
         # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
         # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
         # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
-        def discover_kex_hash_func(base_conn, tls_version):
-            if tls_version == TLSV1_2:
-                sig_algs = KEX_TLS12_SIGALG_PREFERENCE
-            elif tls_version == TLSV1_3:
-                sig_algs = KEX_TLS13_SIGALG_PREFERENCE
-            else:
-                raise ValueError()
-
+        def discover_kex_hash_func(base_conn):
             try:
                 # Only OpenSSL 1.1.1 has the necessary functions for
                 # determining the key exchange signature algorithm and hash
@@ -2025,8 +2020,8 @@ class ConnectionChecker:
                 # OpenSSL 1.1.1). Additionally, only ModernConnection supports
                 # passing the signature algorithm preference to the server.
                 with ModernConnection.from_conn(base_conn,
-                        signature_algorithms=sig_algs,
-                        version=tls_version) as new_conn:
+                        signature_algorithms=KEX_TLS12_SIGALG_PREFERENCE,
+                        version=TLSV1_2) as new_conn:
                     self._note_conn_details(new_conn)
 
                     # Ensure that the requirement in the OpenSSL docs that the
@@ -2050,11 +2045,13 @@ class ConnectionChecker:
             # out" according to NCSC 2.0
             hash_funcs.add("MD5")
             hash_funcs.add("SHA1")
+        elif TLSV1_2 in self._seen_versions:
+            hash_funcs.add(discover_kex_hash_func(self._conn))
         else:
-            if TLSV1_2 in self._seen_versions:
-                hash_funcs.add(discover_kex_hash_func(self._conn, TLSV1_2))
-            if TLSV1_3 in self._seen_versions:
-                hash_funcs.add(discover_kex_hash_func(self._conn, TLSV1_3))
+            # Only SHA2 and SHA3 based hash functions can be selected for key
+            # exchange hashing by TLS 1.3 servers so for NCSC 2.0 there's
+            # nothing to test for TLS 1.3.
+            pass
 
         for hash_func in hash_funcs:
             # This next check shouldn't be necessary as we shouldn't get back a

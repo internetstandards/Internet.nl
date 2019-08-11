@@ -32,8 +32,10 @@ tls1213defaultvhost                       IN  A      {{TARGET_TLS1213_IP}}
 tls1213defaultvhost                       IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213noocspstaple                       IN  A      {{TARGET_TLS1213_IP}}
 tls1213noocspstaple                       IN  AAAA   {{TARGET_TLS1213_IPV6}}
-tls1213tlscompression                           IN  A      {{TARGET_TLS1213TLSCOMPRESSION_IP}}
-tls1213tlscompression                           IN  AAAA   {{TARGET_TLS1213TLSCOMPRESSION_IPV6}}
+tls1213nosha2                             IN  A      {{TARGET_TLS1213_IP}}
+tls1213nosha2                             IN  AAAA   {{TARGET_TLS1213_IPV6}}
+tls1213tlscompression                     IN  A      {{TARGET_TLS1213TLSCOMPRESSION_IP}}
+tls1213tlscompression                     IN  AAAA   {{TARGET_TLS1213TLSCOMPRESSION_IPV6}}
 tls10only                                 IN  A      {{TARGET_TLS10ONLY_IP}}
 tls10only                                 IN  AAAA   {{TARGET_TLS10ONLY_IPV6}}
 tls10onlyhonorclientcipherorder           IN  A      {{TARGET_TLS10ONLYCLIENTCIPHERORDER_IP}}
@@ -55,8 +57,6 @@ tls12onlyffdhe3072                        IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffdhe3072                        IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffother                          IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffother                          IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
-tls12onlynosha2                           IN  A      {{TARGET_TLS12ONLYNOSHA2_IP}}
-tls12onlynosha2                           IN  AAAA   {{TARGET_TLS12ONLYNOSHA2_IPV6}}
 tls12onlylegacybadciphers                 IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
 tls12onlylegacybadciphers                 IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
 tls12onlymodernbadciphers                 IN  A      {{TARGET_TLS12ONLYMODERNBADCIPHERS_IP}}
@@ -67,8 +67,6 @@ tls12onlymodernphaseoutciphers            IN  A      {{TARGET_TLS12ONLYMODERNPHA
 tls12onlymodernphaseoutciphers            IN  AAAA   {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}}
 tls13only                                 IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only                                 IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
-tls13onlynosha2                           IN  A      {{TARGET_TLS13ONLYNOSHA2_IP}}
-tls13onlynosha2                           IN  AAAA   {{TARGET_TLS13ONLYNOSHA2_IPV6}}
 tls13onlydiffipv4ipv6                     IN  A      {{TARGET_TLS13ONLYDIFFIPV4IPV6_IP}}
 tls13onlydiffipv4ipv6                     IN  AAAA   {{TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}}
 tls130rtt                                 IN  A      {{TARGET_TLS130RTT_IP}}
@@ -95,6 +93,7 @@ _443._tcp.tls1213sni                      IN  TLSA   3 1 1 8d0b8af3cfe3dc53375b6
 _443._tcp.tls1213nohsts                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213shorthsts                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213noocspstaple             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213nosha2                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213tlscompression           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls10only                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls10onlyhonorclientcipherorder IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
@@ -106,14 +105,12 @@ _443._tcp.tls12only                       IN  TLSA   3 1 1 f58f7492351360e3855bc
 _443._tcp.tls12onlyffdhe3072              IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyffdhe2048              IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyffother                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
-_443._tcp.tls12onlynosha2                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlylegacybadciphers       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlymodernbadciphers       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlylegacyphaseoutciphers  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlymodernphaseoutciphers  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls13onlydiffipv4ipv6           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls13only                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
-_443._tcp.tls13onlynosha2                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls130rtt                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls13invalidocsp                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls13onlyhonorclientcipherorder IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c

@@ -1,7 +1,9 @@
 import pytest
 import re
 from helpers import DomainConfig, GoodDomain, BadDomain
-from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE, PERFECT_SCORE
+from helpers import id_generator, TESTS, UX
+from helpers import IMPERFECT_SCORE, PERFECT_SCORE
+from helpers import PHASE_OUT_TEXT, PHASE_OUT_TEXT_NL
 
 
 # TODO: Refactor cipher tests to explicitly test for the expected ciphers in
@@ -53,7 +55,7 @@ from helpers import id_generator, TESTS, UX, IMPERFECT_SCORE, PERFECT_SCORE
 # DES-CBC3-SHA              0x00,0x0A  SSLv3     RSA   RSA    3DES(168)    SHA1
 REGEX_LEGACY_BAD_CIPHERS = re.compile(r'(IDEA|DES|RC4|NULL)')
 REGEX_MODERN_BAD_CIPHERS = re.compile(r'AES(128|256)-CCM')
-REGEX_PHASE_OUT_CIPHERS = re.compile(r'(DES.+CBC3|3DES.+CBC|AES(128|256)-(GCM-SHA(256|384)|SHA(256)?)).* \(at risk\)')
+REGEX_PHASE_OUT_CIPHERS = re.compile(r'(DES.+CBC3|3DES.+CBC|AES(128|256)-(GCM-SHA(256|384)|SHA(256)?)).* \({}\)'.format(PHASE_OUT_TEXT))
 
 
 # Some of the "mock" target servers are powered by OpenSSL server which cannot
@@ -101,10 +103,10 @@ class PreTLS12DomainConfig(DomainConfig):
     def override_defaults(self):
         if self._lang == 'en':
             test_id = TESTS.HTTPS_TLS_KEY_EXCHANGE
-            phase_out_txt = 'at risk'
+            phase_out_txt = PHASE_OUT_TEXT
         elif self._lang == 'nl':
             test_id = TESTS.HTTPS_TLS_KEY_EXCHANGE_NL
-            phase_out_txt = 'op risico'
+            phase_out_txt = PHASE_OUT_TEXT_NL
         else:
             raise ValueError()
 
@@ -152,8 +154,8 @@ ncsc_20_tests = [
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
-                ['TLS 1.0 (at risk)'],  # IPv6
-                ['TLS 1.0 (at risk)'],  # IPv4
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
         }),
 
@@ -161,8 +163,8 @@ ncsc_20_tests = [
         'tls10onlyhonorclientcipherorder.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
-                ['TLS 1.0 (at risk)'],  # IPv6
-                ['TLS 1.0 (at risk)'],  # IPv4
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
         },
         expected_failures={
@@ -174,8 +176,8 @@ ncsc_20_tests = [
         'tls10onlyinsecurereneg.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
-                ['TLS 1.0 (at risk)'],  # IPv6
-                ['TLS 1.0 (at risk)'],  # IPv4
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
         },
         expected_failures={
@@ -190,8 +192,8 @@ ncsc_20_tests = [
         'tls11only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
-                ['TLS 1.1 (at risk)'],  # IPv6
-                ['TLS 1.1 (at risk)'],  # IPv4
+                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
             ],
         }),
 
@@ -199,10 +201,10 @@ ncsc_20_tests = [
         'tls1011.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
-                ['TLS 1.1 (at risk)'],  # IPv6
-                ['TLS 1.0 (at risk)'],  # IPv6
-                ['TLS 1.1 (at risk)'],  # IPv4
-                ['TLS 1.0 (at risk)'],  # IPv4
+                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
+                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ],
         }),
 
@@ -210,8 +212,8 @@ ncsc_20_tests = [
         'tls1112.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION: [
-                ['TLS 1.1 (at risk)'],  # IPv6
-                ['TLS 1.1 (at risk)'],  # IPv4
+                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
         }),
 
@@ -338,7 +340,7 @@ ncsc_20_tests = [
         'tls12onlyffdhe2048.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [re.compile(r'(RSASSA-PSS|DH-FFDHE2048).+')]
+                [re.compile(r'DH-FFDHE2048 \({}\)'.format(PHASE_OUT_TEXT))]
             ]
         }),
 
@@ -354,16 +356,21 @@ ncsc_20_tests = [
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_TLS_KEY_EXCHANGE: [
-                [re.compile(r'(RSASSA-PSS.+\(at risk\)|DH-4096)')],
+                ['DH-4096'],
+                ['DH-4096'],
             ]
         }),
 
     DomainConfig('NCSC20'
         '-Table1:TLS12'
+        '-Table1:TLS13'
         '-Table5:No',
-        'tls12onlynosha2.test.nlnetlabs.tk',
+        'tls1213nosha2.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_KEY_EXCHANGE
+            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+                [f'SHA1 ({PHASE_OUT_TEXT})'],  # IPv6
+                [f'SHA1 ({PHASE_OUT_TEXT})'],  # IPv4
+            ]
         }),
 
     DomainConfig('NCSC20'
@@ -387,21 +394,6 @@ ncsc_20_tests = [
             ]
         },
         expected_score=PERFECT_SCORE),
-
-    # NOTE: at the time of writing the target server for this test also
-    # supports SHA2 as well as SHA1. Interpreting the NCSC 2.0 document
-    # literally would mean that we consider this NOT to be a warning because
-    # it's only phase out if SHA2 is NOT supported, irrespective of whether
-    # SHA1 is supported. However, we have decided that like the rest of NCSC
-    # 2.0 we think allowing the client to negotiate a weaker hash function with
-    # the server is a bad thing and thus support for non-SHA2 is a warning.
-    DomainConfig('NCSC20'
-        '-Table1:TLS12'
-        '-Table5:No',
-        'tls13onlynosha2.test.nlnetlabs.tk',
-        expected_warnings={
-            TESTS.HTTPS_TLS_KEY_EXCHANGE
-        }),
 
     # This website virtual host configuration deliberately supports 0-RTT
     # Note: if NGINX hasn't already fetched the OCSP responder response it will
@@ -481,8 +473,8 @@ nl_translation_tests = [
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.HTTPS_TLS_VERSION_NL: [
-                ['TLS 1.0 (op risico)'],  # IPv6
-                ['TLS 1.0 (op risico)'],  # IPv4
+                [f'TLS 1.0 ({PHASE_OUT_TEXT_NL})'],  # IPv6
+                [f'TLS 1.0 ({PHASE_OUT_TEXT_NL})'],  # IPv4
             ]
         },
         lang='nl'),
