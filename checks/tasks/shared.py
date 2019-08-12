@@ -159,6 +159,7 @@ def aggregate_subreports(subreports, report):
     if subreports:
         for test_item in report:
             status = STATUS_MAX
+            worst_status = STATUS_MAX
             report[test_item]['tech_data'] = []
             for server, subreport in subreports.items():
                 substatus = subreport[test_item]['status']
@@ -168,7 +169,7 @@ def aggregate_subreports(subreports, report):
                     verdict = subreport[test_item]['verdict']
                     report[test_item]['status'] = status
                     report[test_item]['verdict'] = verdict
-                if ORDERED_STATUSES[subworststatus] <= ORDERED_STATUSES[subworststatus]:
+                if ORDERED_STATUSES[subworststatus] <= ORDERED_STATUSES[worst_status]:
                     worst_status = subworststatus
                     report[test_item]['worst_status'] = worst_status
 
