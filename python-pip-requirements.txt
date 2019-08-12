@@ -11,7 +11,7 @@ django-enumfields
 django-hosts
 django-markdown_deux
 django-redis
-Django==1.11.20
+Django==1.11.23
 eventlet
 gevent
 kombu==4.4
