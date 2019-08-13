@@ -272,8 +272,7 @@ class ConnectionHelper:
 
     def connect(self, do_handshake_on_connect):
         if self.url and not self.addr:
-            self.addr[0] = socket.AF_INET
-            self.addr[1] = self.url
+            self.addr = (socket.AF_INET, self.url)
         elif self.addr and not self.url:
             self.url = self.addr[1]
         elif not self.url and not self.addr:
