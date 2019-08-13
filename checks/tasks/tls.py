@@ -6,7 +6,6 @@ import csv
 import errno
 import http.client
 import logging
-import re
 import socket
 import ssl
 import time
