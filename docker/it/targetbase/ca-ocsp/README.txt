@@ -26,6 +26,11 @@ pushd /opt/ && ln -s $CA_OCSP_DIR && popd
 # Generate a private key and certificate
 openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=${DOMAINNAME}" -keyout ${BASEFILENAME}.key -out ${BASEFILENAME}.crt
 
+# Alternatively, for an ECDSA key and certificate you need to do something like
+# this instead:
+openssl ecparam -name secp384r1 -genkey -out ${BASEFILENAME}.key
+openssl req -new -days 365 -x509 -subj "/C=NL/ST=Noord Holland/L=Amsterdam/O=NLnet Labs/CN=${DOMAINNAME}" -key ${BASEFILENAME}.key -out ${BASEFILENAME}.crt
+
 # Generate a certificate signing request (CSR)
 openssl x509 -x509toreq -in ${BASEFILENAME}.crt -out ${BASEFILENAME}.csr -signkey ${BASEFILENAME}.key
 
@@ -44,10 +49,8 @@ Certificate is to be certified until Aug 13 09:00:00 2025 GMT (2220 days)
 
 Write out database with 1 new entries
 Data Base Updated
-Now you should:
 
-# Delete the no-longer-needed CSR file
-
+# Now you should delete the no-longer-needed CSR file
 rm ${BASEFILENAME}.csr
 
 # Next steps:

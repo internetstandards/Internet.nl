@@ -1715,13 +1715,21 @@ class ConnectionChecker:
 
     @property
     def debug_conn(self):
-        # Lazily create a DebugConnection on first access, if needed. The client
-        # of this class should use 'with' or .close() when finished with this
-        # checker instance in order to clean up any specially created debug
-        # connection.
+        # Lazily create a DebugConnection on first access, if needed. The
+        # client of this class should use 'with' or .close() when finished with
+        # this checker instance in order to clean up any specially created
+        # debug connection.
         if not self._debug_conn:
             if isinstance(self._conn, DebugConnection):
                 self._debug_conn = self._conn
+            elif (isinstance(self._conn, ModernConnection)
+                  and self._conn.get_ssl_version() == TLSV1_2):
+                # Don't waste time trying to connect with DebugConnection as
+                # we already know it won't work, that's how we ended up with
+                # a TLS 1.2 ModernConnection. The only other time we use
+                # ModernConnection is for TLS 1.3, but in that case the initial
+                # connection would not be TLS 1.2.
+                raise ConnectionHandshakeException()
             else:
                 self._debug_conn = DebugConnection.from_conn(self._conn)
         return self._debug_conn
@@ -1801,8 +1809,8 @@ class ConnectionChecker:
             else:
                 secure_reneg_score = self._score_secure_reneg_bad
             return secure_reneg_score, secure_reneg
-        except (ConnectionSocketException,
-                ConnectionHandshakeException):
+        except (ConnectionSocketException, ConnectionHandshakeException):
+            # TODO: extend to support indicating that we were unable to test?
             return self._score_secure_reneg_good, True
 
         # TLS 1.3 forbids renegotiaton.
@@ -1831,7 +1839,9 @@ class ConnectionChecker:
                 # If we are still here, client reneg is supported
                 client_reneg_score = self._score_client_reneg_bad
                 client_reneg = True
-        except (socket.error, _nassl.OpenSSLError, IOError):
+        except (ConnectionSocketException, ConnectionHandshakeException,
+                socket.error, _nassl.OpenSSLError, IOError):
+            # TODO: extend to support indicating that we were unable to test?
             client_reneg_score = self._score_client_reneg_good
             client_reneg = False
         return client_reneg_score, client_reneg
@@ -1853,8 +1863,8 @@ class ConnectionChecker:
             else:
                 compression_score = self._score_compression_good
             return compression_score, compression
-        except (ConnectionSocketException,
-                ConnectionHandshakeException):
+        except (ConnectionSocketException, ConnectionHandshakeException):
+            # TODO: extend to support indicating that we were unable to test?
             return self._score_compression_good, False
 
     def check_zero_rtt(self, explicit_conn=None):

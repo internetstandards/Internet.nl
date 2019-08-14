@@ -13,6 +13,7 @@ IMPERFECT_SCORE = 'IMPERFECT'
 PERFECT_SCORE = '100%'
 PHASE_OUT_TEXT = 'at risk'
 PHASE_OUT_TEXT_NL = 'op risico'
+ANY = None
 
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'
 LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
@@ -235,10 +236,10 @@ class DomainConfig:
     def __init__(self,
                  test_id,
                  domain,
-                 expected_failures=dict(),
-                 expected_warnings=dict(),
-                 expected_not_tested=dict(),
-                 expected_passes=dict(),
+                 expected_failures=None,
+                 expected_warnings=None,
+                 expected_not_tested=None,
+                 expected_passes=None,
                  expected_score=None):
         self.test_id = test_id
         self.domain = domain
@@ -259,6 +260,8 @@ class DomainConfig:
             return copy.deepcopy(dict_or_set)
         elif isinstance(dict_or_set, set):
             return copy.deepcopy(dict.fromkeys(dict_or_set, None))
+        elif dict_or_set is None:
+            return dict()
         else:
             raise ValueError()
 
@@ -267,20 +270,20 @@ class DomainConfig:
 
 
 class GoodDomain(DomainConfig):
-    def __init__(self, testid, domain, expected_not_tested=dict()):
+    def __init__(self, testid, domain, expected_not_tested=None):
         super().__init__(testid, domain,
             expected_not_tested=expected_not_tested,
             expected_score=PERFECT_SCORE)
 
 
 class BadDomain(DomainConfig):
-    def __init__(self, testid, domain, expected_failures=dict()):
+    def __init__(self, testid, domain, expected_failures=None):
         super().__init__(testid, domain,
             expected_failures=expected_failures,
             expected_score=IMPERFECT_SCORE)
 
 
-def id_generator(val):
+def domainconfig_id_generator(val):
     if isinstance(val, DomainConfig):
         return '{}-{}'.format(
             val.test_id, val.domain.split('.')[0])

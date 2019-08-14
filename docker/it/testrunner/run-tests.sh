@@ -157,13 +157,14 @@ for FQDN in ${TARGETS}; do
     if [ "${HEADER_ROW}" -eq 1 ]; then
         echo -e -n "FQDN"
         for PROT in ${PROTOCOLS}; do echo -e -n "\t${PROT}"; done
-        echo -e -n "\tServer\tCertificate\n"
+        echo -e -n "\tServer\tCertificate\tBest Cipher\n"
         HEADER_ROW=0
     fi
 
     HTTP_REQUEST="GET / HTTP/1.1\nConnection: close\nHost: ${FQDN}\n\n"
     SERVER_NAME="Unknown"
     CERT="Unknown"
+    CIPHER="Unknown"
     echo -n -e "${FQDN}:\t"
     for PROT in ${PROTOCOLS}; do
         SUPPORTED='-'
@@ -176,11 +177,13 @@ for FQDN in ${TARGETS}; do
         if [ "${SUPPORTED}" == "YES" ]; then
             [ "${SERVER_NAME}" == "Unknown" ] && SERVER_NAME=$(echo -e "${HTTP_REQUEST}" | timeout -k 1 2s ${OPENSSL} s_client -quiet -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^Server:' | cut -c 9- | tr -d "\r\n" || echo)
             [ "${CERT}" == "Unknown" ] && CERT=$(echo | timeout -k 1 2s ${OPENSSL} s_client -showcerts -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^subject=.+' | grep -Eo "CN.+" | cut -d '=' -f 2 | tr -d '[:space:]' || echo)
+            [ "${CIPHER}" == "Unknown" ] && CIPHER=$(echo | timeout -k 1 2s ${OPENSSL} s_client -brief -${PROT} ${SERVERNAME} -connect ${FQDN}:443 2>&1 | grep -E '^Ciphersuite: .+' | cut -d ':' -f 2 | tr -d '[:space:]' || echo)
         fi
     done
     [ "${SERVER_NAME}" == "" ] && SERVER_NAME="Unavailable"
     [ "${CERT}" == "" ] && CERT="Unavailable"
-    echo -n -e "${SERVER_NAME}\t${CERT}\n"
+    [ "${CIPHER}" == "" ] && CIPHER="Unavailable"
+    echo -n -e "${SERVER_NAME}\t${CERT}\t${CIPHER}\n"
 done | column -t -s $'\t'
 set +o pipefail
 

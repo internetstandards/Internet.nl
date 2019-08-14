@@ -447,11 +447,31 @@ class HTTPSConnection:
             self.host = host
             addr = (socket_af, self.host)
             try:
+                # First see if the server supports TLS 1.3
+                # Do not use ModernConnection for other protocol versions as it
+                # lacks support for verifying TLS compression, insecure
+                # renegotiation and client renegotiation.
                 self.conn = ModernConnection(url=self.host, addr=addr,
                     version=TLSV1_3, timeout=timeout, tries=tries)
             except ConnectionHandshakeException:
-                self.conn = DebugConnection(url=self.host, addr=addr,
-                    version=SSLV23, timeout=timeout, tries=tries)
+                try:
+                    # No TLS 1.3? Try TLS 1.2, TLS 1.1, TLS 1.0 and SSL 3.0.
+                    # We don't have support for SSL 2.0.
+                    self.conn = DebugConnection(url=self.host, addr=addr,
+                        version=SSLV23, timeout=timeout, tries=tries)
+                except ConnectionHandshakeException:
+                    # Now, try TLS 1.2 again but this time with
+                    # ModernConnection because while it lacks some features it
+                    # also supports some ciphers that DebugConnection does not,
+                    # better to verify what we can than fail to connect at all.
+                    # Ciphers known to be unsupported by DebugConnection but
+                    # supported by ModernConnection include:
+                    #   - AES128-CCM
+                    #   - DHE-RSA-CHACHA20-POLY1305
+                    #   - ECDHE-RSA-CHACHA20-POLY1305
+                    #   - ECDHE-ECDSA-CHACHA20-POLY1305
+                    self.conn = ModernConnection(url=self.host, addr=addr,
+                        version=TLSV1_2, timeout=timeout, tries=tries)
 
     @classmethod
     def fromconn(cls, conn):
