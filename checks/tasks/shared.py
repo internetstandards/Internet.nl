@@ -220,7 +220,7 @@ def socket_af(host, port, af, task, timeout=10):
     if err is not None:
         raise err
     else:
-        raise NoIpError()
+        raise NoIpError(f'host={host} port={port} af={af}')
 
 
 # TODO: factor out TLS test specific functionality (used in tls.py) from basic
