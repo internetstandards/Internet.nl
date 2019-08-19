@@ -4,9 +4,8 @@ import http.client
 import re
 import socket
 import time
-from collections import defaultdict
-from urllib.parse import urlparse
 
+from internetnl import celery_app
 from celery import shared_task
 from django.conf import settings
 import unbound
@@ -22,6 +21,10 @@ from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 from nassl.ssl_client import ClientCertificateRequested
 from io import BytesIO
+
+from cgi import parse_header
+from collections import defaultdict, namedtuple
+from urllib.parse import urlparse
 
 
 SSLV23 = OpenSslVersionEnum.SSLV23
@@ -597,6 +600,8 @@ class HTTPConnection(http.client.HTTPConnection):
 
 
 # TODO: remove unused addr parameter
+# TODO: document and/or clean up the possible set of raised exceptions
+# TODO: remove task parameter and instead use celery_app.current_worker_task?
 def http_fetch(
         host, af=socket.AF_INET, path="/", port=80, http_method="GET",
         task=None, depth=0, addr=None, put_headers=[], ret_headers=None,
@@ -614,7 +619,6 @@ def http_fetch(
                 # TODO: pass the task through and use libunbound based DNS
                 # resolution via the task instead of Python native name
                 # resolution mechanisms?
-                # TODO: pass the address family (af) through as well?
                 conn = HTTPSConnection(
                     host=host, socket_af=af, timeout=timeout, tries=1)
             else:
@@ -688,3 +692,29 @@ def http_fetch(
             keep_conn_open=keep_conn_open)
 
     return conn, res, ret_headers, ret_visited_hosts
+
+
+# Simplified use of http_fetch that also downloads and decodes the response
+# body. Similar to calling requests.get(). Passes the current Celery task (if
+# any) for name resolution so that the caller doesn't have to pass the task
+# around just to get it to this point, the caller shouldn't need to know about
+# celery tasks just to be able to do a HTTP GET...
+# TODO: document the possible set of raised exceptions
+# TODO: move use of the current task to http_fetch() and remove it from the
+# caller hierarchy?
+def http_get(url):
+    scheme, netloc, path, *unused = urlparse(url)
+    port = 443 if scheme == 'https' else 80
+    conn, r, *unused = http_fetch(host=netloc, path=path,
+        port=port, keep_conn_open=True, task=celery_app.current_worker_task)
+    rr = namedtuple('Response', ['status_code', 'text'])
+    rr.status_code = r.status
+    if r.status == 200:
+        ct_header = r.getheader('Content-Type', None)
+        if ct_header:
+            encoding = parse_header(ct_header)[1]['charset']
+        else:
+            encoding = 'utf-8'
+        rr.text = r.read().decode(encoding)
+    conn.close()
+    return rr

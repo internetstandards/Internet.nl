@@ -8,8 +8,6 @@ from django.conf import settings
 from django.core.cache import cache
 from urllib.parse import urlparse
 import unbound
-from cgi import parse_header
-from collections import namedtuple
 
 from . import SetupUnboundContext, shared
 from .dispatcher import post_callback_hook, check_registry
@@ -501,7 +499,7 @@ def do_dmarc(self, url, *args, **kwargs):
     try:
         cb_data = dict(cont=True)
         is_organizational_domain = False
-        public_suffix_list = dmarc_get_public_suffix_list(task=self)
+        public_suffix_list = dmarc_get_public_suffix_list()
         if not public_suffix_list:
             # We don't have the public suffix list.
             # Raise SoftTimeLimitExceeded to easily fail the test.
@@ -717,34 +715,14 @@ def dmarc_find_organizational_domain(domain, public_suffix_list):
     return organizational_domain
 
 
-def dmarc_fetch_public_suffix_list(task):
+def dmarc_fetch_public_suffix_list():
     """
     Fetch the list from the configured URL and parse it leaving out comments
     empty lines and invalid lines.
 
     """
-    def requests_like_get(url):
-        scheme, netloc, path, *unused = urlparse(url)
-        port = 443 if scheme == 'https' else 80
-        conn, r, *unused = shared.http_fetch(host=netloc, path=path,
-            port=port, keep_conn_open=True, task=task)
-
-        rr = namedtuple('Response', ['status_code', 'text'])
-        rr.status_code = r.status
-        if r.status == 200:
-            ct_header = r.getheader('Content-Type', None)
-            if ct_header:
-                encoding = parse_header(ct_header)[1]['charset']
-            else:
-                encoding = 'utf-8'
-            rr.text = r.read().decode(encoding)
-
-        conn.close()
-        return rr
-
-    suffix_url = settings.PUBLIC_SUFFIX_LIST_URL
     public_suffix_list = []
-    r = requests_like_get(suffix_url)
+    r = shared.http_get(settings.PUBLIC_SUFFIX_LIST_URL)
     lines = r.text.split("\n")
     for line in lines:
         line = line.rstrip()
@@ -763,7 +741,7 @@ def dmarc_fetch_public_suffix_list(task):
     return public_suffix_list
 
 
-def dmarc_get_public_suffix_list(task):
+def dmarc_get_public_suffix_list():
     """
     Return the parsed public suffix list.
 
@@ -794,7 +772,7 @@ def dmarc_get_public_suffix_list(task):
             public_suffix_list_loading_id, True,
             timeout=public_suffix_list_loading_ttl)
         if status:
-            public_suffix_list = dmarc_fetch_public_suffix_list(task)
+            public_suffix_list = dmarc_fetch_public_suffix_list()
             if public_suffix_list:
                 cache.set(
                     public_suffix_list_id, public_suffix_list,
