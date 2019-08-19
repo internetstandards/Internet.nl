@@ -1844,21 +1844,19 @@ class ConnectionChecker:
             # TODO: extend to support indicating that we were unable to test?
             return self._score_compression_good, False
 
-    def check_zero_rtt(self, explicit_conn=None):
-        test_conn = self._conn if not explicit_conn else explicit_conn
-
+    def check_zero_rtt(self):
         # This check isn't relevant to anything less than TLS 1.3.
-        if not explicit_conn and test_conn.get_ssl_version() < TLSV1_3:
+        if self._conn.get_ssl_version() < TLSV1_3:
             return self._score_zero_rtt_good, True
 
         # we require an existing connection, as 0-RTT is only possible with
         # connections after the first so that the SSL session can be re-used.
         # is_handshake_completed() will be false if we didn't complete the
         # connection handshake yet or we subsequently shutdown the connection.
-        if not test_conn.is_handshake_completed():
+        if not self._conn.is_handshake_completed():
             raise ValueError()
 
-        session = test_conn.get_session()
+        session = self._conn.get_session()
 
         # does the server announce support for early data?
         # assumes that at least some data was already exchanged because, with
@@ -1870,25 +1868,25 @@ class ConnectionChecker:
 
         # terminate the current connection and re-connect using the previous
         # SSL session details then try and write early data to the connection
-        test_conn.safe_shutdown()
+        self._conn.safe_shutdown()
 
         try:
-            test_conn.connect(do_handshake_on_connect=False)
-            test_conn.set_session(session)
-            if test_conn._ssl.get_early_data_status() == 0:
+            self._conn.connect(do_handshake_on_connect=False)
+            self._conn.set_session(session)
+            if self._conn._ssl.get_early_data_status() == 0:
                 if self._checks_mode == ChecksMode.WEB:
-                    http_client = HTTPSConnection.fromconn(test_conn)
+                    http_client = HTTPSConnection.fromconn(self._conn)
                     http_client.putrequest('GET', '/')
                     http_client.endheaders()
                 elif self._checks_mode == ChecksMode.MAIL:
                     # TODO
                     pass
 
-                if (test_conn._ssl.get_early_data_status() == 1 and
-                    not test_conn.is_handshake_completed()):
-                    test_conn.do_handshake()
-                    self._note_conn_details(test_conn)
-                    if test_conn._ssl.get_early_data_status() == 2:
+                if (self._conn._ssl.get_early_data_status() == 1 and
+                    not self._conn.is_handshake_completed()):
+                    self._conn.do_handshake()
+                    self._note_conn_details(self._conn)
+                    if self._conn._ssl.get_early_data_status() == 2:
                         if self._checks_mode == ChecksMode.WEB:
                             # 0-RTT status is bad unless the target responds with
                             # HTTP status code 425 Too Early. See:
