@@ -205,6 +205,7 @@ class MailTls(Category):
             MailTlsStarttlsExists,
             MailTlsFsParams,
             MailTlsCiphers,
+            MailTlsCipherOrder,
             MailTlsVersion,
             MailTlsCompression,
             MailTlsRenegotiationSecure,
@@ -216,6 +217,8 @@ class MailTls(Category):
             MailTlsDaneExists,
             MailTlsDaneValid,
             MailTlsDaneRollover,
+            MailTlsZeroRTT,
+            MailTlsOCSPStapling,
         ]
         super(MailTls, self).__init__(name, subtests)
 
@@ -1144,6 +1147,11 @@ class MailTlsFsParams(Subtest):
         self.verdict = "detail mail tls fs-params verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls fs-params verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self.was_tested()
         self._status(STATUS_FAIL)
@@ -1177,11 +1185,41 @@ class MailTlsCiphers(Subtest):
         self.verdict = "detail mail tls ciphers verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls ciphers verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls ciphers verdict bad"
         self.tech_data = tech_data
+
+
+class MailTlsCipherOrder(Subtest):
+    def __init__(self):
+        super(MailTlsCipherOrder, self).__init__(
+            name="tls_cipher_order",
+            label="detail mail tls cipher_order label",
+            explanation="detail mail tls cipher_order exp",
+            tech_string="detail mail tls cipher_order tech table",
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_CIPHER_ORDER_GOOD,
+            model_score_field="cipher_order_score")
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_TLS_CIPHER_ORDER_WORST_STATUS
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls cipher_order verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls cipher_order verdict bad"
+        self.tech_data = "detail tech data no"
 
 
 class MailTlsVersion(Subtest):
@@ -1197,6 +1235,11 @@ class MailTlsVersion(Subtest):
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_PROTOCOLS_WORST_STATUS
+
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls version verdict phase-out"
+        self.tech_data = tech_data
 
     def result_good(self):
         self.was_tested()
@@ -1338,6 +1381,11 @@ class MailTlsCertPubkey(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls cert-pubkey verdict good"
         self.tech_data = ""
+
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls cert-pubkey verdict phase-out"
+        self.tech_data = tech_data
 
     def result_bad(self, tech_data):
         self.was_tested()
@@ -1651,6 +1699,61 @@ class MailAuthSpfPolicy(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth spf-policy verdict redirect"
         self.tech_data = tech_data
+
+
+class MailTlsZeroRTT(Subtest):
+    def __init__(self):
+        super(MailTlsZeroRTT, self).__init__(
+            name="zero_rtt",
+            label="detail mail tls zero-rtt label",
+            explanation="detail mail tls zero-rtt exp",
+            tech_string="detail mail tls zero-rtt tech table",
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_ZERO_RTT_GOOD,
+            model_score_field="zero_rtt_score")
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_TLS_ZERO_RTT_WORST_STATUS
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls zero-rtt verdict good"
+        self.tech_data = "detail tech data no"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls zero-rtt verdict bad"
+        self.tech_data = "detail tech data yes"
+
+
+class MailTlsOCSPStapling(Subtest):
+    def __init__(self):
+        super(MailTlsOCSPStapling, self).__init__(
+            name="ocsp_stapling",
+            label="detail mail tls ocsp-stapling label",
+            explanation="detail mail tls ocsp-stapling exp",
+            tech_string="detail mail tls ocsp-stapling tech table",
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_OCSP_STAPLING_GOOD,
+            model_score_field="ocsp_stapling_score")
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_TLS_OCSP_STAPLING_WORST_STATUS
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls ocsp-stapling verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_ok(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls ocsp-stapling verdict ok"
+        self.tech_data = "detail tech data no"
+
+    def result_not_trusted(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls ocsp-stapling verdict bad"
+        self.tech_data = "detail tech data no"
 
 
 # --- APPSECPRIV

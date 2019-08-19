@@ -742,6 +742,11 @@ msgstr ""
 "At least one of your mail server certificates contains a public key with an \n"
 "*insufficiently* secure length."
 
+msgid "detail mail tls cert-pubkey verdict phase-out"
+msgstr ""
+"At least one of your mail server certificates contains a public key with an *insecure* length/ \n"
+"elliptic curve type or which is at risk of becoming insecure."
+
 msgid "detail mail tls cert-pubkey verdict good"
 msgstr ""
 "All your mail server certificates contain a public key with a sufficiently \n"
@@ -829,8 +834,31 @@ msgstr ""
 "At least one of your mail servers supports one or more *insufficiently* secure \n"
 "cipher suites."
 
+msgid "detail mail tls ciphers verdict phase-out"
+msgstr ""
+"At least one of your mail servers supports *insufficiently* secure cipher suites \n"
+"and/or cipher suites that are at risk of becoming insecure."
+
 msgid "detail mail tls ciphers verdict good"
 msgstr "All your mail servers support sufficiently secure cipher suites only."
+
+msgid "detail mail tls cipher_order exp"
+msgstr ""
+"We check if your receiving mail servers (MX) negotiate a cipher with the client according to\n"
+"its own preferences and not those of the client. See ['TLS guidelines from \n"
+"NCSC-EN|(https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guideline B2-5).\n"
+
+msgid "detail mail tls cipher_order label"
+msgstr "Cipher order"
+
+msgid "detail mail tls cipher_order tech table"
+msgstr "Mail server (MX)|Server cipher order enforced"
+
+msgid "detail mail tls cipher_order verdict bad"
+msgstr "At least one of your mail servers respects the client cipher order preference, which is *not* secure."
+
+msgid "detail mail tls cipher_order verdict good"
+msgstr "All your mail servers enforce their own cipher order preference."
 
 msgid "detail mail tls compression exp"
 msgstr ""
@@ -999,6 +1027,11 @@ msgstr ""
 "At least one of your mail servers supports *insufficiently* secure Diffie-Hellman parameters \n"
 "for key exchange."
 
+msgid "detail mail tls fs-params verdict phase-out"
+msgstr ""
+"At least one of your mail servers supports *insufficiently* secure Diffie-Hellman parameters \n"
+"and/or hash functions that are at risk of becoming insecure for key exchange."
+
 msgid "detail mail tls fs-params verdict good"
 msgstr ""
 "All your mail servers support sufficiently secure Diffie-Hellman parameters for \n"
@@ -1106,8 +1139,70 @@ msgstr ""
 "At least one of your mail servers does *not* support sufficiently secure TLS\n"
 " versions."
 
+msgid "detail mail tls version verdict phase-out"
+msgstr "At least one of your mail servers supports TLS versions that are at risk of becoming *insufficiently* secure in the near future."
+
 msgid "detail mail tls version verdict good"
 msgstr "All your mail servers support sufficiently secure TLS versions."
+
+msgid "detail mail tls zero-rtt exp"
+msgstr ""
+"0-RTT _'is an option in TLS 1.3 that transports application data during \n"
+"the first handshake message. 0-RTT does not provide protection against \n"
+"replay attacks at the TLS layer and is therefore hard to use securely in \n"
+"an application agnostic environment'_. See ['IT Security Guidelines for Transport Layer Security (TLS)']"
+"(https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html)"
+", guideline B9-1 (in English).\n"
+"\n"
+"If your receiving mail server does not support TLS 1.3 it is assumed that it does not \n"
+"support 0-RTT. The test is not applicable in this case. \n"
+"\n"
+"TO DO"
+
+msgid "detail mail tls zero-rtt label"
+msgstr "0-RTT"
+
+msgid "detail mail tls zero-rtt tech table"
+msgstr "Mail server (MX)|0-RTT"
+
+msgid "detail mail tls zero-rtt verdict bad"
+msgstr "At least one of your mail servers supports 0-RTT, which could be a security risk."
+
+msgid "detail mail tls zero-rtt verdict good"
+msgstr "None of your mail servers support 0-RTT."
+
+msgid "detail mail tls ocsp-stapling exp"
+msgstr ""
+"We check if your receiving mail server supports the [TLS Certificate Status extension](https://www.ietf.org/rfc/rfc6961.txt) \n"
+"aka OCSP stapling. With OCSP stapling your mail server can provide OCSP \n"
+"responses itself whcih removes the need for the TLS client to verify the \n"
+"validity of the mail server certificate directly with the certificate \n"
+"supplier, and thus avoids exposing potentially privacy sensitive data about \n"
+"the client to the certificate supplier. It also does not require \n"
+"connectivity between client and certificate supplier and is faster. See \n"
+"['IT Security Guidelines for Transport Layer Security (TLS)']"
+"(https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html)"
+", guideline B9-1 (in English).\n"
+"\n"
+"When connecting to your mail server we use the TLS Certificate Status \n"
+"extension to request OCSP data be included in the server response. If your \n"
+"mail server includes OCSP data in the response we then verify that the OCSP \n"
+"data is signed by a known certificate authority."
+
+msgid "detail mail tls ocsp-stapling label"
+msgstr "OCSP Stapling"
+
+msgid "detail mail tls ocsp-stapling tech table"
+msgstr "Mail server (MX)|OCSP stapling"
+
+msgid "detail mail tls ocsp-stapling verdict ok"
+msgstr "At least one of your mail servers does not support OCSP stapling."
+
+msgid "detail mail tls ocsp-stapling verdict good"
+msgstr "Your mail servers support OCSP stapling."
+
+msgid "detail mail tls ocsp-stapling verdict bad"
+msgstr "At least one of your mail servers supports OCSP stapling but responds with invalid data"
 
 msgid "detail tech data bogus"
 msgstr "bogus"
@@ -1528,7 +1623,7 @@ msgstr "Your web server supports sufficiently secure cipher suites only."
 
 msgid "detail web tls cipher_order exp"
 msgstr ""
-"We check if your web server negotiates a cipher with the client according\n"
+"We check if your web server negotiates a cipher with the client according to\n"
 "its own preferences and not those of the client. See ['TLS guidelines from \n"
 "NCSC-EN|(https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guideline B2-5).\n"
 
