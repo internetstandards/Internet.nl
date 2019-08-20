@@ -150,7 +150,7 @@ PROTOCOLS="ssl2 ssl3 tls1 tls1_1 tls1_2 tls1_3"
 TARGETS="$(docker exec $C_SUBMASTER ldns-read-zone -E A -z /etc/nsd/test.nlnetlabs.tk | awk '{print $1}' | sed -e 's/\.$//')"
 
 echo
-echo ':: Interrogating target servers..'
+echo ':: Interrogating test.nlnetlabs.tk target servers..'
 set -o pipefail
 HEADER_ROW=1
 for FQDN in ${TARGETS}; do
@@ -161,11 +161,13 @@ for FQDN in ${TARGETS}; do
         HEADER_ROW=0
     fi
 
+    HOST=$(echo $FQDN | sed -e 's/\.test\.nlnetlabs\.tk//')
+
     HTTP_REQUEST="GET / HTTP/1.1\nConnection: close\nHost: ${FQDN}\n\n"
     SERVER_NAME="Unknown"
     CERT="Unknown"
     CIPHER="Unknown"
-    echo -n -e "${FQDN}:\t"
+    echo -n -e "${HOST}:\t"
     for PROT in ${PROTOCOLS}; do
         SUPPORTED='-'
         OPENSSL=/opt/openssl-old/bin/openssl
