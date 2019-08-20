@@ -1884,20 +1884,24 @@ class ConnectionChecker:
                     http_client.putrequest('GET', '/')
                     http_client.endheaders()
                 elif self._checks_mode == ChecksMode.MAIL:
-                    # TODO
-                    pass
+                    self._conn.write(b"EHLO internet.nl\r\n")
+                    self._conn.read(4096)
 
                 if (self._conn._ssl.get_early_data_status() == 1 and
                     not self._conn.is_handshake_completed()):
                     self._conn.do_handshake()
                     self._note_conn_details(self._conn)
                     if self._conn._ssl.get_early_data_status() == 2:
-                        if self._checks_mode == ChecksMode.WEB:
+                        if self._checks_mode == ChecksMode.MAIL:
+                            return self._score_zero_rtt_bad, False
+                        elif self._checks_mode == ChecksMode.WEB:
                             # 0-RTT status is bad unless the target responds with
                             # HTTP status code 425 Too Early. See:
                             # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
                             if http_client.getresponse().status == 425:
                                 return self._score_zero_rtt_good, True
+                            else:
+                                return self._score_zero_rtt_bad, False
         except (ConnectionHandshakeException,
                 ConnectionSocketException,
                 IOError):
@@ -1905,7 +1909,7 @@ class ConnectionChecker:
 
         # TODO: ensure the handshake is completed ready for the next check that
         # uses this connection?
-        return self._score_zero_rtt_bad, False
+        return self._score_zero_rtt_good, True
 
     def check_protocol_versions(self):
         # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0
@@ -2022,10 +2026,14 @@ class ConnectionChecker:
                     # Ensure that the requirement in the OpenSSL docs that the
                     # peer has signed a message is satisfied by exchanging data
                     # with the server.
-                    http_client = HTTPSConnection.fromconn(new_conn)
-                    http_client.putrequest('GET', '/')
-                    http_client.endheaders()
-                    http_client.getresponse()
+                    if self._checks_mode == ChecksMode.WEB:
+                        http_client = HTTPSConnection.fromconn(new_conn)
+                        http_client.putrequest('GET', '/')
+                        http_client.endheaders()
+                        http_client.getresponse()
+                    elif self._checks_mode == ChecksMode.MAIL:
+                        new_conn.write(b"EHLO internet.nl\r\n")
+                        new_conn.read(4096)
 
                     return new_conn.get_peer_signature_digest()
             except (ConnectionSocketException,
