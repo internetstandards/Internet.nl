@@ -113,14 +113,14 @@ def do_mail_get_servers(self, url, *args, **kwargs):
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):
-    addrs = []
+    af_ip_pairs = []
     ip4 = self.resolve(qname, unbound.RR_TYPE_A)
     if len(ip4) > 0:
-        addrs.append((socket.AF_INET, ip4[0]))
+        af_ip_pairs.append((socket.AF_INET, ip4[0]))
     ip6 = self.resolve(qname, unbound.RR_TYPE_AAAA)
     if len(ip6) > 0:
-        addrs.append((socket.AF_INET6, ip6[0]))
-    return addrs
+        af_ip_pairs.append((socket.AF_INET6, ip6[0]))
+    return af_ip_pairs
 
 
 def resolve_dane(task, port, dname, check_nxdomain=False):

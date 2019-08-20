@@ -423,8 +423,8 @@ batch_mail_registered = check_registry(
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_cert(self, addrs, url, *args, **kwargs):
-    return do_web_cert(addrs, url, self, *args, **kwargs)
+def web_cert(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @batch_web_registered
@@ -433,8 +433,8 @@ def web_cert(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_cert(self, addrs, url, *args, **kwargs):
-    return do_web_cert(addrs, url, self, *args, **kwargs)
+def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @web_registered
@@ -443,8 +443,8 @@ def batch_web_cert(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_conn(self, addrs, url, *args, **kwargs):
-    return do_web_conn(addrs, url, *args, **kwargs)
+def web_conn(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_conn(af_ip_pairs, url, *args, **kwargs)
 
 
 @batch_web_registered
@@ -453,8 +453,8 @@ def web_conn(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_conn(self, addrs, url, *args, **kwargs):
-    return do_web_conn(addrs, url, *args, **kwargs)
+def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_conn(af_ip_pairs, url, *args, **kwargs)
 
 
 @mail_registered
@@ -483,8 +483,8 @@ def batch_mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_http(self, addrs, url, *args, **kwargs):
-    return do_web_http(addrs, url, self, *args, **kwargs)
+def web_http(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_http(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @batch_web_registered
@@ -493,8 +493,8 @@ def web_http(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_http(self, addrs, url, *args, **kwargs):
-    return do_web_http(addrs, url, self, args, **kwargs)
+def batch_web_http(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_http(af_ip_pairs, url, self, args, **kwargs)
 
 
 def save_results(model, results, addr, domain, category):
@@ -1400,26 +1400,26 @@ class StarttlsDetails:
         self.dane_cb_data = dane_cb_data
 
 
-def do_web_cert(addrs, url, task, *args, **kwargs):
+def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     """
     Check the web server's certificate.
 
     """
     try:
         results = {}
-        for addr in addrs:
-            results[addr[1]] = cert_checks(
-                url, ChecksMode.WEB, task, addr, *args, **kwargs)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = cert_checks(
+                url, ChecksMode.WEB, task, af_ip_pair, *args, **kwargs)
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
-                results[addr[1]] = dict(tls_cert=False)
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
+                results[af_ip_pair[1]] = dict(tls_cert=False)
 
     return ('cert', results)
 
 
 def cert_checks(
-        url, mode, task, addr=None, starttls_details=None,
+        url, mode, task, af_ip_pair=None, starttls_details=None,
         *args, **kwargs):
     """
     Perform certificate checks.
@@ -1430,8 +1430,9 @@ def cert_checks(
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
             http_client, *unused = shared.http_fetch(
-                url, af=addr[0], path="", port=443, addr=addr[1],
-                depth=MAX_REDIRECT_DEPTH, task=web_cert)
+                url, af=af_ip_pair[0], path="", port=443,
+                addr=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH,
+                task=web_cert)
             debug_cert_chain = DebugCertChain
             conn_wrapper = HTTPSConnection
         elif mode == ChecksMode.MAIL:
@@ -1447,7 +1448,7 @@ def cert_checks(
             # If we have all the certificate related information we need from a
             # previous check, skip this connection.
             # check chain validity (sort of NCSC guideline B3-6)
-            with conn_wrapper(url, addr=addr,
+            with conn_wrapper(url, addr=af_ip_pair[0],
                     ciphers="!aNULL:ALL:COMPLEMENTOFALL").conn as conn:
                 with ConnectionChecker(conn, mode) as checker:
                     verify_score, verify_result = checker.check_cert_trust()
@@ -1496,20 +1497,20 @@ def cert_checks(
         return results
 
 
-def do_web_conn(addrs, url, *args, **kwargs):
+def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     """
     Start all the TLS related checks for the web test.
 
     """
     try:
         results = {}
-        for addr in addrs:
-            results[addr[1]] = check_web_tls(
-                url, addr, args, kwargs)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = check_web_tls(
+                url, af_ip_pair, args, kwargs)
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
-                results[addr[1]] = dict(tls_enabled=False)
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
+                results[af_ip_pair[1]] = dict(tls_enabled=False)
 
     return ('tls_conn', results)
 
@@ -2432,7 +2433,7 @@ class ConnectionChecker:
         return ciphers_score, result_dict
 
 
-def check_web_tls(url, addr=None, *args, **kwargs):
+def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
 
@@ -2440,9 +2441,8 @@ def check_web_tls(url, addr=None, *args, **kwargs):
 
     def connect_to_web_server():
         http_client, *unused = shared.http_fetch(
-            url, af=addr[0], path="", port=443, addr=addr[1],
-            depth=MAX_REDIRECT_DEPTH, task=web_conn,
-            keep_conn_open=True)
+            url, af=af_ip_pair[0], path="", port=443, addr=af_ip_pair[1],
+            depth=MAX_REDIRECT_DEPTH, task=web_conn, keep_conn_open=True)
         return http_client.conn
 
     try:
@@ -2501,20 +2501,20 @@ def check_web_tls(url, addr=None, *args, **kwargs):
         return dict(tls_enabled=False)
 
 
-def do_web_http(addrs, url, task, *args, **kwargs):
+def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
     """
     Start all the HTTP related checks for the web test.
 
     """
     try:
         results = {}
-        for addr in addrs:
-            results[addr[1]] = http_checks(addr, url, task)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
 
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
-                results[addr[1]] = dict(
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
+                results[af_ip_pair[1]] = dict(
                     forced_https=False,
                     forced_https_score=scoring.WEB_TLS_FORCED_HTTPS_BAD,
                     http_compression_enabled=True,
@@ -2528,17 +2528,17 @@ def do_web_http(addrs, url, task, *args, **kwargs):
     return ('http_checks', results)
 
 
-def http_checks(addr, url, task):
+def http_checks(af_ip_pair, url, task):
     """
     Perform the HTTP header and HTTPS redirection checks for this webserver.
 
     """
-    forced_https_score, forced_https = forced_http_check(addr, url, task)
+    forced_https_score, forced_https = forced_http_check(af_ip_pair, url, task)
     header_checkers = [
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
     ]
-    header_results = http_headers_check(addr, url, header_checkers, task)
+    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
 
     results = {
         'forced_https': forced_https,
@@ -2548,7 +2548,7 @@ def http_checks(addr, url, task):
     return results
 
 
-def forced_http_check(addr, url, task):
+def forced_http_check(af_ip_pair, url, task):
     """
     Check if the webserver is properly configured with HTTPS redirection.
 
@@ -2556,7 +2556,8 @@ def forced_http_check(addr, url, task):
     # First connect on port 80 and see if we get refused
     try:
         conn, res, headers, visited_hosts = shared.http_fetch(
-            url, af=addr[0], path="", port=80, task=task, addr=addr[1])
+            url, af=af_ip_pair[0], path="", port=80, task=task,
+            addr=af_ip_pair[1])
 
     except (socket.error, http.client.BadStatusLine, NoIpError):
         # If we got refused on port 80 the first time

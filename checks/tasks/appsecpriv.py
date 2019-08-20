@@ -81,8 +81,8 @@ batch_web_registered = check_registry(
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_appsecpriv(self, addrs, url, *args, **kwargs):
-    return do_web_appsecpriv(addrs, url, self, *args, **kwargs)
+def web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_appsecpriv(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @batch_web_registered
@@ -91,8 +91,8 @@ def web_appsecpriv(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_appsecpriv(self, addrs, url, *args, **kwargs):
-    return do_web_appsecpriv(addrs, url, self, *args, **kwargs)
+def batch_web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_appsecpriv(af_ip_pairs, url, self, *args, **kwargs)
 
 
 def save_results(model, results, addr, domain):
@@ -199,7 +199,7 @@ def build_summary_report(testappsecpriv, category):
     testappsecpriv.report = appsecpriv_report
 
 
-def do_web_appsecpriv(addrs, url, task, *args, **kwargs):
+def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
     try:
         results = {}
         header_checkers = [
@@ -209,16 +209,16 @@ def do_web_appsecpriv(addrs, url, task, *args, **kwargs):
             HeaderCheckerXXssProtection(),
             HeaderCheckerXContentTypeOptions(),
         ]
-        for addr in addrs:
-            results[addr[1]] = http_headers_check(
-                addr, url, header_checkers, task)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = http_headers_check(
+                af_ip_pair, url, header_checkers, task)
 
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
                 d = {'server_reachable': False}
                 for h in header_checkers:
                     d.update(h.get_negative_values())
-                results[addr[1]] = d
+                results[af_ip_pair[1]] = d
 
     return ('http_headers', results)
