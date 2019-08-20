@@ -1557,6 +1557,27 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
     return ('smtp_starttls', results)
 
 
+# At the time of writing this function makes up to 16 SMTP+STARTTLS connections
+# to the target server, excluding retries, e.g.:
+#   #   Connection Class    Protocol   Caller
+#   ----------------------------------------------------------------------------
+#   1   ModernConnection    SSLV23     initial connection
+#   2   DebugConnection     SSLV23     initial connection (fallback 1)
+#   3   ModernConnection    TLSV1_2    initial connection (fallback 2)
+#   4   DebugConnection     SSLV23     check_client_reneg
+#   5   DebugConnection     SSLV23     check_ciphers
+#   6   DebugConnection     SSLV23     check_ciphers
+#   7   ModernConnection    SSLV23     check_ciphers
+#   8   ModernConnection    TLSV1_3    check_zero_rtt (if TLSV1_3)
+#   9   DebugConnection     TLSV1_1    check_protocol_versions (if not initial)
+#   10  DebugConnection     TLSV1      check_protocol_versions (if not initial)
+#   11  DebugConnection     SSLV3      check_protocol_versions (if not initial)
+#   12  DebugConnection     SSLV2      check_protocol_versions (if not initial)
+#   13  DebugConnection     SSLV23     check_dh_params
+#   14  DebugConnection     SSLV23     check_dh_params
+#   15  ModernConnection    TLSV1_2    check_key_exchange_hash_func (if not TLSV1_3)
+#   16  DebugConnection     SSLV23     check_cipher_order
+#   ---------------------------------------------------------------------------
 def check_mail_tls(server, dane_cb_data, task):
     """
     Perform all the TLS related checks for this mail server in series.
@@ -1570,7 +1591,6 @@ def check_mail_tls(server, dane_cb_data, task):
             and dane_cb_data.get('secure'))
 
         try:
-            # First try to connect with secure ciphers.
             with SMTPConnection(server, send_SNI=send_SNI).conn as conn:
                 with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
                     ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
