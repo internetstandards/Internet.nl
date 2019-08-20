@@ -1655,6 +1655,13 @@ class ConnectionChecker:
             self._score_tls_protocols_bad = scoring.WEB_TLS_PROTOCOLS_BAD
             self._score_tls_fs_ok = scoring.WEB_TLS_FS_OK
             self._score_tls_fs_bad = scoring.WEB_TLS_FS_BAD
+            self._score_zero_rtt_good = scoring.WEB_TLS_ZERO_RTT_GOOD
+            self._score_zero_rtt_bad = scoring.WEB_TLS_ZERO_RTT_BAD
+            self._score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
+            self._score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
+            self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
+            self._score_tls_cipher_order_good = scoring.WEB_TLS_CIPHER_ORDER_GOOD
+            self._score_tls_cipher_order_bad = scoring.WEB_TLS_CIPHER_ORDER_BAD
         elif self._checks_mode == ChecksMode.MAIL:
             self._score_compression_good = scoring.MAIL_TLS_COMPRESSION_GOOD
             self._score_compression_bad = scoring.MAIL_TLS_COMPRESSION_BAD
@@ -1670,17 +1677,15 @@ class ConnectionChecker:
             self._score_tls_protocols_bad = scoring.MAIL_TLS_PROTOCOLS_BAD
             self._score_tls_fs_ok = scoring.MAIL_TLS_FS_BAD
             self._score_tls_fs_bad = scoring.MAIL_TLS_FS_BAD
+            self._score_zero_rtt_good = scoring.MAIL_TLS_ZERO_RTT_GOOD
+            self._score_zero_rtt_bad = scoring.MAIL_TLS_ZERO_RTT_BAD
+            self._score_ocsp_staping_good = scoring.MAIL_TLS_OCSP_STAPLING_GOOD
+            self._score_ocsp_staping_ok = scoring.MAIL_TLS_OCSP_STAPLING_OK
+            self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
+            self._score_tls_cipher_order_good = scoring.MAIL_TLS_CIPHER_ORDER_GOOD
+            self._score_tls_cipher_order_bad = scoring.MAIL_TLS_CIPHER_ORDER_BAD
         else:
             raise ValueError
-
-        # TODO: use mail scores, not web scores
-        self._score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
-        self._score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
-        self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
-        self._score_zero_rtt_good = scoring.WEB_TLS_ZERO_RTT_GOOD
-        self._score_zero_rtt_bad = scoring.WEB_TLS_ZERO_RTT_BAD
-        self._score_tls_cipher_order_good = scoring.WEB_TLS_CIPHER_ORDER_GOOD
-        self._score_tls_cipher_order_bad = scoring.WEB_TLS_CIPHER_ORDER_BAD
 
         self._note_conn_details(self._conn)
 
