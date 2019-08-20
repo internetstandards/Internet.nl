@@ -422,7 +422,7 @@ services:
 
   targettls13onlydiffipv4ipv6:
     image: targetbase
-    command: /opt/jinjify.sh /etc/apache2/sites-enabled/
+    command: /opt/jinjify.sh /etc/apache2/sites-available/tls13onlydiffipv4ipv6.conf
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -431,11 +431,11 @@ services:
     depends_on:
       - targetbase
     environment:
-      - TARGET_TLS13ONLYDIFFIPV4IPV6_IP=${TARGET_TLS13ONLYDIFFIPV4IPV6_IP}
-      - TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6=${TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}
+      - TARGET_TLS13ONLYDIFFIPV4IPV6_IP
+      - TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6
       - WAIT_FOR_CUSTOM_COMMAND=yes
       - APACHE_SITES=http-with-ssl-redirect tls13onlydiffipv4ipv6
-      - APACHE_MODULES=ssl cgid
+      - APACHE_MODULES=ssl
 
   targettls1213:
     image: targetbase
