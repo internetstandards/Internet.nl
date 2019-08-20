@@ -285,6 +285,8 @@ services:
     environment:
       - APACHE_SITES=http-with-ssl-redirect tls12only
       - APACHE_MODULES=ssl
+      - POSTFIX_VERSION=custom-legacy
+      - POSTFIX_CONFIG=tls12only
 
   targettls12onlylegacybadciphers:
     image: targetbase
@@ -480,11 +482,12 @@ services:
     environment:
       - APACHE_SITES=http-with-ssl-redirect tls13only
       - APACHE_MODULES=ssl
+      - POSTFIX_VERSION=custom-modern
+      - POSTFIX_CONFIG=tls13only
 
   targettls130rtt:
     image: targetbase
     entrypoint: /opt/run-nginx-server.sh
-    command: /etc/apache2/sites-available/nginx-0rtt.conf
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -492,11 +495,14 @@ services:
         ipv6_address: ${TARGET_TLS130RTT_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - NGINX_SITES=nginx-0rtt
+      - POSTFIX_VERSION=custom-modern
+      - POSTFIX_CONFIG=tls13only
 
   targettls13invalidocsp:
     image: targetbase
     entrypoint: /opt/run-nginx-server.sh
-    command: /etc/apache2/sites-available/nginx-invalidocsp.conf
     dns: ${RESOLVER_IP}
     networks:
       test_net:
@@ -504,6 +510,8 @@ services:
         ipv6_address: ${TARGET_TLS13INVALIDOCSP_IPV6}
     depends_on:
       - targetbase
+    environment:
+      - NGINX_SITES=nginx-invalidocsp
 
   targettls13onlyclientcipherorder:
     image: targetbase

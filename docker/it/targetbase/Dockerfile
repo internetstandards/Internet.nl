@@ -15,14 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         socat \
         zlib1g-dev
 
-# Build the Postfix SMTP server using legacy OpenSSL
-RUN useradd postfix && groupadd postdrop
-COPY postfix/main.cf /etc/postfix/main.cf
-WORKDIR /tmp/build/postfix
-RUN curl -fsSLo- 'ftp://ftp.cs.uu.nl/mirror/postfix/postfix-release/official/postfix-3.4.5.tar.gz' | tar zx --strip-components 1 && \
-    make makefiles CCARGS="-DUSE_TLS -I/opt/openssl-old/include" AUXLIBS="-L/opt/openssl-old/lib -lssl -lcrypto" && \
-    make && make upgrade
-
 # Enable modules in the stock Apache
 RUN a2enmod env
 RUN a2enmod headers
@@ -98,6 +90,44 @@ RUN curl -fsSLo- 'https://archive.apache.org/dist/httpd/httpd-2.0.63.tar.bz2' | 
                 --enable-ssl
 RUN make && make install
 
+# Build the Postfix SMTP server using legacy OpenSSL
+RUN useradd postfix && groupadd postdrop
+WORKDIR /tmp/build/postfix
+RUN curl -fsSLo- 'ftp://ftp.cs.uu.nl/mirror/postfix/postfix-release/official/postfix-3.4.5.tar.gz' | tar zx --strip-components 1
+ENV POSTFIX_PREFIX_OPENSSL_LEGACY /opt/postfix-old
+RUN make clean && \
+    make makefiles \
+      command_directory=${POSTFIX_PREFIX_OPENSSL_LEGACY}/bin \
+      config_directory=${POSTFIX_PREFIX_OPENSSL_LEGACY}/etc \
+      daemon_directory=${POSTFIX_PREFIX_OPENSSL_LEGACY}/bin \
+      openssl_path=/opt/openssl-old/bin/openssl \
+      shlib_directory=${POSTFIX_PREFIX_OPENSSL_LEGACY}/lib \
+      CCARGS="-DUSE_TLS -I/opt/openssl-old/include" \
+      AUXLIBS="-L/opt/openssl-old/lib -lssl -lcrypto" && \
+    make && \
+    sh postfix-install -non-interactive
+
+# Build the Postfix SMTP server using modern OpenSSL
+ENV POSTFIX_PREFIX_OPENSSL_MODERN /opt/postfix-modern
+RUN make clean && \
+    make makefiles \
+      command_directory=${POSTFIX_PREFIX_OPENSSL_MODERN}/bin \
+      config_directory=${POSTFIX_PREFIX_OPENSSL_MODERN}/etc \
+      daemon_directory=${POSTFIX_PREFIX_OPENSSL_MODERN}/bin \
+      openssl_path=/opt/openssl-modern/bin/openssl \
+      shlib_directory=${POSTFIX_PREFIX_OPENSSL_MODERN}/lib \
+      CCARGS="-DUSE_TLS -I/opt/openssl-modern/include" \
+      AUXLIBS="-L/opt/openssl-modern/lib -lssl -lcrypto" && \
+    make && \
+    sh postfix-install -non-interactive
+
+# Apply our custom Postfix configuration that is common to all target servers
+COPY postfix/postfix-debug.cidrs /etc/
+COPY postfix/main.cf ${POSTFIX_PREFIX_OPENSSL_LEGACY}/etc/main.cf
+COPY postfix/main.cf ${POSTFIX_PREFIX_OPENSSL_MODERN}/etc/main.cf
+RUN POSTFIX_PREFIX=${POSTFIX_PREFIX_OPENSSL_LEGACY} /opt/jinjify.sh ${POSTFIX_PREFIX_OPENSSL_LEGACY}/etc/main.cf
+RUN POSTFIX_PREFIX=${POSTFIX_PREFIX_OPENSSL_MODERN} /opt/jinjify.sh ${POSTFIX_PREFIX_OPENSSL_MODERN}/etc/main.cf
+
 # Install the certificate authority and linked OCSP server files:
 COPY *.sh /opt/
 COPY ca-ocsp /opt/ca-ocsp/
@@ -121,6 +151,8 @@ COPY html /var/www/html/
 RUN SERVER_ROOT=${APACHE_SERVERROOT_OPENSSL_LEGACY} /opt/jinjify.sh ${APACHE_SERVERROOT_OPENSSL_LEGACY}/custom-httpd.conf
 RUN SERVER_ROOT=${APACHE_SERVERROOT_OPENSSL_MODERN} /opt/jinjify.sh ${APACHE_SERVERROOT_OPENSSL_MODERN}/custom-httpd.conf
 RUN SERVER_ROOT=${APACHE_SERVERROOT_OPENSSL_ANCIENT} /opt/jinjify.sh ${APACHE_SERVERROOT_OPENSSL_ANCIENT}/custom-httpd.conf
+
+COPY postfix/configs-available/* /etc/postfix/configs-available/
 
 WORKDIR /root
 ENTRYPOINT ["/opt/run-apache-server.sh"]

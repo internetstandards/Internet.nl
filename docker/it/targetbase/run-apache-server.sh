@@ -5,6 +5,8 @@ WAIT_FOR_CUSTOM_COMMAND=${WAIT_FOR_CUSTOM_COMMAND:-no}
 APACHE_VERSION=${APACHE_VERSION:-stock}
 APACHE_MODULES=${APACHE_MODULES:-}
 APACHE_SITES=${APACHE_SITES:-}
+POSTFIX_VERSION=${POSTFIX_VERSION:-}
+POSTFIX_CONFIG=${POSTFIX_CONFIG:-}
 
 # Enable Apache modules and website configurations as directed by the user invoking Docker build
 a2dissite -q 000-default
@@ -38,6 +40,18 @@ case ${APACHE_VERSION} in
         service apache2 start
 esac
 
-/usr/bin/tail -F /var/log/apache2/*.log /var/log/custom-command.log &
+# Start postfix
+case ${POSTFIX_VERSION} in
+    custom-legacy)
+        cat /etc/postfix/configs-available/${POSTFIX_CONFIG}.cf >>/opt/postfix-old/etc/main.cf
+        /opt/postfix-old/bin/postfix start
+        ;;
+    custom-modern)
+        cat /etc/postfix/configs-available/${POSTFIX_CONFIG}.cf >>/opt/postfix-modern/etc/main.cf
+        /opt/postfix-modern/bin/postfix start
+        ;;
+esac
+
+tail -F /var/log/apache2/*.log /var/log/postfix /var/log/custom-command.log &
 
 sleep infinity

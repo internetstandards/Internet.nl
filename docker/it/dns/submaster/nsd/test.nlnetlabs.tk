@@ -37,7 +37,7 @@ tls1112                                                           IN  A      {{T
 tls1112                                                           IN  AAAA   {{TARGET_TLS1112_IPV6}}
 tls12only                                                         IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only                                                         IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
-tls12only                                                         IN  MX     10   mailtest
+tls12only                                                         IN  MX     10   tls12only
 tls12onlyffdhe2048                                                IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffdhe2048                                                IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffdhe3072                                                IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -135,17 +135,16 @@ tls1213tlscompression                                             IN  A      {{T
 tls1213tlscompression                                             IN  AAAA   {{TARGET_TLS1213TLSCOMPRESSION_IPV6}}
 tls13only                                                         IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only                                                         IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
+tls13only                                                         IN  MX     10   tls13only
 tls13onlydiffipv4ipv6                                             IN  A      {{TARGET_TLS13ONLYDIFFIPV4IPV6_IP}}
 tls13onlydiffipv4ipv6                                             IN  AAAA   {{TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}}
 tls13onlyhonorclientcipherorder                                   IN  A      {{TARGET_TLS13ONLYCLIENTCIPHERORDER_IP}}
 tls13onlyhonorclientcipherorder                                   IN  AAAA   {{TARGET_TLS13ONLYCLIENTCIPHERORDER_IPV6}}
 tls130rtt                                                         IN  A      {{TARGET_TLS130RTT_IP}}
 tls130rtt                                                         IN  AAAA   {{TARGET_TLS130RTT_IPV6}}
+tls130rtt                                                         IN  MX     10   tls130rtt
 tls13invalidocsp                                                  IN  A      {{TARGET_TLS13INVALIDOCSP_IP}}
 tls13invalidocsp                                                  IN  AAAA   {{TARGET_TLS13INVALIDOCSP_IPV6}}
-mailtest                                                          IN  A      {{TARGET_TLS12ONLY_IP}}
-mailtest                                                          IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
-
 
 ; TLSA records generated using https://www.huque.com/bin/gen_tlsa
 ; using options:
