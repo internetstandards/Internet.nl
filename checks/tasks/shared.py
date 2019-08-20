@@ -202,7 +202,7 @@ class NoIpError(Exception):
     pass
 
 
-def socket_af(host, port, af, task, timeout=10):
+def sock_connect_with_task_based_dns_lookup(host, port, af, task, timeout=10):
     if af == socket.AF_INET6:
         ips = task.resolve(host, unbound.RR_TYPE_AAAA)
     else:
@@ -239,22 +239,11 @@ class ConnectionSocketException(socket.error):
 # Almost identical to HTTPConnection::_create_conn()
 def plain_sock_setup(conn):
     conn.sock = None
-    conn.port = 443
 
     tries_left = conn.tries
     while tries_left > 0:
         try:
-            if conn.addr:
-                conn.sock = socket.socket(conn.addr[0], socket.SOCK_STREAM)
-                conn.sock.settimeout(conn.timeout)
-                conn.sock.connect((conn.addr[1], conn.port))
-            else:
-                # TODO: question: why is it acceptable to delegate DNS
-                # resolution to Python here, while in many if not all other
-                # places we use task.resolve, e.g. via the socket_af()
-                # function in this file?
-                conn.sock = socket.create_connection(
-                    (conn.url, conn.port), timeout=conn.timeout)
+            conn.sock_connect()
             break
         except (socket.gaierror, socket.error, IOError, ConnectionRefusedError):
             conn.safe_shutdown()
@@ -273,6 +262,15 @@ class ConnectionCommon:
 
     def dup(self, *args, **kwargs):
         return self.from_conn(self, *args, **kwargs)
+
+    def sock_connect(self):
+        if self.addr:
+            self.sock = socket.socket(self.addr[0], socket.SOCK_STREAM)
+            self.sock.settimeout(self.timeout)
+            self.sock.connect((self.addr[1], self.port))
+        else:
+            (ip, port), self.sock = sock_connect_with_task_based_dns_lookup(
+                self.addr[1], self.port, self.addr[0], self.task, self.timeout)
 
     def connect(self, do_handshake_on_connect):
         if self.url and not self.addr:
@@ -356,7 +354,7 @@ class ModernConnection(ConnectionCommon, SslClient):
     A modern OpenSSL based TLS client. Defaults to TLS 1.3 only.
     """
     def __init__(
-            self, url, addr=None, version=TLSV1_3, shutdown=False,
+            self, url, port, addr=None, version=TLSV1_3, shutdown=False,
             ciphers='ALL:COMPLEMENTOFALL', tls13ciphers=None, options=None,
             send_SNI=True, do_handshake_on_connect=True,
             signature_algorithms=None, timeout=10, tries=MAX_TRIES,
@@ -373,13 +371,15 @@ class ModernConnection(ConnectionCommon, SslClient):
         self.tries = tries
         self.timeout = timeout
         self.sock_setup = sock_setup
+        self.port = port
 
         self.connect(do_handshake_on_connect)
 
     @staticmethod
     def from_conn(conn, *args, **kwargs):
         return ModernConnection(sock_setup=conn.sock_setup, url=conn.url,
-            addr=conn.addr, send_SNI=conn.send_SNI, *args, **kwargs)
+            addr=conn.addr, send_SNI=conn.send_SNI, port=conn.port, *args,
+            **kwargs)
 
     def _set_ciphers(self):
         self.set_cipher_list(self.ciphers, self.tls13ciphers)
@@ -391,7 +391,7 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
     protocol version.
     """
     def __init__(
-            self, url, addr=None, version=SSLV23, shutdown=False,
+            self, url, port, addr=None, version=SSLV23, shutdown=False,
             ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True,
             do_handshake_on_connect=True, signature_algorithms=None,
             timeout=10, tries=MAX_TRIES, sock_setup=plain_sock_setup):
@@ -406,13 +406,15 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
         self.tries = tries
         self.timeout = timeout
         self.sock_setup = sock_setup
+        self.port = port
 
         self.connect(do_handshake_on_connect)
 
     @staticmethod
     def from_conn(conn, *args, **kwargs):
         return DebugConnection(sock_setup=conn.sock_setup, url=conn.url,
-            addr=conn.addr, send_SNI=conn.send_SNI, *args, **kwargs)
+            addr=conn.addr, send_SNI=conn.send_SNI, port=conn.port, *args,
+            **kwargs)
 
     def _set_ciphers(self):
         self.set_cipher_list(self.ciphers)
@@ -438,27 +440,31 @@ class SSLConnectionWrapper:
     protocol features and ciphers.
     """
     def __init__(self, host=None, socket_af=socket.AF_INET, conn=None,
-            sock_setup=plain_sock_setup, **kwargs):
+            sock_setup=plain_sock_setup, port=443, task=None, **kwargs):
         if conn:
             # Use an existing connection
             self.host = conn.url
             self.conn = conn
         else:
             self.host = host
-            addr = (socket_af, self.host)
+            self.port = port
+            self.task = task if task else celery_app.current_worker_task
+
+            kwargs.setdefault('addr', (socket_af, self.host))
+
             try:
                 # First see if the server supports TLS 1.3
                 # Do not use ModernConnection for other protocol versions as it
                 # lacks support for verifying TLS compression, insecure
                 # renegotiation and client renegotiation.
-                self.conn = ModernConnection(url=self.host, version=TLSV1_3,
-                    sock_setup=sock_setup, **kwargs)
+                self.conn = ModernConnection(url=self.host, port=port,
+                    version=TLSV1_3, sock_setup=sock_setup, **kwargs)
             except ConnectionHandshakeException:
                 try:
                     # No TLS 1.3? Try TLS 1.2, TLS 1.1, TLS 1.0 and SSL 3.0.
                     # We don't have support for SSL 2.0.
-                    self.conn = DebugConnection(url=self.host, version=SSLV23,
-                        sock_setup=sock_setup, **kwargs)
+                    self.conn = DebugConnection(url=self.host, port=port,
+                        version=SSLV23, sock_setup=sock_setup, **kwargs)
                 except ConnectionHandshakeException:
                     # Now, try TLS 1.2 again but this time with
                     # ModernConnection because while it lacks some features it
@@ -470,10 +476,8 @@ class SSLConnectionWrapper:
                     #   - DHE-RSA-CHACHA20-POLY1305
                     #   - ECDHE-RSA-CHACHA20-POLY1305
                     #   - ECDHE-ECDSA-CHACHA20-POLY1305
-                    self.conn = ModernConnection(url=self.host,
+                    self.conn = ModernConnection(url=self.host, port=port,
                         version=TLSV1_2, sock_setup=sock_setup, **kwargs)
-
-        self.port = self.conn.port
 
 
 class HTTPSConnection(SSLConnectionWrapper):
@@ -598,7 +602,7 @@ class HTTPConnection(http.client.HTTPConnection):
                     s.close()
                 raise err
         else:
-            (addr, port), s = socket_af(
+            (addr, port), s = sock_connect_with_task_based_dns_lookup(
                 self.host, self.port, self.socket_af, self._task, self.timeout)
             self.addr = addr
             self.port = port
@@ -629,7 +633,8 @@ def http_fetch(
                 # resolution via the task instead of Python native name
                 # resolution mechanisms?
                 conn = HTTPSConnection(
-                    host=host, socket_af=af, timeout=timeout, tries=1)
+                    host, port=port, socket_af=af, task=task, timeout=timeout,
+                    tries=1)
             else:
                 conn = HTTPConnection(
                     host, port=port, socket_af=af, task=task, timeout=timeout)
@@ -715,7 +720,7 @@ def http_get(url):
     scheme, netloc, path, *unused = urlparse(url)
     port = 443 if scheme == 'https' else 80
     conn, r, *unused = http_fetch(host=netloc, path=path,
-        port=port, keep_conn_open=True, task=celery_app.current_worker_task)
+        port=port, keep_conn_open=True)
     rr = namedtuple('Response', ['status_code', 'text'])
     rr.status_code = r.status
     if r.status == 200:

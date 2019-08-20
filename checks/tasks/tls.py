@@ -1287,21 +1287,40 @@ def starttls_sock_setup(conn):
     """
     def readline(fd, maximum_bytes=4096):
         line = fd.readline(maximum_bytes)
-        # print(line)
         return line.decode("ascii")
 
     conn.sock = None
-    conn.port = 25
 
     # If we get an error code(4xx, 5xx) in the first reply upon
     # connecting, we will retry in case it was a one time error.
+    #
+    # From: https://www.rfc-editor.org/rfc/rfc3207.html#section-5
+    #    S: <waits for connection on TCP port 25>
+    # 1  C: <opens connection>
+    # 2  S: 220 mail.imc.org SMTP service ready
+    # 3  C: EHLO mail.example.com
+    # 4  S: 250-mail.imc.org offers a warm hug of welcome
+    # 5  S: 250-8BITMIME
+    #    S: 250-STARTTLS
+    #    S: 250 DSN
+    # 6  C: STARTTLS
+    # 7  S: 220 Go ahead
+    #    C: <starts TLS negotiation>
+    #    C & S: <negotiate a TLS session>
+    #    C & S: <check result of negotiation>
+    #    C: EHLO mail.example.com
+    #    S: 250-mail.imc.org touches your hand gently for a moment
+    #    S: 250-8BITMIME
+    #    S: 250 DSN
     tries_left = conn.tries
     retry = True
     while retry and tries_left > 0:
         retry = False
         try:
-            conn.sock = socket.create_connection(
-                (conn.url, conn.port), timeout=conn.timeout)
+            # 1
+            conn.sock_connect()
+
+            # 2
             fd = conn.sock.makefile("rb")
             line = readline(fd)
 
@@ -1321,18 +1340,23 @@ def starttls_sock_setup(conn):
             while line and line[3] != " ":
                 line = readline(fd)
 
+            # 3
             conn.sock.sendall(b"EHLO internet.nl\r\n")
 
             starttls = False
-            line = readline(fd)
 
+            # 4
+            line = readline(fd)
             while line and line[3] != " ":
                 if "STARTTLS" in line:
+                    # 5
                     starttls = True
                 line = readline(fd)
 
             if starttls or "STARTTLS" in line:
+                # 6
                 conn.sock.sendall(b"STARTTLS\r\n")
+                # 7
                 readline(fd)
                 fd.close()
             else:
@@ -1358,7 +1382,7 @@ def starttls_sock_setup(conn):
 
 class SMTPConnection(SSLConnectionWrapper):
     def __init__(self, *args, timeout=24, **kwargs):
-        super().__init__(*args, timeout=timeout,
+        super().__init__(*args, timeout=timeout, port=25,
             sock_setup=starttls_sock_setup, **kwargs)
 
 
