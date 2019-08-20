@@ -1310,7 +1310,7 @@ def starttls_sock_setup(conn):
                 # The server replied with an error code.
                 # We will retry to connect in case it was an one time
                 # error.
-                conn.safe_shutdown(tls=False)
+                conn.safe_shutdown()
                 tries_left -= 1
                 retry = True
                 if tries_left <= 0:
@@ -1344,12 +1344,12 @@ def starttls_sock_setup(conn):
             # are dropped. This happened in cases where a rate
             # limiting mechanism was in place. Skip the test.
             if conn.sock:
-                conn.safe_shutdown(tls=False)
+                conn.safe_shutdown()
             raise SMTPConnectionCouldNotTestException()
         except IOError as e:
             # We can't reach the server.
             if conn.sock:
-                conn.safe_shutdown(tls=False)
+                conn.safe_shutdown()
             if e.errno in [errno.ENETUNREACH, errno.EHOSTUNREACH,
                             errno.ECONNREFUSED, errno.ENOEXEC]:
                 raise SMTPConnectionCouldNotTestException()
