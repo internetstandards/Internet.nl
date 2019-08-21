@@ -336,7 +336,7 @@ def http_headers_check(af_ip_pair, url, header_checkers, task):
     try:
         conn, res, headers, visited_hosts = http_fetch(
             url, af=af_ip_pair[0], path="", port=443, task=task,
-            addr=af_ip_pair[1], put_headers=put_headers,
+            ip_address=af_ip_pair[1], put_headers=put_headers,
             depth=MAX_REDIRECT_DEPTH,
             needed_headers=get_headers)
     except (socket.error, http.client.BadStatusLine, NoIpError):

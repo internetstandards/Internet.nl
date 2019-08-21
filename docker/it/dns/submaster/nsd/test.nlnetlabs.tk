@@ -38,6 +38,7 @@ tls1112                                                           IN  AAAA   {{T
 tls12only                                                         IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12only                                                         IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12only                                                         IN  MX     10   tls12only
+tls12only                                                         IN  TXT    "v=spf1 mx -all"
 tls12onlyffdhe2048                                                IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffdhe2048                                                IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffdhe3072                                                IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -153,8 +154,8 @@ tls13invalidocsp                                                  IN  AAAA   {{T
 ;   matching-type field=1 - SHA-256
 ;   port=443
 ;   transport=tcp
-;   domain=something.test.nlnet
-;   pem=docker/it/targetbase/certs/wildcard.crt (for e
+;   domain=something.test.nlnet (for example)
+;   pem=docker/it/targetbase/certs/wildcard.crt (for example)
 _443._tcp.nossl                                                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.ssl2only                                                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.ssl3only                                                IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
@@ -216,3 +217,14 @@ _443._tcp.tls12onlySUFFICIENTTLSECDHEECDSAWITHAES128CBCSHA256.ec  IN  TLSA   3 1
 _443._tcp.tls12onlySUFFICIENTTLSECDHEECDSAWITHAES256CBCSHA384.ec  IN  TLSA   3 1 1 cf6269375d3d09fdaa907773161d7edbe077fc32c66c8dd9fe7ebe8236158687
 _443._tcp.tls130rtt                                               IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls13invalidocsp                                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+
+_25._tcp.tls12only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+
+_dmarc.tls12only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12only.test.nlnetlabs.tk"
+
+; Created using https://dkimcore.org
+1566421634.nlnetlabs._domainkey.tls12only.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGPFUGQRVxTYqSSjLCbs4dXCOl"
+        "U6HRa8eTli7987Chweph5k8HSB3HOoaOYbpec3WYdqjTLIEiOnGXyu5ai5+BePbp"
+        "YALesZgfWsSLCKjFH5tDVwJwKPciT5Jk4b7Fi6ZPLFESQeW4UAre1y5iLCS+PHFw"
+        "qcM7zmbgj4gNCvUPpwIDAQAB")

@@ -24,7 +24,8 @@ LOCATOR_NOTTESTED_TEST_CLASS = 'testresult not-tested'
 LOCATOR_PROBING_CLASS = 'probing'
 LOCATOR_PROBE_CATEGORY_SUFFIX = '-summary'
 LOCATOR_PROBE_RUNNING_TEXT = 'Running...'
-LOCATOR_WEBSITE_TEST_FORM_ID = 'web-url'
+LOCATOR_WEBSITE_TEST_INPUT_ID = 'web-url'
+LOCATOR_MAIL_TEST_INPUT_ID = 'mail-url'
 LOCATOR_RESULTS_OVERVIEW_ID = 'testresults-overview'
 LOCATOR_SCORE = 'score'
 
@@ -49,6 +50,9 @@ XPATH_TEST_DETAILS_TABLE_BODY_ROWS = (
 class TESTS:
     DANE_EXISTS = 'DANE existence'
     DANE_VALID = 'DANE validity'
+    DKIM_EXISTS = 'DKIM existence'
+    DMARC_EXISTS = 'DMARC existence'
+    SPF_EXISTS = 'SPF existence'
     DNSSEC_EXIST = 'DNSSEC existence'
     DNSSEC_VALID = 'DNSSEC validity'
     HTTPS_CERT_DOMAIN = 'Domain name on certificate'
@@ -59,18 +63,18 @@ class TESTS:
     HTTPS_HTTP_HSTS = 'HSTS'
     HTTPS_HTTP_HTTPS_AVAILABLE = 'HTTPS available'
     HTTPS_HTTP_REDIRECT = 'HTTPS redirect'
-    HTTPS_TLS_CIPHER_SUITES = 'Cipher suites'
-    HTTPS_TLS_CIPHER_ORDER = 'Cipher order'
-    HTTPS_TLS_CLIENT_RENEG = 'Client-initiated renegotiation'
-    HTTPS_TLS_COMPRESSION = 'TLS compression'
-    HTTPS_TLS_KEY_EXCHANGE = 'Key exchange parameters'
-    HTTPS_TLS_KEY_EXCHANGE_NL = 'Sleuteluitwisselingsparameters'
-    HTTPS_TLS_OCSP_STAPLING = 'OCSP Stapling'
-    HTTPS_TLS_SECURE_RENEG = 'Secure renegotiation'
-    HTTPS_TLS_VERSION = 'TLS version'
-    HTTPS_TLS_VERSION_NL = 'TLS-versie'
-    HTTPS_TLS_ZERO_RTT = '0-RTT'
-    HTTPS_TLS_ZERO_RTT_NL = '0-RTT'
+    TLS_CIPHER_SUITES = 'Cipher suites'
+    TLS_CIPHER_ORDER = 'Cipher order'
+    TLS_CLIENT_RENEG = 'Client-initiated renegotiation'
+    TLS_COMPRESSION = 'TLS compression'
+    TLS_KEY_EXCHANGE = 'Key exchange parameters'
+    TLS_KEY_EXCHANGE_NL = 'Sleuteluitwisselingsparameters'
+    TLS_OCSP_STAPLING = 'OCSP Stapling'
+    TLS_SECURE_RENEG = 'Secure renegotiation'
+    TLS_VERSION = 'TLS version'
+    TLS_VERSION_NL = 'TLS-versie'
+    TLS_ZERO_RTT = '0-RTT'
+    TLS_ZERO_RTT_NL = '0-RTT'
     IPV6_NS_ADDRESS = 'IPv6 addresses for name servers'
     IPV6_NS_REACHABILITY = 'IPv6 reachability of name servers'
     IPV6_WEB_ADDRESS = 'IPv6 addresses for web server'
@@ -190,10 +194,14 @@ class UX:
             return False
 
     @staticmethod
-    def submit_website_test_form(selenium, domain, lang='en'):
+    def submit_website_test_form(selenium, domain, lang='en', mail=False):
         selenium.get(BASE_URL.format(lang))
-        website_test_url_input = selenium.find_element_by_id(
-            LOCATOR_WEBSITE_TEST_FORM_ID)
+        if mail:
+            website_test_url_input = selenium.find_element_by_id(
+                LOCATOR_MAIL_TEST_INPUT_ID)
+        else:
+            website_test_url_input = selenium.find_element_by_id(
+                LOCATOR_WEBSITE_TEST_INPUT_ID)
         website_test_url_input.clear()
         website_test_url_input.send_keys(domain)
         website_test_url_input.submit()

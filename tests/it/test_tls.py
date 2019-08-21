@@ -97,7 +97,7 @@ class OpenSSLServerDomainConfig(DomainConfig):
         # out" ciphers.
         if not self._manual_cipher_checks:
             self.expected_warnings.setdefault(
-                TESTS.HTTPS_TLS_CIPHER_SUITES, [[REGEX_PHASE_OUT_CIPHERS]])
+                TESTS.TLS_CIPHER_SUITES, [[REGEX_PHASE_OUT_CIPHERS]])
 
         # Since we can't control the HTTP response headers produced by the
         # OpenSSL 'www' server that means that HTTP response header related
@@ -123,10 +123,10 @@ class PreTLS12DomainConfig(DomainConfig):
 
     def override_defaults(self):
         if self._lang == 'en':
-            test_id = TESTS.HTTPS_TLS_KEY_EXCHANGE
+            test_id = TESTS.TLS_KEY_EXCHANGE
             phase_out_txt = PHASE_OUT_TEXT
         elif self._lang == 'nl':
-            test_id = TESTS.HTTPS_TLS_KEY_EXCHANGE_NL
+            test_id = TESTS.TLS_KEY_EXCHANGE_NL
             phase_out_txt = PHASE_OUT_TEXT_NL
         else:
             raise ValueError()
@@ -165,15 +165,15 @@ ncsc_20_tests = [
             TESTS.HTTPS_HTTP_COMPRESSION,
             TESTS.HTTPS_HTTP_HSTS,
             TESTS.HTTPS_HTTP_REDIRECT,
-            TESTS.HTTPS_TLS_CIPHER_SUITES,
-            TESTS.HTTPS_TLS_CIPHER_ORDER,
-            TESTS.HTTPS_TLS_CLIENT_RENEG,
-            TESTS.HTTPS_TLS_COMPRESSION,
-            TESTS.HTTPS_TLS_KEY_EXCHANGE,
-            TESTS.HTTPS_TLS_OCSP_STAPLING,
-            TESTS.HTTPS_TLS_SECURE_RENEG,
-            TESTS.HTTPS_TLS_VERSION,
-            TESTS.HTTPS_TLS_ZERO_RTT,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_COMPRESSION,
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_ZERO_RTT,
             TESTS.SECURITY_HTTP_CSP,
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
@@ -187,18 +187,18 @@ ncsc_20_tests = [
     DomainConfig('NCSC20-Table1:SSL30',
         'ssl3only.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_VERSION,
-            TESTS.HTTPS_TLS_CIPHER_SUITES,
-            TESTS.HTTPS_TLS_CIPHER_ORDER,
-            TESTS.HTTPS_TLS_CLIENT_RENEG,
-            TESTS.HTTPS_TLS_SECURE_RENEG,
-            TESTS.HTTPS_TLS_KEY_EXCHANGE,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_KEY_EXCHANGE,
         }),
 
     PreTLS12DomainConfig('NCSC20-Table1:TLS10',
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION: [
+            TESTS.TLS_VERSION: [
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
@@ -207,36 +207,36 @@ ncsc_20_tests = [
     PreTLS12DomainConfig('NCSC20-GuidelineB2-5:TLS10',
         'tls10onlyhonorclientcipherorder.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION: [
+            TESTS.TLS_VERSION: [
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
         },
         expected_failures={
-            TESTS.HTTPS_TLS_CIPHER_ORDER
+            TESTS.TLS_CIPHER_ORDER
         }),
 
     DomainConfig('NCSC20'
         '-Table12:TLS10',
         'tls10onlyinsecurereneg.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION: [
+            TESTS.TLS_VERSION: [
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
         },
         expected_failures={
-            TESTS.HTTPS_TLS_CIPHER_ORDER,
-            TESTS.HTTPS_TLS_CIPHER_SUITES,
-            TESTS.HTTPS_TLS_CLIENT_RENEG,
-            TESTS.HTTPS_TLS_SECURE_RENEG,
-            TESTS.HTTPS_TLS_KEY_EXCHANGE,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_KEY_EXCHANGE,
         }),
 
     PreTLS12DomainConfig('NCSC20-Table1:TLS11',
         'tls11only.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION: [
+            TESTS.TLS_VERSION: [
                 [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
             ],
@@ -245,7 +245,7 @@ ncsc_20_tests = [
     PreTLS12DomainConfig('NCSC20-Table1:TLS1011',
         'tls1011.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION: [
+            TESTS.TLS_VERSION: [
                 [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
@@ -256,7 +256,7 @@ ncsc_20_tests = [
     PreTLS12DomainConfig('NCSC20-Table1:TLS1112',
         'tls1112.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION: [
+            TESTS.TLS_VERSION: [
                 [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
@@ -312,15 +312,15 @@ ncsc_20_tests = [
             TESTS.HTTPS_HTTP_COMPRESSION,
             TESTS.HTTPS_HTTP_HSTS,
             TESTS.HTTPS_HTTP_REDIRECT,
-            TESTS.HTTPS_TLS_CIPHER_SUITES,
-            TESTS.HTTPS_TLS_CIPHER_ORDER,
-            TESTS.HTTPS_TLS_CLIENT_RENEG,
-            TESTS.HTTPS_TLS_COMPRESSION,
-            TESTS.HTTPS_TLS_KEY_EXCHANGE,
-            TESTS.HTTPS_TLS_OCSP_STAPLING,
-            TESTS.HTTPS_TLS_SECURE_RENEG,
-            TESTS.HTTPS_TLS_VERSION,
-            TESTS.HTTPS_TLS_ZERO_RTT,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_COMPRESSION,
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_ZERO_RTT,
             TESTS.SECURITY_HTTP_CSP,
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
@@ -339,7 +339,7 @@ ncsc_20_tests = [
         '-Table6:LegacyBadCiphers',
         'tls12onlylegacybadciphers.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_CIPHER_SUITES: [
+            TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_LEGACY_BAD_CIPHERS],  # matches all rows
             ]
         }),
@@ -348,7 +348,7 @@ ncsc_20_tests = [
         '-Table6:LegacyPhaseOutCiphers',
         'tls12onlylegacyphaseoutciphers.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_CIPHER_SUITES: [
+            TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
             ]
         }),
@@ -357,7 +357,7 @@ ncsc_20_tests = [
         '-Table6:ModernPhaseOutCiphers',
         'tls12onlymodernphaseoutciphers.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_CIPHER_SUITES: [
+            TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
             ],
         }),
@@ -366,7 +366,7 @@ ncsc_20_tests = [
         '-Table6:ModernBadCiphers',
         'tls12onlymodernbadciphers.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_CIPHER_SUITES: [
+            TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_MODERN_BAD_CIPHERS],  # matches all rows
             ],
         }),
@@ -379,7 +379,7 @@ ncsc_20_tests = [
         '-Table10:FFDHE2048',
         'tls12onlyffdhe2048.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+            TESTS.TLS_KEY_EXCHANGE: [
                 [MustMatch(fr'DH-FFDHE2048 \({PHASE_OUT_TEXT}\)')]
             ]
         }),
@@ -395,7 +395,7 @@ ncsc_20_tests = [
         '-Table10:OtherGroups',
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+            TESTS.TLS_KEY_EXCHANGE: [
                 ['DH-4096'],
                 ['DH-4096'],
             ]
@@ -407,7 +407,7 @@ ncsc_20_tests = [
         '-Table5:No',
         'tls1213nosha2.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_KEY_EXCHANGE: [
+            TESTS.TLS_KEY_EXCHANGE: [
                 [f'SHA1 ({PHASE_OUT_TEXT})'],  # IPv6
                 [f'SHA1 ({PHASE_OUT_TEXT})'],  # IPv4
             ]
@@ -418,7 +418,7 @@ ncsc_20_tests = [
         '-Table13:TLS12',
         'tls1213tlscompression.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_COMPRESSION
+            TESTS.TLS_COMPRESSION
         }),
 
     # This website virtual host configuration deliberately does not do OCSP
@@ -428,7 +428,7 @@ ncsc_20_tests = [
         '-Table15:Off',
         'tls1213noocspstaple.test.nlnetlabs.tk',
         expected_passes={
-            TESTS.HTTPS_TLS_OCSP_STAPLING: [
+            TESTS.TLS_OCSP_STAPLING: [
                 ['no'],  # IPv6
                 ['no'],  # IPv4
             ]
@@ -444,7 +444,7 @@ ncsc_20_tests = [
         '-Table1:TLS13'
         '-Table14:On',
         'tls130rtt.test.nlnetlabs.tk',
-        {TESTS.HTTPS_TLS_ZERO_RTT}),
+        {TESTS.TLS_ZERO_RTT}),
 
     # This website virtual host configuration deliberately serves an OCSP
     # response that was obtained for a different domain/cert and so is invalid
@@ -454,7 +454,7 @@ ncsc_20_tests = [
         '-Table15:OnInvalid',
         'tls13invalidocsp.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_OCSP_STAPLING: [
+            TESTS.TLS_OCSP_STAPLING: [
                 ['no'],  # IPv6
                 ['no'],  # IPv4
             ]
@@ -463,7 +463,7 @@ ncsc_20_tests = [
     BadDomain('NCSC20-GuidelineB2-5:TLS13',
         'tls13onlyhonorclientcipherorder.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_TLS_CIPHER_ORDER
+            TESTS.TLS_CIPHER_ORDER
         }),
 ]
 
@@ -512,7 +512,7 @@ nl_translation_tests = [
     PreTLS12DomainConfig('NCSC20-Table1:TLS10',
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.HTTPS_TLS_VERSION_NL: [
+            TESTS.TLS_VERSION_NL: [
                 [f'TLS 1.0 ({PHASE_OUT_TEXT_NL})'],  # IPv6
                 [f'TLS 1.0 ({PHASE_OUT_TEXT_NL})'],  # IPv4
             ]
@@ -616,12 +616,23 @@ def check_table(selenium, expectation):
 
 
 def assess_website(selenium, domain_config, lang='en'):
+    run_assessment(selenium, domain_config, lang, mail=False)
+
+
+def assess_mail_servers(selenium, domain_config, lang='en'):
+    run_assessment(selenium, domain_config, lang, mail=True)
+
+
+def run_assessment(selenium, domain_config, lang, mail=False):
     # Make it clear in the pytest output which website we were connecting to,
     # because when the domain is invalid the test output only shows the
     # /test-site/?invalid URL, not the URL of the site requested to be tested.
-    print(f"Assessing website '{domain_config.domain}' in language '{lang}'")
+    if mail:
+        print(f"Assessing mail servers @ '{domain_config.domain}' in language '{lang}'")
+    else:
+        print(f"Assessing website '{domain_config.domain}' in language '{lang}'")
 
-    UX.submit_website_test_form(selenium, domain_config.domain, lang)
+    UX.submit_website_test_form(selenium, domain_config.domain, lang, mail)
     UX.wait_for_test_to_start(selenium, domain_config.domain)
     UX.wait_for_test_to_complete(selenium)
     UX.open_report_detail_sections(selenium)
@@ -718,7 +729,21 @@ def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
         DomainConfig('ncsc_phaseout_ciphers',
             iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
             expected_warnings={
-                TESTS.HTTPS_TLS_CIPHER_SUITES: [
+                TESTS.TLS_CIPHER_SUITES: [
                     [MustContain(fr'{openssl_cipher_name} \({PHASE_OUT_TEXT}\)')],
                 ],
             }))
+
+
+def test_mail(selenium):
+    assess_mail_servers(selenium, DomainConfig(
+        'mail test', 'tls12only.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.TLS_CLIENT_RENEG
+        },
+        expected_failures={
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CIPHER_SUITES
+        }
+    ))

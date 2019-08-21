@@ -5,6 +5,7 @@ from collections import namedtuple
 import csv
 import errno
 import http.client
+#import inspect
 import logging
 import socket
 import ssl
@@ -1314,6 +1315,7 @@ def starttls_sock_setup(conn):
     #    S: 250 DSN
     tries_left = conn.tries
     retry = True
+    #logger.error(f'sss({conn.server_name}): protocol={conn.version} class={type(conn).__name__}, caller={inspect.stack()[4].function} > {inspect.stack()[5].function} > {inspect.stack()[6].function}')
     while retry and tries_left > 0:
         retry = False
         try:
@@ -1431,7 +1433,7 @@ def cert_checks(
             # certificates in port 443 if there is no HTTPS there.
             http_client, *unused = shared.http_fetch(
                 url, af=af_ip_pair[0], path="", port=443,
-                addr=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH,
+                ip_address=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH,
                 task=web_cert)
             debug_cert_chain = DebugCertChain
             conn_wrapper = HTTPSConnection
@@ -1448,7 +1450,8 @@ def cert_checks(
             # If we have all the certificate related information we need from a
             # previous check, skip this connection.
             # check chain validity (sort of NCSC guideline B3-6)
-            with conn_wrapper(url, addr=af_ip_pair[0],
+            with conn_wrapper(host=url, socket_af=af_ip_pair[0],
+                    ip_address=af_ip_pair[1], task=task,
                     ciphers="!aNULL:ALL:COMPLEMENTOFALL").conn as conn:
                 with ConnectionChecker(conn, mode) as checker:
                     verify_score, verify_result = checker.check_cert_trust()
@@ -1592,7 +1595,7 @@ def check_mail_tls(server, dane_cb_data, task):
             and dane_cb_data.get('secure'))
 
         try:
-            with SMTPConnection(server, send_SNI=send_SNI).conn as conn:
+            with SMTPConnection(server_name=server, send_SNI=send_SNI).conn as conn:
                 with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
                     ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
                     secure_reneg_score, secure_reneg = checker.check_secure_reneg()
@@ -2383,7 +2386,7 @@ class ConnectionChecker:
                                         # ephemeral but I don't know how to do that
                                         # at the moment, if it's even possible.
                                         # TODO: Warn somewhere that this happened?
-                                        logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is ephemeral by name.')
+                                        logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is ephemeral by name.')
                                         pass
                                 else:
                                     # TODO: I know of at least two ciphers that are
@@ -2408,7 +2411,7 @@ class ConnectionChecker:
                                     # hint as to why the cipher was matched.
                                     if ((cipher_suite == 'ECDH' and not 'ECDHE' in curr_cipher) or
                                         (cipher_suite == 'DH' and not 'DHE' in curr_cipher)):
-                                        logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and URL "{self._conn.url}". Reason: cipher is not in our database."')
+                                        logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is not in our database."')
                                         cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
                         except (ConnectionSocketException,
                                 ConnectionHandshakeException):
@@ -2441,7 +2444,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
     def connect_to_web_server():
         http_client, *unused = shared.http_fetch(
-            url, af=af_ip_pair[0], path="", port=443, addr=af_ip_pair[1],
+            url, af=af_ip_pair[0], path="", port=443, ip_address=af_ip_pair[1],
             depth=MAX_REDIRECT_DEPTH, task=web_conn, keep_conn_open=True)
         return http_client.conn
 
@@ -2450,7 +2453,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         # responds to HTTP requests, then check some interesting properties of
         # this 'best possible' connection.
         with connect_to_web_server() as conn:
-             with ConnectionChecker(conn, ChecksMode.WEB) as checker:
+            with ConnectionChecker(conn, ChecksMode.WEB) as checker:
                 # Note: additional connections will be created by the checker
                 # as needed. The order of the checks attempts to benefit from
                 # data acquired during previous checks.
@@ -2557,7 +2560,7 @@ def forced_http_check(af_ip_pair, url, task):
     try:
         conn, res, headers, visited_hosts = shared.http_fetch(
             url, af=af_ip_pair[0], path="", port=80, task=task,
-            addr=af_ip_pair[1])
+            ip_address=af_ip_pair[1])
 
     except (socket.error, http.client.BadStatusLine, NoIpError):
         # If we got refused on port 80 the first time
