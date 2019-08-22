@@ -564,6 +564,27 @@ ncsc_20_phaseout_ciphers = [
 ]
 
 
+mail_tests = [
+    DomainConfig(
+        'mail test', 'tls12only.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.TLS_CLIENT_RENEG
+        },
+        expected_failures={
+            TESTS.TLS_KEY_EXCHANGE,
+        }
+    ),
+
+    pytest.param(DomainConfig(
+        'mail test', 'tls13only.test.nlnetlabs.tk'),
+        marks=pytest.mark.xfail),
+
+    pytest.param(DomainConfig(
+        'mail test', 'tls130rtt.test.nlnetlabs.tk'),
+        marks=pytest.mark.xfail),
+]
+
+
 # Compare the test 'Technical details' table cells against expectations, if
 # defined.
 def check_table(selenium, expectation):
@@ -735,15 +756,7 @@ def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
             }))
 
 
-def test_mail(selenium):
-    assess_mail_servers(selenium, DomainConfig(
-        'mail test', 'tls12only.test.nlnetlabs.tk',
-        expected_warnings={
-            TESTS.TLS_CLIENT_RENEG
-        },
-        expected_failures={
-            TESTS.TLS_KEY_EXCHANGE,
-            TESTS.TLS_CIPHER_ORDER,
-            TESTS.TLS_CIPHER_SUITES
-        }
-    ))
+@pytest.mark.parametrize(
+    'domain_config', mail_tests, ids=domainconfig_id_generator)
+def test_mail(selenium, domain_config):
+    assess_mail_servers(selenium, domain_config)
