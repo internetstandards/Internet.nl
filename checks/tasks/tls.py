@@ -5,7 +5,6 @@ from collections import namedtuple
 import csv
 import errno
 import http.client
-#import inspect
 import logging
 import socket
 import ssl
@@ -50,7 +49,8 @@ from ..templatetags.translate import INJECTED_TRANSLATION_START
 from ..templatetags.translate import INJECTED_TRANSLATION_END
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('internetnl')
+
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
@@ -94,7 +94,7 @@ with open(settings.TLS_CIPHERS) as f:
     cipher_infos = {
         r["name"]: namedtuple(
             "CipherInfo", r.keys())(*r.values()) for r in csv.DictReader(f)}
-logger.debug(f'Read data on {len(cipher_infos)} ciphers from "{settings.TLS_CIPHERS}."')
+logger.info(f'Read data on {len(cipher_infos)} ciphers from "{settings.TLS_CIPHERS}."')
 
 
 # Based on:
@@ -1315,7 +1315,6 @@ def starttls_sock_setup(conn):
     #    S: 250 DSN
     tries_left = conn.tries
     retry = True
-    #logger.error(f'sss({conn.server_name}): protocol={conn.version} class={type(conn).__name__}, caller={inspect.stack()[4].function} > {inspect.stack()[5].function} > {inspect.stack()[6].function}')
     while retry and tries_left > 0:
         retry = False
         try:
@@ -2386,7 +2385,8 @@ class ConnectionChecker:
                                         # ephemeral but I don't know how to do that
                                         # at the moment, if it's even possible.
                                         # TODO: Warn somewhere that this happened?
-                                        logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is ephemeral by name.')
+                                        if logger.isEnabledFor(logging.DEBUG):
+                                            logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is ephemeral by name.')
                                         pass
                                 else:
                                     # TODO: I know of at least two ciphers that are
@@ -2411,7 +2411,8 @@ class ConnectionChecker:
                                     # hint as to why the cipher was matched.
                                     if ((cipher_suite == 'ECDH' and not 'ECDHE' in curr_cipher) or
                                         (cipher_suite == 'DH' and not 'DHE' in curr_cipher)):
-                                        logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is not in our database."')
+                                        if logger.isEnabledFor(logging.DEBUG):
+                                            logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is not in our database."')
                                         cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
                         except (ConnectionSocketException,
                                 ConnectionHandshakeException):

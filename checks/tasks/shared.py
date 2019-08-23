@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import http.client
 import ipaddress
+import inspect
+import logging
 import re
 import socket
 import time
@@ -27,6 +29,10 @@ from io import BytesIO
 from cgi import parse_header
 from collections import defaultdict, namedtuple
 from urllib.parse import urlparse
+
+
+# Use a dedicated logger as this logging can be very verbose
+sslConnectLogger = logging.getLogger('internetnl.ssl.connect')
 
 
 SSLV23 = OpenSslVersionEnum.SSLV23
@@ -363,6 +369,14 @@ class ConnectionCommon:
         return self.from_conn(self, *args, **kwargs)
 
     def sock_connect(self):
+        if sslConnectLogger.isEnabledFor(logging.DEBUG):
+            sslConnectLogger.debug(f"SSL connect with {type(self).__name__}"
+                        f" to host '{self.server_name}'"
+                        f" at IP:port {self.ip_address}:{self.port}"
+                        f" using SSL version {self.version.name}"
+                        f" invoked by {inspect.stack()[4].function}"
+                        f" > {inspect.stack()[5].function}"
+                        f" > {inspect.stack()[6].function}")
         (self.ip_address, self.sock) = sock_connect(
             self.server_name, self.ip_address, self.port, self.ipv6,
             self.task, self.timeout)
