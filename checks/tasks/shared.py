@@ -248,12 +248,12 @@ def sock_connect(host, ip, port, ipv6=False, task=None,
     # successfully connect to.
     af = socket.AF_INET6 if ipv6 else socket.AF_INET
     try:
-        for ip in ips:
+        for this_ip in ips:
             try:
                 s = socket.socket(af, socket.SOCK_STREAM, 0)
                 s.settimeout(timeout)
-                s.connect((ip, port))
-                return (ip, s)
+                s.connect((this_ip, port))
+                return (this_ip, s)
             except OSError as e:
                 if s:
                     s.close()
