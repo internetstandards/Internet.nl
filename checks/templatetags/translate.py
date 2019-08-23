@@ -108,7 +108,12 @@ def render_details_table(headers, arguments):
                         row.append(_('results empty-argument-alt-text'))
                         continue
 
-                    group_list = INJECTED_TRANSLATION_REGEX.findall(value)
+                    # stringify to deal with cases like:
+                    #   value=['*.some-domain.net', ['*.some-domain.net',
+                    #          'some-domain.net']]
+                    # caused for example by the cert_hostmatch test returning
+                    # multiple values.
+                    group_list = INJECTED_TRANSLATION_REGEX.findall(str(value))
                     if value in [
                             'detail tech data yes',
                             'detail tech data no',
