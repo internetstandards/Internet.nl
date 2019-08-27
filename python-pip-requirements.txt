@@ -21,5 +21,4 @@ polib
 psycopg2-binary
 pyparsing
 pyrabbit
-requests
 rjsmin
