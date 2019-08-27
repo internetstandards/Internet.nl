@@ -759,6 +759,9 @@ msgstr ""
 "Tenminste één van je mailservercertificaten bevat een publieke sleutel met \n"
 "een *onvoldoende* veilige lengte."
 
+msgid "detail mail tls cert-pubkey verdict phase-out"
+msgstr "TODO"
+
 msgid "detail mail tls cert-pubkey verdict good"
 msgstr ""
 "Al je mailservercertificaten bevatten een publieke sleutel met een voldoende\n"
@@ -844,9 +847,27 @@ msgstr ""
 "Tenminste één van je mailservers ondersteunt een of meer *onvoldoende* "
 "veilige cipher suites."
 
+msgid "detail mail tls ciphers verdict phase-out"
+msgstr "TODO"
+
 msgid "detail mail tls ciphers verdict good"
 msgstr ""
 "Al je mailservers ondersteunen alleen voldoende veilige cipher suites."
+
+msgid "detail mail tls cipher_order exp"
+msgstr "TODO"
+
+msgid "detail mail tls cipher_order label"
+msgstr "Cipher suite volgorde"
+
+msgid "detail mail tls cipher_order tech table"
+msgstr "Mailserver (MX)|TODO"
+
+msgid "detail mail tls cipher_order verdict bad"
+msgstr "TODO"
+
+msgid "detail mail tls cipher_order verdict good"
+msgstr "TODO"
 
 msgid "detail mail tls compression exp"
 msgstr ""
@@ -1014,6 +1035,9 @@ msgstr ""
 "Je mailserver ondersteunt *onvoldoende* veilige Diffie-Hellman-parameters \n"
 "voor sleuteluitwisseling."
 
+msgid "detail mail tls fs-params verdict phase-out"
+msgstr "TODO"
+
 msgid "detail mail tls fs-params verdict good"
 msgstr ""
 "Je mailserver ondersteunt voldoende veilige Diffie-Hellman-parameters voor \n"
@@ -1123,9 +1147,44 @@ msgstr ""
 "Tenminste één van je mailservers ondersteunt *geen* voldoende veilige TLS-\n"
 "versies."
 
+msgid "detail mail tls version verdict phase-out"
+msgstr "TODO"
+
 msgid "detail mail tls version verdict good"
 msgstr "Al je mailservers ondersteunen voldoende veilige TLS-versies."
 
+msgid "detail mail tls zero-rtt exp"
+msgstr "TODO"
+
+msgid "detail mail tls zero-rtt label"
+msgstr "0-RTT"
+
+msgid "detail mail tls zero-rtt tech table"
+msgstr "Mailserver (MX)|TODO"
+
+msgid "detail mail tls zero-rtt verdict bad"
+msgstr "TODO"
+
+msgid "detail mail tls zero-rtt verdict good"
+msgstr "TODO"
+
+msgid "detail mail tls ocsp-stapling exp"
+msgstr "TODO"
+
+msgid "detail mail tls ocsp-stapling label"
+msgstr "TODO"
+
+msgid "detail mail tls ocsp-stapling tech table"
+msgstr "Mailserver (MX)|TODO"
+
+msgid "detail mail tls ocsp-stapling verdict ok"
+msgstr "TODO"
+
+msgid "detail mail tls ocsp-stapling verdict good"
+msgstr "TODO"
+
+msgid "detail mail tls ocsp-stapling verdict bad"
+msgstr "TODO"
 
 msgid "detail mail tls hash-func exp"
 msgstr "Sleuteluitwisselingshashfunctie"
@@ -1482,6 +1541,9 @@ msgid "detail web tls cert-pubkey verdict bad"
 msgstr ""
 "Je websitecertificaat bevat een publieke sleutel met een *onveilige* lengte."
 
+msgid "detail web tls cert-pubkey verdict phase-out"
+msgstr "TODO"
+
 msgid "detail web tls cert-pubkey verdict good"
 msgstr ""
 "Je websitecertificaat bevat een publieke sleutel met een veilige lengte."
@@ -1556,8 +1618,26 @@ msgstr "Webserver-IP-adres|Onveilige cipher suites"
 msgid "detail web tls ciphers verdict bad"
 msgstr "Je webserver ondersteunt *onvoldoende* veilige cipher suites."
 
+msgid "detail web tls ciphers verdict phase-out"
+msgstr "TODO"
+
 msgid "detail web tls ciphers verdict good"
 msgstr "Je webserver ondersteunt alleen voldoende veilige cipher suites."
+
+msgid "detail web tls cipher_order exp"
+msgstr "TODO"
+
+msgid "detail web tls cipher_order label"
+msgstr "TODO"
+
+msgid "detail web tls cipher_order tech table"
+msgstr "Webserver-IP-adres|TODO"
+
+msgid "detail web tls cipher_order verdict bad"
+msgstr "TODO"
+
+msgid "detail web tls cipher_order verdict good"
+msgstr "TODO"
 
 msgid "detail web tls compression exp"
 msgstr ""
@@ -1689,6 +1769,9 @@ msgid "detail web tls fs-params verdict bad"
 msgstr ""
 "Je webserver ondersteunt *onvoldoende* veilige Diffie-Hellman-parameters \n"
 "voor sleuteluitwisseling."
+
+msgid "detail web tls fs-params verdict phase-out"
+msgstr "TODO"
 
 msgid "detail web tls fs-params verdict good"
 msgstr ""
@@ -1865,9 +1948,44 @@ msgstr "Webserver-IP-adres|Onveilige TLS-versies"
 msgid "detail web tls version verdict bad"
 msgstr "Je webserver ondersteunt *onvoldoende* veilige TLS-versies."
 
+msgid "detail web tls version verdict phase-out"
+msgstr "TODO"
+
 msgid "detail web tls version verdict good"
 msgstr "Je webserver ondersteunt alleen voldoende veilige TLS-versies."
 
+msgid "detail web tls zero-rtt exp"
+msgstr "TODO"
+
+msgid "detail web tls zero-rtt label"
+msgstr "TODO"
+
+msgid "detail web tls zero-rtt tech table"
+msgstr "Webserver-IP-adres|TODO"
+
+msgid "detail web tls zero-rtt verdict bad"
+msgstr "TODO"
+
+msgid "detail web tls zero-rtt verdict good"
+msgstr "TODO"
+
+msgid "detail web tls ocsp-stapling exp"
+msgstr "TODO"
+
+msgid "detail web tls ocsp-stapling label"
+msgstr "TODO"
+
+msgid "detail web tls ocsp-stapling tech table"
+msgstr "Webserver-IP-adres|TODO"
+
+msgid "detail web tls ocsp-stapling verdict ok"
+msgstr "TODO"
+
+msgid "detail web tls ocsp-stapling verdict good"
+msgstr "TODO"
+
+msgid "detail web tls ocsp-stapling verdict bad"
+msgstr "TODO"
 
 msgid "detail web tls hash-func exp"
 msgstr "TODO"
