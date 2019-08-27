@@ -50,6 +50,7 @@ XPATH_TEST_DETAILS_TABLE_BODY_ROWS = (
 class TESTS:
     DANE_EXISTS = 'DANE existence'
     DANE_VALID = 'DANE validity'
+    DANE_ROLLOVER_SCHEME = 'DANE rollover scheme'
     DKIM_EXISTS = 'DKIM existence'
     DMARC_EXISTS = 'DMARC existence'
     SPF_EXISTS = 'SPF existence'
