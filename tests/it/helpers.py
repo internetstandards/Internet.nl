@@ -18,6 +18,7 @@ ANY = None
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'
 LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
 LOCATOR_WARNING_TEST_CLASS = 'testresult warning'
+LOCATOR_INFO_TEST_CLASS = 'testresult info'
 LOCATOR_FAILED_TEST_CLASS = 'testresult failed'
 LOCATOR_NOTTESTED_TEST_CLASS = 'testresult not-tested'
 
@@ -138,6 +139,10 @@ class UX:
         return UX._get_matching_tests(selenium, LOCATOR_WARNING_TEST_CLASS)
 
     @staticmethod
+    def get_info_tests(selenium):
+        return UX._get_matching_tests(selenium, LOCATOR_INFO_TEST_CLASS)
+
+    @staticmethod
     def get_nottested_tests(selenium):
         return UX._get_matching_tests(selenium, LOCATOR_NOTTESTED_TEST_CLASS)
 
@@ -246,6 +251,7 @@ class DomainConfig:
                  domain,
                  expected_failures=None,
                  expected_warnings=None,
+                 expected_info=None,
                  expected_not_tested=None,
                  expected_passes=None,
                  expected_score=None):
@@ -253,6 +259,7 @@ class DomainConfig:
         self.domain = domain
         self.expected_failures = self.clone_as_dict(expected_failures)
         self.expected_warnings = self.clone_as_dict(expected_warnings)
+        self.expected_info = self.clone_as_dict(expected_info)
         self.expected_not_tested = self.clone_as_dict(expected_not_tested)
         self.expected_passes = self.clone_as_dict(expected_passes)
         self.expected_score = expected_score

@@ -115,11 +115,12 @@ class OpenSSLServerDomainConfig(DomainConfig):
 
 class PreTLS12DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=None,
-            expected_failures=None, lang='en'):
+            expected_failures=None, expected_info=None, lang='en'):
         self._lang = lang
         super().__init__(test_id, domain,
             expected_warnings=expected_warnings,
-            expected_failures=expected_failures)
+            expected_failures=expected_failures,
+            expected_info=expected_info)
 
     def override_defaults(self):
         if self._lang == 'en':
@@ -193,6 +194,9 @@ ncsc_20_tests = [
             TESTS.TLS_CLIENT_RENEG,
             TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
+        },
+        expected_info={
+            TESTS.TLS_OCSP_STAPLING
         }),
 
     PreTLS12DomainConfig('NCSC20-Table1:TLS10',
@@ -231,6 +235,9 @@ ncsc_20_tests = [
             TESTS.TLS_CLIENT_RENEG,
             TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
+        },
+        expected_info={
+            TESTS.TLS_OCSP_STAPLING
         }),
 
     PreTLS12DomainConfig('NCSC20-Table1:TLS11',
@@ -290,6 +297,9 @@ ncsc_20_tests = [
         },
         expected_not_tested={
             TESTS.DANE_VALID
+        },
+        expected_info={
+            TESTS.DANE_EXISTS
         }),
 
     GoodDomain('NCSC20'
@@ -427,7 +437,7 @@ ncsc_20_tests = [
         '-Table1:TLS1213'
         '-Table15:Off',
         'tls1213noocspstaple.test.nlnetlabs.tk',
-        expected_passes={
+        expected_info={
             TESTS.TLS_OCSP_STAPLING: [
                 ['no'],  # IPv6
                 ['no'],  # IPv4
@@ -571,7 +581,13 @@ mail_tests = [
             TESTS.TLS_CLIENT_RENEG
         },
         expected_failures={
-            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_KEY_EXCHANGE
+        },
+        expected_info={
+            TESTS.TLS_OCSP_STAPLING: [
+                ['no']
+            ],
+            TESTS.DANE_ROLLOVER_SCHEME: ANY
         }
     ),
 
@@ -662,11 +678,14 @@ def run_assessment(selenium, domain_config, lang, mail=False):
         == set(domain_config.expected_failures.keys()))
     assert (UX.get_nottested_tests(selenium)
         == set(domain_config.expected_not_tested.keys()))
+    assert (UX.get_info_tests(selenium)
+        == set(domain_config.expected_info.keys()))
     assert (UX.get_warning_tests(selenium)
         == set(domain_config.expected_warnings.keys()))
 
     check_table(selenium, domain_config.expected_failures)
     check_table(selenium, domain_config.expected_not_tested)
+    check_table(selenium, domain_config.expected_info)
     check_table(selenium, domain_config.expected_warnings)
     check_table(selenium, domain_config.expected_passes)
 
