@@ -126,7 +126,7 @@ def render_details_table(headers, arguments):
                     elif group_list:
                         replacements = []
                         for groups in group_list:
-                            if groups is tuple:
+                            if isinstance(groups, tuple):
                                 # More than one group *used*.
                                 for group in groups:
                                     # Only one of the groups may have a value.
