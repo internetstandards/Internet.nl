@@ -16,7 +16,6 @@ PHASE_OUT_TEXT_NL = 'op risico'
 ANY = None
 
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'
-LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
 LOCATOR_WARNING_TEST_CLASS = 'testresult warning'
 LOCATOR_INFO_TEST_CLASS = 'testresult info'
 LOCATOR_FAILED_TEST_CLASS = 'testresult failed'
