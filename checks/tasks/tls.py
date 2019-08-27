@@ -1873,10 +1873,9 @@ class ConnectionChecker:
                 secure_reneg_score = self._score_secure_reneg_bad
             return secure_reneg_score, secure_reneg
         except (ConnectionSocketException, ConnectionHandshakeException):
-            # TODO: extend to support indicating that we were unable to test?
+            # TODO: extend to support indicating that we were unable to
+            # test in the case of ConnectionSocketException?
             return self._score_secure_reneg_good, True
-
-        # TLS 1.3 forbids renegotiaton.
 
     def check_client_reneg(self):
         """
@@ -1904,7 +1903,8 @@ class ConnectionChecker:
                 client_reneg = True
         except (ConnectionSocketException, ConnectionHandshakeException,
                 socket.error, _nassl.OpenSSLError, IOError):
-            # TODO: extend to support indicating that we were unable to test?
+            # TODO: extend to support indicating that we were unable to
+            # test in the case of ConnectionSocketException?
             client_reneg_score = self._score_client_reneg_good
             client_reneg = False
         return client_reneg_score, client_reneg
@@ -1927,7 +1927,8 @@ class ConnectionChecker:
                 compression_score = self._score_compression_good
             return compression_score, compression
         except (ConnectionSocketException, ConnectionHandshakeException):
-            # TODO: extend to support indicating that we were unable to test?
+            # TODO: extend to support indicating that we were unable to
+            # test in the case of ConnectionSocketException?
             return self._score_compression_good, False
 
     def check_zero_rtt(self):

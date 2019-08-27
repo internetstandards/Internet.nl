@@ -55,6 +55,9 @@ RUN curl -fsSLo- 'https://github.com/ralphdolmans/python-whois/tarball/ee546f4' 
 RUN python setup.py install
 
 # Build nassl from sources for deprecated protocol support and "extra features" compared to the stock package
+# Don't be misled by the 1.0.2e and master directory names for OpenSSL, these are the names required by the
+# NASSL build process and don't accurately reflect the versions of OpenSSL used, for that look at the versions
+# downloaded from GitHub by the commands below.
 WORKDIR /tmp/build/nassl_free_bsd
 RUN mkdir -p bin/openssl-legacy/freebsd64 \
              bin/openssl-modern/freebsd64 \

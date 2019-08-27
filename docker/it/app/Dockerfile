@@ -25,6 +25,9 @@ RUN sudo mv /tmp/geckodriver /usr/local/bin
 # TODO: use Docker BuildKit local cache mount. See: https://stackoverflow.com/a/57282479
 # Blocked by: https://github.com/docker/docker-py/issues/2230
 # See also: https://github.com/docker/compose/pull/6584
+# Works partly with https://github.com/docker/compose/pull/6865 but changes to the base image
+# do not seem to cause this image to change (all steps are announced as cached=true).
+#RUN --mount=type=cache,target=/home/ximon/.cache/pip sudo -H pip install --upgrade pip && \
 RUN sudo -H pip install --upgrade pip && \
     sudo -H pip install \
         coverage \
