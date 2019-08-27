@@ -415,6 +415,9 @@ class DomainTestTls(BaseTestModel):
     ocsp_stapling = EnumField(OcspStatus, default=OcspStatus.ok)
     ocsp_stapling_score = models.IntegerField(null=True)
 
+    hash_func = models.NullBooleanField(default=False)
+    hash_func_score = models.IntegerField(null=True)
+
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
 
@@ -455,12 +458,12 @@ class DomainTestTls(BaseTestModel):
             'compression', 'compression_score', 'secure_reneg',
             'secure_reneg_score', 'client_reneg', 'client_reneg_score',
             'zero_rtt', 'zero_rtt_score', 'ocsp_stapling',
-            'ocsp_stapling_score', 'forced_https', 'forced_https_score',
-            'http_compression_enabled', 'http_compression_score',
-            'hsts_enabled', 'hsts_policies', 'hsts_score', 'cert_chain',
-            'cert_trusted', 'cert_trusted_score', 'cert_pubkey_bad',
-            'cert_pubkey_phase_out', 'cert_pubkey_score', 'cert_signature_bad',
-            'cert_signature_score', 'cert_hostmatch_bad',
+            'ocsp_stapling_score', 'hash_func', 'hash_func_score',
+            'forced_https', 'forced_https_score', 'http_compression_enabled',
+            'http_compression_score', 'hsts_enabled', 'hsts_policies',
+            'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
+            'cert_pubkey_bad', 'cert_pubkey_phase_out', 'cert_pubkey_score',
+            'cert_signature_bad', 'cert_signature_score', 'cert_hostmatch_bad',
             'cert_hostmatch_score', 'score',
         ]
 

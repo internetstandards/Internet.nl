@@ -1126,6 +1126,25 @@ msgstr ""
 msgid "detail mail tls version verdict good"
 msgstr "Al je mailservers ondersteunen voldoende veilige TLS-versies."
 
+
+msgid "detail mail tls hash-func exp"
+msgstr "Sleuteluitwisselingshashfunctie"
+
+msgid "detail mail tls hash-func label"
+msgstr "TODO"
+
+msgid "detail mail tls hash-func tech table"
+msgstr "Mailserver (MX)|TODO"
+
+msgid "detail mail tls hash-func verdict phase-out"
+msgstr "TODO"
+
+msgid "detail mail tls hash-func verdict good"
+msgstr "TODO"
+
+msgid "detail mail tls hash-func verdict other"
+msgstr "TODO"
+
 msgid "detail tech data bogus"
 msgstr "bogus"
 
@@ -1848,6 +1867,25 @@ msgstr "Je webserver ondersteunt *onvoldoende* veilige TLS-versies."
 
 msgid "detail web tls version verdict good"
 msgstr "Je webserver ondersteunt alleen voldoende veilige TLS-versies."
+
+
+msgid "detail web tls hash-func exp"
+msgstr "TODO"
+
+msgid "detail web tls hash-func label"
+msgstr "Sleuteluitwisselingshashfunctie"
+
+msgid "detail web tls hash-func tech table"
+msgstr "Webserver-IP-adress|TODO"
+
+msgid "detail web tls hash-func verdict phase-out"
+msgstr "TODO"
+
+msgid "detail web tls hash-func verdict good"
+msgstr "TODO"
+
+msgid "detail web tls hash-func verdict other"
+msgstr "TODO"
 
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""

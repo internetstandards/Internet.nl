@@ -76,6 +76,8 @@ class TESTS:
     TLS_VERSION_NL = 'TLS-versie'
     TLS_ZERO_RTT = '0-RTT'
     TLS_ZERO_RTT_NL = '0-RTT'
+    TLS_HASH_FUNC = 'Key exchange hash function'
+    TLS_HASH_FUNC_NL = 'Sleuteluitwisselingshashfunctie'
     IPV6_NS_ADDRESS = 'IPv6 addresses for name servers'
     IPV6_NS_REACHABILITY = 'IPv6 reachability of name servers'
     IPV6_WEB_ADDRESS = 'IPv6 addresses for web server'

@@ -124,17 +124,13 @@ class PreTLS12DomainConfig(DomainConfig):
 
     def override_defaults(self):
         if self._lang == 'en':
-            test_id = TESTS.TLS_KEY_EXCHANGE
-            phase_out_txt = PHASE_OUT_TEXT
+            test_id = TESTS.TLS_HASH_FUNC
         elif self._lang == 'nl':
-            test_id = TESTS.TLS_KEY_EXCHANGE_NL
-            phase_out_txt = PHASE_OUT_TEXT_NL
+            test_id = TESTS.TLS_HASH_FUNC_NL
         else:
             raise ValueError()
 
-        self.expected_warnings.setdefault(test_id, [
-            [MustMatch(fr'(MD5|SHA1) \({phase_out_txt}\)')],
-        ])
+        self.expected_warnings.setdefault(test_id, ANY)
 
 
 # Tests specifically intended to show that Internet.NL tests for compliance
@@ -175,6 +171,7 @@ ncsc_20_tests = [
             TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_VERSION,
             TESTS.TLS_ZERO_RTT,
+            TESTS.TLS_HASH_FUNC,
             TESTS.SECURITY_HTTP_CSP,
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
@@ -185,7 +182,7 @@ ncsc_20_tests = [
     # internet.nl cannot make SSLv3 connections so instead of failing because
     # of the insecure TLS version it fails because it cannot detect HTTPS
     # support at all.
-    DomainConfig('NCSC20-Table1:SSL30',
+    PreTLS12DomainConfig('NCSC20-Table1:SSL30',
         'ssl3only.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_VERSION,
@@ -220,7 +217,7 @@ ncsc_20_tests = [
             TESTS.TLS_CIPHER_ORDER
         }),
 
-    DomainConfig('NCSC20'
+    PreTLS12DomainConfig('NCSC20'
         '-Table12:TLS10',
         'tls10onlyinsecurereneg.test.nlnetlabs.tk',
         expected_warnings={
@@ -260,7 +257,7 @@ ncsc_20_tests = [
             ],
         }),
 
-    PreTLS12DomainConfig('NCSC20-Table1:TLS1112',
+    DomainConfig('NCSC20-Table1:TLS1112',
         'tls1112.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
@@ -327,6 +324,7 @@ ncsc_20_tests = [
             TESTS.TLS_CLIENT_RENEG,
             TESTS.TLS_COMPRESSION,
             TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_HASH_FUNC,
             TESTS.TLS_OCSP_STAPLING,
             TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_VERSION,
@@ -370,6 +368,11 @@ ncsc_20_tests = [
             TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
             ],
+        },
+        expected_info={
+            TESTS.TLS_HASH_FUNC: [
+                [MustMatch('not applicable')]
+            ]
         }),
     DomainConfig('NCSC20'
         '-Table1:TLS12'
@@ -417,9 +420,9 @@ ncsc_20_tests = [
         '-Table5:No',
         'tls1213nosha2.test.nlnetlabs.tk',
         expected_warnings={
-            TESTS.TLS_KEY_EXCHANGE: [
-                [f'SHA1 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'SHA1 ({PHASE_OUT_TEXT})'],  # IPv4
+            TESTS.TLS_HASH_FUNC: [
+                ['no'],  # IPv6
+                ['no'],  # IPv4
             ]
         }),
 
@@ -533,26 +536,31 @@ nl_translation_tests = [
 
 # The order of the ciphers in the tables below matches that of Appendix C of
 # the NCSC "IT Security Guidelines for Transport Layer Security (TLS)" 2.0.
+# Columns:
+#   1: TLS protocol version offered by the test target server for this cipher
+#        Used to construct the integration test target server FQDN
+#   2: IANA cipher name
+#   3: OpenSSL cipher name
 ncsc_20_good_ciphers = [
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',       'ECDHE-ECDSA-AES256-GCM-SHA384'), # FAIL (wrong cipher)
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'ECDHE-ECDSA-CHACHA20-POLY1305'), # FAIL (wrong cipher)
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',       'ECDHE-ECDSA-AES128-GCM-SHA256'), # FAIL (wrong cipher)
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',       'ECDHE-ECDSA-AES256-GCM-SHA384'),
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'ECDHE-ECDSA-CHACHA20-POLY1305'),
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',       'ECDHE-ECDSA-AES128-GCM-SHA256'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',         'ECDHE-RSA-AES256-GCM-SHA384'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256',   'ECDHE-RSA-CHACHA20-POLY1305'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',         'ECDHE-RSA-AES128-GCM-SHA256'),
 ]
 
 ncsc_20_sufficient_ciphers = [
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384',       'ECDHE-ECDSA-AES256-SHA384'),     # FAIL (wrong cipher)
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA',          'ECDHE-ECDSA-AES256-SHA'),        # FAIL (wrong cipher)
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256',       'ECDHE-ECDSA-AES128-SHA256'),     # FAIL (wrong cipher)
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA',          'ECDHE-ECDSA-AES128-SHA'),        # FAIL (wrong cipher)
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384',       'ECDHE-ECDSA-AES256-SHA384'),
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA',          'ECDHE-ECDSA-AES256-SHA'),
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256',       'ECDHE-ECDSA-AES128-SHA256'),
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA',          'ECDHE-ECDSA-AES128-SHA'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384',         'ECDHE-RSA-AES256-SHA384'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA',            'ECDHE-RSA-AES256-SHA'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256',         'ECDHE-RSA-AES128-SHA256'),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA',            'ECDHE-RSA-AES128-SHA'),
     ('TLS12', 'TLS_DHE_RSA_WITH_AES_256_GCM_SHA384',           'DHE-RSA-AES256-GCM-SHA384'),
-    ('TLS12', 'TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256',     'DHE-RSA-CHACHA20-POLY1305'),     # FAIL (wrong cipher)
+    ('TLS12', 'TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256',     'DHE-RSA-CHACHA20-POLY1305'),
     ('TLS12', 'TLS_DHE_RSA_WITH_AES_128_GCM_SHA256',           'DHE-RSA-AES128-GCM-SHA256'),
     ('TLS12', 'TLS_DHE_RSA_WITH_AES_256_CBC_SHA256',           'DHE-RSA-AES256-SHA256'),
     ('TLS12', 'TLS_DHE_RSA_WITH_AES_256_CBC_SHA',              'DHE-RSA-AES256-SHA'),
@@ -560,17 +568,22 @@ ncsc_20_sufficient_ciphers = [
     ('TLS12', 'TLS_DHE_RSA_WITH_AES_128_CBC_SHA',              'DHE-RSA-AES128-SHA'),
 ]
 
+# The next table has a fourth column:
+#   4: SHA2 hash functions supported:
+#        True  - yes
+#        False - no
+#        None  - not applicable (no hash function used with this cipher)
 ncsc_20_phaseout_ciphers = [
-    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA',         'ECDHE-ECDSA-DES-CBC3-SHA'),
-    ('TLS12', 'TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA',           'ECDHE-RSA-DES-CBC3-SHA'),        # FAIL (HTTPS available)
-    ('TLS12', 'TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA',             'EDH-RSA-DES-CBC3-SHA'),
-    ('TLS12', 'TLS_RSA_WITH_AES_256_GCM_SHA384',               'AES256-GCM-SHA384'),
-    ('TLS12', 'TLS_RSA_WITH_AES_128_GCM_SHA256',               'AES128-GCM-SHA256'),
-    ('TLS12', 'TLS_RSA_WITH_AES_256_CBC_SHA256',               'AES256-SHA256'),
-    ('TLS12', 'TLS_RSA_WITH_AES_256_CBC_SHA',                  'AES256-SHA'),
-    ('TLS12', 'TLS_RSA_WITH_AES_128_CBC_SHA256',               'AES128-SHA256'),
-    ('TLS12', 'TLS_RSA_WITH_AES_128_CBC_SHA',                  'AES128-SHA'),
-    ('TLS12', 'TLS_RSA_WITH_3DES_EDE_CBC_SHA',                 'DES-CBC3-SHA'),
+    ('TLS12', 'TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA',         'ECDHE-ECDSA-DES-CBC3-SHA',  False),
+    ('TLS12', 'TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA',           'ECDHE-RSA-DES-CBC3-SHA',    True),
+    ('TLS12', 'TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA',             'EDH-RSA-DES-CBC3-SHA',      True),
+    ('TLS12', 'TLS_RSA_WITH_AES_256_GCM_SHA384',               'AES256-GCM-SHA384',         None),
+    ('TLS12', 'TLS_RSA_WITH_AES_128_GCM_SHA256',               'AES128-GCM-SHA256',         None),
+    ('TLS12', 'TLS_RSA_WITH_AES_256_CBC_SHA256',               'AES256-SHA256',             None),
+    ('TLS12', 'TLS_RSA_WITH_AES_256_CBC_SHA',                  'AES256-SHA',                None),
+    ('TLS12', 'TLS_RSA_WITH_AES_128_CBC_SHA256',               'AES128-SHA256',             None),
+    ('TLS12', 'TLS_RSA_WITH_AES_128_CBC_SHA',                  'AES128-SHA',                None),
+    ('TLS12', 'TLS_RSA_WITH_3DES_EDE_CBC_SHA',                 'DES-CBC3-SHA',              None),
 ]
 
 
@@ -716,8 +729,8 @@ def iana_cipher_to_target_server_fqdn(group, iana_cipher):
 
 def iana_cipher_id_generator(val):
     if isinstance(val, tuple):
-        return '{}-{}'.format(
-            val[0], val[1])
+        return '{}-{}-{}'.format(
+            val[0], val[1], val[2])
 
 
 @pytest.mark.parametrize(
@@ -765,14 +778,26 @@ def test_ncsc_sufficient_ciphers(selenium, iana_cipher):
     'iana_cipher', ncsc_20_phaseout_ciphers, ids=iana_cipher_id_generator)
 def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
     openssl_cipher_name = iana_cipher[2]
-    assess_website(selenium,
-        DomainConfig('ncsc_phaseout_ciphers',
-            iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
-            expected_warnings={
-                TESTS.TLS_CIPHER_SUITES: [
-                    [MustContain(fr'{openssl_cipher_name} \({PHASE_OUT_TEXT}\)')],
-                ],
-            }))
+    ssh2_hash_function_supported = iana_cipher[3]
+
+    domain_config = DomainConfig('ncsc_phaseout_ciphers',
+        iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
+        expected_warnings={
+            TESTS.TLS_CIPHER_SUITES: [
+                [MustContain(fr'{openssl_cipher_name} \({PHASE_OUT_TEXT}\)')],
+            ]
+        })
+
+    if ssh2_hash_function_supported is False:
+        domain_config.expected_warnings[TESTS.TLS_HASH_FUNC] = [
+            [MustMatch('no')]
+        ]
+    elif ssh2_hash_function_supported is None:
+        domain_config.expected_info[TESTS.TLS_HASH_FUNC] = [
+            [MustMatch('not applicable')]
+        ]
+
+    assess_website(selenium, domain_config)
 
 
 @pytest.mark.parametrize(

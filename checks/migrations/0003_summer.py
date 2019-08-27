@@ -64,4 +64,14 @@ class Migration(migrations.Migration):
             name='cipher_order_score',
             field=models.IntegerField(null=True),
         ),
+        migrations.AddField(
+            model_name='domaintesttls',
+            name='hash_func',
+            field=models.NullBooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='domaintesttls',
+            name='hash_func_score',
+            field=models.IntegerField(null=True),
+        ),
     ]

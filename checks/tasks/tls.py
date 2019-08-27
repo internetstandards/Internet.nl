@@ -104,49 +104,57 @@ logger.info(f'Read data on {len(cipher_infos)} ciphers from "{settings.TLS_CIPHE
 # https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-16
 # https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-18
 # openssl list -1 -digest-commands
-# NCSC 2.0 Table 5 - Hash functions for key exchange
-# The table only includes phase out or bad hash functions because we don't need
-# to report about support for good hash functions.
-# MD5 is in the TLS 1.2 RFC-5246 but is not supported by OpenSSL 1.1.1.
-# Attempting to pass it in a signature algorithm string results in a
-# ValueError exception being raised by NaSSL::ssl_client::__init__(). 
-KEX_TLS12_HASHALG_PREFERRED_ORDER = [
-    'SHA1',
+# Define signature algorithms which, if we are unable to connect using any of
+# them, constitutes a phase out warning. See NCSC 2.0 "Table 5 - Hash functions
+# for key exchange".
+# Only SHA256/384/512 based hash functions:
+KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER = [
+    'SHA512',
+    'SHA384',
+    'SHA256',
 ]
-# Put the key exchange signature algorithms in reverse order compared to those
-# preferred by NCSC 2.0 so that we can report the worst csae, connection wtih an
-# insufficient algorithm, and if that fails we can detect connection wtih a phase
-# out algorithm. The alternative is to connect separately with each separate
-# algorithm which is a lot of TLS connections, and more connections can result in
-# being blocked when performing mail TLS tests.
+# All possible algorithms:
 KEX_TLS12_SIGALG_PREFERRED_ORDER = [
     'RSA',
+    'RSA-PSS',
     'DSA',
     'ECDSA',
 ]
 KEX_TLS12_SORTED_ALG_COMBINATIONS = map('+'.join, product(
-    KEX_TLS12_SIGALG_PREFERRED_ORDER, KEX_TLS12_HASHALG_PREFERRED_ORDER))
-KEX_TLS12_SIGALG_PREFERENCE = ':'.join(KEX_TLS12_SORTED_ALG_COMBINATIONS)
+    KEX_TLS12_SIGALG_PREFERRED_ORDER, KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER))
+KEX_TLS12_SHA2_SIGALG_PREFERENCE = ':'.join(KEX_TLS12_SORTED_ALG_COMBINATIONS)
 
 # Based on:
 # https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-signaturescheme
 # https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
+# https://tools.ietf.org/html/rfc8446#section-4.2.3
 # https://tools.ietf.org/html/rfc8032 "EdDSA"
 # NCSC 2.0 Table 5 - Hash functions for key exchange
-# The table only includes phase out or bad hash functions because we don't need
-# to report about support for good hash functions. ed25519 and ed448 are
-# excluded from the table because they are EdDSA based and NCSC 2.0 says "The
-# algorithm EdDSA is Good", and because RFC-8032 states that they are SHA-512
-# and SHAKE256 (SHA-3) based.
-KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER = [
-    'rsa_pkcs1_sha1',
-    'ecdsa_sha1'
+# Only signature schemes that are SHA256/384/512 based:
+#   ed25519 is included in the table because RFC-8032 states that it is SHA-512
+#   based.
+#   ed448 is excluded from the table because RFC-8032 states that it is SHAKE256
+#   (SHA-3) based.
+KEX_TLS13_SHA2_SIGNATURE_SCHEMES = [
+    'rsa_pkcs1_sha512',
+    'rsa_pkcs1_sha384',
+    'rsa_pkcs1_sha256',
+    'ecdsa_secp256r1_sha256',
+    'ecdsa_secp384r1_sha384',
+    'ecdsa_secp521r1_sha512',
+    'rsa_pss_rsae_sha512',
+    'rsa_pss_rsae_sha384',
+    'rsa_pss_rsae_sha256',
+    'ed25519',
+    'rsa_pss_pss_sha512',
+    'rsa_pss_pss_sha384',
+    'rsa_pss_pss_sha256',
 ]
-KEX_TLS13_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER)
+KEX_TLS13_SHA2_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SHA2_SIGNATURE_SCHEMES)
 
-KEX_PHASE_OUT_HASH_FUNCS = frozenset(
-    set(KEX_TLS12_HASHALG_PREFERRED_ORDER) |
-    set(KEX_TLS13_SIG_SCHEME_PREFERRED_ORDER))
+KEX_GOOD_HASH_FUNCS = frozenset(
+    set(KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER) |
+    set(KEX_TLS13_SHA2_SIGNATURE_SCHEMES))
 
 BULK_ENC_CIPHERS_PHASEOUT = ['3DES']
 BULK_ENC_CIPHERS_OTHER_PHASEOUT = ['SEED', 'ARIA']
@@ -533,6 +541,8 @@ def save_results(model, results, addr, domain, category):
                     model.zero_rtt_score = result.get("zero_rtt_score")
                     model.ocsp_stapling = result.get("ocsp_stapling")
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
+                    model.hash_func = result.get("hash_func")
+                    model.hash_func_score = result.get("hash_func_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -599,6 +609,8 @@ def save_results(model, results, addr, domain, category):
                     model.zero_rtt_score = result.get("zero_rtt_score")
                     model.ocsp_stapling = result.get("ocsp_stapling")
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
+                    model.hash_func = result.get("hash_func")
+                    model.hash_func_score = result.get("hash_func_score")
                 if result.get("tls_cert"):
                     model.cert_chain = result.get("chain")
                     model.cert_trusted = result.get("trusted")
@@ -781,6 +793,13 @@ def build_report(dttls, category):
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests['ocsp_stapling'].result_ok()
 
+            if dttls.hash_func:
+                category.subtests['hash_func'].result_good()
+            elif dttls.hash_func is None:
+                category.subtests['hash_func'].result_no_hash_func()
+            else:
+                category.subtests['hash_func'].result_phase_out()
+
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
             category.subtests['starttls_exists'].result_could_not_test()
@@ -921,6 +940,13 @@ def build_report(dttls, category):
                 category.subtests['ocsp_stapling'].result_not_trusted()
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests['ocsp_stapling'].result_ok()
+
+            if dttls.hash_func:
+                category.subtests['hash_func'].result_good()
+            elif dttls.hash_func is None:
+                category.subtests['hash_func'].result_no_hash_func()
+            else:
+                category.subtests['hash_func'].result_phase_out()
 
     dttls.report = category.gen_report()
 
@@ -1578,7 +1604,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 #   12  DebugConnection     SSLV2      check_protocol_versions (if not initial)
 #   13  DebugConnection     SSLV23     check_dh_params
 #   14  DebugConnection     SSLV23     check_dh_params
-#   15  ModernConnection    TLSV1_2    check_key_exchange_hash_func (if not TLSV1_3)
+#   15  ModernConnection    TLSV1_2    check_hash_func (if not TLSV1_3)
 #   16  DebugConnection     SSLV23     check_cipher_order
 #   ---------------------------------------------------------------------------
 def check_mail_tls(server, dane_cb_data, task):
@@ -1603,7 +1629,8 @@ def check_mail_tls(server, dane_cb_data, task):
                     ciphers_score, ciphers_result = checker.check_ciphers()
                     zero_rtt_score, zero_rtt = checker.check_zero_rtt()
                     prots_score, prots_result = checker.check_protocol_versions()
-                    fs_score, fs_result = checker.check_forward_secrecy()
+                    fs_score, fs_result = checker.check_dh_params()
+                    hash_func_score, hash_func = checker.check_hash_func()
                     cipher_order_score, cipher_order = checker.check_cipher_order()
 
                     starttls_details.trusted_score = checker.check_cert_trust()
@@ -1652,6 +1679,9 @@ def check_mail_tls(server, dane_cb_data, task):
 
                 ocsp_stapling=ocsp_stapling,
                 ocsp_stapling_score=ocsp_stapling_score,
+
+                hash_func=hash_func,
+                hash_func_score=hash_func_score,
             )
             results.update(cert_results)
         except (ConnectionSocketException, ConnectionHandshakeException):
@@ -1709,6 +1739,8 @@ class ConnectionChecker:
             self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
             self._score_tls_cipher_order_good = scoring.WEB_TLS_CIPHER_ORDER_GOOD
             self._score_tls_cipher_order_bad = scoring.WEB_TLS_CIPHER_ORDER_BAD
+            self._score_tls_hash_func_good = scoring.WEB_TLS_HASH_FUNC_GOOD
+            self._score_tls_hash_func_bad = scoring.WEB_TLS_HASH_FUNC_BAD
         elif self._checks_mode == ChecksMode.MAIL:
             self._score_compression_good = scoring.MAIL_TLS_COMPRESSION_GOOD
             self._score_compression_bad = scoring.MAIL_TLS_COMPRESSION_BAD
@@ -1731,6 +1763,8 @@ class ConnectionChecker:
             self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
             self._score_tls_cipher_order_good = scoring.MAIL_TLS_CIPHER_ORDER_GOOD
             self._score_tls_cipher_order_bad = scoring.MAIL_TLS_CIPHER_ORDER_BAD
+            self._score_tls_hash_func_good = scoring.MAIL_TLS_HASH_FUNC_GOOD
+            self._score_tls_hash_func_bad = scoring.MAIL_TLS_HASH_FUNC_BAD
         else:
             raise ValueError
 
@@ -2000,7 +2034,7 @@ class ConnectionChecker:
 
         return prots_score, result_dict
 
-    def _check_dh_params(self):
+    def check_dh_params(self):
         dh_param, ecdh_param = False, False
         dh_ff_p, dh_ff_g = False, False
 
@@ -2030,9 +2064,7 @@ class ConnectionChecker:
         fs_bad = []
         fs_phase_out = []
 
-        if dh_param and int(dh_param) < 2048:
-            fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("short bit len")))
-        elif dh_ff_p and dh_ff_g:
+        if dh_ff_p and dh_ff_g:
             if (dh_ff_g == FFDHE_GENERATOR and
                 dh_ff_p in FFDHE_SUFFICIENT_PRIMES):
                 pass
@@ -2041,81 +2073,6 @@ class ConnectionChecker:
                 fs_phase_out.append("DH-FFDHE2048{}".format(self._debug_info("weak ff group")))
             else:
                 fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
-
-        if ecdh_param and int(ecdh_param) < 224:
-            fs_bad.append("ECDH-{}{}".format(ecdh_param, self._debug_info("short bit len")))
-
-        return fs_bad, fs_phase_out, dh_param, ecdh_param
-
-    def _check_key_exchange_hash_func(self):
-        bad = []
-        phase_out = []
-
-        # Re-connect with explicit signature algorithm preferences and
-        # determine signature related properties of the connection. Only
-        # TLS >= 1.2 support specifying the preferred signature algorithms as
-        # ClientHello extensions (of which SignatureAlgorithm is one) were only
-        # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
-        # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
-        # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
-        def discover_kex_hash_func(base_conn):
-            try:
-                # Only OpenSSL 1.1.1 has the necessary functions for
-                # determining the key exchange signature algorithm and hash
-                # function in use, so use ModernConnection (which is based on
-                # OpenSSL 1.1.1). Additionally, only ModernConnection supports
-                # passing the signature algorithm preference to the server.
-                with ModernConnection.from_conn(base_conn,
-                        signature_algorithms=KEX_TLS12_SIGALG_PREFERENCE,
-                        version=TLSV1_2) as new_conn:
-                    self._note_conn_details(new_conn)
-
-                    # Ensure that the requirement in the OpenSSL docs that the
-                    # peer has signed a message is satisfied by exchanging data
-                    # with the server.
-                    if self._checks_mode == ChecksMode.WEB:
-                        http_client = HTTPSConnection.fromconn(new_conn)
-                        http_client.putrequest('GET', '/')
-                        http_client.endheaders()
-                        http_client.getresponse()
-                    elif self._checks_mode == ChecksMode.MAIL:
-                        new_conn.write(b"EHLO internet.nl\r\n")
-                        new_conn.read(4096)
-
-                    return new_conn.get_peer_signature_digest()
-            except (ConnectionSocketException,
-                    ConnectionHandshakeException):
-                return None
-
-        hash_funcs = set()
-        oldest_seen_tls_version = sorted(self._seen_versions)[0]
-        if oldest_seen_tls_version < TLSV1_2:
-            # SSL/TLS protocol versions prior to TLS 1.2 only supported MD5
-            # and SHA1 key exchange hash functions which are both "phase
-            # out" according to NCSC 2.0
-            hash_funcs.add("MD5")
-            hash_funcs.add("SHA1")
-        elif TLSV1_2 in self._seen_versions:
-            hash_funcs.add(discover_kex_hash_func(self._conn))
-        else:
-            # Only SHA2 and SHA3 based hash functions can be selected for key
-            # exchange hashing by TLS 1.3 servers so for NCSC 2.0 there's
-            # nothing to test for TLS 1.3.
-            pass
-
-        for hash_func in hash_funcs:
-            if hash_func in KEX_PHASE_OUT_HASH_FUNCS:
-                phase_out.append("{}{}".format(hash_func,
-                    self._debug_info("weak hash function")))
-
-        return bad, phase_out
-
-    def check_forward_secrecy(self):
-        fs_bad, fs_phase_out, dh_param, ecdh_param = self._check_dh_params()
-        kex_bad, kex_phase_out = self._check_key_exchange_hash_func()
-
-        fs_bad.extend(kex_bad)
-        fs_phase_out.extend(kex_phase_out)
 
         if len(fs_bad) == 0:
             fs_score = self._score_tls_fs_ok
@@ -2130,6 +2087,127 @@ class ConnectionChecker:
         }
 
         return fs_score, result_dict
+
+    def check_hash_func(self):
+        # # Re-connect with explicit signature algorithm preferences and
+        # # determine signature related properties of the connection. Only
+        # # TLS >= 1.2 support specifying the preferred signature algorithms as
+        # # ClientHello extensions (of which SignatureAlgorithm is one) were only
+        # # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
+        # # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
+        # # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
+        def sha2_supported_or_na(v, sigalgs):
+            # Unsupported TLS version or ConnectionSocketException or no hash
+            # function information available.
+            result = None
+
+            # We should have seen all protocol versions by the time this test
+            # is executed, so we can avoid a pointless connection attempt if
+            # the requested protocol version has not been seen already:
+            if v in self._seen_versions:
+                try:
+                    # Only ModernConnection supports passing the signature
+                    # algorithm preference to the server. Don't try to connect
+                    # using cipher suites that use RSA for key exchange as they
+                    # have no signature and thus no hash function is used.
+                    with ModernConnection.from_conn(self._conn, version=v,
+                            signature_algorithms=sigalgs) as new_conn:
+                        # we were able to connect with the given SHA2 sigalgs
+                        self._note_conn_details(new_conn)
+
+                        # Ensure that the requirement in the OpenSSL docs that
+                        # the peer has signed a message is satisfied by
+                        # exchanging data with the server.
+                        if self._checks_mode == ChecksMode.WEB:
+                            http_client = HTTPSConnection.fromconn(new_conn)
+                            http_client.putrequest('GET', '/')
+                            http_client.endheaders()
+                            http_client.getresponse()
+                        elif self._checks_mode == ChecksMode.MAIL:
+                            new_conn.write(b"EHLO internet.nl\r\n")
+                            new_conn.read(4096)
+
+                        # From: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_nid.html
+                        # "There are several possible reasons for failure:
+                        #   1. the cipher suite has no signature (e.g. it uses
+                        #      RSA key exchange or is anonymous)
+                        #   2. the TLS version is below 1.2 or
+                        #   3. the functions were called too early, e.g. before
+                        #      the peer signed a message."
+                        # We can exclude #2 and #3 as we deliberately make a
+                        # TLS 1.2 connection and exchange messages with the
+                        # server, so failure must be because "the cipher suite
+                        # has no signature" in which case there is no hash
+                        # function to check. In my testing only ciphers that
+                        # use RSA for key exchange caused the None value to be
+                        # returned, i.e. case #1.
+                        hash_func = new_conn.get_peer_signature_digest()
+                        if hash_func:
+                            result = hash_func in KEX_GOOD_HASH_FUNCS
+                except ValueError as e:
+                    # The NaSSL library can raise ValueError if the given
+                    # sigalgs value is unable to be set in the underlying
+                    # OpenSSL library.
+                    if str(e) == 'Invalid or unsupported signature algorithm':
+                        # This is an unexpected internal error, not a problem
+                        # with the target server. Log it an continue.
+                        logger.warning(
+                            f"Unexpected ValueError '{e}' while setting "
+                            f"client sigalgs to '{sigalgs}' when attempting "
+                            f"to test which key exchange SHA2 hash functions "
+                            f"target server '{self._conn.server_name}' "
+                            f"supports with TLS version {v.name}")
+                        pass
+                    else:
+                        raise e
+                except ConnectionHandshakeException:
+                    # So we've been able to connect earlier wtih this TLS
+                    # version but now as soon as we restrict ourselves to 
+                    # certain SHA2 hash functions the handshake fails, implying
+                    # that the server does not support them.
+                    result = False
+                except ConnectionSocketException:
+                    # TODO: extend to support indicating that we were unable to
+                    # test in the case of ConnectionSocketException?
+                    pass
+
+            return result
+
+        newest_seen_tls_version = sorted(self._seen_versions, reverse=True)[0]
+        # Older SSL/TLS protocol versions only supported MD5 and SHA1:
+        # From: https://tools.ietf.org/html/rfc5246#section-7.4.1.4.1
+        # ---------------------------------------------------------------------
+        # If the client does not send the signature_algorithms extension, the
+        # server MUST do the following:
+        #
+        # -  If the negotiated key exchange algorithm is one of (RSA, DHE_RSA,
+        #     DH_RSA, RSA_PSK, ECDH_RSA, ECDHE_RSA), behave as if client had
+        #     sent the value {sha1,rsa}.
+        #
+        # -  If the negotiated key exchange algorithm is one of (DHE_DSS,
+        #     DH_DSS), behave as if the client had sent the value {sha1,dsa}.
+        #
+        # -  If the negotiated key exchange algorithm is one of (ECDH_ECDSA,
+        #     ECDHE_ECDSA), behave as if the client had sent value {sha1,ecdsa}.
+        #
+        # Note: this is a change from TLS 1.1 where there are no explicit
+        # rules, but as a practical matter one can assume that the peer
+        # supports MD5 and SHA-1.
+        #
+        # Note: this extension is not meaningful for TLS versions prior to 1.2.
+        # Clients MUST NOT offer it if they are offering prior versions.
+        # ---------------------------------------------------------------------
+        result = (
+            sha2_supported_or_na(TLSV1_3, KEX_TLS13_SHA2_SIGALG_PREFERENCE) or
+            sha2_supported_or_na(TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
+        )
+
+        if newest_seen_tls_version < TLSV1_2 or result is False:
+            return self._score_tls_hash_func_bad, False
+        else:
+            # result can bn None meaning no hash function information was
+            # available, or True meaning a good hash function was used
+            return self._score_tls_hash_func_good, result
 
     def check_cipher_order(self):
         """
@@ -2465,7 +2543,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
                 ciphers_score, ciphers_result = checker.check_ciphers()
                 zero_rtt_score, zero_rtt = checker.check_zero_rtt()
                 prots_score, prots_result = checker.check_protocol_versions()
-                fs_score, fs_result = checker.check_forward_secrecy()
+                fs_score, fs_result = checker.check_dh_params()
+                hash_func_score, hash_func = checker.check_hash_func()
                 cipher_order_score, cipher_order = checker.check_cipher_order()
 
         return dict(
@@ -2498,6 +2577,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
             ocsp_stapling=ocsp_stapling,
             ocsp_stapling_score=ocsp_stapling_score,
+
+            hash_func=hash_func,
+            hash_func_score=hash_func_score,
         )
     except (socket.error, http.client.BadStatusLine, NoIpError,
             ConnectionHandshakeException,
