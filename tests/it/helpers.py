@@ -20,6 +20,7 @@ LOCATOR_WARNING_TEST_CLASS = 'testresult warning'
 LOCATOR_INFO_TEST_CLASS = 'testresult info'
 LOCATOR_FAILED_TEST_CLASS = 'testresult failed'
 LOCATOR_NOTTESTED_TEST_CLASS = 'testresult not-tested'
+LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
 
 LOCATOR_PROBING_CLASS = 'probing'
 LOCATOR_PROBE_CATEGORY_SUFFIX = '-summary'
@@ -149,6 +150,10 @@ class UX:
         return UX._get_matching_tests(selenium, LOCATOR_NOTTESTED_TEST_CLASS)
 
     @staticmethod
+    def get_passed_tests(selenium):
+        return UX._get_matching_tests(selenium, LOCATOR_PASSED_TEST_CLASS)
+
+    @staticmethod
     def get_score(selenium):
         return selenium.find_element(By.CLASS_NAME, LOCATOR_SCORE).text
 
@@ -201,8 +206,9 @@ class UX:
             return False
 
     @staticmethod
-    def submit_website_test_form(selenium, domain, lang='en', mail=False):
-        selenium.get(BASE_URL.format(lang))
+    def submit_website_test_form(selenium, domain, lang='en', mail=False, base_url=None):
+        base_url = base_url or BASE_URL
+        selenium.get(base_url.format(lang))
         if mail:
             website_test_url_input = selenium.find_element_by_id(
                 LOCATOR_MAIL_TEST_INPUT_ID)
@@ -217,7 +223,7 @@ class UX:
     def wait_for_test_to_start(selenium, domain):
         # Wait for the test to start or the result page to show
         # Both contain the domain under test in the HTML page title
-        WebDriverWait(selenium, 30).until(
+        WebDriverWait(selenium, 180).until(
             EC.title_contains('{}'.format(domain)))
 
     # Will raise TimeoutException on failure
@@ -232,7 +238,7 @@ class UX:
         # We should see the result page soon...
         # This will throw a TimeoutException if the element isn't
         # found within the time period specified.
-        WebDriverWait(selenium, 30).until(
+        WebDriverWait(selenium, 180).until(
             EC.presence_of_element_located(
                 (By.ID, LOCATOR_RESULTS_OVERVIEW_ID)))
 

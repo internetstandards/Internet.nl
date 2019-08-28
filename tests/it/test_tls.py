@@ -665,15 +665,15 @@ def check_table(selenium, expectation):
             assert not must_contain_mode, f"Result table of test '{test_title}' has no rows that match '{expected_col}'"
 
 
-def assess_website(selenium, domain_config, lang='en'):
-    run_assessment(selenium, domain_config, lang, mail=False)
+def assess_website(selenium, domain_config, lang='en', base_url=None, check_content=True, request=None):
+    run_assessment(selenium, domain_config, lang, mail=False, base_url=base_url, check_content=check_content, request=request)
 
 
-def assess_mail_servers(selenium, domain_config, lang='en'):
-    run_assessment(selenium, domain_config, lang, mail=True)
+def assess_mail_servers(selenium, domain_config, lang='en', base_url=None, check_content=True, request=None):
+    run_assessment(selenium, domain_config, lang, mail=True, base_url=base_url, check_content=check_content, request=request)
 
 
-def run_assessment(selenium, domain_config, lang, mail=False):
+def run_assessment(selenium, domain_config, lang, mail=False, base_url=None, check_content=True, request=None):
     # Make it clear in the pytest output which website we were connecting to,
     # because when the domain is invalid the test output only shows the
     # /test-site/?invalid URL, not the URL of the site requested to be tested.
@@ -682,19 +682,35 @@ def run_assessment(selenium, domain_config, lang, mail=False):
     else:
         print(f"Assessing website '{domain_config.domain}' in language '{lang}'")
 
-    UX.submit_website_test_form(selenium, domain_config.domain, lang, mail)
+    UX.submit_website_test_form(selenium, domain_config.domain, lang, mail, base_url=base_url)
     UX.wait_for_test_to_start(selenium, domain_config.domain)
     UX.wait_for_test_to_complete(selenium)
     UX.open_report_detail_sections(selenium)
 
-    assert (UX.get_failed_tests(selenium)
-        == set(domain_config.expected_failures.keys()))
-    assert (UX.get_nottested_tests(selenium)
-        == set(domain_config.expected_not_tested.keys()))
-    assert (UX.get_info_tests(selenium)
-        == set(domain_config.expected_info.keys()))
-    assert (UX.get_warning_tests(selenium)
-        == set(domain_config.expected_warnings.keys()))
+    failed_tests = UX.get_failed_tests(selenium)
+    warning_tests = UX.get_warning_tests(selenium)
+    info_tests = UX.get_info_tests(selenium)
+    nottested_tests = UX.get_nottested_tests(selenium)
+    passed_tests = UX.get_passed_tests(selenium)
+
+    score_as_percentage_str = UX.get_score(selenium)
+    score_as_int = int(score_as_percentage_str.strip('%'))
+
+    if request:
+        subresults = dict()
+        subresults.update({k: 'x' for k in failed_tests})
+        subresults.update({k: '!' for k in warning_tests})
+        subresults.update({k: '.' for k in info_tests})
+        subresults.update({k: '_' for k in nottested_tests})
+        subresults.update({k: '/' for k in passed_tests})
+        request.node._score = score_as_int
+        request.node._subresults = subresults
+
+    if check_content:
+        assert (failed_tests == set(domain_config.expected_failures.keys()))
+        assert (warning_tests == set(domain_config.expected_warnings.keys()))
+        assert (info_tests == set(domain_config.expected_info.keys()))
+        assert (nottested_tests == set(domain_config.expected_not_tested.keys()))
 
     check_table(selenium, domain_config.expected_failures)
     check_table(selenium, domain_config.expected_not_tested)
@@ -703,9 +719,7 @@ def run_assessment(selenium, domain_config, lang, mail=False):
     check_table(selenium, domain_config.expected_passes)
 
     if domain_config.expected_score:
-        score_as_percentage_str = UX.get_score(selenium)
         if domain_config.expected_score == IMPERFECT_SCORE:
-            score_as_int = int(score_as_percentage_str.strip('%'))
             assert score_as_int > 0 and score_as_int < 100
         else:
             assert score_as_percentage_str == domain_config.expected_score
@@ -804,3 +818,13 @@ def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
     'domain_config', mail_tests, ids=domainconfig_id_generator)
 def test_mail(selenium, domain_config):
     assess_mail_servers(selenium, domain_config)
+
+
+# 'parametrized' by conftest.py::pytest_generate_tests()
+def test_batch_domain(request, selenium, batch_base_url, batch_domain):
+    assess_website(
+        selenium,
+        GoodDomain('batch_domain', batch_domain),
+        base_url=batch_base_url,
+        check_content=False,
+        request=request)

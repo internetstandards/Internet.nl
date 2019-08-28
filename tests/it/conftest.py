@@ -8,6 +8,8 @@ DEFAULT_BROWSER_WIDTH = 1280
 DEFAULT_BROWSER_HEIGHT = 1024
 
 
+# Configure the pytest-selenium plugin to configure the Firefox browser(s) in
+# which tests will be executed.
 @pytest.fixture
 def firefox_options(firefox_options):
     width = os.getenv('IT_BROWSER_WIDTH', DEFAULT_BROWSER_WIDTH)
@@ -17,22 +19,17 @@ def firefox_options(firefox_options):
     return firefox_options
 
 
+# Using the pytest-metadata plugin. add information about the test setup to the
+# 'Environment' section of the pytest-html plugin produced HTML report. Both
+# plugins are imported and enabled automatically by the pytest-selenium plugin.
+#
+# See: https://github.com/pytest-dev/pytest-html#environment
+# See: https://github.com/pytest-dev/pytest-metadata
 # See: https://docs.pytest.org/en/latest/_modules/_pytest/hookspec.html
 def pytest_configure(config):
-    """
-    Allows plugins and conftest files to perform initial configuration.
+    if not hasattr(config, '_metadata') or not config._metadata:
+        return
 
-    This hook is called for every plugin and initial conftest file
-    after command line options have been parsed.
-
-    After that, the hook is called for other conftest files as they are
-    imported.
-
-    .. note::
-        This hook is incompatible with ``hookwrapper=True``.
-
-    :arg _pytest.config.Config config: pytest config object
-    """
     pip_list_out, unused_err = subprocess.Popen(
         ['pip', 'list'], stdout=subprocess.PIPE).communicate()
 
