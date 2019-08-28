@@ -63,7 +63,7 @@ RUN mkdir -p bin/openssl-legacy/freebsd64 \
              bin/openssl-modern/freebsd64 \
              openssl-1.0.2e \
              openssl-master && \
-    curl -fsSLo- 'https://github.com/ximon18/nassl/tarball/bc17c35' | tar zx --strip-components 1 && \
+    curl -fsSLo- 'https://github.com/ximon18/nassl/tarball/35fbd94' | tar zx --strip-components 1 && \
     curl -fsSLo- 'https://zlib.net/zlib-1.2.11.tar.gz' | tar zx && \
     curl -fsSLo- 'https://github.com/PeterMosmans/openssl/tarball/1.0.2-chacha' | tar zx --strip-components 1 -C openssl-1.0.2e && \
     curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_1_1c.tar.gz' | tar zx --strip-components 1 -C openssl-master && \
