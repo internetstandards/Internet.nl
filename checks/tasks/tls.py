@@ -2046,9 +2046,15 @@ class ConnectionChecker:
             with DebugConnection.from_conn(self._conn, ciphers="DH:DHE:!aNULL") as new_conn:
                 self._note_conn_details(new_conn)
                 dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
-                dh_ff_p = int(dh_param["prime"], 16) # '0x...'
-                dh_ff_g = int(dh_param["generator"].partition(' ')[0]) # 'n (0xn)'
-                dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
+                try:
+                    dh_ff_p = int(dh_param["prime"], 16) # '0x...'
+                    dh_ff_g = int(dh_param["generator"].partition(' ')[0]) # 'n (0xn)'
+                    dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
+                except ValueError as e:
+                    logger.error("Unexpected failure to parse DH params "
+                        f"{dh_param}' for server '{new_conn.server_name}': "
+                        f"reason='{e}'")
+                    dh_param = False
         except (ConnectionSocketException,
                 ConnectionHandshakeException):
             pass
@@ -2057,7 +2063,13 @@ class ConnectionChecker:
             with DebugConnection.from_conn(self._conn, ciphers="ECDH:ECDHE:!aNULL") as new_conn:
                 self._note_conn_details(new_conn)
                 ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
-                ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
+                try:
+                    ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
+                except ValueError as e:
+                    logger.error("Unexpected failure to parse ECDH params "
+                        f"'{ecdh_param}' for server '{new_conn.server_name}': "
+                        f"reason='{e}'")
+                    ecdh_param = False
         except (ConnectionSocketException,
                 ConnectionHandshakeException):
             pass
