@@ -1,10 +1,7 @@
 import os
 import pytest
 import subprocess
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
 from git import Repo
-from git.exc import InvalidGitRepositoryError
 
 
 DEFAULT_BROWSER_WIDTH = 1280
