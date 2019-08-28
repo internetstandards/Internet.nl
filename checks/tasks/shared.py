@@ -358,6 +358,8 @@ class ConnectionCommon:
             ip_obj_is_v6 = isinstance(ip_obj, ipaddress.IPv6Address)
             if ip_obj_is_v6 != self.ipv6:
                 raise ValueError('Mismatched ip address type and ipv6 flag')
+        elif not self.port:
+            raise ValueError('A port number is required')
 
         # If the server_name is a DNS label (mailtest) make sure to remove the
         # trailing dot.
