@@ -2048,7 +2048,8 @@ class ConnectionChecker:
                 dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
                 try:
                     dh_ff_p = int(dh_param["prime"], 16) # '0x...'
-                    dh_ff_g = int(dh_param["generator"].partition(' ')[0]) # 'n (0xn)'
+                    dh_ff_g = dh_param["generator"].partition(' ')[0]  # 'n (0xn)' or '0xn'
+                    dh_ff_g = int(dh_ff_g, 16 if dh_ff_g[0:2] == '0x' else 10)
                     dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
                 except ValueError as e:
                     logger.error("Unexpected failure to parse DH params "
