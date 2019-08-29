@@ -15,6 +15,9 @@ function hideMenuButton(document, window, undefined) {
   menu.setAttribute('aria-hidden', 'false');
   langswitch.setAttribute('aria-hidden', 'false');
 
+	// restore the skiplink to the menu
+	document.querySelector('#skiplink-sitenav').removeAttribute('style');
+
   var ele = document.getElementById("menu-button");
 
   if (ele) {
@@ -47,6 +50,9 @@ function showMenuButton(document, window, undefined) {
   menu.setAttribute('aria-labelledby', 'menu-button');
 
   langswitch.setAttribute('aria-hidden', 'true');
+
+	// remove the skiplink to the menu from the A11Y dom
+	document.querySelector('#skiplink-sitenav').setAttribute('style', 'display: none;');
 
   // Add button to page
   header.insertBefore(menuButton, langswitch);
