@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2019-07-24 16:16:08.405607\n"
+"PO-Revision-Date: 2019-08-29 19:02:00.039461\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -742,15 +742,15 @@ msgstr ""
 "At least one of your mail server certificates contains a public key with an \n"
 "*insufficiently* secure length."
 
-msgid "detail mail tls cert-pubkey verdict phase-out"
-msgstr ""
-"At least one of your mail server certificates contains a public key with an *insecure* length/ \n"
-"elliptic curve type or which is at risk of becoming insecure."
-
 msgid "detail mail tls cert-pubkey verdict good"
 msgstr ""
 "All your mail server certificates contain a public key with a sufficiently \n"
 "secure length."
+
+msgid "detail mail tls cert-pubkey verdict phase-out"
+msgstr ""
+"At least one of your mail server certificates contains a public key with an *insecure* length/ \n"
+"elliptic curve type or which is at risk of becoming insecure."
 
 msgid "detail mail tls cert-signature exp"
 msgstr ""
@@ -803,6 +803,26 @@ msgstr ""
 "The trust chain of all your mail server certificates is complete and signed \n"
 "by a trusted root certificate authority."
 
+msgid "detail mail tls cipher_order exp"
+msgstr ""
+"We check if your receiving mail servers (MX) negotiate a cipher with the client according to\n"
+"its own preferences and not those of the client. See ['TLS guidelines from \n"
+"NCSC-EN|(https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guideline B2-5)."
+
+msgid "detail mail tls cipher_order label"
+msgstr "Cipher order"
+
+msgid "detail mail tls cipher_order tech table"
+msgstr "Mail server (MX)|Server cipher order enforced"
+
+msgid "detail mail tls cipher_order verdict bad"
+msgstr ""
+"At least one of your mail servers respects the client cipher order "
+"preference, which is *not* secure."
+
+msgid "detail mail tls cipher_order verdict good"
+msgstr "All your mail servers enforce their own cipher order preference."
+
 msgid "detail mail tls ciphers exp"
 msgstr ""
 "We check if your receiving mail servers (MX) support any insufficiently secure \n"
@@ -834,31 +854,13 @@ msgstr ""
 "At least one of your mail servers supports one or more *insufficiently* secure \n"
 "cipher suites."
 
+msgid "detail mail tls ciphers verdict good"
+msgstr "All your mail servers support sufficiently secure cipher suites only."
+
 msgid "detail mail tls ciphers verdict phase-out"
 msgstr ""
 "At least one of your mail servers supports *insufficiently* secure cipher suites \n"
 "and/or cipher suites that are at risk of becoming insecure."
-
-msgid "detail mail tls ciphers verdict good"
-msgstr "All your mail servers support sufficiently secure cipher suites only."
-
-msgid "detail mail tls cipher_order exp"
-msgstr ""
-"We check if your receiving mail servers (MX) negotiate a cipher with the client according to\n"
-"its own preferences and not those of the client. See ['TLS guidelines from \n"
-"NCSC-EN|(https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guideline B2-5).\n"
-
-msgid "detail mail tls cipher_order label"
-msgstr "Cipher order"
-
-msgid "detail mail tls cipher_order tech table"
-msgstr "Mail server (MX)|Server cipher order enforced"
-
-msgid "detail mail tls cipher_order verdict bad"
-msgstr "At least one of your mail servers respects the client cipher order preference, which is *not* secure."
-
-msgid "detail mail tls cipher_order verdict good"
-msgstr "All your mail servers enforce their own cipher order preference."
 
 msgid "detail mail tls compression exp"
 msgstr ""
@@ -1027,11 +1029,6 @@ msgstr ""
 "At least one of your mail servers supports *insufficiently* secure Diffie-Hellman parameters \n"
 "for key exchange."
 
-msgid "detail mail tls fs-params verdict phase-out"
-msgstr ""
-"At least one of your mail servers supports *insufficiently* secure Diffie-Hellman parameters \n"
-"and/or hash functions that are at risk of becoming insecure for key exchange."
-
 msgid "detail mail tls fs-params verdict good"
 msgstr ""
 "All your mail servers support sufficiently secure Diffie-Hellman parameters for \n"
@@ -1042,6 +1039,76 @@ msgstr ""
 "At least one of your mail servers does not support Diffie-Hellman for key exchange. Note: RSA \n"
 "is the only sufficiently secure alternative to Diffie-Hellman for key \n"
 "exchange."
+
+msgid "detail mail tls fs-params verdict phase-out"
+msgstr ""
+"At least one of your mail servers supports *insufficiently* secure Diffie-Hellman parameters \n"
+"and/or hash functions that are at risk of becoming insecure for key exchange."
+
+msgid "detail mail tls hash-func exp"
+msgstr ""
+"We check if the hash function used to create the digital signature provided \n"
+"during key exchange is sufficiently secure. To be considered secure your mail \n"
+"server must support at least one of the SHA-256, SHA-384 or SHA-512 hash \n"
+"functions for key exchange. If your mail server lacks support for TLS \n"
+"1.2 or higher it is assumed to be at risk of being insufficiently secure. \n"
+"See ['TLS guidelines from NCSC-EN'](https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guidelines \n"
+"B2-4."
+
+msgid "detail mail tls hash-func label"
+msgstr "Key exchange hash function"
+
+msgid "detail mail tls hash-func tech table"
+msgstr "Mail server (MX)|SHA2 support for signatures"
+
+msgid "detail mail tls hash-func verdict good"
+msgstr ""
+"Your mail server supports sufficiently secure hash functions for key "
+"exchange."
+
+msgid "detail mail tls hash-func verdict other"
+msgstr ""
+"We were unable to determine the hash function used by your mail server. This \n"
+"could be because the cipher suite used has no signature (e.g uses RSA key \n"
+"exchange or is anonymous)."
+
+msgid "detail mail tls hash-func verdict phase-out"
+msgstr ""
+"Your mail server supports *insufficiently* secure hash functions for key "
+"exchange."
+
+msgid "detail mail tls ocsp-stapling exp"
+msgstr ""
+"We check if your receiving mail server supports the [TLS Certificate Status extension](https://www.ietf.org/rfc/rfc6961.txt) \n"
+"aka OCSP stapling. With OCSP stapling your mail server can provide OCSP \n"
+"responses itself which removes the need for the TLS client to verify the \n"
+"validity of the mail server certificate directly with the certificate \n"
+"supplier, and thus avoids exposing potentially privacy sensitive data about \n"
+"the client to the certificate supplier. It also does not require \n"
+"connectivity between client and certificate supplier and is faster. See \n"
+"['IT Security Guidelines for Transport Layer Security (TLS)'](https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html), guideline B9-1 (in English).\n"
+"\n"
+"When connecting to your mail server we use the TLS Certificate Status \n"
+"extension to request OCSP data be included in the server response. If your \n"
+"mail server includes OCSP data in the response we then verify that the OCSP \n"
+"data is signed by a known certificate authority."
+
+msgid "detail mail tls ocsp-stapling label"
+msgstr "OCSP Stapling"
+
+msgid "detail mail tls ocsp-stapling tech table"
+msgstr "Mail server (MX)|OCSP stapling"
+
+msgid "detail mail tls ocsp-stapling verdict bad"
+msgstr ""
+"At least one of your mail servers supports OCSP stapling but responds with "
+"invalid data"
+
+msgid "detail mail tls ocsp-stapling verdict good"
+msgstr "Your mail servers support OCSP stapling."
+
+msgid "detail mail tls ocsp-stapling verdict ok"
+msgstr "At least one of your mail servers does not support OCSP stapling."
 
 msgid "detail mail tls renegotiation-client exp"
 msgstr ""
@@ -1139,20 +1206,20 @@ msgstr ""
 "At least one of your mail servers does *not* support sufficiently secure TLS\n"
 " versions."
 
-msgid "detail mail tls version verdict phase-out"
-msgstr "At least one of your mail servers supports TLS versions that are at risk of becoming *insufficiently* secure in the near future."
-
 msgid "detail mail tls version verdict good"
 msgstr "All your mail servers support sufficiently secure TLS versions."
+
+msgid "detail mail tls version verdict phase-out"
+msgstr ""
+"At least one of your mail servers supports TLS versions that are at risk of "
+"becoming *insufficiently* secure in the near future."
 
 msgid "detail mail tls zero-rtt exp"
 msgstr ""
 "0-RTT _'is an option in TLS 1.3 that transports application data during \n"
 "the first handshake message. 0-RTT does not provide protection against \n"
 "replay attacks at the TLS layer and is therefore hard to use securely in \n"
-"an application agnostic environment'_. See ['IT Security Guidelines for Transport Layer Security (TLS)']"
-"(https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html)"
-", guideline B9-1 (in English).\n"
+"an application agnostic environment'_. See ['IT Security Guidelines for Transport Layer Security (TLS)'](https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html), guideline B9-1 (in English).\n"
 "\n"
 "If your receiving mail server does not support TLS 1.3 it is assumed that it does not \n"
 "support 0-RTT. The test is not applicable in this case. \n"
@@ -1166,73 +1233,12 @@ msgid "detail mail tls zero-rtt tech table"
 msgstr "Mail server (MX)|0-RTT"
 
 msgid "detail mail tls zero-rtt verdict bad"
-msgstr "At least one of your mail servers supports 0-RTT, which could be a security risk."
+msgstr ""
+"At least one of your mail servers supports 0-RTT, which could be a security "
+"risk."
 
 msgid "detail mail tls zero-rtt verdict good"
 msgstr "None of your mail servers support 0-RTT."
-
-msgid "detail mail tls ocsp-stapling exp"
-msgstr ""
-"We check if your receiving mail server supports the [TLS Certificate Status extension](https://www.ietf.org/rfc/rfc6961.txt) \n"
-"aka OCSP stapling. With OCSP stapling your mail server can provide OCSP \n"
-"responses itself which removes the need for the TLS client to verify the \n"
-"validity of the mail server certificate directly with the certificate \n"
-"supplier, and thus avoids exposing potentially privacy sensitive data about \n"
-"the client to the certificate supplier. It also does not require \n"
-"connectivity between client and certificate supplier and is faster. See \n"
-"['IT Security Guidelines for Transport Layer Security (TLS)']"
-"(https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html)"
-", guideline B9-1 (in English).\n"
-"\n"
-"When connecting to your mail server we use the TLS Certificate Status \n"
-"extension to request OCSP data be included in the server response. If your \n"
-"mail server includes OCSP data in the response we then verify that the OCSP \n"
-"data is signed by a known certificate authority."
-
-msgid "detail mail tls ocsp-stapling label"
-msgstr "OCSP Stapling"
-
-msgid "detail mail tls ocsp-stapling tech table"
-msgstr "Mail server (MX)|OCSP stapling"
-
-msgid "detail mail tls ocsp-stapling verdict ok"
-msgstr "At least one of your mail servers does not support OCSP stapling."
-
-msgid "detail mail tls ocsp-stapling verdict good"
-msgstr "Your mail servers support OCSP stapling."
-
-msgid "detail mail tls ocsp-stapling verdict bad"
-msgstr "At least one of your mail servers supports OCSP stapling but responds with invalid data"
-
-msgid "detail mail tls hash-func exp"
-msgstr ""
-"We check if the hash function used to create the digital signature provided \n"
-"during key exchange is sufficiently secure. To be considered secure your mail \n"
-"server must support at least one of the SHA-256, SHA-384 or SHA-512 hash \n"
-"functions for key exchange. If your mail server lacks support for TLS \n"
-"1.2 or higher it is assumed to be at risk of being insufficiently secure. \n"
-"See ['TLS guidelines from NCSC-EN'](https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guidelines \n"
-"B2-4."
-
-msgid "detail mail tls hash-func label"
-msgstr "Key exchange hash function"
-
-msgid "detail mail tls hash-func tech table"
-msgstr "Mail server (MX)|SHA2 support for signatures"
-
-msgid "detail mail tls hash-func verdict phase-out"
-msgstr ""
-"Your mail server supports *insufficiently* secure hash functions for key exchange."
-
-msgid "detail mail tls hash-func verdict good"
-msgstr ""
-"Your mail server supports sufficiently secure hash functions for key exchange."
-
-msgid "detail mail tls hash-func verdict other"
-msgstr ""
-"We were unable to determine the hash function used by your mail server. This \n"
-"could be because the cipher suite used has no signature (e.g uses RSA key \n"
-"exchange or is anonymous)."
 
 msgid "detail tech data bogus"
 msgstr "bogus"
@@ -1567,13 +1573,13 @@ msgid "detail web tls cert-pubkey verdict bad"
 msgstr ""
 "Your website certificate contains a public key with an *insecure* length."
 
+msgid "detail web tls cert-pubkey verdict good"
+msgstr "Your website certificate contains a public key with a secure length."
+
 msgid "detail web tls cert-pubkey verdict phase-out"
 msgstr ""
 "Your website certificate contains a public key with an *insecure* length/ \n"
 "elliptic curve type or which is at risk of becoming insecure."
-
-msgid "detail web tls cert-pubkey verdict good"
-msgstr "Your website certificate contains a public key with a secure length."
 
 msgid "detail web tls cert-signature exp"
 msgstr ""
@@ -1623,6 +1629,26 @@ msgstr ""
 "The trust chain of your website certificate is complete and signed by a \n"
 "trusted root certificate authority."
 
+msgid "detail web tls cipher_order exp"
+msgstr ""
+"We check if your web server negotiates a cipher with the client according to\n"
+"its own preferences and not those of the client. See ['TLS guidelines from \n"
+"NCSC-EN|(https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guideline B2-5)."
+
+msgid "detail web tls cipher_order label"
+msgstr "Cipher order"
+
+msgid "detail web tls cipher_order tech table"
+msgstr "Web server IP address|Server cipher order enforced"
+
+msgid "detail web tls cipher_order verdict bad"
+msgstr ""
+"Your web server respects the client cipher order preference, which is *not* "
+"secure."
+
+msgid "detail web tls cipher_order verdict good"
+msgstr "Your web server enforces its own cipher order preference."
+
 msgid "detail web tls ciphers exp"
 msgstr ""
 "We check if your web server supports sufficiently secure cipher suites only.\n"
@@ -1643,31 +1669,13 @@ msgstr "Web server IP address|Insecure cipher suites"
 msgid "detail web tls ciphers verdict bad"
 msgstr "Your web server supports *insufficiently* secure cipher suites."
 
+msgid "detail web tls ciphers verdict good"
+msgstr "Your web server supports sufficiently secure cipher suites only."
+
 msgid "detail web tls ciphers verdict phase-out"
 msgstr ""
 "Your web server supports *insufficiently* secure cipher suites \n"
 "and/or cipher suites that are at risk of becoming insecure."
-
-msgid "detail web tls ciphers verdict good"
-msgstr "Your web server supports sufficiently secure cipher suites only."
-
-msgid "detail web tls cipher_order exp"
-msgstr ""
-"We check if your web server negotiates a cipher with the client according to\n"
-"its own preferences and not those of the client. See ['TLS guidelines from \n"
-"NCSC-EN|(https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guideline B2-5).\n"
-
-msgid "detail web tls cipher_order label"
-msgstr "Cipher order"
-
-msgid "detail web tls cipher_order tech table"
-msgstr "Web server IP address|Server cipher order enforced"
-
-msgid "detail web tls cipher_order verdict bad"
-msgstr "Your web server respects the client cipher order preference, which is *not* secure."
-
-msgid "detail web tls cipher_order verdict good"
-msgstr "Your web server enforces its own cipher order preference."
 
 msgid "detail web tls compression exp"
 msgstr ""
@@ -1793,11 +1801,6 @@ msgstr ""
 "Your web server supports *insufficiently* secure Diffie-Hellman parameters \n"
 "for key exchange."
 
-msgid "detail web tls fs-params verdict phase-out"
-msgstr ""
-"Your web server supports Diffie-Hellman parameters that are at risk of \n"
-"becoming insecure for key exchange."
-
 msgid "detail web tls fs-params verdict good"
 msgstr ""
 "Your web server supports sufficiently secure Diffie-Hellman parameters."
@@ -1806,6 +1809,43 @@ msgid "detail web tls fs-params verdict other"
 msgstr ""
 "Your web server does not support Diffie-Hellman for key exchange. Note: RSA \n"
 "is the only sufficiently secure alternative to Diffie-Hellman for key \n"
+"exchange."
+
+msgid "detail web tls fs-params verdict phase-out"
+msgstr ""
+"Your web server supports Diffie-Hellman parameters that are at risk of \n"
+"becoming insecure for key exchange."
+
+msgid "detail web tls hash-func exp"
+msgstr ""
+"We check if the hash function used to create the digital signature provided \n"
+"during key exchange is sufficiently secure. To be considered secure your web \n"
+"server must support at least one of the SHA-256, SHA-384 or SHA-512 hash \n"
+"functions for key exchange. If your web server lacks support for TLS \n"
+"1.2 or higher it is assumed to be at risk of being insufficiently secure. \n"
+"See ['TLS guidelines from NCSC-EN'](https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guidelines \n"
+"B2-4."
+
+msgid "detail web tls hash-func label"
+msgstr "Key exchange hash function"
+
+msgid "detail web tls hash-func tech table"
+msgstr "Web server IP address|SHA2 support for signatures"
+
+msgid "detail web tls hash-func verdict good"
+msgstr ""
+"Your web server supports sufficiently secure hash functions for key "
+"exchange."
+
+msgid "detail web tls hash-func verdict other"
+msgstr ""
+"We were unable to determine the hash function used by your webserver. This \n"
+"could be because the cipher suite used has no signature (e.g uses RSA key \n"
+"exchange or is anonymous)."
+
+msgid "detail web tls hash-func verdict phase-out"
+msgstr ""
+"Your web server supports *insufficiently* secure hash functions for key "
 "exchange."
 
 msgid "detail web tls http-compression exp"
@@ -1917,6 +1957,37 @@ msgstr ""
 "Your web server offers an HSTS policy with a cache validity period (`max-"
 "age`) that is *not* sufficiently long (i.e. less than 6 months)."
 
+msgid "detail web tls ocsp-stapling exp"
+msgstr ""
+"We check if your web server supports the [TLS Certificate Status extension](https://www.ietf.org/rfc/rfc6961.txt) \n"
+"aka OCSP stapling. With OCSP stapling your web server can provide OCSP \n"
+"responses itself whcih removes the need for the TLS client to verify the \n"
+"validity of the web server certificate directly with the certificate \n"
+"supplier, and thus avoids exposing potentially privacy sensitive data about \n"
+"the client to the certificate supplier. It also does not require \n"
+"connectivity between client and certificate supplier and is faster. See \n"
+"['IT Security Guidelines for Transport Layer Security (TLS)'](https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html), guideline B9-1 (in English).\n"
+"\n"
+"When connecting to your web server we use the TLS Certificate Status \n"
+"extension to request OCSP data be included in the server response. If your \n"
+"web server includes OCSP data in the response we then verify that the OCSP \n"
+"data is signed by a known certificate authority."
+
+msgid "detail web tls ocsp-stapling label"
+msgstr "OCSP Stapling"
+
+msgid "detail web tls ocsp-stapling tech table"
+msgstr "Web server IP address|OCSP stapling"
+
+msgid "detail web tls ocsp-stapling verdict bad"
+msgstr "Your web server supports OCSP stapling but responds with invalid data"
+
+msgid "detail web tls ocsp-stapling verdict good"
+msgstr "Your web server supports OCSP stapling."
+
+msgid "detail web tls ocsp-stapling verdict ok"
+msgstr "Your web server does not support OCSP stapling."
+
 msgid "detail web tls renegotiation-client exp"
 msgstr ""
 "We check if a client (usually a web browser) can initiate a renegotiation \n"
@@ -1982,27 +2053,26 @@ msgstr "Web server IP address|Insecure TLS versions"
 msgid "detail web tls version verdict bad"
 msgstr "Your web server supports *insufficiently* secure TLS versions."
 
-msgid "detail web tls version verdict phase-out"
-msgstr "Your web server supports TLS versions that are at risk of becoming *insufficiently* secure in the near future."
-
 msgid "detail web tls version verdict good"
 msgstr "Your web server supports sufficiently secure TLS versions only."
+
+msgid "detail web tls version verdict phase-out"
+msgstr ""
+"Your web server supports TLS versions that are at risk of becoming "
+"*insufficiently* secure in the near future."
 
 msgid "detail web tls zero-rtt exp"
 msgstr ""
 "0-RTT _'is an option in TLS 1.3 that transports application data during \n"
 "the first handshake message. 0-RTT does not provide protection against \n"
 "replay attacks at the TLS layer and is therefore hard to use securely in \n"
-"an application agnostic environment'_. See ['IT Security Guidelines for Transport Layer Security (TLS)']"
-"(https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html)"
-", guideline B9-1 (in English).\n"
+"an application agnostic environment'_. See ['IT Security Guidelines for Transport Layer Security (TLS)'](https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html), guideline B9-1 (in English).\n"
 "\n"
 "If your web server does not support TLS 1.3 it is assumed that it does not \n"
 "support 0-RTT. The test is not applicable in this case. \n"
 "\n"
 "For web servers that support TLS 1.3, the index `/` page of the website is \n"
-"fetched using TLS 1.3 and the amount of [early data](https://www.openssl.org/docs/man1.1.1/man3/SSL_get_max_early_data.html) "
-"support [indicated](https://tools.ietf.org/html/rfc8446#section-4.2.10) by \n"
+"fetched using TLS 1.3 and the amount of [early data](https://www.openssl.org/docs/man1.1.1/man3/SSL_get_max_early_data.html) support [indicated](https://tools.ietf.org/html/rfc8446#section-4.2.10) by \n"
 "the server is checked. When more than zero, a second connection is made \n"
 "re-using the TLS session details of the first connection but sending the \n"
 "HTTP request _before_ the TLS handshake (i.e. no round trips (0-RTT) \n"
@@ -2021,69 +2091,6 @@ msgstr "Your web server supports 0-RTT, which could be a security risk."
 
 msgid "detail web tls zero-rtt verdict good"
 msgstr "Your web server does not support 0-RTT."
-
-msgid "detail web tls ocsp-stapling exp"
-msgstr ""
-"We check if your web server supports the [TLS Certificate Status extension](https://www.ietf.org/rfc/rfc6961.txt) \n"
-"aka OCSP stapling. With OCSP stapling your web server can provide OCSP \n"
-"responses itself whcih removes the need for the TLS client to verify the \n"
-"validity of the web server certificate directly with the certificate \n"
-"supplier, and thus avoids exposing potentially privacy sensitive data about \n"
-"the client to the certificate supplier. It also does not require \n"
-"connectivity between client and certificate supplier and is faster. See \n"
-"['IT Security Guidelines for Transport Layer Security (TLS)']"
-"(https://www.ncsc.nl/english/current-topics/factsheets/it-security-guidelines-for-transport-layer-security-tls.html)"
-", guideline B9-1 (in English).\n"
-"\n"
-"When connecting to your web server we use the TLS Certificate Status \n"
-"extension to request OCSP data be included in the server response. If your \n"
-"web server includes OCSP data in the response we then verify that the OCSP \n"
-"data is signed by a known certificate authority."
-
-msgid "detail web tls ocsp-stapling label"
-msgstr "OCSP Stapling"
-
-msgid "detail web tls ocsp-stapling tech table"
-msgstr "Web server IP address|OCSP stapling"
-
-msgid "detail web tls ocsp-stapling verdict ok"
-msgstr "Your web server does not support OCSP stapling."
-
-msgid "detail web tls ocsp-stapling verdict good"
-msgstr "Your web server supports OCSP stapling."
-
-msgid "detail web tls ocsp-stapling verdict bad"
-msgstr "Your web server supports OCSP stapling but responds with invalid data"
-
-msgid "detail web tls hash-func exp"
-msgstr ""
-"We check if the hash function used to create the digital signature provided \n"
-"during key exchange is sufficiently secure. To be considered secure your web \n"
-"server must support at least one of the SHA-256, SHA-384 or SHA-512 hash \n"
-"functions for key exchange. If your web server lacks support for TLS \n"
-"1.2 or higher it is assumed to be at risk of being insufficiently secure. \n"
-"See ['TLS guidelines from NCSC-EN'](https://english.ncsc.nl/publications/publications/2019/juni/01/it-security-guidelines-for-transport-layer-security-tls), guidelines \n"
-"B2-4."
-
-msgid "detail web tls hash-func label"
-msgstr "Key exchange hash function"
-
-msgid "detail web tls hash-func tech table"
-msgstr "Web server IP address|SHA2 support for signatures"
-
-msgid "detail web tls hash-func verdict phase-out"
-msgstr ""
-"Your web server supports *insufficiently* secure hash functions for key exchange."
-
-msgid "detail web tls hash-func verdict good"
-msgstr ""
-"Your web server supports sufficiently secure hash functions for key exchange."
-
-msgid "detail web tls hash-func verdict other"
-msgstr ""
-"We were unable to determine the hash function used by your webserver. This \n"
-"could be because the cipher suite used has no signature (e.g uses RSA key \n"
-"exchange or is anonymous)."
 
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""
@@ -2859,6 +2866,18 @@ msgstr "Seconds until retest option:"
 msgid "results score-description"
 msgstr "The domain {{prettyaddr}} has a test score of {{score}}%."
 
+msgid "results security-level good"
+msgstr "good"
+
+msgid "results security-level insufficient"
+msgstr "insufficient"
+
+msgid "results security-level phase-out"
+msgstr "at risk"
+
+msgid "results security-level sufficient"
+msgstr "sufficient"
+
 msgid "results tech-details label"
 msgstr "Technical details:"
 
@@ -2876,18 +2895,6 @@ msgstr "Explanation of test report"
 
 msgid "results verdict label"
 msgstr "Verdict:"
-
-msgid "results security-level insufficient"
-msgstr "insufficient"
-
-msgid "results security-level phase-out"
-msgstr "at risk"
-
-msgid "results security-level sufficient"
-msgstr "sufficient"
-
-msgid "results security-level good"
-msgstr "good"
 
 msgid "test connipv6 failed description"
 msgstr ""
