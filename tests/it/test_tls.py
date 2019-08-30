@@ -414,6 +414,21 @@ ncsc_20_tests = [
             ]
         }),
 
+    # This domain uses DH parameters that tripped a bug in Internet.NL because
+    # it expected the generator to be a small integer value reported by NaSSL
+    # as "2 (0x2)" but in fact NaSSL reports this long generator value as
+    # "0x...", which being base 16 broke the base 10 string to int conversion.
+    DomainConfig('NCSC20'
+        '-Table1:TLS12'
+        '-BUG:LongGenerator',
+        'tls12onlydhlongg.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.TLS_KEY_EXCHANGE: [
+                ['DH-1024'],
+                ['DH-1024'],
+            ]
+        }),
+
     DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table1:TLS13'

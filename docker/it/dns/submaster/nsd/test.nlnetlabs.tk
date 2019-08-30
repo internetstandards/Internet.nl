@@ -45,6 +45,8 @@ tls12onlyffdhe3072                                                IN  A      {{T
 tls12onlyffdhe3072                                                IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffother                                                  IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffother                                                  IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
+tls12onlydhlongg                                                  IN  A      {{TARGET_TLS12ONLY_IP}}
+tls12onlydhlongg                                                  IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlylegacybadciphers                                         IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
 tls12onlylegacybadciphers                                         IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
 tls12onlymodernbadciphers                                         IN  A      {{TARGET_TLS12ONLYMODERNBADCIPHERS_IP}}
@@ -169,6 +171,7 @@ _443._tcp.tls12only                                               IN  TLSA   3 1
 _443._tcp.tls12onlyffdhe3072                                      IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyffdhe2048                                      IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyffother                                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlydhlongg                                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlylegacybadciphers                               IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlymodernbadciphers                               IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlylegacyphaseoutciphers                          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
