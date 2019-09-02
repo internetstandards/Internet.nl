@@ -40,7 +40,7 @@ def pytest_html_results_table_header(session, cells):
 # invocation. Depends on '_score' and '_subresults' attributes being created
 # by the pytest_runtest_makereport() hook below.
 def pytest_html_results_table_row(report, cells):
-    if hasattr(report, '_score'):
+    if hasattr(report, '_score') and report._score:
         subresult_html = []
         score = report._score[0]
 
