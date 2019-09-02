@@ -223,7 +223,7 @@ class UX:
     def wait_for_test_to_start(selenium, domain):
         # Wait for the test to start or the result page to show
         # Both contain the domain under test in the HTML page title
-        WebDriverWait(selenium, 180).until(
+        WebDriverWait(selenium, 10).until(
             EC.title_contains('{}'.format(domain)))
 
     # Will raise TimeoutException on failure
