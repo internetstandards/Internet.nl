@@ -40,6 +40,15 @@ def pytest_html_results_table_header(session, cells):
 # invocation. Depends on '_score' and '_subresults' attributes being created
 # by the pytest_runtest_makereport() hook below.
 def pytest_html_results_table_row(report, cells):
+    def br_join(items):
+        if items:
+            # create [(a, br), (b, br)] from [a, b]
+            item_br_tuples = [(item, html.br()) for item in items]
+            # flatten [(a, br), (b, br)] to [a, br, b, br]
+            return [item for sublist in item_br_tuples for item in sublist]
+        else:
+            return 'None'
+
     if hasattr(report, '_score') and report._score:
         subresult_html = []
         score = report._score[0]
@@ -61,8 +70,8 @@ def pytest_html_results_table_row(report, cells):
         cells[1] = html.td(report._fqdn)
         cells.insert(2, html.td(score))
         cells.insert(3, html.td(subresult_html, style='font_family:monospace'))
-        cells.insert(4, html.td(report._failures or 'None'))
-        cells.insert(5, html.td(report._warnings or 'None'))
+        cells.insert(4, html.td(br_join(report._failures)))
+        cells.insert(5, html.td(br_join(report._warnings)))
 
 
 def pytest_html_results_table_html(report, data):
