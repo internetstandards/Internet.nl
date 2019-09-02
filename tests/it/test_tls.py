@@ -703,12 +703,17 @@ def run_assessment(selenium, domain_config, lang, mail=False, base_urls=None, re
     compare_mode = True if len(base_urls) > 1 else False
 
     if request:
+        request.node._batch = True
         request.node._fqdn = domain_config.domain
         request.node._score = list()
         request.node._subresults = list()
+        request.node._failures = list()
+        request.node._warnings = list()
+
+    if len(base_urls) > 2:
+        raise NotImplementedError()
 
     total_score = 0
-    # We don't actually support more than two base URLs...
     for idx, this_base_url in enumerate(base_urls):
         print(f"Assessing using instance: {this_base_url}")
         UX.submit_website_test_form(selenium, domain_config.domain, lang, mail, base_url=this_base_url)
@@ -773,8 +778,8 @@ def run_assessment(selenium, domain_config, lang, mail=False, base_urls=None, re
                     assert score_as_percentage_str == domain_config.expected_score
 
     if compare_mode:
-        assert total_score == (100 * len(base_urls))
- 
+        assert total_score == 200
+
 
 def iana_cipher_to_target_server_fqdn(group, iana_cipher):
     ssl_version = iana_cipher[0]

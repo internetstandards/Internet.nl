@@ -36,46 +36,56 @@ def pytest_html_results_table_header(session, cells):
         cells.insert(5, html.th('New Warnings', class_='sortable'))
 
 
+def br_join(iterable):
+    # create [(a, br), (b, br)] from [a, b] and also handle the None case 
+    item_br_tuples = [(item, html.br()) for item in iterable or list()]
+    # flatten [(a, br), (b, br)] to [a, br, b, br]
+    joined = [item for sublist in item_br_tuples for item in sublist]
+    # discard final br, if any
+    joined and joined.pop()
+    return joined
+
+
+# ensure we have some text in the case of an empty list so that sortable JS
+# doesn't fall over on the empty cell.
+def sortsafe(cell_content):
+    return cell_content if cell_content else 'None'
+
+
 # pytest-html hook to manipulate the HTML report table rows, one test/row per
 # invocation. Depends on '_score' and '_subresults' attributes being created
 # by the pytest_runtest_makereport() hook below.
 def pytest_html_results_table_row(report, cells):
-    def br_join(items):
-        if items:
-            # create [(a, br), (b, br)] from [a, b]
-            item_br_tuples = [(item, html.br()) for item in items]
-            # flatten [(a, br), (b, br)] to [a, br, b, br]
-            return [item for sublist in item_br_tuples for item in sublist]
-        else:
-            return 'None'
-
-    if hasattr(report, '_score') and report._score:
+    if hasattr(report, '_batch') and report._batch:
+        score = "-0"  # unable to resovle the domain
         subresult_html = []
-        score = report._score[0]
 
-        for k in sorted(report._subresults[0].keys()):
-            subresult_html.append(make_result_square(k, report._subresults[0][k]))
-        subresult_html.append(html.span(f'{report._reference}', style='padding-left: 5px'))
+        if report._score:
+            score = report._score[0]
 
-        if len(report._subresults) > 1:
-            subresult_html.append(html.br())
             for k in sorted(report._subresults[0].keys()):
-                result = report._subresults[1].pop(k)
-                subresult_html.append(make_result_square(k, result))
-            for k in sorted(report._subresults[1].keys()):
-                subresult_html.append(make_result_square(k, report._subresults[1][k]))
-            subresult_html.append(html.span(f'{report._demo}', style='padding-left: 5px'))
-            score = report._score[1] - score
+                subresult_html.append(make_result_square(k, report._subresults[0][k]))
+            subresult_html.append(html.span(f'{report._reference}', style='padding-left: 5px'))
 
-        cells[1] = html.td(report._fqdn)
-        cells.insert(2, html.td(score))
-        cells.insert(3, html.td(subresult_html, style='font_family:monospace'))
-        cells.insert(4, html.td(br_join(report._failures)))
-        cells.insert(5, html.td(br_join(report._warnings)))
+            if len(report._subresults) > 1:
+                subresult_html.append(html.br())
+                for k in sorted(report._subresults[0].keys()):
+                    result = report._subresults[1].pop(k)
+                    subresult_html.append(make_result_square(k, result))
+                for k in sorted(report._subresults[1].keys()):
+                    subresult_html.append(make_result_square(k, report._subresults[1][k]))
+                subresult_html.append(html.span(f'{report._demo}', style='padding-left: 5px'))
+                score = report._score[1] - score
+
+        cells[1] = html.td(sortsafe(report._fqdn))
+        cells.insert(2, html.td(sortsafe(score)))
+        cells.insert(3, html.td(sortsafe(subresult_html, style='font_family:monospace')))
+        cells.insert(4, html.td(sortsafe(br_join(report._failures))))
+        cells.insert(5, html.td(sortsafe(br_join(report._warnings))))
 
 
 def pytest_html_results_table_html(report, data):
-    if hasattr(report, '_score') and report._score:
+    if hasattr(report, '_batch') and report.batch:
         # Remove the embedded screenshot preview in the result details row to
         # speed up page load time for large (batch-like) reports.
         del data[0]
@@ -86,9 +96,10 @@ def pytest_html_results_table_html(report, data):
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
-    if hasattr(item, '_score'):
+    if hasattr(item, '_batch') and item._batch:
         report = outcome.get_result()
-        report._fqdn  = getattr(item, '_fqdn', None)
+        report._batch = True
+        report._fqdn = getattr(item, '_fqdn', None)
         report._score = getattr(item, '_score', [0])
         report._subresults = getattr(item, '_subresults', [None])
         report._failures = getattr(item, '_failures', set())
