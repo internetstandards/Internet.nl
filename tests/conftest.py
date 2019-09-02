@@ -28,9 +28,9 @@ def make_result_square(subtest_name, result):
 def pytest_html_results_table_header(session, cells):
     if session.config.getoption("--batch-input-file", None):
         (reference, demo) = session.config.getoption("--batch-base-names").split(',')
-        cells[0] = html.th('Result', title=f'Passed if the test results for this domain in both the {reference} and {demo} instances is 100%, Failed otherwise.')
-        cells[1] = html.th('Domain')
-        cells.insert(2, html.th('Delta Score (%)', class_='sortable score numeric', col='_score', title=f'The difference between the {reference} score and the {demo} score for this domain'))
+        cells[0] = html.th('Result', class_='sortable result initial-sort asc active' title=f'Passed if the test results for this domain in both the {reference} and {demo} instances is 100%, Failed otherwise.')
+        cells[1] = html.th('Domain', class_='sortable domain', col='domain')
+        cells.insert(2, html.th('Delta Score (%)', class_='sortable score numeric', col='score', title=f'The difference between the {reference} score and the {demo} score for this domain'))
         cells.insert(3, html.th('Subtest Results (hover for details)'))
         cells.insert(4, html.th('New Failures'))
         cells.insert(5, html.th('New Warnings'))
