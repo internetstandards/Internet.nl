@@ -872,8 +872,17 @@ def test_mail(selenium, domain_config):
 
 
 # 'parametrized' by conftest.py::pytest_generate_tests()
-def test_batch_domain(request, selenium, batch_base_urls, batch_domain):
+def test_batch_web_domains(request, selenium, batch_base_urls, batch_domain):
     assess_website(
+        selenium,
+        GoodDomain('batch_domain', batch_domain),
+        base_urls=batch_base_urls,
+        request=request)
+
+
+# 'parametrized' by conftest.py::pytest_generate_tests()
+def test_batch_mail_domains(request, selenium, batch_base_urls, batch_domain):
+    assess_mail_servers(
         selenium,
         GoodDomain('batch_domain', batch_domain),
         base_urls=batch_base_urls,
