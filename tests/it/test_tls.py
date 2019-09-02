@@ -1,9 +1,11 @@
 import pytest
 import re
+import time
 from helpers import DomainConfig, GoodDomain, BadDomain
 from helpers import domainconfig_id_generator, TESTS, UX
 from helpers import IMPERFECT_SCORE, PERFECT_SCORE
 from helpers import PHASE_OUT_TEXT, PHASE_OUT_TEXT_NL, ANY
+from selenium.common.exceptions import ElementNotInteractableException
 
 
 # TODO: Refactor cipher tests to explicitly test for the expected ciphers in
@@ -680,15 +682,15 @@ def check_table(selenium, expectation):
             assert not must_contain_mode, f"Result table of test '{test_title}' has no rows that match '{expected_col}'"
 
 
-def assess_website(selenium, domain_config, lang='en', base_url=None, check_content=True, request=None):
-    run_assessment(selenium, domain_config, lang, mail=False, base_url=base_url, check_content=check_content, request=request)
+def assess_website(selenium, domain_config, lang='en', base_urls=None, request=None):
+    run_assessment(selenium, domain_config, lang, mail=False, base_urls=base_urls, request=request)
 
 
-def assess_mail_servers(selenium, domain_config, lang='en', base_url=None, check_content=True, request=None):
-    run_assessment(selenium, domain_config, lang, mail=True, base_url=base_url, check_content=check_content, request=request)
+def assess_mail_servers(selenium, domain_config, lang='en', base_urls=None, request=None):
+    run_assessment(selenium, domain_config, lang, mail=True, base_urls=base_urls, request=request)
 
 
-def run_assessment(selenium, domain_config, lang, mail=False, base_url=None, check_content=True, request=None):
+def run_assessment(selenium, domain_config, lang, mail=False, base_urls=None, request=None):
     # Make it clear in the pytest output which website we were connecting to,
     # because when the domain is invalid the test output only shows the
     # /test-site/?invalid URL, not the URL of the site requested to be tested.
@@ -697,48 +699,82 @@ def run_assessment(selenium, domain_config, lang, mail=False, base_url=None, che
     else:
         print(f"Assessing website '{domain_config.domain}' in language '{lang}'")
 
-    UX.submit_website_test_form(selenium, domain_config.domain, lang, mail, base_url=base_url)
-    UX.wait_for_test_to_start(selenium, domain_config.domain)
-    UX.wait_for_test_to_complete(selenium)
-    UX.open_report_detail_sections(selenium)
-
-    failed_tests = UX.get_failed_tests(selenium)
-    warning_tests = UX.get_warning_tests(selenium)
-    info_tests = UX.get_info_tests(selenium)
-    nottested_tests = UX.get_nottested_tests(selenium)
-    passed_tests = UX.get_passed_tests(selenium)
-
-    score_as_percentage_str = UX.get_score(selenium)
-    score_as_int = int(score_as_percentage_str.strip('%'))
+    base_urls = base_urls if base_urls else [None]
+    compare_mode = True if len(base_urls) > 1 else False
 
     if request:
-        subresults = dict()
-        subresults.update({k: 'x' for k in failed_tests})
-        subresults.update({k: '!' for k in warning_tests})
-        subresults.update({k: '.' for k in info_tests})
-        subresults.update({k: '_' for k in nottested_tests})
-        subresults.update({k: '/' for k in passed_tests})
-        request.node._score = score_as_int
-        request.node._subresults = subresults
+        request.node._fqdn = domain_config.domain
+        request.node._score = list()
+        request.node._subresults = list()
 
-    if check_content:
-        assert (failed_tests == set(domain_config.expected_failures.keys()))
-        assert (warning_tests == set(domain_config.expected_warnings.keys()))
-        assert (info_tests == set(domain_config.expected_info.keys()))
-        assert (nottested_tests == set(domain_config.expected_not_tested.keys()))
+    total_score = 0
+    # We don't actually support more than two base URLs...
+    for idx, this_base_url in enumerate(base_urls):
+        print(f"Assessing using instance: {this_base_url}")
+        UX.submit_website_test_form(selenium, domain_config.domain, lang, mail, base_url=this_base_url)
+        UX.wait_for_test_to_start(selenium, domain_config.domain)
+        UX.wait_for_test_to_complete(selenium)
+        while True:
+            try:
+                UX.open_report_detail_sections(selenium)
+                break
+            except ElementNotInteractableException:
+                print('UX not ready, waiting...')
+                time.sleep(1)
 
-    check_table(selenium, domain_config.expected_failures)
-    check_table(selenium, domain_config.expected_not_tested)
-    check_table(selenium, domain_config.expected_info)
-    check_table(selenium, domain_config.expected_warnings)
-    check_table(selenium, domain_config.expected_passes)
+        failed_tests = UX.get_failed_tests(selenium)
+        warning_tests = UX.get_warning_tests(selenium)
+        info_tests = UX.get_info_tests(selenium)
+        nottested_tests = UX.get_nottested_tests(selenium)
+        passed_tests = UX.get_passed_tests(selenium)
 
-    if domain_config.expected_score:
-        if domain_config.expected_score == IMPERFECT_SCORE:
-            assert score_as_int > 0 and score_as_int < 100
+        score_as_percentage_str = UX.get_score(selenium)
+        score_as_int = int(score_as_percentage_str.strip('%'))
+
+        if request:
+            subresults = dict()
+            subresults.update({k: 'x' for k in failed_tests})
+            subresults.update({k: '!' for k in warning_tests})
+            subresults.update({k: '.' for k in info_tests})
+            subresults.update({k: '_' for k in nottested_tests})
+            subresults.update({k: '/' for k in passed_tests})
+            request.node._score.append(score_as_int)
+            request.node._subresults.append(subresults)
+
+        if compare_mode:
+            total_score += score_as_int
+            if request:
+                if idx == 0:
+                    last_failed_tests = failed_tests
+                    last_warning_tests = warning_tests
+                elif idx == 1:
+                    request.node._failures = sorted(set(failed_tests) - set(last_failed_tests))
+                    request.node._warnings = sorted(set(warning_tests) - set(last_warning_tests))
         else:
-            assert score_as_percentage_str == domain_config.expected_score
+            if request:
+                request.node._failures = failed_tests
+                request.node._warnings = warning_tests
 
+            assert (failed_tests == set(domain_config.expected_failures.keys()))
+            assert (warning_tests == set(domain_config.expected_warnings.keys()))
+            assert (info_tests == set(domain_config.expected_info.keys()))
+            assert (nottested_tests == set(domain_config.expected_not_tested.keys()))
+
+            check_table(selenium, domain_config.expected_failures)
+            check_table(selenium, domain_config.expected_not_tested)
+            check_table(selenium, domain_config.expected_info)
+            check_table(selenium, domain_config.expected_warnings)
+            check_table(selenium, domain_config.expected_passes)
+
+            if domain_config.expected_score:
+                if domain_config.expected_score == IMPERFECT_SCORE:
+                    assert score_as_int > 0 and score_as_int < 100
+                else:
+                    assert score_as_percentage_str == domain_config.expected_score
+
+    if compare_mode:
+        assert total_score == (100 * len(base_urls))
+ 
 
 def iana_cipher_to_target_server_fqdn(group, iana_cipher):
     ssl_version = iana_cipher[0]
@@ -836,10 +872,9 @@ def test_mail(selenium, domain_config):
 
 
 # 'parametrized' by conftest.py::pytest_generate_tests()
-def test_batch_domain(request, selenium, batch_base_url, batch_domain):
+def test_batch_domain(request, selenium, batch_base_urls, batch_domain):
     assess_website(
         selenium,
         GoodDomain('batch_domain', batch_domain),
-        base_url=batch_base_url,
-        check_content=False,
+        base_urls=batch_base_urls,
         request=request)

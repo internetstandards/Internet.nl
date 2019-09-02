@@ -25,24 +25,44 @@ def make_result_square(subtest_name, result):
 
 
 # pytest-html hook to manipulate the HTML report table header
-def pytest_html_results_table_header(cells):
-    cells.insert(2, html.th('Score (%)', class_='sortable score numeric', col='score'))
-    cells.insert(3, html.th('Subtest Results (hover for details)'))
+def pytest_html_results_table_header(session, cells):
+    if session.config.getoption("--batch-input-file", None):
+        (reference, demo) = session.config.getoption("--batch-base-names").split(',')
+        cells[0] = html.th('Result', title=f'Passed if the test results for this domain in both the {reference} and {demo} instances is 100%, Failed otherwise.')
+        cells[1] = html.th('Domain')
+        cells.insert(2, html.th('Delta Score (%)', class_='sortable score numeric', col='_score', title=f'The difference between the {reference} score and the {demo} score for this domain'))
+        cells.insert(3, html.th('Subtest Results (hover for details)'))
+        cells.insert(4, html.th('New Failures'))
+        cells.insert(5, html.th('New Warnings'))
 
 
 # pytest-html hook to manipulate the HTML report table rows, one test/row per
 # invocation. Depends on '_score' and '_subresults' attributes being created
 # by the pytest_runtest_makereport() hook below.
 def pytest_html_results_table_row(report, cells):
-    if not hasattr(report, '_score'):
-        cells.insert(2, html.td('-', ))
-        cells.insert(3, html.td('-'))
-    else:
+    if hasattr(report, '_score'):
         subresult_html = []
-        for k in sorted(report._subresults.keys()):
-            subresult_html.append(make_result_square(k, report._subresults[k]))
-        cells.insert(2, html.td(report._score))
+        score = report._score[0]
+
+        for k in sorted(report._subresults[0].keys()):
+            subresult_html.append(make_result_square(k, report._subresults[0][k]))
+        subresult_html.append(html.span(f'{report._reference}', style='padding-left: 5px'))
+
+        if len(report._subresults) > 1:
+            subresult_html.append(html.br())
+            for k in sorted(report._subresults[0].keys()):
+                result = report._subresults[1].pop(k)
+                subresult_html.append(make_result_square(k, result))
+            for k in sorted(report._subresults[1].keys()):
+                subresult_html.append(make_result_square(k, report._subresults[1][k]))
+            subresult_html.append(html.span(f'{report._demo}', style='padding-left: 5px'))
+            score = report._score[1] - score
+
+        cells[1] = html.td(report._fqdn)
+        cells.insert(2, html.td(score))
         cells.insert(3, html.td(subresult_html, style='font_family:monospace'))
+        cells.insert(4, html.td([html.li(item) for item in report._failures]))
+        cells.insert(5, html.td([html.li(item) for item in report._warnings]))
 
 
 # pytest hook invoked after each test. If the test added a '_score' attribute
@@ -52,8 +72,13 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     if hasattr(item, '_score'):
         report = outcome.get_result()
-        report._score = getattr(item, '_score', 0)
-        report._subresults = getattr(item, '_subresults', 0)
+        report._fqdn  = getattr(item, '_fqdn', None)
+        report._score = getattr(item, '_score', [0])
+        report._subresults = getattr(item, '_subresults', [None])
+        report._failures = getattr(item, '_failures', set())
+        report._warnings = getattr(item, '_warnings', set())
+        (report._reference, report._demo) = item.config.getoption("--batch-base-names").split(',')
+
 # -----------------------------------------------------------------------------
 # END: add two custom columns to the HTML report created by pytest-html.
 # -----------------------------------------------------------------------------
@@ -79,14 +104,18 @@ def pytest_addoption(parser):
         help="path to a text file containing one domain per line"
     )
     parser.addoption(
-        "--batch-base-url", action="store", default=None,
-        help="Base URL of the Internet.NL instance to test"
+        "--batch-base-urls", action="store", default=None,
+        help="Comma separated base URLs of the Internet.NL instances to test"
+    )
+    parser.addoption(
+        "--batch-base-names", action="store", default="reference,demo",
+        help="Comma separated friendly names of the Internet.NL instances to test"
     )
 
 
 @pytest.fixture
-def batch_base_url(request):
-    return request.config.getoption("--batch-base-url")
+def batch_base_urls(request):
+    return request.config.getoption("--batch-base-urls").split(',')
 
 
 # helper method used by pytest_generate_tests() below.

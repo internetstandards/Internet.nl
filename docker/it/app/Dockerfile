@@ -32,6 +32,7 @@ RUN sudo -H pip install --upgrade pip && \
     sudo -H pip install \
         coverage \
         coverage-enable-subprocess \
+        git+https://github.com/ximon18/pytest-html.git@dynamic-result-table-header#egg=pytest-html \
         pytest-xdist \
         pytest-progress \
         pytest-selenium \
