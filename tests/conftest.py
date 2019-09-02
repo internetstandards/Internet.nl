@@ -65,6 +65,12 @@ def pytest_html_results_table_row(report, cells):
         cells.insert(5, html.td(report._warnings or 'None'))
 
 
+def pytest_html_results_table_html(report, data):
+    if hasattr(report, '_score') and report._score:
+        # Remove the embedded screenshot preview in the result details row to
+        # speed up page load time for large (batch-like) reports.
+        del data[0]
+
 
 # pytest hook invoked after each test. If the test added a '_score' attribute
 # pass it on so that the pytest-html hooks above can access it.
