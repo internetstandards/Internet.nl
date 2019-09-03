@@ -689,6 +689,5 @@ smtpd_tls_key_file = /etc/ssl/private/wildcard.test.nlnetlabs.tk.key
 smtpd_tls_security_level = may
 maillog_file = /var/log/postfix
 smtpd_tls_loglevel = 2
-inet_protocols = all
 debug_peer_list = cidr:/etc/postfix-debug.cidrs
 debug_peer_level = 4

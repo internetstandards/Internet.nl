@@ -120,6 +120,12 @@ tls12onlyPHASEOUTTLSECDHEECDSAWITH3DESEDECBCSHA.ec                IN  AAAA   {{T
 tls1213                                                           IN  A      {{TARGET_TLS1213_IP}}
 tls1213                                                           IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213ipv4only                                                   IN  A      {{TARGET_TLS1213_IP}}
+tls1213ipv4only                                                   IN  AAAA   {{TARGET_TLS1213_IPV6}}
+tls1213ipv4only                                                   IN  MX     10   tls1213ipv4only
+tls1213ipv4only                                                   IN  TXT    "v=spf1 mx -all"
+tls1213ipv4onlynoipv6                                             IN  A      {{TARGET_TLS1213_IP}}
+tls1213ipv4onlynoipv6                                             IN  MX     10   tls1213ipv4onlynoipv6
+tls1213ipv4onlynoipv6                                             IN  TXT    "v=spf1 mx -all"
 tls1213sni                                                        IN  A      {{TARGET_TLS1213_IP}}
 tls1213sni                                                        IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213nohsts                                                     IN  A      {{TARGET_TLS1213_IP}}
@@ -139,6 +145,7 @@ tls1213tlscompression                                             IN  AAAA   {{T
 tls13only                                                         IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only                                                         IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
 tls13only                                                         IN  MX     10   tls13only
+tls13only                                                         IN  TXT    "v=spf1 mx -all"
 tls13onlydiffipv4ipv6                                             IN  A      {{TARGET_TLS13ONLYDIFFIPV4IPV6_IP}}
 tls13onlydiffipv4ipv6                                             IN  AAAA   {{TARGET_TLS13ONLYDIFFIPV4IPV6_IPV6}}
 tls13onlyhonorclientcipherorder                                   IN  A      {{TARGET_TLS13ONLYCLIENTCIPHERORDER_IP}}
@@ -146,6 +153,7 @@ tls13onlyhonorclientcipherorder                                   IN  AAAA   {{T
 tls130rtt                                                         IN  A      {{TARGET_TLS130RTT_IP}}
 tls130rtt                                                         IN  AAAA   {{TARGET_TLS130RTT_IPV6}}
 tls130rtt                                                         IN  MX     10   tls130rtt
+tls130rtt                                                         IN  TXT    "v=spf1 mx -all"
 tls13invalidocsp                                                  IN  A      {{TARGET_TLS13INVALIDOCSP_IP}}
 tls13invalidocsp                                                  IN  AAAA   {{TARGET_TLS13INVALIDOCSP_IPV6}}
 
@@ -202,6 +210,7 @@ _443._tcp.tls12onlyPHASEOUTTLSECDHERSAWITH3DESEDECBCSHA           IN  TLSA   3 1
 _443._tcp.tls12onlyPHASEOUTTLSECDHEECDSAWITH3DESEDECBCSHA.ec      IN  TLSA   3 1 1 cf6269375d3d09fdaa907773161d7edbe077fc32c66c8dd9fe7ebe8236158687
 _443._tcp.tls1213                                                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213ipv4only                                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213ipv4onlynoipv6                                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213sni                                              IN  TLSA   3 1 1 8d0b8af3cfe3dc53375b632b65b1f8864c7afbea15a85622f7a8aa1386d2048d
 _443._tcp.tls1213nohsts                                           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213shorthsts                                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
@@ -222,8 +231,16 @@ _443._tcp.tls130rtt                                               IN  TLSA   3 1
 _443._tcp.tls13invalidocsp                                        IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 
 _25._tcp.tls12only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_25._tcp.tls1213ipv4only.test.nlnetlabs.tk.                       IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_25._tcp.tls1213ipv4onlynoipv6.test.nlnetlabs.tk.                 IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_25._tcp.tls13only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_25._tcp.tls130rtt.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 
 _dmarc.tls12only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12only.test.nlnetlabs.tk"
+_dmarc.tls1213ipv4only                                            IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls1213ipv4only.test.nlnetlabs.tk"
+_dmarc.tls1213ipv4onlynoipv6                                      IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls1213ipv4onlynoipv6.test.nlnetlabs.tk"
+_dmarc.tls13only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13only.test.nlnetlabs.tk"
+_dmarc.tls130rtt                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls130rtt.test.nlnetlabs.tk"
 
 ; Created using https://dkimcore.org
 1566421634.nlnetlabs._domainkey.tls12only.test.nlnetlabs.tk. IN TXT (
@@ -231,3 +248,23 @@ _dmarc.tls12only                                                  IN  TXT    "v=
         "U6HRa8eTli7987Chweph5k8HSB3HOoaOYbpec3WYdqjTLIEiOnGXyu5ai5+BePbp"
         "YALesZgfWsSLCKjFH5tDVwJwKPciT5Jk4b7Fi6ZPLFESQeW4UAre1y5iLCS+PHFw"
         "qcM7zmbgj4gNCvUPpwIDAQAB")
+1567509201.nlnetlabs._domainkey.tls1213ipv4only.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDR+RSx8IjCS6lduw2HG5tHP7M/"
+        "MnJCcjidYi1S1iqj6aKz+WpfOTb9iPMf5frXR0PKrYO67YIBzWzmxN1RbzSZp6K8"
+        "X4aX/pvEiO5j8sicMF+/pUKK2bKFcCXrK+9loHYdqzyj3Jzk2XEyZWqM8nmtcLhH"
+        "+gT8tfQX5GZkMOW1NwIDAQAB")
+1567509387.nlnetlabs._domainkey.tls1213ipv4onlynoipv6.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCnnIM/ql1Gy/Y6649r9CH5J8Y2"
+        "rfI0DrxznZKzaNVYmqrQ2BJKDPh6/CLfq+hCUINK9bxna7e2HGv+wKGfbAa0TBr9"
+        "NwZPIG9xsqseMuIWYYY8fetpBlJS74JU80Lb/sFDnIvXHADch+GtTEHkUoy2x3FR"
+        "zGUG7ogCwWKY4KvptQIDAQAB")
+1567510815.nlnetlabs._domainkey.tls13only.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2+CDIQ8Jgse1vNWQ+A1Cg5vhI"
+        "Cc2t/AQu7Q8qv1mciVti4wgPGz5ZXEb3TiwG69MwCeejw9g7eQVC6seYnUWXXlt8"
+        "uMLBPhep561g6NMY2CTv72wKA/fxMjEDFiFoSGc0Vr0RMSrIy842G6pMnW/vgMhR"
+        "7ZfxM2JrlG6Z5ExnsQIDAQAB")
+1567510865.nlnetlabs._domainkey.tls130rtt.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDe5VjYoHB1AH6HzLrwPyn5mflt"
+        "73S9mnyQVfIsOqC5ahIKlX31YQhBzLUPjbxRRGUoIzOZpynwhPkjqLqBzQy2srBs"
+        "ozmDfIkF4MVpYFTMZ6iu/ClfihZbWSlG8UirkILbDfZMUjRo5nGPpu6Qxz2A72Gs"
+        "OPNyukUdJhpcmcI6MwIDAQAB")

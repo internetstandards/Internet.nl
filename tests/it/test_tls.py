@@ -135,6 +135,20 @@ class PreTLS12DomainConfig(DomainConfig):
         self.expected_warnings.setdefault(test_id, ANY)
 
 
+class PostfixTLS12Config(DomainConfig):
+    def override_defaults(self):
+        self.expected_failures.setdefault(TESTS.TLS_KEY_EXCHANGE, ANY)
+        self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
+        self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
+
+
+class PostfixTLS13Config(DomainConfig):
+    def override_defaults(self):
+        self.expected_failures.setdefault(TESTS.TLS_CIPHER_ORDER, ANY)
+        self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
+        self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
+
+
 # Tests specifically intended to show that Internet.NL tests for compliance
 # with the NCSC 2.0 guidelines.
 ncsc_20_tests = [
@@ -517,9 +531,20 @@ other_tests = [
             ]
         }),
 
-    # This domain deliberately lacks an IPV6 AAAA record in DNS
+    # This domain deliberately has no server listening on ipv6
     DomainConfig('IPV6:NONE',
         'tls1213ipv4only.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.IPV6_WEB_ADDRESS
+        },
+        expected_not_tested={
+            TESTS.IPV6_WEB_REACHABILITY,
+            TESTS.IPV6_WEB_SAME_WEBSITE
+        }),
+
+    # This domain deliberately lacks an IPV6 AAAA record in DNS
+    DomainConfig('IPV6:NONE',
+        'tls1213ipv4onlynoipv6.test.nlnetlabs.tk',
         expected_failures={
             TESTS.IPV6_WEB_ADDRESS
         },
@@ -605,29 +630,32 @@ ncsc_20_phaseout_ciphers = [
 
 
 mail_tests = [
-    DomainConfig(
+    PostfixTLS12Config(
         'mail test', 'tls12only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CLIENT_RENEG
-        },
+        }),
+
+    PostfixTLS12Config(
+        'mail', 'tls1213ipv4only.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.TLS_KEY_EXCHANGE
+            TESTS.IPV6_MAIL_REACHABILITY
+        }),
+
+    PostfixTLS12Config(
+        'mail', 'tls1213ipv4onlynoipv6.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.IPV6_MAIL_ADDRESS,
         },
-        expected_info={
-            TESTS.TLS_OCSP_STAPLING: [
-                ['no']
-            ],
-            TESTS.DANE_ROLLOVER_SCHEME: ANY
-        }
-    ),
+        expected_not_tested={
+            TESTS.IPV6_MAIL_REACHABILITY
+        }),
 
-    pytest.param(DomainConfig(
+    PostfixTLS13Config(
         'mail test', 'tls13only.test.nlnetlabs.tk'),
-        marks=pytest.mark.xfail),
 
-    pytest.param(DomainConfig(
+    PostfixTLS13Config(
         'mail test', 'tls130rtt.test.nlnetlabs.tk'),
-        marks=pytest.mark.xfail),
 ]
 
 

@@ -451,6 +451,8 @@ services:
     environment:
       - APACHE_SITES=http-with-ssl-redirect tls1213
       - APACHE_MODULES=ssl
+      - POSTFIX_VERSION=custom-modern
+      - POSTFIX_CONFIG=tls1213ipv4only
 
   # To sanity check, exec on this container:
   #   $ echo | LD_LIBRARY_PATH=/opt/openssl-modern/lib /opt/openssl-modern/bin/openssl s_client -comp -tls1_2 -connect localhost:443 2>&1 | fgrep Compression

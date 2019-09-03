@@ -1,1 +1,2 @@
+inet_protocols = all
 smtpd_tls_protocols = TLSv1.3
