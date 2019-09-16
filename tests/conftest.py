@@ -11,6 +11,7 @@ subresult_mappings = {
     '.': ('info', 'blue'),
     '_': ('not tested', 'grey'),
     '/': ('passed', 'green'),
+    None: {'missing', 'white' },
 }
 
 
@@ -70,7 +71,10 @@ def pytest_html_results_table_row(report, cells):
             if len(report._subresults) > 1:
                 subresult_html.append(html.br())
                 for k in sorted(report._subresults[0].keys()):
-                    result = report._subresults[1].pop(k)
+                    if k in report._subresults[1]:
+                        result = report._subresults[1].pop(k)
+                    else:
+                        result = None
                     subresult_html.append(make_result_square(k, result))
                 for k in sorted(report._subresults[1].keys()):
                     subresult_html.append(make_result_square(k, report._subresults[1][k]))
@@ -79,13 +83,13 @@ def pytest_html_results_table_row(report, cells):
 
         cells[1] = html.td(sortsafe(report._fqdn))
         cells.insert(2, html.td(sortsafe(score)))
-        cells.insert(3, html.td(sortsafe(subresult_html, style='font_family:monospace')))
+        cells.insert(3, html.td(sortsafe(subresult_html), style='font_family:monospace'))
         cells.insert(4, html.td(sortsafe(br_join(report._failures))))
         cells.insert(5, html.td(sortsafe(br_join(report._warnings))))
 
 
 def pytest_html_results_table_html(report, data):
-    if hasattr(report, '_batch') and report.batch:
+    if hasattr(report, '_batch') and report._batch:
         # Remove the embedded screenshot preview in the result details row to
         # speed up page load time for large (batch-like) reports.
         del data[0]
