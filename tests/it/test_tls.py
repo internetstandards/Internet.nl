@@ -531,18 +531,18 @@ other_tests = [
 
     # This domain deliberately has no server listening on ipv6
     DomainConfig('IPV6:NONE',
-        'tls1213ipv4only.test.nlnetlabs.tk',
+        'tls13ipv4only.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.IPV6_WEB_ADDRESS
+            TESTS.IPV6_WEB_REACHABILITY,
+            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE
         },
         expected_not_tested={
-            TESTS.IPV6_WEB_REACHABILITY,
             TESTS.IPV6_WEB_SAME_WEBSITE
         }),
 
     # This domain deliberately lacks an IPV6 AAAA record in DNS
     DomainConfig('IPV6:NONE',
-        'tls1213ipv4onlynoipv6.test.nlnetlabs.tk',
+        'tls13ipv4onlynoipv6.test.nlnetlabs.tk',
         expected_failures={
             TESTS.IPV6_WEB_ADDRESS
         },
@@ -634,14 +634,14 @@ mail_tests = [
             TESTS.TLS_CLIENT_RENEG
         }),
 
-    PostfixTLS12Config(
-        'mail', 'tls1213ipv4only.test.nlnetlabs.tk',
+    PostfixTLS13Config(
+        'mail', 'tls13ipv4only.test.nlnetlabs.tk',
         expected_failures={
             TESTS.IPV6_MAIL_REACHABILITY
         }),
 
-    PostfixTLS12Config(
-        'mail', 'tls1213ipv4onlynoipv6.test.nlnetlabs.tk',
+    PostfixTLS13Config(
+        'mail', 'tls13ipv4onlynoipv6.test.nlnetlabs.tk',
         expected_failures={
             TESTS.IPV6_MAIL_ADDRESS,
         },
