@@ -329,6 +329,11 @@ FFDHE_SUFFICIENT_PRIMES = [
 # Useful on one-time errors on SMTP.
 MAX_TRIES = 3
 
+
+SEC_LEVEL_INSUFFICIENT = 'insufficient'
+SEC_LEVEL_PHASEOUT = 'phase-out'
+
+
 root_fingerprints = None
 with open(settings.CA_FINGERPRINTS) as f:
     root_fingerprints = f.read().splitlines()
@@ -632,10 +637,17 @@ def save_results(model, results, addr, domain, category):
 
 
 def build_report(dttls, category):
-    status_phase_out = (
-        INJECTED_TRANSLATION_START
-        + 'results security-level phase-out'
-        + INJECTED_TRANSLATION_END)
+    def annotate_with_sec_level(items, security_level):
+        translatable_annotation = (
+            INJECTED_TRANSLATION_START
+            + f'results security-level {security_level}'
+            + INJECTED_TRANSLATION_END)
+        
+        return [f'{item} ({translatable_annotation})' for item in items]
+
+    def annotate_and_combine(bad_items, phaseout_items):
+        return (annotate_with_sec_level(bad_items, 'insufficient') +
+                annotate_with_sec_level(phaseout_items, 'phase-out'))
 
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:
@@ -670,11 +682,7 @@ def build_report(dttls, category):
             if not dttls.dh_param and not dttls.ecdh_param:
                 category.subtests['fs_params'].result_no_dh_params()
             else:
-                fs_all = []
-                fs_all.extend(dttls.fs_bad)
-                fs_all.extend([
-                    '{prot} ({status})'.format(prot=fs, status=status_phase_out)
-                    for fs in dttls.fs_phase_out])
+                fs_all = annotate_and_combine(dttls.fs_bad, dttls.fs_phase_out)
                 if len(dttls.fs_bad) > 0:
                     category.subtests['fs_params'].result_bad(fs_all)
                 elif len(dttls.fs_phase_out) > 0:
@@ -682,11 +690,8 @@ def build_report(dttls, category):
                 else:
                     category.subtests['fs_params'].result_good()
 
-            ciphers_all = []
-            ciphers_all.extend(dttls.ciphers_bad)
-            ciphers_all.extend([
-                '{cipher} ({status})'.format(cipher=cipher, status=status_phase_out)
-                for cipher in dttls.ciphers_phase_out])
+            ciphers_all = annotate_and_combine(
+                dttls.ciphers_bad, dttls.ciphers_phase_out)
             if len(dttls.ciphers_bad) > 0:
                 category.subtests['tls_ciphers'].result_bad(ciphers_all)
             elif len(dttls.ciphers_phase_out) > 0:
@@ -699,15 +704,12 @@ def build_report(dttls, category):
             else:
                 category.subtests['tls_cipher_order'].result_bad()
 
-            prots = []
-            prots.extend(dttls.protocols_bad)
-            prots.extend([
-                '{prot} ({status})'.format(prot=prot, status=status_phase_out)
-                for prot in dttls.protocols_phase_out])
+            protocols_all = annotate_and_combine(
+                dttls.protocols_bad, dttls.protocols_phase_out)
             if len(dttls.protocols_bad) > 0:
-                category.subtests['tls_version'].result_bad(prots)
+                category.subtests['tls_version'].result_bad(protocols_all)
             elif len(dttls.protocols_phase_out) > 0:
-                category.subtests['tls_version'].result_phase_out(prots)
+                category.subtests['tls_version'].result_phase_out(protocols_all)
             else:
                 category.subtests['tls_version'].result_good()
 
@@ -734,15 +736,12 @@ def build_report(dttls, category):
             if dttls.cert_pubkey_score is None:
                 pass
             else:
-                pubkey_all = []
-                pubkey_all.extend(dttls.cert_pubkey_bad)
-                pubkey_all.extend([
-                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_phase_out)
-                    for pubkey in dttls.cert_pubkey_phase_out])
+                cert_pubkey_all = annotate_and_combine(
+                    dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
                 if len(dttls.cert_pubkey_bad) > 0:
-                    category.subtests['cert_pubkey'].result_bad(pubkey_all)
+                    category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
                 elif len(dttls.cert_pubkey_phase_out) > 0:
-                    category.subtests['cert_pubkey'].result_phase_out(pubkey_all)
+                    category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
                 else:
                     category.subtests['cert_pubkey'].result_good()
 
@@ -813,11 +812,8 @@ def build_report(dttls, category):
             if not dttls.dh_param and not dttls.ecdh_param:
                 category.subtests['fs_params'].result_no_dh_params()
             else:
-                fs_all = []
-                fs_all.extend(dttls.fs_bad)
-                fs_all.extend([
-                    '{prot} ({status})'.format(prot=fs, status=status_phase_out)
-                    for fs in dttls.fs_phase_out])
+                fs_all = annotate_and_combine(
+                    dttls.fs_bad, dttls.fs_phase_out)
                 if len(dttls.fs_bad) > 0:
                     category.subtests['fs_params'].result_bad(fs_all)
                 elif len(dttls.fs_phase_out) > 0:
@@ -825,11 +821,8 @@ def build_report(dttls, category):
                 else:
                     category.subtests['fs_params'].result_good()
 
-            ciphers_all = []
-            ciphers_all.extend(dttls.ciphers_bad)
-            ciphers_all.extend([
-                '{cipher} ({status})'.format(cipher=cipher, status=status_phase_out)
-                for cipher in dttls.ciphers_phase_out])
+            ciphers_all = annotate_and_combine(
+                dttls.ciphers_bad, dttls.ciphers_phase_out)
             if len(dttls.ciphers_bad) > 0:
                 category.subtests['tls_ciphers'].result_bad(ciphers_all)
             elif len(dttls.ciphers_phase_out) > 0:
@@ -842,15 +835,12 @@ def build_report(dttls, category):
             else:
                 category.subtests['tls_cipher_order'].result_bad()
 
-            prots = []
-            prots.extend(dttls.protocols_bad)
-            prots.extend([
-                '{prot} ({status})'.format(prot=prot, status=status_phase_out)
-                for prot in dttls.protocols_phase_out])
+            protocols_all = annotate_and_combine(
+                dttls.protocols_bad, dttls.protocols_phase_out)
             if len(dttls.protocols_bad) > 0:
-                category.subtests['tls_version'].result_bad(prots)
+                category.subtests['tls_version'].result_bad(protocols_all)
             elif len(dttls.protocols_phase_out) > 0:
-                category.subtests['tls_version'].result_phase_out(prots)
+                category.subtests['tls_version'].result_phase_out(protocols_all)
             else:
                 category.subtests['tls_version'].result_good()
 
@@ -877,15 +867,12 @@ def build_report(dttls, category):
             if dttls.cert_pubkey_score is None:
                 pass
             else:
-                pubkey_all = []
-                pubkey_all.extend(dttls.cert_pubkey_bad)
-                pubkey_all.extend([
-                    '{pubkey} ({status})'.format(pubkey=pubkey, status=status_phase_out)
-                    for pubkey in dttls.cert_pubkey_phase_out])
+                cert_pubkey_all = annotate_and_combine(
+                    dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
                 if len(dttls.cert_pubkey_bad) > 0:
-                    category.subtests['cert_pubkey'].result_bad(pubkey_all)
+                    category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
                 elif len(dttls.cert_pubkey_phase_out) > 0:
-                    category.subtests['cert_pubkey'].result_phase_out(pubkey_all)
+                    category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
                 else:
                     category.subtests['cert_pubkey'].result_good()
 

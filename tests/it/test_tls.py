@@ -4,7 +4,7 @@ import time
 from helpers import DomainConfig, GoodDomain, BadDomain
 from helpers import domainconfig_id_generator, TESTS, UX
 from helpers import IMPERFECT_SCORE, PERFECT_SCORE
-from helpers import PHASE_OUT_TEXT, PHASE_OUT_TEXT_NL, ANY
+from helpers import INSUFFICIENT_TEXT, PHASE_OUT_TEXT, PHASE_OUT_TEXT_NL, ANY
 from selenium.common.exceptions import ElementNotInteractableException
 
 
@@ -425,8 +425,7 @@ ncsc_20_tests = [
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_KEY_EXCHANGE: [
-                ['DH-4096'],
-                ['DH-4096'],
+                [MustMatch(fr'DH-4096 \({INSUFFICIENT_TEXT}\)')]
             ]
         }),
 
@@ -440,8 +439,7 @@ ncsc_20_tests = [
         'tls12onlydhlongg.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_KEY_EXCHANGE: [
-                ['DH-1024'],
-                ['DH-1024'],
+                [MustMatch(fr'DH-1024 \({INSUFFICIENT_TEXT}\)')]
             ]
         }),
 

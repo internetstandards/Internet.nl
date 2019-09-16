@@ -2951,16 +2951,16 @@ msgid "results score-description"
 msgstr "Het domein {{prettyaddr}} heeft een testscore van {{score}}%."
 
 msgid "results security-level good"
-msgstr "goed"
+msgstr "Goed"
 
 msgid "results security-level insufficient"
-msgstr "onvoldoende"
+msgstr "Onvoldoende"
 
 msgid "results security-level phase-out"
-msgstr "op risico"
+msgstr "Uit te faseren"
 
 msgid "results security-level sufficient"
-msgstr "voldoende"
+msgstr "Voldoende"
 
 msgid "results tech-details label"
 msgstr "Technische details:"
