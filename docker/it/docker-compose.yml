@@ -142,6 +142,7 @@ services:
       - HUB_HOST=selenium
       - NODE_MAX_INSTANCES=2
       - NODE_MAX_SESSION=1
+      - START_XVFB=false
 
   # Selenium Grid Hub: Browse to http://localhost:4444/grid/console
   selenium:
