@@ -1117,12 +1117,12 @@ class WebTlsHashFunc(Subtest):
         self.verdict = "detail web tls hash-func verdict good"
         self.tech_data = "detail tech data yes"
 
-    def result_phase_out(self):
+    def result_bad(self):
         self._status(STATUS_NOTICE)
         self.verdict = "detail web tls hash-func verdict phase-out"
         self.tech_data = "detail tech data no"
 
-    def result_no_hash_func(self):
+    def result_unknown(self):
         self._status(STATUS_INFO)
         self.verdict = "detail web tls hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"
@@ -1821,15 +1821,15 @@ class MailTlsHashFunc(Subtest):
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web tls hash-func verdict good"
+        self.verdict = "detail mail tls hash-func verdict good"
         self.tech_data = "detail tech data yes"
 
-    def result_phase_out(self):
+    def result_bad(self):
         self._status(STATUS_NOTICE)
-        self.verdict = "detail web tls hash-func verdict phase-out"
+        self.verdict = "detail mail tls hash-func verdict phase-out"
         self.tech_data = "detail tech data no"
 
-    def result_no_hash_func(self):
+    def result_unknown(self):
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"

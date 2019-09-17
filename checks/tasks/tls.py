@@ -44,7 +44,7 @@ from .shared import HTTPSConnection
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
+from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus, HashFuncStatus
 from ..templatetags.translate import INJECTED_TRANSLATION_START
 from ..templatetags.translate import INJECTED_TRANSLATION_END
 
@@ -794,12 +794,12 @@ def build_report(dttls, category):
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests['ocsp_stapling'].result_ok()
 
-            if dttls.hash_func:
+            if dttls.hash_func == HashFuncStatus.good:
                 category.subtests['hash_func'].result_good()
-            elif dttls.hash_func is None:
-                category.subtests['hash_func'].result_no_hash_func()
-            else:
-                category.subtests['hash_func'].result_phase_out()
+            elif dttls.hash_func == HashFuncStatus.bad:
+                category.subtests['hash_func'].result_bad()
+            elif dttls.hash_func == HashFuncStatus.unknown:
+                category.subtests['hash_func'].result_unknown()
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -932,12 +932,12 @@ def build_report(dttls, category):
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests['ocsp_stapling'].result_ok()
 
-            if dttls.hash_func:
+            if dttls.hash_func == HashFuncStatus.good:
                 category.subtests['hash_func'].result_good()
-            elif dttls.hash_func is None:
-                category.subtests['hash_func'].result_no_hash_func()
-            else:
-                category.subtests['hash_func'].result_phase_out()
+            elif dttls.hash_func == HashFuncStatus.bad:
+                category.subtests['hash_func'].result_bad()
+            elif dttls.hash_func == HashFuncStatus.unknown:
+                category.subtests['hash_func'].result_unknown()
 
     dttls.report = category.gen_report()
 
@@ -2102,83 +2102,90 @@ class ConnectionChecker:
         # # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
         # # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
         def sha2_supported_or_na(v, sigalgs):
-            # Unsupported TLS version or ConnectionSocketException or no hash
-            # function information available.
-            result = None
-
             # We should have seen all protocol versions by the time this test
             # is executed, so we can avoid a pointless connection attempt if
             # the requested protocol version has not been seen already:
-            if v in self._seen_versions:
-                try:
-                    # Only ModernConnection supports passing the signature
-                    # algorithm preference to the server. Don't try to connect
-                    # using cipher suites that use RSA for key exchange as they
-                    # have no signature and thus no hash function is used.
-                    with ModernConnection.from_conn(self._conn, version=v,
-                            signature_algorithms=sigalgs) as new_conn:
-                        # we were able to connect with the given SHA2 sigalgs
-                        self._note_conn_details(new_conn)
+            if v not in self._seen_versions:
+                return HashFuncStatus.good
 
-                        # Ensure that the requirement in the OpenSSL docs that
-                        # the peer has signed a message is satisfied by
-                        # exchanging data with the server.
-                        if self._checks_mode == ChecksMode.WEB:
-                            http_client = HTTPSConnection.fromconn(new_conn)
-                            http_client.putrequest('GET', '/')
-                            http_client.endheaders()
-                            http_client.getresponse()
-                        elif self._checks_mode == ChecksMode.MAIL:
-                            new_conn.write(b"EHLO internet.nl\r\n")
-                            new_conn.read(4096)
+            # Unsupported TLS version or ConnectionSocketException or no
+            # hash function information available or no common signature
+            # algorithm. This could be due to lack of SHA2, but we cannot
+            # tell the difference between handshake failure due to lack of
+            # SHA2 versus lack of support for a protocol version.
+            result = HashFuncStatus.unknown
 
-                        # From: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_nid.html
-                        # "There are several possible reasons for failure:
-                        #   1. the cipher suite has no signature (e.g. it uses
-                        #      RSA key exchange or is anonymous)
-                        #   2. the TLS version is below 1.2 or
-                        #   3. the functions were called too early, e.g. before
-                        #      the peer signed a message."
-                        # We can exclude #2 and #3 as we deliberately make a
-                        # TLS 1.2 connection and exchange messages with the
-                        # server, so failure must be because "the cipher suite
-                        # has no signature" in which case there is no hash
-                        # function to check. In my testing only ciphers that
-                        # use RSA for key exchange caused the None value to be
-                        # returned, i.e. case #1.
-                        hash_func = new_conn.get_peer_signature_digest()
-                        if hash_func:
-                            result = hash_func in KEX_GOOD_HASH_FUNCS
-                except ValueError as e:
-                    # The NaSSL library can raise ValueError if the given
-                    # sigalgs value is unable to be set in the underlying
-                    # OpenSSL library.
-                    if str(e) == 'Invalid or unsupported signature algorithm':
-                        # This is an unexpected internal error, not a problem
-                        # with the target server. Log it an continue.
-                        logger.warning(
-                            f"Unexpected ValueError '{e}' while setting "
-                            f"client sigalgs to '{sigalgs}' when attempting "
-                            f"to test which key exchange SHA2 hash functions "
-                            f"target server '{self._conn.server_name}' "
-                            f"supports with TLS version {v.name}")
-                        pass
-                    else:
-                        raise e
-                except ConnectionHandshakeException:
-                    # So we've been able to connect earlier wtih this TLS
-                    # version but now as soon as we restrict ourselves to 
-                    # certain SHA2 hash functions the handshake fails, implying
-                    # that the server does not support them.
-                    result = False
-                except ConnectionSocketException:
-                    # TODO: extend to support indicating that we were unable to
-                    # test in the case of ConnectionSocketException?
+            try:
+                # Only ModernConnection supports passing the signature
+                # algorithm preference to the server. Don't try to connect
+                # using cipher suites that use RSA for key exchange as they
+                # have no signature and thus no hash function is used.
+                with ModernConnection.from_conn(self._conn, version=v,
+                        signature_algorithms=sigalgs) as new_conn:
+                    # we were able to connect with the given SHA2 sigalgs
+                    self._note_conn_details(new_conn)
+
+                    # Ensure that the requirement in the OpenSSL docs that
+                    # the peer has signed a message is satisfied by
+                    # exchanging data with the server.
+                    if self._checks_mode == ChecksMode.WEB:
+                        http_client = HTTPSConnection.fromconn(new_conn)
+                        http_client.putrequest('GET', '/')
+                        http_client.endheaders()
+                        http_client.getresponse()
+                    elif self._checks_mode == ChecksMode.MAIL:
+                        new_conn.write(b"EHLO internet.nl\r\n")
+                        new_conn.read(4096)
+
+                    # From: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_nid.html
+                    # "There are several possible reasons for failure:
+                    #   1. the cipher suite has no signature (e.g. it uses
+                    #      RSA key exchange or is anonymous)
+                    #   2. the TLS version is below 1.2 or
+                    #   3. the functions were called too early, e.g. before
+                    #      the peer signed a message."
+                    # We can exclude #2 and #3 as we deliberately make a
+                    # TLS 1.2 connection and exchange messages with the
+                    # server, so failure must be because "the cipher suite
+                    # has no signature" in which case there is no hash
+                    # function to check. In my testing only ciphers that
+                    # use RSA for key exchange caused the None value to be
+                    # returned, i.e. case #1.
+                    hash_func = new_conn.get_peer_signature_digest()
+                    if hash_func:
+                        if hash_func in KEX_GOOD_HASH_FUNCS:
+                            result = HashFuncStatus.good
+                        else:
+                            result = HashFuncStatus.bad
+            except ValueError as e:
+                # The NaSSL library can raise ValueError if the given
+                # sigalgs value is unable to be set in the underlying
+                # OpenSSL library.
+                if str(e) == 'Invalid or unsupported signature algorithm':
+                    # This is an unexpected internal error, not a problem
+                    # with the target server. Log it and continue.
+                    logger.warning(
+                        f"Unexpected ValueError '{e}' while setting "
+                        f"client sigalgs to '{sigalgs}' when attempting "
+                        f"to test which key exchange SHA2 hash functions "
+                        f"target server '{self._conn.server_name}' "
+                        f"supports with TLS version {v.name}")
                     pass
+                else:
+                    raise e
+            except ConnectionHandshakeException:
+                # So we've been able to connect earlier with this TLS
+                # version but now as soon as we restrict ourselves to 
+                # certain SHA2 hash functions the handshake fails, implying
+                # that the server does not support them.
+                result = HashFuncStatus.bad
+            except ConnectionSocketException:
+                # TODO: extend to support indicating that we were unable to
+                # test in the case of ConnectionSocketException?
+                pass
 
             return result
 
-        newest_seen_tls_version = sorted(self._seen_versions, reverse=True)[0]
         # Older SSL/TLS protocol versions only supported MD5 and SHA1:
         # From: https://tools.ietf.org/html/rfc5246#section-7.4.1.4.1
         # ---------------------------------------------------------------------
@@ -2202,17 +2209,33 @@ class ConnectionChecker:
         # Note: this extension is not meaningful for TLS versions prior to 1.2.
         # Clients MUST NOT offer it if they are offering prior versions.
         # ---------------------------------------------------------------------
-        result = (
-            sha2_supported_or_na(TLSV1_3, KEX_TLS13_SHA2_SIGALG_PREFERENCE) or
-            sha2_supported_or_na(TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
-        )
+        newest_seen_tls_version = sorted(self._seen_versions, reverse=True)[0]
+        # To be considered to have a good key exchange hash function
+        # you've got to be using at least TLS 1.2:
+        if newest_seen_tls_version >= TLSV1_2:
+            # Check TLS 1.3 SHA2 support:
+            result_tls13 = sha2_supported_or_na(
+                TLSV1_3, KEX_TLS13_SHA2_SIGALG_PREFERENCE)
+            # TLS 1.3 without SHA2 is bad, otherwise...
+            if result_tls13 != HashFuncStatus.bad:
+                # Check TLS 1.2 SHA2 support:
+                result_tls12 = sha2_supported_or_na(
+                    TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
+                # If the available protocols > TLS 1.2 all support SHA2 for
+                # key exchange then that's good.
+                if (result_tls13 == HashFuncStatus.good and
+                    result_tls12 == HashFuncStatus.good):
+                    return self._score_tls_hash_func_good, HashFuncStatus.good
+                # But if we're unable to determine conclusively one way or the
+                # other for either TLS 1.2 or TLS 1.3, then don't penalize the
+                # server but do indicate that uncertain situation.
+                elif (result_tls13 == HashFuncStatus.unknown or
+                      result_tls12 == HashFuncStatus.unknown):
+                    return self._score_tls_hash_func_good, HashFuncStatus.unknown            
 
-        if newest_seen_tls_version < TLSV1_2 or result is False:
-            return self._score_tls_hash_func_bad, False
-        else:
-            # result can bn None meaning no hash function information was
-            # available, or True meaning a good hash function was used
-            return self._score_tls_hash_func_good, result
+        # Otherwise at least one of TLS 1.2 and/or TLS 1.3 lacks support for
+        # SHA2 for key exchange which is bad.
+        return self._score_tls_hash_func_bad, HashFuncStatus.bad
 
     def check_cipher_order(self):
         """

@@ -42,6 +42,14 @@ class ZeroRttStatus(Enum):
     bad = 0
     good = 1
     na = 2
+
+
+class HashFuncStatus(Enum):
+    bad = 0
+    good = 1
+    unknown = 2
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -419,7 +427,7 @@ class DomainTestTls(BaseTestModel):
     ocsp_stapling = EnumField(OcspStatus, default=OcspStatus.ok)
     ocsp_stapling_score = models.IntegerField(null=True)
 
-    hash_func = models.NullBooleanField(default=False)
+    hash_func = EnumField(HashFuncStatus, default=HashFuncStatus.bad)
     hash_func_score = models.IntegerField(null=True)
 
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)

@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='domaintesttls',
             name='hash_func',
-            field=models.NullBooleanField(default=False),
+            field=enumfields.fields.EnumField(default=0, enum=checks.models.HashFuncStatus, max_length=10),
         ),
         migrations.AddField(
             model_name='domaintesttls',
