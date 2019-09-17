@@ -15,6 +15,7 @@ set -e -u
 
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-it}
 TEST_SELECTOR=${TEST_SELECTOR:-}
+TEST_MAX_FAIL=${TEST_MAX_FAIL:-}
 
 # assumes that scale=1 for the specified container
 container_name() {
@@ -216,6 +217,10 @@ PYTEST_ARGS="-vv" # to get the full diff in case of failed assertions
 
 if [ "${TEST_SELECTOR}" != "" ]; then
     PYTEST_ARGS="${PYTEST_ARGS} -k ${TEST_SELECTOR}"
+fi
+
+if [ "${TEST_MAX_FAIL}" != "" ]; then
+    PYTEST_ARGS="${PYTEST_ARGS} --maxfail=${TEST_MAX_FAIL}"
 fi
 
 echo
