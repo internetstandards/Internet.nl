@@ -172,12 +172,12 @@ BULK_ENC_CIPHERS_INSUFFICIENT_MODERN = ['AESCCM8']
 INSUFFICIENT_CIPHERS_MODERN = ':'.join(BULK_ENC_CIPHERS_INSUFFICIENT_MODERN)
 
 # Based on: https://tools.ietf.org/html/rfc8446#page-133 (B.4 Cipher suites)
+# Excludes TLS_AES_128_CCM_SHA256 and TLS_AES_128_CCM_8_SHA256 because our
+# OpenSSL client doesn't currently support them.
 TLSV1_3_CIPHERS = frozenset([
     'TLS_AES_128_GCM_SHA256',
     'TLS_AES_256_GCM_SHA384',
     'TLS_CHACHA20_POLY1305_SHA256',
-    'TLS_AES_128_CCM_SHA256',
-    'TLS_AES_128_CCM_8_SHA256',
 ])
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
@@ -2295,218 +2295,227 @@ class ConnectionChecker:
         ciphers_phase_out = set()
         ciphers_score = self._score_tls_suites_ok
 
-        if self._conn.get_ssl_version() < TLSV1_3:
-            # 1. Cipher name string based matching is fragile, e.g. OpenSSL
-            #    cipher names do not always indicate all algorithms in use nor
-            #    is it clear to me that the presence of RSA for example means
-            #    RSA for authentication and/or RSA for key exchange.
-            # 2. It's also not clear to me if letting OpenSSL do the matching
-            #    is sufficient because, again using RSA as an example, the
-            #    OpenSSL documentation says that "RSA" as a cipher string
-            #    matches "Cipher suites using RSA key exchange or
-            #    authentication", but NCSC 2.0 only classifies the cipher as
-            #    "phase out" IFF the cipher uses RSA for key exchange (it's
-            #    okay for the cipher to use RSA for authentication aka
-            #    certificate verification).
-            # 3. There appears to be an issue with DH/ECDH matching by OpenSSL
-            #    because it matches ECDHE/DHE ciphers too.
-            # 4. Even if OpenSSL matches yields the correct results, by
-            #    doing explicit cipher property checks we make the test logic
-            #    less magic, more transparent and less dependent on OpenSSL.
-            # 5. This all raises the question can we even trust that when asked
-            #    to select a particular cipher (suite) can the server be
-            #    trusted to honour the request? Do we have to validate that
-            #    when asked to match a cipher of a particular type that such a
-            #    cipher is actually negotiated (assuming that both client and
-            #    server support such a cipher)?
-            #
-            # An example from the OpenSSL ciphers command output:
-            #    0xC0,0x30 - ECDHE-RSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH \
-            #                Au=RSA  Enc=AESGCM(256) Mac=AEAD
-            #
-            # This cipher uses RSA for authentication but NOT for key exchange.
-            # You cannot tell that from the OpenSSL cipher name alone, nor per
-            # the OpenSSL documentation can you rely on OpenSSL to exclude the
-            # cipher when you request RSA ciphers (e.g. to test for ciphers to
-            # mark as "phase out"). UPDATE: It might be possible to exclude
-            # ciphers that use RSA for authentication by including !aRSA in the
-            # cipher string.
-            #
-            # For ciphers that we don't have any information about, fallback to
-            # trusting OpenSSL cipher matching.
-            #
-            # HOWEVER:
-            #
-            # - This is more complicated than just telling OpenSSL the cipher
-            #   groups we want.
-            # - Parsing the openssl ciphers -V output is a pain because use of
-            #   slash separators doesn't appear to be consistent.
-            # - The OpenSSL docs about RSA as a cipher do not appear to be
-            #   correct, or at least in the context of connection establishment
-            #   rather than certificate signing it seems that RSA does what we
-            #   want, i.e. filters only ciphers using RSA for key exchange, not
-            #   ciphers using RSA for authentication.
-            # - The key exchange algorithm data from openssl ciphers -V doesn't
-            #   appear to be accurate/granular enough for our use because for
-            #   example NCSC 2.0 says only ECDHE key exchange is "Good" and
-            #   that the following cipher is "Good": (output from ciphers -V)
-            #     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 - \
-            #       ECDHE-ECDSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH \
-            #       Au=ECDSA Enc=AESGCM(256) Mac=AEAD
-            #   Note that it says that Kx=ECDH, _NOT_ ECDHE. Either the ciphers
-            #   command output is incorrect, or ECDHE is not distinguishable in
-            #   this way from ECDH and so we cannot use the ciphers -V output
-            #   to check cipher properties...
-            #   However, also odd is that ciphers that _DO_ have ECDHE or DHE
-            #   key exchange algorithms always seem to be pre-shared key (PSK)
-            #   as well.
+        # 1. Cipher name string based matching is fragile, e.g. OpenSSL
+        #    cipher names do not always indicate all algorithms in use nor
+        #    is it clear to me that the presence of RSA for example means
+        #    RSA for authentication and/or RSA for key exchange.
+        # 2. It's also not clear to me if letting OpenSSL do the matching
+        #    is sufficient because, again using RSA as an example, the
+        #    OpenSSL documentation says that "RSA" as a cipher string
+        #    matches "Cipher suites using RSA key exchange or
+        #    authentication", but NCSC 2.0 only classifies the cipher as
+        #    "phase out" IFF the cipher uses RSA for key exchange (it's
+        #    okay for the cipher to use RSA for authentication aka
+        #    certificate verification).
+        # 3. There appears to be an issue with DH/ECDH matching by OpenSSL
+        #    because it matches ECDHE/DHE ciphers too.
+        # 4. Even if OpenSSL matches yields the correct results, by
+        #    doing explicit cipher property checks we make the test logic
+        #    less magic, more transparent and less dependent on OpenSSL.
+        # 5. This all raises the question can we even trust that when asked
+        #    to select a particular cipher (suite) can the server be
+        #    trusted to honour the request? Do we have to validate that
+        #    when asked to match a cipher of a particular type that such a
+        #    cipher is actually negotiated (assuming that both client and
+        #    server support such a cipher)?
+        #
+        # An example from the OpenSSL ciphers command output:
+        #    0xC0,0x30 - ECDHE-RSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH \
+        #                Au=RSA  Enc=AESGCM(256) Mac=AEAD
+        #
+        # This cipher uses RSA for authentication but NOT for key exchange.
+        # You cannot tell that from the OpenSSL cipher name alone, nor per
+        # the OpenSSL documentation can you rely on OpenSSL to exclude the
+        # cipher when you request RSA ciphers (e.g. to test for ciphers to
+        # mark as "phase out"). UPDATE: It might be possible to exclude
+        # ciphers that use RSA for authentication by including !aRSA in the
+        # cipher string.
+        #
+        # For ciphers that we don't have any information about, fallback to
+        # trusting OpenSSL cipher matching.
+        #
+        # HOWEVER:
+        #
+        # - This is more complicated than just telling OpenSSL the cipher
+        #   groups we want.
+        # - Parsing the openssl ciphers -V output is a pain because use of
+        #   slash separators doesn't appear to be consistent.
+        # - The OpenSSL docs about RSA as a cipher do not appear to be
+        #   correct, or at least in the context of connection establishment
+        #   rather than certificate signing it seems that RSA does what we
+        #   want, i.e. filters only ciphers using RSA for key exchange, not
+        #   ciphers using RSA for authentication.
+        # - The key exchange algorithm data from openssl ciphers -V doesn't
+        #   appear to be accurate/granular enough for our use because for
+        #   example NCSC 2.0 says only ECDHE key exchange is "Good" and
+        #   that the following cipher is "Good": (output from ciphers -V)
+        #     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 - \
+        #       ECDHE-ECDSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH \
+        #       Au=ECDSA Enc=AESGCM(256) Mac=AEAD
+        #   Note that it says that Kx=ECDH, _NOT_ ECDHE. Either the ciphers
+        #   command output is incorrect, or ECDHE is not distinguishable in
+        #   this way from ECDH and so we cannot use the ciphers -V output
+        #   to check cipher properties...
+        #   However, also odd is that ciphers that _DO_ have ECDHE or DHE
+        #   key exchange algorithms always seem to be pre-shared key (PSK)
+        #   as well.
 
-            # Connect using bad or phase out ciphers. To detect if a cipher
-            # we can connect with is a phase out cipher we need to match it by
-            # name to a cipher from out the phase out set. However, not all
-            # cipher names include the name contained in the set, e.g. an RSA
-            # based cipher may not include the word RSA in the cipher name. To
-            # match these ciphers we test phase out ciphers first, any cipher
-            # we can connect with must be a phase out cipher, then we try after
-            # that to connect with the "insufficient" ciphers. If somehow a
-            # cipher is present in both sets we treat it as "insufficient" as
-            # this is more negative for the customer than the "phase out"
-            # classification. For example OpenSSL cipher 'AES256-SHA' is an RSA
-            # based cipher with IANA name 'TLS_RSA_WITH_AES_256_CBC_SHA'. More
-            # https://testssl.sh/openssl-iana.mapping.html for more examples.
-            cipher_test_configs = [
-                ( 'phase out',    DebugConnection,  PHASE_OUT_CIPHERS,           ciphers_phase_out ),
-                ( 'insufficient', DebugConnection,  INSUFFICIENT_CIPHERS,        ciphers_bad       ),
-                ( 'insufficient', ModernConnection, INSUFFICIENT_CIPHERS_MODERN, ciphers_bad       ),
-            ]
-            for description, this_conn_handler, all_ciphers_to_test, cipher_set in cipher_test_configs:
-                if self._checks_mode == ChecksMode.WEB:
-                    cipher_suites = all_ciphers_to_test.split(':')
-                elif self._checks_mode == ChecksMode.MAIL:
-                    # We have to limit the number of connections that we make
-                    # to mail servers so just try and connect with the set of
-                    # ciphers and see if we succeed, don't try and work out
-                    # exactly which ciphers the server supports.
-                    #
-                    # if we've already found a cipher in this set, don't check
-                    # for more, e.g. we checked for bad ciphers with
-                    # DebugConnection and found one so don't bother to check
-                    # for any more (e.g. with ModernConnection).
-                    cipher_suites = [] if cipher_set else [all_ciphers_to_test]
+        # Connect using bad or phase out ciphers. To detect if a cipher
+        # we can connect with is a phase out cipher we need to match it by
+        # name to a cipher from out the phase out set. However, not all
+        # cipher names include the name contained in the set, e.g. an RSA
+        # based cipher may not include the word RSA in the cipher name. To
+        # match these ciphers we test phase out ciphers first, any cipher
+        # we can connect with must be a phase out cipher, then we try after
+        # that to connect with the "insufficient" ciphers. If somehow a
+        # cipher is present in both sets we treat it as "insufficient" as
+        # this is more negative for the customer than the "phase out"
+        # classification. For example OpenSSL cipher 'AES256-SHA' is an RSA
+        # based cipher with IANA name 'TLS_RSA_WITH_AES_256_CBC_SHA'. More
+        # https://testssl.sh/openssl-iana.mapping.html for more examples.
+        # Limit ModernConnection to TLS v1.2 otherwise it can connect with TLS
+        # v1.3, and we can't currently test the only TLS v1.3 cipher which
+        # is "bad" (TLS_AES_128_CCM_8_SHA256) because our OpenSSL based client
+        # doesn't support it, and with the current code if we did connect with
+        # a "good" TLS v1.3 cipher we get stuck in an infinite loop because
+        # the cipher isn't any of the TLS <= 1.2 ciphers we are testing for. In
+        # theory setting the TLS 1.3 ciphers to the empty string should also
+        # prevent this but in testing it still connected with a TLS 1.3 cipher
+        # in that case, presumably due to a bug in this or the modified NaSSL
+        # code.
+        cipher_test_configs = [
+            ( 'phase out',    DebugConnection,  SSLV23,  PHASE_OUT_CIPHERS,           ciphers_phase_out ),
+            ( 'insufficient', DebugConnection,  SSLV23,  INSUFFICIENT_CIPHERS,        ciphers_bad       ),
+            ( 'insufficient', ModernConnection, TLSV1_2, INSUFFICIENT_CIPHERS_MODERN, ciphers_bad       ),
+        ]
+        for description, this_conn_handler, test_tls_version, all_ciphers_to_test, cipher_set in cipher_test_configs:
+            if self._checks_mode == ChecksMode.WEB:
+                cipher_suites = all_ciphers_to_test.split(':')
+            elif self._checks_mode == ChecksMode.MAIL:
+                # We have to limit the number of connections that we make
+                # to mail servers so just try and connect with the set of
+                # ciphers and see if we succeed, don't try and work out
+                # exactly which ciphers the server supports.
+                #
+                # if we've already found a cipher in this set, don't check
+                # for more, e.g. we checked for bad ciphers with
+                # DebugConnection and found one so don't bother to check
+                # for any more (e.g. with ModernConnection).
+                cipher_suites = [] if cipher_set else [all_ciphers_to_test]
 
-                for cipher_suite in cipher_suites:
-                    ciphers_to_test = cipher_suite
-                    while True:
-                        try:
-                            with this_conn_handler.from_conn(
-                                self._conn, ciphers=ciphers_to_test,
-                                version=SSLV23
-                            ) as new_conn:
-                                self._note_conn_details(new_conn)
-                                curr_cipher = new_conn.get_current_cipher_name()
+            for cipher_suite in cipher_suites:
+                ciphers_to_test = cipher_suite
+                while True:
+                    try:
+                        with this_conn_handler.from_conn(
+                            self._conn, ciphers=ciphers_to_test,
+                            version=test_tls_version
+                        ) as new_conn:
+                            self._note_conn_details(new_conn)
+                            curr_cipher = new_conn.get_current_cipher_name()
 
-                                # curr_cipher is likely not exactly the same as any
-                                # of the active cipher suites in the cipher string,
-                                # e.g. if the cipher string contains 'RSA' then
-                                # curr_cipher could be the name of an actual cipher
-                                # that uses RSA.
+                            # curr_cipher is likely not exactly the same as any
+                            # of the active cipher suites in the cipher string,
+                            # e.g. if the cipher string contains 'RSA' then
+                            # curr_cipher could be the name of an actual cipher
+                            # that uses RSA.
 
-                                if self._checks_mode != ChecksMode.MAIL:
-                                    # Update the cipher string to exclude the current
-                                    # cipher (not cipher suite) from the cipher suite
-                                    # negotiation on the next connection.
-                                    ciphers_to_test = "!{}:{}".format(
-                                        curr_cipher, ciphers_to_test)
+                            if self._checks_mode != ChecksMode.MAIL:
+                                # Update the cipher string to exclude the current
+                                # cipher (not cipher suite) from the cipher suite
+                                # negotiation on the next connection.
+                                ciphers_to_test = "!{}:{}".format(
+                                    curr_cipher, ciphers_to_test)
 
-                                # Try and classify the cipher based on what we know
-                                # about it.
-                                ci = cipher_infos.get(curr_cipher)
-                                if ci:
-                                    ci_kex_algs = frozenset(ci.kex_algs.split('/'))
-                                    # TODO: sometimes ci_kex_algs is not slash
-                                    # separated but still contains more than one
-                                    # algorithm, e.g. DHEPSK, ECDHEPSK, RSAPSK
-                                    # Make the gen script insert a forward
-                                    # slash in these cases?
-                                    # TODO: sometimes bulk_enc_alg is also
-                                    # slash separated, e.g. CHACH20/POLY1305.
-                                    # TODO: ci_kex_algs can also be 'any'.
-                                    if (
-                                        not ci_kex_algs.isdisjoint(KEX_CIPHERS_INSUFFICIENT_AS_SET)
-                                        and (
-                                            (ci_kex_algs == 'DH' and 'DHE' not in curr_cipher) or
-                                            (ci_kex_algs == 'ECDH' and 'ECDHE' not in curr_cipher)
-                                        )
-                                    ):
-                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info(f'kex alg "{ci.kex_algs}"')))
-                                    elif (ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT or
-                                        ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT_MODERN):
-                                        ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info(f'bulk enc alg "{ci.bulk_enc_alg}"')))
-                                    elif not ci_kex_algs.isdisjoint(KEX_CIPHERS_PHASEOUT):
-                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info(f'kex alg matches "{ci.kex_algs}"')))
-                                    elif ci.bulk_enc_alg in BULK_ENC_CIPHERS_PHASEOUT:
-                                        ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info(f'bulk enc alg matches "{ci.bulk_enc_alg}"')))
-                                    else:
-                                        # This cipher is actually okay. Perhaps
-                                        # OpenSSL matched it based on the cipher
-                                        # string we gave it, but actually we didn't
-                                        # mean for it to be matched (i.e. there is
-                                        # a problem with our cipher string). This
-                                        # happens for ECDHE-RSA-AES256-GCM-SHA384
-                                        # when the cipher string given to OpenSSL
-                                        # contains ECDH. ECDH according to NCSC 2.0
-                                        # is "insufficient" because it cannot
-                                        # provide forward secrecy, while ECDHE can
-                                        # and so is "good". Currently we catch this
-                                        # particular case above by checking the 
-                                        # cipher name for DHE/ECDHE. I'd prefer a
-                                        # way to test for the kex algorithm being
-                                        # ephemeral but I don't know how to do that
-                                        # at the moment, if it's even possible.
-                                        # TODO: Warn somewhere that this happened?
-                                        if logger.isEnabledFor(logging.DEBUG):
-                                            logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is ephemeral by name.')
-                                        pass
+                            # Try and classify the cipher based on what we know
+                            # about it.
+                            ci = cipher_infos.get(curr_cipher)
+                            if ci:
+                                ci_kex_algs = frozenset(ci.kex_algs.split('/'))
+                                # TODO: sometimes ci_kex_algs is not slash
+                                # separated but still contains more than one
+                                # algorithm, e.g. DHEPSK, ECDHEPSK, RSAPSK
+                                # Make the gen script insert a forward
+                                # slash in these cases?
+                                # TODO: sometimes bulk_enc_alg is also
+                                # slash separated, e.g. CHACH20/POLY1305.
+                                # TODO: ci_kex_algs can also be 'any'.
+                                if (
+                                    not ci_kex_algs.isdisjoint(KEX_CIPHERS_INSUFFICIENT_AS_SET)
+                                    and (
+                                        (ci_kex_algs == 'DH' and 'DHE' not in curr_cipher) or
+                                        (ci_kex_algs == 'ECDH' and 'ECDHE' not in curr_cipher)
+                                    )
+                                ):
+                                    ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info(f'kex alg "{ci.kex_algs}"')))
+                                elif (ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT or
+                                    ci.bulk_enc_alg in BULK_ENC_CIPHERS_INSUFFICIENT_MODERN):
+                                    ciphers_bad.add('{}{}'.format(curr_cipher, self._debug_info(f'bulk enc alg "{ci.bulk_enc_alg}"')))
+                                elif not ci_kex_algs.isdisjoint(KEX_CIPHERS_PHASEOUT):
+                                    ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info(f'kex alg matches "{ci.kex_algs}"')))
+                                elif ci.bulk_enc_alg in BULK_ENC_CIPHERS_PHASEOUT:
+                                    ciphers_phase_out.add('{}{}'.format(curr_cipher, self._debug_info(f'bulk enc alg matches "{ci.bulk_enc_alg}"')))
                                 else:
-                                    # TODO: I know of at least two ciphers that are
-                                    # missing: (both 3DES)
-                                    #   - ADH-DES-CBC3-SHA
-                                    #   - AECDH-DES-CBC3-SHA
-                                    # We don't know anything about these ciphers.
-                                    # Fall back to trusting that OpenSSL has only
-                                    # agreed a cipher with the remote that matches
-                                    # our cipher specification, and that our cipher
-                                    # specification doesn't accidentally match
-                                    # something we didn't expect or intend to match
-                                    # (e.g. a cipher that authenticates with RSA
-                                    # but doesn't use RSA for key exchange).
-                                    # However, watch out for cases like cipher suite
-                                    # 'DH' matching 'DHE-RSA-CHACHA20-POLY1305-OLD'
-                                    # which looks like it is ephemeral (DH_E_) and
-                                    # thus actually okay. This is the same as the
-                                    # case above, but above we know the cipher in our
-                                    # cipher_info "database", here we don't know the
-                                    # cipher and have to use the cipher suite as a
-                                    # hint as to why the cipher was matched.
-                                    if ((cipher_suite == 'ECDH' and not 'ECDHE' in curr_cipher) or
-                                        (cipher_suite == 'DH' and not 'DHE' in curr_cipher)):
-                                        if logger.isEnabledFor(logging.DEBUG):
-                                            logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is not in our database."')
-                                        cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
-                        except (ConnectionSocketException,
-                                ConnectionHandshakeException):
-                            break
+                                    # This cipher is actually okay. Perhaps
+                                    # OpenSSL matched it based on the cipher
+                                    # string we gave it, but actually we didn't
+                                    # mean for it to be matched (i.e. there is
+                                    # a problem with our cipher string). This
+                                    # happens for ECDHE-RSA-AES256-GCM-SHA384
+                                    # when the cipher string given to OpenSSL
+                                    # contains ECDH. ECDH according to NCSC 2.0
+                                    # is "insufficient" because it cannot
+                                    # provide forward secrecy, while ECDHE can
+                                    # and so is "good". Currently we catch this
+                                    # particular case above by checking the 
+                                    # cipher name for DHE/ECDHE. I'd prefer a
+                                    # way to test for the kex algorithm being
+                                    # ephemeral but I don't know how to do that
+                                    # at the moment, if it's even possible.
+                                    # TODO: Warn somewhere that this happened?
+                                    if logger.isEnabledFor(logging.DEBUG):
+                                        logger.debug(f'Disregarding OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is ephemeral by name.')
+                                    pass
+                            else:
+                                # TODO: I know of at least two ciphers that are
+                                # missing: (both 3DES)
+                                #   - ADH-DES-CBC3-SHA
+                                #   - AECDH-DES-CBC3-SHA
+                                # We don't know anything about these ciphers.
+                                # Fall back to trusting that OpenSSL has only
+                                # agreed a cipher with the remote that matches
+                                # our cipher specification, and that our cipher
+                                # specification doesn't accidentally match
+                                # something we didn't expect or intend to match
+                                # (e.g. a cipher that authenticates with RSA
+                                # but doesn't use RSA for key exchange).
+                                # However, watch out for cases like cipher suite
+                                # 'DH' matching 'DHE-RSA-CHACHA20-POLY1305-OLD'
+                                # which looks like it is ephemeral (DH_E_) and
+                                # thus actually okay. This is the same as the
+                                # case above, but above we know the cipher in our
+                                # cipher_info "database", here we don't know the
+                                # cipher and have to use the cipher suite as a
+                                # hint as to why the cipher was matched.
+                                if ((cipher_suite == 'ECDH' and not 'ECDHE' in curr_cipher) or
+                                    (cipher_suite == 'DH' and not 'DHE' in curr_cipher)):
+                                    if logger.isEnabledFor(logging.DEBUG):
+                                        logger.debug(f'Honoring OpenSSL cipher match of cipher "{curr_cipher}" to suite "{cipher_suite}" for test group "{description}" and server "{self._conn.server_name}". Reason: cipher is not in our database."')
+                                    cipher_set.add('{}{}'.format(curr_cipher, self._debug_info(f'unknown cipher matches "{cipher_suite}"')))
+                    except (ConnectionSocketException,
+                            ConnectionHandshakeException):
+                        break
 
-                        if self._checks_mode == ChecksMode.MAIL:
-                            break
+                    if self._checks_mode == ChecksMode.MAIL:
+                        break
 
-            # If in both sets, only keep the cipher in the bad set.
-            ciphers_phase_out -= ciphers_bad
+        # If in both sets, only keep the cipher in the bad set.
+        ciphers_phase_out -= ciphers_bad
 
-            if len(ciphers_bad) > 0:
-                ciphers_score = self._score_tls_suites_bad
-            elif len(ciphers_phase_out) > 0:
-                ciphers_score = self._score_tls_suites_ok
+        if len(ciphers_bad) > 0:
+            ciphers_score = self._score_tls_suites_bad
+        elif len(ciphers_phase_out) > 0:
+            ciphers_score = self._score_tls_suites_ok
 
         result_dict = {
             'bad': list(ciphers_bad),

@@ -456,6 +456,18 @@ ncsc_20_tests = [
         }),
 
     DomainConfig('NCSC20'
+        '-Table1:TLS12'
+        '-Table1:TLS13'
+        '-Table6:ModernPhaseOutCiphers',
+        'tls1213modernphaseoutciphers.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.TLS_CIPHER_SUITES: [
+                [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
+            ]
+        }),
+
+
+    DomainConfig('NCSC20'
         '-Table11:TLS12'
         '-Table13:TLS12',
         'tls1213tlscompression.test.nlnetlabs.tk',

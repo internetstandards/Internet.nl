@@ -45,6 +45,12 @@ TLSV1_3 = OpenSslVersionEnum.TLSV1_3
 SSL_VERIFY_NONE = OpenSslVerifyEnum.NONE
 
 
+ALL_TLS12_AND_PRE_CIPHERS = "ALL:COMPLEMENTOFALL"
+# Exclude "TLS_AES_128_CCM_SHA256:TLS_AES_128_CCM_8_SHA256" as our OpenSSL 1.1.1
+# doesn't support them.
+ALL_TLS13_CIPHERS = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256"
+
+
 # Increase http.client's _MAXHEADERS from 100 to 200.
 # We had problems with a site that uses too many 'Link' headers.
 http.client._MAXHEADERS = 200
@@ -333,7 +339,7 @@ class ConnectionCommon:
         self.ip_address = kwargs.get('ip_address')
         self.port = kwargs.get('port')
         self.must_shutdown = kwargs.get('shutdown', False)
-        self.ciphers = kwargs.get('ciphers', 'ALL:COMPLEMENTOFALL')
+        self.ciphers = kwargs.get('ciphers', ALL_TLS12_AND_PRE_CIPHERS)
         self.ipv6 = kwargs.get('ipv6', False)
         self.options = kwargs.get('options')
         self.send_SNI = kwargs.get('send_SNI', True)
@@ -458,7 +464,7 @@ class ModernConnection(ConnectionCommon, SslClient):
 
     See ConnectionCommon for usage instructions.
     """
-    def __init__(self, version=TLSV1_3, tls13ciphers=None, **kwargs):
+    def __init__(self, version=TLSV1_3, tls13ciphers=ALL_TLS13_CIPHERS, **kwargs):
         self.tls13ciphers = tls13ciphers
         self.version = version
 

@@ -142,6 +142,8 @@ tls1213nosha2                                                     IN  A      {{T
 tls1213nosha2                                                     IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213tlscompression                                             IN  A      {{TARGET_TLS1213TLSCOMPRESSION_IP}}
 tls1213tlscompression                                             IN  AAAA   {{TARGET_TLS1213TLSCOMPRESSION_IPV6}}
+tls1213modernphaseoutciphers                                      IN  A      {{TARGET_TLS1213_IP}}
+tls1213modernphaseoutciphers                                      IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls13only                                                         IN  A      {{TARGET_TLS13ONLY_IP}}
 tls13only                                                         IN  AAAA   {{TARGET_TLS13ONLY_IPV6}}
 tls13only                                                         IN  MX     10   tls13only
@@ -215,6 +217,7 @@ _443._tcp.tls1213shorthsts                                        IN  TLSA   3 1
 _443._tcp.tls1213noocspstaple                                     IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213nosha2                                           IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls1213tlscompression                                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls1213modernphaseoutciphers                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyGOODTLSECDHEECDSAWITHAES128GCMSHA256.ec        IN  TLSA   3 1 1 cf6269375d3d09fdaa907773161d7edbe077fc32c66c8dd9fe7ebe8236158687
 _443._tcp.tls12onlyGOODTLSECDHEECDSAWITHAES256GCMSHA384.ec        IN  TLSA   3 1 1 cf6269375d3d09fdaa907773161d7edbe077fc32c66c8dd9fe7ebe8236158687
 _443._tcp.tls12onlyGOODTLSECDHEECDSAWITHCHACHA20POLY1305SHA256.ec IN  TLSA   3 1 1 cf6269375d3d09fdaa907773161d7edbe077fc32c66c8dd9fe7ebe8236158687
