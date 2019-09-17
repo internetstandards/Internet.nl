@@ -21,6 +21,7 @@ LOCATOR_WARNING_TEST_CLASS = 'testresult warning'
 LOCATOR_INFO_TEST_CLASS = 'testresult info'
 LOCATOR_FAILED_TEST_CLASS = 'testresult failed'
 LOCATOR_NOTTESTED_TEST_CLASS = 'testresult not-tested'
+LOCATOR_GOOD_NOTTESTED_TEST_CLASS = 'testresult good-not-tested'
 LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
 
 LOCATOR_PROBING_CLASS = 'probing'
@@ -124,7 +125,7 @@ class UX:
             # title. This would be easier if each test report block had a
             # language independent unique test idenfitier we could extract
             # instead of a language dependent title plus nearby markup...
-            test_title = re.sub(r'(open|close|sluit|[A-Za-z- ]+:)', '',
+            test_title = re.sub(r'(open|close|sluit|[A-Za-z-, ]+:)', '',
                 test_title_anchor.text).strip()
             test_titles.add(test_title)
 
@@ -150,7 +151,8 @@ class UX:
 
     @staticmethod
     def get_nottested_tests(selenium):
-        return UX._get_matching_tests(selenium, LOCATOR_NOTTESTED_TEST_CLASS)
+        return (UX._get_matching_tests(selenium, LOCATOR_NOTTESTED_TEST_CLASS) |
+                UX._get_matching_tests(selenium, LOCATOR_GOOD_NOTTESTED_TEST_CLASS))
 
     @staticmethod
     def get_passed_tests(selenium):

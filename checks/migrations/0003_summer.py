@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='domaintesttls',
             name='zero_rtt',
-            field=models.NullBooleanField(default=False),
+            field=enumfields.fields.EnumField(default=0, enum=checks.models.ZeroRttStatus, max_length=10),
         ),
         migrations.AddField(
             model_name='domaintesttls',

@@ -1,7 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
-from .scoring import STATUS_FAIL, STATUS_NOT_TESTED, STATUS_NOTICE, STATUS_INFO
+from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
+from .scoring import STATUS_GOOD_NOT_TESTED, STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
 
@@ -1062,6 +1063,11 @@ class WebTlsZeroRTT(Subtest):
         self.verdict = "detail web tls zero-rtt verdict good"
         self.tech_data = "detail tech data no"
 
+    def result_na(self):
+        self._status(STATUS_GOOD_NOT_TESTED)
+        self.verdict = "detail web tls zero-rtt verdict na"
+        self.tech_data = "detail tech data no"
+
     def result_bad(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls zero-rtt verdict bad"
@@ -1755,6 +1761,12 @@ class MailTlsZeroRTT(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls zero-rtt verdict good"
         self.tech_data = "detail tech data no"
+
+    def result_na(self):
+        self.was_tested()
+        self._status(STATUS_GOOD_NOT_TESTED)
+        self.verdict = "detail mail tls zero-rtt verdict na"
+        self.tech_data = "detail tech data yes"
 
     def result_bad(self):
         self.was_tested()

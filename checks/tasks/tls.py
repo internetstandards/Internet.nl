@@ -44,7 +44,7 @@ from .shared import HTTPSConnection
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, OcspStatus
+from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from ..templatetags.translate import INJECTED_TRANSLATION_START
 from ..templatetags.translate import INJECTED_TRANSLATION_END
 
@@ -780,10 +780,12 @@ def build_report(dttls, category):
                 # else:
                 #     category.subtests['dane_rollover'].result_bad()
 
-            if dttls.zero_rtt:
+            if dttls.zero_rtt == ZeroRttStatus.good:
                 category.subtests['zero_rtt'].result_good()
-            else:
+            elif dttls.zero_rtt == ZeroRttStatus.bad:
                 category.subtests['zero_rtt'].result_bad()
+            elif dttls.zero_rtt == ZeroRttStatus.na:
+                category.subtests['zero_rtt'].result_na()
 
             if dttls.ocsp_stapling == OcspStatus.good:
                 category.subtests['ocsp_stapling'].result_good()
@@ -916,10 +918,12 @@ def build_report(dttls, category):
                 else:
                     category.subtests['dane_rollover'].result_bad()
 
-            if dttls.zero_rtt:
+            if dttls.zero_rtt == ZeroRttStatus.good:
                 category.subtests['zero_rtt'].result_good()
-            else:
+            elif dttls.zero_rtt == ZeroRttStatus.bad:
                 category.subtests['zero_rtt'].result_bad()
+            elif dttls.zero_rtt == ZeroRttStatus.na:
+                category.subtests['zero_rtt'].result_na()
 
             if dttls.ocsp_stapling == OcspStatus.good:
                 category.subtests['ocsp_stapling'].result_good()
@@ -1921,7 +1925,7 @@ class ConnectionChecker:
     def check_zero_rtt(self):
         # This check isn't relevant to anything less than TLS 1.3.
         if self._conn.get_ssl_version() < TLSV1_3:
-            return self._score_zero_rtt_good, True
+            return self._score_zero_rtt_good, ZeroRttStatus.na
 
         # we require an existing connection, as 0-RTT is only possible with
         # connections after the first so that the SSL session can be re-used.
@@ -1938,7 +1942,7 @@ class ConnectionChecker:
         # has been written to and read from the connection even if early data
         # is actually supported.
         if session.get_max_early_data() <= 0:
-            return self._score_zero_rtt_good, True
+            return self._score_zero_rtt_good, ZeroRttStatus.good
 
         # terminate the current connection and re-connect using the previous
         # SSL session details then try and write early data to the connection
@@ -1968,9 +1972,9 @@ class ConnectionChecker:
                             # HTTP status code 425 Too Early. See:
                             # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
                             if http_client.getresponse().status == 425:
-                                return self._score_zero_rtt_good, True
+                                return self._score_zero_rtt_good, ZeroRttStatus.good
                             else:
-                                return self._score_zero_rtt_bad, False
+                                return self._score_zero_rtt_bad, ZeroRttStatus.bad
         except (ConnectionHandshakeException,
                 ConnectionSocketException,
                 IOError):
@@ -1978,7 +1982,7 @@ class ConnectionChecker:
 
         # TODO: ensure the handshake is completed ready for the next check that
         # uses this connection?
-        return self._score_zero_rtt_good, True
+        return self._score_zero_rtt_good, ZeroRttStatus.good
 
     def check_protocol_versions(self):
         # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0

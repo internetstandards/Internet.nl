@@ -115,6 +115,19 @@ class OpenSSLServerDomainConfig(DomainConfig):
             self.expected_warnings.setdefault(test, ANY)
 
 
+class PreTLS13DomainConfig(DomainConfig):
+    def __init__(self, test_id, domain, expected_warnings=None,
+            expected_failures=None, expected_info=None, lang='en'):
+        self._lang = lang
+        super().__init__(test_id, domain,
+            expected_warnings=expected_warnings,
+            expected_failures=expected_failures,
+            expected_info=expected_info)
+
+    def override_defaults(self):
+        self.expected_not_tested.setdefault(TESTS.TLS_ZERO_RTT, ANY)
+
+
 class PreTLS12DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=None,
             expected_failures=None, expected_info=None, lang='en'):
@@ -126,13 +139,16 @@ class PreTLS12DomainConfig(DomainConfig):
 
     def override_defaults(self):
         if self._lang == 'en':
-            test_id = TESTS.TLS_HASH_FUNC
+            hf_test_id = TESTS.TLS_HASH_FUNC
+            zrtt_test_id = TESTS.TLS_ZERO_RTT
         elif self._lang == 'nl':
-            test_id = TESTS.TLS_HASH_FUNC_NL
+            hf_test_id = TESTS.TLS_HASH_FUNC_NL
+            zrtt_test_id = TESTS.TLS_ZERO_RTT_NL
         else:
             raise ValueError()
 
-        self.expected_warnings.setdefault(test_id, ANY)
+        self.expected_warnings.setdefault(hf_test_id, ANY)
+        self.expected_not_tested.setdefault(zrtt_test_id, ANY)
 
 
 class PostfixTLS12Config(DomainConfig):
@@ -140,6 +156,7 @@ class PostfixTLS12Config(DomainConfig):
         self.expected_failures.setdefault(TESTS.TLS_KEY_EXCHANGE, ANY)
         self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
         self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
+        self.expected_not_tested.setdefault(TESTS.TLS_ZERO_RTT, ANY)
 
 
 class PostfixTLS13Config(DomainConfig):
@@ -273,7 +290,7 @@ ncsc_20_tests = [
             ],
         }),
 
-    DomainConfig('NCSC20-Table1:TLS1112',
+    PreTLS13DomainConfig('NCSC20-Table1:TLS1112',
         'tls1112.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
@@ -282,7 +299,7 @@ ncsc_20_tests = [
             ]
         }),
 
-    GoodDomain('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE4096',
         'tls12only.test.nlnetlabs.tk'),
@@ -358,7 +375,7 @@ ncsc_20_tests = [
     # support so we have to expect the client renegotiation test to fail in
     # addition to the usual tests that fail when testing against an OpenSSL
     # server.
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyBadCiphers',
         'tls12onlylegacybadciphers.test.nlnetlabs.tk',
@@ -367,7 +384,7 @@ ncsc_20_tests = [
                 [REGEX_LEGACY_BAD_CIPHERS],  # matches all rows
             ]
         }),
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyPhaseOutCiphers',
         'tls12onlylegacyphaseoutciphers.test.nlnetlabs.tk',
@@ -376,7 +393,7 @@ ncsc_20_tests = [
                 [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
             ]
         }),
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:ModernPhaseOutCiphers',
         'tls12onlymodernphaseoutciphers.test.nlnetlabs.tk',
@@ -390,7 +407,7 @@ ncsc_20_tests = [
                 [MustMatch('not applicable')]
             ]
         }),
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:ModernBadCiphers',
         'tls12onlymodernbadciphers.test.nlnetlabs.tk',
@@ -403,7 +420,7 @@ ncsc_20_tests = [
     # 0-RTT is a TLS 1.3 feature so should not be tested.
     # Finite-field group ffdhe2048 is listed as 'phase out' by NCSC 2.0 and
     # so should result in a perfect score and a warning about the ff group.
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE2048',
         'tls12onlyffdhe2048.test.nlnetlabs.tk',
@@ -413,13 +430,13 @@ ncsc_20_tests = [
             ]
         }),
 
-    GoodDomain('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:FFDHE3072',
         'tls12onlyffdhe3072.test.nlnetlabs.tk'),
 
     # This domain doesn't use an NCSC 2.0 approved DH finite-field group.
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table10:OtherGroups',
         'tls12onlyffother.test.nlnetlabs.tk',
@@ -433,7 +450,7 @@ ncsc_20_tests = [
     # it expected the generator to be a small integer value reported by NaSSL
     # as "2 (0x2)" but in fact NaSSL reports this long generator value as
     # "0x...", which being base 16 broke the base 10 string to int conversion.
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-BUG:LongGenerator',
         'tls12onlydhlongg.test.nlnetlabs.tk',
@@ -443,6 +460,12 @@ ncsc_20_tests = [
             ]
         }),
 
+    # Even though the server below supports TLS 1.3, in TLS 1.3 "Legacy
+    # algorithms" "specifically SHA-1" "are not defined for use in signed TLS
+    # handshake messages" and so we cannot connect with TLS 1.3 to this server
+    # which lacks SHA2 and thus cannot test for 0-RTT support. See:
+    #   "Legacy Algorithms" under "4.2.3. Signature Algorithms" of RFC-8446
+    #   https://tools.ietf.org/html/rfc8446#section-4.2.3
     DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table1:TLS13'
@@ -453,6 +476,9 @@ ncsc_20_tests = [
                 ['no'],  # IPv6
                 ['no'],  # IPv4
             ]
+        },
+        expected_not_tested={
+            TESTS.TLS_ZERO_RTT
         }),
 
     DomainConfig('NCSC20'
@@ -466,8 +492,7 @@ ncsc_20_tests = [
             ]
         }),
 
-
-    DomainConfig('NCSC20'
+    PreTLS13DomainConfig('NCSC20'
         '-Table11:TLS12'
         '-Table13:TLS12',
         'tls1213tlscompression.test.nlnetlabs.tk',
@@ -870,7 +895,7 @@ def test_translations(selenium, domain_config):
     'iana_cipher', ncsc_20_good_ciphers, ids=iana_cipher_id_generator)
 def test_ncsc_good_ciphers(selenium, iana_cipher):
     assess_website(selenium,
-        GoodDomain('ncsc_good_ciphers',
+        PreTLS13DomainConfig('ncsc_good_ciphers',
             iana_cipher_to_target_server_fqdn('GOOD', iana_cipher)))
 
 
@@ -878,7 +903,7 @@ def test_ncsc_good_ciphers(selenium, iana_cipher):
     'iana_cipher', ncsc_20_sufficient_ciphers, ids=iana_cipher_id_generator)
 def test_ncsc_sufficient_ciphers(selenium, iana_cipher):
     assess_website(selenium,
-        GoodDomain('ncsc_sufficient_ciphers',
+        PreTLS13DomainConfig('ncsc_sufficient_ciphers',
             iana_cipher_to_target_server_fqdn('SUFFICIENT', iana_cipher)))
 
 
@@ -888,7 +913,7 @@ def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
     openssl_cipher_name = iana_cipher[2]
     ssh2_hash_function_supported = iana_cipher[3]
 
-    domain_config = DomainConfig('ncsc_phaseout_ciphers',
+    domain_config = PreTLS13DomainConfig('ncsc_phaseout_ciphers',
         iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
         expected_warnings={
             TESTS.TLS_CIPHER_SUITES: [

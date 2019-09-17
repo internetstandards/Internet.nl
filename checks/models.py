@@ -38,6 +38,10 @@ class OcspStatus(Enum):
     not_trusted = 2
 
 
+class ZeroRttStatus(Enum):
+    bad = 0
+    good = 1
+    na = 2
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -409,7 +413,7 @@ class DomainTestTls(BaseTestModel):
     client_reneg = models.NullBooleanField(default=False)
     client_reneg_score = models.IntegerField(null=True)
 
-    zero_rtt = models.NullBooleanField(default=False)
+    zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
     zero_rtt_score = models.IntegerField(null=True)
 
     ocsp_stapling = EnumField(OcspStatus, default=OcspStatus.ok)

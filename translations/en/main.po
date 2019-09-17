@@ -1240,6 +1240,9 @@ msgstr ""
 msgid "detail mail tls zero-rtt verdict good"
 msgstr "None of your mail servers support 0-RTT."
 
+msgid "detail mail tls zero-rtt verdict na"
+msgstr "This test is not applicable as your mail servers do not support TLS 1.3."
+
 msgid "detail tech data bogus"
 msgstr "bogus"
 
@@ -2092,6 +2095,9 @@ msgstr "Your web server supports 0-RTT, which could be a security risk."
 
 msgid "detail web tls zero-rtt verdict good"
 msgstr "Your web server does not support 0-RTT."
+
+msgid "detail web tls zero-rtt verdict na"
+msgstr "This test is not applicable as your webservers do not support TLS 1.3."
 
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""

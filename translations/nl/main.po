@@ -1204,6 +1204,9 @@ msgstr "TODO"
 msgid "detail mail tls zero-rtt verdict good"
 msgstr "TODO"
 
+msgid "detail mail tls zero-rtt verdict na"
+msgstr "TODO"
+
 msgid "detail tech data bogus"
 msgstr "bogus"
 
@@ -1994,7 +1997,7 @@ msgid "detail web tls zero-rtt exp"
 msgstr "TODO"
 
 msgid "detail web tls zero-rtt label"
-msgstr "TODO"
+msgstr "0-RTT"
 
 msgid "detail web tls zero-rtt tech table"
 msgstr "Webserver-IP-adres|TODO"
@@ -2003,6 +2006,9 @@ msgid "detail web tls zero-rtt verdict bad"
 msgstr "TODO"
 
 msgid "detail web tls zero-rtt verdict good"
+msgstr "TODO"
+
+msgid "detail web tls zero-rtt verdict na"
 msgstr "TODO"
 
 msgid "detail web-mail ipv6 ns-AAAA exp"
