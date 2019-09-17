@@ -33,10 +33,10 @@ RUN sudo -H pip install --upgrade pip && \
         coverage \
         coverage-enable-subprocess \
         git+https://github.com/ximon18/pytest-html.git@dynamic-result-table-header#egg=pytest-html \
-        pytest-xdist \
+        gitpython \
         pytest-progress \
         pytest-selenium \
-        gitpython
+        pytest-xdist
 
 COPY docker/it/app/entrypoint.sh.it ${APP_PATH}/docker/it/app/entrypoint.sh.it
 COPY docker/it/app/coverage/coverage-finalize.sh /opt/

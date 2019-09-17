@@ -182,8 +182,8 @@ ncsc_20_tests = [
     DomainConfig('NCSC20-Table1:SSL20',
         'ssl2only.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.IPV6_WEB_SAME_WEBSITE,
             TESTS.HTTPS_HTTP_HTTPS_AVAILABLE,
+            TESTS.IPV6_WEB_SAME_WEBSITE,
         },
         expected_not_tested={
             TESTS.DANE_EXISTS,
@@ -195,21 +195,21 @@ ncsc_20_tests = [
             TESTS.HTTPS_HTTP_COMPRESSION,
             TESTS.HTTPS_HTTP_HSTS,
             TESTS.HTTPS_HTTP_REDIRECT,
-            TESTS.TLS_CIPHER_SUITES,
-            TESTS.TLS_CIPHER_ORDER,
-            TESTS.TLS_CLIENT_RENEG,
-            TESTS.TLS_COMPRESSION,
-            TESTS.TLS_KEY_EXCHANGE,
-            TESTS.TLS_OCSP_STAPLING,
-            TESTS.TLS_SECURE_RENEG,
-            TESTS.TLS_VERSION,
-            TESTS.TLS_ZERO_RTT,
-            TESTS.TLS_HASH_FUNC,
             TESTS.SECURITY_HTTP_CSP,
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
             TESTS.SECURITY_HTTP_XXSS,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_COMPRESSION,
+            TESTS.TLS_HASH_FUNC,
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_ZERO_RTT,
         }),
 
     # internet.nl cannot make SSLv3 connections so instead of failing because
@@ -218,12 +218,12 @@ ncsc_20_tests = [
     PreTLS12DomainConfig('NCSC20-Table1:SSL30',
         'ssl3only.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.TLS_VERSION,
-            TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CLIENT_RENEG,
-            TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
         },
         expected_info={
             TESTS.TLS_OCSP_STAPLING
@@ -263,8 +263,8 @@ ncsc_20_tests = [
             TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CLIENT_RENEG,
-            TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_SECURE_RENEG,
         },
         expected_info={
             TESTS.TLS_OCSP_STAPLING
@@ -352,21 +352,21 @@ ncsc_20_tests = [
             TESTS.HTTPS_HTTP_COMPRESSION,
             TESTS.HTTPS_HTTP_HSTS,
             TESTS.HTTPS_HTTP_REDIRECT,
-            TESTS.TLS_CIPHER_SUITES,
-            TESTS.TLS_CIPHER_ORDER,
-            TESTS.TLS_CLIENT_RENEG,
-            TESTS.TLS_COMPRESSION,
-            TESTS.TLS_KEY_EXCHANGE,
-            TESTS.TLS_HASH_FUNC,
-            TESTS.TLS_OCSP_STAPLING,
-            TESTS.TLS_SECURE_RENEG,
-            TESTS.TLS_VERSION,
-            TESTS.TLS_ZERO_RTT,
             TESTS.SECURITY_HTTP_CSP,
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
             TESTS.SECURITY_HTTP_XXSS,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_COMPRESSION,
+            TESTS.TLS_HASH_FUNC,
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_ZERO_RTT,
         }),
 
     # Old OpenSSL is used because it supports the bad ciphers that we want to
@@ -585,7 +585,7 @@ other_tests = [
         },
         expected_not_tested={
             TESTS.IPV6_WEB_REACHABILITY,
-            TESTS.IPV6_WEB_SAME_WEBSITE
+            TESTS.IPV6_WEB_SAME_WEBSITE,
         }),
 
     # This domain deliberately serves different response content on IPv4
