@@ -119,6 +119,7 @@ services:
       # Environment variables that influence integration test behaviour
       - IT_BROWSER_WIDTH
       - IT_BROWSER_HEIGHT
+      - ENABLE_COVERAGE
       - TEST_SELECTOR
     ports:
       - "8080:8080"
