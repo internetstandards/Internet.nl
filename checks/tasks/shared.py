@@ -555,6 +555,12 @@ class SSLConnectionWrapper:
             self.host = self.conn.server_name
             self.port = self.conn.port
 
+    def __enter__(self):
+        return self.conn.__enter__()
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        return self.conn.__exit__(exception_type, exception_value, traceback)
+
 
 class HTTPSConnection(SSLConnectionWrapper):
     """
