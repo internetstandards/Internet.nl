@@ -613,6 +613,7 @@ services:
       - ROOT_IPV6
       - ROOT_IP
       - SUBNETV4
+      - TARGET_TLS1213_IP
 
   # An NSD authoratitive container responsible for the nlnetlabs.tk. zone
   submaster:
