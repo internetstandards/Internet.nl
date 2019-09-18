@@ -123,6 +123,7 @@ services:
       - TEST_SELECTOR
     ports:
       - "8080:8080"
+      - "5555:5555"
 
 
   # --------------------------------------------------------------------------
@@ -169,12 +170,14 @@ services:
         ipv6_address: ${REDIS_IPV6}
 
   rabbitmq:
-    image: rabbitmq:alpine
+    image: rabbitmq:management-alpine
     dns: ${RESOLVER_IP}
     networks:
       test_net:
         ipv4_address: ${RABBITMQ_IP}
         ipv6_address: ${RABBITMQ_IPV6}
+    ports:
+      - "15672:15672"
 
   postgres:
     image: postgres:alpine

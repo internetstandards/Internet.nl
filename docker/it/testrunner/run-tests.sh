@@ -224,7 +224,11 @@ if [ "${TEST_MAX_FAIL}" != "" ]; then
 fi
 
 echo
-echo ":: Execute the browser based integration test suite.. (TEST_SELECTOR: ${TEST_SELECTOR})"
+echo ":: Launch Flower for Celery task processing insight.."
+docker exec $C_APP flower -A internetnl --port=5555 &
+
+echo
+echo ":: Execute the browser based integration test suite.. (TEST_SELECTOR: ${TEST_SELECTOR}, TEST_MAX_FAIL: ${TEST_MAX_FAIL})"
 
 docker exec $C_APP sudo mkdir -p /tmp/it-report/coverage-data
 docker exec $C_APP sudo chmod -R a+w /tmp/it-report
