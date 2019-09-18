@@ -117,6 +117,7 @@ USER internetnl
 
 # Configure internetnl to know where LDNS-DANE is installed
 RUN sed -i -e "s|LDNS_DANE = .*|LDNS_DANE = '/usr/bin/ldns-dane'|g" ${APP_PATH}/internetnl/settings.py-dist
+RUN sed -i -e "s|TIME_ZONE = .*|TIME_ZONE = 'UTC'|g" ${APP_PATH}/internetnl/settings.py-dist
 
 # Prepare translations
 RUN make translations
