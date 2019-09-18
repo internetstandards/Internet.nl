@@ -104,9 +104,9 @@ services:
       - postgres
       - resolver
     environment:
+      - LDNS_DANE_VALIDATION_DOMAIN=tls12only.test.nlnetlabs.tk
       # setting CACHE_TTL (seconds) too low (e.g. to 1) causes test failures because the
       # Javascript retries run out before the probes complete.
-      - ENABLE_COVERAGE
       - CACHE_TTL=200
       - REDIS_HOST=redis
       - RABBITMQ_HOST=rabbitmq

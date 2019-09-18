@@ -11,6 +11,7 @@ POSTGRES_DB=${POSTGRES_DB:-internetnl_db1}
 RABBITMQ_HOST=${RABBITMQ_HOST:-localhost}
 REDIS_HOST=${REDIS_HOST:-localhost}
 RUN_SERVER_CMD=${RUN_SERVER_CMD:-runserver}
+LDNS_DANE_VALIDATION_DOMAIN=${LDNS_DANE_VALIDATION_DOMAIN:-internet.nl}
 
 APP_PATH=/app
 
@@ -18,8 +19,10 @@ APP_PATH=/app
 sudo unbound-control start
 sudo unbound-control status
 
-# Sanity check our DNS configuration
-ldns-dane -n -T verify internet.nl 443 || echo >&2 "ERROR: Please run this container with --dns 127.0.0.1"
+# Sanity check our DNS configuration. The default resolver should be DNSSEC
+# capable. If not LDNS-DANE will fail to verify domains. Internet.NL calls out
+# to LDNS-DANE so this needs to work for Internet.NL tests to work properly.
+ldns-dane -n -T verify ${LDNS_DANE_VALIDATION_DOMAIN} 443 || echo >&2 "ERROR: Please run this container with --dns 127.0.0.1"
 
 # Configure the Internet.nl Django app, e.g. to know how to connect to RabbitMQ, Redis and PostgreSQL.
 # Default values for the environment variables referred to below are provided by the Docker image but can be
