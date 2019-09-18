@@ -491,6 +491,11 @@ ncsc_20_tests = [
             TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
             ]
+        },
+        expected_info={
+            TESTS.TLS_HASH_FUNC: [
+                [MustMatch('not applicable')]
+            ]
         }),
 
     PreTLS13DomainConfig('NCSC20'
@@ -571,11 +576,35 @@ other_tests = [
     DomainConfig('IPV6:NONE',
         'tls13ipv4only.test.nlnetlabs.tk',
         expected_failures={
+            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE,
             TESTS.IPV6_WEB_REACHABILITY,
-            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE
         },
         expected_not_tested={
-            TESTS.IPV6_WEB_SAME_WEBSITE
+            TESTS.DANE_EXISTS,
+            TESTS.DANE_VALID,
+            TESTS.HTTPS_CERT_DOMAIN,
+            TESTS.HTTPS_CERT_PUBKEY,
+            TESTS.HTTPS_CERT_SIG,
+            TESTS.HTTPS_CERT_TRUST,
+            TESTS.HTTPS_HTTP_COMPRESSION,
+            TESTS.HTTPS_HTTP_HSTS,
+            TESTS.HTTPS_HTTP_REDIRECT,
+            TESTS.IPV6_WEB_SAME_WEBSITE,
+            TESTS.SECURITY_HTTP_CSP,
+            TESTS.SECURITY_HTTP_REFERRER,
+            TESTS.SECURITY_HTTP_XCONTYPE,
+            TESTS.SECURITY_HTTP_XFRAME,
+            TESTS.SECURITY_HTTP_XXSS,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_COMPRESSION,
+            TESTS.TLS_HASH_FUNC,
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_ZERO_RTT,
         }),
 
     # This domain deliberately lacks an IPV6 AAAA record in DNS
