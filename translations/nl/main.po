@@ -1807,7 +1807,7 @@ msgstr "TODO"
 
 msgid "detail web tls http-compression exp"
 msgstr ""
-"We testen of je webserver HTTP-compressie ondersteunt. HTTP-compressie maakt de beveiligde verbinding met je webserver kwetsbaar voor de BREACH-aanval. Het uitschakelen kan een negatieve invloed hebben op de prestaties van het systeem. Als je HTTP-compressie inzet, ga dan na of het mogelijk is maatregelen te treffen op applicatieniveau tegen de aanvalstechniek. Let op: dit testonderdeel controleert of de webserver op rootdirectory-niveau HTTP-compressie ondersteunt, maar controleert geen andere websitebronnen zoals plaatje en scripts. Zie ['TLS-beveiligingsrichtlijnen van NCSC](https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html), richtlijn B6-1].\n"
+"We testen of je webserver HTTP-compressie ondersteunt. HTTP-compressie maakt de beveiligde verbinding met je webserver kwetsbaar voor de BREACH-aanval. Het uitschakelen kan een negatieve invloed hebben op de prestaties van het systeem. Als je HTTP-compressie inzet, ga dan na of het mogelijk is maatregelen te treffen op applicatieniveau tegen de aanvalstechniek. Let op: dit testonderdeel controleert of de webserver op rootdirectory-niveau HTTP-compressie ondersteunt, maar controleert geen andere websitebronnen zoals plaatje en scripts. Zie ['TLS-beveiligingsrichtlijnen van NCSC'](https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html), richtlijn B6-1].\n"
 "\n"
 "*Niveau van vereistheid: Aanbevolen*"
 
