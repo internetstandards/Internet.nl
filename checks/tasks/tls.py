@@ -1170,8 +1170,23 @@ class DebugCertChain(object):
             hostmatch_score = self.score_hostmatch_good
         except ssl.CertificateError:
             hostmatch_score = self.score_hostmatch_bad
+            # bad_hostmatch was of the form list(CN, list(SAN, SAN, ..)). In the
+            # report the CN is shown on one row of the tech table and the SANs
+            # are shown as '[SAN, SAN]' on a second row. Showing the SANs in the
+            # report as the string representation of a Python list is a separate
+            # issue so ignore that for the moment. It is possible for there to
+            # be duplicates and overlap between the SANs and the CN which when
+            # shown in a report column titled 'Unmatched domains on certificate'
+            # looks odd to have duplicate entries. I have flattened this to the
+            # form list(CN, SAN, SAN, ..) while still preserving the order. As
+            # Python doesn't have an OrderedSet type and adding one is overkill
+            # I use a trick to remove duplicates in the ordered list. See:
+            # https://www.w3schools.com/python/python_howto_remove_duplicates.asp
+            # However, was anyone relying on the nested structure of this result
+            # value, e.g. perhaps via the Internet.NL batch API?
             bad_hostmatch.append(common_name)
-            bad_hostmatch.append(sans)
+            bad_hostmatch.extend(sans)
+            bad_hostmatch = list(dict.fromkeys(bad_hostmatch))  # de-dupe
         return hostmatch_score, bad_hostmatch
 
     # NCSC guidelines B3-3, B3-4, B3-5
