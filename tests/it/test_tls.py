@@ -8,13 +8,6 @@ from helpers import INSUFFICIENT_TEXT, PHASE_OUT_TEXT, PHASE_OUT_TEXT_NL, ANY
 from selenium.common.exceptions import ElementNotInteractableException
 
 
-# TODO: Refactor cipher tests to explicitly test for the expected ciphers in
-# the right order (overlaps with testing of cipher preference order checking,
-# which is not implemented yet).
-# TODO: Report and test for IANA/RFC cipher names instead of OpenSSL cipher
-# names?
-
-
 class DetailTableCellMatcher:
     def __init__(self, pattern_string):
         self._pattern = re.compile(pattern_string)
