@@ -2090,9 +2090,13 @@ class ConnectionChecker:
                 pass
             elif (dh_ff_g == FFDHE_GENERATOR and
                   dh_ff_p == FFDHE2048_PRIME):
-                fs_phase_out.append("DH-FFDHE2048{}".format(self._debug_info("weak ff group")))
+                fs_phase_out.append("DH-2048{}".format(self._debug_info("weak ff group")))
             else:
                 fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
+        elif dh_param and int(dh_param) < 2048:
+            fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("weak bit length")))
+        if ecdh_param and int(ecdh_param) < 224:
+            fs_bad.append("ECDH-{}{}".format(ecdh_param, self._debug_info("weak bit length")))
 
         if len(fs_bad) == 0:
             fs_score = self._score_tls_fs_ok
