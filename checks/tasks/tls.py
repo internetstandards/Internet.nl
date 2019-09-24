@@ -638,16 +638,20 @@ def save_results(model, results, addr, domain, category):
 
 def build_report(dttls, category):
     def annotate_with_sec_level(items, security_level):
-        translatable_annotation = (
-            INJECTED_TRANSLATION_START
-            + f'results security-level {security_level}'
-            + INJECTED_TRANSLATION_END)
+        # translatable_annotation = (
+        #     INJECTED_TRANSLATION_START
+        #     + f'results security-level {security_level}'
+        #     + INJECTED_TRANSLATION_END)
+        translatable_annotation = f'detail tech data {security_level}'
         
-        return [f'{item} ({translatable_annotation})' for item in items]
+        return [items, [translatable_annotation for i in range(len(items))]]
 
     def annotate_and_combine(bad_items, phaseout_items):
-        return (annotate_with_sec_level(bad_items, 'insufficient') +
-                annotate_with_sec_level(phaseout_items, 'phase-out'))
+        # return (annotate_with_sec_level(bad_items, 'insufficient') +
+        #         annotate_with_sec_level(phaseout_items, 'phase-out'))
+        bad = annotate_with_sec_level(bad_items, 'insufficient')
+        phase_out = annotate_with_sec_level(phaseout_items, 'phase-out')
+        return [a + b for a, b in zip(bad, phase_out)]
 
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:

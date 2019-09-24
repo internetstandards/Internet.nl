@@ -777,7 +777,7 @@ msgid "detail mail tls cert-signature label"
 msgstr "Handtekening van certificaat"
 
 msgid "detail mail tls cert-signature tech table"
-msgstr "Mailserver (MX)|Onveilig hashing-algoritme"
+msgstr "Mailserver (MX)|Getroffen hashing-algoritme|Veiligheidsniveau"
 
 msgid "detail mail tls cert-signature verdict bad"
 msgstr ""
@@ -855,7 +855,7 @@ msgid "detail mail tls ciphers label"
 msgstr "Cipher suites"
 
 msgid "detail mail tls ciphers tech table"
-msgstr "Mailserver (MX)|Eerstgevonden onveilige cipher suite"
+msgstr "Mailserver (MX)|Eerstgevonden onveilige cipher suite|Veiligheidsniveau"
 
 msgid "detail mail tls ciphers verdict bad"
 msgstr ""
@@ -1028,7 +1028,7 @@ msgid "detail mail tls fs-params label"
 msgstr "Sleuteluitwisselingsparameters"
 
 msgid "detail mail tls fs-params tech table"
-msgstr "Mailserver (MX)|Onveilige parameters"
+msgstr "Mailserver (MX)|Getroffen parameters|Veiligheidsniveau"
 
 msgid "detail mail tls fs-params verdict bad"
 msgstr ""
@@ -1176,7 +1176,7 @@ msgid "detail mail tls version label"
 msgstr "TLS-versie"
 
 msgid "detail mail tls version tech table"
-msgstr "Mailserver (MX)|Onveilige TLS-versies"
+msgstr "Mailserver (MX)|Getroffen TLS-versies|Veiligheidsniveau"
 
 msgid "detail mail tls version verdict bad"
 msgstr ""
@@ -1562,7 +1562,7 @@ msgid "detail web tls cert-signature label"
 msgstr "Handtekening van certificaat"
 
 msgid "detail web tls cert-signature tech table"
-msgstr "Webserver-IP-adres|Onveilig hashing-algoritme"
+msgstr "Webserver-IP-adres|Getroffen hashing-algoritme|Veiligheidsniveau"
 
 msgid "detail web tls cert-signature verdict bad"
 msgstr ""
@@ -1631,7 +1631,7 @@ msgid "detail web tls ciphers label"
 msgstr "Cipher suites"
 
 msgid "detail web tls ciphers tech table"
-msgstr "Webserver-IP-adres|Onveilige cipher suites"
+msgstr "Webserver-IP-adres|Getroffen cipher suites|Veiligheidsniveau"
 
 msgid "detail web tls ciphers verdict bad"
 msgstr "Je webserver ondersteunt *onvoldoende* veilige cipher suites."
@@ -1766,7 +1766,7 @@ msgid "detail web tls fs-params label"
 msgstr "Sleuteluitwisselingsparameters"
 
 msgid "detail web tls fs-params tech table"
-msgstr "Webserver-IP-adres|Onveilige parameters"
+msgstr "Webserver-IP-adres|Getroffen parameters|Veiligheidsniveau"
 
 msgid "detail web tls fs-params verdict bad"
 msgstr ""
@@ -1982,7 +1982,7 @@ msgid "detail web tls version label"
 msgstr "TLS-versie"
 
 msgid "detail web tls version tech table"
-msgstr "Webserver-IP-adres|Onveilige TLS-versies"
+msgstr "Webserver-IP-adres|Getroffen TLS-versies|Veiligheidsniveau"
 
 msgid "detail web tls version verdict bad"
 msgstr "Je webserver ondersteunt *onvoldoende* veilige TLS-versies."

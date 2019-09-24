@@ -762,7 +762,7 @@ msgid "detail mail tls cert-signature label"
 msgstr "Signature of certificate"
 
 msgid "detail mail tls cert-signature tech table"
-msgstr "Mail server (MX)|Affected hash algorithm"
+msgstr "Mail server (MX)|Affected hash algorithm|Security level"
 
 msgid "detail mail tls cert-signature verdict bad"
 msgstr ""
@@ -847,7 +847,7 @@ msgid "detail mail tls ciphers label"
 msgstr "Cipher suites"
 
 msgid "detail mail tls ciphers tech table"
-msgstr "Mail server (MX)|First found insecure cipher suite"
+msgstr "Mail server (MX)|First found affected cipher suite|Security level"
 
 msgid "detail mail tls ciphers verdict bad"
 msgstr ""
@@ -1022,7 +1022,7 @@ msgid "detail mail tls fs-params label"
 msgstr "Key exchange parameters"
 
 msgid "detail mail tls fs-params tech table"
-msgstr "Mail server (MX)|Affected parameters"
+msgstr "Mail server (MX)|Affected parameters|Security level"
 
 msgid "detail mail tls fs-params verdict bad"
 msgstr ""
@@ -1200,7 +1200,7 @@ msgid "detail mail tls version label"
 msgstr "TLS version"
 
 msgid "detail mail tls version tech table"
-msgstr "Mail server (MX)|Affected TLS versions"
+msgstr "Mail server (MX)|Affected TLS versions|Security level"
 
 msgid "detail mail tls version verdict bad"
 msgstr ""
@@ -1596,7 +1596,7 @@ msgid "detail web tls cert-signature label"
 msgstr "Signature of certificate"
 
 msgid "detail web tls cert-signature tech table"
-msgstr "Web server IP address|Affected hash algorithm"
+msgstr "Web server IP address|Affected hash algorithm|Security level"
 
 msgid "detail web tls cert-signature verdict bad"
 msgstr ""
@@ -1668,7 +1668,7 @@ msgid "detail web tls ciphers label"
 msgstr "Cipher suites"
 
 msgid "detail web tls ciphers tech table"
-msgstr "Web server IP address|Affected cipher suites"
+msgstr "Web server IP address|Affected cipher suites|Security level"
 
 msgid "detail web tls ciphers verdict bad"
 msgstr "Your web server supports *insufficiently* secure cipher suites."
@@ -1798,7 +1798,7 @@ msgid "detail web tls fs-params label"
 msgstr "Key exchange parameters"
 
 msgid "detail web tls fs-params tech table"
-msgstr "Web server IP address|Affected parameters"
+msgstr "Web server IP address|Affected parameters|Security level"
 
 msgid "detail web tls fs-params verdict bad"
 msgstr ""
@@ -2054,7 +2054,7 @@ msgid "detail web tls version label"
 msgstr "TLS version"
 
 msgid "detail web tls version tech table"
-msgstr "Web server IP address|Affected TLS versions"
+msgstr "Web server IP address|Affected TLS versions|Security level"
 
 msgid "detail web tls version verdict bad"
 msgstr "Your web server supports *insufficiently* secure TLS versions."

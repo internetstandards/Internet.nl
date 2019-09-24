@@ -13,19 +13,6 @@ from ..scoring import STATUS_NOT_TESTED, STATUS_INFO
 
 register = template.Library()
 
-INJECTED_TRANSLATION_START = "🌜"
-INJECTED_TRANSLATION_END = "🌛"
-INJECTED_TRANSLATION_LABELS = [
-    'results security-level',
-]
-INJECTED_TRANSLATION_REGEX = re.compile(
-    r'|'.join([
-        '{}({}[^{}]*){}'.format(
-            INJECTED_TRANSLATION_START,
-            label,
-            INJECTED_TRANSLATION_END, INJECTED_TRANSLATION_END)
-        for label in INJECTED_TRANSLATION_LABELS]))
-
 
 @register.simple_tag(takes_context=True)
 def translate(context, longname):
@@ -106,41 +93,17 @@ def render_details_table(headers, arguments):
                     value = cell_deque.popleft()
                     if not value:
                         row.append(_('results empty-argument-alt-text'))
-                        continue
-
-                    # stringify to deal with cases like:
-                    #   value=['*.some-domain.net', ['*.some-domain.net',
-                    #          'some-domain.net']]
-                    # caused for example by the cert_hostmatch test returning
-                    # multiple values.
-                    group_list = INJECTED_TRANSLATION_REGEX.findall(str(value))
-                    if value in [
+                    elif value in [
                             'detail tech data yes',
                             'detail tech data no',
                             'detail tech data secure',
                             'detail tech data insecure',
                             'detail tech data bogus',
                             'detail tech data not-applicable',
-                            'detail tech data not-tested']:
+                            'detail tech data not-tested',
+                            'detail tech data phase-out',
+                            'detail tech data insufficient']:
                         value = _(value)
-                    elif group_list:
-                        replacements = []
-                        for groups in group_list:
-                            if isinstance(groups, tuple):
-                                # More than one group *used*.
-                                for group in groups:
-                                    # Only one of the groups may have a value.
-                                    if not group:
-                                        continue
-                                    replacements.append((group, _(group)))
-                                    break
-                            else:
-                                replacements.append((groups, _(groups)))
-                        for orig, new in replacements:
-                            value = (
-                                value.replace(orig, new)
-                                .replace(INJECTED_TRANSLATION_START, "")
-                                .replace(INJECTED_TRANSLATION_END, ""))
                     row.append(value)
                 else:
                     if column == 0 and table_length > 1:
