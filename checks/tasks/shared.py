@@ -196,7 +196,13 @@ def aggregate_subreports(subreports, report):
                     tech_type = subreport[test_item]['tech_type']
                     report[test_item]['tech_type'] = tech_type
 
-                data = (server, subreport[test_item]['tech_data'])
+                subtechdata = subreport[test_item]['tech_data']
+                if (subreport[test_item]['tech_multi_col'] and
+                        isinstance(subtechdata, list)):
+                    # support more than two columns in the tech detail table
+                    data = (server, *subtechdata)
+                else:
+                    data = (server, subtechdata)
                 report[test_item]['tech_data'].append(data)
 
             # If the results are 'good' and 'not_tested' mixed, we show the

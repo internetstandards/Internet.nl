@@ -63,7 +63,8 @@ class Subtest(object):
             init_status=STATUS_NOT_TESTED,
             init_verdict="detail verdict not-tested",
             init_tech_type="table",
-            init_tech_data="detail tech data not-tested"):
+            init_tech_data="detail tech data not-tested",
+            init_tech_multi_col=False):
         self.name = name
         self.label = label
         self.explanation = explanation
@@ -75,6 +76,7 @@ class Subtest(object):
         self.verdict = init_verdict
         self.tech_type = init_tech_type
         self.tech_data = init_tech_data
+        self.tech_multi_col = init_tech_multi_col
 
     def _status(self, status):
         """
@@ -101,6 +103,7 @@ class Subtest(object):
             'tech_type': self.tech_type,
             'tech_string': self.tech_string,
             'tech_data': self.tech_data,
+            'tech_multi_col': self.tech_multi_col,
         }
 
 
