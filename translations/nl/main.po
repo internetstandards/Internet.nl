@@ -827,9 +827,12 @@ msgid "detail mail tls cipher_order label"
 msgstr "Cipher suite volgorde"
 
 msgid "detail mail tls cipher_order tech table"
-msgstr "Mailserver (MX)|TODO"
+msgstr "Mail server (MX)|Ciphers|Rule #"
 
 msgid "detail mail tls cipher_order verdict bad"
+msgstr "TODO"
+
+msgid "detail mail tls cipher_order verdict warning"
 msgstr "TODO"
 
 msgid "detail mail tls cipher_order verdict good"
@@ -1608,10 +1611,14 @@ msgid "detail web tls cipher_order label"
 msgstr "TODO"
 
 msgid "detail web tls cipher_order tech table"
-msgstr "Webserver-IP-adres|TODO"
+msgstr "Mail server (MX)|Ciphers|Rule #"
 
 msgid "detail web tls cipher_order verdict bad"
 msgstr "TODO"
+
+msgid "detail web tls cipher_order verdict warning"
+msgstr "TODO"
+
 
 msgid "detail web tls cipher_order verdict good"
 msgstr "TODO"
@@ -2956,17 +2963,17 @@ msgstr "Seconden tot hertest-mogelijkheid:"
 msgid "results score-description"
 msgstr "Het domein {{prettyaddr}} heeft een testscore van {{score}}%."
 
-msgid "results security-level good"
-msgstr "Goed"
+msgid "detail tech data good"
+msgstr "goed"
 
-msgid "results security-level insufficient"
-msgstr "Onvoldoende"
+msgid "detail tech data insufficient"
+msgstr "onvoldoende"
 
-msgid "results security-level phase-out"
-msgstr "Uit te faseren"
+msgid "detail tech data phase-out"
+msgstr "uit te faseren"
 
-msgid "results security-level sufficient"
-msgstr "Voldoende"
+msgid "detail tech data sufficient"
+msgstr "voldoende"
 
 msgid "results tech-details label"
 msgstr "Technische details:"

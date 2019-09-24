@@ -50,6 +50,12 @@ class HashFuncStatus(Enum):
     unknown = 2
 
 
+class CipherOrderStatus(Enum):
+    bad = 0
+    good = 1
+    not_prescribed = 2
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -407,7 +413,8 @@ class DomainTestTls(BaseTestModel):
     ciphers_phase_out = ListField(null=True)
     ciphers_score = models.IntegerField(null=True)
 
-    cipher_order = models.NullBooleanField(default=False)
+    cipher_order = EnumField(CipherOrderStatus, default=CipherOrderStatus.bad)
+    cipher_order_violation = ListField(null=True)
     cipher_order_score = models.IntegerField(null=True)
 
     protocols_bad = ListField(null=True)
@@ -466,6 +473,7 @@ class DomainTestTls(BaseTestModel):
             'could_not_test_smtp_starttls', 'dane_log', 'dane_score',
             'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_phase_out',
             'fs_score', 'ciphers_bad', 'ciphers_phase_out', 'ciphers_score',
+            'cipher_order', 'cipher_order_violation', 'cipher_order_score',
             'protocols_bad', 'protocols_phase_out', 'protocols_score',
             'compression', 'compression_score', 'secure_reneg',
             'secure_reneg_score', 'client_reneg', 'client_reneg_score',

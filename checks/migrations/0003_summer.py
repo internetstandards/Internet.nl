@@ -57,12 +57,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='domaintesttls',
             name='cipher_order',
-            field=models.NullBooleanField(default=False),
+            field=enumfields.fields.EnumField(default=0, enum=checks.models.CipherOrderStatus, max_length=10),
         ),
         migrations.AddField(
             model_name='domaintesttls',
             name='cipher_order_score',
             field=models.IntegerField(null=True),
+        ),
+        migrations.AddField(
+            model_name='domaintesttls',
+            name='cipher_order_violation',
+            field=checks.models.ListField(null=True)
         ),
         migrations.AddField(
             model_name='domaintesttls',

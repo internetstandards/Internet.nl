@@ -3,7 +3,7 @@
 import http.client
 import socket
 
-from .shared import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
+from .connection import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
 from .. import scoring
 
 

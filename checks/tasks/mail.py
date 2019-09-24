@@ -9,7 +9,8 @@ from django.core.cache import cache
 from urllib.parse import urlparse
 import unbound
 
-from . import SetupUnboundContext, shared
+from . import SetupUnboundContext
+from .connection import http_get
 from .dispatcher import post_callback_hook, check_registry
 from .dmarc_parser import parse as dmarc_parse
 from .spf_parser import parse as spf_parse
@@ -722,7 +723,7 @@ def dmarc_fetch_public_suffix_list():
 
     """
     public_suffix_list = []
-    r = shared.http_get(settings.PUBLIC_SUFFIX_LIST_URL)
+    r = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
     lines = r.text.split("\n")
     for line in lines:
         line = line.rstrip()

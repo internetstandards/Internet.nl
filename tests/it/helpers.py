@@ -11,9 +11,9 @@ from selenium.webdriver.support import expected_conditions as EC
 BASE_URL = 'http://{0}.internetnl.test.nlnetlabs.tk:8080/'
 IMPERFECT_SCORE = 'IMPERFECT'
 PERFECT_SCORE = '100%'
-INSUFFICIENT_TEXT = 'Insufficient'
-PHASE_OUT_TEXT = 'Phase out'
-PHASE_OUT_TEXT_NL = 'Uit te faseren'
+INSUFFICIENT_TEXT = 'insufficient'
+PHASE_OUT_TEXT = 'phase out'
+PHASE_OUT_TEXT_NL = 'uit te faseren'
 ANY = None
 
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'

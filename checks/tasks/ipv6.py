@@ -15,6 +15,7 @@ from django.db import transaction
 from . import dispatcher
 from . import SetupUnboundContext
 from . import shared
+from .connection import http_fetch, NoIpError
 from .dispatcher import check_registry
 from .. import scoring, categories, redis_id
 from .. import batch, batch_shared_task
@@ -425,14 +426,14 @@ def simhash(url, task=None):
     v6_conn = None
     for port in [80, 443]:
         try:
-            v4_conn, v4_res, _, _ = shared.http_fetch(
+            v4_conn, v4_res, _, _ = http_fetch(
                 url, socket.AF_INET, port=port, task=task,
                 keep_conn_open=True)
-            v6_conn, v6_res, _, _ = shared.http_fetch(
+            v6_conn, v6_res, _, _ = http_fetch(
                 url, socket.AF_INET6, port=port, task=task,
                 keep_conn_open=True)
             break
-        except (socket.error, shared.NoIpError, http.client.BadStatusLine):
+        except (socket.error, NoIpError, http.client.BadStatusLine):
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
             if v4_conn:

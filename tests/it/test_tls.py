@@ -30,49 +30,9 @@ class MustMatch(DetailTableCellMatcher):
     pass
 
 
-# Cipher testing
-# NCSC 2.0 defines a set of phase out ciphers. Here are the OpenSSL equivalent
-# cipher names. Uses mappings taken from openssl 1.1.1b "ciphers" command, e.g.
-#
-#   openssl ciphers -V -psk -srp -stdname ALL@SECLEVEL=0 | fgrep <cipher name>
-#
-# Where this did not contain a match, the cipher name was looked up on
-# https://testssl.sh/openssl-iana.mapping.html and then checked to see if
-# openssl 1.0.2e knows it with this command (on any Docker container based on
-# the 'targetbase' image):
-#
-#   /opt/openssl-old/bin/openssl ciphers -V <openssl cipher name>
-#
-# NCSC 2.0/RFC/IANA cipher name          OpenSSL cipher name    OpenSSL version
-# -----------------------------------------------------------------------------
-# TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA  ECDHE-ECDSA-DES-CBC3-SHA    1.0.2e
-# TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA    ECDHE-RSA-DES-CBC3-SHA      1.0.2e
-# TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA      EDH-RSA-DES-CBC3-SHA        1.0.2e
-# TLS_RSA_WITH_AES_256_GCM_SHA384        AES256-GCM-SHA384           1.1.1b
-# TLS_RSA_WITH_AES_128_GCM_SHA256        AES128-GCM-SHA256           1.1.1b
-# TLS_RSA_WITH_AES_256_CBC_SHA256        AES256-SHA256               1.1.1b
-# TLS_RSA_WITH_AES_256_CBC_SHA           AES256-SHA                  1.1.1b
-# TLS_RSA_WITH_AES_128_CBC_SHA256        AES128-SHA256               1.1.1b
-# TLS_RSA_WITH_AES_128_CBC_SHA           AES128-SHA                  1.1.1b
-# TLS_RSA_WITH_3DES_EDE_CBC_SHA          DES-CBC3-SHA                1.0.2e
-#
-# These ciphers have the following properties according to 'ciphers -V':
-#
-# OpenSSL cipher name       code       protocol  kx    au     enc          mac
-# -----------------------------------------------------------------------------
-# ECDHE-ECDSA-DES-CBC3-SHA  0xC0,0x08  SSLv3     ECDH  ECDSA  3DES(168)    SHA1
-# ECDHE-RSA-DES-CBC3-SHA    0xC0,0x12  SSLv3     ECDH  RSA    3DES(168)    SHA1
-# EDH-RSA-DES-CBC3-SHA      0x00,0x16  SSLv3     DH    RSA    3DES(168)    SHA1
-# AES256-GCM-SHA384         0x00,0x9D  TLSv1.2   RSA   RSA    AESGCM(256)  AEAD
-# AES128-GCM-SHA256         0x00,0x9C  TLSv1.2   RSA   RSA    AESGCM(128)  AEAD
-# AES256-SHA256             0x00,0x3D  TLSv1.2   RSA   RSA    AES(256)     SHA256
-# AES256-SHA                0x00,0x35  SSLv3     RSA   RSA    AES(256)     SHA1
-# AES128-SHA256             0x00,0x3C  TLSv1.2   RSA   RSA    AES(128)     SHA256
-# AES128-SHA                0x00,0x2F  SSLv3     RSA   RSA    AES(128)     SHA1
-# DES-CBC3-SHA              0x00,0x0A  SSLv3     RSA   RSA    3DES(168)    SHA1
 REGEX_LEGACY_BAD_CIPHERS = MustMatch(r'(IDEA|DES|RC4|NULL)')
 REGEX_MODERN_BAD_CIPHERS = MustMatch(r'AES(128|256)-CCM')
-REGEX_PHASE_OUT_CIPHERS = MustMatch(r'(DES.+CBC3|3DES.+CBC|AES(128|256)-(GCM-SHA(256|384)|SHA(256)?)).* \({}\)'.format(PHASE_OUT_TEXT))
+REGEX_PHASE_OUT_CIPHERS = MustMatch(r'(DES.+CBC3|3DES.+CBC|AES(128|256)-(GCM-SHA(256|384)|SHA(256)?))')
 
 
 # Some of the "mock" target servers are powered by OpenSSL server which cannot
@@ -93,7 +53,9 @@ class OpenSSLServerDomainConfig(DomainConfig):
         # out" ciphers.
         if not self._manual_cipher_checks:
             self.expected_warnings.setdefault(
-                TESTS.TLS_CIPHER_SUITES, [[REGEX_PHASE_OUT_CIPHERS]])
+                TESTS.TLS_CIPHER_SUITES, [
+                    [REGEX_PHASE_OUT_CIPHERS, PHASE_OUT_TEXT],  # matches all rows
+                ])
 
         # Since we can't control the HTTP response headers produced by the
         # OpenSSL 'www' server that means that HTTP response header related
@@ -227,8 +189,8 @@ ncsc_20_tests = [
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
             ]
         }),
 
@@ -236,8 +198,8 @@ ncsc_20_tests = [
         'tls10onlyhonorclientcipherorder.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
             ]
         },
         expected_failures={
@@ -249,13 +211,13 @@ ncsc_20_tests = [
         'tls10onlyinsecurereneg.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
-            ]
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
+            ],
         },
         expected_failures={
-            TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CLIENT_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
             TESTS.TLS_SECURE_RENEG,
@@ -268,8 +230,8 @@ ncsc_20_tests = [
         'tls11only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv4
             ],
         }),
 
@@ -277,10 +239,10 @@ ncsc_20_tests = [
         'tls1011.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
-                [f'TLS 1.0 ({PHASE_OUT_TEXT})'],  # IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
             ],
         }),
 
@@ -288,8 +250,8 @@ ncsc_20_tests = [
         'tls1112.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv6
-                [f'TLS 1.1 ({PHASE_OUT_TEXT})'],  # IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv4
             ]
         }),
 
@@ -326,11 +288,6 @@ ncsc_20_tests = [
             TESTS.DANE_EXISTS
         }),
 
-    GoodDomain('NCSC20'
-        '-Table1:TLS13'
-        '-Table14:Off',
-        'tls13only.test.nlnetlabs.tk'),
-
     DomainConfig('NCSC20-Table1:None',
         'nossl.test.nlnetlabs.tk',
         expected_failures={
@@ -363,20 +320,56 @@ ncsc_20_tests = [
             TESTS.TLS_ZERO_RTT,
         }),
 
-    # Old OpenSSL is used because it supports the bad ciphers that we want to
-    # test for. For TLS 1.2 we normally use modern OpenSSL which has support
-    # for disabling client renegotiation, but old OpenSSL does not have such
-    # support so we have to expect the client renegotiation test to fail in
-    # addition to the usual tests that fail when testing against an OpenSSL
-    # server.
+    PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
+        'tls12onlynotprescribedorder1.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.TLS_CIPHER_SUITES
+        },
+        expected_warnings={
+            TESTS.TLS_CIPHER_ORDER: [
+                [MustMatch(r'.+'), ''],   # IPv6
+                [MustMatch(r'.+'), '1'],  # IPv6
+                [MustMatch(r'.+'), ''],   # IPv4
+                [MustMatch(r'.+'), '1'],  # IPv4
+            ]
+        }),
+
+    PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
+        'tls12onlynotprescribedorder4.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.TLS_CIPHER_ORDER: [
+                [MustMatch(r'.+'), ''],   # IPv6
+                [MustMatch(r'.+'), '4'],  # IPv6
+                [MustMatch(r'.+'), ''],   # IPv4
+                [MustMatch(r'.+'), '4'],  # IPv4
+            ]
+        }),
+
+    PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
+        'tls12onlynotprescribedorder5.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.TLS_CIPHER_SUITES
+        },
+        expected_warnings={
+            TESTS.TLS_CIPHER_ORDER: [
+                [MustMatch(r'.+'), ''],   # IPv6
+                [MustMatch(r'.+'), '5'],  # IPv6
+                [MustMatch(r'.+'), ''],   # IPv4
+                [MustMatch(r'.+'), '5'],  # IPv4
+            ]
+        }),
+
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyBadCiphers',
         'tls12onlylegacybadciphers.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_CIPHER_SUITES: [
-                [REGEX_LEGACY_BAD_CIPHERS],  # matches all rows
+                [REGEX_LEGACY_BAD_CIPHERS, INSUFFICIENT_TEXT],  # matches all rows
             ]
+        },
+        expected_warnings={
+            TESTS.TLS_CIPHER_ORDER
         }),
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
@@ -384,21 +377,7 @@ ncsc_20_tests = [
         'tls12onlylegacyphaseoutciphers.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CIPHER_SUITES: [
-                [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
-            ]
-        }),
-    PreTLS13DomainConfig('NCSC20'
-        '-Table1:TLS12'
-        '-Table6:ModernPhaseOutCiphers',
-        'tls12onlymodernphaseoutciphers.test.nlnetlabs.tk',
-        expected_warnings={
-            TESTS.TLS_CIPHER_SUITES: [
-                [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
-            ],
-        },
-        expected_info={
-            TESTS.TLS_HASH_FUNC: [
-                [MustMatch('not applicable')]
+                [REGEX_PHASE_OUT_CIPHERS, PHASE_OUT_TEXT],  # matches all rows
             ]
         }),
     PreTLS13DomainConfig('NCSC20'
@@ -407,8 +386,22 @@ ncsc_20_tests = [
         'tls12onlymodernbadciphers.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_CIPHER_SUITES: [
-                [REGEX_MODERN_BAD_CIPHERS],  # matches all rows
+                [REGEX_MODERN_BAD_CIPHERS, INSUFFICIENT_TEXT],  # matches all rows
+            ]
+        }),
+    PreTLS13DomainConfig('NCSC20'
+        '-Table1:TLS12'
+        '-Table6:ModernPhaseOutCiphers',
+        'tls12onlymodernphaseoutciphers.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.TLS_CIPHER_SUITES: [
+                [REGEX_PHASE_OUT_CIPHERS, PHASE_OUT_TEXT],  # matches all rows
             ],
+        },
+        expected_info={
+            TESTS.TLS_HASH_FUNC: [
+                [MustMatch('not applicable')]
+            ]
         }),
 
     # 0-RTT is a TLS 1.3 feature so should not be tested.
@@ -420,7 +413,8 @@ ncsc_20_tests = [
         'tls12onlyffdhe2048.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_KEY_EXCHANGE: [
-                [MustMatch(fr'DH-FFDHE2048 \({PHASE_OUT_TEXT}\)')]
+                ['DH-2048', PHASE_OUT_TEXT],  # IPv6
+                ['DH-2048', PHASE_OUT_TEXT],  # IPv4
             ]
         }),
 
@@ -436,7 +430,8 @@ ncsc_20_tests = [
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_KEY_EXCHANGE: [
-                [MustMatch(fr'DH-4096 \({INSUFFICIENT_TEXT}\)')]
+                ['DH-4096', INSUFFICIENT_TEXT], # IPv6
+                ['DH-4096', INSUFFICIENT_TEXT], # IPv4
             ]
         }),
 
@@ -450,7 +445,8 @@ ncsc_20_tests = [
         'tls12onlydhlongg.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_KEY_EXCHANGE: [
-                [MustMatch(fr'DH-1024 \({INSUFFICIENT_TEXT}\)')]
+                ['DH-1024', INSUFFICIENT_TEXT], # IPv6
+                ['DH-1024', INSUFFICIENT_TEXT], # IPv4
             ]
         }),
 
@@ -482,7 +478,7 @@ ncsc_20_tests = [
         'tls1213modernphaseoutciphers.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CIPHER_SUITES: [
-                [REGEX_PHASE_OUT_CIPHERS],  # matches all rows
+                [REGEX_PHASE_OUT_CIPHERS, PHASE_OUT_TEXT],  # matches all rows
             ]
         },
         expected_info={
@@ -498,6 +494,11 @@ ncsc_20_tests = [
         expected_failures={
             TESTS.TLS_COMPRESSION
         }),
+
+    GoodDomain('NCSC20'
+        '-Table1:TLS13'
+        '-Table14:Off',
+        'tls13only.test.nlnetlabs.tk'),
 
     # This website virtual host configuration deliberately does not do OCSP
     # stapling.
@@ -626,8 +627,8 @@ nl_translation_tests = [
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION_NL: [
-                [f'TLS 1.0 ({PHASE_OUT_TEXT_NL})'],  # IPv6
-                [f'TLS 1.0 ({PHASE_OUT_TEXT_NL})'],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT_NL],  # IPv6
+                ['TLS 1.0', PHASE_OUT_TEXT_NL],  # IPv4
             ]
         },
         lang='nl'),
@@ -940,7 +941,8 @@ def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
         iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
         expected_warnings={
             TESTS.TLS_CIPHER_SUITES: [
-                [MustContain(fr'{openssl_cipher_name} \({PHASE_OUT_TEXT}\)')],
+                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv6
+                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv4
             ]
         })
 
