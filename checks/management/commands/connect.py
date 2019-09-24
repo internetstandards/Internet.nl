@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from checks.tasks.shared import SSLConnectionWrapper, DebugConnection, ModernConnection
-from checks.tasks.shared import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2, TLSV1_3
-from checks.tasks.shared import http_get
-from checks.tasks.tls import CipherScoreAndSecLevel, cipher_infos
+from checks.tasks.connection import SSLConnectionWrapper, DebugConnection, ModernConnection
+from checks.tasks.connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2, TLSV1_3
+from checks.tasks.connection import http_get
+from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
 from sys import exit
 
 class Command(BaseCommand):
