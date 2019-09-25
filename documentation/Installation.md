@@ -160,14 +160,14 @@ for PostgreSQL.
 
 ## Django setup
 
-- Apply the DB schema and/or migrations:
-  ```
-  python manage.py migrate checks
-  ```
 - Copy distributed config and edit:
   * `cp internetnl/settings.py-dist internetnl/settings.py`
   * Review the settings and make sure to at least change secret, database
     settings, redis settings, celery settings, ldns-dane location
+- Apply the DB schema and/or migrations:
+  ```
+  python manage.py migrate checks
+  ```
 
 
 ## Running services

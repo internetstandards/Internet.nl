@@ -1,9 +1,18 @@
+# The currently supported Django version
+Django==1.11.23
+
 # Newer versions of amqp do not work on all systems because of newer TCP settings.
 # Celery upgraded to 4.3 due to bug https://github.com/celery/celery/pull/4852 hit with Python 3.7
 # Kombu upgraded to 4.4 to meet Celery 4.3 minimum requirements
 # Kombu 4.4 requires amqp >= 2.4.0
 amqp==2.4.0
 celery==4.3
+kombu==4.4
+
+# Wheel is not installed by default when using venv for creating Python
+# virtual environments
+wheel
+
 cryptography
 django-bleach
 django-csp
@@ -11,10 +20,8 @@ django-enumfields
 django-hosts
 django-markdown_deux
 django-redis
-Django==1.11.23
 eventlet
 gevent
-kombu==4.4
 libsass
 markdown
 polib
