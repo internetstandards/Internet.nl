@@ -92,7 +92,7 @@ def render_details_table(headers, arguments):
                 if cell_deque:
                     value = cell_deque.popleft()
                     if not value:
-                        row.append(_('results empty-argument-alt-text'))
+                        value = _('results empty-argument-alt-text')
                     elif value in [
                             'detail tech data yes',
                             'detail tech data no',
