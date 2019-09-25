@@ -1,5 +1,5 @@
-$ORIGIN test.nlnetlabs.tk.   
-$TTL 60   
+$ORIGIN test.nlnetlabs.tk.
+$TTL 60
 @                                                                 IN	 SOA    ns2a.tk. admin.nlnetlabs.tk. (
                                                                       1      ; serial
                                                                       5S     ; refresh (5 seconds)

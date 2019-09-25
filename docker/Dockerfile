@@ -12,7 +12,7 @@ ENV BRANCH ${BRANCH:-master}
 EXPOSE 8080
 
 # Install required dependencies
-# swig is needed to build Unbound with Python bindings 
+# swig is needed to build Unbound with Python bindings
 # gettext is needed by python manage.py compilemessages
 # libwww-perl is needed by make update_cert_fingerprints
 RUN apt-get update && \

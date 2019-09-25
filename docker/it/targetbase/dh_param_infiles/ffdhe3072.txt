@@ -1,5 +1,5 @@
 This PEM file is an ASCII armoured BASE64 encoding of the BER (binary ASN.1
-DER) representation of the PKCS #3 DHParameter structure which is a sequence of 
+DER) representation of the PKCS #3 DHParameter structure which is a sequence of
 two mandatory and one optional integer values: p, g and l respectively. In this
 case these values are for FFDH3072 as defined by RFC-7919. This PEM
 representation of FFDHE3072 was taken from the Mozilla Server Side TLS

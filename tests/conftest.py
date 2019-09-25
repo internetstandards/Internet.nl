@@ -38,7 +38,7 @@ def pytest_html_results_table_header(session, cells):
 
 
 def br_join(iterable):
-    # create [(a, br), (b, br)] from [a, b] and also handle the None case 
+    # create [(a, br), (b, br)] from [a, b] and also handle the None case
     item_br_tuples = [(item, html.br()) for item in iterable or list()]
     # flatten [(a, br), (b, br)] to [a, br, b, br]
     joined = [item for sublist in item_br_tuples for item in sublist]

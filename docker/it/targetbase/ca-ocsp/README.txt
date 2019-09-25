@@ -144,7 +144,7 @@ openssl genrsa -out ca/rootCA.key 4096
 openssl req -new -x509 -days 3650 -key ca/rootCA.key -out ca/rootCA.crt -config ca/validation.cnf
 
 [XIMON] When asked, I entered the following details:
-[XIMON] Country Name (2 letter code) [AU]:NL 
+[XIMON] Country Name (2 letter code) [AU]:NL
 [XIMON] State or Province Name (full name) [Some-State]:Noord Holland
 [XIMON] Locality Name (eg, city) []:Amsterdam
 [XIMON] Organization Name (eg, company) [Internet Widgits Pty Ltd]:NLnet Labs
@@ -156,19 +156,19 @@ openssl req -new -x509 -days 3650 -key ca/rootCA.key -out ca/rootCA.crt -config 
 [XIMON] PRIVATE KEY AND CERTIFICATE SIGNED BY OUR CA" above.
 
 # 7. Create another private key to be used as the end user private key.
-# 
+#
 # openssl genrsa -out certKey.key 4096
-# 
+#
 # 8. Create an end user certificate based on the generated private key.
-# 
+#
 # openssl req -new -x509 -days 3650 -key certKey.key -out certificate.crt -config validation.cnf
-# 
+#
 # 9. Generate the certificate signing request(CSR) for the generated end-user certificate.
-# 
+#
 # openssl x509 -x509toreq -in certificate.crt -out CSR.csr -signkey certKey.key
-# 
+#
 # 10. Sign the client certificate, using above created CA and include CRL URLs and OCSP URLs in the certificate
-# 
+#
 # openssl ca -batch -startdate 150813080000Z -enddate 250813090000Z -keyfile rootCA.key -cert rootCA.crt -policy policy_anything -config validation.cnf -notext -out certificate.crt -infiles CSR.csr
 
 
@@ -184,7 +184,7 @@ In order to host an OCSP server, an OCSP signing certificate has to be generated
 openssl req -new -nodes -out ocsp/ocspSigning.csr -keyout ocsp/ocspSigning.key -config ca/validation.cnf -extensions v3_OCSP
 
 [XIMON] When asked, I entered the following details:
-[XIMON] Country Name (2 letter code) [AU]:NL 
+[XIMON] Country Name (2 letter code) [AU]:NL
 [XIMON] State or Province Name (full name) [Some-State]:Noord Holland
 [XIMON] Locality Name (eg, city) []:Amsterdam
 [XIMON] Organization Name (eg, company) [Internet Widgits Pty Ltd]:NLnet Labs
@@ -201,8 +201,8 @@ openssl ca -keyfile ca/rootCA.key -cert ca/rootCA.crt -in ocsp/ocspSigning.csr -
 [XIMON] When prompted answer yes twice, e.g.:
 [XIMON] Certificate is to be certified until Jul 15 07:34:04 2020 GMT (365 days)
 [XIMON] Sign the certificate? [y/n]:y
-[XIMON] 
-[XIMON] 
+[XIMON]
+[XIMON]
 [XIMON] 1 out of 1 certificate requests certified, commit? [y/n]y
 [XIMON] Write out database with 1 new entries
 [XIMON] Data Base Updated

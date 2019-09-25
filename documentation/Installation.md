@@ -122,7 +122,7 @@ If not:
   - Get an ldns version >= 1.7.0 from [here](https://www.nlnetlabs.nl/projects/ldns/download/)
   - `./configure --with-examples --with-ssl=/path/to/above/ssl/build/dir`
   - `make`
-- Create a wrapper file for using the compiled ldns-dane binary  
+- Create a wrapper file for using the compiled ldns-dane binary
   `cat ldns-dane-wrapper`
   ```
   #!/bin/sh
@@ -173,13 +173,13 @@ for PostgreSQL.
 ## Running services
 
 Make sure the following services are installed and running on your system:
-- Redis  
+- Redis
   _should be installed by the previous steps_
-- RabbitMQ  
+- RabbitMQ
   _should be installed by the previous steps_
 - Unbound
 
-- Celery and celery beat  
+- Celery and celery beat
   These services need to be setup manually. You can follow [these](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html)
   instructions and consult the [example configuration files](example_configuration/).
 

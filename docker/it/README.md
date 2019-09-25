@@ -118,7 +118,7 @@ you can test.
 ## Appendices
 
 ### Appendix: Integration test execution sequence
-```                                                
+```
 =========================  DOCKER CONTAINERS/GROUPS   =========================
 testrunner    internetnl    selenium    selenium-firefox    dns        target
               tests  app      hub         instances     hierarchy     servers
@@ -187,7 +187,7 @@ testrunner    internetnl    selenium    selenium-firefox    dns        target
 
 ### Appendix: Supported versions and configuration
 ```
-$ cat /etc/lsb-release 
+$ cat /etc/lsb-release
 DISTRIB_ID=Ubuntu
 DISTRIB_RELEASE=19.04
 DISTRIB_CODENAME=disco

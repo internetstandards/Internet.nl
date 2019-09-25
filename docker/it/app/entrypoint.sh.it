@@ -57,7 +57,7 @@ openssl x509 -noout -fingerprint -sha1 -inform pem -in ${CUSTOM_ROOT_CA_CERT} \
 
 echo
 echo ":: Waiting for root trust anchor file to appear.."
-while ! test -f ${TRUST_ANCHOR_PATH}; do   
+while ! test -f ${TRUST_ANCHOR_PATH}; do
   sleep 5s
 done
 
@@ -74,6 +74,6 @@ fi
 
 ${APP_PATH}/docker/entrypoint.sh &
 
-# Don't exit, that might cause docker-compose up to terminate prematurely 
+# Don't exit, that might cause docker-compose up to terminate prematurely
 # (before coverage data has been processed).
 sleep infinity

@@ -74,7 +74,7 @@ services:
       dockerfile: docker/it/app/Dockerfile
       network: host
       args:
-        - BASE_IMAGE        
+        - BASE_IMAGE
     volumes:
       # Allow the developer to launch a browser in the container using the host X server
       # Example usage:
@@ -83,7 +83,7 @@ services:
       #   $ docker-compose exec app firefox
       # The 'xhost +' disables X11 security to workaround "Error: cannot open
       # display :0' when running firefox (or running any command in the Docker
-      # container that attempts to communicate with the host X11 server) 
+      # container that attempts to communicate with the host X11 server)
       - "/tmp/.X11-unix:/tmp/.X11-unix"
       # Allow the test run report to be written to the host machine
       - "/tmp/it-report:/tmp/it-report"

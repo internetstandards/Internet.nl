@@ -11,7 +11,7 @@ from selenium.common.exceptions import ElementNotInteractableException
 class DetailTableCellMatcher:
     def __init__(self, pattern_string):
         self._pattern = re.compile(pattern_string)
-        
+
     def matches(self, value):
         return self._pattern.search(value) is not None
 

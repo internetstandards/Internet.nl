@@ -136,7 +136,7 @@ class CipherScoreAndSecLevel:
     def get_subscore_hash_size(ci, conn):
         # Hash size is dependent on protocol version and protocol extensions.
         # SSLv2, SSLv3, TLSv1.0 and TLSv1.1 used SHA-1 which has a digest size
-        # of 160-bits. TLS 1.2 introduced the SignatureAlgorithms extension 
+        # of 160-bits. TLS 1.2 introduced the SignatureAlgorithms extension
         # which made it possible to specify the hash algorithm and size, or
         # default to SHA-1 if not specified. TLS 1.3 mandates the use of the
         # SignatureAlgorithms extensions.
@@ -179,7 +179,7 @@ class CipherScoreAndSecLevel:
         for sec_level in reversed(counts.keys()):
             if counts[sec_level]:
                 return sec_level
-    
+
         return SecLevel.UNKNOWN
 
     @staticmethod
@@ -343,7 +343,7 @@ def load_cipher_info():
     result = dict()
     for client_class, conn_class in [
         (LegacySslClient, DebugConnection),
-        (SslClient, ModernConnection), 
+        (SslClient, ModernConnection),
     ]:
         c = client_class()
         if client_class == SslClient:

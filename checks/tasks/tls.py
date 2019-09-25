@@ -622,7 +622,7 @@ def build_report(dttls, category):
         #     + f'results security-level {security_level}'
         #     + INJECTED_TRANSLATION_END)
         translatable_annotation = f'detail tech data {security_level}'
-        
+
         return [items, [translatable_annotation for i in range(len(items))]]
 
     def annotate_and_combine(bad_items, phaseout_items):
@@ -2213,7 +2213,7 @@ class ConnectionChecker:
                     raise e
             except ConnectionHandshakeException:
                 # So we've been able to connect earlier with this TLS
-                # version but now as soon as we restrict ourselves to 
+                # version but now as soon as we restrict ourselves to
                 # certain SHA2 hash functions the handshake fails, implying
                 # that the server does not support them.
                 result = HashFuncStatus.bad
@@ -2269,7 +2269,7 @@ class ConnectionChecker:
                 # server but do indicate that uncertain situation.
                 elif (result_tls13 == HashFuncStatus.unknown or
                       result_tls12 == HashFuncStatus.unknown):
-                    return self._score_tls_hash_func_good, HashFuncStatus.unknown            
+                    return self._score_tls_hash_func_good, HashFuncStatus.unknown
 
         # Otherwise at least one of TLS 1.2 and/or TLS 1.3 lacks support for
         # SHA2 for key exchange which is bad.
@@ -2318,7 +2318,7 @@ class ConnectionChecker:
                         # cipher (not cipher suite) from the cipher suite
                         # negotiation on the next connection.
                         cipher_string = f"!{curr_cipher}:{cipher_string}"
-                
+
                         last_cipher = curr_cipher
                 except (ConnectionSocketException,
                         ConnectionHandshakeException):
@@ -2353,7 +2353,7 @@ class ConnectionChecker:
         # ciphers that the client tells the server it supports, and see if the
         # server still selects the same cipher. We hope that the server doesn't
         # consider both ciphers to be of equal weight and thus happy to use
-        # either irrespective of order. 
+        # either irrespective of order.
 
         # Which ciphers seen so far during checks are relevant for self._conn?
         relevant_ciphers = self._get_seen_ciphers_for_conn(self._conn)
