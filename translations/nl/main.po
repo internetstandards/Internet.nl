@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2019-09-02 13:49:37.015195\n"
+"PO-Revision-Date: 2019-09-25 15:34:34.285285\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -832,10 +832,10 @@ msgstr "Mail server (MX)|Ciphers|Rule #"
 msgid "detail mail tls cipher_order verdict bad"
 msgstr "TODO"
 
-msgid "detail mail tls cipher_order verdict warning"
+msgid "detail mail tls cipher_order verdict good"
 msgstr "TODO"
 
-msgid "detail mail tls cipher_order verdict good"
+msgid "detail mail tls cipher_order verdict warning"
 msgstr "TODO"
 
 msgid "detail mail tls ciphers exp"
@@ -858,7 +858,8 @@ msgid "detail mail tls ciphers label"
 msgstr "Cipher suites"
 
 msgid "detail mail tls ciphers tech table"
-msgstr "Mailserver (MX)|Eerstgevonden onveilige cipher suite|Veiligheidsniveau"
+msgstr ""
+"Mailserver (MX)|Eerstgevonden onveilige cipher suite|Veiligheidsniveau"
 
 msgid "detail mail tls ciphers verdict bad"
 msgstr ""
@@ -1213,8 +1214,14 @@ msgstr "TODO"
 msgid "detail tech data bogus"
 msgstr "bogus"
 
+msgid "detail tech data good"
+msgstr "goed"
+
 msgid "detail tech data insecure"
 msgstr "insecure"
+
+msgid "detail tech data insufficient"
+msgstr "onvoldoende"
 
 msgid "detail tech data no"
 msgstr "nee"
@@ -1225,8 +1232,14 @@ msgstr "niet van toepassing"
 msgid "detail tech data not-tested"
 msgstr "niet getest"
 
+msgid "detail tech data phase-out"
+msgstr "uit te faseren"
+
 msgid "detail tech data secure"
 msgstr "secure"
+
+msgid "detail tech data sufficient"
+msgstr "voldoende"
 
 msgid "detail tech data yes"
 msgstr "ja"
@@ -1616,11 +1629,10 @@ msgstr "Mail server (MX)|Ciphers|Rule #"
 msgid "detail web tls cipher_order verdict bad"
 msgstr "TODO"
 
-msgid "detail web tls cipher_order verdict warning"
+msgid "detail web tls cipher_order verdict good"
 msgstr "TODO"
 
-
-msgid "detail web tls cipher_order verdict good"
+msgid "detail web tls cipher_order verdict warning"
 msgstr "TODO"
 
 msgid "detail web tls ciphers exp"
@@ -2962,18 +2974,6 @@ msgstr "Seconden tot hertest-mogelijkheid:"
 
 msgid "results score-description"
 msgstr "Het domein {{prettyaddr}} heeft een testscore van {{score}}%."
-
-msgid "detail tech data good"
-msgstr "goed"
-
-msgid "detail tech data insufficient"
-msgstr "onvoldoende"
-
-msgid "detail tech data phase-out"
-msgstr "uit te faseren"
-
-msgid "detail tech data sufficient"
-msgstr "voldoende"
 
 msgid "results tech-details label"
 msgstr "Technische details:"

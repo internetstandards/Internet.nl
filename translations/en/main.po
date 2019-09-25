@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2019-09-02 13:49:36.921621\n"
+"PO-Revision-Date: 2019-09-25 15:34:34.217879\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -818,7 +818,7 @@ msgstr ""
 "2. Algorithms that do bulk encryption based on AEAD algorithms are preferred over alternatives.\n"
 "3. Algorithms that do certificate verification based on ECDSA are preferred over RSA.\n"
 "4. Algorithms are preferred in descending order of their key and then hash size.\n"
-"5. AES-256 is preferred over ChaCha20.\n"
+"5. AES-256 is preferred over ChaCha20."
 
 msgid "detail mail tls cipher_order label"
 msgstr "Cipher order"
@@ -831,16 +831,15 @@ msgstr ""
 "At least one of your mail servers respects the client cipher order "
 "preference, which is *not* secure."
 
-msgid "detail mail tls cipher_order verdict warning"
-msgstr ""
-"At least one of your mail servers does not select ciphers according to NCSC\n"
-"2.0 prescribed ordering"
-
 msgid "detail mail tls cipher_order verdict good"
 msgstr ""
 "All your mail servers enforce their own cipher order preference and selects\n"
 "ciphers in accordance with NCSC 2.0 prescribed ordering."
 
+msgid "detail mail tls cipher_order verdict warning"
+msgstr ""
+"At least one of your mail servers does not select ciphers according to NCSC\n"
+"2.0 prescribed ordering"
 
 msgid "detail mail tls ciphers exp"
 msgstr ""
@@ -1261,13 +1260,20 @@ msgid "detail mail tls zero-rtt verdict good"
 msgstr "None of your mail servers support 0-RTT."
 
 msgid "detail mail tls zero-rtt verdict na"
-msgstr "This test is not applicable as your mail servers do not support TLS 1.3."
+msgstr ""
+"This test is not applicable as your mail servers do not support TLS 1.3."
 
 msgid "detail tech data bogus"
 msgstr "bogus"
 
+msgid "detail tech data good"
+msgstr "good"
+
 msgid "detail tech data insecure"
 msgstr "insecure"
+
+msgid "detail tech data insufficient"
+msgstr "insufficient"
 
 msgid "detail tech data no"
 msgstr "no"
@@ -1278,8 +1284,14 @@ msgstr "not applicable"
 msgid "detail tech data not-tested"
 msgstr "not tested"
 
+msgid "detail tech data phase-out"
+msgstr "phase out"
+
 msgid "detail tech data secure"
 msgstr "secure"
+
+msgid "detail tech data sufficient"
+msgstr "sufficient"
 
 msgid "detail tech data yes"
 msgstr "yes"
@@ -1667,7 +1679,7 @@ msgstr ""
 "2. Algorithms that do bulk encryption based on AEAD algorithms are preferred over alternatives.\n"
 "3. Algorithms that do certificate verification based on ECDSA are preferred over RSA.\n"
 "4. Algorithms are preferred in descending order of their key and then hash size.\n"
-"5. AES-256 is preferred over ChaCha20.\n"
+"5. AES-256 is preferred over ChaCha20."
 
 msgid "detail web tls cipher_order label"
 msgstr "Cipher order"
@@ -1680,15 +1692,15 @@ msgstr ""
 "Your web server respects the client cipher order preference, which is *not* "
 "secure."
 
-msgid "detail web tls cipher_order verdict warning"
-msgstr ""
-"At least one of your web servers does not select ciphers in accordance\n"
-"with NCSC 2.0 prescribed ordering."
-
 msgid "detail web tls cipher_order verdict good"
 msgstr ""
 "Your web server enforces its own cipher order preference and selects\n"
 "ciphers in accordance with NCSC 2.0 prescribed ordering."
+
+msgid "detail web tls cipher_order verdict warning"
+msgstr ""
+"At least one of your web servers does not select ciphers in accordance\n"
+"with NCSC 2.0 prescribed ordering."
 
 msgid "detail web tls ciphers exp"
 msgstr ""
@@ -2136,7 +2148,8 @@ msgid "detail web tls zero-rtt verdict good"
 msgstr "Your web server does not support 0-RTT."
 
 msgid "detail web tls zero-rtt verdict na"
-msgstr "This test is not applicable as your webservers do not support TLS 1.3."
+msgstr ""
+"This test is not applicable as your webservers do not support TLS 1.3."
 
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""
@@ -2911,18 +2924,6 @@ msgstr "Seconds until retest option:"
 
 msgid "results score-description"
 msgstr "The domain {{prettyaddr}} has a test score of {{score}}%."
-
-msgid "detail tech data good"
-msgstr "good"
-
-msgid "detail tech data insufficient"
-msgstr "insufficient"
-
-msgid "detail tech data phase-out"
-msgstr "phase out"
-
-msgid "detail tech data sufficient"
-msgstr "sufficient"
 
 msgid "results tech-details label"
 msgstr "Technical details:"
