@@ -1077,7 +1077,6 @@ class WebTlsZeroRTT(Subtest):
         self.tech_data = "detail tech data no"
 
     def result_na(self):
-        self._status(STATUS_GOOD_NOT_TESTED)
         self.verdict = "detail web tls zero-rtt verdict na"
         self.tech_data = "detail tech data no"
 
@@ -1788,9 +1787,8 @@ class MailTlsZeroRTT(Subtest):
 
     def result_na(self):
         self.was_tested()
-        self._status(STATUS_GOOD_NOT_TESTED)
         self.verdict = "detail mail tls zero-rtt verdict na"
-        self.tech_data = "detail tech data yes"
+        self.tech_data = "detail tech data no"
 
     def result_bad(self):
         self.was_tested()
