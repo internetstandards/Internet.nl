@@ -72,6 +72,7 @@ def render_details_table(headers, arguments):
 
     table_length = len(headers)
     final_rows = []
+    max_columns = 0
     for row_argument in arguments:
         row_generator = []
         # Create the row_generator for this row(s).
@@ -116,7 +117,13 @@ def render_details_table(headers, arguments):
                         # All other data get a dash.
                         row.append('-')
 
+            max_columns = max(max_columns, column+1)
             final_rows.append(row)
+
+    # Skip headers when the content is not that long.
+    # Kind of a hack and mainly used for the 'security level' header
+    # when there is no data to apply a security level to.
+    headers = headers[:max_columns]
 
     return {
         'details_table_headers': headers,
