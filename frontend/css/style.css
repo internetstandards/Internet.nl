@@ -145,7 +145,6 @@ html {
    left:-9999px;
    z-index:1000;
 }
-
 .skiplink a:focus {
   left:0;
   top:0;
@@ -153,6 +152,9 @@ html {
   color:black;
   text-decoration: none;
   background:#00BFD6;
+}
+.skiplink-hide {
+  display: none;
 }
 
 a:focus {
