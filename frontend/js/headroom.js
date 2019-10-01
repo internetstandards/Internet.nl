@@ -1,6 +1,5 @@
 /* internet.nl
    headroom.js
-   v6 | 201805
 */
 
 /*!
