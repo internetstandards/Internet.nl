@@ -552,6 +552,10 @@ class MailDnssecMxExists(Subtest):
     def was_tested(self):
         self.worst_status = scoring.MAIL_DNSSEC_WORST_STATUS
 
+    def result_no_mailservers(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail dnssec mx-exists verdict no-mailservers"
+
     def result_good(self):
         self.was_tested()
         self._status(STATUS_SUCCESS)
