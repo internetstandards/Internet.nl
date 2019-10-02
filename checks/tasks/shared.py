@@ -156,9 +156,9 @@ def aggregate_subreports(subreports, report):
                     report[test_item]['tech_type'] = tech_type
 
                 subtechdata = subreport[test_item]['tech_data']
-                if (subreport[test_item]['tech_multi_col'] and
+                if (subreport[test_item]['tech_type'] == "table_multi_col" and
                         isinstance(subtechdata, list)):
-                    # support more than two columns in the tech detail table
+                    # Enable more columns in the aggregated tech table.
                     data = (server, *subtechdata)
                 else:
                     data = (server, subtechdata)

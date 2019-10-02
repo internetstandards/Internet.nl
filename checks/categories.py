@@ -63,8 +63,7 @@ class Subtest(object):
             init_status=STATUS_NOT_TESTED,
             init_verdict="detail verdict not-tested",
             init_tech_type="table",
-            init_tech_data="detail tech data not-tested",
-            init_tech_multi_col=False):
+            init_tech_data="detail tech data not-tested"):
         self.name = name
         self.label = label
         self.explanation = explanation
@@ -76,7 +75,6 @@ class Subtest(object):
         self.verdict = init_verdict
         self.tech_type = init_tech_type
         self.tech_data = init_tech_data
-        self.tech_multi_col = init_tech_multi_col
 
     def _status(self, status):
         """
@@ -103,7 +101,6 @@ class Subtest(object):
             'tech_type': self.tech_type,
             'tech_string': self.tech_string,
             'tech_data': self.tech_data,
-            'tech_multi_col': self.tech_multi_col,
         }
 
 
@@ -722,11 +719,11 @@ class WebTlsFsParams(Subtest):
             name="fs_params",
             label="detail web tls fs-params label",
             explanation="detail web tls fs-params exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls fs-params tech table",
             worst_status=scoring.WEB_TLS_FS_WORST_STATUS,
             full_score=scoring.WEB_TLS_FS_GOOD,
-            model_score_field="fs_score",
-            init_tech_multi_col=True)
+            model_score_field="fs_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -755,11 +752,11 @@ class WebTlsCiphers(Subtest):
             name="tls_ciphers",
             label="detail web tls ciphers label",
             explanation="detail web tls ciphers exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls ciphers tech table",
             worst_status=scoring.WEB_TLS_SUITES_WORST_STATUS,
             full_score=scoring.WEB_TLS_SUITES_GOOD,
-            model_score_field="ciphers_score",
-            init_tech_multi_col=True)
+            model_score_field="ciphers_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -783,11 +780,11 @@ class WebTlsCipherOrder(Subtest):
             name="tls_cipher_order",
             label="detail web tls cipher_order label",
             explanation="detail web tls cipher_order exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls cipher_order tech table",
             worst_status=scoring.WEB_TLS_CIPHER_ORDER_WORST_STATUS,
             full_score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
-            model_score_field="cipher_order_score",
-            init_tech_multi_col=True)
+            model_score_field="cipher_order_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -811,11 +808,11 @@ class WebTlsVersion(Subtest):
             name="tls_version",
             label="detail web tls version label",
             explanation="detail web tls version exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls version tech table",
             worst_status=scoring.WEB_TLS_PROTOCOLS_WORST_STATUS,
             full_score=scoring.WEB_TLS_PROTOCOLS_GOOD,
-            model_score_field="protocols_score",
-            init_tech_multi_col=True)
+            model_score_field="protocols_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -954,11 +951,11 @@ class WebTlsCertSignature(Subtest):
             name="cert_signature",
             label="detail web tls cert-signature label",
             explanation="detail web tls cert-signature exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls cert-signature tech table",
             worst_status=scoring.WEB_TLS_SIGNATURE_WORST_STATUS,
             full_score=scoring.WEB_TLS_SIGNATURE_GOOD,
-            model_score_field="cert_signature_score",
-            init_tech_multi_col=True)
+            model_score_field="cert_signature_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1185,11 +1182,11 @@ class MailTlsFsParams(Subtest):
             name="fs_params",
             label="detail mail tls fs-params label",
             explanation="detail mail tls fs-params exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls fs-params tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_FS_GOOD,
-            model_score_field="fs_score",
-            init_tech_multi_col=True)
+            model_score_field="fs_score")
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_FS_WORST_STATUS
@@ -1225,11 +1222,11 @@ class MailTlsCiphers(Subtest):
             name="tls_ciphers",
             label="detail mail tls ciphers label",
             explanation="detail mail tls ciphers exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls ciphers tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_SUITES_GOOD,
-            model_score_field="ciphers_score",
-            init_tech_multi_col=True)
+            model_score_field="ciphers_score")
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_SUITES_WORST_STATUS
@@ -1259,11 +1256,11 @@ class MailTlsCipherOrder(Subtest):
             name="tls_cipher_order",
             label="detail mail tls cipher_order label",
             explanation="detail mail tls cipher_order exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls cipher_order tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_CIPHER_ORDER_GOOD,
-            model_score_field="cipher_order_score",
-            init_tech_multi_col=True)
+            model_score_field="cipher_order_score")
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_CIPHER_ORDER_WORST_STATUS
@@ -1293,11 +1290,11 @@ class MailTlsVersion(Subtest):
             name="tls_version",
             label="detail mail tls version label",
             explanation="detail mail tls version exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls version tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_PROTOCOLS_GOOD,
-            model_score_field="protocols_score",
-            init_tech_multi_col=True)
+            model_score_field="protocols_score")
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_PROTOCOLS_WORST_STATUS
@@ -1468,11 +1465,11 @@ class MailTlsCertSignature(Subtest):
             name="cert_signature",
             label="detail mail tls cert-signature label",
             explanation="detail mail tls cert-signature exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls cert-signature tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_SIGNATURE_GOOD,
-            model_score_field="cert_signature_score",
-            init_tech_multi_col=True)
+            model_score_field="cert_signature_score")
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_SIGNATURE_WORST_STATUS
