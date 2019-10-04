@@ -80,9 +80,6 @@ class PreTLS13DomainConfig(DomainConfig):
             expected_failures=expected_failures,
             expected_info=expected_info)
 
-    def override_defaults(self):
-        self.expected_not_tested.setdefault(TESTS.TLS_ZERO_RTT, ANY)
-
 
 class PreTLS12DomainConfig(DomainConfig):
     def __init__(self, test_id, domain, expected_warnings=None,
@@ -104,7 +101,6 @@ class PreTLS12DomainConfig(DomainConfig):
             raise ValueError()
 
         self.expected_warnings.setdefault(hf_test_id, ANY)
-        self.expected_not_tested.setdefault(zrtt_test_id, ANY)
 
 
 class PostfixTLS12Config(DomainConfig):
@@ -112,7 +108,6 @@ class PostfixTLS12Config(DomainConfig):
         self.expected_failures.setdefault(TESTS.TLS_KEY_EXCHANGE, ANY)
         self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
         self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
-        self.expected_not_tested.setdefault(TESTS.TLS_ZERO_RTT, ANY)
 
 
 class PostfixTLS13Config(DomainConfig):
@@ -466,9 +461,6 @@ ncsc_20_tests = [
                 ['no'],  # IPv6
                 ['no'],  # IPv4
             ]
-        },
-        expected_not_tested={
-            TESTS.TLS_ZERO_RTT
         }),
 
     DomainConfig('NCSC20'
