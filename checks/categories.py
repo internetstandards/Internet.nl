@@ -1132,7 +1132,7 @@ class WebTlsHashFunc(Subtest):
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
-        self._status(STATUS_NOTICE)
+        self._status(STATUS_FAIL)
         self.verdict = "detail web tls hash-func verdict phase-out"
         self.tech_data = "detail tech data no"
 
