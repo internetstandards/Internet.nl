@@ -45,6 +45,13 @@ class CipherScoreAndSecLevel:
             }.get(ci.auth_alg, (0, SecLevel.INSUFFICIENT))
 
     @staticmethod
+    def get_subscore_mac_alg(ci, conn):
+        return {
+            'MD5': SecLevel.INSUFFICIENT,
+            'SHA1': SecLevel.SUFFICIENT,
+        }.get(ci.mac_alg, SecLevel.GOOD)
+
+    @staticmethod
     def get_subscore_aead(ci, conn):
         return {
             'AEAD': (1, SecLevel.GOOD),
@@ -174,6 +181,7 @@ class CipherScoreAndSecLevel:
         counts[CipherScoreAndSecLevel.get_subscore_ecdsa_rsa(ci, conn)[1]] += 1
         counts[CipherScoreAndSecLevel.get_subscore_ecdhe_dhe(ci, conn)[1]] += 1
         counts[CipherScoreAndSecLevel.get_subscore_bulk_enc_alg(ci, conn)[1]] += 1
+        counts[CipherScoreAndSecLevel.get_subscore_mac_alg(ci, conn)] += 1
 
         # Return lowest detected security level
         for sec_level in reversed(counts.keys()):
