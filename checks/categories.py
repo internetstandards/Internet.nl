@@ -789,17 +789,22 @@ class WebTlsCipherOrder(Subtest):
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls cipher_order verdict good"
-        self.tech_data = "detail tech data secure"
+        self.tech_data = ""
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls cipher_order verdict bad"
+        self.tech_data = ""
 
     def result_warning(self, cipher_order_violation):
         self._status(STATUS_NOTICE)
         self.verdict = "detail web tls cipher_order verdict warning"
         self.tech_data = cipher_order_violation
 
-    def result_bad(self):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web tls cipher_order verdict bad"
-        self.tech_data = "detail tech data insecure"
+    def result_info(self, cipher_order_violation):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls cipher_order verdict warning"
+        self.tech_data = cipher_order_violation
 
 
 class WebTlsVersion(Subtest):
@@ -1269,7 +1274,13 @@ class MailTlsCipherOrder(Subtest):
         self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls cipher_order verdict good"
-        self.tech_data = "detail tech data secure"
+        self.tech_data = ""
+
+    def result_bad(self):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls cipher_order verdict bad"
+        self.tech_data = ""
 
     def result_warning(self, cipher_order_violation):
         self.was_tested()
@@ -1277,11 +1288,11 @@ class MailTlsCipherOrder(Subtest):
         self.verdict = "detail mail tls cipher_order verdict warning"
         self.tech_data = cipher_order_violation
 
-    def result_bad(self):
+    def result_info(self, cipher_order_violation):
         self.was_tested()
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls cipher_order verdict bad"
-        self.tech_data = "detail tech data insecure"
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls cipher_order verdict warning"
+        self.tech_data = cipher_order_violation
 
 
 class MailTlsVersion(Subtest):

@@ -682,10 +682,17 @@ def build_report(dttls, category):
                 # 1.2.3.4               | cipher1 | ' '
                 # ...                   | cipher2 | violated_rule
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
-                category.subtests['tls_cipher_order'].result_warning([
-                        [cipher1, cipher2],
-                        [' ', violated_rule]
-                    ])
+                # The 5th rule is only informational.
+                if violated_rule == 5:
+                    category.subtests['tls_cipher_order'].result_info([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
+                else:
+                    category.subtests['tls_cipher_order'].result_warning([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
             else:
                 category.subtests['tls_cipher_order'].result_good()
 
@@ -820,8 +827,24 @@ def build_report(dttls, category):
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
-                category.subtests['tls_cipher_order'].result_warning(
-                    dttls.cipher_order_violation)
+                # Provide tech_data that supplies values for two rows each of
+                # two cells to fill in a table like so:
+                # Web server IP address | Ciphers | Rule #
+                # -----------------------------------------------------------------------
+                # 1.2.3.4               | cipher1 | ' '
+                # ...                   | cipher2 | violated_rule
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                # The 5th rule is only informational.
+                if violated_rule == 5:
+                    category.subtests['tls_cipher_order'].result_info([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
+                else:
+                    category.subtests['tls_cipher_order'].result_warning([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
             else:
                 category.subtests['tls_cipher_order'].result_good()
 
