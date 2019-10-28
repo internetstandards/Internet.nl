@@ -17,12 +17,7 @@
           {% include "string.html" with name="results verdict label" %}
         </h4>
           <p>{% include "string.html" with name=testitem.verdict %}</p>
-        <h4>
-          {% include "string.html" with name="results explanation label" %}
-        </h4>
-          {% include "content.html" with name=testitem.exp %}
         {% if testitem.tech_type and testitem.tech_data %}
-        <br>
         <h4>
           {% include "string.html" with name="results tech-details label" %}
         </h4>
@@ -30,6 +25,10 @@
             {% render_details_table testitem.tech_string testitem.tech_data %}
           {% endif %}
         {% endif %}
+        <h4>
+          {% include "string.html" with name="results explanation label" %}
+        </h4>
+        {% include "content.html" with name=testitem.exp %}
       </div>
     </div>
   {% endwith %}

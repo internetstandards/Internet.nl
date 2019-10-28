@@ -1030,7 +1030,7 @@ table {
 table th {
   font-family: 'robotobold', arial, sans-serif;
   font-weight: bold;
-  padding-top: 1em;
+  padding-top: 0.5em;
   border-bottom: 1px solid #dadada;
 }
 table td,
@@ -1038,7 +1038,7 @@ table th {
   padding-right: 1em;
   text-align: left;
   word-break: break-word;
-  font-size: 80%;
+  font-size: 90%;
 }
 table td {
   padding-top: .4em;
@@ -1122,6 +1122,7 @@ table td {
 }
 
 .tech-details-table {
+  font-family: monospace;
   padding-left: 0.5rem;
   margin-bottom: 1rem;
   overflow-x: auto;
