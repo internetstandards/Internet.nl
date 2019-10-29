@@ -51,9 +51,6 @@ from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from ..models import HashFuncStatus, CipherOrderStatus
 
 
-logger = logging.getLogger('internetnl')
-
-
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
 # instead of just Exception which may intervene with Celery's own exceptions.
@@ -74,6 +71,7 @@ except ImportError as e:
     else:
         raise e
 
+logger = logging.getLogger('internetnl')
 
 # Based on:
 # hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"
@@ -1418,15 +1416,17 @@ def starttls_sock_setup(conn):
             # We can't reach the server.
             if conn.sock:
                 conn.safe_shutdown()
-            if e.errno in [errno.ENETUNREACH, errno.EHOSTUNREACH,
-                            errno.ECONNREFUSED, errno.ENOEXEC]:
+            if e.errno in [
+                    errno.ENETUNREACH, errno.EHOSTUNREACH,
+                    errno.ECONNREFUSED, errno.ENOEXEC]:
                 raise SMTPConnectionCouldNotTestException()
             raise e
 
 
 class SMTPConnection(SSLConnectionWrapper):
     def __init__(self, *args, timeout=24, **kwargs):
-        super().__init__(*args, timeout=timeout, port=25,
+        super().__init__(
+            *args, timeout=timeout, port=25,
             sock_setup=starttls_sock_setup, **kwargs)
 
 
@@ -1492,7 +1492,8 @@ def cert_checks(
             # If we have all the certificate related information we need from a
             # previous check, skip this connection.
             # check chain validity (sort of NCSC guideline B3-6)
-            with conn_wrapper(host=url, socket_af=af_ip_pair[0],
+            with conn_wrapper(
+                    host=url, socket_af=af_ip_pair[0],
                     ip_address=af_ip_pair[1], task=task,
                     ciphers=f"!aNULL",
                     cipher_list_action=CipherListAction.PREPEND).conn as conn:
@@ -2008,7 +2009,7 @@ class ConnectionChecker:
                     self._conn.read(4096)
 
                 if (self._conn._ssl.get_early_data_status() == 1 and
-                    not self._conn.is_handshake_completed()):
+                        not self._conn.is_handshake_completed()):
                     self._conn.do_handshake()
                     self._note_conn_details(self._conn)
                     if self._conn._ssl.get_early_data_status() == 2:
@@ -2039,10 +2040,10 @@ class ConnectionChecker:
         prots_score = self._score_tls_protocols_good
 
         prot_test_configs = [
-            ( TLSV1_1, 'TLS 1.1', prots_phase_out, self._score_tls_protocols_good ),
-            ( TLSV1,   'TLS 1.0', prots_phase_out, self._score_tls_protocols_good ),
-            ( SSLV3,   'SSL 3.0', prots_bad,       self._score_tls_protocols_bad ),
-            ( SSLV2,   'SSL 2.0', prots_bad,       self._score_tls_protocols_bad ),
+            (TLSV1_1, 'TLS 1.1', prots_phase_out, self._score_tls_protocols_good),
+            (TLSV1,   'TLS 1.0', prots_phase_out, self._score_tls_protocols_good),
+            (SSLV3,   'SSL 3.0', prots_bad,       self._score_tls_protocols_bad),
+            (SSLV2,   'SSL 2.0', prots_bad,       self._score_tls_protocols_bad),
         ]
 
         for version, name, prot_set, score in prot_test_configs:
@@ -2085,12 +2086,13 @@ class ConnectionChecker:
                 self._note_conn_details(new_conn)
                 dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
                 try:
-                    dh_ff_p = int(dh_param["prime"], 16) # '0x...'
+                    dh_ff_p = int(dh_param["prime"], 16)  # '0x...'
                     dh_ff_g = dh_param["generator"].partition(' ')[0]  # 'n (0xn)' or '0xn'
                     dh_ff_g = int(dh_ff_g, 16 if dh_ff_g[0:2] == '0x' else 10)
                     dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
                 except ValueError as e:
-                    logger.error("Unexpected failure to parse DH params "
+                    logger.error(
+                        "Unexpected failure to parse DH params "
                         f"{dh_param}' for server '{new_conn.server_name}': "
                         f"reason='{e}'")
                     dh_param = False
@@ -2105,7 +2107,8 @@ class ConnectionChecker:
                 try:
                     ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
                 except ValueError as e:
-                    logger.error("Unexpected failure to parse ECDH params "
+                    logger.error(
+                        "Unexpected failure to parse ECDH params "
                         f"'{ecdh_param}' for server '{new_conn.server_name}': "
                         f"reason='{e}'")
                     ecdh_param = False
@@ -2117,11 +2120,13 @@ class ConnectionChecker:
         fs_phase_out = []
 
         if dh_ff_p and dh_ff_g:
-            if (dh_ff_g == FFDHE_GENERATOR and
-                dh_ff_p in FFDHE_SUFFICIENT_PRIMES):
+            if (
+                    dh_ff_g == FFDHE_GENERATOR and
+                    dh_ff_p in FFDHE_SUFFICIENT_PRIMES):
                 pass
-            elif (dh_ff_g == FFDHE_GENERATOR and
-                  dh_ff_p == FFDHE2048_PRIME):
+            elif (
+                    dh_ff_g == FFDHE_GENERATOR and
+                    dh_ff_p == FFDHE2048_PRIME):
                 fs_phase_out.append("DH-2048{}".format(self._debug_info("weak ff group")))
             else:
                 fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
@@ -2171,7 +2176,8 @@ class ConnectionChecker:
                 # algorithm preference to the server. Don't try to connect
                 # using cipher suites that use RSA for key exchange as they
                 # have no signature and thus no hash function is used.
-                with ModernConnection.from_conn(self._conn, version=v,
+                with ModernConnection.from_conn(
+                        self._conn, version=v,
                         signature_algorithms=sigalgs) as new_conn:
                     # we were able to connect with the given SHA2 sigalgs
                     self._note_conn_details(new_conn)
@@ -2274,8 +2280,9 @@ class ConnectionChecker:
                     TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
                 # If the available protocols > TLS 1.2 all support SHA2 for
                 # key exchange then that's good.
-                if (result_tls13 == HashFuncStatus.good and
-                    result_tls12 == HashFuncStatus.good):
+                if (
+                        result_tls13 == HashFuncStatus.good and
+                        result_tls12 == HashFuncStatus.good):
                     return self._score_tls_hash_func_good, HashFuncStatus.good
                 # But if we're unable to determine conclusively one way or the
                 # other for either TLS 1.2 or TLS 1.3, then don't penalize the
@@ -2288,7 +2295,6 @@ class ConnectionChecker:
         # SHA2 for key exchange which is bad.
         return self._score_tls_hash_func_bad, HashFuncStatus.bad
 
-
     def _check_ciphers(self, test_config):
         for conn_type, tls_version, cipher_string in test_config:
             # Exclude ciphers we've already seen for this connection handler
@@ -2298,11 +2304,13 @@ class ConnectionChecker:
             cipher_string = f"{reject_string}:{cipher_string}"
             lowest_score = None
             lowest_score_cipher = None
+
             last_cipher = None
             while True:
                 try:
-                    with conn_type.from_conn(self._conn,
-                        ciphers=cipher_string, version=tls_version) as new_conn:
+                    with conn_type.from_conn(
+                            self._conn, ciphers=cipher_string,
+                            version=tls_version) as new_conn:
 
                         # record the cipher details and add the cipher to the
                         # insufficient or phase out sets.
@@ -2311,7 +2319,12 @@ class ConnectionChecker:
                         # ensure we don't get stuck in an infinite loop.
                         curr_cipher = new_conn.get_current_cipher_name()
                         if curr_cipher == last_cipher:
-                            logger.warning(f'Infinite loop breakout in check_cipher_sec_level with cipher {curr_cipher}, protocol {new_conn.get_ssl_version().name}, server {new_conn.server_name}')
+                            logger.warning(
+                                'Infinite loop breakout in '
+                                'check_cipher_sec_level '
+                                f'with cipher {curr_cipher}, '
+                                f'protocol {new_conn.get_ssl_version().name}, '
+                                f'server {new_conn.server_name}')
                             break
 
                         # check for compliance with NCSC 2.0 prescribed
@@ -2319,6 +2332,7 @@ class ConnectionChecker:
                         if not self._cipher_order_violation:
                             ci = cipher_infos.get(curr_cipher, None)
                             score = CipherScoreAndSecLevel.calc_cipher_score(ci, new_conn) if ci else None
+
                             if score:
                                 if lowest_score and not CipherScoreAndSecLevel.is_in_prescribed_order(lowest_score, score):
                                     rule = CipherScoreAndSecLevel.get_violated_rule_number(score, lowest_score)
@@ -2341,23 +2355,24 @@ class ConnectionChecker:
                 if self._checks_mode == ChecksMode.MAIL:
                     break
 
-
     def check_cipher_order(self):
         """
         Check whether the server enforces its own cipher order or if that
         order can be overriden by the client.
 
-        Also complete the prescribed order check: if `self.check_cipher_sec_level()`
-        found no violations in phase out or insufficient ciphers, and IFF the
-        server enforces its own cipher order, then also test the order that
-        "good" ciphers are selected by the server.
-        """
+        Also complete the prescribed order check: if
+        `self.check_cipher_sec_level()` found no violations in phase out or
+        insufficient ciphers, and IFF the server enforces its own cipher order,
+        then also test the order that "good" ciphers are selected by the
+        server.
 
+        """
         def _get_nth_or_default(collection, index, default):
             return collection[index] if index < len(collection) else default
 
         cipher_order_score = self._score_tls_cipher_order_good
-        cipher_order = (CipherOrderStatus.not_prescribed
+        cipher_order = (
+            CipherOrderStatus.not_prescribed
             if self._cipher_order_violation else CipherOrderStatus.good)
 
         # For this test we need two ciphers, one selected by the server and
@@ -2379,8 +2394,9 @@ class ConnectionChecker:
             # If we haven't yet connected with a second cipher, do so now.
             if not second_cipher:
                 if self._conn.get_ssl_version() < TLSV1_3:
-                    with self._conn.dup(ciphers=f'!{first_cipher}',
-                            cipher_list_action=CipherListAction.PREPEND) as new_conn:
+                    with self._conn.dup(
+                            cipher_list_action=CipherListAction.PREPEND,
+                            ciphers=f'!{first_cipher}') as new_conn:
                         self._note_conn_details(new_conn)
                         second_cipher = new_conn.get_current_cipher_name()
                 else:
@@ -2423,20 +2439,20 @@ class ConnectionChecker:
 
         # Did a previous call to self.check_cipher_sec_level() discover a
         # prescribed order violation?
-        if (not self._cipher_order_violation
-            and cipher_order == CipherOrderStatus.bad):
+        if (
+                not self._cipher_order_violation
+                and cipher_order == CipherOrderStatus.bad):
             # Complete the prescribed order check by testing "good" ciphers.
             # and "sufficient" ciphers.
             self._check_ciphers([
-                ( DebugConnection,  SSLV23,  GOOD_SUFFICIENT_DEBUG_CIPHERS ),
-                ( ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS ),
+                (DebugConnection,  SSLV23,  GOOD_SUFFICIENT_DEBUG_CIPHERS),
+                (ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS),
             ])
 
             # The self._cipher_order_violation list will be populated if the
             # call to self._check_ciphers() finds a prescribed order violation
 
         return cipher_order_score, cipher_order, self._cipher_order_violation
-
 
     def check_cipher_sec_level(self):
         """
@@ -2463,12 +2479,13 @@ class ConnectionChecker:
         Note: We do NOT test TLS 1.3 ciphers as these are "good" (when
         excluding negotiated properites, such as the hash function, as per NCSC
         v2.0 TLS "Appendix C - List of cipher suites").
+
         """
         ciphers_score = self._score_tls_suites_ok
 
         self._check_ciphers([
-            ( DebugConnection,  SSLV23,  ':'.join(PHASE_OUT_CIPHERS+INSUFFICIENT_CIPHERS) ),
-            ( ModernConnection, TLSV1_2, ':'.join(INSUFFICIENT_CIPHERS_MODERN)            ),
+            (DebugConnection,  SSLV23,  ':'.join(PHASE_OUT_CIPHERS+INSUFFICIENT_CIPHERS)),
+            (ModernConnection, TLSV1_2, ':'.join(INSUFFICIENT_CIPHERS_MODERN)),
         ])
 
         if len(self._bad_ciphers) > 0:
@@ -2634,4 +2651,3 @@ def forced_http_check(af_ip_pair, url, task):
                 break
 
     return forced_https_score, forced_https
-
