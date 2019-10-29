@@ -266,13 +266,12 @@ class CipherScoreAndSecLevel:
         # to a cipher that does.
         #                            DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC
         bit_mask_only_hash_size  = 0b0000000000000000000000111111111111111100
-        bit_mask_erase_hash_size = 0b1111111111111111111111000000000000000011
 
         hash_size_1 = score1 & bit_mask_only_hash_size
         hash_size_2 = score2 & bit_mask_only_hash_size
         if not hash_size_1 or not hash_size_2:
-            score1 &= bit_mask_erase_hash_size
-            score2 &= bit_mask_erase_hash_size
+            score1 &= ~bit_mask_only_hash_size
+            score2 &= ~bit_mask_only_hash_size
 
         compliant = score1 >= score2
         return compliant
