@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2019-10-28 16:40:40.518428\n"
+"PO-Revision-Date: 2019-11-01 21:26:49.300361\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -825,22 +825,25 @@ msgstr ""
 "De vertrouwensketen van al je mailservercertificaten is compleet en \n"
 "ondertekend door een vertrouwde certificaatautoriteit."
 
-msgid "detail mail tls cipher_order exp"
+msgid "detail mail tls cipher-order exp"
 msgstr "TODO"
 
-msgid "detail mail tls cipher_order label"
+msgid "detail mail tls cipher-order label"
 msgstr "Cipher suite volgorde"
 
-msgid "detail mail tls cipher_order tech table"
+msgid "detail mail tls cipher-order seclevel-bad"
+msgstr "TODO"
+
+msgid "detail mail tls cipher-order tech table"
 msgstr "Mail server (MX)|Ciphers|Rule #"
 
-msgid "detail mail tls cipher_order verdict bad"
+msgid "detail mail tls cipher-order verdict bad"
 msgstr "TODO"
 
-msgid "detail mail tls cipher_order verdict good"
+msgid "detail mail tls cipher-order verdict good"
 msgstr "TODO"
 
-msgid "detail mail tls cipher_order verdict warning"
+msgid "detail mail tls cipher-order verdict warning"
 msgstr "TODO"
 
 msgid "detail mail tls ciphers exp"
@@ -1049,7 +1052,7 @@ msgstr ""
 "Je mailserver ondersteunt voldoende veilige Diffie-Hellman-parameters voor \n"
 "sleuteluitwisseling."
 
-msgid "detail mail tls fs-params verdict other"
+msgid "detail mail tls fs-params verdict na"
 msgstr ""
 "Je mailserver ondersteunt geen Diffie-Hellman voor sleuteluitwisseling. Let \n"
 "op: RSA is het enige voldoende veilige alternatief voor Diffie-Hellman voor \n"
@@ -1058,22 +1061,22 @@ msgstr ""
 msgid "detail mail tls fs-params verdict phase-out"
 msgstr "TODO"
 
-msgid "detail mail tls hash-func exp"
+msgid "detail mail tls kex-hash-func exp"
 msgstr "Sleuteluitwisselingshashfunctie"
 
-msgid "detail mail tls hash-func label"
+msgid "detail mail tls kex-hash-func label"
 msgstr "TODO"
 
-msgid "detail mail tls hash-func tech table"
+msgid "detail mail tls kex-hash-func tech table"
 msgstr "Mailserver (MX)|TODO"
 
-msgid "detail mail tls hash-func verdict good"
+msgid "detail mail tls kex-hash-func verdict good"
 msgstr "TODO"
 
-msgid "detail mail tls hash-func verdict other"
+msgid "detail mail tls kex-hash-func verdict other"
 msgstr "TODO"
 
-msgid "detail mail tls hash-func verdict phase-out"
+msgid "detail mail tls kex-hash-func verdict phase-out"
 msgstr "TODO"
 
 msgid "detail mail tls ocsp-stapling exp"
@@ -1622,22 +1625,25 @@ msgstr ""
 "De vertrouwensketen van je websitecertificaat is compleet en ondertekend \n"
 "door een vertrouwde certificaatautoriteit."
 
-msgid "detail web tls cipher_order exp"
+msgid "detail web tls cipher-order exp"
 msgstr "TODO"
 
-msgid "detail web tls cipher_order label"
+msgid "detail web tls cipher-order label"
 msgstr "Algoritmeselecties-volgorde"
 
-msgid "detail web tls cipher_order tech table"
+msgid "detail web tls cipher-order tech table"
 msgstr "Webserver IP-adres|Algoritmeselectie-paar|Overtreden regel #"
 
-msgid "detail web tls cipher_order verdict bad"
+msgid "detail web tls cipher-order verdict bad"
 msgstr "TODO"
 
-msgid "detail web tls cipher_order verdict good"
+msgid "detail web tls cipher-order verdict good"
 msgstr "TODO"
 
-msgid "detail web tls cipher_order verdict warning"
+msgid "detail web tls cipher-order verdict seclevel-bad"
+msgstr "TODO"
+
+msgid "detail web tls cipher-order verdict warning"
 msgstr "TODO"
 
 msgid "detail web tls ciphers exp"
@@ -1652,7 +1658,7 @@ msgstr ""
 "In de onderstaande tabel wordt voor cipher suites de naamgeving van OpenSSL gehanteerd. Voor een vertaling naar de [IANA-naamgeving](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml) zie de [OpenSSL-documentatie](https://www.openssl.org/docs/apps/ciphers.html)."
 
 msgid "detail web tls ciphers label"
-msgstr "Cipher suites"
+msgstr "Ciphers"
 
 msgid "detail web tls ciphers tech table"
 msgstr "Webserver-IP-adres|Getroffen algoritmeselectie|Veiligheidsniveau"
@@ -1802,31 +1808,13 @@ msgstr ""
 "Je webserver ondersteunt voldoende veilige Diffie-Hellman-parameters voor \n"
 "sleuteluitwisseling."
 
-msgid "detail web tls fs-params verdict other"
+msgid "detail web tls fs-params verdict na"
 msgstr ""
 "Je webserver ondersteunt geen Diffie-Hellman voor sleuteluitwisseling. Let \n"
 "op: RSA is het enige voldoende veilige alternatief voor Diffie-Hellman voor \n"
 "sleuteluitwisseling."
 
 msgid "detail web tls fs-params verdict phase-out"
-msgstr "TODO"
-
-msgid "detail web tls hash-func exp"
-msgstr "TODO"
-
-msgid "detail web tls hash-func label"
-msgstr "Sleuteluitwisselingshashfunctie"
-
-msgid "detail web tls hash-func tech table"
-msgstr "Webserver-IP-adress|TODO"
-
-msgid "detail web tls hash-func verdict good"
-msgstr "TODO"
-
-msgid "detail web tls hash-func verdict other"
-msgstr "TODO"
-
-msgid "detail web tls hash-func verdict phase-out"
 msgstr "TODO"
 
 msgid "detail web tls http-compression exp"
@@ -1926,6 +1914,24 @@ msgid "detail web tls https-hsts verdict other"
 msgstr ""
 "Je webserver biedt een HSTS-policy aan met een geldigheidsduur voor caching "
 "(`max-age`) die *niet* voldoende lang (d.w.z. korter dan 6 maanden) is."
+
+msgid "detail web tls kex-hash-func exp"
+msgstr "TODO"
+
+msgid "detail web tls kex-hash-func label"
+msgstr "Sleuteluitwisselingshashfunctie"
+
+msgid "detail web tls kex-hash-func tech table"
+msgstr "Webserver-IP-adress|TODO"
+
+msgid "detail web tls kex-hash-func verdict good"
+msgstr "TODO"
+
+msgid "detail web tls kex-hash-func verdict other"
+msgstr "TODO"
+
+msgid "detail web tls kex-hash-func verdict phase-out"
+msgstr "TODO"
 
 msgid "detail web tls ocsp-stapling exp"
 msgstr "TODO"

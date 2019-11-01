@@ -778,37 +778,37 @@ class WebTlsCipherOrder(Subtest):
     def __init__(self):
         super(WebTlsCipherOrder, self).__init__(
             name="tls_cipher_order",
-            label="detail web tls cipher_order label",
-            explanation="detail web tls cipher_order exp",
+            label="detail web tls cipher-order label",
+            explanation="detail web tls cipher-order exp",
             init_tech_type="table_multi_col",
-            tech_string="detail web tls cipher_order tech table",
+            tech_string="detail web tls cipher-order tech table",
             worst_status=scoring.WEB_TLS_CIPHER_ORDER_WORST_STATUS,
             full_score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
             model_score_field="cipher_order_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web tls cipher_order verdict good"
+        self.verdict = "detail web tls cipher-order verdict good"
         self.tech_data = ""
 
     def result_bad(self):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls cipher_order verdict bad"
+        self.verdict = "detail web tls cipher-order verdict bad"
         self.tech_data = ""
 
     def result_seclevel_bad(self, cipher_order_violation):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls cipher_order verdict seclevel-bad"
+        self.verdict = "detail web tls cipher-order verdict seclevel-bad"
         self.tech_data = cipher_order_violation
 
     def result_score_warning(self, cipher_order_violation):
         self._status(STATUS_NOTICE)
-        self.verdict = "detail web tls cipher_order verdict warning"
+        self.verdict = "detail web tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
     def result_score_info(self, cipher_order_violation):
         self._status(STATUS_INFO)
-        self.verdict = "detail web tls cipher_order verdict warning"
+        self.verdict = "detail web tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
 
@@ -1264,10 +1264,10 @@ class MailTlsCipherOrder(Subtest):
     def __init__(self):
         super(MailTlsCipherOrder, self).__init__(
             name="tls_cipher_order",
-            label="detail mail tls cipher_order label",
-            explanation="detail mail tls cipher_order exp",
+            label="detail mail tls cipher-order label",
+            explanation="detail mail tls cipher-order exp",
             init_tech_type="table_multi_col",
-            tech_string="detail mail tls cipher_order tech table",
+            tech_string="detail mail tls cipher-order tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_CIPHER_ORDER_GOOD,
             model_score_field="cipher_order_score")
@@ -1278,31 +1278,31 @@ class MailTlsCipherOrder(Subtest):
     def result_good(self):
         self.was_tested()
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail tls cipher_order verdict good"
+        self.verdict = "detail mail tls cipher-order verdict good"
         self.tech_data = ""
 
     def result_bad(self):
         self.was_tested()
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls cipher_order verdict bad"
+        self.verdict = "detail mail tls cipher-order verdict bad"
         self.tech_data = ""
 
     def result_seclevel_bad(self, cipher_order_violation):
         self.was_tested()
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls cipher_order verdict seclevel-bad"
+        self.verdict = "detail mail tls cipher-order verdict seclevel-bad"
         self.tech_data = cipher_order_violation
 
     def result_warning(self, cipher_order_violation):
         self.was_tested()
         self._status(STATUS_NOTICE)
-        self.verdict = "detail mail tls cipher_order verdict warning"
+        self.verdict = "detail mail tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
     def result_info(self, cipher_order_violation):
         self.was_tested()
         self._status(STATUS_INFO)
-        self.verdict = "detail mail tls cipher_order verdict warning"
+        self.verdict = "detail mail tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
 
