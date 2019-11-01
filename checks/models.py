@@ -54,6 +54,7 @@ class CipherOrderStatus(Enum):
     bad = 0
     good = 1
     not_prescribed = 2
+    not_seclevel = 3
 
 
 def conn_test_id():

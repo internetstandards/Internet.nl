@@ -742,7 +742,7 @@ class WebTlsFsParams(Subtest):
 
     def result_no_dh_params(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web tls fs-params verdict other"
+        self.verdict = "detail web tls fs-params verdict na"
         self.tech_data = ""
 
 
@@ -796,12 +796,17 @@ class WebTlsCipherOrder(Subtest):
         self.verdict = "detail web tls cipher_order verdict bad"
         self.tech_data = ""
 
-    def result_warning(self, cipher_order_violation):
+    def result_seclevel_bad(self, cipher_order_violation):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls cipher_order verdict seclevel-bad"
+        self.tech_data = cipher_order_violation
+
+    def result_score_warning(self, cipher_order_violation):
         self._status(STATUS_NOTICE)
         self.verdict = "detail web tls cipher_order verdict warning"
         self.tech_data = cipher_order_violation
 
-    def result_info(self, cipher_order_violation):
+    def result_score_info(self, cipher_order_violation):
         self._status(STATUS_INFO)
         self.verdict = "detail web tls cipher_order verdict warning"
         self.tech_data = cipher_order_violation
@@ -1217,7 +1222,7 @@ class MailTlsFsParams(Subtest):
     def result_no_dh_params(self):
         self.was_tested()
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail tls fs-params verdict other"
+        self.verdict = "detail mail tls fs-params verdict na"
         self.tech_data = ""
 
 
@@ -1281,6 +1286,12 @@ class MailTlsCipherOrder(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls cipher_order verdict bad"
         self.tech_data = ""
+
+    def result_seclevel_bad(self, cipher_order_violation):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls cipher_order verdict seclevel-bad"
+        self.tech_data = cipher_order_violation
 
     def result_warning(self, cipher_order_violation):
         self.was_tested()

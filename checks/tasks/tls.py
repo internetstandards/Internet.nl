@@ -672,22 +672,24 @@ def build_report(dttls, category):
 
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
+            elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
+                category.subtests['tls_cipher_order'].result_seclevel_bad()
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
                 # two cells to fill in a table like so:
                 # Web server IP address | Ciphers | Rule #
-                # -----------------------------------------------------------------------
+                # -------------------------------------------------------------
                 # 1.2.3.4               | cipher1 | ' '
                 # ...                   | cipher2 | violated_rule
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 # The 5th rule is only informational.
                 if violated_rule == 5:
-                    category.subtests['tls_cipher_order'].result_info([
+                    category.subtests['tls_cipher_order'].result_score_info([
                             [cipher1, cipher2],
                             [' ', violated_rule]
                         ])
                 else:
-                    category.subtests['tls_cipher_order'].result_warning([
+                    category.subtests['tls_cipher_order'].result_score_warning([
                             [cipher1, cipher2],
                             [' ', violated_rule]
                         ])
@@ -824,22 +826,24 @@ def build_report(dttls, category):
 
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
+            elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
+                category.subtests['tls_cipher_order'].result_seclevel_bad()
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
                 # two cells to fill in a table like so:
                 # Web server IP address | Ciphers | Rule #
-                # -----------------------------------------------------------------------
+                # -------------------------------------------------------------
                 # 1.2.3.4               | cipher1 | ' '
                 # ...                   | cipher2 | violated_rule
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 # The 5th rule is only informational.
                 if violated_rule == 5:
-                    category.subtests['tls_cipher_order'].result_info([
+                    category.subtests['tls_cipher_order'].result_score_info([
                             [cipher1, cipher2],
                             [' ', violated_rule]
                         ])
                 else:
-                    category.subtests['tls_cipher_order'].result_warning([
+                    category.subtests['tls_cipher_order'].result_score_warning([
                             [cipher1, cipher2],
                             [' ', violated_rule]
                         ])
@@ -1220,13 +1224,10 @@ class DebugCertChain(object):
             elif public_key_type is _EllipticCurvePublicKey:
                 curve = public_key.curve.name
                 if (curve not in [
-                        "brainpoolP512r1",
-                        "brainpoolP384r1",
-                        "brainpoolP256r1",
-                        "secp521r1",
                         "secp384r1",
                         "secp256r1",
-                        "prime256v1",
+                        "x448",
+                        "x25519",
                         ] or bits < 224):
                     failed_key_type = "EllipticCurvePublicKey"
             if failed_key_type:
@@ -2295,6 +2296,49 @@ class ConnectionChecker:
         # SHA2 for key exchange which is bad.
         return self._score_tls_hash_func_bad, HashFuncStatus.bad
 
+    def _check_sec_score_order(self, lowest_values, curr_cipher, new_conn):
+        # check for compliance with NCSC 2.0 prescribed
+        # ordering.
+        if (not self._cipher_order_violation
+                or self._cipher_order_violation[2] != ''):
+            return
+
+        ci = cipher_infos.get(curr_cipher, None)
+        score = (
+            CipherScoreAndSecLevel.calc_cipher_score(ci, new_conn)
+            if ci else None)
+        seclevel = (
+            CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci)
+            if ci else None)
+
+        if not self._cipher_order_violation:
+            if score:
+                if (lowest_values['score'] and not
+                        CipherScoreAndSecLevel.is_in_prescribed_order(
+                            lowest_values['score'], score)):
+                    rule = CipherScoreAndSecLevel.get_violated_rule_number(
+                        score, lowest_values['score'])
+                    self._cipher_order_violation = [
+                        lowest_values['score_cipher'], curr_cipher, rule]
+                else:
+                    lowest_values['score'] = score
+                    lowest_values['score_cipher'] = curr_cipher
+
+        if (not self._cipher_order_violation
+                or (self._cipher_order_violation and
+                    self._cipher_order_violation[2] != '')):
+            # There may be already a score violation but security level trumps
+            # score.
+            if seclevel:
+                if (lowest_values['seclevel'] and not
+                        CipherScoreAndSecLevel.is_in_seclevel_order(
+                            lowest_values['seclevel'], seclevel)):
+                    self._cipher_order_violation = [
+                        lowest_values['seclevel_cipher'], curr_cipher, '']
+                else:
+                    lowest_values['seclevel'] = seclevel
+                    lowest_values['seclevel_cipher'] = curr_cipher
+
     def _check_ciphers(self, test_config):
         for conn_type, tls_version, cipher_string in test_config:
             # Exclude ciphers we've already seen for this connection handler
@@ -2302,8 +2346,13 @@ class ConnectionChecker:
                 conn_type, frozenset())
             reject_string = ':'.join([f'!{x}' for x in relevant_ciphers])
             cipher_string = f"{reject_string}:{cipher_string}"
-            lowest_score = None
-            lowest_score_cipher = None
+
+            lowest_values = {
+                'score': None,
+                'score_cipher': None,
+                'seclevel': None,
+                'seclevel_cipher': None,
+            }
 
             last_cipher = None
             while True:
@@ -2327,19 +2376,8 @@ class ConnectionChecker:
                                 f'server {new_conn.server_name}')
                             break
 
-                        # check for compliance with NCSC 2.0 prescribed
-                        # ordering.
-                        if not self._cipher_order_violation:
-                            ci = cipher_infos.get(curr_cipher, None)
-                            score = CipherScoreAndSecLevel.calc_cipher_score(ci, new_conn) if ci else None
-
-                            if score:
-                                if lowest_score and not CipherScoreAndSecLevel.is_in_prescribed_order(lowest_score, score):
-                                    rule = CipherScoreAndSecLevel.get_violated_rule_number(score, lowest_score)
-                                    self._cipher_order_violation = [lowest_score_cipher, curr_cipher, rule]
-                                else:
-                                    lowest_score = score
-                                    lowest_score_cipher = curr_cipher
+                        self._check_sec_score_order(
+                            lowest_values, curr_cipher, new_conn)
 
                         # Update the cipher string to exclude the current
                         # cipher (not cipher suite) from the cipher suite
@@ -2371,9 +2409,7 @@ class ConnectionChecker:
             return collection[index] if index < len(collection) else default
 
         cipher_order_score = self._score_tls_cipher_order_good
-        cipher_order = (
-            CipherOrderStatus.not_prescribed
-            if self._cipher_order_violation else CipherOrderStatus.good)
+        cipher_order = CipherOrderStatus.good
 
         # For this test we need two ciphers, one selected by the server and
         # another selected by the server when the former was disallowed by the
@@ -2439,9 +2475,10 @@ class ConnectionChecker:
 
         # Did a previous call to self.check_cipher_sec_level() discover a
         # prescribed order violation?
-        if (
-                not self._cipher_order_violation
-                and cipher_order == CipherOrderStatus.bad):
+        if not (cipher_order == CipherOrderStatus.bad
+                or (
+                    self._cipher_order_violation
+                    and self._cipher_order_violation[2] == '')):
             # Complete the prescribed order check by testing "good" ciphers.
             # and "sufficient" ciphers.
             self._check_ciphers([
@@ -2449,8 +2486,19 @@ class ConnectionChecker:
                 (ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS),
             ])
 
-            # The self._cipher_order_violation list will be populated if the
-            # call to self._check_ciphers() finds a prescribed order violation
+        # The self._cipher_order_violation list will be populated if the
+        # call to self._check_ciphers() finds a prescribed order violation.
+
+        if cipher_order == CipherOrderStatus.bad:
+            # Server does not respect its own preference; ignore any order
+            # violation.
+            pass
+        elif self._cipher_order_violation:
+            if self._cipher_order_violation[2] == '':
+                cipher_order = CipherOrderStatus.not_seclevel
+                cipher_order_score = self._score_tls_cipher_order_bad
+            else:
+                cipher_order = CipherOrderStatus.not_prescribed
 
         return cipher_order_score, cipher_order, self._cipher_order_violation
 

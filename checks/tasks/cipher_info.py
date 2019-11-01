@@ -6,13 +6,9 @@ from collections import OrderedDict
 from enum import Enum
 from math import log, pow
 
-
-from nassl import _nassl
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 
-
-from . import unbound
 from .connection import DebugConnection, ModernConnection
 
 
@@ -35,8 +31,8 @@ class CipherScoreAndSecLevel:
     @staticmethod
     def get_subscore_ecdsa_rsa(ci, conn):
         if ci.tls_version == 'TLSv1.3':
-            # negotiated, might be (2, SecLevel.GOOD) - can we check the conn to
-            # find out?
+            # negotiated, might be (2, SecLevel.GOOD) - can we check the conn
+            # to find out?
             return (1, SecLevel.GOOD)
         else:
             return {
@@ -60,16 +56,17 @@ class CipherScoreAndSecLevel:
     @staticmethod
     def get_subscore_ecdhe_dhe(ci, conn):
         # TODO: in TLS 1.3 the kex alg is not considered part of the cipher
-        # suite and thus OpenSSL reports it as kx=any. We don't handle this here.
+        # suite and thus OpenSSL reports it as kx=any. We don't handle this
+        # here.
         # Note: TLS 1.3 doesn't support RSA. TLS 1.3 is always either PSK or
         # (EC)DHE or both. See: https://tools.ietf.org/html/rfc8446#section-2
         # As we as the Internet.NL client can't use a pre-shared key with
         # the target server (as how would we get the PSK?), that leaves only
         # (EC)DHE when using TLS 1.3. We would be able to tell from the
-        # connection details if it were ECDHE or DHE except that only the legacy
-        # client has the necessary get_ecdh_param() function and it doesn't
-        # support TLS 1.3. So we score them as good rather than potentially
-        # incorrectly score them as sufficient.
+        # connection details if it were ECDHE or DHE except that only the
+        # legacy client has the necessary get_ecdh_param() function and it
+        # doesn't support TLS 1.3. So we score them as good rather than
+        # potentially incorrectly score them as sufficient.
 
         # Note: We can only score the trailing E (ephemeral) nature of the
         # communication once the handshake is complete as only then do we know
@@ -86,7 +83,8 @@ class CipherScoreAndSecLevel:
             # This helper method exists because with OpenSSL 1.0.2 the cipher
             # key exchange algorithms do not consistently use the terms DHE and
             # ECDHE but also use EDH and EECDH.
-            # See: https://www.openssl.org/docs/man1.0.2/man3/SSL_CIPHER_get_version.html
+            # See:
+            # https://www.openssl.org/docs/man1.0.2/man3/SSL_CIPHER_get_version.html
             return len([x for x in needles if x in haystack]) > 0
 
         if ci.tls_version == 'TLSv1.3':
@@ -119,12 +117,29 @@ class CipherScoreAndSecLevel:
             score = 0
 
         # See: https://blog.cloudflare.com/it-takes-two-to-chacha-poly/
-        if ((ci.bulk_enc_alg == 'AESGCM' and ci.bulk_enc_alg_sec_len == 256) or
-            (ci.bulk_enc_alg == 'CHACHA20/POLY1305') or
-            (ci.bulk_enc_alg == 'ChaCha20' and 'CHACHA20-POLY1305-OLD' in ci.name) or
-            (ci.bulk_enc_alg == 'AESGCM' and ci.bulk_enc_alg_sec_len == 128) or
-            (ci.bulk_enc_alg == 'AESCCM' and ci.bulk_enc_alg_sec_len == 256) or
-            (ci.bulk_enc_alg == 'AESCCM' and ci.bulk_enc_alg_sec_len == 128)):
+        if (
+                (
+                    ci.bulk_enc_alg == 'AESGCM'
+                    and ci.bulk_enc_alg_sec_len == 256)
+                or
+                (
+                    ci.bulk_enc_alg == 'CHACHA20/POLY1305')
+                or
+                (
+                    ci.bulk_enc_alg == 'ChaCha20'
+                    and 'CHACHA20-POLY1305-OLD' in ci.name)
+                or
+                (
+                    ci.bulk_enc_alg == 'AESGCM'
+                    and ci.bulk_enc_alg_sec_len == 128)
+                or
+                (
+                    ci.bulk_enc_alg == 'AESCCM'
+                    and ci.bulk_enc_alg_sec_len == 256)
+                or
+                (
+                    ci.bulk_enc_alg == 'AESCCM'
+                    and ci.bulk_enc_alg_sec_len == 128)):
             sec_level = SecLevel.GOOD
         elif ((ci.bulk_enc_alg == 'AES' and ci.bulk_enc_alg_sec_len == 256) or
               (ci.bulk_enc_alg == 'AES' and ci.bulk_enc_alg_sec_len == 128) or
@@ -157,19 +172,20 @@ class CipherScoreAndSecLevel:
             'SHA256': (256, SecLevel.GOOD),
             'SHA384': (384, SecLevel.GOOD),
             'SHA512': (512, SecLevel.GOOD),
-            None:     (0,   SecLevel.GOOD),      # no hash func or cannot be determined
+            None:     (0,   SecLevel.GOOD),  # no hash func or undetermined.
         }.get(digest, (160, SecLevel.PHASE_OUT))
 
     @staticmethod
     def determine_appendix_c_sec_level(ci, conn=None):
         """
         Report the security level of the cipher using the same rules as used by
-        'Appendix C - List of cipher suites' in the NCSC 'IT Security Guidelines
-        for Transport Layer Security v2.0' document, i.e. excluding:
+        'Appendix C - List of cipher suites' in the NCSC 'IT Security
+        Guidelines for Transport Layer Security v2.0' document, i.e. excluding:
 
             'versions; hash functions for certificate verification; hash
              functions for key exchange; key sizes & choice of groups; and
              options'
+
         """
         counts = OrderedDict()
         counts[SecLevel.GOOD] = 0
@@ -202,23 +218,24 @@ class CipherScoreAndSecLevel:
         algorithms. Prefer Good over Sufficient over Phase out algorithm
         selections. Within a particular security level, proceed as follows.
 
-        First, algorithms that perform key exchange based on elliptic curves are
-        preferred over those that use finite fields. Both are preferred over
-        algorithms that use a static key exchange.
+        First, algorithms that perform key exchange based on elliptic curves
+        are preferred over those that use finite fields. Both are preferred
+        over algorithms that use a static key exchange.
 
         Second, algorithms that do bulk encryption based on AEAD algorithms are
         preferred over alternatives (see Algorithms for bulk encryption).
 
         Third, algorithms that do certificate verification based on ECDSA are
-        preferred over RSA (though this requires the use of a certificate for an
-        ECDSA key). *22
+        preferred over RSA (though this requires the use of a certificate for
+        an ECDSA key). *22
 
         Fourth, algorithms are preferred in descending order of their key and
         then hash size. Finally, AES-256 is preferred over ChaCha20. *33
 
         *22: ECDSA is preferred over RSA for performance reasons
         *23: AES is an older algorithm that has been studied for longer by the
-             (academic) cryptologic community than the newer ChaCha20 algorithm.
+             (academic) cryptologic community than the newer ChaCha20
+             algorithm.
              AES also has a speed advantage on platforms that provide hardware
              acceleration. However, AES is less efficient than ChaCha20 on
              (mobile) platforms that lack such acceleration. Some choose to
@@ -241,12 +258,13 @@ class CipherScoreAndSecLevel:
             0000010000000100000000000000000000000010  AES256-SHA256
 
         """
-        return ((CipherScoreAndSecLevel.get_subscore_ecdhe_dhe(ci, conn)[0] << 37) |
-                (CipherScoreAndSecLevel.get_subscore_aead(ci, conn)[0] << 36)      |
-                (CipherScoreAndSecLevel.get_subscore_ecdsa_rsa(ci, conn)[0] << 34) |
-                (CipherScoreAndSecLevel.get_subscore_key_size(ci, conn)[0] << 18)  |
-                (CipherScoreAndSecLevel.get_subscore_hash_size(ci, conn)[0] << 2)  |
-                (CipherScoreAndSecLevel.get_subscore_bulk_enc_alg(ci, conn)[0]))
+        return (
+            (CipherScoreAndSecLevel.get_subscore_ecdhe_dhe(ci, conn)[0] << 37)
+            | (CipherScoreAndSecLevel.get_subscore_aead(ci, conn)[0] << 36)
+            | (CipherScoreAndSecLevel.get_subscore_ecdsa_rsa(ci, conn)[0] << 34)
+            | (CipherScoreAndSecLevel.get_subscore_key_size(ci, conn)[0] << 18)
+            | (CipherScoreAndSecLevel.get_subscore_hash_size(ci, conn)[0] << 2)
+            | (CipherScoreAndSecLevel.get_subscore_bulk_enc_alg(ci, conn)[0]))
 
     @staticmethod
     def format_score(score):
@@ -257,6 +275,10 @@ class CipherScoreAndSecLevel:
         return 'DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC'
 
     @staticmethod
+    def is_in_seclevel_order(seclevel1, seclevel2):
+        return seclevel1.value >= seclevel2.value
+
+    @staticmethod
     def is_in_prescribed_order(score1, score2):
         if score1 is None or score2 is None:
             raise ValueError
@@ -264,8 +286,8 @@ class CipherScoreAndSecLevel:
         # Ignore hash size if not set in either cipher score, as some ciphers
         # do not use a hash function and thus are not comparable by hash size
         # to a cipher that does.
-        #                            DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC
-        bit_mask_only_hash_size  = 0b0000000000000000000000111111111111111100
+        #                           DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC
+        bit_mask_only_hash_size = 0b0000000000000000000000111111111111111100
 
         hash_size_1 = score1 & bit_mask_only_hash_size
         hash_size_2 = score2 & bit_mask_only_hash_size
@@ -273,8 +295,7 @@ class CipherScoreAndSecLevel:
             score1 &= ~bit_mask_only_hash_size
             score2 &= ~bit_mask_only_hash_size
 
-        compliant = score1 >= score2
-        return compliant
+        return score1 >= score2
 
     @staticmethod
     def get_violated_rule_number(score1, score2):
@@ -291,7 +312,8 @@ class CipherScoreAndSecLevel:
             highbit1 = get_highest_set_bit(score1)
             highbit2 = get_highest_set_bit(score2)
             if highbit1 == highbit2:
-                bit_mask_to_keep_only_bits_below_highbit = int(pow(2,highbit1))-1
+                bit_mask_to_keep_only_bits_below_highbit = (
+                    int(pow(2, highbit1)) - 1)
                 score1 &= bit_mask_to_keep_only_bits_below_highbit
                 score2 &= bit_mask_to_keep_only_bits_below_highbit
             else:
@@ -375,7 +397,9 @@ def load_cipher_info():
 
                     result[cipher_name] = ci
                 else:
-                    logger.warn(f'Unable to parse description of cipher {cipher_name} output by {client_class.__name__}: "{desc}"')
+                    logger.warn(
+                        f'Unable to parse description of cipher {cipher_name} '
+                        f'output by {client_class.__name__}: "{desc}"')
             else:
                 # Add this connction class to the set of supported connection
                 # classes.
