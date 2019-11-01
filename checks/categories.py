@@ -149,7 +149,7 @@ class WebTls(Category):
             WebTlsDaneValid,
             WebTlsZeroRTT,
             WebTlsOCSPStapling,
-            WebTlsHashFunc,
+            WebTlsKexHashFunc,
             # WebTlsDaneRollover,
         ]
         super(WebTls, self).__init__(name, subtests)
@@ -221,7 +221,7 @@ class MailTls(Category):
             MailTlsDaneRollover,
             MailTlsZeroRTT,
             MailTlsOCSPStapling,
-            MailTlsHashFunc,
+            MailTlsKexHashFunc,
         ]
         super(MailTls, self).__init__(name, subtests)
 
@@ -1125,30 +1125,30 @@ class WebTlsOCSPStapling(Subtest):
         self.tech_data = "detail tech data no"
 
 
-class WebTlsHashFunc(Subtest):
+class WebTlsKexHashFunc(Subtest):
     def __init__(self):
-        super(WebTlsHashFunc, self).__init__(
-            name="hash_func",
-            label="detail web tls hash-func label",
-            explanation="detail web tls hash-func exp",
-            tech_string="detail web tls hash-func tech table",
-            worst_status=scoring.WEB_TLS_HASH_FUNC_WORST_STATUS,
-            full_score=scoring.WEB_TLS_HASH_FUNC_GOOD,
-            model_score_field="hash_func_score")
+        super(WebTlsKexHashFunc, self).__init__(
+            name="kex_hash_func",
+            label="detail web tls kex-hash-func label",
+            explanation="detail web tls kex-hash-func exp",
+            tech_string="detail web tls kex-hash-func tech table",
+            worst_status=scoring.WEB_TLS_KEX_HASH_FUNC_WORST_STATUS,
+            full_score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
+            model_score_field="kex_hash_func_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web tls hash-func verdict good"
+        self.verdict = "detail web tls kex-hash-func verdict good"
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls hash-func verdict phase-out"
+        self.verdict = "detail web tls kex-hash-func verdict phase-out"
         self.tech_data = "detail tech data no"
 
     def result_unknown(self):
         self._status(STATUS_INFO)
-        self.verdict = "detail web tls hash-func verdict other"
+        self.verdict = "detail web tls kex-hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"
 
 
@@ -1855,30 +1855,30 @@ class MailTlsOCSPStapling(Subtest):
         self.tech_data = "detail tech data no"
 
 
-class MailTlsHashFunc(Subtest):
+class MailTlsKexHashFunc(Subtest):
     def __init__(self):
-        super(MailTlsHashFunc, self).__init__(
-            name="hash_func",
-            label="detail mail tls hash-func label",
-            explanation="detail mail tls hash-func exp",
-            tech_string="detail mail tls hash-func tech table",
-            worst_status=scoring.MAIL_TLS_HASH_FUNC_WORST_STATUS,
-            full_score=scoring.MAIL_TLS_HASH_FUNC_GOOD,
-            model_score_field="hash_func_score")
+        super(MailTlsKexHashFunc, self).__init__(
+            name="kex_hash_func",
+            label="detail mail tls kex-hash-func label",
+            explanation="detail mail tls kex-hash-func exp",
+            tech_string="detail mail tls kex-hash-func tech table",
+            worst_status=scoring.MAIL_TLS_KEX_HASH_FUNC_WORST_STATUS,
+            full_score=scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD,
+            model_score_field="kex_hash_func_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail tls hash-func verdict good"
+        self.verdict = "detail mail tls kex-hash-func verdict good"
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
         self._status(STATUS_NOTICE)
-        self.verdict = "detail mail tls hash-func verdict phase-out"
+        self.verdict = "detail mail tls kex-hash-func verdict phase-out"
         self.tech_data = "detail tech data no"
 
     def result_unknown(self):
         self._status(STATUS_INFO)
-        self.verdict = "detail mail tls hash-func verdict other"
+        self.verdict = "detail mail tls kex-hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"
 
 

@@ -48,7 +48,7 @@ from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
-from ..models import HashFuncStatus, CipherOrderStatus
+from ..models import KexHashFuncStatus, CipherOrderStatus
 
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
@@ -522,8 +522,8 @@ def save_results(model, results, addr, domain, category):
                     model.zero_rtt_score = result.get("zero_rtt_score")
                     model.ocsp_stapling = result.get("ocsp_stapling")
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
-                    model.hash_func = result.get("hash_func")
-                    model.hash_func_score = result.get("hash_func_score")
+                    model.kex_hash_func = result.get("kex_hash_func")
+                    model.kex_hash_func_score = result.get("kex_hash_func_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -591,8 +591,8 @@ def save_results(model, results, addr, domain, category):
                     model.zero_rtt_score = result.get("zero_rtt_score")
                     model.ocsp_stapling = result.get("ocsp_stapling")
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
-                    model.hash_func = result.get("hash_func")
-                    model.hash_func_score = result.get("hash_func_score")
+                    model.kex_hash_func = result.get("kex_hash_func")
+                    model.kex_hash_func_score = result.get("kex_hash_func_score")
                 if result.get("tls_cert"):
                     model.cert_chain = result.get("chain")
                     model.cert_trusted = result.get("trusted")
@@ -786,12 +786,12 @@ def build_report(dttls, category):
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests['ocsp_stapling'].result_ok()
 
-            if dttls.hash_func == HashFuncStatus.good:
-                category.subtests['hash_func'].result_good()
-            elif dttls.hash_func == HashFuncStatus.bad:
-                category.subtests['hash_func'].result_bad()
-            elif dttls.hash_func == HashFuncStatus.unknown:
-                category.subtests['hash_func'].result_unknown()
+            if dttls.kex_hash_func == KexHashFuncStatus.good:
+                category.subtests['kex_hash_func'].result_good()
+            elif dttls.kex_hash_func == KexHashFuncStatus.bad:
+                category.subtests['kex_hash_func'].result_bad()
+            elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
+                category.subtests['kex_hash_func'].result_unknown()
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -945,12 +945,12 @@ def build_report(dttls, category):
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests['ocsp_stapling'].result_ok()
 
-            if dttls.hash_func == HashFuncStatus.good:
-                category.subtests['hash_func'].result_good()
-            elif dttls.hash_func == HashFuncStatus.bad:
-                category.subtests['hash_func'].result_bad()
-            elif dttls.hash_func == HashFuncStatus.unknown:
-                category.subtests['hash_func'].result_unknown()
+            if dttls.kex_hash_func == KexHashFuncStatus.good:
+                category.subtests['kex_hash_func'].result_good()
+            elif dttls.kex_hash_func == KexHashFuncStatus.bad:
+                category.subtests['kex_hash_func'].result_bad()
+            elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
+                category.subtests['kex_hash_func'].result_unknown()
 
     dttls.report = category.gen_report()
 
@@ -1624,7 +1624,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 #   12  DebugConnection     SSLV2      check_protocol_versions (if not initial)
 #   13  DebugConnection     SSLV23     check_dh_params
 #   14  DebugConnection     SSLV23     check_dh_params
-#   15  ModernConnection    TLSV1_2    check_hash_func (if not TLSV1_3)
+#   15  ModernConnection    TLSV1_2    check_kex_hash_func (if not TLSV1_3)
 #   16  DebugConnection     SSLV23     check_cipher_order
 #   ---------------------------------------------------------------------------
 def check_mail_tls(server, dane_cb_data, task):
@@ -1650,7 +1650,7 @@ def check_mail_tls(server, dane_cb_data, task):
                     zero_rtt_score, zero_rtt = checker.check_zero_rtt()
                     prots_score, prots_result = checker.check_protocol_versions()
                     fs_score, fs_result = checker.check_dh_params()
-                    hash_func_score, hash_func = checker.check_hash_func()
+                    kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
                     cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
 
                     starttls_details.trusted_score = checker.check_cert_trust()
@@ -1701,8 +1701,8 @@ def check_mail_tls(server, dane_cb_data, task):
                 ocsp_stapling=ocsp_stapling,
                 ocsp_stapling_score=ocsp_stapling_score,
 
-                hash_func=hash_func,
-                hash_func_score=hash_func_score,
+                kex_hash_func=kex_hash_func,
+                kex_hash_func_score=kex_hash_func_score,
             )
             results.update(cert_results)
         except (ConnectionSocketException, ConnectionHandshakeException):
@@ -1763,8 +1763,8 @@ class ConnectionChecker:
             self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
             self._score_tls_cipher_order_good = scoring.WEB_TLS_CIPHER_ORDER_GOOD
             self._score_tls_cipher_order_bad = scoring.WEB_TLS_CIPHER_ORDER_BAD
-            self._score_tls_hash_func_good = scoring.WEB_TLS_HASH_FUNC_GOOD
-            self._score_tls_hash_func_bad = scoring.WEB_TLS_HASH_FUNC_BAD
+            self._score_tls_kex_hash_func_good = scoring.WEB_TLS_KEX_HASH_FUNC_GOOD
+            self._score_tls_kex_hash_func_bad = scoring.WEB_TLS_KEX_HASH_FUNC_BAD
         elif self._checks_mode == ChecksMode.MAIL:
             self._score_compression_good = scoring.MAIL_TLS_COMPRESSION_GOOD
             self._score_compression_bad = scoring.MAIL_TLS_COMPRESSION_BAD
@@ -1787,8 +1787,8 @@ class ConnectionChecker:
             self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
             self._score_tls_cipher_order_good = scoring.MAIL_TLS_CIPHER_ORDER_GOOD
             self._score_tls_cipher_order_bad = scoring.MAIL_TLS_CIPHER_ORDER_BAD
-            self._score_tls_hash_func_good = scoring.MAIL_TLS_HASH_FUNC_GOOD
-            self._score_tls_hash_func_bad = scoring.MAIL_TLS_HASH_FUNC_BAD
+            self._score_tls_kex_hash_func_good = scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD
+            self._score_tls_kex_hash_func_bad = scoring.MAIL_TLS_KEX_HASH_FUNC_BAD
         else:
             raise ValueError
 
@@ -2150,7 +2150,7 @@ class ConnectionChecker:
 
         return fs_score, result_dict
 
-    def check_hash_func(self):
+    def check_kex_hash_func(self):
         # # Re-connect with explicit signature algorithm preferences and
         # # determine signature related properties of the connection. Only
         # # TLS >= 1.2 support specifying the preferred signature algorithms as
@@ -2163,14 +2163,14 @@ class ConnectionChecker:
             # is executed, so we can avoid a pointless connection attempt if
             # the requested protocol version has not been seen already:
             if v not in self._seen_versions:
-                return HashFuncStatus.good
+                return KexHashFuncStatus.good
 
             # Unsupported TLS version or ConnectionSocketException or no
             # hash function information available or no common signature
             # algorithm. This could be due to lack of SHA2, but we cannot
             # tell the difference between handshake failure due to lack of
             # SHA2 versus lack of support for a protocol version.
-            result = HashFuncStatus.unknown
+            result = KexHashFuncStatus.unknown
 
             try:
                 # Only ModernConnection supports passing the signature
@@ -2209,12 +2209,12 @@ class ConnectionChecker:
                     # function to check. In my testing only ciphers that
                     # use RSA for key exchange caused the None value to be
                     # returned, i.e. case #1.
-                    hash_func = new_conn.get_peer_signature_digest()
-                    if hash_func:
-                        if hash_func in KEX_GOOD_HASH_FUNCS:
-                            result = HashFuncStatus.good
+                    kex_hash_func = new_conn.get_peer_signature_digest()
+                    if kex_hash_func:
+                        if kex_hash_func in KEX_GOOD_HASH_FUNCS:
+                            result = KexHashFuncStatus.good
                         else:
-                            result = HashFuncStatus.bad
+                            result = KexHashFuncStatus.bad
             except ValueError as e:
                 # The NaSSL library can raise ValueError if the given
                 # sigalgs value is unable to be set in the underlying
@@ -2236,7 +2236,7 @@ class ConnectionChecker:
                 # version but now as soon as we restrict ourselves to
                 # certain SHA2 hash functions the handshake fails, implying
                 # that the server does not support them.
-                result = HashFuncStatus.bad
+                result = KexHashFuncStatus.bad
             except ConnectionSocketException:
                 # TODO: extend to support indicating that we were unable to
                 # test in the case of ConnectionSocketException?
@@ -2275,26 +2275,26 @@ class ConnectionChecker:
             result_tls13 = sha2_supported_or_na(
                 TLSV1_3, KEX_TLS13_SHA2_SIGALG_PREFERENCE)
             # TLS 1.3 without SHA2 is bad, otherwise...
-            if result_tls13 != HashFuncStatus.bad:
+            if result_tls13 != KexHashFuncStatus.bad:
                 # Check TLS 1.2 SHA2 support:
                 result_tls12 = sha2_supported_or_na(
                     TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
                 # If the available protocols > TLS 1.2 all support SHA2 for
                 # key exchange then that's good.
                 if (
-                        result_tls13 == HashFuncStatus.good and
-                        result_tls12 == HashFuncStatus.good):
-                    return self._score_tls_hash_func_good, HashFuncStatus.good
+                        result_tls13 == KexHashFuncStatus.good and
+                        result_tls12 == KexHashFuncStatus.good):
+                    return self._score_tls_kex_hash_func_good, KexHashFuncStatus.good
                 # But if we're unable to determine conclusively one way or the
                 # other for either TLS 1.2 or TLS 1.3, then don't penalize the
                 # server but do indicate that uncertain situation.
-                elif (result_tls13 == HashFuncStatus.unknown or
-                      result_tls12 == HashFuncStatus.unknown):
-                    return self._score_tls_hash_func_good, HashFuncStatus.unknown
+                elif (result_tls13 == KexHashFuncStatus.unknown or
+                      result_tls12 == KexHashFuncStatus.unknown):
+                    return self._score_tls_kex_hash_func_good, KexHashFuncStatus.unknown
 
         # Otherwise at least one of TLS 1.2 and/or TLS 1.3 lacks support for
         # SHA2 for key exchange which is bad.
-        return self._score_tls_hash_func_bad, HashFuncStatus.bad
+        return self._score_tls_kex_hash_func_bad, KexHashFuncStatus.bad
 
     def _check_sec_score_order(self, lowest_values, curr_cipher, new_conn):
         # check for compliance with NCSC 2.0 prescribed
@@ -2578,7 +2578,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
                 zero_rtt_score, zero_rtt = checker.check_zero_rtt()
                 prots_score, prots_result = checker.check_protocol_versions()
                 fs_score, fs_result = checker.check_dh_params()
-                hash_func_score, hash_func = checker.check_hash_func()
+                kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
                 cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
 
         return dict(
@@ -2613,8 +2613,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             ocsp_stapling=ocsp_stapling,
             ocsp_stapling_score=ocsp_stapling_score,
 
-            hash_func=hash_func,
-            hash_func_score=hash_func_score,
+            kex_hash_func=kex_hash_func,
+            kex_hash_func_score=kex_hash_func_score,
         )
     except (socket.error, http.client.BadStatusLine, NoIpError,
             ConnectionHandshakeException,

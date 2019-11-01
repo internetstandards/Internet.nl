@@ -44,7 +44,7 @@ class ZeroRttStatus(Enum):
     na = 2
 
 
-class HashFuncStatus(Enum):
+class KexHashFuncStatus(Enum):
     bad = 0
     good = 1
     unknown = 2
@@ -435,8 +435,8 @@ class DomainTestTls(BaseTestModel):
     ocsp_stapling = EnumField(OcspStatus, default=OcspStatus.ok)
     ocsp_stapling_score = models.IntegerField(null=True)
 
-    hash_func = EnumField(HashFuncStatus, default=HashFuncStatus.bad)
-    hash_func_score = models.IntegerField(null=True)
+    kex_hash_func = EnumField(KexHashFuncStatus, default=KexHashFuncStatus.bad)
+    kex_hash_func_score = models.IntegerField(null=True)
 
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
@@ -479,7 +479,7 @@ class DomainTestTls(BaseTestModel):
             'compression', 'compression_score', 'secure_reneg',
             'secure_reneg_score', 'client_reneg', 'client_reneg_score',
             'zero_rtt', 'zero_rtt_score', 'ocsp_stapling',
-            'ocsp_stapling_score', 'hash_func', 'hash_func_score',
+            'ocsp_stapling_score', 'kex_hash_func', 'kex_hash_func_score',
             'forced_https', 'forced_https_score', 'http_compression_enabled',
             'http_compression_score', 'hsts_enabled', 'hsts_policies',
             'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
