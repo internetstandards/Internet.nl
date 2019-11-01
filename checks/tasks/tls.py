@@ -589,8 +589,9 @@ def save_results(model, results, addr, domain, category):
                     model.client_reneg_score = result.get("client_reneg_score")
                     model.zero_rtt = result.get("zero_rtt")
                     model.zero_rtt_score = result.get("zero_rtt_score")
-                    model.ocsp_stapling = result.get("ocsp_stapling")
-                    model.ocsp_stapling_score = result.get("ocsp_stapling_score")
+                    # OCSP disabled for mail.
+                    # model.ocsp_stapling = result.get("ocsp_stapling")
+                    # model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
                 if result.get("tls_cert"):
@@ -938,12 +939,13 @@ def build_report(dttls, category):
             elif dttls.zero_rtt == ZeroRttStatus.na:
                 category.subtests['zero_rtt'].result_na()
 
-            if dttls.ocsp_stapling == OcspStatus.good:
-                category.subtests['ocsp_stapling'].result_good()
-            elif dttls.ocsp_stapling == OcspStatus.not_trusted:
-                category.subtests['ocsp_stapling'].result_not_trusted()
-            elif dttls.ocsp_stapling == OcspStatus.ok:
-                category.subtests['ocsp_stapling'].result_ok()
+            # OCSP disabled for mail.
+            # if dttls.ocsp_stapling == OcspStatus.good:
+            #     category.subtests['ocsp_stapling'].result_good()
+            # elif dttls.ocsp_stapling == OcspStatus.not_trusted:
+            #     category.subtests['ocsp_stapling'].result_not_trusted()
+            # elif dttls.ocsp_stapling == OcspStatus.ok:
+            #     category.subtests['ocsp_stapling'].result_ok()
 
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests['kex_hash_func'].result_good()
@@ -1642,7 +1644,8 @@ def check_mail_tls(server, dane_cb_data, task):
         try:
             with SMTPConnection(server_name=server, send_SNI=send_SNI).conn as conn:
                 with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
-                    ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
+                    # OCSP disabled for mail.
+                    # ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
                     secure_reneg_score, secure_reneg = checker.check_secure_reneg()
                     client_reneg_score, client_reneg = checker.check_client_reneg()
                     compression_score, compression = checker.check_compression()
@@ -1698,8 +1701,9 @@ def check_mail_tls(server, dane_cb_data, task):
                 zero_rtt_score=zero_rtt_score,
                 zero_rtt=zero_rtt,
 
-                ocsp_stapling=ocsp_stapling,
-                ocsp_stapling_score=ocsp_stapling_score,
+                # OCSP disabled for mail.
+                # ocsp_stapling=ocsp_stapling,
+                # ocsp_stapling_score=ocsp_stapling_score,
 
                 kex_hash_func=kex_hash_func,
                 kex_hash_func_score=kex_hash_func_score,
@@ -1782,9 +1786,10 @@ class ConnectionChecker:
             self._score_tls_fs_bad = scoring.MAIL_TLS_FS_BAD
             self._score_zero_rtt_good = scoring.MAIL_TLS_ZERO_RTT_GOOD
             self._score_zero_rtt_bad = scoring.MAIL_TLS_ZERO_RTT_BAD
-            self._score_ocsp_staping_good = scoring.MAIL_TLS_OCSP_STAPLING_GOOD
-            self._score_ocsp_staping_ok = scoring.MAIL_TLS_OCSP_STAPLING_OK
-            self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
+            # OCSP disabled for mail.
+            # self._score_ocsp_staping_good = scoring.MAIL_TLS_OCSP_STAPLING_GOOD
+            # self._score_ocsp_staping_ok = scoring.MAIL_TLS_OCSP_STAPLING_OK
+            # self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
             self._score_tls_cipher_order_good = scoring.MAIL_TLS_CIPHER_ORDER_GOOD
             self._score_tls_cipher_order_bad = scoring.MAIL_TLS_CIPHER_ORDER_BAD
             self._score_tls_kex_hash_func_good = scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD

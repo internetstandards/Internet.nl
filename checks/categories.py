@@ -220,8 +220,8 @@ class MailTls(Category):
             MailTlsDaneValid,
             MailTlsDaneRollover,
             MailTlsZeroRTT,
-            MailTlsOCSPStapling,
             MailTlsKexHashFunc,
+            # MailTlsOCSPStapling,  # Disabled for mail.
         ]
         super(MailTls, self).__init__(name, subtests)
 
@@ -1605,10 +1605,6 @@ class MailTlsDaneValid(Subtest):
 
 
 class MailTlsDaneRollover(Subtest):
-    """
-    .. note:: Disabled for now. May also disable DANE for web in the future.
-
-    """
     def __init__(self):
         super(MailTlsDaneRollover, self).__init__(
             name="dane_rollover",
@@ -1823,6 +1819,10 @@ class MailTlsZeroRTT(Subtest):
 
 
 class MailTlsOCSPStapling(Subtest):
+    """
+    .. note:: Disabled for mail.
+
+    """
     def __init__(self):
         super(MailTlsOCSPStapling, self).__init__(
             name="ocsp_stapling",
