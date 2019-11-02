@@ -106,14 +106,14 @@ class PreTLS12DomainConfig(DomainConfig):
 class PostfixTLS12Config(DomainConfig):
     def override_defaults(self):
         self.expected_failures.setdefault(TESTS.TLS_KEY_EXCHANGE, ANY)
-        self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
+        # self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
         self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
 
 
 class PostfixTLS13Config(DomainConfig):
     def override_defaults(self):
         self.expected_failures.setdefault(TESTS.TLS_CIPHER_ORDER, ANY)
-        self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
+        # self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
         self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
 
 
@@ -316,10 +316,14 @@ ncsc_20_tests = [
         }),
 
     PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
-        'tls12onlynotprescribedorder1.test.nlnetlabs.tk',
+        'tls12onlynotsecurityorder.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.TLS_CIPHER_SUITES
-        },
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CIPHER_ORDER,
+        }),
+
+    PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
+        'tls12onlynotprescribedorder1.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CIPHER_ORDER: [
                 [MustMatch(r'.+'), ''],   # IPv6
@@ -342,10 +346,7 @@ ncsc_20_tests = [
 
     PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
         'tls12onlynotprescribedorder5.test.nlnetlabs.tk',
-        expected_failures={
-            TESTS.TLS_CIPHER_SUITES
-        },
-        expected_warnings={
+        expected_info={
             TESTS.TLS_CIPHER_ORDER: [
                 [MustMatch(r'.+'), ''],   # IPv6
                 [MustMatch(r'.+'), '5'],  # IPv6
@@ -361,11 +362,10 @@ ncsc_20_tests = [
         expected_failures={
             TESTS.TLS_CIPHER_SUITES: [
                 [REGEX_LEGACY_BAD_CIPHERS, INSUFFICIENT_TEXT],  # matches all rows
-            ]
-        },
-        expected_warnings={
-            TESTS.TLS_CIPHER_ORDER
+            ],
+            TESTS.TLS_CIPHER_ORDER: [],
         }),
+
     PreTLS13DomainConfig('NCSC20'
         '-Table1:TLS12'
         '-Table6:LegacyPhaseOutCiphers',
@@ -520,11 +520,11 @@ ncsc_20_tests = [
     # This website virtual host configuration deliberately serves an OCSP
     # response that was obtained for a different domain/cert and so is invalid
     # for this domain/cert.
-    BadDomain('NCSC20'
+    DomainConfig('NCSC20'
         '-Table1:TLS13'
         '-Table15:OnInvalid',
         'tls13invalidocsp.test.nlnetlabs.tk',
-        expected_failures={
+        expected_warnings={
             TESTS.TLS_OCSP_STAPLING: [
                 ['no'],  # IPv6
                 ['no'],  # IPv4

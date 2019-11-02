@@ -55,6 +55,8 @@ tls12onlylegacyphaseoutciphers                                    IN  A      {{T
 tls12onlylegacyphaseoutciphers                                    IN  AAAA   {{TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6}}
 tls12onlymodernphaseoutciphers                                    IN  A      {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IP}}
 tls12onlymodernphaseoutciphers                                    IN  AAAA   {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}}
+tls12onlynotsecurityorder                                         IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
+tls12onlynotsecurityorder                                         IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
 tls12onlynotprescribedorder1                                      IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
 tls12onlynotprescribedorder1                                      IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
 tls12onlynotprescribedorder4                                      IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -192,6 +194,7 @@ _443._tcp.tls12onlylegacybadciphers                               IN  TLSA   3 1
 _443._tcp.tls12onlymodernbadciphers                               IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlylegacyphaseoutciphers                          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlymodernphaseoutciphers                          IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlynotsecurityorder                               IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlynotprescribedorder1                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlynotprescribedorder4                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlynotprescribedorder5                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c

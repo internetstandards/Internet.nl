@@ -674,7 +674,11 @@ def build_report(dttls, category):
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
-                category.subtests['tls_cipher_order'].result_seclevel_bad()
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                category.subtests['tls_cipher_order'].result_seclevel_bad([
+                        [cipher1, cipher2],
+                        [' ', violated_rule]
+                    ])
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
                 # two cells to fill in a table like so:
@@ -828,7 +832,11 @@ def build_report(dttls, category):
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
-                category.subtests['tls_cipher_order'].result_seclevel_bad()
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                category.subtests['tls_cipher_order'].result_seclevel_bad([
+                        [cipher1, cipher2],
+                        [' ', violated_rule]
+                    ])
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
                 # two cells to fill in a table like so:
@@ -2304,8 +2312,8 @@ class ConnectionChecker:
     def _check_sec_score_order(self, lowest_values, curr_cipher, new_conn):
         # check for compliance with NCSC 2.0 prescribed
         # ordering.
-        if (not self._cipher_order_violation
-                or self._cipher_order_violation[2] != ''):
+        if (self._cipher_order_violation
+                and self._cipher_order_violation[2] == ''):
             return
 
         ci = cipher_infos.get(curr_cipher, None)
@@ -2481,9 +2489,7 @@ class ConnectionChecker:
         # Did a previous call to self.check_cipher_sec_level() discover a
         # prescribed order violation?
         if not (cipher_order == CipherOrderStatus.bad
-                or (
-                    self._cipher_order_violation
-                    and self._cipher_order_violation[2] == '')):
+                or self._cipher_order_violation):
             # Complete the prescribed order check by testing "good" ciphers.
             # and "sufficient" ciphers.
             self._check_ciphers([
