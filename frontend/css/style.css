@@ -1,6 +1,6 @@
 /* internet.nl
    style.css
-   v6 | 201806
+   v7.5-20191114a
 */
 
 @font-face {
@@ -1454,6 +1454,45 @@ footer ul li:last-child {
 }
 
 /* ====================================================== */
+
+@media (min-width:540px) {
+
+/* 
+	issue 170: styling hall of fame, only add columns to the test result list.
+	that is, only columns if the viewport > 540px
+*/	
+	.list-column {
+		-webkit-column-count: 2;
+		-moz-column-count: 2;
+		column-count: 2;
+		list-style-position: inside;	
+	}
+	.list-column li {
+		text-overflow: ellipsis; /* makes for better abbreviations in the list items */
+	}
+
+	/* reset colums for lists in lists */
+	.list-column ol,
+	.list-column ul {
+		-webkit-column-count: 1;
+		-moz-column-count: 1;
+		column-count: 1;
+	}
+
+}
+
+@media (min-width:800px) {
+
+	.list-column.column-3 {
+		-webkit-column-count: 3;
+		-moz-column-count: 3;
+		column-count: 3;
+	}
+
+}
+
+/* ====================================================== */
+
 @media (min-width: 740px) {
 
   .body-with-semifixed-header main {
@@ -1596,12 +1635,6 @@ footer ul li:last-child {
     font-size: 100%;
   }
 
-  .hall-of-fame main ul {
-    -webkit-column-count: 2;
-    -moz-column-count: 2;
-    column-count: 2;
-  }
-
   .site-titel a {
     padding-bottom: .25em;
   }
@@ -1670,11 +1703,5 @@ footer ul li:last-child {
     margin-right:auto;
     padding-top: .5em;
     padding-bottom: .5em;
-  }
-
-  .hall-of-fame main ul {
-    -webkit-column-count: 3;
-    -moz-column-count: 3;
-    column-count: 3;
   }
 }
