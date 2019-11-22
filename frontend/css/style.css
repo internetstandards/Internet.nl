@@ -517,6 +517,8 @@ main ol {
 h1 {
   font-size: 1.625em;
   line-height: 1.5em;
+	word-wrap: break-word;
+	hyphens: auto; /* prevents the title from breaking out of the container, see issue #401 */
 }
 h2 {
   margin-top: .8em;
@@ -1394,7 +1396,7 @@ footer ul li:last-child {
   .websitetest h1 {
     word-wrap: break-word;
     font-size: 1.25em;
-  }
+  } 
   .websitetest .testresults-percentage {
     word-wrap: break-word;
   }
@@ -1431,20 +1433,23 @@ footer ul li:last-child {
     display: -ms-flexbox;
     display: flex;
     flex-flow: row wrap;
-    justify-content: flex-start;
-    justify-content: space-between;
+    justify-content: space-between; 
   }
   .home main .wrap {
     align-items: stretch;
     flex-flow: column wrap;
   }
 
-  aside,
+/* 
+	remove these selectors. no need to add display:flex to these elements, as they are already children of a flex container. relates to issue #401 
+	
+ aside, 
   main .wrap .block,
   main .wrap .result {
     display: flex;
     flex-direction: column;
   }
+*/  
   aside {
     width:100%;
     margin-top: .25em;
@@ -1476,8 +1481,22 @@ footer ul li:last-child {
   }
   main .wrap .block.wide,
   main .wrap .result.wide {
-    flex: 1;
+    flex: 1 0 65%; /* added flex-shrink and flex-basis to this shorthand, issue #401 */
   }
+
+	main .wrap .block.wide + aside,
+	main .wrap .result.wide + aside {
+		/* specifically target the asides AFTER the results and main content, issue #401 */
+		flex: 1 0 32%;
+		margin-right: 0;
+	}
+	
+	main .wrap .block.wide + aside .block,
+	main .wrap .result.wide + aside .block {
+		/* do not limit width to 300px, but make these blocks align right */
+		width: auto;
+	}
+  
   main .wrap .block.fullwidth {
     min-width: 99%;
   }
