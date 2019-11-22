@@ -1,6 +1,5 @@
 /* internet.nl
    accordion.js
-   v6 | 201805
 */
 
 /* global console, $ */

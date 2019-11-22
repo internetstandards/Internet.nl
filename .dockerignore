@@ -1,0 +1,6 @@
+.git
+.gitignore
+*.log
+*.pid
+**/*.pyc
+**/.pytest_cache

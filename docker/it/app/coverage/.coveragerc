@@ -1,0 +1,10 @@
+[run]
+data_file = /tmp/it-report/coverage-data/.coverage
+branch = True
+parallel = True
+timid = True
+concurrency =
+    thread
+    multiprocessing
+source =
+    /app/

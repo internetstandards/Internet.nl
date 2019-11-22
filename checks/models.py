@@ -32,6 +32,31 @@ class ForcedHttpsStatus(Enum):
     no_http = 2
 
 
+class OcspStatus(Enum):
+    ok = 0
+    good = 1
+    not_trusted = 2
+
+
+class ZeroRttStatus(Enum):
+    bad = 0
+    good = 1
+    na = 2
+
+
+class KexHashFuncStatus(Enum):
+    bad = 0
+    good = 1
+    unknown = 2
+
+
+class CipherOrderStatus(Enum):
+    bad = 0
+    good = 1
+    not_prescribed = 2
+    not_seclevel = 3
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -382,12 +407,19 @@ class DomainTestTls(BaseTestModel):
     dh_param = models.CharField(max_length=255, default="", null=True)
     ecdh_param = models.CharField(max_length=255, default="", null=True)
     fs_bad = ListField(null=True)
+    fs_phase_out = ListField(null=True)
     fs_score = models.IntegerField(null=True)
 
     ciphers_bad = ListField(null=True)
+    ciphers_phase_out = ListField(null=True)
     ciphers_score = models.IntegerField(null=True)
 
+    cipher_order = EnumField(CipherOrderStatus, default=CipherOrderStatus.bad)
+    cipher_order_violation = ListField(null=True)
+    cipher_order_score = models.IntegerField(null=True)
+
     protocols_bad = ListField(null=True)
+    protocols_phase_out = ListField(null=True)
     protocols_score = models.IntegerField(null=True)
 
     compression = models.NullBooleanField(default=False)
@@ -396,6 +428,15 @@ class DomainTestTls(BaseTestModel):
     secure_reneg_score = models.IntegerField(null=True)
     client_reneg = models.NullBooleanField(default=False)
     client_reneg_score = models.IntegerField(null=True)
+
+    zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
+    zero_rtt_score = models.IntegerField(null=True)
+
+    ocsp_stapling = EnumField(OcspStatus, default=OcspStatus.ok)
+    ocsp_stapling_score = models.IntegerField(null=True)
+
+    kex_hash_func = EnumField(KexHashFuncStatus, default=KexHashFuncStatus.bad)
+    kex_hash_func_score = models.IntegerField(null=True)
 
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
@@ -415,6 +456,7 @@ class DomainTestTls(BaseTestModel):
     cert_trusted_score = models.IntegerField(null=True)
 
     cert_pubkey_bad = ListField(null=True)
+    cert_pubkey_phase_out = ListField(null=True)
     cert_pubkey_score = models.IntegerField(null=True)
 
     cert_signature_bad = ListField(null=True)
@@ -430,15 +472,19 @@ class DomainTestTls(BaseTestModel):
             'timestamp', 'domain', 'report', 'port', 'maildomain', 'webdomain',
             'server_reachable', 'tls_enabled', 'tls_enabled_score',
             'could_not_test_smtp_starttls', 'dane_log', 'dane_score',
-            'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_score',
-            'ciphers_bad', 'ciphers_score', 'protocols_bad', 'protocols_score',
+            'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_phase_out',
+            'fs_score', 'ciphers_bad', 'ciphers_phase_out', 'ciphers_score',
+            'cipher_order', 'cipher_order_violation', 'cipher_order_score',
+            'protocols_bad', 'protocols_phase_out', 'protocols_score',
             'compression', 'compression_score', 'secure_reneg',
             'secure_reneg_score', 'client_reneg', 'client_reneg_score',
+            'zero_rtt', 'zero_rtt_score', 'ocsp_stapling',
+            'ocsp_stapling_score', 'kex_hash_func', 'kex_hash_func_score',
             'forced_https', 'forced_https_score', 'http_compression_enabled',
             'http_compression_score', 'hsts_enabled', 'hsts_policies',
             'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
-            'cert_pubkey_bad', 'cert_pubkey_score', 'cert_signature_bad',
-            'cert_signature_score', 'cert_hostmatch_bad',
+            'cert_pubkey_bad', 'cert_pubkey_phase_out', 'cert_pubkey_score',
+            'cert_signature_bad', 'cert_signature_score', 'cert_hostmatch_bad',
             'cert_hostmatch_score', 'score',
         ]
 

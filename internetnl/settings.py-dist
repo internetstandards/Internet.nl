@@ -49,7 +49,7 @@ if ENABLE_BATCH:
     BATCH_MAX_RUNNING_TIME = 60 * 10  # seconds
 
     # Central unbound where all the pyunbounds forward to. Used for better
-    # cache performance while batch testing. Format is "ip@port". 
+    # cache performance while batch testing. Format is "ip@port".
     # Leave empty ("") for disabling the feature; NOT recommended.
     CENTRAL_UNBOUND = "127.0.0.1@4321"
 
@@ -270,7 +270,6 @@ SHARED_TASK_TIME_LIMIT_LOW = 15
 LDNS_DANE = './ldns-dane-wrapper'
 CA_CERTIFICATES = os.path.join(BASE_DIR, 'remote_data/certs/ca-bundle.crt')
 CA_FINGERPRINTS = os.path.join(BASE_DIR, 'remote_data/certs/root_fingerprints')
-
 
 # --- Markdown/HTML settings
 #

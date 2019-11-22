@@ -5,6 +5,7 @@ import socket
 import time
 
 import pythonwhois
+import sys
 import unbound
 
 from celery import shared_task
@@ -122,7 +123,10 @@ def registrar_lookup(addr):
 
     """
     res = ""
-    if not settings.ENABLE_BATCH:
+    if (
+        'pythonwhois' in sys.modules
+        and not settings.ENABLE_BATCH
+    ):
         cache_id = redis_id.whois.id.format(addr)
         cache_ttl = redis_id.whois.ttl
         cached = cache.get(cache_id)
@@ -176,7 +180,12 @@ def save_results_mail(addr, results, category):
         mailtdnssec.testset.add(dtdnssec)
 
     # Build the summary report for the MX.
-    mx_report = category.__class__().gen_report()
+    category = category.__class__()
+    if i == 0:
+        # Give a warning for the mailserver part of the DNSSEC test when there
+        # are no mailservers.
+        category.subtests['dnssec_mx_exists'].result_no_mailservers()
+    mx_report = category.gen_report()
     shared.aggregate_subreports(subreports, mx_report)
 
     mx_report.update(domain_report)

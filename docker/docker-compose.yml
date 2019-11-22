@@ -1,8 +1,8 @@
 version: '2.0'
 
-services:  
+services:
   app:
-    image: nlnetlabs/internetnl:latest
+    image: nlnetlabs/internetnl:localbuild-inttls13
     build:
       context: ..
       dockerfile: docker/Dockerfile

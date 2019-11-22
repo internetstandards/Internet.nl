@@ -1,6 +1,5 @@
 /* internet.nl
    style.css
-   v7.5-20191114a
 */
 
 @font-face {
@@ -145,7 +144,6 @@ html {
    left:-9999px;
    z-index:1000;
 }
-
 .skiplink a:focus {
   left:0;
   top:0;
@@ -153,6 +151,9 @@ html {
   color:black;
   text-decoration: none;
   background:#00BFD6;
+}
+.skiplink-hide {
+  display: none;
 }
 
 a:focus {
@@ -516,6 +517,8 @@ main ol {
 h1 {
   font-size: 1.625em;
   line-height: 1.5em;
+  word-wrap: break-word;
+  hyphens: auto; /* prevents the title from breaking out of the container, see issue #401 */
 }
 h2 {
   margin-top: .8em;
@@ -1029,7 +1032,7 @@ table {
 table th {
   font-family: 'robotobold', arial, sans-serif;
   font-weight: bold;
-  padding-top: 1em;
+  padding-top: 0.5em;
   border-bottom: 1px solid #dadada;
 }
 table td,
@@ -1037,7 +1040,7 @@ table th {
   padding-right: 1em;
   text-align: left;
   word-break: break-word;
-  font-size: 80%;
+  font-size: 90%;
 }
 table td {
   padding-top: .4em;
@@ -1121,6 +1124,7 @@ table td {
 }
 
 .tech-details-table {
+  font-family: monospace;
   padding-left: 0.5rem;
   margin-bottom: 1rem;
   overflow-x: auto;
@@ -1268,9 +1272,6 @@ table td {
   text-align: right;
   padding: 0;
   margin: 0;
-}
-#dated-results-warning a{
-  color: #05BFD6;
 }
 
 .retest-text {
@@ -1432,7 +1433,6 @@ footer ul li:last-child {
     display: -ms-flexbox;
     display: flex;
     flex-flow: row wrap;
-    justify-content: flex-start;
     justify-content: space-between;
   }
   .home main .wrap {
@@ -1440,12 +1440,6 @@ footer ul li:last-child {
     flex-flow: column wrap;
   }
 
-  aside,
-  main .wrap .block,
-  main .wrap .result {
-    display: flex;
-    flex-direction: column;
-  }
   aside {
     width:100%;
     margin-top: .25em;
@@ -1516,8 +1510,22 @@ footer ul li:last-child {
   }
   main .wrap .block.wide,
   main .wrap .result.wide {
-    flex: 1;
+    flex: 1 0 65%; /* added flex-shrink and flex-basis to this shorthand, issue #401 */
   }
+
+  main .wrap .block.wide + aside,
+  main .wrap .result.wide + aside {
+    /* specifically target the asides AFTER the results and main content, issue #401 */
+    flex: 1 0 32%;
+    margin-right: 0;
+  }
+
+  main .wrap .block.wide + aside .block,
+  main .wrap .result.wide + aside .block {
+    /* do not limit width to 300px, but make these blocks align right */
+    width: auto;
+  }
+
   main .wrap .block.fullwidth {
     min-width: 99%;
   }

@@ -20,10 +20,21 @@ from checks import redis_id
 
 
 ub_ctx = unbound.ub_ctx()
+if hasattr(settings, 'ENABLE_INTEGRATION_TEST') and settings.ENABLE_INTEGRATION_TEST:
+    ub_ctx.debuglevel(2)
+    ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
+    ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
 ub_ctx.set_async(True)
 if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
     ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
 
+# See: https://stackoverflow.com/a/53875771 for a good summary of the various
+# RFCs and other rulings that combine to define what is a valid domain name.
+# Of particular note are xn-- which is used for internationalized TLDs, and
+# the rejection of digits in the TLD if not xn--. Digits in the last label
+# were legal under the original RFC-1035 but not according to the "ICANN
+# Application Guidebook for new TLDs (June 2012)" which stated that "The
+# ASCII label must consist entirely of letters (alphabetic characters a-z)".
 regex_dname = (
     r'^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+'
     '([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)$'

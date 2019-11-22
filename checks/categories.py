@@ -1,7 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
-from .scoring import STATUS_FAIL, STATUS_NOT_TESTED, STATUS_NOTICE
+from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
+from .scoring import STATUS_GOOD_NOT_TESTED, STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
 
@@ -135,6 +136,7 @@ class WebTls(Category):
             WebTlsHttpCompression,
             WebTlsFsParams,
             WebTlsCiphers,
+            WebTlsCipherOrder,
             WebTlsVersion,
             WebTlsCompression,
             WebTlsRenegotiationSecure,
@@ -145,6 +147,9 @@ class WebTls(Category):
             WebTlsCertHostmatch,
             WebTlsDaneExists,
             WebTlsDaneValid,
+            WebTlsZeroRTT,
+            WebTlsOCSPStapling,
+            WebTlsKexHashFunc,
             # WebTlsDaneRollover,
         ]
         super(WebTls, self).__init__(name, subtests)
@@ -202,6 +207,7 @@ class MailTls(Category):
             MailTlsStarttlsExists,
             MailTlsFsParams,
             MailTlsCiphers,
+            MailTlsCipherOrder,
             MailTlsVersion,
             MailTlsCompression,
             MailTlsRenegotiationSecure,
@@ -213,6 +219,9 @@ class MailTls(Category):
             MailTlsDaneExists,
             MailTlsDaneValid,
             MailTlsDaneRollover,
+            MailTlsZeroRTT,
+            MailTlsKexHashFunc,
+            # MailTlsOCSPStapling,  # Disabled for mail.
         ]
         super(MailTls, self).__init__(name, subtests)
 
@@ -540,6 +549,10 @@ class MailDnssecMxExists(Subtest):
     def was_tested(self):
         self.worst_status = scoring.MAIL_DNSSEC_WORST_STATUS
 
+    def result_no_mailservers(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail dnssec mx-exists verdict no-mailservers"
+
     def result_good(self):
         self.was_tested()
         self._status(STATUS_SUCCESS)
@@ -706,6 +719,7 @@ class WebTlsFsParams(Subtest):
             name="fs_params",
             label="detail web tls fs-params label",
             explanation="detail web tls fs-params exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls fs-params tech table",
             worst_status=scoring.WEB_TLS_FS_WORST_STATUS,
             full_score=scoring.WEB_TLS_FS_GOOD,
@@ -716,6 +730,11 @@ class WebTlsFsParams(Subtest):
         self.verdict = "detail web tls fs-params verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls fs-params verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls fs-params verdict bad"
@@ -723,7 +742,7 @@ class WebTlsFsParams(Subtest):
 
     def result_no_dh_params(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web tls fs-params verdict other"
+        self.verdict = "detail web tls fs-params verdict na"
         self.tech_data = ""
 
 
@@ -733,6 +752,7 @@ class WebTlsCiphers(Subtest):
             name="tls_ciphers",
             label="detail web tls ciphers label",
             explanation="detail web tls ciphers exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls ciphers tech table",
             worst_status=scoring.WEB_TLS_SUITES_WORST_STATUS,
             full_score=scoring.WEB_TLS_SUITES_GOOD,
@@ -743,10 +763,53 @@ class WebTlsCiphers(Subtest):
         self.verdict = "detail web tls ciphers verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls ciphers verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls ciphers verdict bad"
         self.tech_data = tech_data
+
+
+class WebTlsCipherOrder(Subtest):
+    def __init__(self):
+        super(WebTlsCipherOrder, self).__init__(
+            name="tls_cipher_order",
+            label="detail web tls cipher-order label",
+            explanation="detail web tls cipher-order exp",
+            init_tech_type="table_multi_col",
+            tech_string="detail web tls cipher-order tech table",
+            worst_status=scoring.WEB_TLS_CIPHER_ORDER_WORST_STATUS,
+            full_score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
+            model_score_field="cipher_order_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls cipher-order verdict good"
+        self.tech_data = ""
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls cipher-order verdict bad"
+        self.tech_data = ""
+
+    def result_seclevel_bad(self, cipher_order_violation):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls cipher-order verdict seclevel-bad"
+        self.tech_data = cipher_order_violation
+
+    def result_score_warning(self, cipher_order_violation):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls cipher-order verdict warning"
+        self.tech_data = cipher_order_violation
+
+    def result_score_info(self, cipher_order_violation):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls cipher-order verdict warning"
+        self.tech_data = cipher_order_violation
 
 
 class WebTlsVersion(Subtest):
@@ -755,6 +818,7 @@ class WebTlsVersion(Subtest):
             name="tls_version",
             label="detail web tls version label",
             explanation="detail web tls version exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls version tech table",
             worst_status=scoring.WEB_TLS_PROTOCOLS_WORST_STATUS,
             full_score=scoring.WEB_TLS_PROTOCOLS_GOOD,
@@ -764,6 +828,11 @@ class WebTlsVersion(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls version verdict good"
         self.tech_data = ""
+
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls version verdict phase-out"
+        self.tech_data = tech_data
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
@@ -875,6 +944,11 @@ class WebTlsCertPubkey(Subtest):
         self.verdict = "detail web tls cert-pubkey verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls cert-pubkey verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls cert-pubkey verdict bad"
@@ -887,6 +961,7 @@ class WebTlsCertSignature(Subtest):
             name="cert_signature",
             label="detail web tls cert-signature label",
             explanation="detail web tls cert-signature exp",
+            init_tech_type="table_multi_col",
             tech_string="detail web tls cert-signature tech table",
             worst_status=scoring.WEB_TLS_SIGNATURE_WORST_STATUS,
             full_score=scoring.WEB_TLS_SIGNATURE_GOOD,
@@ -996,6 +1071,87 @@ class WebTlsDaneRollover(Subtest):
         self.tech_data = "detail tech data no"
 
 
+class WebTlsZeroRTT(Subtest):
+    def __init__(self):
+        super(WebTlsZeroRTT, self).__init__(
+            name="zero_rtt",
+            label="detail web tls zero-rtt label",
+            explanation="detail web tls zero-rtt exp",
+            tech_string="detail web tls zero-rtt tech table",
+            worst_status=scoring.WEB_TLS_ZERO_RTT_WORST_STATUS,
+            full_score=scoring.WEB_TLS_ZERO_RTT_GOOD,
+            model_score_field="zero_rtt_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls zero-rtt verdict good"
+        self.tech_data = "detail tech data no"
+
+    def result_na(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls zero-rtt verdict na"
+        self.tech_data = "detail tech data no"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls zero-rtt verdict bad"
+        self.tech_data = "detail tech data yes"
+
+
+class WebTlsOCSPStapling(Subtest):
+    def __init__(self):
+        super(WebTlsOCSPStapling, self).__init__(
+            name="ocsp_stapling",
+            label="detail web tls ocsp-stapling label",
+            explanation="detail web tls ocsp-stapling exp",
+            tech_string="detail web tls ocsp-stapling tech table",
+            worst_status=scoring.WEB_TLS_OCSP_STAPLING_WORST_STATUS,
+            full_score=scoring.WEB_TLS_OCSP_STAPLING_GOOD,
+            model_score_field="ocsp_stapling_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls ocsp-stapling verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_ok(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls ocsp-stapling verdict ok"
+        self.tech_data = "detail tech data no"
+
+    def result_not_trusted(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls ocsp-stapling verdict bad"
+        self.tech_data = "detail tech data no"
+
+
+class WebTlsKexHashFunc(Subtest):
+    def __init__(self):
+        super(WebTlsKexHashFunc, self).__init__(
+            name="kex_hash_func",
+            label="detail web tls kex-hash-func label",
+            explanation="detail web tls kex-hash-func exp",
+            tech_string="detail web tls kex-hash-func tech table",
+            worst_status=scoring.WEB_TLS_KEX_HASH_FUNC_WORST_STATUS,
+            full_score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
+            model_score_field="kex_hash_func_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls kex-hash-func verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls kex-hash-func verdict phase-out"
+        self.tech_data = "detail tech data no"
+
+    def result_unknown(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls kex-hash-func verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+
 class MailTlsStarttlsExists(Subtest):
     def __init__(self):
         super(MailTlsStarttlsExists, self).__init__(
@@ -1036,6 +1192,7 @@ class MailTlsFsParams(Subtest):
             name="fs_params",
             label="detail mail tls fs-params label",
             explanation="detail mail tls fs-params exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls fs-params tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_FS_GOOD,
@@ -1050,6 +1207,12 @@ class MailTlsFsParams(Subtest):
         self.verdict = "detail mail tls fs-params verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls fs-params verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self.was_tested()
         self._status(STATUS_FAIL)
@@ -1059,7 +1222,7 @@ class MailTlsFsParams(Subtest):
     def result_no_dh_params(self):
         self.was_tested()
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail tls fs-params verdict other"
+        self.verdict = "detail mail tls fs-params verdict na"
         self.tech_data = ""
 
 
@@ -1069,6 +1232,7 @@ class MailTlsCiphers(Subtest):
             name="tls_ciphers",
             label="detail mail tls ciphers label",
             explanation="detail mail tls ciphers exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls ciphers tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_SUITES_GOOD,
@@ -1083,11 +1247,63 @@ class MailTlsCiphers(Subtest):
         self.verdict = "detail mail tls ciphers verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls ciphers verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls ciphers verdict bad"
         self.tech_data = tech_data
+
+
+class MailTlsCipherOrder(Subtest):
+    def __init__(self):
+        super(MailTlsCipherOrder, self).__init__(
+            name="tls_cipher_order",
+            label="detail mail tls cipher-order label",
+            explanation="detail mail tls cipher-order exp",
+            init_tech_type="table_multi_col",
+            tech_string="detail mail tls cipher-order tech table",
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_CIPHER_ORDER_GOOD,
+            model_score_field="cipher_order_score")
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_TLS_CIPHER_ORDER_WORST_STATUS
+
+    def result_good(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls cipher-order verdict good"
+        self.tech_data = ""
+
+    def result_bad(self):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls cipher-order verdict bad"
+        self.tech_data = ""
+
+    def result_seclevel_bad(self, cipher_order_violation):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls cipher-order verdict seclevel-bad"
+        self.tech_data = cipher_order_violation
+
+    def result_warning(self, cipher_order_violation):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls cipher-order verdict warning"
+        self.tech_data = cipher_order_violation
+
+    def result_info(self, cipher_order_violation):
+        self.was_tested()
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls cipher-order verdict warning"
+        self.tech_data = cipher_order_violation
 
 
 class MailTlsVersion(Subtest):
@@ -1096,6 +1312,7 @@ class MailTlsVersion(Subtest):
             name="tls_version",
             label="detail mail tls version label",
             explanation="detail mail tls version exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls version tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_PROTOCOLS_GOOD,
@@ -1103,6 +1320,12 @@ class MailTlsVersion(Subtest):
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_PROTOCOLS_WORST_STATUS
+
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls version verdict phase-out"
+        self.tech_data = tech_data
 
     def result_good(self):
         self.was_tested()
@@ -1245,6 +1468,12 @@ class MailTlsCertPubkey(Subtest):
         self.verdict = "detail mail tls cert-pubkey verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls cert-pubkey verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self.was_tested()
         self._status(STATUS_FAIL)
@@ -1258,6 +1487,7 @@ class MailTlsCertSignature(Subtest):
             name="cert_signature",
             label="detail mail tls cert-signature label",
             explanation="detail mail tls cert-signature exp",
+            init_tech_type="table_multi_col",
             tech_string="detail mail tls cert-signature tech table",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_TLS_SIGNATURE_GOOD,
@@ -1375,10 +1605,6 @@ class MailTlsDaneValid(Subtest):
 
 
 class MailTlsDaneRollover(Subtest):
-    """
-    .. note:: Disabled for now. May also disable DANE for web in the future.
-
-    """
     def __init__(self):
         super(MailTlsDaneRollover, self).__init__(
             name="dane_rollover",
@@ -1557,6 +1783,103 @@ class MailAuthSpfPolicy(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth spf-policy verdict redirect"
         self.tech_data = tech_data
+
+
+class MailTlsZeroRTT(Subtest):
+    def __init__(self):
+        super(MailTlsZeroRTT, self).__init__(
+            name="zero_rtt",
+            label="detail mail tls zero-rtt label",
+            explanation="detail mail tls zero-rtt exp",
+            tech_string="detail mail tls zero-rtt tech table",
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_ZERO_RTT_GOOD,
+            model_score_field="zero_rtt_score")
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_TLS_ZERO_RTT_WORST_STATUS
+
+    def result_good(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls zero-rtt verdict good"
+        self.tech_data = "detail tech data no"
+
+    def result_na(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls zero-rtt verdict na"
+        self.tech_data = "detail tech data no"
+
+    def result_bad(self):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls zero-rtt verdict bad"
+        self.tech_data = "detail tech data yes"
+
+
+class MailTlsOCSPStapling(Subtest):
+    """
+    .. note:: Disabled for mail.
+
+    """
+    def __init__(self):
+        super(MailTlsOCSPStapling, self).__init__(
+            name="ocsp_stapling",
+            label="detail mail tls ocsp-stapling label",
+            explanation="detail mail tls ocsp-stapling exp",
+            tech_string="detail mail tls ocsp-stapling tech table",
+            worst_status=STATUS_NOTICE,
+            full_score=scoring.MAIL_TLS_OCSP_STAPLING_GOOD,
+            model_score_field="ocsp_stapling_score")
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_TLS_OCSP_STAPLING_WORST_STATUS
+
+    def result_good(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls ocsp-stapling verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_ok(self):
+        self.was_tested()
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls ocsp-stapling verdict ok"
+        self.tech_data = "detail tech data no"
+
+    def result_not_trusted(self):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls ocsp-stapling verdict bad"
+        self.tech_data = "detail tech data no"
+
+
+class MailTlsKexHashFunc(Subtest):
+    def __init__(self):
+        super(MailTlsKexHashFunc, self).__init__(
+            name="kex_hash_func",
+            label="detail mail tls kex-hash-func label",
+            explanation="detail mail tls kex-hash-func exp",
+            tech_string="detail mail tls kex-hash-func tech table",
+            worst_status=scoring.MAIL_TLS_KEX_HASH_FUNC_WORST_STATUS,
+            full_score=scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD,
+            model_score_field="kex_hash_func_score")
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls kex-hash-func verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_bad(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls kex-hash-func verdict phase-out"
+        self.tech_data = "detail tech data no"
+
+    def result_unknown(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls kex-hash-func verdict other"
+        self.tech_data = "detail tech data not-applicable"
 
 
 # --- APPSECPRIV

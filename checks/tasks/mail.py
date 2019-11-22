@@ -6,11 +6,11 @@ from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
-import requests
 from urllib.parse import urlparse
 import unbound
 
 from . import SetupUnboundContext
+from .connection import http_get
 from .dispatcher import post_callback_hook, check_registry
 from .dmarc_parser import parse as dmarc_parse
 from .spf_parser import parse as spf_parse
@@ -722,12 +722,8 @@ def dmarc_fetch_public_suffix_list():
     empty lines and invalid lines.
 
     """
-    suffix_url = settings.PUBLIC_SUFFIX_LIST_URL
     public_suffix_list = []
-    r = requests.get(suffix_url)
-    if r.status_code != 200:
-        return public_suffix_list
-
+    r = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
     lines = r.text.split("\n")
     for line in lines:
         line = line.rstrip()

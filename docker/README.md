@@ -6,7 +6,7 @@ $ xdg-open http://localhost:8080/
 ```
 
 ## With your own Redis, RabbitMQ and Postgres servers
-If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly: 
+If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly:
 ```
 $ docker run --dns 127.0.0.1 --network host \
     -e RABBITMQ_HOST=<IP address or domain name> \

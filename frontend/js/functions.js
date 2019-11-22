@@ -1,6 +1,5 @@
 /* internet.nl
    functions.js
-   v6 | 201805
 */
 
 /*
