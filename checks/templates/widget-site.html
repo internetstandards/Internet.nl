@@ -1,0 +1,85 @@
+{% extends "faqarticle.html" %}
+{% load translate %}
+
+{% block faqarticlecontent %}
+    {% include "content.html" with name="widget site intro" %}
+    <h2><label for="html-block">HTML</label></h2>
+    <div>
+    <textarea id="html-block" readonly>&lt;form action="https://internet.nl/site/" method="POST"&gt;
+  &lt;p&gt;
+    &lt;img class="internetnl" src="https://internet.nl/static/logo_en.svg" alt="{% translate 'page sitedescription' %}"/&gt;
+    {% translate 'widget site html-block' %}
+  &lt;/p&gt;
+  &lt;label for="internetnl-site-url"&gt;{% translate 'base test website input'%}&lt;/label&gt;
+  &lt;input id="internetnl-site-url" type="text" name="url" placeholder="www.example.nl"&gt;
+  &lt;button class="internetnl"&gt;{% translate 'base test start'%}&lt;/button&gt;
+&lt;/form&gt;</textarea>
+    </div>
+    <h2><label for="css-block">CSS</label></h2>
+    <textarea id="css-block" readonly>img.internetnl {
+  max-width: 100%;
+  height: auto;
+  float: none;
+  clear: both;
+  display: block;
+}
+button.internetnl:hover {
+    cursor: pointer;
+}
+button.internetnl:hover,
+button.internetnl:focus,
+button.internetnl:active {
+    background: #ffab4c;
+}
+button.internetnl {
+    display: block;
+    margin: 0 auto .5em;
+    background: #fff;
+    border: solid .3em #ffab4c;
+    font-family: 'robotobold', arial, sans-serif;
+    font-weight: bold;
+    font-size: 100%;
+    border-radius: 18px;
+    padding: .2em .5em;
+}</textarea>
+    {% include "content.html" with name="widget content csp" %}
+    <hr>
+    <h3>Preview:</h3>
+<form action="https://internet.nl/site/" method="POST">
+  <p>
+    <img class="internetnl" src="https://internet.nl/static/logo_en.svg" alt="{% translate 'page sitedescription' %}"/>
+    {% translate 'widget site html-block' %}
+  </p>
+<label for="internetnl-web-url">{% translate 'base test website input'%}</label>
+  <input id="internetnl-web-url" type="text" name="url" placeholder="www.example.nl">
+  <button class="internetnl">Start test</button>
+</form>
+<style>
+img.internetnl {
+  max-width: 100%;
+  height: auto;
+  float: none;
+  clear: both;
+  display: block;
+}
+button.internetnl:hover {
+    cursor: pointer;
+}
+button.internetnl:hover,
+button.internetnl:focus,
+button.internetnl:active {
+    background: #ffab4c;
+}
+button.internetnl {
+    display: block;
+    margin: 0 auto .5em;
+    background: #fff;
+    border: solid .3em #ffab4c;
+    font-family: 'robotobold', arial, sans-serif;
+    font-weight: bold;
+    font-size: 100%;
+    border-radius: 18px;
+    padding: .2em .5em;
+}
+</style>
+{% endblock %}

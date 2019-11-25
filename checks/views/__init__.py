@@ -119,6 +119,18 @@ def aboutpage(request):
         dict(pagemenu="about", pageclass="contact", pagetitle=_("base about")))
 
 
+def widgetsitepage(request):
+    return render(
+        request, 'widget-site.html', dict(
+            pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget site")))
+
+
+def widgetmailpage(request):
+    return render(
+        request, 'widget-mail.html', dict(
+            pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget mail")))
+
+
 def partnerspage(request):
     return render(
         request, 'partners.html',

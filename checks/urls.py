@@ -30,6 +30,8 @@ urlpatterns = [
     url(r'^faqs/(?P<subject>[a-zA-Z0-9\-]{1,40})/$', views.faqarticlepage),
     url(r'^usage/$', views.indexpage),
     url(r'^about/$', views.aboutpage),
+    url(r'^widget-site/$', views.widgetsitepage),
+    url(r'^widget-mail/$', views.widgetmailpage),
     url(r'^partners/$', views.partnerspage),
     url(r'^blogs/$', views.blogindexpage),
     url(r'^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$', views.blogarticlepage),

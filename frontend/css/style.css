@@ -549,6 +549,14 @@ h4 {
   vertical-align: middle;
   line-height: 1;
 }
+textarea#html-block {
+  width: 630px;
+  height: 180px;
+}
+textarea#css-block {
+  width: 630px;
+  height: 180px;
+}
 /* content styling */
 article ol {
   padding-left: 1.5em;
