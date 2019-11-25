@@ -16,11 +16,11 @@ logger = get_task_logger(__name__)
 class HOFEntry(object):
     def __init__(self, domain):
         self.domain = domain
-        self.web_timestamp = ""
-        self.web_permalink = ""
-        self.mail_timestamp = ""
-        self.mail_permalink = ""
-        self.mail_nomx = ""
+        self.web_timestamp = None
+        self.web_permalink = None
+        self.mail_timestamp = None
+        self.mail_permalink = None
+        self.mail_nomx = None
 
     def __str__(self):
         return f"""------- {self.domain}
