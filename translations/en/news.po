@@ -4,6 +4,7 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"introducing-new-TLS-guidelines\n"
 "next-major-release-will-use-new-TLS-guidelines\n"
 "open-source-release\n"
 "email-test-on-internetnl-extended\n"
