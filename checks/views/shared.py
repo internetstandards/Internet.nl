@@ -208,13 +208,24 @@ def add_score_to_report(report, score):
         report.save()
 
 
-def gethalloffamecache(count=10):
-    cache_id = redis_id.hof_data.id
+def get_hof_cache(cache_id, count):
     cached_data = cache.get(cache_id, None)
     if cached_data is None:
         return "…", 0, []
     return (
         cached_data['date'], cached_data['count'], cached_data['data'][:count])
+
+
+def get_hof_champions(count=100000):
+    return get_hof_cache(redis_id.hof_champions.id, count)
+
+
+def get_hof_web(count=100000):
+    return get_hof_cache(redis_id.hof_web.id, count)
+
+
+def get_hof_mail(count=100000):
+    return get_hof_cache(redis_id.hof_mail.id, count)
 
 
 def get_retest_time(report):
@@ -291,11 +302,11 @@ def run_stats_queries():
 
     """
     statswebsite = execsql("select count(distinct r.domain) as count from checks_domaintestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_domaintestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp")
-    statswebsitegood = gethalloffamecache()[1]
+    statswebsitegood = get_hof_web(count=1)[1]
     statswebsitebad = max(statswebsite - statswebsitegood, 0)
 
     statsmail = execsql("select count(distinct r.domain) as count from checks_mailtestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_mailtestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp")
-    statsmailgood = execsql("select count(distinct r.domain) as count from checks_mailtestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_mailtestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp where coalesce(r.score, 0) = 100")
+    statsmailgood = get_hof_mail(count=1)[1]
     statsmailbad = max(statsmail - statsmailgood, 0)
 
     statsconnection = execsql("select count(distinct coalesce(ipv4_addr, ipv6_addr)) as count from checks_connectiontest as r inner join ( select coalesce(ipv4_addr, ipv6_addr) as source, max(timestamp) as timestamp from checks_connectiontest where finished = true group by coalesce(ipv4_addr, ipv6_addr)) as rmax on coalesce(r.ipv4_addr, r.ipv6_addr) = rmax.source where finished = true")

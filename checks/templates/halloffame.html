@@ -3,11 +3,23 @@
 
 {% block maincontent %}
   <article class="block fullwidth">
-    {% include "content.html" with name="halloffame teaser" %}
-    <ul>
-      {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.name|idna|truncatechars:36}}</a></li>
-      {% endfor %}
-    </ul>
+    <div class="intro">
+      <h1>{% include "content.html" with name=hof_title %}
+      </h1>
+      <ul class="hall-of-fame menu">
+          <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "content.html" with name="halloffame champions menu" %}</a></li>
+        <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "content.html" with name="halloffame web menu" %}</a></li>
+        <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "content.html" with name="halloffame mail menu" %}</a></li>
+      </ul>
+      <p>{% include "content.html" with name=hof_text %}</p>
+      <h2>{% include "content.html" with name=hof_subtitle %}</h2>
+    </div>
+    <div>
+      <ul class="list-column column-3">
+        {% for member in halloffame %}
+        <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
   </article>
 {% endblock %}

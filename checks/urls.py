@@ -41,7 +41,9 @@ urlpatterns = [
     url(r'^articles/$', views.articleindexpage),
     url(r'^article/$', views.articlespage),
     url(r'^article/(?P<article>[a-zA-Z0-9\-]{1,80})/$', views.articlepage),
-    url(r'^halloffame/$', views.halloffamepage),
+    url(r'^halloffame/$', views.hofchampionspage),
+    url(r'^halloffame/web/$', views.hofwebpage),
+    url(r'^halloffame/mail/$', views.hofmailpage),
 
     url(r'^test-connection/$', views.testconnectionpage),
     url(r'^connection/$', connection.index),

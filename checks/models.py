@@ -666,27 +666,6 @@ class MailTestReport(models.Model):
         ]
 
 
-class Ranking(models.Model):
-    """
-    Ranking contains an index of the scoring of connections, web-site and
-    mailservers. It needs to be updated periodically.
-
-    """
-    TYPE_CONNECTION = 1
-    TYPE_WEBSITE = 2
-    TYPE_EMAIL = 3
-    # name will typically be the name of the ISP or the caconical bare
-    # name of a web-site, depending on the type.
-    name = models.CharField(max_length=255, default="", null=False)
-    type = models.IntegerField(null=False)
-    score = models.FloatField(null=False)
-    timestamp = models.DateTimeField(auto_now=False)
-    permalink = models.CharField(max_length=255, default="/", null=False)
-
-    def __dir__(self):
-        return ['name', 'type', 'score', 'timestamp', 'permalink']
-
-
 class BatchUser(models.Model):
     """
     Users allowed to run batch tests.

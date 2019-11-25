@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2019-11-25 16:34:26.084740\n"
+"PO-Revision-Date: 2019-11-25 17:58:24.238823\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -103,13 +103,22 @@ msgstr "Follow us on Twitter"
 msgid "base halloffame"
 msgstr "Hall of Fame"
 
+msgid "base halloffame champions"
+msgstr "Hall of Fame - Champions"
+
 msgid "base halloffame lead"
 msgstr ""
-"{{count}} websites with 100% score  \n"
+"{{count}} domains with double-perfect score  \n"
 "Latest entry: {{latest|date:'d-m-Y'}}"
 
 msgid "base halloffame link"
 msgstr "To Hall of Fame"
+
+msgid "base halloffame mail"
+msgstr "Hall of Fame - Email test"
+
+msgid "base halloffame web"
+msgstr "Hall of Fame - Website test"
 
 msgid "base home"
 msgstr "Home"
@@ -2802,11 +2811,66 @@ msgid "faqs title"
 msgstr "Knowledge base"
 
 #, md-format
+msgid "halloffame champions menu"
+msgstr "Champions"
+
+#, md-format
+msgid "halloffame champions subtitle"
+msgstr "100% in BOTH website and mail test"
+
+#, md-format
+msgid "halloffame champions text"
+msgstr ""
+"The {{count}} domains below are fully using modern internet standards.   \n"
+"They therefore score 100% in the [website test](/test-site/) *and* 100% in\n"
+"the [email test](/test-mail/) on Internet.nl."
+
+#, md-format
+msgid "halloffame champions title"
+msgstr "Hall of Fame: Champions!"
+
+#, md-format
+msgid "halloffame mail menu"
+msgstr "Email test"
+
+#, md-format
+msgid "halloffame mail subtitle"
+msgstr "100% in email test"
+
+#, md-format
+msgid "halloffame mail text"
+msgstr ""
+"The {{count}} email domains below are fully using modern internet standards.   \n"
+"They therefore score 100% in the [email test](/test-mail/) on Internet.nl."
+
+#, md-format
+msgid "halloffame mail title"
+msgstr "Hall of Fame: Email test"
+
+#, md-format
 msgid "halloffame teaser"
 msgstr ""
 "# Hall of Fame - website test\n"
 "The {{count}} websites below are fully using modern internet standards.   \n"
 "They therefore score 100% in the [website test](/test-site/) on Internet.nl."
+
+#, md-format
+msgid "halloffame web menu"
+msgstr "Website test"
+
+#, md-format
+msgid "halloffame web subtitle"
+msgstr "100% in website test"
+
+#, md-format
+msgid "halloffame web text"
+msgstr ""
+"The {{count}} websites below are fully using modern internet standards.   \n"
+"They therefore score 100% in the [website test](/test-site/) on Internet.nl."
+
+#, md-format
+msgid "halloffame web title"
+msgstr "Hall of Fame: Website test"
 
 msgid "home pagetitle"
 msgstr ""

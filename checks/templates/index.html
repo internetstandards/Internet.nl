@@ -90,7 +90,7 @@
         </p>
         <ol>
         {% for member in halloffame %}
-          <li><a href="{{member.permalink}}">{{member.name|idna}}</a></li>
+          <li><a href="{{member.permalink}}">{{member.domain|idna}}</a></li>
         {% endfor %}
         </ol>
         <p class="read-more"><a href="/halloffame/">{% include "string.html" with name="base halloffame link" %}</a></p>
