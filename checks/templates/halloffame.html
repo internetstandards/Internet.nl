@@ -4,10 +4,36 @@
 {% block maincontent %}
   <article class="block fullwidth">
     {% include "content.html" with name="halloffame teaser" %}
-    <ul class="list-column column-3">
-      {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.name|idna|truncatechars:36}}</a></li>
-      {% endfor %}
-    </ul>
+    
+	
+	<div class="intro">
+		<div class="flexblocks champions">
+			<div class="flexblock">
+				<h1>[TEXTSTRING_1] Hall of Fame: Champions!</h1>
+				<ul class="hall-of-fame menu">
+					<li><a href="[url1]" aria-current="page">[TEXTSTRING_2] Champions</a></li>
+					<li><a href="[url2]">[TEXTSTRING_3] Website test</a></li>
+					<li><a href="[url3]">[TEXTSTRING_4] Email test</a></li>
+				</ul>
+			</div>
+			<div class="flexblock">
+				<img src="/static/embed-badge-websitetest.svg" alt="[TEXTSTRING_5] Badge with text: 100% score in website test">
+				<img src="/static/embed-badge-emailtest.svg" alt="[TEXTSTRING_6] Badge with text: 100% score in email test">
+			</div>
+		</div>
+		<p>[TEXTSTRING_7] The 120 domains below score 100% in BOTH the website and email test.</p>
+	</div>
+
+
+	<div class="perfect-scores-list">
+		<h2>[TEXTSTRING_8] 100% in BOTH website and mail test</h2>
+	    <ul class="list-column column-3">
+	      {% for member in halloffame %}
+	      <li><a href="{{member.permalink}}">{{member.name|idna|truncatechars:36}}</a></li>
+	      {% endfor %}
+	    </ul>
+	</div>	
+		
+    
   </article>
 {% endblock %}

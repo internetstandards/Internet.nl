@@ -1,0 +1,9 @@
+,Champions,Website test,Email test
+TEXTSTRING_1,Hall of Fame: Champions!,Hall of Fame: Website test,Hall of Fame: Email test
+TEXTSTRING_2,Champions,Champions,Champions
+TEXTSTRING_3,Website test,Website test,Website test
+TEXTSTRING_4,Email test,Email test,Email test
+TEXTSTRING_5,Badge with text: 100% score in website test,Badge with text: 100% score in website test,[n.a.]
+TEXTSTRING_6,Badge with text: 100% score in email test,[n.a.],Badge with text: 100% score in email test
+TEXTSTRING_7,The [number] domains below score 100% in BOTH the website and email test.,The [number] domains below score 100% in the website test.,The [number] domains below score 100% in the mail test.
+TEXTSTRING_8,100% in BOTH website and mail test,100% in website test,100% in mail test

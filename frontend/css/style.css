@@ -1,5 +1,6 @@
 /* internet.nl
    style.css
+   v7.6-20191126
 */
 
 @font-face {
@@ -1713,3 +1714,82 @@ footer ul li:last-child {
     padding-bottom: .5em;
   }
 }
+
+/* ====================================================== */
+
+@media (min-width:800px) {
+	
+	.hall-of-fame .intro {
+		margin-bottom: 1rem;
+	}
+	.flexblocks {
+		display: flex;
+	}
+	.flexblocks img {
+		margin: .5rem .5rem .1rem .5rem;
+		clear: both;
+		max-width: intrinsic;
+		float: right;
+	}
+	.flexblocks .flexblock {
+		flex: 1;
+		padding-right: 1rem;
+	}
+	.flexblocks .flexblock + .flexblock {
+		padding-right: 0;
+		padding-left: 1rem;
+	}
+}
+
+.hall-of-fame .intro h2,
+.hall-of-fame .intro p {
+	margin-bottom: 0;
+}
+.hall-of-fame .intro nav li {
+	margin: 0 1rem 0 0;
+	padding: 0;
+}
+ul.menu {
+	overflow: hidden;
+	margin-left: -.35rem;
+}
+ul.menu li {
+	display:inline-block;
+	float: left;
+}
+ul.menu li + li:before {
+	content: ' ';
+	display: block;
+	float: left;
+	background: #000;
+	height: .75rem;
+	width: 1px;
+	margin: .75rem .5rem 0 .5rem;
+}
+ul.menu li a {
+	display: block;
+	float: left;
+	padding: .25rem .1rem;
+	margin: .1rem .25rem;
+	border-bottom: 3px solid white;
+}
+ul.menu a {
+	text-decoration: none;
+	color: #000000;
+}
+ul.menu a:hover,
+ul.menu a:focus,
+ul.menu a:active {
+	text-decoration: underline;
+}
+ul.menu a,
+ul.menu a:visited {
+	color: #000;
+}
+ul.menu li a[aria-current="page"] {
+	font-weight: bold;
+  border-color: #ffab4c;
+}
+
+/* ====================================================== */
+
