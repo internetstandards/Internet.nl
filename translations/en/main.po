@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2019-11-25 20:08:13.105406\n"
+"PO-Revision-Date: 2019-11-26 13:31:47.098919\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -2829,6 +2829,9 @@ msgstr ""
 msgid "halloffame champions title"
 msgstr "Hall of Fame: Champions!"
 
+msgid "halloffame mail badge"
+msgstr "Badge with text: 100% score in email test"
+
 #, md-format
 msgid "halloffame mail menu"
 msgstr "Email test"
@@ -2853,6 +2856,9 @@ msgstr ""
 "# Hall of Fame - website test\n"
 "The {{count}} websites below are fully using modern internet standards.   \n"
 "They therefore score 100% in the [website test](/test-site/) on Internet.nl."
+
+msgid "halloffame web badge"
+msgstr "Badge with text: 100% score in website test"
 
 #, md-format
 msgid "halloffame web menu"
