@@ -1,7 +1,7 @@
 import http.client
+import inspect
 import ipaddress
 import logging
-import re
 import socket
 import time
 
@@ -59,8 +59,8 @@ class NoIpError(Exception):
     pass
 
 
-def sock_connect(host, ip, port, ipv6=False, task=None,
-        timeout=DEFAULT_TIMEOUT):
+def sock_connect(
+        host, ip, port, ipv6=False, task=None, timeout=DEFAULT_TIMEOUT):
     """
     Connect to the specified host or IP address on the specified port.
 
@@ -80,6 +80,7 @@ def sock_connect(host, ip, port, ipv6=False, task=None,
     address.
 
     Raises OSError or a subclass thereof if unable to connect.
+
     """
     if ip:
         ips = [ip]
@@ -90,13 +91,13 @@ def sock_connect(host, ip, port, ipv6=False, task=None,
         if task:
             ips = task.resolve(host, rr_type)
         else:
-            cb_data = ub_resolve_with_timeout(host, rr_type,
-                unbound.RR_CLASS_IN, timeout)
+            cb_data = ub_resolve_with_timeout(
+                host, rr_type, unbound.RR_CLASS_IN, timeout)
             af = socket.AF_INET6 if ipv6 else socket.AF_INET
             ips = [socket.inet_ntop(af, rr) for rr in cb_data["data"].data]
         if not ips:
-            raise NoIpError(f"Unable to resolve {rr_type} record for host "
-                "'{host}'")
+            raise NoIpError(
+                f"Unable to resolve {rr_type} record for host '{host}'")
 
     # Return the connection details for the first IP address that we can
     # successfully connect to.
@@ -137,7 +138,9 @@ def plain_sock_setup(conn):
         try:
             conn.sock_connect()
             break
-        except (socket.gaierror, socket.error, IOError, ConnectionRefusedError):
+        except (
+                socket.gaierror, socket.error, IOError,
+                ConnectionRefusedError):
             conn.safe_shutdown()
             tries_left -= 1
             if tries_left <= 0:
@@ -169,8 +172,8 @@ class ConnectionCommon:
       You may provide an alternate sock_setup implementation to upgrade to
       SSL/TLS after first initialising the socket connection to the correct
       state (e.g. for SMTP STARTTLS).
-    """
 
+    """
     def __enter__(self):
         return self
 
@@ -191,18 +194,18 @@ class ConnectionCommon:
         self.timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
         self.task = kwargs.get('task', celery_app.current_worker_task)
         self.sock_setup = kwargs.get('sock_setup', plain_sock_setup)
-        self.do_handshake_on_connect = kwargs.get('do_handshake_on_connect',
-            True)
-        self.cipher_list_action = kwargs.get('cipher_list_action',
-            CipherListAction.REPLACE)
+        self.do_handshake_on_connect = kwargs.get(
+            'do_handshake_on_connect', True)
+        self.cipher_list_action = kwargs.get(
+            'cipher_list_action', CipherListAction.REPLACE)
 
         # Catch non-sensical parameter combinations and values:
         if not self.server_name:
             if self.send_SNI:
                 raise ValueError('SNI requires a server name.')
             if not self.ip_address:
-                raise ValueError('Either a server name or IP address is'
-                    'required')
+                raise ValueError(
+                    'Either a server name or IP address is required')
         elif self.ip_address:
             # Can raise ValueError if the string is not a valid IP address
             ip_obj = ipaddress.ip_address(self.ip_address)
@@ -235,13 +238,14 @@ class ConnectionCommon:
 
     def sock_connect(self):
         if sslConnectLogger.isEnabledFor(logging.DEBUG):
-            sslConnectLogger.debug(f"SSL connect with {type(self).__name__}"
-                        f" to host '{self.server_name}'"
-                        f" at IP:port {self.ip_address}:{self.port}"
-                        f" using SSL version {self.version.name}"
-                        f" invoked by {inspect.stack()[4].function}"
-                        f" > {inspect.stack()[5].function}"
-                        f" > {inspect.stack()[6].function}")
+            sslConnectLogger.debug(
+                f"SSL connect with {type(self).__name__}"
+                f" to host '{self.server_name}'"
+                f" at IP:port {self.ip_address}:{self.port}"
+                f" using SSL version {self.version.name}"
+                f" invoked by {inspect.stack()[4].function}"
+                f" > {inspect.stack()[5].function}"
+                f" > {inspect.stack()[6].function}")
         (self.ip_address, self.sock) = sock_connect(
             self.server_name, self.ip_address, self.port, self.ipv6,
             self.task, self.timeout)
@@ -321,18 +325,19 @@ class CipherListAction(Enum):
     APPEND = 2
 
 
-class ModernConnection(
-    ConnectionCommon, SslClient):
+class ModernConnection(ConnectionCommon, SslClient):
     """
     A modern OpenSSL based TLS client. Defaults to TLS 1.3 only.
 
     See ConnectionCommon for usage instructions.
+
     """
     ALL_CIPHERS = 'ALL:COMPLEMENTOFALL@SECLEVEL=0'
 
     ALL_TLS13_CIPHERS = None
 
-    def __init__(self, version=TLSV1_3, ciphers=ALL_CIPHERS,
+    def __init__(
+            self, version=TLSV1_3, ciphers=ALL_CIPHERS,
             tls13ciphers=None, **kwargs):
         self.init_all_tls13_ciphers()
         self.ciphers = ciphers
@@ -345,6 +350,7 @@ class ModernConnection(
         """
         Lazily compute the TLS 1.3 all ciphers string in order to avoid a
         circular dependency on cipher_info.
+
         """
         if not cls.ALL_TLS13_CIPHERS:
             from .cipher_info import cipher_infos
@@ -361,7 +367,8 @@ class ModernConnection(
 
     @staticmethod
     def from_conn(conn, *args, **kwargs):
-        return ModernConnection(server_name=conn.server_name,
+        return ModernConnection(
+            server_name=conn.server_name,
             ip_address=conn.ip_address, port=conn.port, ipv6=conn.ipv6,
             send_SNI=conn.send_SNI, task=conn.task, sock_setup=conn.sock_setup,
             *args, **kwargs)
@@ -374,6 +381,7 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
     """
     A legacy OpenSSL based SSL/TLS <= TLS 1.2 client. Defaults to best possible
     protocol version.
+
     """
     ALL_CIPHERS = 'ALL:COMPLEMENTOFALL'
 
@@ -384,7 +392,8 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
 
     @staticmethod
     def from_conn(conn, *args, **kwargs):
-        return DebugConnection(server_name=conn.server_name,
+        return DebugConnection(
+            server_name=conn.server_name,
             ip_address=conn.ip_address, port=conn.port, ipv6=conn.ipv6,
             send_SNI=conn.send_SNI, task=conn.task, sock_setup=conn.sock_setup,
             *args, **kwargs)
@@ -396,8 +405,8 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
 class SSLConnectionWrapper:
     """
     A NASSL based SSL connection that tries hard to connect using various
-    combinations of protocol settings and  with an http.client.HTTPConnection like
-    interface. Makes a TLS connection using ModernConnection for TLS 1.3,
+    combinations of protocol settings and  with an http.client.HTTPConnection
+    like interface. Makes a TLS connection using ModernConnection for TLS 1.3,
     otherwise connecting with the highest possible SSL/TLS version supported
     by DebugConnection for target servers that do not support newer protocols
     and ciphers.
@@ -405,6 +414,7 @@ class SSLConnectionWrapper:
     This class should be used instead of native Python SSL/TLS connectivity
     because the native functionality does not support legacy protocols,
     protocol features and ciphers.
+
     """
     def __init__(self, conn=None, **kwargs):
         if conn:
@@ -455,8 +465,10 @@ class HTTPSConnection(SSLConnectionWrapper):
     HTTP requests are simple HTTP/1.1 one-shot (connection: close) requests.
     HTTP responses are truncated at a maximum of 8192 bytes. This class is NOT
     intended to be a general purpose rich HTTP client.
+
     """
-    def __init__(self, host=None, port=None,
+    def __init__(
+            self, host=None, port=None,
             timeout=socket._GLOBAL_DEFAULT_TIMEOUT, socket_af=socket.AF_INET,
             task=None, ip_address=None, conn=None, **kwargs):
         if conn:
@@ -520,8 +532,8 @@ class HTTPSConnection(SSLConnectionWrapper):
                 # it.
                 pos = self.bytesio.handle.tell()
 
-                # move the read/write cursor in the underlying buffer to the end
-                # so that we append to the existing data.
+                # move the read/write cursor in the underlying buffer to the
+                # end so that we append to the existing data.
                 self.bytesio.handle.seek(0, 2)
 
                 # read and decrypt upto the number of requested bytes from the
@@ -572,8 +584,9 @@ class HTTPConnection(http.client.HTTPConnection):
 
     def connect(self):
         ipv6 = True if self.socket_af is socket.AF_INET6 else False
-        (self.ip_address, self.sock) = sock_connect(self.host, self.ip_address,
-            self.port, ipv6, self.task, self.timeout)
+        (self.ip_address, self.sock) = sock_connect(
+            self.host, self.ip_address, self.port, ipv6, self.task,
+            self.timeout)
 
 
 # TODO: document and/or clean up the possible set of raised exceptions
@@ -680,8 +693,8 @@ def http_fetch(
 def http_get(url):
     scheme, netloc, path, *unused = urlparse(url)
     port = 443 if scheme == 'https' else 80
-    conn, r, *unused = http_fetch(host=netloc, path=path,
-        port=port, keep_conn_open=True)
+    conn, r, *unused = http_fetch(
+        host=netloc, path=path, port=port, keep_conn_open=True)
     rr = namedtuple('Response', ['status_code', 'text'])
     rr.status_code = r.status
     if r.status == 200:

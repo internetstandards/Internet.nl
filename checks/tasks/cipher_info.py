@@ -9,7 +9,7 @@ from math import log, pow
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 
-from .connection import DebugConnection, ModernConnection
+from .tls_connection import DebugConnection, ModernConnection
 
 
 logger = logging.getLogger('internetnl')

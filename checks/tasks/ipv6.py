@@ -15,7 +15,7 @@ from django.db import transaction
 from . import dispatcher
 from . import SetupUnboundContext
 from . import shared
-from .connection import http_fetch, NoIpError
+from .tls_connection import http_fetch, NoIpError
 from .dispatcher import check_registry
 from .. import scoring, categories, redis_id
 from .. import batch, batch_shared_task

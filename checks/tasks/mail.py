@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import unbound
 
 from . import SetupUnboundContext
-from .connection import http_get
+from .tls_connection import http_get
 from .dispatcher import post_callback_hook, check_registry
 from .dmarc_parser import parse as dmarc_parse
 from .spf_parser import parse as spf_parse
