@@ -1,14 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import ipaddress
-import inspect
-import logging
 import re
 import socket
-import time
 
-from enum import Enum
-from internetnl import celery_app
 from celery import shared_task
 from django.conf import settings
 import unbound

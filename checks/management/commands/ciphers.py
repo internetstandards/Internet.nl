@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from checks.tasks.cipher_info import load_cipher_info, CipherScoreAndSecLevel
 
 

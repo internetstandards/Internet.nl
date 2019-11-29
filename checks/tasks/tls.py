@@ -139,7 +139,10 @@ KEX_CIPHERS_PHASEOUT = ['kRSA']
 KEX_CIPHERS_INSUFFICIENT = ['DH', 'ECDH', 'eNULL', 'aNULL', 'PSK', 'SRP', 'MD5']
 KEX_CIPHERS_INSUFFICIENT_AS_SET = frozenset(KEX_CIPHERS_INSUFFICIENT)
 
-PHASE_OUT_CIPHERS = BULK_ENC_CIPHERS_PHASEOUT + BULK_ENC_CIPHERS_OTHER_PHASEOUT + KEX_CIPHERS_PHASEOUT
+PHASE_OUT_CIPHERS = (
+    BULK_ENC_CIPHERS_PHASEOUT
+    + BULK_ENC_CIPHERS_OTHER_PHASEOUT
+    + KEX_CIPHERS_PHASEOUT)
 INSUFFICIENT_CIPHERS = BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSUFFICIENT
 
 # Some ciphers are not supported by LegacySslClient, only by SslClient which is
@@ -1193,26 +1196,27 @@ class DebugCertChain(object):
             hostmatch_score = self.score_hostmatch_good
         except ssl.CertificateError:
             hostmatch_score = self.score_hostmatch_bad
-            # bad_hostmatch was of the form list(CN, list(SAN, SAN, ..)). In the
-            # report the CN is shown on one row of the tech table and the SANs
-            # are shown as '[SAN, SAN]' on a second row. Showing the SANs in the
-            # report as the string representation of a Python list is a separate
-            # issue so ignore that for the moment. It is possible for there to
-            # be duplicates and overlap between the SANs and the CN which when
-            # shown in a report column titled 'Unmatched domains on certificate'
-            # looks odd to have duplicate entries. I have flattened this to the
-            # form list(CN, SAN, SAN, ..) while still preserving the order. As
-            # Python doesn't have an OrderedSet type and adding one is overkill
-            # I use a trick to remove duplicates in the ordered list. See:
+            # bad_hostmatch was of the form list(CN, list(SAN, SAN, ..)). In
+            # the report the CN is shown on one row of the tech table and the
+            # SANs are shown as '[SAN, SAN]' on a second row. Showing the SANs
+            # in the report as the string representation of a Python list is a
+            # separate issue so ignore that for the moment. It is possible for
+            # there to be duplicates and overlap between the SANs and the CN
+            # which when shown in a report column titled 'Unmatched domains on
+            # certificate' looks odd to have duplicate entries. I have
+            # flattened this to the form list(CN, SAN, SAN, ..) while still
+            # preserving the order. As Python doesn't have an OrderedSet type
+            # and adding one is overkill I use a trick to remove duplicates in
+            # the ordered list. See:
             # https://www.w3schools.com/python/python_howto_remove_duplicates.asp
-            # However, was anyone relying on the nested structure of this result
-            # value, e.g. perhaps via the Internet.NL batch API?
+            # However, was anyone relying on the nested structure of this
+            # result value, e.g. perhaps via the Internet.NL batch API?
             bad_hostmatch.append(common_name)
             bad_hostmatch.extend(sans)
             bad_hostmatch = list(dict.fromkeys(bad_hostmatch))  # de-dupe
         return hostmatch_score, bad_hostmatch
 
-    # NCSC guidelines B3-3, B3-4, B3-5
+    # NCSC guidelines B3-3, B5-1
     def check_pubkey(self):
         bad_pubkey = []
         phase_out_pubkey = []
@@ -1502,7 +1506,7 @@ def cert_checks(
             # All the checks inside the smtp_starttls test are done in series.
             # If we have all the certificate related information we need from a
             # previous check, skip this connection.
-            # check chain validity (sort of NCSC guideline B3-6)
+            # check chain validity (sort of NCSC guideline B3-4)
             with conn_wrapper(
                     host=url, socket_af=af_ip_pair[0],
                     ip_address=af_ip_pair[1], task=task,
@@ -1619,7 +1623,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 # At the time of writing this function makes up to 16 SMTP+STARTTLS connections
 # to the target server, excluding retries, e.g.:
 #   #   Connection Class    Protocol   Caller
-#   ----------------------------------------------------------------------------
+#   ---------------------------------------------------------------------------
 #   1   ModernConnection    SSLV23     initial connection
 #   2   DebugConnection     SSLV23     initial connection (fallback 1)
 #   3   ModernConnection    TLSV1_2    initial connection (fallback 2)
@@ -2310,8 +2314,11 @@ class ConnectionChecker:
         return self._score_tls_kex_hash_func_bad, KexHashFuncStatus.bad
 
     def _check_sec_score_order(self, lowest_values, curr_cipher, new_conn):
-        # check for compliance with NCSC 2.0 prescribed
-        # ordering.
+        """
+        Check for compliance with NCSC 2.0 prescribed ordering.
+
+        """
+        # If we already have a security level violation return.
         if (self._cipher_order_violation
                 and self._cipher_order_violation[2] == ''):
             return
@@ -2338,8 +2345,7 @@ class ConnectionChecker:
                     lowest_values['score_cipher'] = curr_cipher
 
         if (not self._cipher_order_violation
-                or (self._cipher_order_violation and
-                    self._cipher_order_violation[2] != '')):
+                or self._cipher_order_violation[2] != ''):
             # There may be already a score violation but security level trumps
             # score.
             if seclevel:

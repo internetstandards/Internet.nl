@@ -22,7 +22,8 @@ class SetupUnboundContext(Task):
     def ub_ctx(self):
         if self._ub_ctx is None:
             self._ub_ctx = unbound.ub_ctx()
-            if hasattr(settings, 'ENABLE_INTEGRATION_TEST') and settings.ENABLE_INTEGRATION_TEST:
+            if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
+                    and settings.ENABLE_INTEGRATION_TEST):
                 self._ub_ctx.debuglevel(2)
                 self._ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
                 self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)

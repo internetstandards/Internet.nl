@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
 from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
-from .scoring import STATUS_GOOD_NOT_TESTED, STATUS_NOTICE, STATUS_INFO
+from .scoring import STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
 

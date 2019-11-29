@@ -1,7 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
-import re
 
 from django import template
 from django.conf import settings
