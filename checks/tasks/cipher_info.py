@@ -117,29 +117,15 @@ class CipherScoreAndSecLevel:
             score = 0
 
         # See: https://blog.cloudflare.com/it-takes-two-to-chacha-poly/
-        if (
-                (
-                    ci.bulk_enc_alg == 'AESGCM'
-                    and ci.bulk_enc_alg_sec_len == 256)
-                or
-                (
-                    ci.bulk_enc_alg == 'CHACHA20/POLY1305')
-                or
-                (
-                    ci.bulk_enc_alg == 'ChaCha20'
-                    and 'CHACHA20-POLY1305-OLD' in ci.name)
-                or
-                (
-                    ci.bulk_enc_alg == 'AESGCM'
-                    and ci.bulk_enc_alg_sec_len == 128)
-                or
-                (
-                    ci.bulk_enc_alg == 'AESCCM'
-                    and ci.bulk_enc_alg_sec_len == 256)
-                or
-                (
-                    ci.bulk_enc_alg == 'AESCCM'
-                    and ci.bulk_enc_alg_sec_len == 128)):
+        if ((ci.bulk_enc_alg == 'AESGCM'
+                and ci.bulk_enc_alg_sec_len == 256) or
+            (ci.bulk_enc_alg == 'CHACHA20/POLY1305') or
+            (ci.bulk_enc_alg == 'AESGCM'
+                and ci.bulk_enc_alg_sec_len == 128) or
+            (ci.bulk_enc_alg == 'AESCCM'
+                and ci.bulk_enc_alg_sec_len == 256) or
+            (ci.bulk_enc_alg == 'AESCCM'
+                and ci.bulk_enc_alg_sec_len == 128)):
             sec_level = SecLevel.GOOD
         elif ((ci.bulk_enc_alg == 'AES' and ci.bulk_enc_alg_sec_len == 256) or
               (ci.bulk_enc_alg == 'AES' and ci.bulk_enc_alg_sec_len == 128) or
@@ -147,6 +133,8 @@ class CipherScoreAndSecLevel:
             sec_level = SecLevel.SUFFICIENT
         elif ((ci.bulk_enc_alg == '3DES') or
               (ci.bulk_enc_alg == 'SEED') or
+              (ci.bulk_enc_alg == 'ChaCha20'
+                and 'CHACHA20-POLY1305-OLD' in ci.name) or
               (ci.bulk_enc_alg == 'ARIAGCM')):
             sec_level = SecLevel.PHASE_OUT
         else:
