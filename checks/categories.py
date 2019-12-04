@@ -1753,6 +1753,8 @@ class MailAuthSpfPolicy(Subtest):
             worst_status=scoring.MAIL_AUTH_SPF_POLICY_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_SPF_POLICY_PASS,
             model_score_field="spf_policy_score")
+        # Fix for one line, one value data.
+        self.tech_data = [[self.tech_data]]
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
