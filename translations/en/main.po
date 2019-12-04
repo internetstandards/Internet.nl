@@ -2850,13 +2850,6 @@ msgstr ""
 msgid "halloffame mail title"
 msgstr "Hall of Fame: Email test"
 
-#, md-format
-msgid "halloffame teaser"
-msgstr ""
-"# Hall of Fame - website test\n"
-"The {{count}} websites below are fully using modern internet standards.   \n"
-"They therefore score 100% in the [website test](/test-site/) on Internet.nl."
-
 msgid "halloffame web badge"
 msgstr "Badge with text: 100% score in website test"
 
@@ -3742,12 +3735,6 @@ msgstr ""
 
 msgid "test sitetls warning summary"
 msgstr "Connection *not* or insufficiently secured (HTTPS)"
-
-msgid "widget content csp"
-msgstr ""
-"## CSP\n"
-"In case you are using a CSP policy for your website you would also\n"
-"need to add `internet.nl` to your `img-src` and `form-action` rules."
 
 msgid "widget mail html-block"
 msgstr "Test on internet.nl"
