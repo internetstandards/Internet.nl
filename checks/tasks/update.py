@@ -60,7 +60,7 @@ def _update_mail_entry(hof, domain_name, report_id, timestamp):
     """
     entry = _create_hof_entry(hof, domain_name)
     entry.mail_timestamp = timestamp
-    entry.mail_permalink = f"mail/{domain_name}/{report_id}/"
+    entry.mail_permalink = f"/mail/{domain_name}/{report_id}/"
     report = MailTestReport.objects.get(id=report_id)
     ipv6_report = report.ipv6.report
     if not isinstance(ipv6_report, dict):
