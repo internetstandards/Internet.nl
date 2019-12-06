@@ -1,3 +1,7 @@
+# Wheel is not installed by default when using venv for creating Python
+# virtual environments
+wheel
+
 # The currently supported Django version
 Django==1.11.23
 
@@ -8,10 +12,6 @@ Django==1.11.23
 amqp==2.4.0
 celery==4.3
 kombu==4.4
-
-# Wheel is not installed by default when using venv for creating Python
-# virtual environments
-wheel
 
 cryptography
 django-bleach
