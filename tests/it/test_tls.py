@@ -345,13 +345,16 @@ ncsc_20_tests = [
         }),
 
     PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
-        'tls12onlynotprescribedorder5.test.nlnetlabs.tk',
-        expected_info={
+        'tls12onlyphaseoutorder.test.nlnetlabs.tk',
+        expected_warnings={
+            TESTS.TLS_CIPHER_SUITES,
+        },
+        expected_failures={
             TESTS.TLS_CIPHER_ORDER: [
                 [MustMatch(r'.+'), ''],   # IPv6
-                [MustMatch(r'.+'), '5'],  # IPv6
+                [MustMatch(r'.+'), 'None'],  # IPv6
                 [MustMatch(r'.+'), ''],   # IPv4
-                [MustMatch(r'.+'), '5'],  # IPv4
+                [MustMatch(r'.+'), 'None'],  # IPv4
             ]
         }),
 

@@ -61,8 +61,8 @@ tls12onlynotprescribedorder1                                      IN  A      {{T
 tls12onlynotprescribedorder1                                      IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
 tls12onlynotprescribedorder4                                      IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlynotprescribedorder4                                      IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
-tls12onlynotprescribedorder5                                      IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
-tls12onlynotprescribedorder5                                      IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
+tls12onlyphaseoutorder                                            IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
+tls12onlyphaseoutorder                                            IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
 tls12onlyGOODTLSECDHERSAWITHAES256GCMSHA384                       IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyGOODTLSECDHERSAWITHAES256GCMSHA384                       IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyGOODTLSECDHERSAWITHCHACHA20POLY1305SHA256                IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -197,7 +197,7 @@ _443._tcp.tls12onlymodernphaseoutciphers                          IN  TLSA   3 1
 _443._tcp.tls12onlynotsecurityorder                               IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlynotprescribedorder1                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlynotprescribedorder4                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
-_443._tcp.tls12onlynotprescribedorder5                            IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_443._tcp.tls12onlyphaseoutorder                                  IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyGOODTLSECDHERSAWITHAES128GCMSHA256             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyGOODTLSECDHERSAWITHAES256GCMSHA384             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _443._tcp.tls12onlyGOODTLSECDHERSAWITHCHACHA20POLY1305SHA256      IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
