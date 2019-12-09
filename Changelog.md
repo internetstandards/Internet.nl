@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased next version
+
+New
+
+Dependencies
+
+Bug Fixes
+
 ## 1.1.0
 
 TLS 1.3 support, NCSCv2 guidelines, IT suite and more.
