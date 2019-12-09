@@ -10,10 +10,10 @@ New
 Dependencies
 - Python bumped to 3.7. Make sure to update your environment and reinstall
   everything Python related (including unbound). You can follow the
-  [Installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/v1.0.3/documentation/Installation.md).
+  [Installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/v1.1.0/documentation/Installation.md).
 - The [nassl fork](https://github.com/ximon18/nassl/tree/free_bsd) was updated.
   Make sure to use the _new_ repository and follow the
-  [Installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/v1.0.3/documentation/Installation.md).
+  [Installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/v1.1.0/documentation/Installation.md).
 
 Bug Fixes
 - Long domain names break the design. [(#401)]
