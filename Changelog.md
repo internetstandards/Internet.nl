@@ -6,6 +6,7 @@ TLS 1.3 support, NCSCv2 guidelines, IT suite and more.
 
 New
 - Update internet.nl to conform with the new v2 of the NCSC guidelines. [(#402)]
+- Updated Hall of Fame. [(#170)]
 
 Dependencies
 - Python bumped to 3.7. Make sure to update your environment and reinstall
@@ -24,7 +25,6 @@ Bug Fixes
 - Fix the mailserver part of DNSSEC to give a warning when there are no mailservers.
 - Connection test: DNSSEC defaults to secure when no client connection. [(#410)]
 - Widget for embedding test on other websites. [(#362)]
-- Updated Hall of Fame. [(#170)]
 - HTML-element is closed while not opened based on @julezrulez commit. [(#392)]
 - Try to detect browser DoNotTrack. [(#426)]
 
