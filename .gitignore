@@ -13,6 +13,8 @@
 /nbproject
 /dump.rdb
 /celerybeat-schedule*
-/celerybeat.pid
 /batch_results/
 /locale_files/
+*.log
+*.pid
+/tests/.pytest_cache/

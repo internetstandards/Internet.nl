@@ -1,13 +1,38 @@
 {% extends "base.html" %}
-{% load translate %}
+{%load translate %}
 
 {% block maincontent %}
-  <article class="block fullwidth">
-    {% include "content.html" with name="halloffame teaser" %}
-    <ul>
-      {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.name|idna|truncatechars:36}}</a></li>
-      {% endfor %}
+<article class="block fullwidth">
+  <div class="intro">
+    <div class="flexblocks champions">
+      <div class="flexblock">
+        <h1>{% include "string.html" with name=hof_title %}</h1>
+          <ul class="hall-of-fame menu">
+            <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
+            <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
+            <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
+          </ul>
+      </div>
+      <div class="flexblock">
+      {% if cpage == 'champions' %}
+        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
+        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
+      {% elif cpage == 'web' %}
+        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
+      {% elif cpage == 'mail' %}
+        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
+      {% endif %}
+      </div>
+    </div>
+    <p>{% include "string.html" with name=hof_text %}</p>
+  </div>
+  <div class="perfect-scores-list">
+    <h2>{% include "string.html" with name=hof_subtitle %}</h2>
+    <ul class="list-column column-3">
+    {% for member in halloffame %}
+      <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
+    {% endfor %}
     </ul>
-  </article>
+  </div>
+</article>
 {% endblock %}

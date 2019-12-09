@@ -29,7 +29,9 @@ req_limit = REDIS_RECORD("dom:req_limit:{}", 2*60*60)
 hof_lock = REDIS_RECORD("hof:updater:lock", 60*5)
 
 # HoF data
-hof_data = REDIS_RECORD("hof:data", None)
+hof_champions = REDIS_RECORD("hof:champions", None)
+hof_web = REDIS_RECORD("hof:web", None)
+hof_mail = REDIS_RECORD("hof:mail", None)
 
 # Public suffix list data
 psl_data = REDIS_RECORD(

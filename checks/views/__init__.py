@@ -10,7 +10,7 @@ from django.utils import translation
 from django.utils.translation import ugettext as _
 
 from checks import redis_id, simple_cache_page
-from checks.views.shared import gethalloffamecache
+from checks.views.shared import get_hof_champions, get_hof_web, get_hof_mail
 from checks.views.shared import update_base_stats
 
 
@@ -42,7 +42,7 @@ def indexpage(request):
     statsconnectionbad = cache.get(
         cache_id.format("statsconnectionbad"), novalue)
     update_base_stats()
-    hof_date, hof_count, hof_entries = gethalloffamecache()
+    hof_date, hof_count, hof_entries = get_hof_champions(10)
     return render(
         request, 'index.html',
         dict(
@@ -117,6 +117,18 @@ def aboutpage(request):
     return render(
         request, 'about.html',
         dict(pagemenu="about", pageclass="contact", pagetitle=_("base about")))
+
+
+def widgetsitepage(request):
+    return render(
+        request, 'widget-site.html', dict(
+            pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget site")))
+
+
+def widgetmailpage(request):
+    return render(
+        request, 'widget-mail.html', dict(
+            pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget mail")))
 
 
 def partnerspage(request):
@@ -218,16 +230,56 @@ def articlepage(request, article):
 
 
 @simple_cache_page
-def halloffamepage(request):
-    hof_date, hof_count, hof_entries = gethalloffamecache(100000)
-    # We don't show all the records in the HoF
-    hof_count = len(hof_entries)
+def hofchampionspage(request):
+    hof_date, hof_count, hof_entries = get_hof_champions()
     return render(
         request, 'halloffame.html',
         dict(
             pageclass="hall-of-fame",
-            pagetitle=_("base halloffame"),
+            pagetitle=_("base halloffame champions"),
             pagemenu="halloffame",
+            hof_title="halloffame champions title",
+            cpage="champions",
+            hof_text="halloffame champions text",
+            hof_subtitle="halloffame champions subtitle",
+            latest=hof_date,
+            count=hof_count,
+            halloffame=hof_entries
+        ))
+
+
+@simple_cache_page
+def hofwebpage(request):
+    hof_date, hof_count, hof_entries = get_hof_web()
+    return render(
+        request, 'halloffame.html',
+        dict(
+            pageclass="hall-of-fame",
+            pagetitle=_("base halloffame web"),
+            pagemenu="halloffame",
+            hof_title="halloffame web title",
+            cpage="web",
+            hof_text="halloffame web text",
+            hof_subtitle="halloffame web subtitle",
+            latest=hof_date,
+            count=hof_count,
+            halloffame=hof_entries
+        ))
+
+
+@simple_cache_page
+def hofmailpage(request):
+    hof_date, hof_count, hof_entries = get_hof_mail()
+    return render(
+        request, 'halloffame.html',
+        dict(
+            pageclass="hall-of-fame",
+            pagetitle=_("base halloffame mail"),
+            pagemenu="halloffame",
+            hof_title="halloffame mail title",
+            cpage="mail",
+            hof_text="halloffame mail text",
+            hof_subtitle="halloffame mail subtitle",
             latest=hof_date,
             count=hof_count,
             halloffame=hof_entries

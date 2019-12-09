@@ -3,8 +3,7 @@
 Internet.nl is a [Django](https://www.djangoproject.com/)
 based application and therefore inherits its requirements.
 
-Current install base is Django 1.11 with Python 3.5+.
-(Python 3.7+ is not currently supported)
+Current install base is Django 1.11 with Python 3.7+.
 
 The following instructions should work on most Debian-based systems.
 
@@ -39,9 +38,9 @@ in the various TLS related tests in the website and mail tests.
 
 A fork is used to facilitate installation on freeBSD systems.
 
-1. Clone nassl (use fork at https://github.com/gthess/nassl)
+1. Clone nassl (use fork at https://github.com/ximon18/nassl/tree/free_bsd)
    ```
-   git clone https://github.com/gthess/nassl.git nassl_freebsd
+   git clone https://github.com/ximon18/nassl.git nassl_freebsd
    cd nassl_freebsd
    git checkout free_bsd
    mkdir -p bin/openssl-legacy/freebsd64
@@ -63,7 +62,7 @@ A fork is used to facilitate installation on freeBSD systems.
 4.  Clone openssl inside nassl's directory
    ```
    git clone https://github.com/openssl/openssl.git openssl-master
-   cd openssl-master; git checkout 1f5878b8e25a785dde330bf485e6ed5a6ae09a1a; cd ..
+   cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
    ```
 
 5. Build nassl
@@ -122,7 +121,7 @@ If not:
   - Get an ldns version >= 1.7.0 from [here](https://www.nlnetlabs.nl/projects/ldns/download/)
   - `./configure --with-examples --with-ssl=/path/to/above/ssl/build/dir`
   - `make`
-- Create a wrapper file for using the compiled ldns-dane binary  
+- Create a wrapper file for using the compiled ldns-dane binary
   `cat ldns-dane-wrapper`
   ```
   #!/bin/sh
@@ -160,26 +159,26 @@ for PostgreSQL.
 
 ## Django setup
 
-- Apply the DB schema and/or migrations:
-  ```
-  python manage.py migrate checks
-  ```
 - Copy distributed config and edit:
   * `cp internetnl/settings.py-dist internetnl/settings.py`
   * Review the settings and make sure to at least change secret, database
     settings, redis settings, celery settings, ldns-dane location
+- Apply the DB schema and/or migrations:
+  ```
+  python manage.py migrate checks
+  ```
 
 
 ## Running services
 
 Make sure the following services are installed and running on your system:
-- Redis  
+- Redis
   _should be installed by the previous steps_
-- RabbitMQ  
+- RabbitMQ
   _should be installed by the previous steps_
 - Unbound
 
-- Celery and celery beat  
+- Celery and celery beat
   These services need to be setup manually. You can follow [these](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html)
   instructions and consult the [example configuration files](example_configuration/).
 

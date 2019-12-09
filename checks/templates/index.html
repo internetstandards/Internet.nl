@@ -90,7 +90,7 @@
         </p>
         <ol>
         {% for member in halloffame %}
-          <li><a href="{{member.permalink}}">{{member.name|idna}}</a></li>
+          <li><a href="{{member.permalink}}">{{member.domain|idna}}</a></li>
         {% endfor %}
         </ol>
         <p class="read-more"><a href="/halloffame/">{% include "string.html" with name="base halloffame link" %}</a></p>
@@ -99,18 +99,42 @@
         <h2>{% include "string.html" with name="home stats header" %}</h2>
         <h3>{{statswebsite}} {% include "string.html" with name="home stats website" %}</h3>
         <ol>
-          <li class="passed">{% include "string.html" with name="home stats passed" %} <span>{{statswebsitegood}} {% include "string.html" with name="home stats website-items" %}</span></li>
-          <li class="notpassed">{% include "string.html" with name="home stats notpassed" %} <span>{{statswebsitebad}} {% include "string.html" with name="home stats website-items" %}</span></li>
+          <li class="passed">
+            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
+            {% include "string.html" with name="home stats passed" %}
+            <span>{{statswebsitegood}} {% include "string.html" with name="home stats website-items" %}</span>
+          </li>
+          <li class="notpassed">
+            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
+            {% include "string.html" with name="home stats notpassed" %}
+            <span>{{statswebsitebad}} {% include "string.html" with name="home stats website-items" %}</span>
+          </li>
         </ol>
         <h3>{{statsmail}} {% include "string.html" with name="home stats mail" %}</h3>
         <ol>
-          <li class="passed">{% include "string.html" with name="home stats passed" %} <span>{{statsmailgood}} {% include "string.html" with name="home stats mail-items" %}</span></li>
-          <li class="notpassed">{% include "string.html" with name="home stats notpassed" %} <span>{{statsmailbad}} {% include "string.html" with name="home stats mail-items" %}</span></li>
+          <li class="passed">
+            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
+            {% include "string.html" with name="home stats passed" %}
+            <span>{{statsmailgood}} {% include "string.html" with name="home stats mail-items" %}</span>
+          </li>
+          <li class="notpassed">
+            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
+            {% include "string.html" with name="home stats notpassed" %}
+            <span>{{statsmailbad}} {% include "string.html" with name="home stats mail-items" %}</span>
+          </li>
         </ol>
         <h3>{{statsconnection}} {% include "string.html" with name="home stats connection" %}</h3>
         <ol>
-          <li class="passed">{% include "string.html" with name="home stats passed" %} <span>{{statsconnectiongood}} {% include "string.html" with name="home stats connection-items" %}</span></li>
-          <li class="notpassed">{% include "string.html" with name="home stats notpassed" %} <span>{{statsconnectionbad}} {% include "string.html" with name="home stats connection-items" %}</span></li>
+          <li class="passed">
+            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
+            {% include "string.html" with name="home stats passed" %}
+            <span>{{statsconnectiongood}} {% include "string.html" with name="home stats connection-items" %}</span>
+          </li>
+          <li class="notpassed">
+            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
+            {% include "string.html" with name="home stats notpassed" %}
+            <span>{{statsconnectionbad}} {% include "string.html" with name="home stats connection-items" %}</span>
+          </li>
         </ol>
       </section>
 {% endblock %}

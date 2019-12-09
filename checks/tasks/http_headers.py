@@ -3,7 +3,7 @@
 import http.client
 import socket
 
-from .shared import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
+from .tls_connection import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
 from .. import scoring
 
 
@@ -323,7 +323,7 @@ class HeaderCheckerReferrerPolicy(object):
         }
 
 
-def http_headers_check(addr, url, header_checkers, task):
+def http_headers_check(af_ip_pair, url, header_checkers, task):
     results = dict()
     # set defaults to positive values. Header tests return negative values if
     # a test failed.
@@ -335,8 +335,8 @@ def http_headers_check(addr, url, header_checkers, task):
     get_headers = [h.name for h in header_checkers]
     try:
         conn, res, headers, visited_hosts = http_fetch(
-            url, af=addr[0], path="", port=443, task=task,
-            addr=addr[1], put_headers=put_headers,
+            url, af=af_ip_pair[0], path="", port=443, task=task,
+            ip_address=af_ip_pair[1], put_headers=put_headers,
             depth=MAX_REDIRECT_DEPTH,
             needed_headers=get_headers)
     except (socket.error, http.client.BadStatusLine, NoIpError):

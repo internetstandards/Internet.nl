@@ -1,0 +1,16 @@
+$ORIGIN .
+@         IN SOA    myroot.tk. admin.nlnetlabs.tk. (
+			 1      ; serial
+			 5S     ; refresh (5 seconds)
+			 1S     ; retry (1 seconds)
+			 15S    ; expire (15 seconds)
+			 5S     ; minimum (5 seconds)
+		  )
+@          IN    NS   myroot.tk.
+myroot.tk  IN    A    {{OWN_IP}}
+myroot.tk  IN    AAAA {{OWN_IPV6}}
+tk         IN    NS   ns1.tk.
+ns1.tk     IN    A    {{MASTER_IP}}
+ns1.tk     IN    AAAA {{MASTER_IPV6}}
+ns1.tk     IN    A    {{MASTER2_IP}}
+ns1.tk     IN    AAAA {{MASTER2_IPV6}}

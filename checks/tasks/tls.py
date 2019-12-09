@@ -3,10 +3,11 @@
 from binascii import hexlify
 import errno
 import http.client
+import logging
 import socket
 import ssl
-
 import time
+from enum import Enum
 from timeit import default_timer as timer
 
 from celery import shared_task
@@ -22,21 +23,33 @@ from cryptography.hazmat.primitives import hashes
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
+from itertools import product
 from nassl import _nassl
-from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
-from nassl.legacy_ssl_client import LegacySslClient
-from nassl.ssl_client import ClientCertificateRequested
+from nassl.ocsp_response import OcspResponseNotTrustedError
 
-from . import SetupUnboundContext, shared
+from . import SetupUnboundContext
 from .dispatcher import check_registry, post_callback_hook
 from .http_headers import HeaderCheckerContentEncoding, http_headers_check
 from .http_headers import HeaderCheckerStrictTransportSecurity
-from .shared import MAX_REDIRECT_DEPTH, NoIpError, resolve_dane
+from .shared import resolve_dane
 from .shared import results_per_domain, aggregate_subreports
+from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
+from .shared import mail_get_servers, batch_mail_get_servers
+from .tls_connection import MAX_REDIRECT_DEPTH, NoIpError
+from .tls_connection import DebugConnection, ModernConnection
+from .tls_connection import ConnectionHandshakeException
+from .tls_connection import ConnectionSocketException
+from .tls_connection import SSLConnectionWrapper
+from .tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
+from .tls_connection import HTTPSConnection, CipherListAction, TLSV1_3
+from .tls_connection import http_fetch
+from .cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus
+from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
+from ..models import KexHashFuncStatus, CipherOrderStatus
+
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
@@ -58,15 +71,246 @@ except ImportError as e:
     else:
         raise e
 
-SSLV2 = OpenSslVersionEnum.SSLV2
-SSLV23 = OpenSslVersionEnum.SSLV23
-SSLV3 = OpenSslVersionEnum.SSLV3
-SSL_VERIFY_NONE = OpenSslVerifyEnum.NONE
+logger = logging.getLogger('internetnl')
+
+# Based on:
+# hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"
+# https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set1_sigalgs_list.html
+# https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
+# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-16
+# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-18
+# openssl list -1 -digest-commands
+# Define signature algorithms which, if we are unable to connect using any of
+# them, constitutes a phase out warning. See NCSC 2.0 "Table 5 - Hash functions
+# for key exchange".
+# Only SHA256/384/512 based hash functions:
+KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER = [
+    'SHA512',
+    'SHA384',
+    'SHA256',
+]
+# All possible algorithms:
+KEX_TLS12_SIGALG_PREFERRED_ORDER = [
+    'RSA',
+    'RSA-PSS',
+    'DSA',
+    'ECDSA',
+]
+KEX_TLS12_SORTED_ALG_COMBINATIONS = map('+'.join, product(
+    KEX_TLS12_SIGALG_PREFERRED_ORDER, KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER))
+KEX_TLS12_SHA2_SIGALG_PREFERENCE = ':'.join(KEX_TLS12_SORTED_ALG_COMBINATIONS)
+
+# Based on:
+# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-signaturescheme
+# https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
+# https://tools.ietf.org/html/rfc8446#section-4.2.3
+# https://tools.ietf.org/html/rfc8032 "EdDSA"
+# NCSC 2.0 Table 5 - Hash functions for key exchange
+# Only signature schemes that are SHA256/384/512 based:
+#   ed25519 is included in the table because RFC-8032 states that it is SHA-512
+#   based.
+#   ed448 is excluded from the table because RFC-8032 states that it is SHAKE256
+#   (SHA-3) based.
+KEX_TLS13_SHA2_SIGNATURE_SCHEMES = [
+    'rsa_pkcs1_sha512',
+    'rsa_pkcs1_sha384',
+    'rsa_pkcs1_sha256',
+    'ecdsa_secp256r1_sha256',
+    'ecdsa_secp384r1_sha384',
+    'ecdsa_secp521r1_sha512',
+    'rsa_pss_rsae_sha512',
+    'rsa_pss_rsae_sha384',
+    'rsa_pss_rsae_sha256',
+    'ed25519',
+    'rsa_pss_pss_sha512',
+    'rsa_pss_pss_sha384',
+    'rsa_pss_pss_sha256',
+]
+KEX_TLS13_SHA2_SIGALG_PREFERENCE = ':'.join(KEX_TLS13_SHA2_SIGNATURE_SCHEMES)
+
+KEX_GOOD_HASH_FUNCS = frozenset(
+    set(KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER) |
+    set(KEX_TLS13_SHA2_SIGNATURE_SCHEMES))
+
+BULK_ENC_CIPHERS_PHASEOUT = ['3DES']
+BULK_ENC_CIPHERS_OTHER_PHASEOUT = ['SEED', 'ARIA']
+BULK_ENC_CIPHERS_INSUFFICIENT = ['EXP', 'eNULL', 'RC4', 'DES', 'IDEA']
+KEX_CIPHERS_PHASEOUT = ['kRSA']
+KEX_CIPHERS_INSUFFICIENT = ['DH', 'ECDH', 'eNULL', 'aNULL', 'PSK', 'SRP', 'MD5']
+KEX_CIPHERS_INSUFFICIENT_AS_SET = frozenset(KEX_CIPHERS_INSUFFICIENT)
+
+PHASE_OUT_CIPHERS = (
+    BULK_ENC_CIPHERS_PHASEOUT
+    + BULK_ENC_CIPHERS_OTHER_PHASEOUT
+    + KEX_CIPHERS_PHASEOUT)
+INSUFFICIENT_CIPHERS = BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSUFFICIENT
+
+# Some ciphers are not supported by LegacySslClient, only by SslClient which is
+# based on more modern OpenSSL.
+BULK_ENC_CIPHERS_INSUFFICIENT_MODERN = ['AESCCM8']
+INSUFFICIENT_CIPHERS_MODERN = BULK_ENC_CIPHERS_INSUFFICIENT_MODERN
+
+
+GOOD_SUFFICIENT_SEC_LEVELS = frozenset([SecLevel.GOOD, SecLevel.SUFFICIENT])
+GOOD_SUFFICIENT_DEBUG_CIPHERS = list(x.name for x in filter(
+    lambda x: (DebugConnection in x.supported_conns and
+               x.sec_level in GOOD_SUFFICIENT_SEC_LEVELS),
+    cipher_infos.values()))
+GOOD_SUFFICIENT_MODERN_CIPHERS = list(x.name for x in filter(
+    lambda x: (ModernConnection in x.supported_conns and
+               x.sec_level in GOOD_SUFFICIENT_SEC_LEVELS),
+    cipher_infos.values()))
+
+
+# Based on: https://tools.ietf.org/html/rfc7919#appendix-A
+FFDHE2048_PRIME = int(
+    (
+        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
+        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
+        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
+        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
+        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
+        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
+        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
+        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
+        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
+        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
+        "886B4238 61285C97 FFFFFFFF FFFFFFFF"
+    ).replace(' ', ''), 16)
+FFDHE3072_PRIME = int(
+    (
+        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
+        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
+        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
+        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
+        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
+        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
+        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
+        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
+        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
+        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
+        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
+        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
+        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
+        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
+        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
+        "3C1B20EE 3FD59D7C 25E41D2B 66C62E37 FFFFFFFF FFFFFFFF"
+    ).replace(' ', ''), 16)
+FFDHE4096_PRIME = int(
+    (
+        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
+        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
+        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
+        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
+        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
+        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
+        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
+        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
+        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
+        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
+        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
+        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
+        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
+        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
+        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
+        "3C1B20EE 3FD59D7C 25E41D2B 669E1EF1 6E6F52C3 164DF4FB"
+        "7930E9E4 E58857B6 AC7D5F42 D69F6D18 7763CF1D 55034004"
+        "87F55BA5 7E31CC7A 7135C886 EFB4318A ED6A1E01 2D9E6832"
+        "A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A"
+        "1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF"
+        "8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E655F6A"
+        "FFFFFFFF FFFFFFFF"
+    ).replace(' ', ''), 16)
+FFDHE6144_PRIME = int(
+    (
+        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
+        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
+        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
+        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
+        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
+        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
+        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
+        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
+        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
+        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
+        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
+        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
+        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
+        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
+        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
+        "3C1B20EE 3FD59D7C 25E41D2B 669E1EF1 6E6F52C3 164DF4FB"
+        "7930E9E4 E58857B6 AC7D5F42 D69F6D18 7763CF1D 55034004"
+        "87F55BA5 7E31CC7A 7135C886 EFB4318A ED6A1E01 2D9E6832"
+        "A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A"
+        "1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF"
+        "8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E0DD902"
+        "0BFD64B6 45036C7A 4E677D2C 38532A3A 23BA4442 CAF53EA6"
+        "3BB45432 9B7624C8 917BDD64 B1C0FD4C B38E8C33 4C701C3A"
+        "CDAD0657 FCCFEC71 9B1F5C3E 4E46041F 388147FB 4CFDB477"
+        "A52471F7 A9A96910 B855322E DB6340D8 A00EF092 350511E3"
+        "0ABEC1FF F9E3A26E 7FB29F8C 183023C3 587E38DA 0077D9B4"
+        "763E4E4B 94B2BBC1 94C6651E 77CAF992 EEAAC023 2A281BF6"
+        "B3A739C1 22611682 0AE8DB58 47A67CBE F9C9091B 462D538C"
+        "D72B0374 6AE77F5E 62292C31 1562A846 505DC82D B854338A"
+        "E49F5235 C95B9117 8CCF2DD5 CACEF403 EC9D1810 C6272B04"
+        "5B3B71F9 DC6B80D6 3FDD4A8E 9ADB1E69 62A69526 D43161C1"
+        "A41D570D 7938DAD4 A40E329C D0E40E65 FFFFFFFF FFFFFFFF"
+    ).replace(' ', ''), 16)
+FFDHE8192_PRIME = int(
+    (
+        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
+        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
+        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
+        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
+        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
+        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
+        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
+        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
+        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
+        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
+        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
+        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
+        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
+        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
+        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
+        "3C1B20EE 3FD59D7C 25E41D2B 669E1EF1 6E6F52C3 164DF4FB"
+        "7930E9E4 E58857B6 AC7D5F42 D69F6D18 7763CF1D 55034004"
+        "87F55BA5 7E31CC7A 7135C886 EFB4318A ED6A1E01 2D9E6832"
+        "A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A"
+        "1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF"
+        "8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E0DD902"
+        "0BFD64B6 45036C7A 4E677D2C 38532A3A 23BA4442 CAF53EA6"
+        "3BB45432 9B7624C8 917BDD64 B1C0FD4C B38E8C33 4C701C3A"
+        "CDAD0657 FCCFEC71 9B1F5C3E 4E46041F 388147FB 4CFDB477"
+        "A52471F7 A9A96910 B855322E DB6340D8 A00EF092 350511E3"
+        "0ABEC1FF F9E3A26E 7FB29F8C 183023C3 587E38DA 0077D9B4"
+        "763E4E4B 94B2BBC1 94C6651E 77CAF992 EEAAC023 2A281BF6"
+        "B3A739C1 22611682 0AE8DB58 47A67CBE F9C9091B 462D538C"
+        "D72B0374 6AE77F5E 62292C31 1562A846 505DC82D B854338A"
+        "E49F5235 C95B9117 8CCF2DD5 CACEF403 EC9D1810 C6272B04"
+        "5B3B71F9 DC6B80D6 3FDD4A8E 9ADB1E69 62A69526 D43161C1"
+        "A41D570D 7938DAD4 A40E329C CFF46AAA 36AD004C F600C838"
+        "1E425A31 D951AE64 FDB23FCE C9509D43 687FEB69 EDD1CC5E"
+        "0B8CC3BD F64B10EF 86B63142 A3AB8829 555B2F74 7C932665"
+        "CB2C0F1C C01BD702 29388839 D2AF05E4 54504AC7 8B758282"
+        "2846C0BA 35C35F5C 59160CC0 46FD8251 541FC68C 9C86B022"
+        "BB709987 6A460E74 51A8A931 09703FEE 1C217E6C 3826E52C"
+        "51AA691E 0E423CFC 99E9E316 50C1217B 624816CD AD9A95F9"
+        "D5B80194 88D9C0A0 A1FE3075 A577E231 83F81D4A 3F2FA457"
+        "1EFC8CE0 BA8A4FE8 B6855DFE 72B0A66E DED2FBAB FBE58A30"
+        "FAFABE1C 5D71A87E 2F741EF8 C1FE86FE A6BBFDE5 30677F0D"
+        "97D11D49 F7A8443D 0822E506 A9F4614E 011E2A94 838FF88C"
+        "D68C8BB7 C5C6424C FFFFFFFF FFFFFFFF"
+    ).replace(' ', ''), 16)
+FFDHE_GENERATOR = 2
+FFDHE_SUFFICIENT_PRIMES = [
+    FFDHE8192_PRIME, FFDHE6144_PRIME, FFDHE4096_PRIME, FFDHE3072_PRIME]
 
 
 # Maximum number of tries on failure to establish a connection.
 # Useful on one-time errors on SMTP.
 MAX_TRIES = 3
+
 
 root_fingerprints = None
 with open(settings.CA_FINGERPRINTS) as f:
@@ -86,6 +330,11 @@ test_map = {
         'port': 25,
     },
 }
+
+
+class ChecksMode(Enum):
+    WEB = 0,
+    MAIL = 1
 
 
 @shared_task(bind=True)
@@ -151,13 +400,13 @@ def callback(results, domain, test_type):
     return testdomain, results
 
 
-web_registered = check_registry("web_tls", web_callback, shared.resolve_a_aaaa)
+web_registered = check_registry("web_tls", web_callback, resolve_a_aaaa)
 batch_web_registered = check_registry(
-    "batch_web_tls", batch_web_callback, shared.batch_resolve_a_aaaa)
+    "batch_web_tls", batch_web_callback, batch_resolve_a_aaaa)
 mail_registered = check_registry(
-    "mail_tls", mail_callback, shared.mail_get_servers)
+    "mail_tls", mail_callback, mail_get_servers)
 batch_mail_registered = check_registry(
-    "batch_mail_tls", batch_mail_callback, shared.batch_mail_get_servers)
+    "batch_mail_tls", batch_mail_callback, batch_mail_get_servers)
 
 
 @web_registered
@@ -166,8 +415,8 @@ batch_mail_registered = check_registry(
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_cert(self, addrs, url, *args, **kwargs):
-    return do_web_cert(addrs, url, self, *args, **kwargs)
+def web_cert(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @batch_web_registered
@@ -176,8 +425,8 @@ def web_cert(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_cert(self, addrs, url, *args, **kwargs):
-    return do_web_cert(addrs, url, self, *args, **kwargs)
+def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @web_registered
@@ -186,8 +435,8 @@ def batch_web_cert(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_conn(self, addrs, url, *args, **kwargs):
-    return do_web_conn(addrs, url, *args, **kwargs)
+def web_conn(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_conn(af_ip_pairs, url, *args, **kwargs)
 
 
 @batch_web_registered
@@ -196,8 +445,8 @@ def web_conn(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_conn(self, addrs, url, *args, **kwargs):
-    return do_web_conn(addrs, url, *args, **kwargs)
+def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_conn(af_ip_pairs, url, *args, **kwargs)
 
 
 @mail_registered
@@ -226,8 +475,8 @@ def batch_mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def web_http(self, addrs, url, *args, **kwargs):
-    return do_web_http(addrs, url, self, *args, **kwargs)
+def web_http(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_http(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @batch_web_registered
@@ -236,8 +485,8 @@ def web_http(self, addrs, url, *args, **kwargs):
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
-def batch_web_http(self, addrs, url, *args, **kwargs):
-    return do_web_http(addrs, url, self, args, **kwargs)
+def batch_web_http(self, af_ip_pairs, url, *args, **kwargs):
+    return do_web_http(af_ip_pairs, url, self, args, **kwargs)
 
 
 def save_results(model, results, addr, domain, category):
@@ -255,10 +504,16 @@ def save_results(model, results, addr, domain, category):
                     model.dh_param = result.get("dh_param")
                     model.ecdh_param = result.get("ecdh_param")
                     model.fs_bad = result.get("fs_bad")
+                    model.fs_phase_out = result.get("fs_phase_out")
                     model.fs_score = result.get("fs_score")
                     model.ciphers_bad = result.get("ciphers_bad")
+                    model.ciphers_phase_out = result.get("ciphers_phase_out")
                     model.ciphers_score = result.get("ciphers_score")
+                    model.cipher_order = result.get("cipher_order")
+                    model.cipher_order_score = result.get("cipher_order_score")
+                    model.cipher_order_violation = result.get("cipher_order_violation")
                     model.protocols_bad = result.get("prots_bad")
+                    model.protocols_phase_out = result.get("prots_phase_out")
                     model.protocols_score = result.get("prots_score")
                     model.compression = result.get("compression")
                     model.compression_score = result.get("compression_score")
@@ -266,12 +521,19 @@ def save_results(model, results, addr, domain, category):
                     model.secure_reneg_score = result.get("secure_reneg_score")
                     model.client_reneg = result.get("client_reneg")
                     model.client_reneg_score = result.get("client_reneg_score")
+                    model.zero_rtt = result.get("zero_rtt")
+                    model.zero_rtt_score = result.get("zero_rtt_score")
+                    model.ocsp_stapling = result.get("ocsp_stapling")
+                    model.ocsp_stapling_score = result.get("ocsp_stapling_score")
+                    model.kex_hash_func = result.get("kex_hash_func")
+                    model.kex_hash_func_score = result.get("kex_hash_func_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
                 model.cert_trusted = result.get("trusted")
                 model.cert_trusted_score = result.get("trusted_score")
                 model.cert_pubkey_bad = result.get("pubkey_bad")
+                model.cert_pubkey_phase_out = result.get("pubkey_phase_out")
                 model.cert_pubkey_score = result.get("pubkey_score")
                 model.cert_signature_bad = result.get("sigalg_bad")
                 model.cert_signature_score = result.get("sigalg_score")
@@ -312,9 +574,15 @@ def save_results(model, results, addr, domain, category):
                     model.ecdh_param = result.get("ecdh_param")
                     model.fs_bad = result.get("fs_bad")
                     model.fs_score = result.get("fs_score")
+                    model.fs_phase_out = result.get("fs_phase_out")
                     model.ciphers_bad = result.get("ciphers_bad")
+                    model.ciphers_phase_out = result.get("ciphers_phase_out")
                     model.ciphers_score = result.get("ciphers_score")
+                    model.cipher_order = result.get("cipher_order")
+                    model.cipher_order_score = result.get("cipher_order_score")
+                    model.cipher_order_violation = result.get("cipher_order_violation")
                     model.protocols_bad = result.get("prots_bad")
+                    model.protocols_phase_out = result.get("prots_phase_out")
                     model.protocols_score = result.get("prots_score")
                     model.compression = result.get("compression")
                     model.compression_score = result.get("compression_score")
@@ -322,11 +590,19 @@ def save_results(model, results, addr, domain, category):
                     model.secure_reneg_score = result.get("secure_reneg_score")
                     model.client_reneg = result.get("client_reneg")
                     model.client_reneg_score = result.get("client_reneg_score")
+                    model.zero_rtt = result.get("zero_rtt")
+                    model.zero_rtt_score = result.get("zero_rtt_score")
+                    # OCSP disabled for mail.
+                    # model.ocsp_stapling = result.get("ocsp_stapling")
+                    # model.ocsp_stapling_score = result.get("ocsp_stapling_score")
+                    model.kex_hash_func = result.get("kex_hash_func")
+                    model.kex_hash_func_score = result.get("kex_hash_func_score")
                 if result.get("tls_cert"):
                     model.cert_chain = result.get("chain")
                     model.cert_trusted = result.get("trusted")
                     model.cert_trusted_score = result.get("trusted_score")
                     model.cert_pubkey_bad = result.get("pubkey_bad")
+                    model.cert_pubkey_phase_out = result.get("pubkey_phase_out")
                     model.cert_pubkey_score = result.get("pubkey_score")
                     model.cert_signature_bad = result.get("sigalg_bad")
                     model.cert_signature_score = result.get("sigalg_score")
@@ -342,6 +618,12 @@ def save_results(model, results, addr, domain, category):
 
 
 def build_report(dttls, category):
+    def annotate_and_combine(bad_items, phaseout_items):
+        return [
+            bad_items + phaseout_items,
+            ['detail tech data insufficient'] * len(bad_items) +
+            ['detail tech data phase-out'] * len(phaseout_items)]
+
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:
             category.subtests['https_exists'].result_unreachable()
@@ -375,19 +657,59 @@ def build_report(dttls, category):
             if not dttls.dh_param and not dttls.ecdh_param:
                 category.subtests['fs_params'].result_no_dh_params()
             else:
+                fs_all = annotate_and_combine(dttls.fs_bad, dttls.fs_phase_out)
                 if len(dttls.fs_bad) > 0:
-                    category.subtests['fs_params'].result_bad(dttls.fs_bad)
+                    category.subtests['fs_params'].result_bad(fs_all)
+                elif len(dttls.fs_phase_out) > 0:
+                    category.subtests['fs_params'].result_phase_out(fs_all)
                 else:
                     category.subtests['fs_params'].result_good()
 
+            ciphers_all = annotate_and_combine(
+                dttls.ciphers_bad, dttls.ciphers_phase_out)
             if len(dttls.ciphers_bad) > 0:
-                category.subtests['tls_ciphers'].result_bad(dttls.ciphers_bad)
+                category.subtests['tls_ciphers'].result_bad(ciphers_all)
+            elif len(dttls.ciphers_phase_out) > 0:
+                category.subtests['tls_ciphers'].result_phase_out(ciphers_all)
             else:
                 category.subtests['tls_ciphers'].result_good()
 
+            if dttls.cipher_order == CipherOrderStatus.bad:
+                category.subtests['tls_cipher_order'].result_bad()
+            elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                category.subtests['tls_cipher_order'].result_seclevel_bad([
+                        [cipher1, cipher2],
+                        [' ', violated_rule]
+                    ])
+            elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
+                # Provide tech_data that supplies values for two rows each of
+                # two cells to fill in a table like so:
+                # Web server IP address | Ciphers | Rule #
+                # -------------------------------------------------------------
+                # 1.2.3.4               | cipher1 | ' '
+                # ...                   | cipher2 | violated_rule
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                # The 5th rule is only informational.
+                if violated_rule == 5:
+                    category.subtests['tls_cipher_order'].result_score_info([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
+                else:
+                    category.subtests['tls_cipher_order'].result_score_warning([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
+            else:
+                category.subtests['tls_cipher_order'].result_good()
+
+            protocols_all = annotate_and_combine(
+                dttls.protocols_bad, dttls.protocols_phase_out)
             if len(dttls.protocols_bad) > 0:
-                category.subtests['tls_version'].result_bad(
-                    dttls.protocols_bad)
+                category.subtests['tls_version'].result_bad(protocols_all)
+            elif len(dttls.protocols_phase_out) > 0:
+                category.subtests['tls_version'].result_phase_out(protocols_all)
             else:
                 category.subtests['tls_version'].result_good()
 
@@ -413,11 +735,15 @@ def build_report(dttls, category):
 
             if dttls.cert_pubkey_score is None:
                 pass
-            elif len(dttls.cert_pubkey_bad) > 0:
-                category.subtests['cert_pubkey'].result_bad(
-                    dttls.cert_pubkey_bad)
             else:
-                category.subtests['cert_pubkey'].result_good()
+                cert_pubkey_all = annotate_and_combine(
+                    dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                if len(dttls.cert_pubkey_bad) > 0:
+                    category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
+                elif len(dttls.cert_pubkey_phase_out) > 0:
+                    category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
+                else:
+                    category.subtests['cert_pubkey'].result_good()
 
             if dttls.cert_signature_score is None:
                 pass
@@ -454,6 +780,27 @@ def build_report(dttls, category):
                 # else:
                 #     category.subtests['dane_rollover'].result_bad()
 
+            if dttls.zero_rtt == ZeroRttStatus.good:
+                category.subtests['zero_rtt'].result_good()
+            elif dttls.zero_rtt == ZeroRttStatus.bad:
+                category.subtests['zero_rtt'].result_bad()
+            elif dttls.zero_rtt == ZeroRttStatus.na:
+                category.subtests['zero_rtt'].result_na()
+
+            if dttls.ocsp_stapling == OcspStatus.good:
+                category.subtests['ocsp_stapling'].result_good()
+            elif dttls.ocsp_stapling == OcspStatus.not_trusted:
+                category.subtests['ocsp_stapling'].result_not_trusted()
+            elif dttls.ocsp_stapling == OcspStatus.ok:
+                category.subtests['ocsp_stapling'].result_ok()
+
+            if dttls.kex_hash_func == KexHashFuncStatus.good:
+                category.subtests['kex_hash_func'].result_good()
+            elif dttls.kex_hash_func == KexHashFuncStatus.bad:
+                category.subtests['kex_hash_func'].result_bad()
+            elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
+                category.subtests['kex_hash_func'].result_unknown()
+
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
             category.subtests['starttls_exists'].result_could_not_test()
@@ -467,19 +814,60 @@ def build_report(dttls, category):
             if not dttls.dh_param and not dttls.ecdh_param:
                 category.subtests['fs_params'].result_no_dh_params()
             else:
+                fs_all = annotate_and_combine(
+                    dttls.fs_bad, dttls.fs_phase_out)
                 if len(dttls.fs_bad) > 0:
-                    category.subtests['fs_params'].result_bad(dttls.fs_bad)
+                    category.subtests['fs_params'].result_bad(fs_all)
+                elif len(dttls.fs_phase_out) > 0:
+                    category.subtests['fs_params'].result_phase_out(fs_all)
                 else:
                     category.subtests['fs_params'].result_good()
 
+            ciphers_all = annotate_and_combine(
+                dttls.ciphers_bad, dttls.ciphers_phase_out)
             if len(dttls.ciphers_bad) > 0:
-                category.subtests['tls_ciphers'].result_bad(dttls.ciphers_bad)
+                category.subtests['tls_ciphers'].result_bad(ciphers_all)
+            elif len(dttls.ciphers_phase_out) > 0:
+                category.subtests['tls_ciphers'].result_phase_out(ciphers_all)
             else:
                 category.subtests['tls_ciphers'].result_good()
 
+            if dttls.cipher_order == CipherOrderStatus.bad:
+                category.subtests['tls_cipher_order'].result_bad()
+            elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                category.subtests['tls_cipher_order'].result_seclevel_bad([
+                        [cipher1, cipher2],
+                        [' ', violated_rule]
+                    ])
+            elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
+                # Provide tech_data that supplies values for two rows each of
+                # two cells to fill in a table like so:
+                # Web server IP address | Ciphers | Rule #
+                # -------------------------------------------------------------
+                # 1.2.3.4               | cipher1 | ' '
+                # ...                   | cipher2 | violated_rule
+                (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
+                # The 5th rule is only informational.
+                if violated_rule == 5:
+                    category.subtests['tls_cipher_order'].result_score_info([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
+                else:
+                    category.subtests['tls_cipher_order'].result_score_warning([
+                            [cipher1, cipher2],
+                            [' ', violated_rule]
+                        ])
+            else:
+                category.subtests['tls_cipher_order'].result_good()
+
+            protocols_all = annotate_and_combine(
+                dttls.protocols_bad, dttls.protocols_phase_out)
             if len(dttls.protocols_bad) > 0:
-                category.subtests['tls_version'].result_bad(
-                    dttls.protocols_bad)
+                category.subtests['tls_version'].result_bad(protocols_all)
+            elif len(dttls.protocols_phase_out) > 0:
+                category.subtests['tls_version'].result_phase_out(protocols_all)
             else:
                 category.subtests['tls_version'].result_good()
 
@@ -505,11 +893,15 @@ def build_report(dttls, category):
 
             if dttls.cert_pubkey_score is None:
                 pass
-            elif len(dttls.cert_pubkey_bad) > 0:
-                category.subtests['cert_pubkey'].result_bad(
-                    dttls.cert_pubkey_bad)
             else:
-                category.subtests['cert_pubkey'].result_good()
+                cert_pubkey_all = annotate_and_combine(
+                    dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                if len(dttls.cert_pubkey_bad) > 0:
+                    category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
+                elif len(dttls.cert_pubkey_phase_out) > 0:
+                    category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
+                else:
+                    category.subtests['cert_pubkey'].result_good()
 
             if dttls.cert_signature_score is None:
                 pass
@@ -550,6 +942,28 @@ def build_report(dttls, category):
                     category.subtests['dane_rollover'].result_good()
                 else:
                     category.subtests['dane_rollover'].result_bad()
+
+            if dttls.zero_rtt == ZeroRttStatus.good:
+                category.subtests['zero_rtt'].result_good()
+            elif dttls.zero_rtt == ZeroRttStatus.bad:
+                category.subtests['zero_rtt'].result_bad()
+            elif dttls.zero_rtt == ZeroRttStatus.na:
+                category.subtests['zero_rtt'].result_na()
+
+            # OCSP disabled for mail.
+            # if dttls.ocsp_stapling == OcspStatus.good:
+            #     category.subtests['ocsp_stapling'].result_good()
+            # elif dttls.ocsp_stapling == OcspStatus.not_trusted:
+            #     category.subtests['ocsp_stapling'].result_not_trusted()
+            # elif dttls.ocsp_stapling == OcspStatus.ok:
+            #     category.subtests['ocsp_stapling'].result_ok()
+
+            if dttls.kex_hash_func == KexHashFuncStatus.good:
+                category.subtests['kex_hash_func'].result_good()
+            elif dttls.kex_hash_func == KexHashFuncStatus.bad:
+                category.subtests['kex_hash_func'].result_bad()
+            elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
+                category.subtests['kex_hash_func'].result_unknown()
 
     dttls.report = category.gen_report()
 
@@ -782,13 +1196,30 @@ class DebugCertChain(object):
             hostmatch_score = self.score_hostmatch_good
         except ssl.CertificateError:
             hostmatch_score = self.score_hostmatch_bad
+            # bad_hostmatch was of the form list(CN, list(SAN, SAN, ..)). In
+            # the report the CN is shown on one row of the tech table and the
+            # SANs are shown as '[SAN, SAN]' on a second row. Showing the SANs
+            # in the report as the string representation of a Python list is a
+            # separate issue so ignore that for the moment. It is possible for
+            # there to be duplicates and overlap between the SANs and the CN
+            # which when shown in a report column titled 'Unmatched domains on
+            # certificate' looks odd to have duplicate entries. I have
+            # flattened this to the form list(CN, SAN, SAN, ..) while still
+            # preserving the order. As Python doesn't have an OrderedSet type
+            # and adding one is overkill I use a trick to remove duplicates in
+            # the ordered list. See:
+            # https://www.w3schools.com/python/python_howto_remove_duplicates.asp
+            # However, was anyone relying on the nested structure of this
+            # result value, e.g. perhaps via the Internet.NL batch API?
             bad_hostmatch.append(common_name)
-            bad_hostmatch.append(sans)
+            bad_hostmatch.extend(sans)
+            bad_hostmatch = list(dict.fromkeys(bad_hostmatch))  # de-dupe
         return hostmatch_score, bad_hostmatch
 
-    # NCSC guidelines B3-3, B3-4, B3-5
+    # NCSC guidelines B3-3, B5-1
     def check_pubkey(self):
         bad_pubkey = []
+        phase_out_pubkey = []
         pubkey_score = self.score_pubkey_good
         for cert in self.chain:
             common_name = get_common_name(cert)
@@ -807,14 +1238,10 @@ class DebugCertChain(object):
             elif public_key_type is _EllipticCurvePublicKey:
                 curve = public_key.curve.name
                 if (curve not in [
-                        "brainpoolP512r1",
-                        "brainpoolP384r1",
-                        "brainpoolP256r1",
-                        "secp521r1",
                         "secp384r1",
                         "secp256r1",
-                        "prime256v1",
-                        "secp224r1",
+                        "x448",
+                        "x25519",
                         ] or bits < 224):
                     failed_key_type = "EllipticCurvePublicKey"
             if failed_key_type:
@@ -822,9 +1249,12 @@ class DebugCertChain(object):
                     common_name, failed_key_type, bits)
                 if curve:
                     message += ", curve: {}".format(curve)
-                bad_pubkey.append(message)
-                pubkey_score = self.score_pubkey_bad
-        return pubkey_score, bad_pubkey
+                if curve == "secp224r1":
+                    phase_out_pubkey.append(message)
+                else:
+                    bad_pubkey.append(message)
+                    pubkey_score = self.score_pubkey_bad
+        return pubkey_score, bad_pubkey, phase_out_pubkey
 
     def check_sigalg(self):
         """
@@ -890,15 +1320,7 @@ class DebugCertChainMail(DebugCertChain):
         self.score_dane_validated = scoring.MAIL_TLS_DANE_VALIDATED
 
 
-class DebugConnectionHandshakeException(Exception):
-    pass
-
-
-class DebugConnectionSocketException(Exception):
-    pass
-
-
-class DebugSMTPConnectionCouldNotTestException(Exception):
+class SMTPConnectionCouldNotTestException(Exception):
     """
     Used on the SMTP STARTTLS test.
 
@@ -909,268 +1331,118 @@ class DebugSMTPConnectionCouldNotTestException(Exception):
     pass
 
 
-class DebugConnection(LegacySslClient):
-    def __init__(
-            self, url, addr=None, version=SSLV23, shutdown=True,
-            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
-        self.url = url
-        self.version = version
-        self.must_shutdown = shutdown
-        self.ciphers = ciphers
-        self.addr = addr
-        self.options = options
-        self.send_SNI = send_SNI
+def starttls_sock_setup(conn):
+    """
+    Setup socket for SMTP STARTTLS.
 
-        self.score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
-        self.score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
-        self.score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
-        self.score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
-        self.score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        self.score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
-        self.score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
-        self.score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+    Retries to connect when we get an error code upon connecting.
 
-        self.sock_setup()
-        self.connect()
+    Raises SMTPConnectionCouldNotTestException when we get no reply
+    from the server or when the server still replies with an error code
+    upon connecting after a number of retries.
 
-    def sock_setup(self):
-        self.port = 443
-        self.sock_timeout = 10
-
-        tries_left = MAX_TRIES
-        while tries_left > 0:
-            try:
-                if self.addr:
-                    self.sock = socket.socket(self.addr[0], socket.SOCK_STREAM)
-                    self.sock.settimeout(self.sock_timeout)
-                    self.sock.connect((self.addr[1], self.port))
-                else:
-                    self.sock = socket.create_connection(
-                        (self.url, 443), timeout=self.sock_timeout)
-                break
-            except (socket.gaierror, socket.error, IOError):
-                self.safe_shutdown(tls=False)
-                tries_left -= 1
-                if tries_left <= 0:
-                    raise DebugConnectionSocketException()
-                time.sleep(1)
-
-    def connect(self):
-        try:
-            # TODO force ipv4 or ipv6
-            super(DebugConnection, self).__init__(
-                ssl_version=self.version,
-                underlying_socket=self.sock,
-                ssl_verify=SSL_VERIFY_NONE,
-                ssl_verify_locations=settings.CA_CERTIFICATES,
-                ignore_client_authentication_requests=True)
-            if self.options:
-                self.set_options(self.options)
-
-            # TODO broken SNI-fallback
-            if self.send_SNI and self.version != SSLV2:
-                # If the url is a DNS label (mailtest) make sure to remove the
-                # trailing dot.
-                server_name = self.url.rstrip(".")
-                self.set_tlsext_host_name(server_name)
-
-            self.set_cipher_list(self.ciphers)
-            self.do_handshake()
-
-        except (socket.gaierror, socket.error, IOError, _nassl.OpenSSLError,
-                ClientCertificateRequested):
-            # Not able to connect to port 443
-            raise DebugConnectionHandshakeException()
-        finally:
-            if self.must_shutdown:
-                self.safe_shutdown()
-
-    def get_peer_certificate_chain(self):
-        """
-        Wrap nassl's method in order to catch ValueError when there is an error
-        getting the peer's certificate chain.
-
-        """
-        chain = None
-        try:
-            chain = self.get_peer_cert_chain()
-        except ValueError:
-            pass
-        return chain
-
-    def safe_shutdown(self, tls=True):
-        """
-        Shutdown TLS and socket. Ignore any exceptions.
-
-        """
-        try:
-            if tls:
-                self.shutdown()
-            self.sock.shutdown(2)
-        except (IOError, _nassl.OpenSSLError):
-            pass
-        finally:
-            self.sock.close()
-
-    def trusted_score(self):
-        """
-        Verify the certificate chain,
-
-        """
-        verify_result, _ = self.get_certificate_chain_verify_result()
-        if verify_result != 0:
-            return verify_result, self.score_trusted_bad
-        else:
-            return verify_result, self.score_trusted_good
-
-    def check_compression(self):
-        """
-        Check if TLS compression is enabled.
-
-        TLS compression should not be enabled.
-
-        """
-        compression = self.get_current_compression_method() is not None
-        if compression:
-            compression_score = self.score_compression_bad
-        else:
-            compression_score = self.score_compression_good
-        return compression_score, compression
-
-    def check_secure_reneg(self):
-        """
-        Check if secure renegotiation is supported.
-
-        Secure renegotiation should be supported.
-
-        """
-        secure_reneg = self.get_secure_renegotiation_support()
-        if secure_reneg:
-            secure_reneg_score = self.score_secure_reneg_good
-        else:
-            secure_reneg_score = self.score_secure_reneg_bad
-        return secure_reneg_score, secure_reneg
-
-    def check_client_reneg(self):
-        """
-        Check if client renegotiation is possible.
-
-        Client renegotiation should not be possible.
-
-        """
-        try:
-            # Step 1.
-            # Send reneg on open connection
-            self.do_renegotiate()
-            # Step 2.
-            # Connection should now be closed, send 2nd reneg to verify
-            self.do_renegotiate()
-            # If we are still here, client reneg is supported
-            client_reneg_score = self.score_client_reneg_bad
-            client_reneg = True
-        except (socket.error, _nassl.OpenSSLError, IOError):
-            client_reneg_score = self.score_client_reneg_good
-            client_reneg = False
-        return client_reneg_score, client_reneg
-
-
-class DebugSMTPConnection(DebugConnection):
-    def __init__(
-            self, url, addr=None, version=SSLV23, shutdown=True,
-            ciphers='ALL:COMPLEMENTOFALL', options=None, send_SNI=True):
-        super(DebugSMTPConnection, self).__init__(
-            url, addr, version, shutdown, ciphers, options, send_SNI)
-        self.score_compression_good = scoring.MAIL_TLS_COMPRESSION_GOOD
-        self.score_compression_bad = scoring.MAIL_TLS_COMPRESSION_BAD
-        self.score_secure_reneg_good = scoring.MAIL_TLS_SECURE_RENEG_GOOD
-        self.score_secure_reneg_bad = scoring.MAIL_TLS_SECURE_RENEG_BAD
-        self.score_client_reneg_good = scoring.MAIL_TLS_CLIENT_RENEG_GOOD
-        self.score_client_reneg_bad = scoring.MAIL_TLS_CLIENT_RENEG_BAD
-        self.score_trusted_good = scoring.MAIL_TLS_TRUSTED_GOOD
-        self.score_trusted_bad = scoring.MAIL_TLS_TRUSTED_BAD
-
-    @staticmethod
+    """
     def readline(fd, maximum_bytes=4096):
         line = fd.readline(maximum_bytes)
-        # print(line)
         return line.decode("ascii")
 
-    def sock_setup(self):
-        """
-        Setup socket for SMTP STARTTLS.
+    conn.sock = None
 
-        Retries to connect when we get an error code upon connecting.
+    # If we get an error code(4xx, 5xx) in the first reply upon
+    # connecting, we will retry in case it was a one time error.
+    #
+    # From: https://www.rfc-editor.org/rfc/rfc3207.html#section-5
+    #    S: <waits for connection on TCP port 25>
+    # 1  C: <opens connection>
+    # 2  S: 220 mail.imc.org SMTP service ready
+    # 3  C: EHLO mail.example.com
+    # 4  S: 250-mail.imc.org offers a warm hug of welcome
+    # 5  S: 250-8BITMIME
+    #    S: 250-STARTTLS
+    #    S: 250 DSN
+    # 6  C: STARTTLS
+    # 7  S: 220 Go ahead
+    #    C: <starts TLS negotiation>
+    #    C & S: <negotiate a TLS session>
+    #    C & S: <check result of negotiation>
+    #    C: EHLO mail.example.com
+    #    S: 250-mail.imc.org touches your hand gently for a moment
+    #    S: 250-8BITMIME
+    #    S: 250 DSN
+    tries_left = conn.tries
+    retry = True
+    while retry and tries_left > 0:
+        retry = False
+        try:
+            # 1
+            conn.sock_connect()
 
-        Raises DebugSMTPConnectionCouldNotTestException when we get no reply
-        from the server or when the server still replies with an error code
-        upon connecting after a number of retries.
+            # 2
+            fd = conn.sock.makefile("rb")
+            line = readline(fd)
 
-        """
-        self.port = 25
-        self.sock_timeout = 24
+            if (line and line[3] == " " and
+                    (line[0] == '4' or line[0] == '5')):
+                # The server replied with an error code.
+                # We will retry to connect in case it was an one time
+                # error.
+                conn.safe_shutdown()
+                tries_left -= 1
+                retry = True
+                if tries_left <= 0:
+                    raise SMTPConnectionCouldNotTestException()
+                time.sleep(1)
+                continue
 
-        # If we get an error code(4xx, 5xx) in the first reply upon
-        # connecting, we will retry in case it was a one time error.
-        tries_left = MAX_TRIES
-        self.sock = None
-        retry = True
-        while retry and tries_left > 0:
-            retry = False
-            try:
-                self.sock = socket.create_connection(
-                    (self.url, self.port), timeout=self.sock_timeout)
-                fd = self.sock.makefile("rb")
-                line = self.readline(fd)
+            while line and line[3] != " ":
+                line = readline(fd)
 
-                if (line and line[3] == " " and
-                        (line[0] == '4' or line[0] == '5')):
-                    # The server replied with an error code.
-                    # We will retry to connect in case it was an one time
-                    # error.
-                    self.safe_shutdown(tls=False)
-                    tries_left -= 1
-                    retry = True
-                    if tries_left <= 0:
-                        raise DebugSMTPConnectionCouldNotTestException()
-                    time.sleep(1)
-                    continue
+            # 3
+            conn.sock.sendall(b"EHLO internet.nl\r\n")
 
-                while line and line[3] != " ":
-                    line = self.readline(fd)
+            starttls = False
 
-                self.sock.sendall(b"EHLO internet.nl\r\n")
+            # 4
+            line = readline(fd)
+            while line and line[3] != " ":
+                if "STARTTLS" in line:
+                    # 5
+                    starttls = True
+                line = readline(fd)
 
-                starttls = False
-                line = self.readline(fd)
+            if starttls or "STARTTLS" in line:
+                # 6
+                conn.sock.sendall(b"STARTTLS\r\n")
+                # 7
+                readline(fd)
+                fd.close()
+            else:
+                fd.close()
+                raise ConnectionHandshakeException()
 
-                while line and line[3] != " ":
-                    if "STARTTLS" in line:
-                        starttls = True
-                    line = self.readline(fd)
+        except (socket.error, socket.timeout, socket.gaierror):
+            # We didn't get a reply back, this means our packets
+            # are dropped. This happened in cases where a rate
+            # limiting mechanism was in place. Skip the test.
+            if conn.sock:
+                conn.safe_shutdown()
+            raise SMTPConnectionCouldNotTestException()
+        except IOError as e:
+            # We can't reach the server.
+            if conn.sock:
+                conn.safe_shutdown()
+            if e.errno in [
+                    errno.ENETUNREACH, errno.EHOSTUNREACH,
+                    errno.ECONNREFUSED, errno.ENOEXEC]:
+                raise SMTPConnectionCouldNotTestException()
+            raise e
 
-                if starttls or "STARTTLS" in line:
-                    self.sock.sendall(b"STARTTLS\r\n")
-                    self.readline(fd)
-                    fd.close()
-                else:
-                    fd.close()
-                    raise DebugConnectionHandshakeException()
 
-            except (socket.error, socket.timeout, socket.gaierror):
-                # We didn't get a reply back, this means our packets
-                # are dropped. This happened in cases where a rate
-                # limiting mechanism was in place. Skip the test.
-                if self.sock:
-                    self.safe_shutdown(tls=False)
-                raise DebugSMTPConnectionCouldNotTestException()
-            except IOError as e:
-                # We can't reach the server.
-                if self.sock:
-                    self.safe_shutdown(tls=False)
-                if e.errno in [errno.ENETUNREACH, errno.EHOSTUNREACH,
-                               errno.ECONNREFUSED, errno.ENOEXEC]:
-                    raise DebugSMTPConnectionCouldNotTestException()
-                raise e
+class SMTPConnection(SSLConnectionWrapper):
+    def __init__(self, *args, timeout=24, **kwargs):
+        super().__init__(
+            *args, timeout=timeout, port=25,
+            sock_setup=starttls_sock_setup, **kwargs)
 
 
 class StarttlsDetails:
@@ -1187,41 +1459,46 @@ class StarttlsDetails:
         self.dane_cb_data = dane_cb_data
 
 
-def do_web_cert(addrs, url, task, *args, **kwargs):
+def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     """
     Check the web server's certificate.
 
     """
     try:
         results = {}
-        for addr in addrs:
-            results[addr[1]] = cert_checks(
-                url, DebugConnection, task, addr, *args, **kwargs)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = cert_checks(
+                url, ChecksMode.WEB, task, af_ip_pair, *args, **kwargs)
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
-                results[addr[1]] = dict(tls_cert=False)
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
+                results[af_ip_pair[1]] = dict(tls_cert=False)
 
     return ('cert', results)
 
 
 def cert_checks(
-        url, conn_handler, task, addr=None, starttls_details=None,
+        url, mode, task, af_ip_pair=None, starttls_details=None,
         *args, **kwargs):
     """
     Perform certificate checks.
 
     """
     try:
-        if conn_handler is DebugConnection:
+        if mode == ChecksMode.WEB:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
-            shared.http_fetch(
-                url, af=addr[0], path="", port=443, addr=addr[1],
-                depth=MAX_REDIRECT_DEPTH, task=web_cert)
+            http_client, *unused = http_fetch(
+                url, af=af_ip_pair[0], path="", port=443,
+                ip_address=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH,
+                task=web_cert)
             debug_cert_chain = DebugCertChain
-        else:
+            conn_wrapper = HTTPSConnection
+        elif mode == ChecksMode.MAIL:
             debug_cert_chain = DebugCertChainMail
+            conn_wrapper = SMTPConnection
+        else:
+            raise ValueError
 
         if (not starttls_details or starttls_details.debug_chain is None
                 or starttls_details.trusted_score is None
@@ -1229,20 +1506,22 @@ def cert_checks(
             # All the checks inside the smtp_starttls test are done in series.
             # If we have all the certificate related information we need from a
             # previous check, skip this connection.
-            conn = conn_handler(
-                url, addr=addr, version=SSLV23, shutdown=False,
-                ciphers="!aNULL:ALL:COMPLEMENTOFALL")
-            # check chain validity (sort of NCSC guideline B3-6)
-            verify_result, verify_score = conn.trusted_score()
-            debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
-            conn_port = conn.port
-            conn.safe_shutdown()
+            # check chain validity (sort of NCSC guideline B3-4)
+            with conn_wrapper(
+                    host=url, socket_af=af_ip_pair[0],
+                    ip_address=af_ip_pair[1], task=task,
+                    ciphers=f"!aNULL",
+                    cipher_list_action=CipherListAction.PREPEND).conn as conn:
+                with ConnectionChecker(conn, mode) as checker:
+                    verify_score, verify_result = checker.check_cert_trust()
+                    debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
+                    conn_port = conn.port
         else:
-            verify_result, verify_score = starttls_details.trusted_score
+            verify_score, verify_result = starttls_details.trusted_score
             debug_chain = starttls_details.debug_chain
             conn_port = starttls_details.conn_port
     except (socket.error, http.client.BadStatusLine, NoIpError,
-            DebugConnectionHandshakeException, DebugConnectionSocketException):
+            ConnectionHandshakeException, ConnectionSocketException):
         return dict(tls_cert=False)
 
     if debug_chain is None:
@@ -1250,7 +1529,7 @@ def cert_checks(
 
     else:
         hostmatch_score, hostmatch_bad = debug_chain.check_hostname(url)
-        pubkey_score, pubkey_bad = debug_chain.check_pubkey()
+        pubkey_score, pubkey_bad, pubkey_phase_out = debug_chain.check_pubkey()
         sigalg_score, sigalg_bad = debug_chain.check_sigalg()
         chain_str = debug_chain.chain_str()
 
@@ -1268,6 +1547,7 @@ def cert_checks(
             trusted=verify_result,
             trusted_score=verify_score,
             pubkey_bad=pubkey_bad,
+            pubkey_phase_out=pubkey_phase_out,
             pubkey_score=pubkey_score,
             sigalg_bad=sigalg_bad,
             sigalg_score=sigalg_score,
@@ -1279,20 +1559,20 @@ def cert_checks(
         return results
 
 
-def do_web_conn(addrs, url, *args, **kwargs):
+def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     """
     Start all the TLS related checks for the web test.
 
     """
     try:
         results = {}
-        for addr in addrs:
-            results[addr[1]] = check_web_tls(
-                url, DebugConnection, addr, args, kwargs)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = check_web_tls(
+                url, af_ip_pair, args, kwargs)
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
-                results[addr[1]] = dict(tls_enabled=False)
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
+                results[af_ip_pair[1]] = dict(tls_enabled=False)
 
     return ('tls_conn', results)
 
@@ -1340,6 +1620,27 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
     return ('smtp_starttls', results)
 
 
+# At the time of writing this function makes up to 16 SMTP+STARTTLS connections
+# to the target server, excluding retries, e.g.:
+#   #   Connection Class    Protocol   Caller
+#   ---------------------------------------------------------------------------
+#   1   ModernConnection    SSLV23     initial connection
+#   2   DebugConnection     SSLV23     initial connection (fallback 1)
+#   3   ModernConnection    TLSV1_2    initial connection (fallback 2)
+#   4   DebugConnection     SSLV23     check_client_reneg
+#   5   DebugConnection     SSLV23     check_cipher_sec_level
+#   6   DebugConnection     SSLV23     check_cipher_sec_level
+#   7   ModernConnection    SSLV23     check_cipher_sec_level
+#   8   ModernConnection    TLSV1_3    check_zero_rtt (if TLSV1_3)
+#   9   DebugConnection     TLSV1_1    check_protocol_versions (if not initial)
+#   10  DebugConnection     TLSV1      check_protocol_versions (if not initial)
+#   11  DebugConnection     SSLV3      check_protocol_versions (if not initial)
+#   12  DebugConnection     SSLV2      check_protocol_versions (if not initial)
+#   13  DebugConnection     SSLV23     check_dh_params
+#   14  DebugConnection     SSLV23     check_dh_params
+#   15  ModernConnection    TLSV1_2    check_kex_hash_func (if not TLSV1_3)
+#   16  DebugConnection     SSLV23     check_cipher_order
+#   ---------------------------------------------------------------------------
 def check_mail_tls(server, dane_cb_data, task):
     """
     Perform all the TLS related checks for this mail server in series.
@@ -1353,156 +1654,77 @@ def check_mail_tls(server, dane_cb_data, task):
             and dane_cb_data.get('secure'))
 
         try:
-            # First try to connect with secure ciphers.
-            conn = DebugSMTPConnection(
-                server, shutdown=False, send_SNI=send_SNI,
-                ciphers='ALL:COMPLEMENTOFALL:'
-                        '!EXP:!aNULL:!PSK:!SRP:!IDEA:!DES:!eNULL:!RC4:'
-                        '!MD5')
+            with SMTPConnection(server_name=server, send_SNI=send_SNI).conn as conn:
+                with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
+                    # OCSP disabled for mail.
+                    # ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
+                    secure_reneg_score, secure_reneg = checker.check_secure_reneg()
+                    client_reneg_score, client_reneg = checker.check_client_reneg()
+                    compression_score, compression = checker.check_compression()
+                    ciphers_score, ciphers_result = checker.check_cipher_sec_level()
+                    zero_rtt_score, zero_rtt = checker.check_zero_rtt()
+                    prots_score, prots_result = checker.check_protocol_versions()
+                    fs_score, fs_result = checker.check_dh_params()
+                    kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
+                    cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
 
-            secure_reneg_score, secure_reneg = conn.check_secure_reneg()
-            client_reneg_score, client_reneg = conn.check_client_reneg()
-            compression_score, compression = conn.check_compression()
+                    starttls_details.trusted_score = checker.check_cert_trust()
+                    starttls_details.debug_chain = DebugCertChainMail(
+                        conn.get_peer_certificate_chain())
+                    starttls_details.conn_port = conn.port
 
-            starttls_details.trusted_score = conn.trusted_score()
-            starttls_details.debug_chain = DebugCertChainMail(
-                conn.get_peer_certificate_chain())
-            starttls_details.conn_port = conn.port
+                    # Check the certificates.
+                    cert_results = cert_checks(
+                        server, ChecksMode.MAIL, task,
+                        starttls_details=starttls_details)
 
-            conn.safe_shutdown()
-            connected_with_secure_ciphers = True
-        except DebugConnectionSocketException:
+                    # HACK for DANE-TA(2) and hostname mismatch!
+                    # Give a good hosmatch score if DANE-TA *is not* present.
+                    if (not has_daneTA(cert_results['dane_records'])
+                            and cert_results['hostmatch_bad']):
+                        cert_results['hostmatch_score'] = scoring.MAIL_TLS_HOSTMATCH_GOOD
+
+            results = dict(
+                tls_enabled=True,
+                prots_bad=prots_result['bad'],
+                prots_phase_out=prots_result['phase_out'],
+                prots_score=prots_score,
+
+                ciphers_bad=ciphers_result['bad'],
+                ciphers_phase_out=ciphers_result['phase_out'],
+                ciphers_score=ciphers_score,
+                cipher_order_score=cipher_order_score,
+                cipher_order=cipher_order,
+                cipher_order_violation=cipher_order_violation,
+
+                secure_reneg=secure_reneg,
+                secure_reneg_score=secure_reneg_score,
+                client_reneg=client_reneg,
+                client_reneg_score=client_reneg_score,
+                compression=compression,
+                compression_score=compression_score,
+
+                dh_param=fs_result['dh_param'],
+                ecdh_param=fs_result['ecdh_param'],
+                fs_bad=fs_result['bad'],
+                fs_phase_out=fs_result['phase_out'],
+                fs_score=fs_score,
+
+                zero_rtt_score=zero_rtt_score,
+                zero_rtt=zero_rtt,
+
+                # OCSP disabled for mail.
+                # ocsp_stapling=ocsp_stapling,
+                # ocsp_stapling_score=ocsp_stapling_score,
+
+                kex_hash_func=kex_hash_func,
+                kex_hash_func_score=kex_hash_func_score,
+            )
+            results.update(cert_results)
+        except (ConnectionSocketException, ConnectionHandshakeException):
             return dict(server_reachable=False)
-        except DebugConnectionHandshakeException:
-            # If we cannot connect on the TLS layer try again including
-            # weak ciphers.
-            connected_with_secure_ciphers = False
 
-        ciphers_score = scoring.MAIL_TLS_SUITES_OK
-        ciphers_bad = []
-        ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
-        try:
-            conn = DebugSMTPConnection(
-                server, ciphers=ncsc_bad_ciphers, shutdown=False,
-                send_SNI=send_SNI)
-        except DebugConnectionSocketException:
-            return dict(server_reachable=False)
-        except DebugConnectionHandshakeException:
-            # If we still cannot connect on the TLS layer, too bad.
-            if not connected_with_secure_ciphers:
-                return dict(tls_enabled=False)
-        else:
-            ciphers_score = scoring.MAIL_TLS_SUITES_BAD
-            curr_cipher = conn.get_current_cipher_name()
-            ciphers_bad.append(curr_cipher)
-
-            if not connected_with_secure_ciphers:
-                secure_reneg_score, secure_reneg = conn.check_secure_reneg()
-                client_reneg_score, client_reneg = conn.check_client_reneg()
-                compression_score, compression = conn.check_compression()
-
-                starttls_details.trusted_score = conn.trusted_score()
-                starttls_details.debug_chain = DebugCertChainMail(
-                    conn.get_peer_certificate_chain())
-                starttls_details.conn_port = conn.port
-
-            conn.safe_shutdown()
-
-        # Number of connections: 2
-
-        # SSLv2 and SSLv3 should not be supported
-        prots_bad = []
-        prots_score = scoring.MAIL_TLS_PROTOCOLS_GOOD
-        try:
-            DebugSMTPConnection(
-                server, version=SSLV2, shutdown=True, send_SNI=send_SNI)
-            prots_bad.append('SSLv2')
-            prots_score = scoring.MAIL_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-        try:
-            DebugSMTPConnection(
-                server, version=SSLV3, shutdown=True, send_SNI=send_SNI)
-            prots_bad.append('SSLv3')
-            prots_score = scoring.MAIL_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-
-        # Number of connections: 4
-
-        # Connect using DH(E) and ECDH(E) to get FS params
-        dh_param, ecdh_param = False, False
-        try:
-            conn = DebugSMTPConnection(
-                server, ciphers="DH:DHE:!aNULL",
-                shutdown=False, send_SNI=send_SNI)
-            dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
-            dh_param = dh_param["DH_Parameters"].strip("( bit)")
-            conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-        try:
-            conn = DebugSMTPConnection(
-                server, ciphers="ECDH:ECDHE:!aNULL",
-                shutdown=False, send_SNI=send_SNI)
-            ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
-            ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
-            conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-
-        fs_bad = []
-        if dh_param and int(dh_param) < 2048:
-            fs_bad.append("DH-{}".format(dh_param))
-        if ecdh_param and int(ecdh_param) < 224:
-            fs_bad.append("ECDH-{}".format(ecdh_param))
-
-        if len(fs_bad) == 0:
-            fs_score = scoring.MAIL_TLS_FS_OK
-        else:
-            fs_score = scoring.MAIL_TLS_FS_BAD
-
-        # Number of connections: 6
-
-        # Check the certificates.
-        cert_results = cert_checks(
-            server, DebugSMTPConnection, task,
-            starttls_details=starttls_details)
-
-        # Number of connections: {6, 7}
-
-        # HACK for DANE-TA(2) and hostname mismatch!
-        # Give a good hosmatch score if DANE-TA *is not* present.
-        if (not has_daneTA(cert_results['dane_records'])
-                and cert_results['hostmatch_bad']):
-            cert_results['hostmatch_score'] = scoring.MAIL_TLS_HOSTMATCH_GOOD
-
-        results = dict(
-            tls_enabled=True,
-            prots_bad=prots_bad,
-            prots_score=prots_score,
-
-            ciphers_bad=ciphers_bad,
-            ciphers_score=ciphers_score,
-
-            compression=compression,
-            compression_score=compression_score,
-            secure_reneg=secure_reneg,
-            secure_reneg_score=secure_reneg_score,
-            client_reneg=client_reneg,
-            client_reneg_score=client_reneg_score,
-
-            dh_param=dh_param,
-            ecdh_param=ecdh_param,
-            fs_bad=fs_bad,
-            fs_score=fs_score,
-        )
-        results.update(cert_results)
-    except DebugSMTPConnectionCouldNotTestException:
+    except SMTPConnectionCouldNotTestException:
         # If we could not test something, fail the starttls test.
         # We do not show partial results.
         return dict(
@@ -1524,136 +1746,913 @@ def has_daneTA(tlsa_records):
     return False
 
 
-def check_web_tls(url, conn_handler, addr=None, *args, **kwargs):
+class ConnectionChecker:
+    def __init__(self, conn, checks_mode=ChecksMode.WEB):
+        self._conn = conn
+        self._debug_conn = None
+        self._seen_versions = set()
+        self._seen_ciphers = dict()
+        self._checks_mode = checks_mode
+        self._bad_ciphers = set()
+        self._phase_out_ciphers = set()
+        self._cipher_order_violation = []
+
+        if self._checks_mode == ChecksMode.WEB:
+            self._score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
+            self._score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
+            self._score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
+            self._score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
+            self._score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
+            self._score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
+            self._score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
+            self._score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
+            self._score_tls_suites_ok = scoring.WEB_TLS_SUITES_OK
+            self._score_tls_suites_bad = scoring.WEB_TLS_SUITES_BAD
+            self._score_tls_protocols_good = scoring.WEB_TLS_PROTOCOLS_GOOD
+            self._score_tls_protocols_bad = scoring.WEB_TLS_PROTOCOLS_BAD
+            self._score_tls_fs_ok = scoring.WEB_TLS_FS_OK
+            self._score_tls_fs_bad = scoring.WEB_TLS_FS_BAD
+            self._score_zero_rtt_good = scoring.WEB_TLS_ZERO_RTT_GOOD
+            self._score_zero_rtt_bad = scoring.WEB_TLS_ZERO_RTT_BAD
+            self._score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
+            self._score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
+            self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
+            self._score_tls_cipher_order_good = scoring.WEB_TLS_CIPHER_ORDER_GOOD
+            self._score_tls_cipher_order_bad = scoring.WEB_TLS_CIPHER_ORDER_BAD
+            self._score_tls_kex_hash_func_good = scoring.WEB_TLS_KEX_HASH_FUNC_GOOD
+            self._score_tls_kex_hash_func_bad = scoring.WEB_TLS_KEX_HASH_FUNC_BAD
+        elif self._checks_mode == ChecksMode.MAIL:
+            self._score_compression_good = scoring.MAIL_TLS_COMPRESSION_GOOD
+            self._score_compression_bad = scoring.MAIL_TLS_COMPRESSION_BAD
+            self._score_secure_reneg_good = scoring.MAIL_TLS_SECURE_RENEG_GOOD
+            self._score_secure_reneg_bad = scoring.MAIL_TLS_SECURE_RENEG_BAD
+            self._score_client_reneg_good = scoring.MAIL_TLS_CLIENT_RENEG_GOOD
+            self._score_client_reneg_bad = scoring.MAIL_TLS_CLIENT_RENEG_BAD
+            self._score_trusted_good = scoring.MAIL_TLS_TRUSTED_GOOD
+            self._score_trusted_bad = scoring.MAIL_TLS_TRUSTED_BAD
+            self._score_tls_suites_ok = scoring.MAIL_TLS_SUITES_OK
+            self._score_tls_suites_bad = scoring.MAIL_TLS_SUITES_BAD
+            self._score_tls_protocols_good = scoring.MAIL_TLS_PROTOCOLS_GOOD
+            self._score_tls_protocols_bad = scoring.MAIL_TLS_PROTOCOLS_BAD
+            self._score_tls_fs_ok = scoring.MAIL_TLS_FS_BAD
+            self._score_tls_fs_bad = scoring.MAIL_TLS_FS_BAD
+            self._score_zero_rtt_good = scoring.MAIL_TLS_ZERO_RTT_GOOD
+            self._score_zero_rtt_bad = scoring.MAIL_TLS_ZERO_RTT_BAD
+            # OCSP disabled for mail.
+            # self._score_ocsp_staping_good = scoring.MAIL_TLS_OCSP_STAPLING_GOOD
+            # self._score_ocsp_staping_ok = scoring.MAIL_TLS_OCSP_STAPLING_OK
+            # self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
+            self._score_tls_cipher_order_good = scoring.MAIL_TLS_CIPHER_ORDER_GOOD
+            self._score_tls_cipher_order_bad = scoring.MAIL_TLS_CIPHER_ORDER_BAD
+            self._score_tls_kex_hash_func_good = scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD
+            self._score_tls_kex_hash_func_bad = scoring.MAIL_TLS_KEX_HASH_FUNC_BAD
+        else:
+            raise ValueError
+
+        self._note_conn_details(self._conn)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.close()
+
+    @property
+    def debug_conn(self):
+        # Lazily create a DebugConnection on first access, if needed. The
+        # client of this class should use 'with' or .close() when finished with
+        # this checker instance in order to clean up any specially created
+        # debug connection.
+        if not self._debug_conn:
+            if isinstance(self._conn, DebugConnection):
+                self._debug_conn = self._conn
+            elif (isinstance(self._conn, ModernConnection)
+                  and self._conn.get_ssl_version() == TLSV1_2):
+                # Don't waste time trying to connect with DebugConnection as
+                # we already know it won't work, that's how we ended up with
+                # a TLS 1.2 ModernConnection. The only other time we use
+                # ModernConnection is for TLS 1.3, but in that case the initial
+                # connection would not be TLS 1.2.
+                raise ConnectionHandshakeException()
+            else:
+                self._debug_conn = DebugConnection.from_conn(self._conn)
+        return self._debug_conn
+
+    @debug_conn.setter
+    def debug_conn(self, value):
+        self._debug_conn = value
+        self._note_conn_details(self._debug_conn)
+
+    def close(self):
+        if self._debug_conn and self._debug_conn is not self._conn:
+            self._debug_conn.safe_shutdown()
+            self._debug_conn = None
+
+    def _note_conn_details(self, conn):
+        ssl_version = conn.get_ssl_version()
+        cipher_name = conn.get_current_cipher_name()
+        conn_type = type(conn)
+
+        # create missing dict keys if needed
+        # don't use a set of ciphers because we care about the order in which
+        # the ciphers were encountered
+        self._seen_ciphers.setdefault(ssl_version, dict())
+        self._seen_ciphers[ssl_version].setdefault(conn_type, list())
+
+        # note the seen SSL version and cipher name
+        self._seen_versions.add(ssl_version)
+        ciphers = self._seen_ciphers[ssl_version][conn_type]
+        if cipher_name not in ciphers:
+            ciphers.append(cipher_name)
+
+        self._note_cipher(cipher_name, conn)
+
+    def _debug_info(self, info):
+        if (hasattr(settings, 'ENABLE_VERBOSE_TECHNICAL_DETAILS')
+                and settings.ENABLE_VERBOSE_TECHNICAL_DETAILS):
+            return ' [reason: {}] '.format(info)
+        else:
+            return ''
+
+    def _get_seen_ciphers_for_conn(self, conn):
+        ssl_version = conn.get_ssl_version()
+        conn_type = type(conn)
+        return self._seen_ciphers[ssl_version][conn_type]
+
+    def _note_cipher(self, cipher, conn=None):
+        ci = cipher_infos.get(cipher, None)
+        if ci:
+            # sec_level = CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci, conn)
+            if ci.sec_level == SecLevel.INSUFFICIENT:
+                self._bad_ciphers.add(ci.name)
+            elif ci.sec_level == SecLevel.PHASE_OUT:
+                self._phase_out_ciphers.add(ci.name)
+
+    def check_cert_trust(self):
+        """
+        Verify the certificate chain,
+
+        """
+        verify_result, _ = self._conn.get_certificate_chain_verify_result()
+        if verify_result != 0:
+            return self._score_trusted_bad, verify_result
+        else:
+            return self._score_trusted_good, verify_result
+
+    def check_ocsp_stapling(self):
+        # This will only work if SNI is in use and the handshake has already
+        # been done.
+        ocsp_response = self._conn.get_tlsext_status_ocsp_resp()
+        if ocsp_response is not None and ocsp_response.status == 0:
+            try:
+                ocsp_response.verify(settings.CA_CERTIFICATES)
+                return self._score_ocsp_staping_good, OcspStatus.good
+            except OcspResponseNotTrustedError:
+                return self._score_ocsp_staping_bad, OcspStatus.not_trusted
+        else:
+            return self._score_ocsp_staping_ok, OcspStatus.ok
+
+    def check_secure_reneg(self):
+        """
+        Check if secure renegotiation is supported.
+
+        Secure renegotiation should be supported, except in TLS 1.3.
+
+        """
+        # Although the test is not relevant for TLS 1.3, we're still interested
+        # in whether the server has this issue with an earlier TLS version, so
+        # we always check with DebugConnection.
+        try:
+            secure_reneg = self.debug_conn.get_secure_renegotiation_support()
+            if secure_reneg:
+                secure_reneg_score = self._score_secure_reneg_good
+            else:
+                secure_reneg_score = self._score_secure_reneg_bad
+            return secure_reneg_score, secure_reneg
+        except (ConnectionSocketException, ConnectionHandshakeException):
+            # TODO: extend to support indicating that we were unable to
+            # test in the case of ConnectionSocketException?
+            return self._score_secure_reneg_good, True
+
+    def check_client_reneg(self):
+        """
+        Check if client renegotiation is possible.
+
+        Client renegotiation should not be possible.
+
+        """
+        # Although the test is not relevant for TLS 1.3, we're still interested
+        # in whether the server has this issue with an earlier TLS version, so
+        # we always check with DebugConnection.
+        try:
+            # this check requires a new connection, otherwise we encounter:
+            # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
+            with DebugConnection.from_conn(self._conn, version=SSLV23) as new_conn:
+                self._note_conn_details(new_conn)
+                # Step 1.
+                # Send reneg on open connection
+                new_conn.do_renegotiate()
+                # Step 2.
+                # Connection should now be closed, send 2nd reneg to verify
+                new_conn.do_renegotiate()
+                # If we are still here, client reneg is supported
+                client_reneg_score = self._score_client_reneg_bad
+                client_reneg = True
+        except (ConnectionSocketException, ConnectionHandshakeException,
+                socket.error, _nassl.OpenSSLError, IOError):
+            # TODO: extend to support indicating that we were unable to
+            # test in the case of ConnectionSocketException?
+            client_reneg_score = self._score_client_reneg_good
+            client_reneg = False
+        return client_reneg_score, client_reneg
+
+    def check_compression(self):
+        """
+        Check if TLS compression is enabled.
+
+        TLS compression should not be enabled.
+
+        """
+        # Although the test is not relevant for TLS 1.3, we're still interested
+        # in whether the server has this issue with an earlier TLS version, so
+        # we always check with DebugConnection.
+        try:
+            compression = self.debug_conn.get_current_compression_method() is not None
+            if compression:
+                compression_score = self._score_compression_bad
+            else:
+                compression_score = self._score_compression_good
+            return compression_score, compression
+        except (ConnectionSocketException, ConnectionHandshakeException):
+            # TODO: extend to support indicating that we were unable to
+            # test in the case of ConnectionSocketException?
+            return self._score_compression_good, False
+
+    def check_zero_rtt(self):
+        # This check isn't relevant to anything less than TLS 1.3.
+        if self._conn.get_ssl_version() < TLSV1_3:
+            return self._score_zero_rtt_good, ZeroRttStatus.na
+
+        # we require an existing connection, as 0-RTT is only possible with
+        # connections after the first so that the SSL session can be re-used.
+        # is_handshake_completed() will be false if we didn't complete the
+        # connection handshake yet or we subsequently shutdown the connection.
+        if not self._conn.is_handshake_completed():
+            raise ValueError()
+
+        session = self._conn.get_session()
+
+        # does the server announce support for early data?
+        # assumes that at least some data was already exchanged because, with
+        # NGINX at least, get_max_early_data() will be <= 0 if no prior data
+        # has been written to and read from the connection even if early data
+        # is actually supported.
+        if session.get_max_early_data() <= 0:
+            return self._score_zero_rtt_good, ZeroRttStatus.good
+
+        # terminate the current connection and re-connect using the previous
+        # SSL session details then try and write early data to the connection
+        self._conn.safe_shutdown()
+
+        try:
+            self._conn.connect(do_handshake_on_connect=False)
+            self._conn.set_session(session)
+            if self._conn._ssl.get_early_data_status() == 0:
+                if self._checks_mode == ChecksMode.WEB:
+                    http_client = HTTPSConnection.fromconn(self._conn)
+                    http_client.putrequest('GET', '/')
+                    http_client.endheaders()
+                elif self._checks_mode == ChecksMode.MAIL:
+                    self._conn.write(b"EHLO internet.nl\r\n")
+                    self._conn.read(4096)
+
+                if (self._conn._ssl.get_early_data_status() == 1 and
+                        not self._conn.is_handshake_completed()):
+                    self._conn.do_handshake()
+                    self._note_conn_details(self._conn)
+                    if self._conn._ssl.get_early_data_status() == 2:
+                        if self._checks_mode == ChecksMode.MAIL:
+                            return self._score_zero_rtt_bad, False
+                        elif self._checks_mode == ChecksMode.WEB:
+                            # 0-RTT status is bad unless the target responds with
+                            # HTTP status code 425 Too Early. See:
+                            # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
+                            if http_client.getresponse().status == 425:
+                                return self._score_zero_rtt_good, ZeroRttStatus.good
+                            else:
+                                return self._score_zero_rtt_bad, ZeroRttStatus.bad
+        except (ConnectionHandshakeException,
+                ConnectionSocketException,
+                IOError):
+            pass
+
+        # TODO: ensure the handshake is completed ready for the next check that
+        # uses this connection?
+        return self._score_zero_rtt_good, ZeroRttStatus.good
+
+    def check_protocol_versions(self):
+        # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0
+        # Test for SSL v2 and v3 as these are "insecure" per NCSC 2.0
+        prots_bad = []
+        prots_phase_out = []
+        prots_score = self._score_tls_protocols_good
+
+        prot_test_configs = [
+            (TLSV1_1, 'TLS 1.1', prots_phase_out, self._score_tls_protocols_good),
+            (TLSV1,   'TLS 1.0', prots_phase_out, self._score_tls_protocols_good),
+            (SSLV3,   'SSL 3.0', prots_bad,       self._score_tls_protocols_bad),
+            (SSLV2,   'SSL 2.0', prots_bad,       self._score_tls_protocols_bad),
+        ]
+
+        for version, name, prot_set, score in prot_test_configs:
+            if version in self._seen_versions:
+                # No need to test for this protocol version as we already
+                # connected with it.
+                connected = True
+            else:
+                # We already tested TLS 1.3 at the beginning when calling
+                # http_fetch(), so we only need to use DebugConnection as it
+                # can handle the older protocol versions.
+                try:
+                    with DebugConnection.from_conn(self._conn, version=version) as new_conn:
+                        connected = True
+                        self._note_conn_details(new_conn)
+                except (ConnectionSocketException,
+                        ConnectionHandshakeException):
+                    connected = False
+
+            if connected:
+                prot_set.append(name)
+                prots_score = score
+
+        result_dict = {
+            'bad': prots_bad,
+            'phase_out': prots_phase_out,
+        }
+
+        return prots_score, result_dict
+
+    def check_dh_params(self):
+        dh_param, ecdh_param = False, False
+        dh_ff_p, dh_ff_g = False, False
+
+        try:
+            # We have to use DebugConnection because ModernConnection doesn't
+            # have the _openssl_str_to_dic() method, but use of custom DH FF
+            # groups is not relevant for TLS 1.3/ModernConnection anyway.
+            with DebugConnection.from_conn(self._conn, ciphers="DH:DHE:!aNULL") as new_conn:
+                self._note_conn_details(new_conn)
+                dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
+                try:
+                    dh_ff_p = int(dh_param["prime"], 16)  # '0x...'
+                    dh_ff_g = dh_param["generator"].partition(' ')[0]  # 'n (0xn)' or '0xn'
+                    dh_ff_g = int(dh_ff_g, 16 if dh_ff_g[0:2] == '0x' else 10)
+                    dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
+                except ValueError as e:
+                    logger.error(
+                        "Unexpected failure to parse DH params "
+                        f"{dh_param}' for server '{new_conn.server_name}': "
+                        f"reason='{e}'")
+                    dh_param = False
+        except (ConnectionSocketException,
+                ConnectionHandshakeException):
+            pass
+
+        try:
+            with DebugConnection.from_conn(self._conn, ciphers="ECDH:ECDHE:!aNULL") as new_conn:
+                self._note_conn_details(new_conn)
+                ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
+                try:
+                    ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
+                except ValueError as e:
+                    logger.error(
+                        "Unexpected failure to parse ECDH params "
+                        f"'{ecdh_param}' for server '{new_conn.server_name}': "
+                        f"reason='{e}'")
+                    ecdh_param = False
+        except (ConnectionSocketException,
+                ConnectionHandshakeException):
+            pass
+
+        fs_bad = []
+        fs_phase_out = []
+
+        if dh_ff_p and dh_ff_g:
+            if (
+                    dh_ff_g == FFDHE_GENERATOR and
+                    dh_ff_p in FFDHE_SUFFICIENT_PRIMES):
+                pass
+            elif (
+                    dh_ff_g == FFDHE_GENERATOR and
+                    dh_ff_p == FFDHE2048_PRIME):
+                fs_phase_out.append("DH-2048{}".format(self._debug_info("weak ff group")))
+            else:
+                fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
+        elif dh_param and int(dh_param) < 2048:
+            fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("weak bit length")))
+        if ecdh_param and int(ecdh_param) < 224:
+            fs_bad.append("ECDH-{}{}".format(ecdh_param, self._debug_info("weak bit length")))
+
+        if len(fs_bad) == 0:
+            fs_score = self._score_tls_fs_ok
+        else:
+            fs_score = self._score_tls_fs_bad
+
+        result_dict = {
+            'bad': fs_bad,
+            'phase_out': fs_phase_out,
+            'dh_param': dh_param,
+            'ecdh_param': ecdh_param
+        }
+
+        return fs_score, result_dict
+
+    def check_kex_hash_func(self):
+        # # Re-connect with explicit signature algorithm preferences and
+        # # determine signature related properties of the connection. Only
+        # # TLS >= 1.2 support specifying the preferred signature algorithms as
+        # # ClientHello extensions (of which SignatureAlgorithm is one) were only
+        # # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
+        # # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
+        # # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
+        def sha2_supported_or_na(v, sigalgs):
+            # We should have seen all protocol versions by the time this test
+            # is executed, so we can avoid a pointless connection attempt if
+            # the requested protocol version has not been seen already:
+            if v not in self._seen_versions:
+                return KexHashFuncStatus.good
+
+            # Unsupported TLS version or ConnectionSocketException or no
+            # hash function information available or no common signature
+            # algorithm. This could be due to lack of SHA2, but we cannot
+            # tell the difference between handshake failure due to lack of
+            # SHA2 versus lack of support for a protocol version.
+            result = KexHashFuncStatus.unknown
+
+            try:
+                # Only ModernConnection supports passing the signature
+                # algorithm preference to the server. Don't try to connect
+                # using cipher suites that use RSA for key exchange as they
+                # have no signature and thus no hash function is used.
+                with ModernConnection.from_conn(
+                        self._conn, version=v,
+                        signature_algorithms=sigalgs) as new_conn:
+                    # we were able to connect with the given SHA2 sigalgs
+                    self._note_conn_details(new_conn)
+
+                    # Ensure that the requirement in the OpenSSL docs that
+                    # the peer has signed a message is satisfied by
+                    # exchanging data with the server.
+                    if self._checks_mode == ChecksMode.WEB:
+                        http_client = HTTPSConnection.fromconn(new_conn)
+                        http_client.putrequest('GET', '/')
+                        http_client.endheaders()
+                        http_client.getresponse()
+                    elif self._checks_mode == ChecksMode.MAIL:
+                        new_conn.write(b"EHLO internet.nl\r\n")
+                        new_conn.read(4096)
+
+                    # From: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_nid.html
+                    # "There are several possible reasons for failure:
+                    #   1. the cipher suite has no signature (e.g. it uses
+                    #      RSA key exchange or is anonymous)
+                    #   2. the TLS version is below 1.2 or
+                    #   3. the functions were called too early, e.g. before
+                    #      the peer signed a message."
+                    # We can exclude #2 and #3 as we deliberately make a
+                    # TLS 1.2 connection and exchange messages with the
+                    # server, so failure must be because "the cipher suite
+                    # has no signature" in which case there is no hash
+                    # function to check. In my testing only ciphers that
+                    # use RSA for key exchange caused the None value to be
+                    # returned, i.e. case #1.
+                    kex_hash_func = new_conn.get_peer_signature_digest()
+                    if kex_hash_func:
+                        if kex_hash_func in KEX_GOOD_HASH_FUNCS:
+                            result = KexHashFuncStatus.good
+                        else:
+                            result = KexHashFuncStatus.bad
+            except ValueError as e:
+                # The NaSSL library can raise ValueError if the given
+                # sigalgs value is unable to be set in the underlying
+                # OpenSSL library.
+                if str(e) == 'Invalid or unsupported signature algorithm':
+                    # This is an unexpected internal error, not a problem
+                    # with the target server. Log it and continue.
+                    logger.warning(
+                        f"Unexpected ValueError '{e}' while setting "
+                        f"client sigalgs to '{sigalgs}' when attempting "
+                        f"to test which key exchange SHA2 hash functions "
+                        f"target server '{self._conn.server_name}' "
+                        f"supports with TLS version {v.name}")
+                    pass
+                else:
+                    raise e
+            except ConnectionHandshakeException:
+                # So we've been able to connect earlier with this TLS
+                # version but now as soon as we restrict ourselves to
+                # certain SHA2 hash functions the handshake fails, implying
+                # that the server does not support them.
+                result = KexHashFuncStatus.bad
+            except ConnectionSocketException:
+                # TODO: extend to support indicating that we were unable to
+                # test in the case of ConnectionSocketException?
+                pass
+
+            return result
+
+        # Older SSL/TLS protocol versions only supported MD5 and SHA1:
+        # From: https://tools.ietf.org/html/rfc5246#section-7.4.1.4.1
+        # ---------------------------------------------------------------------
+        # If the client does not send the signature_algorithms extension, the
+        # server MUST do the following:
+        #
+        # -  If the negotiated key exchange algorithm is one of (RSA, DHE_RSA,
+        #     DH_RSA, RSA_PSK, ECDH_RSA, ECDHE_RSA), behave as if client had
+        #     sent the value {sha1,rsa}.
+        #
+        # -  If the negotiated key exchange algorithm is one of (DHE_DSS,
+        #     DH_DSS), behave as if the client had sent the value {sha1,dsa}.
+        #
+        # -  If the negotiated key exchange algorithm is one of (ECDH_ECDSA,
+        #     ECDHE_ECDSA), behave as if the client had sent value {sha1,ecdsa}.
+        #
+        # Note: this is a change from TLS 1.1 where there are no explicit
+        # rules, but as a practical matter one can assume that the peer
+        # supports MD5 and SHA-1.
+        #
+        # Note: this extension is not meaningful for TLS versions prior to 1.2.
+        # Clients MUST NOT offer it if they are offering prior versions.
+        # ---------------------------------------------------------------------
+        newest_seen_tls_version = sorted(self._seen_versions, reverse=True)[0]
+        # To be considered to have a good key exchange hash function
+        # you've got to be using at least TLS 1.2:
+        if newest_seen_tls_version >= TLSV1_2:
+            # Check TLS 1.3 SHA2 support:
+            result_tls13 = sha2_supported_or_na(
+                TLSV1_3, KEX_TLS13_SHA2_SIGALG_PREFERENCE)
+            # TLS 1.3 without SHA2 is bad, otherwise...
+            if result_tls13 != KexHashFuncStatus.bad:
+                # Check TLS 1.2 SHA2 support:
+                result_tls12 = sha2_supported_or_na(
+                    TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
+                # If the available protocols > TLS 1.2 all support SHA2 for
+                # key exchange then that's good.
+                if (
+                        result_tls13 == KexHashFuncStatus.good and
+                        result_tls12 == KexHashFuncStatus.good):
+                    return self._score_tls_kex_hash_func_good, KexHashFuncStatus.good
+                # But if we're unable to determine conclusively one way or the
+                # other for either TLS 1.2 or TLS 1.3, then don't penalize the
+                # server but do indicate that uncertain situation.
+                elif (result_tls13 == KexHashFuncStatus.unknown or
+                      result_tls12 == KexHashFuncStatus.unknown):
+                    return self._score_tls_kex_hash_func_good, KexHashFuncStatus.unknown
+
+        # Otherwise at least one of TLS 1.2 and/or TLS 1.3 lacks support for
+        # SHA2 for key exchange which is bad.
+        return self._score_tls_kex_hash_func_bad, KexHashFuncStatus.bad
+
+    def _check_sec_score_order(self, lowest_values, curr_cipher, new_conn):
+        """
+        Check for compliance with NCSC 2.0 prescribed ordering.
+
+        """
+        # If we already have a security level violation return.
+        if (self._cipher_order_violation
+                and self._cipher_order_violation[2] == ''):
+            return
+
+        ci = cipher_infos.get(curr_cipher, None)
+        score = (
+            CipherScoreAndSecLevel.calc_cipher_score(ci, new_conn)
+            if ci else None)
+        seclevel = (
+            CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci)
+            if ci else None)
+
+        if not self._cipher_order_violation:
+            if score:
+                if (lowest_values['score'] and not
+                        CipherScoreAndSecLevel.is_in_prescribed_order(
+                            lowest_values['score'], score)):
+                    rule = CipherScoreAndSecLevel.get_violated_rule_number(
+                        score, lowest_values['score'])
+                    self._cipher_order_violation = [
+                        lowest_values['score_cipher'], curr_cipher, rule]
+                else:
+                    lowest_values['score'] = score
+                    lowest_values['score_cipher'] = curr_cipher
+
+        if (not self._cipher_order_violation
+                or self._cipher_order_violation[2] != ''):
+            # There may be already a score violation but security level trumps
+            # score.
+            if seclevel:
+                if (lowest_values['seclevel'] and not
+                        CipherScoreAndSecLevel.is_in_seclevel_order(
+                            lowest_values['seclevel'], seclevel)):
+                    self._cipher_order_violation = [
+                        lowest_values['seclevel_cipher'], curr_cipher, '']
+                else:
+                    lowest_values['seclevel'] = seclevel
+                    lowest_values['seclevel_cipher'] = curr_cipher
+
+    def _check_ciphers(self, test_config):
+        for conn_type, tls_version, cipher_string in test_config:
+            # Exclude ciphers we've already seen for this connection handler
+            relevant_ciphers = self._seen_ciphers.get(tls_version, dict()).get(
+                conn_type, frozenset())
+            reject_string = ':'.join([f'!{x}' for x in relevant_ciphers])
+            cipher_string = f"{reject_string}:{cipher_string}"
+
+            lowest_values = {
+                'score': None,
+                'score_cipher': None,
+                'seclevel': None,
+                'seclevel_cipher': None,
+            }
+
+            last_cipher = None
+            while True:
+                try:
+                    with conn_type.from_conn(
+                            self._conn, ciphers=cipher_string,
+                            version=tls_version) as new_conn:
+
+                        # record the cipher details and add the cipher to the
+                        # insufficient or phase out sets.
+                        self._note_conn_details(new_conn)
+
+                        # ensure we don't get stuck in an infinite loop.
+                        curr_cipher = new_conn.get_current_cipher_name()
+                        if curr_cipher == last_cipher:
+                            logger.warning(
+                                'Infinite loop breakout in '
+                                'check_cipher_sec_level '
+                                f'with cipher {curr_cipher}, '
+                                f'protocol {new_conn.get_ssl_version().name}, '
+                                f'server {new_conn.server_name}')
+                            break
+
+                        self._check_sec_score_order(
+                            lowest_values, curr_cipher, new_conn)
+
+                        # Update the cipher string to exclude the current
+                        # cipher (not cipher suite) from the cipher suite
+                        # negotiation on the next connection.
+                        cipher_string = f"!{curr_cipher}:{cipher_string}"
+
+                        last_cipher = curr_cipher
+                except (ConnectionSocketException,
+                        ConnectionHandshakeException):
+                    break
+
+                # When checking SMTP servers only check for one bad cipher.
+                if self._checks_mode == ChecksMode.MAIL:
+                    break
+
+    def check_cipher_order(self):
+        """
+        Check whether the server enforces its own cipher order or if that
+        order can be overriden by the client.
+
+        Also complete the prescribed order check: if
+        `self.check_cipher_sec_level()` found no violations in phase out or
+        insufficient ciphers, and IFF the server enforces its own cipher order,
+        then also test the order that "good" ciphers are selected by the
+        server.
+
+        """
+        def _get_nth_or_default(collection, index, default):
+            return collection[index] if index < len(collection) else default
+
+        cipher_order_score = self._score_tls_cipher_order_good
+        cipher_order = CipherOrderStatus.good
+
+        # For this test we need two ciphers, one selected by the server and
+        # another selected by the server when the former was disallowed by the
+        # client. We then reverse the order of these two ciphers in the list of
+        # ciphers that the client tells the server it supports, and see if the
+        # server still selects the same cipher. We hope that the server doesn't
+        # consider both ciphers to be of equal weight and thus happy to use
+        # either irrespective of order.
+
+        # Which ciphers seen so far during checks are relevant for self._conn?
+        relevant_ciphers = self._get_seen_ciphers_for_conn(self._conn)
+
+        # Get the cipher name of at least one cipher that works with self._conn
+        first_cipher = relevant_ciphers[0]
+        second_cipher = _get_nth_or_default(relevant_ciphers, 1, None)
+
+        try:
+            # If we haven't yet connected with a second cipher, do so now.
+            if not second_cipher:
+                if self._conn.get_ssl_version() < TLSV1_3:
+                    with self._conn.dup(
+                            cipher_list_action=CipherListAction.PREPEND,
+                            ciphers=f'!{first_cipher}') as new_conn:
+                        self._note_conn_details(new_conn)
+                        second_cipher = new_conn.get_current_cipher_name()
+                else:
+                    # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
+                    # support '!' thus we must instead manually exclude the
+                    # current cipher using the known small set of allowed TLS
+                    # 1.3 ciphers. See '-ciphersuites' at:
+                    #   https://www.openssl.org/docs/man1.1.1/man1/ciphers.html
+                    remaining_ciphers = set(
+                        ModernConnection.ALL_TLS13_CIPHERS.split(':'))
+                    remaining_ciphers.remove(first_cipher)
+                    cipher_string = ':'.join(remaining_ciphers)
+                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
+                        second_cipher = new_conn.get_current_cipher_name()
+
+            if first_cipher != second_cipher:
+                # Now that we know of two ciphers that can be used to connect
+                # to the server, one of which was chosen in preference to the
+                # other, ask the server to use them in reverse order and
+                # confirm that the server instead continues to impose its own
+                # order preference on the cipher selection process:
+                cipher_string = f'{second_cipher}:{first_cipher}'
+                if self._conn.get_ssl_version() < TLSV1_3:
+                    with self._conn.dup(ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
+                        newly_selected_cipher = new_conn.get_current_cipher_name()
+                else:
+                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
+                        newly_selected_cipher = new_conn.get_current_cipher_name()
+
+                if newly_selected_cipher == second_cipher:
+                    cipher_order_score = self._score_tls_cipher_order_bad
+                    cipher_order = CipherOrderStatus.bad
+        except ConnectionHandshakeException:
+            # Unable to connect with a second cipher or with reversed cipher
+            # order.
+            pass
+
+        # Did a previous call to self.check_cipher_sec_level() discover a
+        # prescribed order violation?
+        if not (cipher_order == CipherOrderStatus.bad
+                or self._cipher_order_violation):
+            # Complete the prescribed order check by testing "good" ciphers.
+            # and "sufficient" ciphers.
+            self._check_ciphers([
+                (DebugConnection,  SSLV23,  GOOD_SUFFICIENT_DEBUG_CIPHERS),
+                (ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS),
+            ])
+
+        # The self._cipher_order_violation list will be populated if the
+        # call to self._check_ciphers() finds a prescribed order violation.
+
+        if cipher_order == CipherOrderStatus.bad:
+            # Server does not respect its own preference; ignore any order
+            # violation.
+            pass
+        elif self._cipher_order_violation:
+            if self._cipher_order_violation[2] == '':
+                cipher_order = CipherOrderStatus.not_seclevel
+                cipher_order_score = self._score_tls_cipher_order_bad
+            else:
+                cipher_order = CipherOrderStatus.not_prescribed
+
+        return cipher_order_score, cipher_order, self._cipher_order_violation
+
+    def check_cipher_sec_level(self):
+        """
+        Check whether ciphers selected by the server are phase out or
+        insufficient according to the rules set out in the NCSC "IT Security
+        Guidelines for Transport Layer Security (TLS) v2.0" document.
+
+        This is done by connecting with the "bad" TLS cipher suites then
+        re-connecting minus the last connected cipher. Ciphers that have
+        already been seen in other ConnectionChecker checks are excluded. This
+        is because the actual work of recording which ciphers are phase out or
+        insufficient is done by `self._note_cipher()`, whether in this check or
+        an earlier check, thus avoiding unnecessary connections with ciphers
+        that have already been seen.
+
+        As the prescribed order check also involves visiting lots of ciphers in
+        server order part of the prescribed order check is done in this check.
+        The check is completed and the result returned by
+        `self.check_cipher_order()` (both to better group logically related
+        results and because if no violation is detected in this check it may
+        still be the case that "Good" ciphers violate the check, but there's no
+        reason to check those if the server cipher order check fails).
+
+        Note: We do NOT test TLS 1.3 ciphers as these are "good" (when
+        excluding negotiated properites, such as the hash function, as per NCSC
+        v2.0 TLS "Appendix C - List of cipher suites").
+
+        """
+        ciphers_score = self._score_tls_suites_ok
+
+        self._check_ciphers([
+            (DebugConnection,  SSLV23,  ':'.join(PHASE_OUT_CIPHERS+INSUFFICIENT_CIPHERS)),
+            (ModernConnection, TLSV1_2, ':'.join(INSUFFICIENT_CIPHERS_MODERN)),
+        ])
+
+        if len(self._bad_ciphers) > 0:
+            ciphers_score = self._score_tls_suites_bad
+        elif len(self._phase_out_ciphers) > 0:
+            ciphers_score = self._score_tls_suites_ok
+
+        result_dict = {
+            'bad': list(self._bad_ciphers),
+            'phase_out': list(self._phase_out_ciphers)
+        }
+
+        return ciphers_score, result_dict
+
+
+def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
 
     """
+
+    def connect_to_web_server():
+        http_client, *unused = http_fetch(
+            url, af=af_ip_pair[0], path="", port=443, ip_address=af_ip_pair[1],
+            depth=MAX_REDIRECT_DEPTH, task=web_conn, keep_conn_open=True)
+        return http_client.conn
+
     try:
-        # Make sure port 443 serves web content and then open the connection
-        # for testing.
-        shared.http_fetch(
-            url, af=addr[0], path="", port=443, addr=addr[1],
-            depth=MAX_REDIRECT_DEPTH, task=web_conn)
-        conn = conn_handler(url, version=SSLV23, addr=addr, shutdown=False)
-    except (socket.error, http.client.BadStatusLine, NoIpError,
-            DebugConnectionHandshakeException,
-            DebugConnectionSocketException):
-        return dict(tls_enabled=False)
-    else:
-        secure_reneg_score, secure_reneg = conn.check_secure_reneg()
-        client_reneg_score, client_reneg = conn.check_client_reneg()
-        compression_score, compression = conn.check_compression()
-
-        prots_bad = []
-        prots_score = scoring.WEB_TLS_PROTOCOLS_GOOD
-
-        ciphers_bad = []
-        ciphers_score = scoring.WEB_TLS_SUITES_OK
-
-        dh_param, ecdh_param = (False, False)
-        fs_bad = []
-        fs_score = scoring.WEB_TLS_FS_BAD
-
-        conn.safe_shutdown()
-
-        # SSLv2 and SSLv3 should not be supported
-        try:
-            conn_handler(url, addr=addr, version=SSLV2)
-            prots_bad.append('SSLv2')
-            prots_score = scoring.WEB_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-        try:
-            conn_handler(url, addr=addr, version=SSLV3)
-            prots_bad.append('SSLv3')
-            prots_score = scoring.WEB_TLS_PROTOCOLS_BAD
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-
-        # Connect using bad cipher
-        ncsc_bad_ciphers = 'EXP:aNULL:PSK:SRP:IDEA:DES:eNULL:RC4:MD5'
-        while True:
-            try:
-                conn = conn_handler(
-                    url, addr=addr, ciphers=ncsc_bad_ciphers, shutdown=False)
-            except (DebugConnectionHandshakeException,
-                    DebugConnectionSocketException):
-                break
-            else:
-                ciphers_score = scoring.WEB_TLS_SUITES_BAD
-                curr_cipher = conn.get_current_cipher_name()
-                ncsc_bad_ciphers = "!{}:{}".format(
-                    curr_cipher, ncsc_bad_ciphers)
-                ciphers_bad.append(curr_cipher)
-                conn.safe_shutdown()
-
-        # Connect using DH(E) and ECDH(E) to get FS params
-        try:
-            conn = conn_handler(
-                url, addr=addr, ciphers="DH:DHE:!aNULL", shutdown=False)
-            dh_param = conn._openssl_str_to_dic(conn._ssl.get_dh_param())
-            dh_param = dh_param["DH_Parameters"].strip("( bit)")
-            conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-        try:
-            conn = conn_handler(
-                url, addr=addr, ciphers="ECDH:ECDHE:!aNULL", shutdown=False)
-            ecdh_param = conn._openssl_str_to_dic(conn._ssl.get_ecdh_param())
-            ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
-            conn.safe_shutdown()
-        except (DebugConnectionHandshakeException,
-                DebugConnectionSocketException):
-            pass
-
-        if dh_param and int(dh_param) < 2048:
-            fs_bad.append("DH-{}".format(dh_param))
-        if ecdh_param and int(ecdh_param) < 224:
-            fs_bad.append("ECDH-{}".format(ecdh_param))
-
-        if len(fs_bad) == 0:
-            fs_score = scoring.WEB_TLS_FS_OK
+        # connect with the higest possible TLS version assuming that the server
+        # responds to HTTP requests, then check some interesting properties of
+        # this 'best possible' connection.
+        with connect_to_web_server() as conn:
+            with ConnectionChecker(conn, ChecksMode.WEB) as checker:
+                # Note: additional connections will be created by the checker
+                # as needed. The order of the checks attempts to benefit from
+                # data acquired during previous checks.
+                ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
+                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
+                client_reneg_score, client_reneg = checker.check_client_reneg()
+                compression_score, compression = checker.check_compression()
+                ciphers_score, ciphers_result = checker.check_cipher_sec_level()
+                zero_rtt_score, zero_rtt = checker.check_zero_rtt()
+                prots_score, prots_result = checker.check_protocol_versions()
+                fs_score, fs_result = checker.check_dh_params()
+                kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
+                cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
 
         return dict(
             tls_enabled=True,
-            prots_bad=prots_bad,
+            prots_bad=prots_result['bad'],
+            prots_phase_out=prots_result['phase_out'],
             prots_score=prots_score,
 
-            ciphers_bad=ciphers_bad,
+            ciphers_bad=ciphers_result['bad'],
+            ciphers_phase_out=ciphers_result['phase_out'],
             ciphers_score=ciphers_score,
+            cipher_order_score=cipher_order_score,
+            cipher_order=cipher_order,
+            cipher_order_violation=cipher_order_violation,
 
-            compression=compression,
-            compression_score=compression_score,
             secure_reneg=secure_reneg,
             secure_reneg_score=secure_reneg_score,
             client_reneg=client_reneg,
             client_reneg_score=client_reneg_score,
+            compression=compression,
+            compression_score=compression_score,
 
-            dh_param=dh_param,
-            ecdh_param=ecdh_param,
-            fs_bad=fs_bad,
+            dh_param=fs_result['dh_param'],
+            ecdh_param=fs_result['ecdh_param'],
+            fs_bad=fs_result['bad'],
+            fs_phase_out=fs_result['phase_out'],
             fs_score=fs_score,
+
+            zero_rtt_score=zero_rtt_score,
+            zero_rtt=zero_rtt,
+
+            ocsp_stapling=ocsp_stapling,
+            ocsp_stapling_score=ocsp_stapling_score,
+
+            kex_hash_func=kex_hash_func,
+            kex_hash_func_score=kex_hash_func_score,
         )
+    except (socket.error, http.client.BadStatusLine, NoIpError,
+            ConnectionHandshakeException,
+            ConnectionSocketException):
+        return dict(tls_enabled=False)
 
 
-def do_web_http(addrs, url, task, *args, **kwargs):
+def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
     """
     Start all the HTTP related checks for the web test.
 
     """
     try:
         results = {}
-        for addr in addrs:
-            results[addr[1]] = http_checks(addr, url, task)
+        for af_ip_pair in af_ip_pairs:
+            results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
 
     except SoftTimeLimitExceeded:
-        for addr in addrs:
-            if not results.get(addr[1]):
-                results[addr[1]] = dict(
+        for af_ip_pair in af_ip_pairs:
+            if not results.get(af_ip_pair[1]):
+                results[af_ip_pair[1]] = dict(
                     forced_https=False,
                     forced_https_score=scoring.WEB_TLS_FORCED_HTTPS_BAD,
                     http_compression_enabled=True,
@@ -1667,17 +2666,17 @@ def do_web_http(addrs, url, task, *args, **kwargs):
     return ('http_checks', results)
 
 
-def http_checks(addr, url, task):
+def http_checks(af_ip_pair, url, task):
     """
     Perform the HTTP header and HTTPS redirection checks for this webserver.
 
     """
-    forced_https, forced_https_score = forced_http_check(addr, url, task)
+    forced_https_score, forced_https = forced_http_check(af_ip_pair, url, task)
     header_checkers = [
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
     ]
-    header_results = http_headers_check(addr, url, header_checkers, task)
+    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
 
     results = {
         'forced_https': forced_https,
@@ -1687,20 +2686,21 @@ def http_checks(addr, url, task):
     return results
 
 
-def forced_http_check(addr, url, task):
+def forced_http_check(af_ip_pair, url, task):
     """
     Check if the webserver is properly configured with HTTPS redirection.
 
     """
     # First connect on port 80 and see if we get refused
     try:
-        conn, res, headers, visited_hosts = shared.http_fetch(
-            url, af=addr[0], path="", port=80, task=task, addr=addr[1])
+        conn, res, headers, visited_hosts = http_fetch(
+            url, af=af_ip_pair[0], path="", port=80, task=task,
+            ip_address=af_ip_pair[1])
 
     except (socket.error, http.client.BadStatusLine, NoIpError):
         # If we got refused on port 80 the first time
         # return the FORCED_HTTPS_NO_HTTP status and score
-        return ForcedHttpsStatus.no_http, scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP
+        return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
 
     # Valid if same domain, or *higher* domain. Use case:
     # www.example.com:80 -> example.com:443. Example.com:443 can set HSTS
@@ -1715,4 +2715,4 @@ def forced_http_check(addr, url, task):
                 forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
                 break
 
-    return forced_https, forced_https_score
+    return forced_https_score, forced_https

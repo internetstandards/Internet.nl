@@ -1,6 +1,5 @@
 /* internet.nl
    headroom.js
-   v6 | 201805
 */
 
 /*!
@@ -164,7 +163,7 @@
       this.debouncer = new Debouncer(this.update.bind(this));
       this.elem.classList.add(this.classes.initial);
 
-      // defer event registration to handle browser 
+      // defer event registration to handle browser
       // potentially restoring previous scroll position
       setTimeout(this.attachEvent.bind(this), 100);
 

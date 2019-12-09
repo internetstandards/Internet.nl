@@ -1,6 +1,5 @@
 /* internet.nl
    style.css
-   v6 | 201806
 */
 
 @font-face {
@@ -145,7 +144,6 @@ html {
    left:-9999px;
    z-index:1000;
 }
-
 .skiplink a:focus {
   left:0;
   top:0;
@@ -153,6 +151,9 @@ html {
   color:black;
   text-decoration: none;
   background:#00BFD6;
+}
+.skiplink-hide {
+  display: none;
 }
 
 a:focus {
@@ -516,6 +517,8 @@ main ol {
 h1 {
   font-size: 1.625em;
   line-height: 1.5em;
+  word-wrap: break-word;
+  hyphens: auto; /* prevents the title from breaking out of the container, see issue #401 */
 }
 h2 {
   margin-top: .8em;
@@ -545,6 +548,14 @@ h4 {
   width:100%;
   vertical-align: middle;
   line-height: 1;
+}
+textarea#html-block {
+  width: 630px;
+  height: 180px;
+}
+textarea#css-block {
+  width: 630px;
+  height: 180px;
 }
 /* content styling */
 article ol {
@@ -1029,7 +1040,7 @@ table {
 table th {
   font-family: 'robotobold', arial, sans-serif;
   font-weight: bold;
-  padding-top: 1em;
+  padding-top: 0.5em;
   border-bottom: 1px solid #dadada;
 }
 table td,
@@ -1037,7 +1048,7 @@ table th {
   padding-right: 1em;
   text-align: left;
   word-break: break-word;
-  font-size: 80%;
+  font-size: 90%;
 }
 table td {
   padding-top: .4em;
@@ -1121,6 +1132,7 @@ table td {
 }
 
 .tech-details-table {
+  font-family: monospace;
   padding-left: 0.5rem;
   margin-bottom: 1rem;
   overflow-x: auto;
@@ -1268,9 +1280,6 @@ table td {
   text-align: right;
   padding: 0;
   margin: 0;
-}
-#dated-results-warning a{
-  color: #05BFD6;
 }
 
 .retest-text {
@@ -1432,7 +1441,6 @@ footer ul li:last-child {
     display: -ms-flexbox;
     display: flex;
     flex-flow: row wrap;
-    justify-content: flex-start;
     justify-content: space-between;
   }
   .home main .wrap {
@@ -1440,12 +1448,6 @@ footer ul li:last-child {
     flex-flow: column wrap;
   }
 
-  aside,
-  main .wrap .block,
-  main .wrap .result {
-    display: flex;
-    flex-direction: column;
-  }
   aside {
     width:100%;
     margin-top: .25em;
@@ -1454,6 +1456,43 @@ footer ul li:last-child {
 }
 
 /* ====================================================== */
+
+@media (min-width:540px) {
+
+/*
+  issue 170: styling hall of fame, only add columns to the test result list.
+  that is, only columns if the viewport > 540px
+*/
+  .list-column {
+    -webkit-column-count: 2;
+    -moz-column-count: 2;
+    column-count: 2;
+    list-style-position: inside;
+  }
+  .list-column li {
+    text-overflow: ellipsis; /* makes for better abbreviations in the list items */
+  }
+
+  /* reset colums for lists in lists */
+  .list-column ol,
+  .list-column ul {
+    -webkit-column-count: 1;
+    -moz-column-count: 1;
+    column-count: 1;
+  }
+}
+
+@media (min-width:800px) {
+
+  .list-column.column-3 {
+    -webkit-column-count: 3;
+    -moz-column-count: 3;
+    column-count: 3;
+  }
+}
+
+/* ====================================================== */
+
 @media (min-width: 740px) {
 
   .body-with-semifixed-header main {
@@ -1477,8 +1516,22 @@ footer ul li:last-child {
   }
   main .wrap .block.wide,
   main .wrap .result.wide {
-    flex: 1;
+    flex: 1 0 65%; /* added flex-shrink and flex-basis to this shorthand, issue #401 */
   }
+
+  main .wrap .block.wide + aside,
+  main .wrap .result.wide + aside {
+    /* specifically target the asides AFTER the results and main content, issue #401 */
+    flex: 1 0 32%;
+    margin-right: 0;
+  }
+
+  main .wrap .block.wide + aside .block,
+  main .wrap .result.wide + aside .block {
+    /* do not limit width to 300px, but make these blocks align right */
+    width: auto;
+  }
+
   main .wrap .block.fullwidth {
     min-width: 99%;
   }
@@ -1550,7 +1603,6 @@ footer ul li:last-child {
     margin-right: .75em;
     margin-bottom: .75em;
   }
-
 }
 
 /* ====================================================== */
@@ -1594,12 +1646,6 @@ footer ul li:last-child {
   table th,
   table td {
     font-size: 100%;
-  }
-
-  .hall-of-fame main ul {
-    -webkit-column-count: 2;
-    -moz-column-count: 2;
-    column-count: 2;
   }
 
   .site-titel a {
@@ -1671,10 +1717,82 @@ footer ul li:last-child {
     padding-top: .5em;
     padding-bottom: .5em;
   }
+}
 
-  .hall-of-fame main ul {
-    -webkit-column-count: 3;
-    -moz-column-count: 3;
-    column-count: 3;
+/* ====================================================== */
+
+@media (min-width:800px) {
+
+  .hall-of-fame .intro {
+    margin-bottom: 1rem;
+  }
+  .flexblocks {
+    display: flex;
+  }
+  .flexblocks img {
+    margin: .5rem .5rem .1rem .5rem;
+    clear: both;
+    max-width: intrinsic;
+    float: right;
+  }
+  .flexblocks .flexblock {
+    flex: 1;
+    padding-right: 1rem;
+  }
+  .flexblocks .flexblock + .flexblock {
+    padding-right: 0;
+    padding-left: 1rem;
   }
 }
+
+.hall-of-fame .intro h2,
+.hall-of-fame .intro p {
+  margin-bottom: 0;
+}
+.hall-of-fame .intro nav li {
+  margin: 0 1rem 0 0;
+  padding: 0;
+}
+ul.menu {
+  overflow: hidden;
+  margin-left: -.35rem;
+}
+ul.menu li {
+  display:inline-block;
+  float: left;
+}
+ul.menu li + li:before {
+  content: ' ';
+  display: block;
+  float: left;
+  background: #000;
+  height: .75rem;
+  width: 1px;
+  margin: .75rem .5rem 0 .5rem;
+}
+ul.menu li a {
+  display: block;
+  float: left;
+  padding: .25rem .1rem;
+  margin: .1rem .25rem;
+  border-bottom: 3px solid white;
+}
+ul.menu a {
+  text-decoration: none;
+  color: #000000;
+}
+ul.menu a:hover,
+ul.menu a:focus,
+ul.menu a:active {
+  text-decoration: underline;
+}
+ul.menu a,
+ul.menu a:visited {
+  color: #000;
+}
+ul.menu li a[aria-current="page"] {
+  font-weight: bold;
+  border-color: #ffab4c;
+}
+
+/* ====================================================== */

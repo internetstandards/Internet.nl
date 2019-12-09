@@ -215,20 +215,6 @@ def finished(request, testid):
         report['resolver_conn']['verdict'] = (
             "detail conn ipv6 resolver-conn verdict bad")
 
-    bogus = cache.get(redis_id.conn_test_bogus.id.format(testid))
-    if not bogus:
-        ct.dnssec_val = True
-        reportdnssec['validation']['status'] = STATUS_SUCCESS
-        reportdnssec['validation']['verdict'] = (
-            "detail conn dnssec validation verdict good")
-        reportdnssec['validation']['tech_data'] = [resolv_owner]
-
-    else:
-        reportdnssec['validation']['status'] = STATUS_FAIL
-        reportdnssec['validation']['verdict'] = (
-            "detail conn dnssec validation verdict bad")
-        reportdnssec['validation']['tech_data'] = [resolv_owner]
-
     if cache.get(redis_id.conn_test_aaaa.id.format(testid)):
         ct.aaaa_ipv6 = True
         report['dns_conn']['status'] = STATUS_SUCCESS
@@ -302,6 +288,21 @@ def finished(request, testid):
         report['ipv4_conn']['verdict'] = (
             "detail conn ipv6 ipv4-conn verdict bad")
         report['ipv4_conn']['tech_type'] = ""
+
+    bogus = cache.get(redis_id.conn_test_bogus.id.format(testid))
+    if not bogus:
+        if (report['ipv4_conn']['status'] == STATUS_SUCCESS
+                or report['dns_conn']['status'] == STATUS_SUCCESS):
+            ct.dnssec_val = True
+            reportdnssec['validation']['status'] = STATUS_SUCCESS
+            reportdnssec['validation']['verdict'] = (
+                "detail conn dnssec validation verdict good")
+            reportdnssec['validation']['tech_data'] = [resolv_owner]
+    else:
+        reportdnssec['validation']['status'] = STATUS_FAIL
+        reportdnssec['validation']['verdict'] = (
+            "detail conn dnssec validation verdict bad")
+        reportdnssec['validation']['tech_data'] = [resolv_owner]
 
     ct.report = report
     ct.reportdnssec = reportdnssec

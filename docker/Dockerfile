@@ -1,4 +1,4 @@
-FROM python:3.5.6
+FROM ubuntu:19.04
 
 LABEL vendor="NLnet Labs" \
       license="Apache License, Version 2.0"
@@ -12,19 +12,28 @@ ENV BRANCH ${BRANCH:-master}
 EXPOSE 8080
 
 # Install required dependencies
-# swig is needed to build Unbound with Python bindings 
+# swig is needed to build Unbound with Python bindings
 # gettext is needed by python manage.py compilemessages
 # libwww-perl is needed by make update_cert_fingerprints
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install --no-install-recommends -y \
+        build-essential \
         curl \
+        gcc \
         gettext \
         git \
         ldnsutils \
+        libevent-dev \
         libhiredis-dev \
+        libssl-dev=1.1.1b\* \
         libwww-perl \
-        postgresql-server-dev-9.6 \
+        openssl=1.1.1b\* \
+        postgresql-server-dev-11 \
+        python3-gdbm \
+        python3.7 \
+        python3.7-dev \
+        python3-pip \
         swig3.0 \
         sudo && \
     rm -rf /var/lib/apt/lists/*
@@ -32,31 +41,42 @@ RUN apt-get update && \
 # Create a user for the internetnl app to run as
 RUN useradd -ms /bin/bash -G sudo internetnl && echo "internetnl ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/internetnl
 
+# Ensure python 3.7 and pip3 are available as 'python' and 'pip' respectively
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1 && \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+
+# Upgrade pip, and install setuptools (needed below to build Python whois)
+RUN pip install --upgrade pip
+RUN pip install setuptools
+
 # Install forked pythonwhois
-RUN git clone -b timeout https://github.com/ralphdolmans/python-whois.git /tmp/python-whois
-WORKDIR /tmp/python-whois
+WORKDIR /tmp/build/python-whois
+RUN curl -fsSLo- 'https://github.com/ralphdolmans/python-whois/tarball/ee546f4' | tar zx --strip-components 1
 RUN python setup.py install
 
 # Build nassl from sources for deprecated protocol support and "extra features" compared to the stock package
-RUN git clone -b free_bsd https://github.com/gthess/nassl.git /tmp/nassl_freebsd
-WORKDIR /tmp/nassl_freebsd
-RUN mkdir -p bin/openssl-legacy/freebsd64 && mkdir -p bin/openssl-modern/freebsd64
-RUN curl https://zlib.net/zlib-1.2.11.tar.gz | tar zx && \
-    git clone -b 1.0.2-chacha https://github.com/PeterMosmans/openssl.git openssl-1.0.2e && \
-    git clone https://github.com/openssl/openssl.git openssl-master && \
-    cd openssl-master && \
-    git checkout 1f5878b8e25a785dde330bf485e6ed5a6ae09a1a && \
-    cd .. && \
+# Don't be misled by the 1.0.2e and master directory names for OpenSSL, these are the names required by the
+# NASSL build process and don't accurately reflect the versions of OpenSSL used, for that look at the versions
+# downloaded from GitHub by the commands below.
+WORKDIR /tmp/build/nassl_free_bsd
+RUN mkdir -p bin/openssl-legacy/freebsd64 \
+             bin/openssl-modern/freebsd64 \
+             openssl-1.0.2e \
+             openssl-master && \
+    curl -fsSLo- 'https://github.com/ximon18/nassl/tarball/758723b' | tar zx --strip-components 1 && \
+    curl -fsSLo- 'https://zlib.net/zlib-1.2.11.tar.gz' | tar zx && \
+    curl -fsSLo- 'https://github.com/PeterMosmans/openssl/tarball/1.0.2-chacha' | tar zx --strip-components 1 -C openssl-1.0.2e && \
+    curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_1_1c.tar.gz' | tar zx --strip-components 1 -C openssl-master && \
     python build_from_scratch.py && \
     python setup.py install
 
 # Unbound
 # See: https://github.com/ralphdolmans/unbound/blob/internetnl/README.md
 # TODO: edit internetnl/internetnl.c to match our deployment of Internet.nl
-RUN git clone -b internetnl https://github.com/ralphdolmans/unbound.git /tmp/unbound
-WORKDIR /tmp/unbound
-RUN patch -p0 -i ./unbound_1.8.0_patch_unsupported_ds.diff && \
-    ln -s /usr/local/bin/python3.5 /usr/local/bin/python3.5.6 && \
+#    ln -s /usr/local/bin/python3.5 /usr/local/bin/python3.5.6 && \
+WORKDIR /tmp/build/unbound
+RUN curl -fsSLo- 'https://github.com/ralphdolmans/unbound/tarball/internetnl' | tar zx --strip-components 1 && \
+    patch -p0 -i ./unbound_1.8.0_patch_unsupported_ds.diff && \
     ln -s /usr/bin/swig3.0 /usr/bin/swig && \
     ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis && \
     make && \
@@ -77,24 +97,30 @@ RUN useradd unbound && \
     unbound-anchor || test $? -eq 1 && \
     chown -R unbound: .
 
-WORKDIR ${APP_PATH}
-#RUN chown -R internetnl:internetnl ${APP_PATH}
+# Cleanup temporary build files
+RUN rm -rf /tmp/build
 
-# Fetch the Internet.nl web application files and install Python dependencies
-COPY --chown=internetnl:internetnl . ${APP_PATH}
-RUN chown -R internetnl: ${APP_PATH}
-RUN pip install --trusted-host pypi.python.org -r ./python-pip-requirements.txt
+WORKDIR ${APP_PATH}
+
+# Install Internet.nl web application Python dependencies
+COPY python-pip-requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --trusted-host pypi.python.org -r ./python-pip-requirements.txt
+
+# Copy our files into the image. Doing this after and separately to installing
+# dependencies avoids re-installing dependencies when the set of dependencies
+# is unchanged.
+COPY --chown=internetnl:internetnl . .
+RUN chown -R internetnl: .
 
 USER internetnl
 
 # Configure internetnl to know where LDNS-DANE is installed
 RUN sed -i -e "s|LDNS_DANE = .*|LDNS_DANE = '/usr/bin/ldns-dane'|g" ${APP_PATH}/internetnl/settings.py-dist
+RUN sed -i -e "s|TIME_ZONE = .*|TIME_ZONE = 'UTC'|g" ${APP_PATH}/internetnl/settings.py-dist
 
 # Prepare translations
 RUN make translations
 
-# Cleanup
-RUN sudo rm -rf ${APP_PATH}/.git /tmp/unbound /tmp/nassl_freebsd /tmp/python-whois
-
 # Setup the entrypoint command which will be executed when a container built from this image is run
-ENTRYPOINT ${APP_PATH}/docker/entrypoint.sh
+ENTRYPOINT ["/app/docker/entrypoint.sh"]

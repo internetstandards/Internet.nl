@@ -20,10 +20,22 @@ from checks import redis_id
 
 
 ub_ctx = unbound.ub_ctx()
+if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
+        and settings.ENABLE_INTEGRATION_TEST):
+    ub_ctx.debuglevel(2)
+    ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
+    ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
 ub_ctx.set_async(True)
 if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
     ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
 
+# See: https://stackoverflow.com/a/53875771 for a good summary of the various
+# RFCs and other rulings that combine to define what is a valid domain name.
+# Of particular note are xn-- which is used for internationalized TLDs, and
+# the rejection of digits in the TLD if not xn--. Digits in the last label
+# were legal under the original RFC-1035 but not according to the "ICANN
+# Application Guidebook for new TLDs (June 2012)" which stated that "The
+# ASCII label must consist entirely of letters (alphabetic characters a-z)".
 regex_dname = (
     r'^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+'
     '([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)$'
@@ -197,13 +209,24 @@ def add_score_to_report(report, score):
         report.save()
 
 
-def gethalloffamecache(count=10):
-    cache_id = redis_id.hof_data.id
+def get_hof_cache(cache_id, count):
     cached_data = cache.get(cache_id, None)
     if cached_data is None:
         return "…", 0, []
     return (
         cached_data['date'], cached_data['count'], cached_data['data'][:count])
+
+
+def get_hof_champions(count=100000):
+    return get_hof_cache(redis_id.hof_champions.id, count)
+
+
+def get_hof_web(count=100000):
+    return get_hof_cache(redis_id.hof_web.id, count)
+
+
+def get_hof_mail(count=100000):
+    return get_hof_cache(redis_id.hof_mail.id, count)
 
 
 def get_retest_time(report):
@@ -280,11 +303,11 @@ def run_stats_queries():
 
     """
     statswebsite = execsql("select count(distinct r.domain) as count from checks_domaintestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_domaintestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp")
-    statswebsitegood = gethalloffamecache()[1]
+    statswebsitegood = get_hof_web(count=1)[1]
     statswebsitebad = max(statswebsite - statswebsitegood, 0)
 
     statsmail = execsql("select count(distinct r.domain) as count from checks_mailtestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_mailtestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp")
-    statsmailgood = execsql("select count(distinct r.domain) as count from checks_mailtestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_mailtestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp where coalesce(r.score, 0) = 100")
+    statsmailgood = get_hof_mail(count=1)[1]
     statsmailbad = max(statsmail - statsmailgood, 0)
 
     statsconnection = execsql("select count(distinct coalesce(ipv4_addr, ipv6_addr)) as count from checks_connectiontest as r inner join ( select coalesce(ipv4_addr, ipv6_addr) as source, max(timestamp) as timestamp from checks_connectiontest where finished = true group by coalesce(ipv4_addr, ipv6_addr)) as rmax on coalesce(r.ipv4_addr, r.ipv6_addr) = rmax.source where finished = true")
