@@ -56,45 +56,4 @@ button.internetnl {
     padding: .2em .5em;
 }</textarea>
     {% include "content.html" with name="widget content notes" %}
-    <hr>
-    <h3>Preview:</h3>
-<form action="https://internet.nl/mail/" method="POST">
-  <p>
-    <img class="internetnl" src="/static/logo_en.svg" alt="Is your Internet up-to-date?"/>
-    {% translate 'widget mail html-block' %}
-  </p>
-<label for="internetnl-mail-url">{% translate 'base test mail input'%}</label>
-<span class="internetnl emailfield">
-  <input id="internetnl-mail-url" type="text" name="url" placeholder="example.nl">
-</span>
-  <button class="internetnl">Start test</button>
-</form>
-<style>
-img.internetnl {
-  max-width: 100%;
-  height: auto;
-  float: none;
-  clear: both;
-  display: block;
-}
-button.internetnl:hover {
-    cursor: pointer;
-}
-button.internetnl:hover,
-button.internetnl:focus,
-button.internetnl:active {
-    background: #ffab4c;
-}
-button.internetnl {
-    display: block;
-    margin: 0 auto .5em;
-    background: #fff;
-    border: solid .3em #ffab4c;
-    font-family: 'robotobold', arial, sans-serif;
-    font-weight: bold;
-    font-size: 100%;
-    border-radius: 18px;
-    padding: .2em .5em;
-}
-</style>
 {% endblock %}
