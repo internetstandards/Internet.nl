@@ -3,8 +3,7 @@
 Internet.nl is a [Django](https://www.djangoproject.com/)
 based application and therefore inherits its requirements.
 
-Current install base is Django 1.11 with Python 3.5+.
-(Python 3.7+ is not currently supported)
+Current install base is Django 1.11 with Python 3.7+.
 
 The following instructions should work on most Debian-based systems.
 
