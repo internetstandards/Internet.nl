@@ -1794,7 +1794,7 @@ class ConnectionChecker:
             self._score_tls_suites_bad = scoring.MAIL_TLS_SUITES_BAD
             self._score_tls_protocols_good = scoring.MAIL_TLS_PROTOCOLS_GOOD
             self._score_tls_protocols_bad = scoring.MAIL_TLS_PROTOCOLS_BAD
-            self._score_tls_fs_ok = scoring.MAIL_TLS_FS_BAD
+            self._score_tls_fs_ok = scoring.MAIL_TLS_FS_OK
             self._score_tls_fs_bad = scoring.MAIL_TLS_FS_BAD
             self._score_zero_rtt_good = scoring.MAIL_TLS_ZERO_RTT_GOOD
             self._score_zero_rtt_bad = scoring.MAIL_TLS_ZERO_RTT_BAD
