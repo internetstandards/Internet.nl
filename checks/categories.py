@@ -1159,7 +1159,9 @@ class MailTlsStarttlsExists(Subtest):
             label="detail mail tls starttls-exists label",
             explanation="detail mail tls starttls-exists exp",
             tech_string="detail mail tls starttls-exists tech table",
-            worst_status=scoring.MAIL_TLS_STARTTLS_EXISTS_WORST_STATUS)
+            full_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
+            worst_status=scoring.MAIL_TLS_STARTTLS_EXISTS_WORST_STATUS,
+            model_score_field="tls_enabled_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)

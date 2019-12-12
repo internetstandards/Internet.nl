@@ -1686,6 +1686,7 @@ def check_mail_tls(server, dane_cb_data, task):
 
             results = dict(
                 tls_enabled=True,
+                tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
                 prots_bad=prots_result['bad'],
                 prots_phase_out=prots_result['phase_out'],
                 prots_score=prots_score,
