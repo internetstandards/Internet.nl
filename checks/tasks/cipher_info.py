@@ -100,7 +100,7 @@ class CipherScoreAndSecLevel:
         elif 'DH' in ci.kex_algs:
             return {
                 False: (1, SecLevel.INSUFFICIENT),
-                True:  (3, SecLevel.GOOD),
+                True:  (3, SecLevel.SUFFICIENT),
             }.get(contains(ci.name, DHE_TERMS))
         elif 'RSA' in ci.kex_algs:
             return (0, SecLevel.PHASE_OUT)

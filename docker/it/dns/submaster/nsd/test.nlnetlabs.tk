@@ -57,8 +57,8 @@ tls12onlymodernphaseoutciphers                                    IN  A      {{T
 tls12onlymodernphaseoutciphers                                    IN  AAAA   {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}}
 tls12onlynotsecurityorder                                         IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
 tls12onlynotsecurityorder                                         IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
-tls12onlynotprescribedorder1                                      IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
-tls12onlynotprescribedorder1                                      IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
+tls12onlynotprescribedorder1                                      IN  A      {{TARGET_TLS12ONLY_IP}}
+tls12onlynotprescribedorder1                                      IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlynotprescribedorder4                                      IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlynotprescribedorder4                                      IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyphaseoutorder                                            IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
