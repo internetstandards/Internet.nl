@@ -1,7 +1,6 @@
 var _paq = _paq || [];
 
 function matomoGeneratedCode(disableCookies) {
-  var _paq = _paq || [];
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
   var d=$("#matomo-subdomain-tracking").text();
   if ("" != d) {
