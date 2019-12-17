@@ -81,6 +81,7 @@ class TESTS:
     TLS_ZERO_RTT_NL = '0-RTT'
     TLS_HASH_FUNC = 'Hash function for key exchange'
     TLS_HASH_FUNC_NL = 'Hashfunctie voor sleuteluitwisseling'
+    STARTTLS_AVAILABLE = 'STARTTLS available'
     IPV6_NS_ADDRESS = 'IPv6 addresses for name servers'
     IPV6_NS_REACHABILITY = 'IPv6 reachability of name servers'
     IPV6_WEB_ADDRESS = 'IPv6 addresses for web server'

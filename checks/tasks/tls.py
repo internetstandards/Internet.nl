@@ -1436,6 +1436,8 @@ def starttls_sock_setup(conn):
                     errno.ECONNREFUSED, errno.ENOEXEC]:
                 raise SMTPConnectionCouldNotTestException()
             raise e
+        except NoIpError:
+            raise SMTPConnectionCouldNotTestException()
 
 
 class SMTPConnection(SSLConnectionWrapper):

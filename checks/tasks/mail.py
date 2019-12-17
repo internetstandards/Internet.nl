@@ -718,12 +718,15 @@ def dmarc_find_organizational_domain(domain, public_suffix_list):
 
 def dmarc_fetch_public_suffix_list():
     """
-    Fetch the list from the configured URL and parse it leaving out comments
+    Fetch the list from the configured URL and parse it leaving out comments,
     empty lines and invalid lines.
 
     """
     public_suffix_list = []
     r = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
+    if not r:
+        return public_suffix_list
+
     lines = r.text.split("\n")
     for line in lines:
         line = line.rstrip()
