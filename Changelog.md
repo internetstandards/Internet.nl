@@ -1,12 +1,19 @@
 # Change Log
 
-## Unreleased next version
+## 1.1.1
+
+Hotfix release.
 
 New
-
-Dependencies
+- Ignore cipher order when only GOOD ciphers are supported.
 
 Bug Fixes
+- Fix scoring bug on FS params.
+- Fix scoring bug when no starttls tests could be performed.
+- DHE should be SUFFICIENT not GOOD.
+- Fix JS bug for matomo.
+- Fix unhandled NoIpError exception.
+- Typos.
 
 ## 1.1.0
 
