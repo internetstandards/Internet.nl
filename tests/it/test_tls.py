@@ -112,7 +112,7 @@ class PostfixTLS12Config(DomainConfig):
 
 class PostfixTLS13Config(DomainConfig):
     def override_defaults(self):
-        self.expected_failures.setdefault(TESTS.TLS_CIPHER_ORDER, ANY)
+        # self.expected_failures.setdefault(TESTS.TLS_CIPHER_ORDER, ANY)
         # self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
         self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
 
@@ -534,11 +534,10 @@ ncsc_20_tests = [
             ]
         }),
 
-    BadDomain('NCSC20-GuidelineB2-5:TLS13',
-        'tls13onlyhonorclientcipherorder.test.nlnetlabs.tk',
-        expected_failures={
-            TESTS.TLS_CIPHER_ORDER
-        }),
+    # Supporting only GOOD ciphers (like TLS1.3 only) should
+    # pass the cipher order test.
+    GoodDomain('NCSC20-GuidelineB2-5:TLS13',
+        'tls13onlyhonorclientcipherorder.test.nlnetlabs.tk'),
 ]
 
 other_tests = [
@@ -688,6 +687,32 @@ mail_tests = [
         'mail test', 'tls12only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CLIENT_RENEG
+        }),
+
+    DomainConfig(
+        'mail test', 'tls12onlynoip.test.nlnetlabs.tk',
+        expected_failures={
+            TESTS.IPV6_MAIL_ADDRESS,
+            TESTS.STARTTLS_AVAILABLE,
+        },
+        expected_not_tested={
+            TESTS.IPV6_MAIL_REACHABILITY,
+            TESTS.DANE_EXISTS,
+            TESTS.DANE_VALID,
+            TESTS.DANE_ROLLOVER_SCHEME,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_CIPHER_ORDER,
+            TESTS.TLS_CLIENT_RENEG,
+            TESTS.TLS_COMPRESSION,
+            TESTS.TLS_KEY_EXCHANGE,
+            TESTS.TLS_SECURE_RENEG,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_ZERO_RTT,
+            TESTS.TLS_HASH_FUNC,
+            TESTS.HTTPS_CERT_DOMAIN,
+            TESTS.HTTPS_CERT_PUBKEY,
+            TESTS.HTTPS_CERT_SIG,
+            TESTS.HTTPS_CERT_TRUST
         }),
 
     PostfixTLS13Config(

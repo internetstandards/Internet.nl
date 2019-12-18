@@ -39,6 +39,8 @@ tls12only                                                         IN  A      {{T
 tls12only                                                         IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12only                                                         IN  MX     10   tls12only
 tls12only                                                         IN  TXT    "v=spf1 mx -all"
+tls12onlynoip                                                     IN  MX     10   noip
+tls12onlynoip                                                     IN  TXT    "v=spf1 mx -all"
 tls12onlyffdhe2048                                                IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlyffdhe2048                                                IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyffdhe3072                                                IN  A      {{TARGET_TLS12ONLY_IP}}
@@ -57,8 +59,8 @@ tls12onlymodernphaseoutciphers                                    IN  A      {{T
 tls12onlymodernphaseoutciphers                                    IN  AAAA   {{TARGET_TLS12ONLYMODERNPHASEOUTCIPHERS_IPV6}}
 tls12onlynotsecurityorder                                         IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
 tls12onlynotsecurityorder                                         IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
-tls12onlynotprescribedorder1                                      IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
-tls12onlynotprescribedorder1                                      IN  AAAA   {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6}}
+tls12onlynotprescribedorder1                                      IN  A      {{TARGET_TLS12ONLY_IP}}
+tls12onlynotprescribedorder1                                      IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlynotprescribedorder4                                      IN  A      {{TARGET_TLS12ONLY_IP}}
 tls12onlynotprescribedorder4                                      IN  AAAA   {{TARGET_TLS12ONLY_IPV6}}
 tls12onlyphaseoutorder                                            IN  A      {{TARGET_TLS12ONLYLEGACYBADCIPHERS_IP}}
@@ -246,12 +248,14 @@ _443._tcp.tls13onlydiffipv4ipv6                                   IN  TLSA   3 1
 _443._tcp.tls13onlyhonorclientcipherorder                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 
 _25._tcp.tls12only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_25._tcp.tls12onlynoip.test.nlnetlabs.tk.                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _25._tcp.tls13only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _25._tcp.tls130rtt.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _25._tcp.tls13ipv4only.test.nlnetlabs.tk.                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _25._tcp.tls13ipv4onlynoipv6.test.nlnetlabs.tk.                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 
 _dmarc.tls12only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12only.test.nlnetlabs.tk"
+_dmarc.tls12onlynoip                                              IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12onlynoip.test.nlnetlabs.tk"
 _dmarc.tls13only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13only.test.nlnetlabs.tk"
 _dmarc.tls130rtt                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls130rtt.test.nlnetlabs.tk"
 _dmarc.tls13ipv4only                                              IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13ipv4only.test.nlnetlabs.tk"
@@ -259,6 +263,11 @@ _dmarc.tls13ipv4onlynoipv6                                        IN  TXT    "v=
 
 ; Created using https://dkimcore.org
 1566421634.nlnetlabs._domainkey.tls12only.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGPFUGQRVxTYqSSjLCbs4dXCOl"
+        "U6HRa8eTli7987Chweph5k8HSB3HOoaOYbpec3WYdqjTLIEiOnGXyu5ai5+BePbp"
+        "YALesZgfWsSLCKjFH5tDVwJwKPciT5Jk4b7Fi6ZPLFESQeW4UAre1y5iLCS+PHFw"
+        "qcM7zmbgj4gNCvUPpwIDAQAB")
+1566421634.nlnetlabs._domainkey.tls12onlynoip.test.nlnetlabs.tk. IN TXT (
         "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGPFUGQRVxTYqSSjLCbs4dXCOl"
         "U6HRa8eTli7987Chweph5k8HSB3HOoaOYbpec3WYdqjTLIEiOnGXyu5ai5+BePbp"
         "YALesZgfWsSLCKjFH5tDVwJwKPciT5Jk4b7Fi6ZPLFESQeW4UAre1y5iLCS+PHFw"

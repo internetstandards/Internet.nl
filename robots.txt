@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /domain/
+Disallow: /site/
+Disallow: /mail/
+Disallow: /statistics/
+Disallow: /stats/

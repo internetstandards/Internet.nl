@@ -811,6 +811,11 @@ class WebTlsCipherOrder(Subtest):
         self.verdict = "detail web tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
+    def result_na(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls cipher-order verdict na"
+        self.tech_data = ""
+
 
 class WebTlsVersion(Subtest):
     def __init__(self):
@@ -1159,7 +1164,9 @@ class MailTlsStarttlsExists(Subtest):
             label="detail mail tls starttls-exists label",
             explanation="detail mail tls starttls-exists exp",
             tech_string="detail mail tls starttls-exists tech table",
-            worst_status=scoring.MAIL_TLS_STARTTLS_EXISTS_WORST_STATUS)
+            full_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
+            worst_status=scoring.MAIL_TLS_STARTTLS_EXISTS_WORST_STATUS,
+            model_score_field="tls_enabled_score")
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1304,6 +1311,12 @@ class MailTlsCipherOrder(Subtest):
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
+
+    def result_na(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls cipher-order verdict na"
+        self.tech_data = ""
 
 
 class MailTlsVersion(Subtest):
