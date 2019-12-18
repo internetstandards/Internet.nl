@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased next version
+
+New
+
+Dependencies
+
+Bug Fixes
+
 ## 1.1.1
 
 Hotfix release.
