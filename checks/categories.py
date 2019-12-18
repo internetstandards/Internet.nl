@@ -811,6 +811,11 @@ class WebTlsCipherOrder(Subtest):
         self.verdict = "detail web tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
+    def result_na(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls cipher-order verdict na"
+        self.tech_data = ""
+
 
 class WebTlsVersion(Subtest):
     def __init__(self):
@@ -1306,6 +1311,12 @@ class MailTlsCipherOrder(Subtest):
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
+
+    def result_na(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls cipher-order verdict na"
+        self.tech_data = ""
 
 
 class MailTlsVersion(Subtest):

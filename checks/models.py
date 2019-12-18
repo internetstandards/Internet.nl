@@ -55,6 +55,7 @@ class CipherOrderStatus(Enum):
     good = 1
     not_prescribed = 2
     not_seclevel = 3
+    na = 4  # Only GOOD ciphers; don't care about order.
 
 
 def conn_test_id():

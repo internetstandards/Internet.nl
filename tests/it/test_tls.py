@@ -112,7 +112,7 @@ class PostfixTLS12Config(DomainConfig):
 
 class PostfixTLS13Config(DomainConfig):
     def override_defaults(self):
-        self.expected_failures.setdefault(TESTS.TLS_CIPHER_ORDER, ANY)
+        # self.expected_failures.setdefault(TESTS.TLS_CIPHER_ORDER, ANY)
         # self.expected_info.setdefault(TESTS.TLS_OCSP_STAPLING, [['no']])
         self.expected_info.setdefault(TESTS.DANE_ROLLOVER_SCHEME, ANY)
 
@@ -534,11 +534,10 @@ ncsc_20_tests = [
             ]
         }),
 
-    BadDomain('NCSC20-GuidelineB2-5:TLS13',
-        'tls13onlyhonorclientcipherorder.test.nlnetlabs.tk',
-        expected_failures={
-            TESTS.TLS_CIPHER_ORDER
-        }),
+    # Supporting only GOOD ciphers (like TLS1.3 only) should
+    # pass the cipher order test.
+    GoodDomain('NCSC20-GuidelineB2-5:TLS13',
+        'tls13onlyhonorclientcipherorder.test.nlnetlabs.tk'),
 ]
 
 other_tests = [

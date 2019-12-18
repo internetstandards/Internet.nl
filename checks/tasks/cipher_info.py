@@ -389,7 +389,7 @@ def load_cipher_info():
                         f'Unable to parse description of cipher {cipher_name} '
                         f'output by {client_class.__name__}: "{desc}"')
             else:
-                # Add this connction class to the set of supported connection
+                # Add this connection class to the set of supported connection
                 # classes.
                 result[cipher_name].supported_conns.add(conn_class)
 

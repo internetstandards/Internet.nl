@@ -150,6 +150,14 @@ INSUFFICIENT_CIPHERS = BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSUFFICIENT
 BULK_ENC_CIPHERS_INSUFFICIENT_MODERN = ['AESCCM8']
 INSUFFICIENT_CIPHERS_MODERN = BULK_ENC_CIPHERS_INSUFFICIENT_MODERN
 
+SUFFICIENT_DEBUG_CIPHERS = list(x.name for x in filter(
+    lambda x: (DebugConnection in x.supported_conns and
+               x.sec_level == SecLevel.SUFFICIENT),
+    cipher_infos.values()))
+SUFFICIENT_MODERN_CIPHERS = list(x.name for x in filter(
+    lambda x: (ModernConnection in x.supported_conns and
+               x.sec_level == SecLevel.SUFFICIENT),
+    cipher_infos.values()))
 
 GOOD_SUFFICIENT_SEC_LEVELS = frozenset([SecLevel.GOOD, SecLevel.SUFFICIENT])
 GOOD_SUFFICIENT_DEBUG_CIPHERS = list(x.name for x in filter(
@@ -676,6 +684,8 @@ def build_report(dttls, category):
 
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
+            elif dttls.cipher_order == CipherOrderStatus.na:
+                category.subtests['tls_cipher_order'].result_na()
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 category.subtests['tls_cipher_order'].result_seclevel_bad([
@@ -834,6 +844,8 @@ def build_report(dttls, category):
 
             if dttls.cipher_order == CipherOrderStatus.bad:
                 category.subtests['tls_cipher_order'].result_bad()
+            elif dttls.cipher_order == CipherOrderStatus.na:
+                category.subtests['tls_cipher_order'].result_na()
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 category.subtests['tls_cipher_order'].result_seclevel_bad([
@@ -1758,6 +1770,7 @@ class ConnectionChecker:
         self._checks_mode = checks_mode
         self._bad_ciphers = set()
         self._phase_out_ciphers = set()
+        self._sufficient_ciphers = set()
         self._cipher_order_violation = []
 
         if self._checks_mode == ChecksMode.WEB:
@@ -1885,11 +1898,12 @@ class ConnectionChecker:
     def _note_cipher(self, cipher, conn=None):
         ci = cipher_infos.get(cipher, None)
         if ci:
-            # sec_level = CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci, conn)
             if ci.sec_level == SecLevel.INSUFFICIENT:
                 self._bad_ciphers.add(ci.name)
             elif ci.sec_level == SecLevel.PHASE_OUT:
                 self._phase_out_ciphers.add(ci.name)
+            elif ci.sec_level == SecLevel.SUFFICIENT:
+                self._sufficient_ciphers.add(ci.name)
 
     def check_cert_trust(self):
         """
@@ -2361,8 +2375,11 @@ class ConnectionChecker:
                     lowest_values['seclevel'] = seclevel
                     lowest_values['seclevel_cipher'] = curr_cipher
 
-    def _check_ciphers(self, test_config):
+    def _check_ciphers(self, test_config, first_cipher_only=False):
+        done = False
         for conn_type, tls_version, cipher_string in test_config:
+            if done:
+                break
             # Exclude ciphers we've already seen for this connection handler
             relevant_ciphers = self._seen_ciphers.get(tls_version, dict()).get(
                 conn_type, frozenset())
@@ -2412,7 +2429,8 @@ class ConnectionChecker:
                     break
 
                 # When checking SMTP servers only check for one bad cipher.
-                if self._checks_mode == ChecksMode.MAIL:
+                if self._checks_mode == ChecksMode.MAIL or first_cipher_only:
+                    done = True
                     break
 
     def check_cipher_order(self):
@@ -2432,6 +2450,20 @@ class ConnectionChecker:
 
         cipher_order_score = self._score_tls_cipher_order_good
         cipher_order = CipherOrderStatus.good
+
+        # Check specifically for SUFFICIENT cipher support.
+        self._check_ciphers([
+            (DebugConnection,  SSLV23,  ':'.join(SUFFICIENT_DEBUG_CIPHERS)),
+            (ModernConnection, TLSV1_2, ':'.join(SUFFICIENT_MODERN_CIPHERS)),
+        ], first_cipher_only=True)
+        # If the server only supports GOOD ciphers we don't care
+        # about the cipher order.
+        if not (self._bad_ciphers or self._phase_out_ciphers or
+                self._sufficient_ciphers):
+            self._cipher_order_violation = []
+            return (
+                cipher_order_score, CipherOrderStatus.na,
+                self._cipher_order_violation)
 
         # For this test we need two ciphers, one selected by the server and
         # another selected by the server when the former was disallowed by the
@@ -2556,9 +2588,9 @@ class ConnectionChecker:
             (ModernConnection, TLSV1_2, ':'.join(INSUFFICIENT_CIPHERS_MODERN)),
         ])
 
-        if len(self._bad_ciphers) > 0:
+        if self._bad_ciphers:
             ciphers_score = self._score_tls_suites_bad
-        elif len(self._phase_out_ciphers) > 0:
+        elif self._phase_out_ciphers:
             ciphers_score = self._score_tls_suites_ok
 
         result_dict = {
