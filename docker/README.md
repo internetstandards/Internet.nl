@@ -1,4 +1,9 @@
 ## tl;dr
+
+> **Note: "host networking" support required (see issue [#435](https://github.com/NLnetLabs/Internet.nl/issues/435)).**
+>
+> According to [docs.docker.com](https://docs.docker.com/network/host/) _"The host networking driver only works on Linux hosts, and is not supported on Docker Desktop for Mac, Docker Desktop for Windows, or Docker EE for Windows Server"_.
+
 ```
 $ docker-compose pull
 $ docker-compose up
