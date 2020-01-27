@@ -1,12 +1,13 @@
 # Change Log
 
-## Unreleased next version
+## 1.1.2
 
-New
-
-Dependencies
+Hotfix release.
 
 Bug Fixes
+- Documentation update.
+- Content update.
+- Typos.
 
 ## 1.1.1
 
