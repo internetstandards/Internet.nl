@@ -700,7 +700,7 @@ msgstr "All receiving mail servers on your domain have an IPv6 address."
 
 msgid "detail mail ipv6 mx-AAAA verdict other"
 msgstr ""
-"No mNo mail servers are set on your domain. The test does not fall back to "
+"No mail servers are set on your domain. The test does not fall back to "
 "A/AAAA records for mail servers in case of absence of an MX record."
 
 msgid "detail mail ipv6 mx-reach exp"
