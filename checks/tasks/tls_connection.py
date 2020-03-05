@@ -470,7 +470,7 @@ class HTTPSConnection(SSLConnectionWrapper):
     """
     def __init__(
             self, host=None, port=None,
-            timeout=socket._GLOBAL_DEFAULT_TIMEOUT, socket_af=socket.AF_INET,
+            timeout=DEFAULT_TIMEOUT, socket_af=socket.AF_INET,
             task=None, ip_address=None, conn=None, **kwargs):
         if conn:
             super().__init__(conn=conn)
@@ -570,7 +570,7 @@ class HTTPSConnection(SSLConnectionWrapper):
 
 class HTTPConnection(http.client.HTTPConnection):
     def __init__(
-            self, host, port=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+            self, host, port=None, timeout=DEFAULT_TIMEOUT,
             source_address=None, socket_af=socket.AF_INET, task=None,
             ip_address=None):
         self.host = host
