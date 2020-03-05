@@ -82,6 +82,9 @@ if ENABLE_BATCH:
         'checks.tasks.tls.batch_web_conn': {'queue': 'batch_main'},
         'checks.tasks.tls.batch_web_http': {'queue': 'batch_main'},
 
+        'checks.tasks.appsecpriv.batch_web_appsecpriv': {'queue': 'batch_main'},
+        'checks.tasks.appsecpriv.batch_web_callback': {'queue': 'batch_callback'},
+
         'checks.batch.util.batch_async_generate_results': {'queue': 'worker_slow'},
         'checks.batch.util.batch_async_register': {'queue': 'worker_slow'},
     }
