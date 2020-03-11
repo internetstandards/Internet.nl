@@ -1552,7 +1552,7 @@ class MailTlsCertHostmatch(Subtest):
         self.was_tested()
         # HACK: for DANE-TA(2) and hostname mismatch!
         # Give a fail only if DANE-TA *is* present.
-        self.status(STATUS_FAIL)
+        self.status = STATUS_FAIL
         self.verdict = "detail mail tls cert-hostmatch verdict bad"
         self.tech_data = tech_data
 
