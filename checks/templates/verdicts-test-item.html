@@ -11,11 +11,7 @@
       {#<span class="icon"><img src="{% static "push-open.png" %}" alt=""></span>#}
     </a>
   </h3>
-  <div class="panel-contentt">
-    <h4>
-      {% include "string.html" with name="results explanation label" %}
-    </h4>
-    <p>{% include "string.html" with name=fullname|addstr:" exp" %}</p>
+  <div class="should-not-be-panel-content">
     <h4>
       {% include "string.html" with name="results verdict label" %}
     </h4>
@@ -29,6 +25,12 @@
 {% endwith %}
 {% endfor %}
 {% endwith %}
+
+    <h4>
+      {% include "string.html" with name="results explanation label" %}
+    </h4>
+    <p>{% include "string.html" with name=fullname|addstr:" exp" %}</p>
+
 
   </div>
 </div>
