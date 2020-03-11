@@ -1,0 +1,36 @@
+{% load staticfiles %}
+{% load translate %}
+
+{% with "detail "|addstr:testname as fullname %}
+
+<div class="testresult">
+  <h3 class="panel-title" >
+    <a aria-expanded="false" id="{{testname|replacespacestr}}">
+      {% include "string.html" with name=fullname|addstr:" label" %}
+      <span class="pre-icon visuallyhidden"></span>
+      {#<span class="icon"><img src="{% static "push-open.png" %}" alt=""></span>#}
+    </a>
+  </h3>
+  <div class="panel-contentt">
+    <h4>
+      {% include "string.html" with name="results explanation label" %}
+    </h4>
+    <p>{% include "string.html" with name=fullname|addstr:" exp" %}</p>
+    <h4>
+      {% include "string.html" with name="results verdict label" %}
+    </h4>
+
+{% with tests|getdictvalue:testname as verdicts %}
+{% for set in verdicts %}
+{% with testname|addstr:" "|addstr:set.0 as verdict_api %}
+{% with fullname|addstr:" verdict "|addstr:set.0 as fullverdict %}
+<div class="faq-subtest {{set.1}}" id="{{verdict_api|replacespacestr}}">{{verdict_api|replacespacestr}}:<br/>{% include "string.html" with name=fullverdict %}</div>
+{% endwith %}
+{% endwith %}
+{% endfor %}
+{% endwith %}
+
+  </div>
+</div>
+
+{% endwith %}

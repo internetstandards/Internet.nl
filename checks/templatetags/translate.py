@@ -184,6 +184,24 @@ def addstr(str1, str2):
 
 
 @register.filter()
+def replacespacestr(str1, value="_"):
+    """
+    Replace all spaces in str1 with value.
+
+    """
+    return str1.replace(" ", value)
+
+
+@register.filter()
+def getdictvalue(dictionary, key):
+    """
+    Rerurn the value of the key in dictionary.
+
+    """
+    return dictionary.get(key)
+
+
+@register.filter()
 def get_settings_value(name):
     """
     Return a settings value.

@@ -437,7 +437,7 @@ class ForumStandaardisatieView(CustomView):
 
     """
     def setup(self):
-        self.view_id = 'old_view'
+        self.view_id = '20190524_FS'
         self.settings = {
             BatchRequestType.web: {
                 'ipv6': {
@@ -468,6 +468,13 @@ class ForumStandaardisatieView(CustomView):
                     'cert_hostmatch': 'web_https_cert_domain',
                     'dane_exists': 'web_https_dane_exist',
                     'dane_valid': 'web_https_dane_valid',
+                },
+                'appsecpriv': {
+                    'http_x_frame': 'web_appsecpriv_x_frame_options',
+                    'http_x_content_type': 'web_appsecpriv_x_content_type_options',
+                    'http_x_xss': 'web_appsecpriv_x_xss_protection',
+                    'http_csp': 'web_appsecpriv_csp',
+                    'http_referrer_policy': 'web_appsecpriv_referrer_policy',
                 },
             },
             BatchRequestType.mail: {
@@ -508,42 +515,6 @@ class ForumStandaardisatieView(CustomView):
                 },
             },
         }
-
-    def get_view_data(self, batch_request_type, batch_domain):
-        """
-        For each test item specified in the settings above check if the test
-        passed and return the result based on the name mapping provided in the
-        settings above.
-
-        """
-        view_data = []
-        batch_test = batch_domain.get_batch_test()
-        for report_model, name_mappings in self.settings[batch_request_type].items():
-            report = getattr(batch_test.report, report_model).report
-            for item, data in report.items():
-                if name_mappings.get(item):
-                    view_data.append(dict(
-                        name=name_mappings[item],
-                        result=data['status'] == STATUS_SUCCESS))
-        return view_data
-
-
-class ForumStandaardisatieNewView(ForumStandaardisatieView):
-    """
-    This new view will eventually replace the older view.
-
-    """
-    def setup(self):
-        super().setup()
-        # Add the new security header tests
-        self.settings[BatchRequestType.web]['appsecpriv'] = {
-            'http_x_frame': 'web_appsecpriv_x_frame_options',
-            'http_x_content_type': 'web_appsecpriv_x_content_type_options',
-            'http_x_xss': 'web_appsecpriv_x_xss_protection',
-            'http_csp': 'web_appsecpriv_csp',
-            'http_referrer_policy': 'web_appsecpriv_referrer_policy',
-        }
-        self.view_id = '20190524_FS'
 
     def _get_dmarc_extra_info(self, batch_domain, view_data):
         """
@@ -628,10 +599,204 @@ class ForumStandaardisatieNewView(ForumStandaardisatieView):
             result=non_sending_domain))
 
     def get_view_data(self, batch_request_type, batch_domain):
-        view_data = super().get_view_data(batch_request_type, batch_domain)
+        """
+        For each test item specified in the settings above check if the test
+        passed and return the result based on the name mapping provided in the
+        settings above.
+
+        """
+        view_data = []
+        batch_test = batch_domain.get_batch_test()
+        for report_model, name_mappings in self.settings[batch_request_type].items():
+            report = getattr(batch_test.report, report_model).report
+            for item, data in report.items():
+                if name_mappings.get(item):
+                    view_data.append(dict(
+                        name=name_mappings[item],
+                        result=data['status'] == STATUS_SUCCESS))
         if batch_request_type == BatchRequestType.mail:
             self._get_dmarc_extra_info(batch_domain, view_data)
             self._get_starttls_extra_info(batch_domain, view_data)
+        return view_data
+
+
+class ForumStandaardisatieNewView(ForumStandaardisatieView):
+    """
+    New version of the Forum Standaardisatie view.
+    It creates fields per verdict per subtest and returns them mapped to those
+    verdict identifiers. Only one verditct can be true per subtest.
+    It would be easier for users to group and understand the API results before
+    the API output overhaul.
+
+    """
+    def _gather_tests_verdicts_categories(self):
+        """
+        This populates self.tests with all available verdicts and statuses per
+        subtest.
+
+        """
+        import inspect
+        from ..probes import webprobes, mailprobes
+        testname_regex = re.compile(
+            r'^detail ([^\s]+ [^\s]+ [^\s]+) label$',
+            flags=re.I)
+        verdict_regex = re.compile(
+            r'^detail (?:[^\s]+ [^\s]+ [^\s]+ )?verdict ([^\s]+)$',
+            flags=re.I)
+        statuses = {
+            0: 'failed',
+            1: 'passed',
+            2: 'warning',
+            3: 'good-not-tested',
+            4: 'not-tested',
+            5: 'info',
+        }
+        tests = {}
+        for probeset in (webprobes, mailprobes):
+            for probe in probeset:
+                category = probe.category()
+                for subtest in category.subtests.values():
+                    testname = testname_regex.fullmatch(subtest.label).group(1)
+                    tests[testname] = []
+                    result_methods = [
+                        method[1]
+                        for method in inspect.getmembers(
+                            subtest, predicate=inspect.ismethod)
+                        if method[0].startswith('result_')
+                    ]
+                    for method in result_methods:
+                        subtest.__init__()
+                        arg_len = len(inspect.signature(method).parameters)
+                        if arg_len:
+                            method({None for i in range(arg_len)})
+                        else:
+                            method()
+                        fullverdict = verdict_regex.fullmatch(subtest.verdict).group(0)
+                        if fullverdict == "detail verdict not-tested":
+                            continue
+                        verdict = verdict_regex.fullmatch(subtest.verdict).group(1)
+                        status = statuses[subtest.status]
+                        tests[testname].append((verdict, status))
+        self.tests = tests
+
+    def setup(self):
+        self.view_id = '2020_FS'
+        self._gather_tests_verdicts_categories()
+        self.settings = {
+            BatchRequestType.web: {
+                'ipv6': {
+                    'ns_aaaa': 'ns-AAAA',
+                    'ns_reach': 'ns-reach',
+                    'web_aaaa': 'web-AAAA',
+                    'web_reach': 'web-reach',
+                    'web_ipv46': 'web-ipv46',
+                },
+                'dnssec': {
+                    'dnssec_exists': 'exists',
+                    'dnssec_valid': 'valid',
+                },
+                'tls': {
+                    'https_exists': 'https-exists',
+                    'https_forced': 'https-forced',
+                    'http_compression': 'http-compression',
+                    'https_hsts': 'https-hsts',
+                    'tls_version': 'version',
+                    'tls_ciphers': 'ciphers',
+                    'tls_cipher_order': 'cipher-order',
+                    'fs_params': 'fs-params',
+                    'kex_hash_func': 'kex-hash-func',
+                    'tls_compression': 'compression',
+                    'renegotiation_secure': 'renegotiation-secure',
+                    'renegotiation_client': 'renegotiation-client',
+                    'zero_rtt': 'zero-rtt',
+                    'ocsp_stapling': 'ocsp-stapling',
+                    'cert_trust': 'cert-trust',
+                    'cert_pubkey': 'cert-pubkey',
+                    'cert_signature': 'cert-signature',
+                    'cert_hostmatch': 'cert-hostmatch',
+                    'dane_exists': 'dane-exists',
+                    'dane_valid': 'dane-valid',
+                },
+                'appsecpriv': {
+                    'http_x_frame': 'http-x-frame',
+                    'http_x_content_type': 'http-x-content-type',
+                    'http_x_xss': 'http-x-xss',
+                    'http_csp': 'http-csp',
+                    'http_referrer_policy': 'http-referrer-policy',
+                },
+            },
+            BatchRequestType.mail: {
+                'ipv6': {
+                    'ns_aaaa': 'ns-AAAA',
+                    'ns_reach': 'ns-reach',
+                    'mx_aaaa': 'mx-AAAA',
+                    'mx_reach': 'mx-reach',
+                },
+                'dnssec': {
+                    'dnssec_exists': 'exists',
+                    'dnssec_valid': 'valid',
+                    'dnssec_mx_exists': 'mx-exists',
+                    'dnssec_mx_valid': 'mx-valid',
+                },
+                'auth': {
+                    'dmarc': 'dmarc',
+                    'dmarc_policy': 'dmarc-policy',
+                    'dkim': 'dkim',
+                    'spf': 'spf',
+                    'spf_policy': 'spf-policy',
+                },
+                'tls': {
+                    'starttls_exists': 'starttls-exists',
+                    'tls_version': 'version',
+                    'tls_ciphers': 'ciphers',
+                    'tls_cipher_order': 'cipher-order',
+                    'fs_params': 'fs-params',
+                    'kex_hash_func': 'kex-hash-func',
+                    'tls_compression': 'compression',
+                    'renegotiation_secure': 'renegotiation-secure',
+                    'renegotiation_client': 'renegotiation-client',
+                    'zero_rtt': 'zero-rtt',
+                    'cert_trust': 'cert-trust',
+                    'cert_pubkey': 'cert-pubkey',
+                    'cert_signature': 'cert-signature',
+                    'cert_hostmatch': 'cert-hostmatch',
+                    'dane_exists': 'dane-exists',
+                    'dane_valid': 'dane-valid',
+                    'dane_rollover': 'dane-rollover',
+                },
+            },
+        }
+
+    def get_view_data(self, batch_request_type, batch_domain):
+        verdict_regex = re.compile(r'.*verdict ([^\s]+)$', flags=re.I)
+        statuses = {
+            0: 'failed',
+            1: 'passed',
+            2: 'warning',
+            3: 'good-not-tested',
+            4: 'not-tested',
+            5: 'info',
+        }
+        view_data = []
+        batch_test = batch_domain.get_batch_test()
+        for report_model, name_map in self.settings[batch_request_type].items():
+            report = getattr(batch_test.report, report_model).report
+            for subtest, data in report.items():
+                if name_map.get(subtest):
+                    if (report_model == 'ipv6'
+                            and subtest in ('ns_aaaa, ns_reach')):
+                        test_type = 'web-mail'
+                    else:
+                        test_type = f'{batch_request_type}'.lower()
+                    verdict = verdict_regex.fullmatch(data['verdict']).group(1)
+                    status = statuses[data['status']]
+                    view_data.append(dict(
+                        name=f'{test_type}_{report_model}_{name_map[subtest]}',
+                        result=f'{verdict},{status}'))
+
+        #if batch_request_type == BatchRequestType.mail:
+        #    self._get_dmarc_extra_info(batch_domain, view_data)
+        #    self._get_starttls_extra_info(batch_domain, view_data)
         return view_data
 
 

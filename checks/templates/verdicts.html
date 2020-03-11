@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% load translate %}
+{% load staticfiles %}
+
+{% block maincontent %}
+  <article class="result wide">
+    <h2>WEB</h2>
+    <div class="block">
+    {% for probe in webprobes %}
+      <section class="test-header">
+      {% if not forloop.first %}
+        <hr/>
+      {% endif %}
+        <div class="test-title">
+          <h2 id="site{{probe.name}}">
+            {% include "string.html" with name="test site"|addstr:probe.name|addstr:" label" %}
+          </h2>
+        </div>
+      </section>
+      <section class="testresults">
+        <br/>
+      {% if probe.name == 'ipv6' %}
+          <div class="test-subsection">
+            {% include "string.html" with name="results domain-mail ipv6 name-servers label" %}
+          </div>
+          {% include "verdicts-test-item.html" with testname="web-mail ipv6 ns-AAAA" %}
+          {% include "verdicts-test-item.html" with testname="web-mail ipv6 ns-reach" %}
+          <div class="test-subsection">
+            {% include "string.html" with name="results domain ipv6 web-server label" %}
+          </div>
+          {% include "verdicts-test-item.html" with testname="web ipv6 web-AAAA" %}
+          {% include "verdicts-test-item.html" with testname="web ipv6 web-reach" %}
+          {% include "verdicts-test-item.html" with testname="web ipv6 web-ipv46" %}
+
+      {% elif probe.name == 'dnssec' %}
+        {% include "verdicts-test-item.html" with testname="web dnssec exists" %}
+        {% include "verdicts-test-item.html" with testname="web dnssec valid" %}
+
+      {% elif probe.name == 'tls' %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain tls https label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="web tls https-exists" %}
+        {% include "verdicts-test-item.html" with testname="web tls https-forced" %}
+        {% include "verdicts-test-item.html" with testname="web tls http-compression" %}
+        {% include "verdicts-test-item.html" with testname="web tls https-hsts" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain tls tls label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="web tls version" %}
+        {% include "verdicts-test-item.html" with testname="web tls ciphers" %}
+        {% include "verdicts-test-item.html" with testname="web tls cipher-order" %}
+        {% include "verdicts-test-item.html" with testname="web tls fs-params" %}
+        {% include "verdicts-test-item.html" with testname="web tls kex-hash-func" %}
+        {% include "verdicts-test-item.html" with testname="web tls compression" %}
+        {% include "verdicts-test-item.html" with testname="web tls renegotiation-secure" %}
+        {% include "verdicts-test-item.html" with testname="web tls renegotiation-client" %}
+        {% include "verdicts-test-item.html" with testname="web tls zero-rtt" %}
+        {% include "verdicts-test-item.html" with testname="web tls ocsp-stapling" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain-mail tls certificate label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="web tls cert-trust" %}
+        {% include "verdicts-test-item.html" with testname="web tls cert-pubkey" %}
+        {% include "verdicts-test-item.html" with testname="web tls cert-signature" %}
+        {% include "verdicts-test-item.html" with testname="web tls cert-hostmatch" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain-mail tls dane label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="web tls dane-exists" %}
+        {% include "verdicts-test-item.html" with testname="web tls dane-valid" %}
+
+      {% elif probe.name == 'appsecpriv' %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain appsecpriv http-headers label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="web appsecpriv http-x-frame" %}
+        {% include "verdicts-test-item.html" with testname="web appsecpriv http-x-content-type" %}
+        {% include "verdicts-test-item.html" with testname="web appsecpriv http-x-xss" %}
+        {% include "verdicts-test-item.html" with testname="web appsecpriv http-csp" %}
+        {% include "verdicts-test-item.html" with testname="web appsecpriv http-referrer-policy" %}
+
+      {% endif %}
+      </section>
+      {% endfor %}
+     </div>
+    <h2>MAIL</h2>
+    <div class="block">
+    {% for probe in mailprobes %}
+      <section class="test-header">
+      {% if not forloop.first %}
+        <hr/>
+      {% endif %}
+        <div class="test-title">
+          <h2 id="mail{{probe.name}}">
+            {% include "string.html" with name="test mail"|addstr:probe.name|addstr:" label" %}
+          </h2>
+        </div>
+      </section>
+      <section class="testresults">
+        <br/>
+        {% if probe.name == 'ipv6' %}
+          <div class="test-subsection">
+            {% include "string.html" with name="results domain-mail ipv6 name-servers label" %}
+          </div>
+          {% include "verdicts-test-item.html" with testname="web-mail ipv6 ns-AAAA" %}
+          {% include "verdicts-test-item.html" with testname="web-mail ipv6 ns-reach" %}
+          <div class="test-subsection">
+            {% include "string.html" with name="results mail ipv6 mail-servers label" %}
+          </div>
+          {% include "verdicts-test-item.html" with testname="mail ipv6 mx-AAAA" %}
+          {% include "verdicts-test-item.html" with testname="mail ipv6 mx-reach" %}
+
+      {% elif probe.name == 'dnssec' %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results mail dnssec domain label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail dnssec exists" %}
+        {% include "verdicts-test-item.html" with testname="mail dnssec valid" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results mail dnssec mail-servers label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail dnssec mx-exists" %}
+        {% include "verdicts-test-item.html" with testname="mail dnssec mx-valid" %}
+
+      {% elif probe.name == 'auth' %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results mail auth dmarc label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail auth dmarc" %}
+        {% include "verdicts-test-item.html" with testname="mail auth dmarc-policy" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results mail auth dkim label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail auth dkim" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results mail auth spf label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail auth spf" %}
+        {% include "verdicts-test-item.html" with testname="mail auth spf-policy" %}
+
+      {% elif probe.name == 'tls' %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results mail tls starttls label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail tls starttls-exists" %}
+        {% include "verdicts-test-item.html" with testname="mail tls version" %}
+        {% include "verdicts-test-item.html" with testname="mail tls ciphers" %}
+        {% include "verdicts-test-item.html" with testname="mail tls cipher-order" %}
+        {% include "verdicts-test-item.html" with testname="mail tls fs-params" %}
+        {% include "verdicts-test-item.html" with testname="mail tls kex-hash-func" %}
+        {% include "verdicts-test-item.html" with testname="mail tls compression" %}
+        {% include "verdicts-test-item.html" with testname="mail tls renegotiation-secure" %}
+        {% include "verdicts-test-item.html" with testname="mail tls renegotiation-client" %}
+        {% include "verdicts-test-item.html" with testname="mail tls zero-rtt" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain-mail tls certificate label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail tls cert-trust" %}
+        {% include "verdicts-test-item.html" with testname="mail tls cert-pubkey" %}
+        {% include "verdicts-test-item.html" with testname="mail tls cert-signature" %}
+        {% include "verdicts-test-item.html" with testname="mail tls cert-hostmatch" %}
+        <div class="test-subsection">
+          {% include "string.html" with name="results domain-mail tls dane label" %}
+        </div>
+        {% include "verdicts-test-item.html" with testname="mail tls dane-exists" %}
+        {% include "verdicts-test-item.html" with testname="mail tls dane-valid" %}
+        {% include "verdicts-test-item.html" with testname="mail tls dane-rollover" %}
+
+
+      {% endif %}
+      </section>
+      {% endfor %}
+     </div>
+  </article>
+
+  <aside>
+     <div class="block">
+       <section>
+         <h2>WEB</h2>
+         <ul>
+         {% for probe in webprobes %}
+         <li>{% include "string.html" with name="test site"|addstr:probe.name|addstr:" label" %}
+           <ul>
+         {% if probe.name == 'ipv6' %}
+             {% include "verdicts-menu-item.html" with testname="web-mail ipv6 ns-AAAA" %}
+             {% include "verdicts-menu-item.html" with testname="web-mail ipv6 ns-reach" %}
+             {% include "verdicts-menu-item.html" with testname="web ipv6 web-AAAA" %}
+             {% include "verdicts-menu-item.html" with testname="web ipv6 web-reach" %}
+             {% include "verdicts-menu-item.html" with testname="web ipv6 web-ipv46" %}
+
+        {% elif probe.name == 'dnssec' %}
+             {% include "verdicts-menu-item.html" with testname="web dnssec exists" %}
+             {% include "verdicts-menu-item.html" with testname="web dnssec valid" %}
+
+        {% elif probe.name == 'tls' %}
+             {% include "verdicts-menu-item.html" with testname="web tls https-exists" %}
+             {% include "verdicts-menu-item.html" with testname="web tls https-forced" %}
+             {% include "verdicts-menu-item.html" with testname="web tls http-compression" %}
+             {% include "verdicts-menu-item.html" with testname="web tls https-hsts" %}
+             {% include "verdicts-menu-item.html" with testname="web tls version" %}
+             {% include "verdicts-menu-item.html" with testname="web tls ciphers" %}
+             {% include "verdicts-menu-item.html" with testname="web tls cipher-order" %}
+             {% include "verdicts-menu-item.html" with testname="web tls fs-params" %}
+             {% include "verdicts-menu-item.html" with testname="web tls kex-hash-func" %}
+             {% include "verdicts-menu-item.html" with testname="web tls compression" %}
+             {% include "verdicts-menu-item.html" with testname="web tls renegotiation-secure" %}
+             {% include "verdicts-menu-item.html" with testname="web tls renegotiation-client" %}
+             {% include "verdicts-menu-item.html" with testname="web tls zero-rtt" %}
+             {% include "verdicts-menu-item.html" with testname="web tls ocsp-stapling" %}
+             {% include "verdicts-menu-item.html" with testname="web tls cert-trust" %}
+             {% include "verdicts-menu-item.html" with testname="web tls cert-pubkey" %}
+             {% include "verdicts-menu-item.html" with testname="web tls cert-signature" %}
+             {% include "verdicts-menu-item.html" with testname="web tls cert-hostmatch" %}
+             {% include "verdicts-menu-item.html" with testname="web tls dane-exists" %}
+             {% include "verdicts-menu-item.html" with testname="web tls dane-valid" %}
+
+        {% elif probe.name == 'appsecpriv' %}
+             {% include "verdicts-menu-item.html" with testname="web appsecpriv http-x-frame" %}
+             {% include "verdicts-menu-item.html" with testname="web appsecpriv http-x-content-type" %}
+             {% include "verdicts-menu-item.html" with testname="web appsecpriv http-x-xss" %}
+             {% include "verdicts-menu-item.html" with testname="web appsecpriv http-csp" %}
+             {% include "verdicts-menu-item.html" with testname="web appsecpriv http-referrer-policy" %}
+
+        {% endif %}
+           </ul>
+         </li>
+         {% endfor %}
+         </ul>
+       </section>
+       <section>
+         <h2>MAIL</h2>
+         <ul>
+         {% for probe in mailprobes %}
+         <li>{% include "string.html" with name="test mail"|addstr:probe.name|addstr:" label" %}
+           <ul>
+         {% if probe.name == 'ipv6' %}
+           {% include "verdicts-menu-item.html" with testname="web-mail ipv6 ns-AAAA" %}
+           {% include "verdicts-menu-item.html" with testname="web-mail ipv6 ns-reach" %}
+           {% include "verdicts-menu-item.html" with testname="mail ipv6 mx-AAAA" %}
+           {% include "verdicts-menu-item.html" with testname="mail ipv6 mx-reach" %}
+
+         {% elif probe.name == 'dnssec' %}
+           {% include "verdicts-menu-item.html" with testname="mail dnssec exists" %}
+           {% include "verdicts-menu-item.html" with testname="mail dnssec valid" %}
+           {% include "verdicts-menu-item.html" with testname="mail dnssec mx-exists" %}
+           {% include "verdicts-menu-item.html" with testname="mail dnssec mx-valid" %}
+
+         {% elif probe.name == 'auth' %}
+           {% include "verdicts-menu-item.html" with testname="mail auth dmarc" %}
+           {% include "verdicts-menu-item.html" with testname="mail auth dmarc-policy" %}
+           {% include "verdicts-menu-item.html" with testname="mail auth dkim" %}
+           {% include "verdicts-menu-item.html" with testname="mail auth spf" %}
+           {% include "verdicts-menu-item.html" with testname="mail auth spf-policy" %}
+
+         {% elif probe.name == 'tls' %}
+           {% include "verdicts-menu-item.html" with testname="mail tls starttls-exists" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls version" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls ciphers" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls cipher-order" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls fs-params" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls kex-hash-func" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls compression" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls renegotiation-secure" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls renegotiation-client" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls zero-rtt" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls cert-trust" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls cert-pubkey" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls cert-signature" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls cert-hostmatch" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls dane-exists" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls dane-valid" %}
+           {% include "verdicts-menu-item.html" with testname="mail tls dane-rollover" %}
+
+      {% endif %}
+           </ul>
+         </li>
+         {% endfor %}
+         </ul>
+       </section>
+     </div>
+  </aside>
+
+
+{% endblock %}

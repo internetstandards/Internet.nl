@@ -89,6 +89,7 @@ if settings.ENABLE_BATCH is True:
         url(r'^api/batch/v{}/list/$'.format(BATCH_API_VERSION), batch.list_tests, name='batch_list'),
         url(r'^api/batch/v{}/cancel/{}/$'.format(BATCH_API_VERSION, regex_testid), batch.cancel_test, name='batch_cancel'),
         url(r'^api/batch/documentation/?$', batch.documentation, name='batch_documentation'),
+        url(r'^api/batch/verdicts/?$', batch.verdicts, name='batch_verdicts'),
         # The following should always be the last to catch now-invalid urls.
         url(r'^api/batch/', batch.old_url, name='batch_old'),
     ]

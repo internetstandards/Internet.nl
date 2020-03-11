@@ -6,13 +6,16 @@ import json
 
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse, HttpResponseRedirect
+from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+from django.utils.translation import ugettext as _
 
 from .util import check_valid_user, batch_async_generate_results
 from .util import get_site_url
-from .. import simple_cache_page
+from .. import simple_cache_page, probes
 from ..batch import BATCH_API_VERSION
 from ..batch.util import batch_async_register
+from ..batch import custom_views
 from ..models import BatchRequest
 from ..models import BatchRequestType
 from ..models import BatchRequestStatus
@@ -24,6 +27,15 @@ def documentation(request, *args, **kwargs):
     return HttpResponseRedirect(
         'https://github.com/NLnetLabs/Internet.nl/blob/master/'
         'documentation/batch_http_api.md')
+
+
+def verdicts(request, *args, **kwargs):
+    return render(
+        request, 'verdicts.html',
+        dict(
+            pageclass="verdicts", pagetitle=_("page title"), pagemenu="faqs",
+            webprobes=probes.webprobes, mailprobes=probes.mailprobes,
+            tests=custom_views.VIEWS_MAP['forum_standaardisatie_new_view'].tests))
 
 
 @require_http_methods(['POST'])
