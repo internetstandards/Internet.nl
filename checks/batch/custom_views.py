@@ -797,7 +797,7 @@ class ForumStandaardisatieNewView(ForumStandaardisatieView):
                     view_data.append(dict(
                         name=f'{name_map[subtest]["api_field"]}',
                         verdict=f'{verdict}',
-                        status=f'{status}',
+                        icon=f'{status}',
                         translation_key=f'{test_type}_{report_model}_{name_map[subtest]["translation_part"]}',
                     ))
 
