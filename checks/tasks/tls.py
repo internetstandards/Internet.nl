@@ -738,38 +738,41 @@ def build_report(dttls, category):
             else:
                 category.subtests['renegotiation_client'].result_good()
 
-            if dttls.cert_trusted == 0:
-                category.subtests['cert_trust'].result_good()
+            if not dttls.cert_chain:
+                category.subtests['cert_trust'].result_could_not_test()
             else:
-                category.subtests['cert_trust'].result_bad(dttls.cert_chain)
-
-            if dttls.cert_pubkey_score is None:
-                pass
-            else:
-                cert_pubkey_all = annotate_and_combine(
-                    dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
-                if len(dttls.cert_pubkey_bad) > 0:
-                    category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
-                elif len(dttls.cert_pubkey_phase_out) > 0:
-                    category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
+                if dttls.cert_trusted == 0:
+                    category.subtests['cert_trust'].result_good()
                 else:
-                    category.subtests['cert_pubkey'].result_good()
+                    category.subtests['cert_trust'].result_bad(dttls.cert_chain)
 
-            if dttls.cert_signature_score is None:
-                pass
-            elif len(dttls.cert_signature_bad) > 0:
-                category.subtests['cert_signature'].result_bad(
-                    dttls.cert_signature_bad)
-            else:
-                category.subtests['cert_signature'].result_good()
+                if dttls.cert_pubkey_score is None:
+                    pass
+                else:
+                    cert_pubkey_all = annotate_and_combine(
+                        dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    if len(dttls.cert_pubkey_bad) > 0:
+                        category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
+                    elif len(dttls.cert_pubkey_phase_out) > 0:
+                        category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
+                    else:
+                        category.subtests['cert_pubkey'].result_good()
 
-            if dttls.cert_hostmatch_score is None:
-                pass
-            elif len(dttls.cert_hostmatch_bad) > 0:
-                category.subtests['cert_hostmatch'].result_bad(
-                    dttls.cert_hostmatch_bad)
-            else:
-                category.subtests['cert_hostmatch'].result_good()
+                if dttls.cert_signature_score is None:
+                    pass
+                elif len(dttls.cert_signature_bad) > 0:
+                    category.subtests['cert_signature'].result_bad(
+                        dttls.cert_signature_bad)
+                else:
+                    category.subtests['cert_signature'].result_good()
+
+                if dttls.cert_hostmatch_score is None:
+                    pass
+                elif len(dttls.cert_hostmatch_bad) > 0:
+                    category.subtests['cert_hostmatch'].result_bad(
+                        dttls.cert_hostmatch_bad)
+                else:
+                    category.subtests['cert_hostmatch'].result_good()
 
             if dttls.dane_status == DaneStatus.none:
                 category.subtests['dane_exists'].result_bad()
@@ -898,44 +901,47 @@ def build_report(dttls, category):
             else:
                 category.subtests['renegotiation_client'].result_good()
 
-            if dttls.cert_trusted == 0:
-                category.subtests['cert_trust'].result_good()
+            if not dttls.cert_chain:
+                category.subtests['cert_trust'].result_could_not_test()
             else:
-                category.subtests['cert_trust'].result_bad(dttls.cert_chain)
-
-            if dttls.cert_pubkey_score is None:
-                pass
-            else:
-                cert_pubkey_all = annotate_and_combine(
-                    dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
-                if len(dttls.cert_pubkey_bad) > 0:
-                    category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
-                elif len(dttls.cert_pubkey_phase_out) > 0:
-                    category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
+                if dttls.cert_trusted == 0:
+                    category.subtests['cert_trust'].result_good()
                 else:
-                    category.subtests['cert_pubkey'].result_good()
+                    category.subtests['cert_trust'].result_bad(dttls.cert_chain)
 
-            if dttls.cert_signature_score is None:
-                pass
-            elif len(dttls.cert_signature_bad) > 0:
-                category.subtests['cert_signature'].result_bad(
-                    dttls.cert_signature_bad)
-            else:
-                category.subtests['cert_signature'].result_good()
-
-            if dttls.cert_hostmatch_score is None:
-                pass
-            elif len(dttls.cert_hostmatch_bad) > 0:
-                # HACK: for DANE-TA(2) and hostname mismatch!
-                # Give a fail only if DANE-TA *is* present, otherwise info.
-                if has_daneTA(dttls.dane_records):
-                    category.subtests['cert_hostmatch'].result_has_daneTA(
-                        dttls.cert_hostmatch_bad)
+                if dttls.cert_pubkey_score is None:
+                    pass
                 else:
-                    category.subtests['cert_hostmatch'].result_bad(
-                        dttls.cert_hostmatch_bad)
-            else:
-                category.subtests['cert_hostmatch'].result_good()
+                    cert_pubkey_all = annotate_and_combine(
+                        dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    if len(dttls.cert_pubkey_bad) > 0:
+                        category.subtests['cert_pubkey'].result_bad(cert_pubkey_all)
+                    elif len(dttls.cert_pubkey_phase_out) > 0:
+                        category.subtests['cert_pubkey'].result_phase_out(cert_pubkey_all)
+                    else:
+                        category.subtests['cert_pubkey'].result_good()
+
+                if dttls.cert_signature_score is None:
+                    pass
+                elif len(dttls.cert_signature_bad) > 0:
+                    category.subtests['cert_signature'].result_bad(
+                        dttls.cert_signature_bad)
+                else:
+                    category.subtests['cert_signature'].result_good()
+
+                if dttls.cert_hostmatch_score is None:
+                    pass
+                elif len(dttls.cert_hostmatch_bad) > 0:
+                    # HACK: for DANE-TA(2) and hostname mismatch!
+                    # Give a fail only if DANE-TA *is* present, otherwise info.
+                    if has_daneTA(dttls.dane_records):
+                        category.subtests['cert_hostmatch'].result_has_daneTA(
+                            dttls.cert_hostmatch_bad)
+                    else:
+                        category.subtests['cert_hostmatch'].result_bad(
+                            dttls.cert_hostmatch_bad)
+                else:
+                    category.subtests['cert_hostmatch'].result_good()
 
             if dttls.dane_status == DaneStatus.none:
                 category.subtests['dane_exists'].result_bad()
@@ -1499,6 +1505,13 @@ def cert_checks(
 
     """
     try:
+        # Generic arguments for web and mail.
+        conn_wrapper_args = {
+            'host': url,
+            'task': task,
+            'ciphers': "!aNULL",
+            'cipher_list_action': CipherListAction.PREPEND
+        }
         if mode == ChecksMode.WEB:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
@@ -1508,9 +1521,15 @@ def cert_checks(
                 task=web_cert)
             debug_cert_chain = DebugCertChain
             conn_wrapper = HTTPSConnection
+            conn_wrapper_args['socket_af'] = af_ip_pair[0]
+            conn_wrapper_args['ip_address'] = af_ip_pair[1]
         elif mode == ChecksMode.MAIL:
             debug_cert_chain = DebugCertChainMail
             conn_wrapper = SMTPConnection
+            conn_wrapper_args['server_name'] = url
+            conn_wrapper_args['send_SNI'] = (
+                starttls_details.dane_cb_data.get('data')
+                and starttls_details.dane_cb_data.get('secure'))
         else:
             raise ValueError
 
@@ -1521,11 +1540,8 @@ def cert_checks(
             # If we have all the certificate related information we need from a
             # previous check, skip this connection.
             # check chain validity (sort of NCSC guideline B3-4)
-            with conn_wrapper(
-                    host=url, socket_af=af_ip_pair[0],
-                    ip_address=af_ip_pair[1], task=task,
-                    ciphers=f"!aNULL",
-                    cipher_list_action=CipherListAction.PREPEND).conn as conn:
+
+            with conn_wrapper(**conn_wrapper_args).conn as conn:
                 with ConnectionChecker(conn, mode) as checker:
                     verify_score, verify_result = checker.check_cert_trust()
                     debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
@@ -1694,7 +1710,8 @@ def check_mail_tls(server, dane_cb_data, task):
 
                     # HACK for DANE-TA(2) and hostname mismatch!
                     # Give a good hosmatch score if DANE-TA *is not* present.
-                    if (not has_daneTA(cert_results['dane_records'])
+                    if (cert_results['tls_cert']
+                            and not has_daneTA(cert_results['dane_records'])
                             and cert_results['hostmatch_bad']):
                         cert_results['hostmatch_score'] = scoring.MAIL_TLS_HOSTMATCH_GOOD
 
@@ -1907,7 +1924,7 @@ class ConnectionChecker:
 
     def check_cert_trust(self):
         """
-        Verify the certificate chain,
+        Verify the certificate chain.
 
         """
         verify_result, _ = self._conn.get_certificate_chain_verify_result()
