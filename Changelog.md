@@ -7,6 +7,9 @@ New
 Dependencies
 
 Bug Fixes
+- Fix breaking bug when the cert chain could not be received.
+- Fix breaking bug for daneTA hack.
+- Typos.
 
 ## 1.1.2
 
