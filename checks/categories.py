@@ -932,6 +932,9 @@ class WebTlsCertTrust(Subtest):
         self.verdict = "detail web tls cert-trust verdict bad"
         self.tech_data = tech_data
 
+    def result_could_not_test(self):
+        self.verdict = "detail verdict could-not-test"
+
 
 class WebTlsCertPubkey(Subtest):
     def __init__(self):
@@ -1459,6 +1462,9 @@ class MailTlsCertTrust(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls cert-trust verdict bad"
         self.tech_data = tech_data
+
+    def result_could_not_test(self):
+        self.verdict = "detail verdict could-not-test"
 
 
 class MailTlsCertPubkey(Subtest):
