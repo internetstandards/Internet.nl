@@ -76,7 +76,6 @@ RUN mkdir -p bin/openssl-legacy/freebsd64 \
 #    ln -s /usr/local/bin/python3.5 /usr/local/bin/python3.5.6 && \
 WORKDIR /tmp/build/unbound
 RUN curl -fsSLo- 'https://github.com/ralphdolmans/unbound/tarball/internetnl' | tar zx --strip-components 1 && \
-    patch -p0 -i ./unbound_1.8.0_patch_unsupported_ds.diff && \
     ln -s /usr/bin/swig3.0 /usr/bin/swig && \
     ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis && \
     make && \
