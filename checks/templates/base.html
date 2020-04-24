@@ -59,21 +59,21 @@
         <ul class="language-switch-list">
 
       {% with user_language=request.current_language_code %}
-        {% get_language_info_list for LANGUAGES as languages %}
-          {% for language in languages %}
+        {% for language in LANGUAGES %}
+        {% get_language_info for language.0 as lang %}
           <li>
-          {% if language.code == user_language %}
-            <button class="active-language" disabled>{{language.name_local}}</button>
+          {% if language.0 == user_language %}
+            <button class="active-language" disabled>{{lang.name_local}}</button>
           {% else %}
             <form action="/change_language/" method="post">
             {% csrf_token %}
               <input type="hidden" name="previous-page" value="{{request.path}}"/>
-              <input type="hidden" name="language" value="{{language.code}}"/>
-              <button>{{language.name_local}}</button>
+              <input type="hidden" name="language" value="{{language.0}}"/>
+              <button>{{lang.name_local}}</button>
             </form>
           {% endif %}
           </li>
-          {% endfor %}
+        {% endfor %}
       {% endwith %}
 
         </ul>
