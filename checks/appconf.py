@@ -38,8 +38,8 @@ def cache_report_metadata():
 
     """
     if settings.ENABLE_BATCH:
-        from checks.batch.util import build_report_metadata
-        metadata = build_report_metadata()
+        from checks.batch.util import ReportMetadata
+        metadata = ReportMetadata().build_report_metadata()
         cache_id = redis_id.batch_metadata.id
         cache.set(cache_id, metadata['name_map'])
         del metadata['name_map']

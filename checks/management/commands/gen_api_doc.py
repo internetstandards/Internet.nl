@@ -25,12 +25,8 @@ REPLACE_MAP = {
 
 class Command(BaseCommand):
     help = (
-        'Generate the batch API documentation based on configured values.')
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            'ciphers', nargs='*',
-            help='Zero or more OpenSSL cipher names to show details for.')
+        'Generate the batch API documentation also based on configured '
+        'values.')
 
     def info(self, text):
         if self.v_level:
@@ -41,18 +37,26 @@ class Command(BaseCommand):
             self.stdout.write(f"{text}")
 
     def update_values(self, api_doc):
+        """
+        Updates strutures in the API text with configured values.
+
+        """
         self.info(f"Updating values...")
         for name, path in VALUES_MAP.items():
-            self.debug(f"* Updating {' > '.join(path)}")
+            self.debug(f"* Updating {'.'.join(path)}")
             current_node = api_doc
             for node in path[:-1]:
                 current_node = current_node[node]
             current_node[path[-1]] = getattr(settings, name)
 
     def replace_text(self, api_doc):
+        """
+        Replaces API text with configured values.
+
+        """
         self.info(f"Replacing text...")
         for name, path in REPLACE_MAP.items():
-            self.debug(f"* Replacing @@{name}@@ in {' > '.join(path)}")
+            self.debug(f"* Replacing @@{name}@@ in {'.'.join(path)}")
             current_node = api_doc
             for node in path[:-1]:
                 current_node = current_node[node]

@@ -8,15 +8,31 @@ BATCH_API_FULL_VERSION = (
     f".{BATCH_API_MINOR_VERSION}"
     f".{BATCH_API_PATCH_VERSION}")
 
-BATCH_PROBE_NAME_MAP = {
+# Both forward and reverse mapping.
+BATCH_PROBE_NAME_TRANSLATION = {
     "siteipv6": "web_ipv6",
+    "web_ipv6": "ipv6",
+
     "sitednssec": "web_dnssec",
+    "web_dnssec": "dnssec",
+
     "sitetls": "web_https",
+    "web_https": "tls",
+
     "siteappsecpriv": "web_appsecpriv",
+    "web_appsecpriv": "appsecpriv",
+
     "mailipv6": "mail_ipv6",
+    "mail_ipv6": "ipv6",
+
     "maildnssec": "mail_dnssec",
+    "mail_dnssec": "dnssec",
+
     "mailauth": "mail_auth",
-    "mailtls": "mail_starttls"
+    "mail_auth": "auth",
+
+    "mailtls": "mail_starttls",
+    "mail_starttls": "tls"
 }
 
 REPORT_METADATA_WEB_MAP = [

@@ -95,11 +95,6 @@ if settings.ENABLE_BATCH is True:
             batch.endpoint_metadata_report,
             name='batch_endpoint_metadata_report'),
 
-        #url(r'^api/batch/v{}/web/$'.format(BATCH_API_MAJOR_VERSION), batch.register_web_test, name='batch_web_test'),
-        #url(r'^api/batch/v{}/mail/$'.format(BATCH_API_MAJOR_VERSION), batch.register_mail_test, name='batch_email_test'),
-        #url(r'^api/batch/v{}/results/{}/$'.format(BATCH_API_MAJOR_VERSION, regex_testid), batch.get_results, name='batch_results'),
-        #url(r'^api/batch/v{}/list/$'.format(BATCH_API_MAJOR_VERSION), batch.list_tests, name='batch_list'),
-        url(r'^api/batch/v{}/cancel/{}/$'.format(BATCH_API_MAJOR_VERSION, regex_testid), batch.cancel_test, name='batch_cancel'),
         url(r'^api/batch/documentation/?$', batch.documentation, name='batch_documentation'),
 
         # The following should always be the last to catch now-invalid urls.

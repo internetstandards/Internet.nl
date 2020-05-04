@@ -2,19 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 
 from .util import check_valid_user, batch_async_generate_results
 from .util import get_site_url, get_report_metadata, list_requests
-from .util import register_request
+from .util import register_request, get_request, patch_request
 from .responses import api_response, unknown_request_response
 from .responses import invalid_url_response, bad_client_request_response
 from .responses import general_server_error
 from .. import simple_cache_page
 from ..models import BatchRequest
 from ..models import BatchRequestStatus
-from ..models import BatchDomain, BatchDomainStatus
 
 
 @require_http_methods(['GET', 'POST'])
@@ -26,7 +25,7 @@ def endpoint_requests(request, *args, **kwargs):
         return register_request(request, *args, **kwargs)
 
 
-@require_http_methods(['GET'])
+@require_http_methods(['GET', 'PATCH'])
 @check_valid_user
 def endpoint_request(request, request_id, *args, **kwargs):
     user = kwargs['batch_user']
@@ -35,19 +34,11 @@ def endpoint_request(request, request_id, *args, **kwargs):
             user=user, request_id=request_id)
     except BatchRequest.DoesNotExist:
         return unknown_request_response()
-    provide_progress = request.GET.get('progress')
-    provide_progress = provide_progress and provide_progress.lower() == 'true'
-    res = {"request": batch_request.to_api_dict()}
-    if provide_progress:
-        total_domains = BatchDomain.objects.filter(
-            batch_request=batch_request).count()
-        finished_domains = BatchDomain.objects.filter(
-            batch_request=batch_request,
-            status__in=(BatchDomainStatus.done,
-                        BatchDomainStatus.error)).count()
-        res['request']['progress'] = f"{finished_domains}/{total_domains}"
-        res['request']['num_domains'] = total_domains
-    return api_response(res)
+
+    if request.method == "GET":
+        return get_request(request, batch_request)
+    elif request.method == "PATCH":
+        return patch_request(request, batch_request)
 
 
 @require_http_methods(['GET'])
@@ -93,27 +84,6 @@ def documentation(request, *args, **kwargs):
     return HttpResponseRedirect(
         'https://github.com/NLnetLabs/Internet.nl/blob/master/'
         'documentation/batch_http_api.md')
-
-
-@require_http_methods(['GET'])
-@check_valid_user
-def cancel_test(request, request_id, *args, **kwargs):
-    user = kwargs['batch_user']
-    try:
-        batch_request = BatchRequest.objects.get(
-            user=user, request_id=request_id)
-    except BatchRequest.DoesNotExist:
-        return unknown_request_response()
-
-    batch_request.status = BatchRequestStatus.cancelled
-    batch_request.save()
-    BatchDomain.objects.filter(batch_request=batch_request).update(
-       status=BatchDomainStatus.cancelled)
-    return JsonResponse(
-        dict(
-            success=True,
-            message="OK",
-            data={}))
 
 
 @check_valid_user

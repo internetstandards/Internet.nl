@@ -1,8 +1,10 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import inspect
 import random
 import re
 import json
+from collections import defaultdict
 from functools import wraps
 
 from celery.five import monotonic
@@ -15,7 +17,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
-from . import REPORT_METADATA_MAIL_MAP, BATCH_PROBE_NAME_MAP
+from . import REPORT_METADATA_MAIL_MAP, BATCH_PROBE_NAME_TRANSLATION
 from .responses import api_response, unauthorised_response
 from .responses import bad_client_request_response, general_server_error
 from .custom_views import get_applicable_views, gather_views_results
@@ -26,6 +28,20 @@ from ..models import BatchCustomView, BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..views.shared import pretty_domain_name, validate_dname
 from ..templatetags.translate import render_details_table
+
+from ..probes import webprobes, mailprobes
+
+verdict_regex = re.compile(
+    r'^detail (?:[^\s]+ [^\s]+ [^\s]+ )?verdict ([^\s]+)$',
+    flags=re.I)
+statuses = {
+    0: 'failed',
+    1: 'passed',
+    2: 'warning',
+    3: 'good_not_tested',
+    4: 'not_tested',
+    5: 'info',
+}
 
 
 def get_site_url(request):
@@ -73,43 +89,95 @@ def get_user_from_request(request):
     return user
 
 
-def parse_report_item(item, hierarchy, data, name_map):
-    data[item['name']] = {
-        'type': item['type'],
-        'translation_key': item['translation_key'],
-    }
-    hier = {'name': item['name']}
-    if 'children' in item:
-        hier['children'] = []
-        for child in item['children']:
-            parse_report_item(child, hier['children'], data, name_map)
-    if item['type'] == "test":
+class ReportMetadata:
+    def _parse_report_item(
+            self, item, hierarchy, data, name_map, probeset, category=None):
+        data[item['name']] = {
+            'type': item['type'],
+            'translation_key': item['translation_key'],
+        }
+        hier = {'name': item['name']}
+
+        if 'children' in item:
+            hier['children'] = []
+
+            # Initialise the category if visiting a category's children.
+            if item['type'] == "category":
+                probe_name = BATCH_PROBE_NAME_TRANSLATION[item['name']]
+                category = probeset[probe_name].category()
+
+            for child in item['children']:
+                self._parse_report_item(
+                    child, hier['children'], data, name_map, probeset, category)
+        hierarchy.append(hier)
+        if item['type'] != "test":
+            return
+
+        self._gather_status_verdict_map(item, data, name_map, category)
+
+    def _gather_status_verdict_map(self, item, data, name_map, category):
+        # Continue here for test items.
         name_map[item['name_on_report']] = item['name']
-    hierarchy.append(hier)
+
+        status_verdict_map = defaultdict(set)
+
+        testname = item['name_on_report']
+        subtest = category.subtests[testname]
+
+        result_methods = [
+            method[1]
+            for method in inspect.getmembers(
+                subtest, predicate=inspect.ismethod)
+            if method[0].startswith('result_')
+        ]
+        for method in result_methods:
+            subtest.__init__()
+            arg_len = len(inspect.signature(method).parameters)
+            if arg_len:
+                method({None for i in range(arg_len)})
+            else:
+                method()
+            status = statuses[subtest.status]
+            fullverdict = verdict_regex.fullmatch(subtest.verdict).group(0)
+            if fullverdict in (
+                    "detail verdict not-tested",
+                    "detail verdict could-not-test"):
+                verdict = fullverdict
+            else:
+                verdict = verdict_regex.fullmatch(subtest.verdict).group(1)
+            status_verdict_map[status].add(verdict)
+        # Add the default status/verdict for each test.
+        status_verdict_map['not_tested'].add("detail verdict not-tested")
+        # Make it JSON serialisable.
+        data[item['name']]['status_verdict_map'] = {
+            status: list(verdicts)
+            for status, verdicts in status_verdict_map.items()
+        }
+
+    def build_report_metadata(self):
+        res = {}
+        res['hierarchy'] = {
+            'web': [],
+            'mail': []
+        }
+        res['data'] = {}
+        res['name_map'] = {}
+        for item in REPORT_METADATA_WEB_MAP:
+            self._parse_report_item(
+                item, res['hierarchy']['web'], res['data'], res['name_map'],
+                webprobes)
+
+        for item in REPORT_METADATA_MAIL_MAP:
+            self._parse_report_item(
+                item, res['hierarchy']['mail'], res['data'], res['name_map'],
+                mailprobes)
+
+        return res
 
 
 def get_report_metadata():
     cache_id = redis_id.report_metadata.id
     return cache.get(cache_id)
-
-
-def build_report_metadata():
-    res = {}
-    res['hierarchy'] = {
-        'web': [],
-        'mail': []
-    }
-    res['data'] = {}
-    res['name_map'] = {}
-    for item in REPORT_METADATA_WEB_MAP:
-        parse_report_item(
-            item, res['hierarchy']['web'], res['data'], res['name_map'])
-
-    for item in REPORT_METADATA_MAIL_MAP:
-        parse_report_item(
-            item, res['hierarchy']['mail'], res['data'], res['name_map'])
-
-    return res
 
 
 @contextmanager
@@ -178,17 +246,6 @@ def gather_batch_results(user, batch_request, site_url):
     dictionary that will be eventually converted to JSON for the API answer.
 
     """
-    statuses = {
-        0: 'failed',
-        1: 'passed',
-        2: 'warning',
-        3: 'good_not_tested',
-        4: 'not_tested',
-        5: 'info',
-    }
-    verdict_regex = re.compile(r'.*verdict ([^\s]+)$', flags=re.I)
-    report_metadata = get_report_metadata()
-
     data = {
         "api_version": BATCH_API_FULL_VERSION,
         "request": batch_request.to_api_dict()
@@ -233,7 +290,6 @@ def gather_batch_results(user, batch_request, site_url):
         args = url_arg + [batch_domain.domain, report_table.id]
         result['report'] = "{}{}".format(site_url, reverse(url_name, args=args))
         result['scoring'] = {"percentage": score}
-        result['technical_details'] = "TODO"
         result['results'] = {
             "categories": {},
             "tests": {},
@@ -245,7 +301,7 @@ def gather_batch_results(user, batch_request, site_url):
         result['results']['categories'] = categories
         result['results']['tests'] = tests
         for probe in probes:
-            category = BATCH_PROBE_NAME_MAP[probe.prefix+probe.name]
+            category = BATCH_PROBE_NAME_TRANSLATION[probe.prefix+probe.name]
             model = getattr(report_table, probe.name)
             _, _, verdict = probe.get_scores_and_verdict(model)
             categories[category] = {"verdict": verdict}
@@ -259,7 +315,9 @@ def gather_batch_results(user, batch_request, site_url):
                         verdict_regex.fullmatch(sub_data['verdict']).group(1))
                     res = []
                     if sub_data['tech_type']:
-                        res = render_details_table(sub_data['tech_string'], sub_data['tech_data'])['details_table_rows']
+                        res = render_details_table(
+                            sub_data['tech_string'],
+                            sub_data['tech_data'])['details_table_rows']
                     tests[name_map[subtest]] = {
                         "status": status,
                         "verdict": verdict,
@@ -478,3 +536,42 @@ def list_requests(request, *args, **kwargs):
         #            reverse(
         #                'batch_results', args=(batch_request.request_id, ))),
     return api_response({"requests": batch_info})
+
+
+@transaction.atomic
+def patch_request(request, batch_request):
+    try:
+        json_req = json.loads(request.body.decode('utf-8'))
+        request_status = json_req.get('status')
+        if not request_status:
+            return bad_client_request_response(
+                "'status' is missing from the request.")
+        cancel_value = BatchRequestStatus.cancelled.name.lower()
+        if request_status.lower() != cancel_value:
+            return bad_client_request_response(
+                "'status' does not have one of the supported values: "
+                f"['{cancel_value}'].")
+        batch_request.status = BatchRequestStatus.cancelled
+        batch_request.save()
+        BatchDomain.objects.filter(batch_request=batch_request).update(
+            status=BatchDomainStatus.cancelled)
+        return api_response({"request": batch_request.to_api_dict()})
+
+    except Exception:
+        return general_server_error("Problem cancelling the batch request.")
+
+
+def get_request(request, batch_request):
+    provide_progress = request.GET.get('progress')
+    provide_progress = provide_progress and provide_progress.lower() == 'true'
+    res = {"request": batch_request.to_api_dict()}
+    if provide_progress:
+        total_domains = BatchDomain.objects.filter(
+            batch_request=batch_request).count()
+        finished_domains = BatchDomain.objects.filter(
+            batch_request=batch_request,
+            status__in=(BatchDomainStatus.done,
+                        BatchDomainStatus.error)).count()
+        res['request']['progress'] = f"{finished_domains}/{total_domains}"
+        res['request']['num_domains'] = total_domains
+    return api_response(res)
