@@ -1,0 +1,905 @@
+openapi: "3.0.3"
+
+info:
+  version: 2.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  termsOfService: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  contact: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  x-logo: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  description: |
+    # Introduction
+    Welcome to the batch API documentation, a JSON based REST-like API for
+    batch testing multiple domains for compliance with modern internet
+    standards.
+
+    For a visual representation of this specification you can use
+    [https://redocly.github.io/redoc/](https://redocly.github.io/redoc/?url=@@DESC_INTRO_REDOCLY_LINK@@).
+
+    @@DESC_INTRO_EXTRA@@
+
+    ## Versioning
+    The API uses semantic versioning (`major.minor.patch`).
+
+    Changes to the `.major` version introduce and/or remove
+    semantics/paths/features to the API and that could lead to breaking changes.
+
+    Changes to the `.minor` version introduce new fields that don't break the
+    current API but you would need extra parsing code to get the new values.
+
+    Changes to the `.patch` version denote changes to the text of this document
+    but not to the API functionality eg. typos.
+
+    The `.major` version is part of the API path. In case the user requests a
+    path with a previous version, a message to check the version number will be
+    returned as the result to the API call.
+
+    This API only supports the current version.
+
+    # Authentication
+    All batch API endpoints are protected by HTTP Basic Authentication.
+    To use the endpoints the client must supply an HTTP Basic Authentication
+    header of the form:
+    ```
+    Authorization: Basic(base64)
+    ```
+    where `base64` is the base64-encoding of the string `<username>:<password>`.
+
+servers: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+
+security:
+  - BATCH_HTTP_AUTH: []
+
+tags:
+  - name: Requests
+  - name: Metadata
+
+paths:
+  /requests:
+    post:
+      operationId: register_request
+      tags:
+        - Requests
+      summary: New request
+      description: |
+        Registers a new batch request for the given domains. You can use the
+        returned id in a status request to track progress.
+
+        _A note on the domain list_: After the initial validation of the
+        domains' name, domains are used as-is. No extra logic is used to
+        produce more test targets e.g, web testing the bare and the www
+        version of a domain requires both domain names to be present in the
+        domain list.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/RegisterResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/request_limit'
+      operationId: list_requests
+      tags:
+        - Requests
+      summary: List requests
+      description: |
+        Lists the user's requests in descending order; newest first. You can
+        limit the number of returned entries (defautls to 10).
+      responses:
+        "200":
+          $ref: '#/components/responses/ListRequestsResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+  /requests/{request_id}:
+    parameters:
+      - $ref: '#/components/parameters/request_id'
+    get:
+      operationId: status_request
+      tags:
+        - Requests
+      summary: Request status
+      description: |
+        Retrieves information about the progress of the request. When the
+        status of the request is `done`, results are available.
+      responses:
+        "200":
+          $ref: '#/components/responses/StatusResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+    patch:
+      operationId: patch_request
+      tags:
+        - Requests
+      summary: Cancel request
+      description: |
+        TODO: will cancel the request. No resuming.
+
+  /requests/{request_id}/results:
+    parameters:
+      - $ref: '#/components/parameters/request_id'
+    get:
+      operationId: results
+      tags:
+        - Requests
+      summary: Results
+      description: Retrieves the results for this request. The request needs to
+        be `done` in order for results to be available.
+      responses:
+        "110":
+          $ref: '#/components/responses/ResultsCategoriesResponse'
+        "111":
+          $ref: '#/components/responses/ResultsTestsResponse'
+        "112":
+          $ref: '#/components/responses/ResultsCustomsResponse'
+        "200":
+          $ref: '#/components/responses/ResultsResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+  /requests/{request_id}/results_technical:
+    parameters:
+      - $ref: '#/components/parameters/request_id'
+    get:
+      operationId: results_technical
+      tags:
+        - Requests
+      summary: Techincal results
+      description: |
+        TODO
+        Retrieves the results for this request. These results are
+        more focused on the technical details of the domains. The request needs
+        to be `done` in order for results to be available.
+      responses:
+        "200":
+          $ref: '#/components/responses/ResultsTechnicalResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+  /metadata/report:
+    get:
+      operationId: metadata_report
+      tags:
+        - Metadata
+      summary: Report metadata
+      description: |
+        Machine readable metadata on report related information like
+        documentation, translation, display, etc. This can be used to create
+        reports equivalent to the main application.
+      responses:
+        "200":
+          $ref: '#/components/responses/MetadataReportResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+components:
+  securitySchemes:
+    BATCH_HTTP_AUTH:
+      type: http
+      scheme: basic
+
+  parameters:
+    request_id:
+      in: path
+      name: request_id
+      schema:
+        $ref: '#/components/schemas/RequestId'
+      required: true
+    request_limit:
+      in: query
+      name: limit
+      description: >
+        Limits the number of returned entries. Defaults to `10`. Use `0` for no
+        limit.
+      schema:
+        type: integer
+
+  schemas:
+    #
+    # Types
+    #
+    Handle:
+      type: string
+      maxLength: 255
+      description: |
+         A free form string that only serves as a reference for the requester.
+         Does not need to be unique.
+      example: "Web test - 1/1/1970"
+
+    RequestType:
+      type: string
+      enum:
+        - web
+        - mail
+
+    RequestId:
+      type: string
+      description: UUID of the request.
+      pattern: '[a-f0-9]{32}'
+      example: 'e94251da69c54da7b16fc5202a69c5c2'
+
+    ApiVersion:
+        type: string
+        pattern: '[0-9]+.[0-9]+.[0-9]+'
+        example: '2.0.0'
+
+    ListOfDomains:
+      type: array
+      items:
+        type: string
+      description: List of domains to test.
+      example:
+        - internet.nl
+        - batch.internet.nl
+        - dashboard.internet.nl
+        - nic.商标
+
+    ApiReply:
+      type: object
+      required:
+        - api_version
+      properties:
+        api_version:
+          $ref: '#/components/schemas/ApiVersion'
+
+    RequestReply:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - request
+          properties:
+            request:
+              $ref: '#/components/schemas/Request'
+
+    ResultsReply:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - request
+          properties:
+            request:
+              $ref: '#/components/schemas/Request'
+        - type: object
+          required:
+            - domains
+          properties:
+            domains:
+              type: object
+              additionalProperties:
+                x-additionalPropertiesName: <domain.name>
+                $ref: '#/components/schemas/Domain'
+              # TODO: Maybe the example needs to be autogenerated
+              #example:
+              #  example.nl:
+              #    status: success
+              #    report: "https://<test server>/site/example.nl/1234/"
+              #    scoring:
+              #      percentage: 100
+              #    resutls:
+              #  badexample.nl:
+              #    status: fail
+
+    Request:
+      type: object
+      required:
+        - request_id
+        - name
+        - request_type
+        - status
+        - submit_date
+        - finished_date
+      properties:
+        request_id:
+          $ref: '#/components/schemas/RequestId'
+        name:
+          $ref: '#/components/schemas/Handle'
+        request_type:
+          $ref: '#/components/schemas/RequestType'
+        status:
+          type: string
+          enum:
+            - registering
+            - running
+            - generating
+            - done
+            - cancelled
+            - error
+          description: |
+            * `registering` - Registering domains.
+            * `running` - Domains are being tested.
+            * `generating` - Report is being generated.
+            * `done` - Results ready.
+            * `cancelled` - Cancelled by the user.
+            * `error` - Error registering domains.
+        submit_date:
+          type: string
+          format: date-time
+        finished_date:
+          type: string
+          format: date-time
+          description: Only set when the tests are completed.
+
+    TechnicalDetailsWeb:
+      type: object
+
+    TechnicalDetailsMail:
+      type: object
+
+    Domain:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/DomainStatus'
+        scoring:
+          $ref: '#/components/schemas/DomainScoring'
+        report:
+          $ref: '#/components/schemas/DomainReport'
+        results:
+          $ref: '#/components/schemas/DomainResults'
+        technical_details:
+          description: Either here or within each test. Still thinking about it.
+          oneOf:
+            - $ref: '#/components/schemas/TechnicalDetailsWeb'
+            - $ref: '#/components/schemas/TechnicalDetailsMail'
+
+    DomainStatus:
+      type: string
+      enum:
+        - ok
+        - error
+      description: |
+        Status of the tested domain.
+        * `ok` - The domain was tested succesfully. All other keys in this
+          structure are available.
+        * `error` - The domain was partially tested because of errors during
+          testing. No results are available for this domain and no other keys
+          in this structure are present.
+
+    DomainScoring:
+      type: object
+      required:
+        - percentage
+      properties:
+        percentage:
+          type: integer
+          description: >
+            The score of a domain in percentage. It ranges from `0`
+            to `100` (perfect score). The score is a complex calculation based
+            on all test results included. This calculation can change
+            over time when tests are adjusted or new tests are introduced.
+          example: 100
+
+    DomainReport:
+      type: string
+      format: url
+      description: >
+        URL to the visual report on the testing server. Accessing these reports
+        does not require HTTP authentication.
+      example: "https://<test.server>/site/example.nl/1234/"
+
+    CustomResults:
+      type: object
+      description: >
+       Results that are not tied to any one of the tests. A custom result may
+       be derived from a combination of results, a combination of technical
+       data or other logic. They exist because they may facilitate further
+       interpretation of a domain's compliance. If custom results are
+       configured on the server they will be available here per domain.
+       Custom results don't need to share attributes like categories and tests.
+       Take a look at the `112` reposnse for a complete overview of the
+       available content here.
+      nullable: true
+
+    Category:
+      type: object
+      required:
+        - result
+      properties:
+        verdict:
+          type: string
+          enum:
+            - failed
+            - info
+            - passed
+            - warning
+          description: |
+            Verdict of a test category:
+            * `passed`- All the tests in this category passed.
+            * `info` - At least one optional test failed in this category.
+            * `warning` - At least one recommended test failed in this category.
+            * `failed` - At least one required test failed in this category.
+
+    WebCategories:
+      type: object
+      description: Web categories.
+      required:
+        - web_ipv6
+        - web_dnssec
+        - web_https
+        - web_appsecpriv
+      properties:
+        web_ipv6:
+          $ref: '#/components/schemas/Category'
+        web_dnssec:
+          $ref: '#/components/schemas/Category'
+        web_https:
+          $ref: '#/components/schemas/Category'
+        web_appsecpriv:
+          $ref: '#/components/schemas/Category'
+
+    MailCategories:
+      type: object
+      description: Mail categories.
+      required:
+        - mail_ipv6
+        - mail_dnssec
+        - mail_auth
+        - mail_starttls
+      properties:
+        mail_ipv6:
+          $ref: '#/components/schemas/Category'
+        mail_dnssec:
+          $ref: '#/components/schemas/Category'
+        mail_auth:
+          $ref: '#/components/schemas/Category'
+        mail_starttls:
+          $ref: '#/components/schemas/Category'
+
+    Categories:
+      description: |
+        Results per main categories for the domain. Take a look at
+        the `110` response for a complete overview of the available
+        content here.
+      type: object
+      additionalProperties:
+        x-additionalPropertiesName: <category>
+        description: Category name
+        $ref: '#/components/schemas/Category'
+
+    Test:
+      required:
+        - status
+        - verdict
+        - technical_details
+      properties:
+        status:
+          type: string
+          enum:
+            - passed
+            - failed
+            - info
+            - warning
+            - good_not_tested
+            - not_tested
+          description: |
+            Status of a test:
+            * `passed`- The test was successful.
+            * `failed` - Failure on a required test.
+            * `info` - Failure on an optional test.
+            * `warning` - Failure on a recommended test.
+            * `not_tested` - Not tested; a related parent test already failed.
+            * `good_not_tested` - Some servers passed this test but not all
+              servers could be tested.
+        verdict:
+          type: string
+          description: |
+            Verdict of the test; only useful for translation when combined
+            with the information on the `/metadata/report` endpoint.
+        technical_details:
+          type: array
+          description: 
+            List of the rows as presented visually on the report. Each row is a
+            list containing the column values. You can use the
+            `/metadata/report` endpoint to get the headers of the tables for
+            each test.
+
+    Tests:
+      description: |
+        Results per test for the domain. Take a look at the `111` response
+        for a complete overview of the available content here.
+      type: object
+      additionalProperties:
+        x-additionalPropertiesName: <test>
+        $ref: '#/components/schemas/Test'
+
+    DomainResults:
+      type: object
+      required:
+        - categories
+        - tests
+        - custom
+      properties:
+        categories:
+          $ref: '#/components/schemas/Categories'
+        tests:
+          $ref: '#/components/schemas/Tests'
+        custom:
+          $ref: '#/components/schemas/CustomResults'
+
+    MReportTest:
+      type: object
+      required:
+        - type
+        - translation_key
+      properties:
+        type:
+          type: string
+          enum: [test]
+        translation_key:
+          type: string
+          description: |
+            This key can be used to build a msgid in order to fetch
+            translations from the application's .po files for this item.
+            For some of them you would need the `<verdict>` from a result.
+            Related translations for tests:
+              * `detail <key> label` - Title of the test.
+              * `detail <key> exp` - Explanation of the test.
+              * `detail <key> verdict <verdict>` - Verdict of the test.
+              * `detail <key> tech table` - Headers of the technical table
+                (if any).
+
+    MReportCategory:
+      type: object
+      required:
+        - type
+        - translation_key
+      properties:
+        type:
+          type: string
+          enum: [category]
+        translation_key:
+          type: string
+          description: |
+            This key can be used to build a msgid in order to fetch
+            translations from the application's .po files for this item.
+            For some of them you would need the `<verdict>` from a result.
+            Related translations for tests:
+              * `test <key> label` - Title of the category.
+              * `test <key> <verdict> description` - Description of the
+                verdict.
+              * `test <key> <verdict> summary` - Summary of the verdict.
+
+    MReportSection:
+      type: object
+      required:
+        - type
+        - translation_key
+      properties:
+        type:
+          type: string
+          enum: [section]
+        translation_key:
+          type: string
+          description: |
+            This key can be used to build a msgid in order to fetch
+            translations from the application's .po files for this item.
+            Related translations for tests:
+              * `results <key> label` - Title of the section.
+
+    MReportHierarchyItem:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The item's name.
+        children:
+          description: This key is only present if this item has items below it.
+          type: array
+          items:
+            $ref: '#/components/schemas/MReportHierarchyItem'
+
+    #
+    # Request bodies
+    #
+    RegisterRequest:
+      type: object
+      required:
+        - domains
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/RequestType'
+        name:
+          $ref: '#/components/schemas/Handle'
+        domains:
+          $ref: '#/components/schemas/ListOfDomains'
+
+    #
+    # Response bodies
+    #
+    RegisterResponse:
+      $ref: '#/components/schemas/RequestReply'
+
+    ListRequestsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - requests
+          properties:
+            requests:
+              type: array
+              items:
+                $ref: '#/components/schemas/Request'
+
+    MetadataReportResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - report
+          properties:
+            report:
+              type: object
+              required:
+                - hierarchy
+                - data
+              properties:
+                data:
+                  type: object
+                  description: A collection of the items of the report.
+                  additionalProperties:
+                    x-additionalPropertiesName: <item_name>
+                    description: |
+                      If an item is also part of the results (categories and
+                      tests) the same name is used both here and in the results.
+                    anyOf:
+                      - $ref: '#/components/schemas/MReportCategory'
+                      - $ref: '#/components/schemas/MReportTest'
+                      - $ref: '#/components/schemas/MReportSection'
+                hierarchy:
+                  type: object
+                  description: |
+                    A hierarchical representation of the report's items.
+                    Divided based on the report type (web or email). The item
+                    names are the same as the `data` structure.
+                  required:
+                    - web
+                    - mail
+                  properties:
+                    web:
+                      description: Items present in the web report.
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MReportHierarchyItem'
+                    mail:
+                      description: Items present in the mail report.
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MReportHierarchyItem'
+
+    BadRequestResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - label
+                - msg
+              properties:
+                label:
+                  type: string
+                  enum:
+                    - bad-request
+                    - invalid-url
+                msg:
+                  type: string
+                  description: Verbose description of the error.
+                  example: "Could not parse domains. Make sure the domain list
+                    is properly formatted."
+
+    UnknownRequestErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - label
+                - msg
+              properties:
+                label:
+                  type: string
+                  enum: [unknown-request]
+                msg:
+                  type: string
+                  description: Verbose description of the error.
+                  example: "This request_id does not exist for the user."
+
+    StatusResponse:
+      $ref: '#/components/schemas/RequestReply'
+
+    ResultsResponse:
+      $ref: '#/components/schemas/ResultsReply'
+
+    ResultsTechnicalResponse:
+        type: object
+        description: TODO
+
+    ResultsCategoriesResponse:
+      oneOf:
+        - $ref: '#/components/schemas/WebCategories'
+        - $ref: '#/components/schemas/MailCategories'
+
+    ResultsCustomsResponse:
+      type: object
+
+    ResultsTestsResponse:
+      type: object
+
+    ServerErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - label
+                - msg
+              properties:
+                label:
+                  type: string
+                  enum: [server-error]
+                msg:
+                  type: string
+                  description: Verbose description of the error.
+                  example: "General server error. Please report this if it
+                    keeps happening."
+
+  responses:
+    UnauthorisedResponse:
+      description: Unauthorised
+
+    RegisterResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterResponse'
+      links:
+        status:
+          operationId: status_request
+          parameters:
+            request_id: '$response.body#/request/id'
+          description: >
+            The request_id in the answer can be used to retrieve the request's
+            status.
+
+    ListRequestsResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListRequestsResponse'
+
+    StatusResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+      links:
+        results:
+          operationId: results
+          parameters:
+            request_id: '$response.body#/request/id'
+          description: >
+            The request_id in the answer can be used to retrieve the request's
+            results when the request is `done`.
+
+    ResultsResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsResponse'
+
+    ResultsTechnicalResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsTechnicalResponse'
+
+    ResultsCategoriesResponse:
+      description: NOT A RESPONSE. Overview of the available CATEGORIES.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsCategoriesResponse'
+
+    ResultsCustomsResponse:
+      description: NOT A RESPONSE. Overview of the available CUSTOM RESULTS.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsCustomsResponse'
+
+    ResultsTestsResponse:
+      description: NOT A RESPONSE. Overview of the available TESTS.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsTestsResponse'
+
+    MetadataReportResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MetadataReportResponse'
+
+    BadRequestResponse:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequestResponse'
+
+    UnknownRequestErrorResponse:
+      description: Unknown request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnknownRequestErrorResponse'
+
+    ServerErrorResponse:
+      description: General server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerErrorResponse'

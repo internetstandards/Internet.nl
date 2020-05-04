@@ -1,8 +1,9 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import random
+import re
 import json
 from functools import wraps
-import os
 
 from celery.five import monotonic
 from contextlib import contextmanager
@@ -11,18 +12,20 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import JsonResponse
 from django.utils import timezone
 
-from . import BATCH_API_VERSION
+from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
+from . import REPORT_METADATA_MAIL_MAP, BATCH_PROBE_NAME_MAP
+from .responses import api_response, unauthorised_response
+from .responses import bad_client_request_response, general_server_error
 from .custom_views import get_applicable_views, gather_views_results
-from .custom_views import ForumStandaardisatieView
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchCustomView, BatchWebTest, BatchMailTest
-from ..models import BatchDomain, BatchRequestStatus
+from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..views.shared import pretty_domain_name, validate_dname
+from ..templatetags.translate import render_details_table
 
 
 def get_site_url(request):
@@ -44,10 +47,7 @@ def check_valid_user(function):
     def wrap(request, *args, **kwargs):
         user = get_user_from_request(request)
         if not user:
-            return JsonResponse(dict(
-                success=False,
-                message="Unknown user",
-                data=[]))
+            return unauthorised_response()
         kwargs['batch_user'] = user
         return function(request, *args, **kwargs)
 
@@ -71,6 +71,45 @@ def get_user_from_request(request):
     except BatchUser.DoesNotExist:
         pass
     return user
+
+
+def parse_report_item(item, hierarchy, data, name_map):
+    data[item['name']] = {
+        'type': item['type'],
+        'translation_key': item['translation_key'],
+    }
+    hier = {'name': item['name']}
+    if 'children' in item:
+        hier['children'] = []
+        for child in item['children']:
+            parse_report_item(child, hier['children'], data, name_map)
+    if item['type'] == "test":
+        name_map[item['name_on_report']] = item['name']
+    hierarchy.append(hier)
+
+
+def get_report_metadata():
+    cache_id = redis_id.report_metadata.id
+    return cache.get(cache_id)
+
+
+def build_report_metadata():
+    res = {}
+    res['hierarchy'] = {
+        'web': [],
+        'mail': []
+    }
+    res['data'] = {}
+    res['name_map'] = {}
+    for item in REPORT_METADATA_WEB_MAP:
+        parse_report_item(
+            item, res['hierarchy']['web'], res['data'], res['name_map'])
+
+    for item in REPORT_METADATA_MAIL_MAP:
+        parse_report_item(
+            item, res['hierarchy']['mail'], res['data'], res['name_map'])
+
+    return res
 
 
 @contextmanager
@@ -126,8 +165,7 @@ def batch_async_generate_results(self, user, batch_request, site_url):
 
     lock_id = lock_id_name.format(user.username, batch_request.request_id)
     batch_request.refresh_from_db()
-    if not (batch_request.report_file
-            and os.path.isfile(batch_request.report_file.path)):
+    if not batch_request.has_report_file():
         with memcache_lock(lock_id, lock_ttl) as acquired:
             if acquired:
                 results = gather_batch_results(user, batch_request, site_url)
@@ -140,13 +178,23 @@ def gather_batch_results(user, batch_request, site_url):
     dictionary that will be eventually converted to JSON for the API answer.
 
     """
-    results = {
-        'submission-date': batch_request.submit_date.isoformat(),
-        'finished-date': batch_request.finished_date.isoformat(),
-        'name': batch_request.name,
-        'identifier': batch_request.request_id,
-        'api-version': BATCH_API_VERSION
+    statuses = {
+        0: 'failed',
+        1: 'passed',
+        2: 'warning',
+        3: 'good_not_tested',
+        4: 'not_tested',
+        5: 'info',
     }
+    verdict_regex = re.compile(r'.*verdict ([^\s]+)$', flags=re.I)
+    report_metadata = get_report_metadata()
+
+    data = {
+        "api_version": BATCH_API_FULL_VERSION,
+        "request": batch_request.to_api_dict()
+    }
+    # Technically the status is still generating.
+    data['request']['status'] = "done"
 
     if batch_request.type is BatchRequestType.web:
         probes = batch_webprobes.getset()
@@ -159,7 +207,7 @@ def gather_batch_results(user, batch_request, site_url):
         url_arg = []
         related_testset = 'mailtest'
 
-    dom_results = []
+    dom_results = {}
     custom_views = get_applicable_views(user, batch_request)
 
     # Quering for the related rows upfront minimizes further DB queries and
@@ -171,53 +219,65 @@ def gather_batch_results(user, batch_request, site_url):
 
     batch_domains = batch_request.domains.all().select_related(*related_fields)
     for batch_domain in batch_domains:
+        result = {}
         domain_name_idna = pretty_domain_name(batch_domain.domain)
+        dom_results[domain_name_idna] = result
         if batch_domain.status == BatchDomainStatus.error:
-            dom_results.append(
-                dict(domain=domain_name_idna, status="failed"))
+            result['status'] = "error"
             continue
 
         batch_test = batch_domain.get_batch_test()
-        report = batch_test.report
-        score = report.score
+        report_table = batch_test.report
+        score = report_table.score
 
-        args = url_arg + [batch_domain.domain, report.id]
-        link = "{}{}".format(site_url, reverse(url_name, args=args))
+        args = url_arg + [batch_domain.domain, report_table.id]
+        result['report'] = "{}{}".format(site_url, reverse(url_name, args=args))
+        result['scoring'] = {"percentage": score}
+        result['technical_details'] = "TODO"
+        result['results'] = {
+            "categories": {},
+            "tests": {},
+            "custom": {}
+        }
 
-        categories = []
+        tests = {}
+        categories = {}
+        result['results']['categories'] = categories
+        result['results']['tests'] = tests
         for probe in probes:
-            category = probe.name
-            model = getattr(report, probe.name)
+            category = BATCH_PROBE_NAME_MAP[probe.prefix+probe.name]
+            model = getattr(report_table, probe.name)
             _, _, verdict = probe.get_scores_and_verdict(model)
-            passed = False
-            if verdict == 'passed':
-                passed = True
-            categories.append(dict(category=category, passed=passed))
+            categories[category] = {"verdict": verdict}
 
-        result = dict(
-            domain=domain_name_idna,
-            status="ok",
-            score=score,
-            link=link,
-            categories=categories)
+            name_map = cache.get(redis_id.batch_metadata.id)
+            report = model.report
+            for subtest, sub_data in report.items():
+                if name_map.get(subtest):
+                    status = statuses[sub_data['status']]
+                    verdict = (
+                        verdict_regex.fullmatch(sub_data['verdict']).group(1))
+                    res = []
+                    if sub_data['tech_type']:
+                        res = render_details_table(sub_data['tech_string'], sub_data['tech_data'])['details_table_rows']
+                    tests[name_map[subtest]] = {
+                        "status": status,
+                        "verdict": verdict,
+                        "technical_details": res
+                    }
 
-        views = gather_views_results(
-            custom_views, batch_domain, batch_request.type)
-        if views:
-            views = sorted(views, key=lambda view: view['name'])
-            result['views'] = views
+        # We need the techincal details for web and mail
+        # Also defined in the openapi.yaml.
 
-        dom_results.append(result)
+        # This will be replaced by customs.
+        # views = gather_views_results(
+        #     custom_views, batch_domain, batch_request.type)
+        # if views:
+        #     views = sorted(views, key=lambda view: view['name'])
+        #     result['views'] = views
 
-    results['domains'] = dom_results
-
-    # Add a temporary identifier for the new custom view.
-    # Will be replaced in a later release with a universal default output.
-    if (len(custom_views) == 1
-            and isinstance(custom_views[0], ForumStandaardisatieView)
-            and custom_views[0].view_id):
-        results['api-view-id'] = custom_views[0].view_id
-    return results
+    data['domains'] = dom_results
+    return data
 
 
 def save_batch_results_to_file(user, batch_request, results):
@@ -340,3 +400,81 @@ def add_custom_view_to_user(view_name, username):
 
     user.custom_views.add(view)
     return view, user
+
+
+def register_request(request, *args, **kwargs):
+    try:
+        json_req = json.loads(request.body.decode('utf-8'))
+        request_type = json_req.get('type')
+        if not request_type:
+            return bad_client_request_response(
+                "'type' is missing from the request.")
+
+        domains = json_req.get('domains')
+        if not domains:
+            return bad_client_request_response(
+                "'domains' is missing from the request.")
+        name = json_req.get('name', 'no-name')
+    except Exception:
+        return general_server_error("Problem parsing domains.")
+
+    if request_type.lower() == "web":
+        return register_batch_request(
+            request, kwargs['batch_user'], BatchRequestType.web, name, domains)
+
+    elif request_type.lower() == "mail":
+        return register_batch_request(
+            request, kwargs['batch_user'], BatchRequestType.mail, name, domains)
+
+    else:
+        return bad_client_request_response(
+            "'type' is not one of the expected values.")
+
+
+def register_batch_request(request, user, test_type, name, domains):
+    batch_request = BatchRequest(user=user, name=name, type=test_type)
+    batch_request.save()
+
+    # Sort domains and shuffle them. Cheap countermeasure to avoid testing the
+    # same end-systems simultaneously.
+    domains = sorted(set(domains))
+    random.shuffle(domains)
+    batch_async_register.delay(
+        batch_request=batch_request, test_type=test_type, domains=domains)
+
+    request_dict = batch_request.to_api_dict()
+    return api_response({"request": request_dict})
+
+
+def list_requests(request, *args, **kwargs):
+    user = kwargs['batch_user']
+    try:
+        limit = int(request.GET.get('limit'))
+        if limit == 0:
+            limit = None
+    except TypeError:
+        limit = 10
+    provide_progress = request.GET.get('progress')
+    provide_progress = provide_progress and provide_progress.lower() == 'true'
+
+    batch_requests = (
+        BatchRequest.objects.filter(user=user).order_by('-id')[:limit])
+    batch_info = []
+    for batch_request in batch_requests:
+        request_dict = batch_request.to_api_dict()
+        if provide_progress:
+            total_domains = BatchDomain.objects.filter(
+                batch_request=batch_request).count()
+            finished_domains = BatchDomain.objects.filter(
+                batch_request=batch_request,
+                status__in=(BatchDomainStatus.done,
+                            BatchDomainStatus.error)).count()
+            request_dict['progress'] = f"{finished_domains}/{total_domains}"
+            request_dict['num_domains'] = total_domains
+        batch_info.append(request_dict)
+        # We don't need a link to the results, the API is pretty clean now
+        #        results="{}{}".format(
+        #            get_site_url(request),
+        #            reverse(
+        #                'batch_results', args=(batch_request.request_id, ))),
+    return api_response({"requests": batch_info})

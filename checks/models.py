@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import ast
+import os
 from enum import Enum
 from enumfields import EnumField, EnumIntegerField
 from enumfields import Enum as LabelEnum
@@ -741,6 +742,36 @@ class BatchRequest(models.Model):
             'user', 'name', 'submit_date', 'finished_date', 'type', 'status',
             'request_id', 'report_file'
         ]
+
+    def _api_status(self):
+        if self.status == BatchRequestStatus.registering:
+            return "registering"
+        elif self.status in (BatchRequestStatus.live, BatchRequestStatus.running):
+            return "running"
+        elif self.status == BatchRequestStatus.error:
+            return "error"
+        elif self.status == BatchRequestStatus.done:
+            if self.has_report_file():
+                return "done"
+            return "generating"
+        elif self.status == BatchRequestStatus.cancelled:
+            return "cancelled"
+        return "-"
+
+    def has_report_file(self):
+        return self.report_file and os.path.isfile(self.report_file.path)
+
+    def to_api_dict(self):
+        finished_date = self.finished_date
+        if finished_date:
+            finished_date = finished_date.isoformat()
+        return dict(
+            name=self.name,
+            submit_date=self.submit_date.isoformat(),
+            finished_date=finished_date,
+            request_type=self.type.label.lower(),
+            status=self._api_status(),
+            request_id=self.request_id)
 
 
 class BatchDomainStatus(LabelEnum):

@@ -88,3 +88,9 @@ batch_scheduler_lock = REDIS_RECORD("batch:scheduler:lock", 60*5)
 
 # Running batch test id
 running_batch_test = REDIS_RECORD("batch:task_id:{}", 60*10)
+
+# Report metadata
+report_metadata = REDIS_RECORD("batch:report_metadata", None)
+
+# Batch metadata for test name map
+batch_metadata = REDIS_RECORD("batch:name_map_metadata", None)

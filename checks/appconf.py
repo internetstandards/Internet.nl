@@ -32,9 +32,26 @@ def clear_cached_pages():
     cache.delete_pattern("{}*".format(pattern))
 
 
+def cache_report_metadata():
+    """
+    Store the report metadata used in the batch API.
+
+    """
+    if settings.ENABLE_BATCH:
+        from checks.batch.util import build_report_metadata
+        metadata = build_report_metadata()
+        cache_id = redis_id.batch_metadata.id
+        cache.set(cache_id, metadata['name_map'])
+        del metadata['name_map']
+
+        cache_id = redis_id.report_metadata.id
+        cache.set(cache_id, metadata)
+
+
 class ChecksAppConfig(AppConfig):
     name = 'checks'
 
     def ready(self):
         load_padded_macs_in_cache()
         clear_cached_pages()
+        cache_report_metadata()
