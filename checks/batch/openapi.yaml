@@ -174,8 +174,6 @@ paths:
       description: Retrieves the results for this request. The request needs to
         be `done` in order for results to be available.
       responses:
-        "110":
-          $ref: '#/components/responses/ResultsCategoriesResponse'
         "200":
           $ref: '#/components/responses/ResultsResponse'
         "400":
