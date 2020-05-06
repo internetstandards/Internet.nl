@@ -5,8 +5,10 @@ except ImportError:
     from yaml import Loader, Dumper
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
-from internetnl import batch_api_doc_conf as settings
+from internetnl import batch_api_doc_conf as batch_settings
+from checks.batch.custom_results import CUSTOM_RESULTS_MAP
 
 OPENAPIFILE = "checks/batch/openapi.yaml"
 DOC_DESTINATION = "documentation/openapi.yaml"
@@ -47,7 +49,7 @@ class Command(BaseCommand):
             current_node = api_doc
             for node in path[:-1]:
                 current_node = current_node[node]
-            current_node[path[-1]] = getattr(settings, name)
+            current_node[path[-1]] = getattr(batch_settings, name)
 
     def replace_text(self, api_doc):
         """
@@ -61,9 +63,25 @@ class Command(BaseCommand):
             for node in path[:-1]:
                 current_node = current_node[node]
             current_text = current_node[path[-1]]
-            new_text = getattr(settings, name)
+            new_text = getattr(batch_settings, name)
             current_node[path[-1]] = current_text.replace(
                 f'@@{name}@@', new_text, 1)
+
+    def add_custom_results(self, api_doc):
+        """
+        Adds the available custom results to the API document.
+
+        """
+        results_schema = api_doc['components']['schemas']['CustomResults']
+        required = []
+        properties = {}
+        results_schema['required'] = required
+        results_schema['properties'] = properties
+        for custom in (
+                CUSTOM_RESULTS_MAP[r] for r, active
+                in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
+            required.append(custom.name)
+            properties[custom.name] = custom.openapi_spec
 
     def handle(self, *args, **options):
         self.v_level = options['verbosity']
@@ -73,6 +91,7 @@ class Command(BaseCommand):
 
         self.update_values(api_doc)
         self.replace_text(api_doc)
+        self.add_custom_results(api_doc)
 
         with open(DOC_DESTINATION, 'w+') as f:
             dump(api_doc, f, Dumper=Dumper)

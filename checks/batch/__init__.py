@@ -8,33 +8,29 @@ BATCH_API_FULL_VERSION = (
     f".{BATCH_API_MINOR_VERSION}"
     f".{BATCH_API_PATCH_VERSION}")
 
-# Both forward and reverse mapping.
-BATCH_PROBE_NAME_TRANSLATION = {
+BATCH_PROBE_NAME_TO_API_CATEGORY = {
     "siteipv6": "web_ipv6",
-    "web_ipv6": "ipv6",
-
     "sitednssec": "web_dnssec",
-    "web_dnssec": "dnssec",
-
     "sitetls": "web_https",
-    "web_https": "tls",
-
     "siteappsecpriv": "web_appsecpriv",
-    "web_appsecpriv": "appsecpriv",
 
     "mailipv6": "mail_ipv6",
-    "mail_ipv6": "ipv6",
-
     "maildnssec": "mail_dnssec",
-    "mail_dnssec": "dnssec",
-
     "mailauth": "mail_auth",
-    "mail_auth": "auth",
-
     "mailtls": "mail_starttls",
-    "mail_starttls": "tls"
 }
 
+BATCH_API_CATEGORY_TO_PROBE_NAME = {
+    "web_ipv6": "ipv6",
+    "web_dnssec": "dnssec",
+    "web_https": "tls",
+    "web_appsecpriv": "appsecpriv",
+
+    "mail_ipv6": "ipv6",
+    "mail_dnssec": "dnssec",
+    "mail_auth": "auth",
+    "mail_starttls": "tls"
+}
 REPORT_METADATA_WEB_MAP = [
     {
         'name': 'web_ipv6',
@@ -526,11 +522,6 @@ REPORT_METADATA_MAIL_MAP = [
                         'type': 'test',
                         'translation_key': 'mail tls zero-rtt'
                     },
-                    #{
-                    #    'name': 'mail_starttls_tls_ocsp',
-                    #    'type': 'test',
-                    #    'translation_key': 'mail tls ocsp'
-                    #},
                 ]
             },
             {

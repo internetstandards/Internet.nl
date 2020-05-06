@@ -422,12 +422,17 @@ components:
           example: 100
 
     DomainReport:
-      type: string
-      format: url
-      description: >
-        URL to the visual report on the testing server. Accessing these reports
-        does not require HTTP authentication.
-      example: "https://<batch.server>/site/example.nl/1234/"
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: url
+          description: >
+            URL to the visual report on the testing server. Accessing these reports
+            does not require HTTP authentication.
+          example: "https://<batch.server>/site/example.nl/1234/"
 
     CustomResults:
       type: object
@@ -438,16 +443,16 @@ components:
        interpretation of a domain's compliance. If custom results are
        configured on the server they will be available here per domain.
        Custom results don't need to share attributes like categories and tests.
-       Take a look at the `112` reposnse for a complete overview of the
-       available content here.
+       Each available one is documented here.
       nullable: true
 
     Category:
       type: object
       required:
-        - result
+        - status
+        - verdict
       properties:
-        verdict:
+        status:
           type: string
           enum:
             - failed
@@ -455,11 +460,16 @@ components:
             - passed
             - warning
           description: |
-            Verdict of a test category:
+            Status of a test category:
             * `passed`- All the tests in this category passed.
             * `info` - At least one optional test failed in this category.
             * `warning` - At least one recommended test failed in this category.
             * `failed` - At least one required test failed in this category.
+        verdict:
+          type: string
+          description: >
+            Verdict of the category; only useful for translation when combined
+            with the information on the `/metadata/report` endpoint.
 
     WebCategories:
       type: object

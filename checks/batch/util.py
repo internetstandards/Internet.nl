@@ -17,10 +17,11 @@ from django.db import transaction
 from django.utils import timezone
 
 from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
-from . import REPORT_METADATA_MAIL_MAP, BATCH_PROBE_NAME_TRANSLATION
+from . import REPORT_METADATA_MAIL_MAP
+from . import BATCH_PROBE_NAME_TO_API_CATEGORY, BATCH_API_CATEGORY_TO_PROBE_NAME
 from .responses import api_response, unauthorised_response
 from .responses import bad_client_request_response, general_server_error
-from .custom_views import get_applicable_views, gather_views_results
+from .custom_results import CUSTOM_RESULTS_MAP
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
@@ -29,7 +30,6 @@ from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..views.shared import pretty_domain_name, validate_dname
 from ..templatetags.translate import render_details_table
 
-from ..probes import webprobes, mailprobes
 
 verdict_regex = re.compile(
     r'^detail (?:[^\s]+ [^\s]+ [^\s]+ )?verdict ([^\s]+)$',
@@ -103,7 +103,7 @@ class ReportMetadata:
 
             # Initialise the category if visiting a category's children.
             if item['type'] == "category":
-                probe_name = BATCH_PROBE_NAME_TRANSLATION[item['name']]
+                probe_name = BATCH_API_CATEGORY_TO_PROBE_NAME[item['name']]
                 category = probeset[probe_name].category()
 
             for child in item['children']:
@@ -112,7 +112,6 @@ class ReportMetadata:
         hierarchy.append(hier)
         if item['type'] != "test":
             return
-
         self._gather_status_verdict_map(item, data, name_map, category)
 
     def _gather_status_verdict_map(self, item, data, name_map, category):
@@ -165,12 +164,12 @@ class ReportMetadata:
         for item in REPORT_METADATA_WEB_MAP:
             self._parse_report_item(
                 item, res['hierarchy']['web'], res['data'], res['name_map'],
-                webprobes)
+                batch_webprobes)
 
         for item in REPORT_METADATA_MAIL_MAP:
             self._parse_report_item(
                 item, res['hierarchy']['mail'], res['data'], res['name_map'],
-                mailprobes)
+                batch_mailprobes)
 
         return res
 
@@ -265,7 +264,6 @@ def gather_batch_results(user, batch_request, site_url):
         related_testset = 'mailtest'
 
     dom_results = {}
-    custom_views = get_applicable_views(user, batch_request)
 
     # Quering for the related rows upfront minimizes further DB queries and
     # gives ~33% boost to performance.
@@ -288,23 +286,28 @@ def gather_batch_results(user, batch_request, site_url):
         score = report_table.score
 
         args = url_arg + [batch_domain.domain, report_table.id]
-        result['report'] = "{}{}".format(site_url, reverse(url_name, args=args))
-        result['scoring'] = {"percentage": score}
-        result['results'] = {
-            "categories": {},
-            "tests": {},
-            "custom": {}
+        result['report'] = {
+            'url': "{}{}".format(site_url, reverse(url_name, args=args))
         }
+        result['scoring'] = {"percentage": score}
 
         tests = {}
         categories = {}
-        result['results']['categories'] = categories
-        result['results']['tests'] = tests
+        customs = {}
+        result['results'] = {
+            "categories": categories,
+            "tests": tests,
+            "custom": customs
+        }
+
         for probe in probes:
-            category = BATCH_PROBE_NAME_TRANSLATION[probe.prefix+probe.name]
+            category = BATCH_PROBE_NAME_TO_API_CATEGORY[probe.prefix+probe.name]
             model = getattr(report_table, probe.name)
             _, _, verdict = probe.get_scores_and_verdict(model)
-            categories[category] = {"verdict": verdict}
+            categories[category] = {
+                "verdict": verdict,
+                "status": verdict
+            }
 
             name_map = cache.get(redis_id.batch_metadata.id)
             report = model.report
@@ -327,12 +330,12 @@ def gather_batch_results(user, batch_request, site_url):
         # We need the techincal details for web and mail
         # Also defined in the openapi.yaml.
 
-        # This will be replaced by customs.
-        # views = gather_views_results(
-        #     custom_views, batch_domain, batch_request.type)
-        # if views:
-        #     views = sorted(views, key=lambda view: view['name'])
-        #     result['views'] = views
+        for custom_result in (
+                r for r, active
+                in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
+            custom_instance = CUSTOM_RESULTS_MAP[custom_result]
+            customs[custom_instance.name] = custom_instance.get_data(
+                batch_request.type, batch_domain)
 
     data['domains'] = dom_results
     return data
@@ -429,35 +432,6 @@ def create_batch_user(username, name, organization, email):
         username=username, name=name, organization=organization, email=email)
     user.save()
     return user
-
-
-def create_custom_view(name, description, usernames=[]):
-    """
-    Create a custom view in the DB.
-
-    """
-    view = BatchCustomView(name=name, description=description)
-    view.save()
-    for user in BatchUser.objects.filter(username__in=usernames):
-        user.custom_views.add(view)
-    return view
-
-
-def add_custom_view_to_user(view_name, username):
-    """
-    Add the mapping from user to custom view in the DB.
-
-    """
-    view = None
-    user = None
-    try:
-        view = BatchCustomView.objects.get(name=view_name)
-        user = BatchUser.objects.get(username=username)
-    except BatchCustomView.DoesNotExist:
-        return view, user
-
-    user.custom_views.add(view)
-    return view, user
 
 
 def register_request(request, *args, **kwargs):
