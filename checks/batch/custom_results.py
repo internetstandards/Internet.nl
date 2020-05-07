@@ -20,6 +20,12 @@ class CustomResult(ABC):
     """
     @abstractmethod
     def get_data(self, batch_request_type, batch_domain):
+        """
+        Returns `None` if the custom result is not relevant for the domain
+        e.g., the `batch_request_type` is of type mail and the custom result
+        is for web domains.
+
+        """
         pass
 
     @property

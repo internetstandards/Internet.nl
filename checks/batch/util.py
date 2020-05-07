@@ -327,15 +327,14 @@ def gather_batch_results(user, batch_request, site_url):
                         "technical_details": res
                     }
 
-        # We need the techincal details for web and mail
-        # Also defined in the openapi.yaml.
-
         for custom_result in (
                 r for r, active
                 in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
             custom_instance = CUSTOM_RESULTS_MAP[custom_result]
-            customs[custom_instance.name] = custom_instance.get_data(
+            custom_data = custom_instance.get_data(
                 batch_request.type, batch_domain)
+            if custom_data:
+                customs[custom_instance.name] = custom_data
 
     data['domains'] = dom_results
     return data
