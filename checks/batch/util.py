@@ -155,21 +155,24 @@ class ReportMetadata:
 
     def build_report_metadata(self):
         res = {}
+        res['data'] = {}
         res['hierarchy'] = {
             'web': [],
             'mail': []
         }
-        res['data'] = {}
-        res['name_map'] = {}
+        res['name_map'] = {
+            'web': {},
+            'mail': {}
+        }
         for item in REPORT_METADATA_WEB_MAP:
             self._parse_report_item(
-                item, res['hierarchy']['web'], res['data'], res['name_map'],
-                batch_webprobes)
+                item, res['hierarchy']['web'], res['data'],
+                res['name_map']['web'], batch_webprobes)
 
         for item in REPORT_METADATA_MAIL_MAP:
             self._parse_report_item(
-                item, res['hierarchy']['mail'], res['data'], res['name_map'],
-                batch_mailprobes)
+                item, res['hierarchy']['mail'], res['data'],
+                res['name_map']['mail'], batch_mailprobes)
 
         return res
 
@@ -257,11 +260,13 @@ def gather_batch_results(user, batch_request, site_url):
         url_name = 'webtest_results'
         url_arg = ['site']
         related_testset = 'webtest'
+        name_map = cache.get(redis_id.batch_metadata.id)['web']
     else:
         probes = batch_mailprobes.getset()
         url_name = 'mailtest_results'
         url_arg = []
         related_testset = 'mailtest'
+        name_map = cache.get(redis_id.batch_metadata.id)['mail']
 
     dom_results = {}
 
@@ -309,7 +314,6 @@ def gather_batch_results(user, batch_request, site_url):
                 "status": verdict
             }
 
-            name_map = cache.get(redis_id.batch_metadata.id)
             report = model.report
             for subtest, sub_data in report.items():
                 if name_map.get(subtest):
@@ -534,7 +538,7 @@ def patch_request(request, batch_request):
         return general_server_error("Problem cancelling the batch request.")
 
 
-def get_request(request, batch_request):
+def get_request(request, batch_request, user):
     provide_progress = request.GET.get('progress')
     provide_progress = provide_progress and provide_progress.lower() == 'true'
     res = {"request": batch_request.to_api_dict()}
@@ -547,4 +551,10 @@ def get_request(request, batch_request):
                         BatchDomainStatus.error)).count()
         res['request']['progress'] = f"{finished_domains}/{total_domains}"
         res['request']['num_domains'] = total_domains
+    if (batch_request.status == BatchRequestStatus.done
+            and not batch_request.has_report_file()):
+        batch_async_generate_results.delay(
+            user=user,
+            batch_request=batch_request,
+            site_url=get_site_url(request))
     return api_response(res)

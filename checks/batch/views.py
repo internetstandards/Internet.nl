@@ -36,7 +36,7 @@ def endpoint_request(request, request_id, *args, **kwargs):
         return unknown_request_response()
 
     if request.method == "GET":
-        return get_request(request, batch_request)
+        return get_request(request, batch_request, user)
     elif request.method == "PATCH":
         return patch_request(request, batch_request)
 

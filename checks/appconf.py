@@ -44,11 +44,11 @@ def _batch_startup_checks():
             """
             metadata = ReportMetadata().build_report_metadata()
             cache_id = redis_id.batch_metadata.id
-            cache.set(cache_id, metadata['name_map'])
+            cache.set(cache_id, metadata['name_map'], None)
             del metadata['name_map']
 
             cache_id = redis_id.report_metadata.id
-            cache.set(cache_id, metadata)
+            cache.set(cache_id, metadata, None)
 
         def check_custom_results_names():
             """
