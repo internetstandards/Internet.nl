@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 
 from .util import check_valid_user, batch_async_generate_results
-from .util import get_site_url, get_report_metadata, list_requests
+from .util import get_site_url, APIMetadata, list_requests
 from .util import register_request, get_request, patch_request
 from .responses import api_response, unknown_request_response
 from .responses import invalid_url_response, bad_client_request_response
@@ -76,7 +76,7 @@ def endpoint_results(request, request_id, *args, **kwargs):
 @require_http_methods(['GET'])
 @check_valid_user
 def endpoint_metadata_report(request, *args, **kwargs):
-    return api_response({"report": get_report_metadata()})
+    return api_response({"report": APIMetadata.get_report_metadata()})
 
 
 @check_valid_user

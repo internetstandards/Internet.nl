@@ -1622,6 +1622,9 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # Cheap counteraction for some mailservers that allow only one
         # concurrent connection per IP.
         time.sleep(5)
+
+        # Always try to get cached results (within the allowed time frame) to
+        # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
         while timer() - start < cache_ttl and not all(results.values()) > 0:
             for server, dane_cb_data in mailservers:

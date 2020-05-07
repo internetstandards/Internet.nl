@@ -34,7 +34,7 @@ def _clear_cached_pages():
 
 def _batch_startup_checks():
     if settings.ENABLE_BATCH:
-        from checks.batch.util import ReportMetadata, get_report_metadata
+        from checks.batch.util import APIMetadata
         from checks.batch.custom_results import CUSTOM_RESULTS_MAP
 
         def cache_report_metadata():
@@ -42,13 +42,7 @@ def _batch_startup_checks():
             Stores the report metadata used in the batch API.
 
             """
-            metadata = ReportMetadata().build_report_metadata()
-            cache_id = redis_id.batch_metadata.id
-            cache.set(cache_id, metadata['name_map'], None)
-            del metadata['name_map']
-
-            cache_id = redis_id.report_metadata.id
-            cache.set(cache_id, metadata, None)
+            APIMetadata.build_metadata()
 
         def check_custom_results_names():
             """
@@ -61,7 +55,7 @@ def _batch_startup_checks():
                     raise ValueError(
                         f"Unknown configured custom result ({result_name}).")
 
-            metadata = get_report_metadata()['data']
+            metadata = APIMetadata.get_report_metadata()['data']
             for name, r in CUSTOM_RESULTS_MAP.items():
                 if r.name in metadata:
                     raise ValueError(

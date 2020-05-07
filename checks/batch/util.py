@@ -17,15 +17,15 @@ from django.db import transaction
 from django.utils import timezone
 
 from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
-from . import REPORT_METADATA_MAIL_MAP
-from . import BATCH_PROBE_NAME_TO_API_CATEGORY, BATCH_API_CATEGORY_TO_PROBE_NAME
+from . import REPORT_METADATA_MAIL_MAP, BATCH_API_CATEGORY_TO_PROBE_NAME
+from . import BATCH_PROBE_NAME_TO_API_CATEGORY
 from .responses import api_response, unauthorised_response
 from .responses import bad_client_request_response, general_server_error
 from .custom_results import CUSTOM_RESULTS_MAP
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
-from ..models import BatchCustomView, BatchWebTest, BatchMailTest
+from ..models import BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..views.shared import pretty_domain_name, validate_dname
 from ..templatetags.translate import render_details_table
@@ -42,6 +42,126 @@ statuses = {
     4: 'not_tested',
     5: 'info',
 }
+
+
+class APIMetadata:
+    """
+    Class to manage the API metadata.
+
+    """
+    @staticmethod
+    def _cache_metadata(metadata):
+        cache_id = redis_id.batch_metadata.id
+        cache.set(cache_id, metadata['name_map'], None)
+        del metadata['name_map']
+
+        cache_id = redis_id.report_metadata.id
+        cache.set(cache_id, metadata, None)
+
+    @staticmethod
+    def _gather_status_verdict_map(item, data, name_map, category):
+        # Continue here for test items.
+        name_map[item['name_on_report']] = item['name']
+
+        status_verdict_map = defaultdict(set)
+
+        testname = item['name_on_report']
+        subtest = category.subtests[testname]
+
+        result_methods = [
+            method[1]
+            for method in inspect.getmembers(
+                subtest, predicate=inspect.ismethod)
+            if method[0].startswith('result_')
+        ]
+        for method in result_methods:
+            subtest.__init__()
+            arg_len = len(inspect.signature(method).parameters)
+            if arg_len:
+                method({None for i in range(arg_len)})
+            else:
+                method()
+            status = statuses[subtest.status]
+            fullverdict = verdict_regex.fullmatch(subtest.verdict).group(0)
+            if fullverdict in (
+                    "detail verdict not-tested",
+                    "detail verdict could-not-test"):
+                verdict = fullverdict
+            else:
+                verdict = verdict_regex.fullmatch(subtest.verdict).group(1)
+            status_verdict_map[status].add(verdict)
+        # Add the default status/verdict for each test.
+        status_verdict_map['not_tested'].add("detail verdict not-tested")
+        # Make it JSON serialisable.
+        data[item['name']]['status_verdict_map'] = {
+            status: list(verdicts)
+            for status, verdicts in status_verdict_map.items()
+        }
+
+    @classmethod
+    def get_report_metadata(cls):
+        cache_id = redis_id.report_metadata.id
+        if not cache.get(cache_id, None):
+            cls.build_metadata()
+        return cache.get(cache_id, None)
+
+    @classmethod
+    def get_batch_metadata(cls):
+        cache_id = redis_id.report_metadata.id
+        if not cache.get(cache_id, None):
+            cls.build_metadata()
+        return cache.get(cache_id, None)
+
+    @classmethod
+    def _parse_report_item(
+            cls, item, hierarchy, data, name_map, probeset, category=None):
+        data[item['name']] = {
+            'type': item['type'],
+            'translation_key': item['translation_key'],
+        }
+        hier = {'name': item['name']}
+
+        if 'children' in item:
+            hier['children'] = []
+
+            # Initialise the category if visiting a category's children.
+            if item['type'] == "category":
+                probe_name = BATCH_API_CATEGORY_TO_PROBE_NAME[item['name']]
+                category = probeset[probe_name].category()
+
+            for child in item['children']:
+                cls._parse_report_item(
+                    child, hier['children'], data, name_map, probeset,
+                    category)
+        hierarchy.append(hier)
+        if item['type'] != "test":
+            return
+        cls._gather_status_verdict_map(item, data, name_map, category)
+
+    @classmethod
+    def build_metadata(cls):
+        # Unique process lolck cache
+        res = {}
+        res['data'] = {}
+        res['hierarchy'] = {
+            'web': [],
+            'mail': []
+        }
+        res['name_map'] = {
+            'web': {},
+            'mail': {}
+        }
+        for item in REPORT_METADATA_WEB_MAP:
+            cls._parse_report_item(
+                item, res['hierarchy']['web'], res['data'],
+                res['name_map']['web'], batch_webprobes)
+
+        for item in REPORT_METADATA_MAIL_MAP:
+            cls._parse_report_item(
+                item, res['hierarchy']['mail'], res['data'],
+                res['name_map']['mail'], batch_mailprobes)
+
+        cls._cache_metadata(res)
 
 
 def get_site_url(request):
@@ -87,99 +207,6 @@ def get_user_from_request(request):
     except BatchUser.DoesNotExist:
         pass
     return user
-
-
-class ReportMetadata:
-    def _parse_report_item(
-            self, item, hierarchy, data, name_map, probeset, category=None):
-        data[item['name']] = {
-            'type': item['type'],
-            'translation_key': item['translation_key'],
-        }
-        hier = {'name': item['name']}
-
-        if 'children' in item:
-            hier['children'] = []
-
-            # Initialise the category if visiting a category's children.
-            if item['type'] == "category":
-                probe_name = BATCH_API_CATEGORY_TO_PROBE_NAME[item['name']]
-                category = probeset[probe_name].category()
-
-            for child in item['children']:
-                self._parse_report_item(
-                    child, hier['children'], data, name_map, probeset, category)
-        hierarchy.append(hier)
-        if item['type'] != "test":
-            return
-        self._gather_status_verdict_map(item, data, name_map, category)
-
-    def _gather_status_verdict_map(self, item, data, name_map, category):
-        # Continue here for test items.
-        name_map[item['name_on_report']] = item['name']
-
-        status_verdict_map = defaultdict(set)
-
-        testname = item['name_on_report']
-        subtest = category.subtests[testname]
-
-        result_methods = [
-            method[1]
-            for method in inspect.getmembers(
-                subtest, predicate=inspect.ismethod)
-            if method[0].startswith('result_')
-        ]
-        for method in result_methods:
-            subtest.__init__()
-            arg_len = len(inspect.signature(method).parameters)
-            if arg_len:
-                method({None for i in range(arg_len)})
-            else:
-                method()
-            status = statuses[subtest.status]
-            fullverdict = verdict_regex.fullmatch(subtest.verdict).group(0)
-            if fullverdict in (
-                    "detail verdict not-tested",
-                    "detail verdict could-not-test"):
-                verdict = fullverdict
-            else:
-                verdict = verdict_regex.fullmatch(subtest.verdict).group(1)
-            status_verdict_map[status].add(verdict)
-        # Add the default status/verdict for each test.
-        status_verdict_map['not_tested'].add("detail verdict not-tested")
-        # Make it JSON serialisable.
-        data[item['name']]['status_verdict_map'] = {
-            status: list(verdicts)
-            for status, verdicts in status_verdict_map.items()
-        }
-
-    def build_report_metadata(self):
-        res = {}
-        res['data'] = {}
-        res['hierarchy'] = {
-            'web': [],
-            'mail': []
-        }
-        res['name_map'] = {
-            'web': {},
-            'mail': {}
-        }
-        for item in REPORT_METADATA_WEB_MAP:
-            self._parse_report_item(
-                item, res['hierarchy']['web'], res['data'],
-                res['name_map']['web'], batch_webprobes)
-
-        for item in REPORT_METADATA_MAIL_MAP:
-            self._parse_report_item(
-                item, res['hierarchy']['mail'], res['data'],
-                res['name_map']['mail'], batch_mailprobes)
-
-        return res
-
-
-def get_report_metadata():
-    cache_id = redis_id.report_metadata.id
-    return cache.get(cache_id)
 
 
 @contextmanager
@@ -306,7 +333,8 @@ def gather_batch_results(user, batch_request, site_url):
         }
 
         for probe in probes:
-            category = BATCH_PROBE_NAME_TO_API_CATEGORY[probe.prefix+probe.name]
+            probe_full_name = probe.prefix + probe.name
+            category = BATCH_PROBE_NAME_TO_API_CATEGORY[probe_full_name]
             model = getattr(report_table, probe.name)
             _, _, verdict = probe.get_scores_and_verdict(model)
             categories[category] = {
@@ -455,11 +483,13 @@ def register_request(request, *args, **kwargs):
 
     if request_type.lower() == "web":
         return register_batch_request(
-            request, kwargs['batch_user'], BatchRequestType.web, name, domains)
+            request, kwargs['batch_user'], BatchRequestType.web, name,
+            domains)
 
     elif request_type.lower() == "mail":
         return register_batch_request(
-            request, kwargs['batch_user'], BatchRequestType.mail, name, domains)
+            request, kwargs['batch_user'], BatchRequestType.mail, name,
+            domains)
 
     else:
         return bad_client_request_response(
