@@ -174,7 +174,7 @@ REPORT_METADATA_WEB_MAP = [
                         'translation_key': 'web tls kex-hash-func'
                     },
                     {
-                        'name': 'web_https_tls_compression',
+                        'name': 'web_https_tls_compress',
                         'name_on_report': 'tls_compression',
                         'type': 'test',
                         'translation_key': 'web tls compression'
@@ -499,7 +499,7 @@ REPORT_METADATA_MAIL_MAP = [
                         'translation_key': 'mail tls kex-hash-func'
                     },
                     {
-                        'name': 'mail_starttls_tls_compression',
+                        'name': 'mail_starttls_tls_compress',
                         'name_on_report': 'tls_compression',
                         'type': 'test',
                         'translation_key': 'mail tls compression'
