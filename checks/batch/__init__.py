@@ -334,13 +334,13 @@ REPORT_METADATA_MAIL_MAP = [
                 'translation_key': 'mail ipv6 mail-servers',
                 'children': [
                     {
-                        'name': 'mail_ipv6_address',
+                        'name': 'mail_ipv6_mx_address',
                         'name_on_report': 'mx_aaaa',
                         'type': 'test',
                         'translation_key': 'mail ipv6 mx-AAAA'
                     },
                     {
-                        'name': 'mail_ipv6_reach',
+                        'name': 'mail_ipv6_mx_reach',
                         'name_on_report': 'mx_reach',
                         'type': 'test',
                         'translation_key': 'mail ipv6 mx-reach'
@@ -424,7 +424,7 @@ REPORT_METADATA_MAIL_MAP = [
                 'translation_key': 'mail auth dkim',
                 'children': [
                     {
-                        'name': 'mail_auth_dkim',
+                        'name': 'mail_auth_dkim_exist',
                         'name_on_report': 'dkim',
                         'type': 'test',
                         'translation_key': 'mail auth dkim',
