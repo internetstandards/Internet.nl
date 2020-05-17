@@ -8,7 +8,8 @@ from django.template import Template
 from django.utils.translation import ugettext as _
 
 from ..scoring import STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED
-from ..scoring import STATUS_NOT_TESTED, STATUS_INFO
+from ..scoring import STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL
+from ..scoring import STATUSES_HTML_CSS_TEXT_MAP
 
 register = template.Library()
 
@@ -140,24 +141,13 @@ def get_type(value):
 
 @register.filter()
 def get_testitem_div_class_and_text_status(testitem):
-    if testitem['status'] == STATUS_SUCCESS:
-        div_class = "passed"
-        text_status = _("results no-icon-status passed")
-    elif testitem['status'] == STATUS_NOTICE:
-        div_class = "warning"
-        text_status = _("results no-icon-status warning")
-    elif testitem['status'] == STATUS_GOOD_NOT_TESTED:
-        div_class = "good-not-tested"
-        text_status = _("results no-icon-status good-not-tested")
-    elif testitem['status'] == STATUS_NOT_TESTED:
-        div_class = "not-tested"
-        text_status = _("results no-icon-status not-tested")
-    elif testitem['status'] == STATUS_INFO:
-        div_class = "info"
-        text_status = _("results no-icon-status info")
-    else:
-        div_class = "failed"
-        text_status = _("results no-icon-status failed")
+    status = testitem['status']
+    if status not in (
+            STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED,
+            STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL):
+        status = STATUS_FAIL
+    div_class = STATUSES_HTML_CSS_TEXT_MAP[status]
+    text_status = _(f"results no-icon-status {div_class}")
     return div_class, text_status
 
 

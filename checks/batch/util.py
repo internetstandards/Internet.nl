@@ -20,28 +20,22 @@ from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
 from . import REPORT_METADATA_MAIL_MAP, BATCH_API_CATEGORY_TO_PROBE_NAME
 from . import BATCH_PROBE_NAME_TO_API_CATEGORY
 from .responses import api_response, unauthorised_response
-from .responses import bad_client_request_response, general_server_error
+from .responses import bad_client_request_response
+from .responses import general_server_error_response
 from .custom_results import CUSTOM_RESULTS_MAP
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
-from ..views.shared import pretty_domain_name, validate_dname
+from ..scoring import STATUSES_API_TEXT_MAP
 from ..templatetags.translate import render_details_table
+from ..views.shared import pretty_domain_name, validate_dname
 
 
 verdict_regex = re.compile(
     r'^detail (?:[^\s]+ [^\s]+ [^\s]+ )?verdict ([^\s]+)$',
     flags=re.I)
-statuses = {
-    0: 'failed',
-    1: 'passed',
-    2: 'warning',
-    3: 'good_not_tested',
-    4: 'not_tested',
-    5: 'info',
-}
 
 
 class APIMetadata:
@@ -81,7 +75,7 @@ class APIMetadata:
                 method({None for i in range(arg_len)})
             else:
                 method()
-            status = statuses[subtest.status]
+            status = STATUSES_API_TEXT_MAP[subtest.status]
             fullverdict = verdict_regex.fullmatch(subtest.verdict).group(0)
             if fullverdict in (
                     "detail verdict not-tested",
@@ -345,7 +339,7 @@ def gather_batch_results(user, batch_request, site_url):
             report = model.report
             for subtest, sub_data in report.items():
                 if name_map.get(subtest):
-                    status = statuses[sub_data['status']]
+                    status = STATUSES_API_TEXT_MAP[sub_data['status']]
                     verdict = (
                         verdict_regex.fullmatch(sub_data['verdict']).group(1))
                     res = []
@@ -356,7 +350,7 @@ def gather_batch_results(user, batch_request, site_url):
                     tests[name_map[subtest]] = {
                         "status": status,
                         "verdict": verdict,
-                        "technical_details": res
+                        "technical_details": {"data_matrix": res},
                     }
 
         for custom_result in (
@@ -479,7 +473,7 @@ def register_request(request, *args, **kwargs):
                 "'domains' is missing from the request.")
         name = json_req.get('name', 'no-name')
     except Exception:
-        return general_server_error("Problem parsing domains.")
+        return general_server_error_response("Problem parsing domains.")
 
     if request_type.lower() == "web":
         return register_batch_request(
@@ -565,7 +559,8 @@ def patch_request(request, batch_request):
         return api_response({"request": batch_request.to_api_dict()})
 
     except Exception:
-        return general_server_error("Problem cancelling the batch request.")
+        return general_server_error_response(
+            "Problem cancelling the batch request.")
 
 
 def get_request(request, batch_request, user):

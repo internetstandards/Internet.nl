@@ -9,6 +9,7 @@ from .models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
 from .models import MailTestTls, WebTestAppsecpriv
 from .scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
+from .scoring import STATUSES_HTML_CSS_TEXT_MAP
 
 
 class ProbeSet(object):
@@ -142,13 +143,13 @@ class Probe(object):
                 count[worst_status] += 1
 
         if count[STATUS_FAIL]:
-            verdict = "failed"
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_FAIL]
         elif count[STATUS_NOTICE] and not has_mandatory:
-            verdict = "warning"
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_NOTICE]
         elif count[STATUS_INFO] and not (has_mandatory or has_optional):
-            verdict = "info"
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_INFO]
         else:
-            verdict = "passed"
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_SUCCESS]
 
         if len(report) == count[STATUS_NOT_TESTED]:
             not_tested = True
@@ -164,9 +165,9 @@ class Probe(object):
 
         """
         if total_score >= 100:
-            verdict = "passed"
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_SUCCESS]
         else:
-            verdict = "failed"
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_FAIL]
         return verdict
 
     def raw_results(self, dname, remote_addr):

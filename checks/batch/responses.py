@@ -36,7 +36,7 @@ def bad_client_request_response(text):
         status_code=400)
 
 
-def general_server_error(
+def general_server_error_response(
         text="General server error. Please report this if it keeps happening"):
     return api_response({
         "error":

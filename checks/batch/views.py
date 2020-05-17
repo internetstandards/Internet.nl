@@ -10,7 +10,7 @@ from .util import get_site_url, APIMetadata, list_requests
 from .util import register_request, get_request, patch_request
 from .responses import api_response, unknown_request_response
 from .responses import invalid_url_response, bad_client_request_response
-from .responses import general_server_error
+from .responses import general_server_error_response
 from .. import simple_cache_page
 from ..models import BatchRequest
 from ..models import BatchRequestStatus
@@ -41,9 +41,7 @@ def endpoint_request(request, request_id, *args, **kwargs):
         return patch_request(request, batch_request)
 
 
-@require_http_methods(['GET'])
-@check_valid_user
-def endpoint_results(request, request_id, *args, **kwargs):
+def results(request, request_id, *args, **kwargs):
     user = kwargs['batch_user']
     try:
         batch_request = BatchRequest.objects.get(
@@ -67,7 +65,8 @@ def endpoint_results(request, request_id, *args, **kwargs):
                 batch_request.report_file.open('r')
                 data = json.load(batch_request.report_file)
             except Exception:
-                return general_server_error("Report could not be generated.")
+                return general_server_error_response(
+                    "Report could not be generated.")
             finally:
                 batch_request.report_file.close()
             return api_response(data)
@@ -75,8 +74,14 @@ def endpoint_results(request, request_id, *args, **kwargs):
 
 @require_http_methods(['GET'])
 @check_valid_user
+def endpoint_results(request, request_id, *args, **kwargs):
+    return results(request, request_id, *args, **kwargs)
+
+
+@require_http_methods(['GET'])
+@check_valid_user
 def endpoint_results_technical(request, request_id, *args, **kwargs):
-    return api_response({"in": "progress"})
+    return results(request, request_id, *args, **kwargs)
 
 
 @require_http_methods(['GET'])

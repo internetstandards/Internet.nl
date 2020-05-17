@@ -1187,7 +1187,7 @@ components:
         technical_details:
           type: object
           properties:
-            data-matrix:
+            data_matrix:
               type: array
               description: >
                 A table with data (if any). Essentially a list of the rows as

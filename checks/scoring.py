@@ -24,6 +24,21 @@ ORDERED_STATUSES = {
     STATUS_SUCCESS: 5
 }
 
+# Text used for HTML/CSS.
+STATUSES_HTML_CSS_TEXT_MAP = {
+    STATUS_FAIL: 'failed',
+    STATUS_SUCCESS: 'passed',
+    STATUS_NOTICE: 'warning',
+    STATUS_GOOD_NOT_TESTED: 'good-not-tested',
+    STATUS_NOT_TESTED: 'not-tested',
+    STATUS_INFO: 'info',
+}
+# Text used for the API output.
+STATUSES_API_TEXT_MAP = {
+    k: v.replace('-', '_')
+    for k, v in STATUSES_HTML_CSS_TEXT_MAP.items()
+}
+
 
 # --- SCORES
 #
