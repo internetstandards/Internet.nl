@@ -75,15 +75,19 @@ def endpoint_results(request, request_id, *args, **kwargs):
 
 @require_http_methods(['GET'])
 @check_valid_user
+def endpoint_results_technical(request, request_id, *args, **kwargs):
+    return api_response({"in": "progress"})
+
+
+@require_http_methods(['GET'])
+@check_valid_user
 def endpoint_metadata_report(request, *args, **kwargs):
     return api_response({"report": APIMetadata.get_report_metadata()})
 
 
 @check_valid_user
 def documentation(request, *args, **kwargs):
-    return HttpResponseRedirect(
-        'https://github.com/NLnetLabs/Internet.nl/blob/master/'
-        'documentation/batch_http_api.md')
+    return HttpResponseRedirect('/static/openapi.yaml')
 
 
 @check_valid_user

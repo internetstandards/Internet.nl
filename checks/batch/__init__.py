@@ -8,6 +8,18 @@ BATCH_API_FULL_VERSION = (
     f".{BATCH_API_MINOR_VERSION}"
     f".{BATCH_API_PATCH_VERSION}")
 
+BATCH_INDEXES = [
+    # (db_table, field_to_index, index_name),
+    ('checks_domaintestdnssec', 'domain', 'checks_domaintestdnssec_domain'),
+    ('checks_domaintestipv6', 'domain', 'checks_domaintestipv6_domain'),
+    ('checks_mailtestauth', 'domain', 'checks_mailtestauth_domain'),
+    ('checks_mailtestdnssec', 'domain', 'checks_mailtestdnssec_domain'),
+    ('checks_mailtestipv6', 'domain', 'checks_mailtestipv6_domain'),
+    ('checks_mailtesttls', 'domain', 'checks_mailtesttls_domain'),
+    ('checks_webtesttls', 'domain', 'checks_webtesttls_domain'),
+    ('checks_webtestappsecpriv', 'domain', 'checks_webtestappsecpriv_domain'),
+]
+
 BATCH_PROBE_NAME_TO_API_CATEGORY = {
     "siteipv6": "web_ipv6",
     "sitednssec": "web_dnssec",
@@ -19,7 +31,6 @@ BATCH_PROBE_NAME_TO_API_CATEGORY = {
     "mailauth": "mail_auth",
     "mailtls": "mail_starttls",
 }
-
 BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "web_ipv6": "ipv6",
     "web_dnssec": "dnssec",
@@ -31,6 +42,7 @@ BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "mail_auth": "auth",
     "mail_starttls": "tls"
 }
+
 REPORT_METADATA_WEB_MAP = [
     {
         'name': 'web_ipv6',
