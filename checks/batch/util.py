@@ -306,6 +306,114 @@ def gather_batch_results(user, batch_request, site_url):
         if batch_domain.status == BatchDomainStatus.error:
             result['status'] = "error"
             continue
+        result['status'] = "ok"
+
+        batch_test = batch_domain.get_batch_test()
+        report_table = batch_test.report
+        score = report_table.score
+
+        args = url_arg + [batch_domain.domain, report_table.id]
+        result['report'] = {
+            'url': "{}{}".format(site_url, reverse(url_name, args=args))
+        }
+        result['scoring'] = {"percentage": score}
+
+        tests = {}
+        categories = {}
+        customs = {}
+        result['results'] = {
+            "categories": categories,
+            "tests": tests,
+            "custom": customs
+        }
+
+        for probe in probes:
+            probe_full_name = probe.prefix + probe.name
+            category = BATCH_PROBE_NAME_TO_API_CATEGORY[probe_full_name]
+            model = getattr(report_table, probe.name)
+            _, _, verdict = probe.get_scores_and_verdict(model)
+            categories[category] = {
+                "verdict": verdict,
+                "status": verdict
+            }
+
+            report = model.report
+            for subtest, sub_data in report.items():
+                if name_map.get(subtest):
+                    status = STATUSES_API_TEXT_MAP[sub_data['status']]
+                    verdict = (
+                        verdict_regex.fullmatch(sub_data['verdict']).group(1))
+                    res = []
+                    if sub_data['tech_type']:
+                        res = render_details_table(
+                            sub_data['tech_string'],
+                            sub_data['tech_data'])['details_table_rows']
+                    tests[name_map[subtest]] = {
+                        "status": status,
+                        "verdict": verdict,
+                        "technical_details": {"data_matrix": res},
+                    }
+
+        for custom_result in (
+                r for r, active
+                in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
+            custom_instance = CUSTOM_RESULTS_MAP[custom_result]
+            custom_data = custom_instance.get_data(
+                batch_request.type, batch_domain)
+            if custom_data is not None:
+                customs[custom_instance.name] = custom_data
+
+    data['domains'] = dom_results
+    return data
+
+
+def gather_batch_results_technical(user, batch_request, site_url):
+    """
+    Gather all the technical results for the batch request and return them in a
+    dictionary that will be eventually converted to JSON for the API answer.
+
+    """
+    data = {
+        "api_version": BATCH_API_FULL_VERSION,
+        "request": batch_request.to_api_dict()
+    }
+    # Technically the status is still generating.
+    data['request']['status'] = "done"
+
+    if batch_request.type is BatchRequestType.web:
+        probes = batch_webprobes.getset()
+        url_name = 'webtest_results'
+        url_arg = ['site']
+        related_testset = 'webtest'
+        name_map = cache.get(redis_id.batch_metadata.id)['web']
+    else:
+        probes = batch_mailprobes.getset()
+        url_name = 'mailtest_results'
+        url_arg = []
+        related_testset = 'mailtest'
+        name_map = cache.get(redis_id.batch_metadata.id)['mail']
+
+    dom_results = {}
+
+    # Quering for the related rows upfront minimizes further DB queries and
+    # gives ~33% boost to performance.
+    related_fields = []
+    for probe in probes:
+        related_fields.append(
+            '{}__report__{}'.format(related_testset, probe.name))
+
+    batch_domains = batch_request.domains.all().select_related(*related_fields)
+    for batch_domain in batch_domains:
+        result = {
+            'domain': {},
+            'nameservers': {},
+        }
+        domain_name_idna = pretty_domain_name(batch_domain.domain)
+        dom_results[domain_name_idna] = result
+        if batch_domain.status == BatchDomainStatus.error:
+            result['status'] = "error"
+            continue
+        result['status'] = "ok"
 
         batch_test = batch_domain.get_batch_test()
         report_table = batch_test.report
