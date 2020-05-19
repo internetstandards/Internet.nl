@@ -175,7 +175,9 @@ class Tls13Support(CustomResult):
             'description': """Derives TLS1.3 support through the 0-RTT test.
 Explicitly testing for TLS1.3 support is not part of the compliance tool.
 However, TLS1.3 support could be derived from the 0-RTT test as the function
-is only available starting from TLS1.3:
+is only available starting from TLS1.3. As there is no explicit TLS1.3
+connection during testing, the test assumes that the server chose TLS1.3 when
+given the opportunity to do so.
 * `yes` - All the servers support TLS1.3.
 * `no` - At least one of servers does not support TLS1.3.
 * `undetermined` - We cannot properly determine TLS1.3 support for at least one
