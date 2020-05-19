@@ -176,8 +176,8 @@ def callback(results, addr, parent, parent_name, category):
                 parent_name: parent,
                 'domain': domain,
                 'score': dom.get("score"),
-                # 'v4_good': v4_good,
-                # 'v4_bad': v4_bad,
+                'v4_good': v4_good,
+                'v4_bad': v4_bad,
                 'v6_good': v6_good,
                 'v6_bad': v6_bad}
             dm = model_map.get(testname)(**kw)
