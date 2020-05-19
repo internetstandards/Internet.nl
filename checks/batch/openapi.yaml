@@ -441,12 +441,18 @@ components:
 
     TechnicalIpv4:
       type: object
-      required: address
+      required:
+        - address
+        - reachable
       properties:
         address:
           type: string
           format: IPv4 address
           description: The IPv4 address.
+        reachable:
+          type: boolean
+          description: >
+            If connectivity to this address was possible.
 
     TechnicalIpv6:
       type: object
@@ -822,10 +828,10 @@ components:
     DomainWebTechnical:
       type: object
       required:
-        - domain
-        - nameservers
-        - webservers
+        - status
       properties:
+        status:
+          $ref: '#/components/schemas/DomainStatus'
         domain:
           type: object
           description: Results that apply to the tested domain as a whole.
@@ -861,10 +867,10 @@ components:
     DomainMailTechnical:
       type: object
       required:
-        - domain
-        - nameservers
-        - receiving_mailservers
+        - status
       properties:
+        status:
+          $ref: '#/components/schemas/DomainStatus'
         domain:
           type: object
           description: Results that apply to the tested domain as a whole.

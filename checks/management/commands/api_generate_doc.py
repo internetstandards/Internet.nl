@@ -92,7 +92,8 @@ class Command(BaseCommand):
         for custom in (
                 CUSTOM_RESULTS_MAP[r] for r, active
                 in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
-            required.append(custom.name)
+            if custom.required:
+                required.append(custom.name)
             properties[custom.name] = custom.openapi_spec
 
     def complete_technical_results(self, api_doc):
