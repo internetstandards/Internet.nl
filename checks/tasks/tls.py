@@ -1602,7 +1602,8 @@ def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     except SoftTimeLimitExceeded:
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
-                results[af_ip_pair[1]] = dict(tls_enabled=False)
+                results[af_ip_pair[1]] = dict(
+                    server_reachable=False, tls_enabled=False)
 
     return ('tls_conn', results)
 
@@ -2688,9 +2689,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             kex_hash_func=kex_hash_func,
             kex_hash_func_score=kex_hash_func_score,
         )
-    except (socket.error, http.client.BadStatusLine, NoIpError,
-            ConnectionHandshakeException,
-            ConnectionSocketException):
+    except (socket.error, NoIpError, ConnectionSocketException):
+        return dict(server_reachable=False, tls_enabled=False)
+    except (http.client.BadStatusLine, ConnectionHandshakeException):
         return dict(tls_enabled=False)
 
 
