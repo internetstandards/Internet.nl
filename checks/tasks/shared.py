@@ -77,7 +77,10 @@ def do_mail_get_servers(self, url, *args, **kwargs):
                 continue
             dane_cb_data = resolve_dane(self, 25, rdata)
             mailservers.append((rdata, dane_cb_data))
-    return mailservers[:MAX_MAILSERVERS]
+    # Sort the mailsevers on their name so that the same ones are tested for
+    # all related tests.
+    mailservers = sorted(mailservers, key=lambda x: x[0])[:MAX_MAILSERVERS]
+    return mailservers
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):
