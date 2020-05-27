@@ -28,6 +28,7 @@ from ..probes import batch_webprobes, batch_mailprobes
 from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
+from ..models import DomainTestReport
 from ..scoring import STATUSES_API_TEXT_MAP
 from ..templatetags.translate import render_details_table
 from ..views.shared import pretty_domain_name, validate_dname
@@ -134,7 +135,6 @@ class APIMetadata:
 
     @classmethod
     def build_metadata(cls):
-        # Unique process lolck cache
         res = {}
         res['data'] = {}
         res['hierarchy'] = {
@@ -232,6 +232,13 @@ def memcache_lock(lock_id, lock_duration=60*5):
             cache.delete(lock_id)
 
 
+def get_active_custom_result_instances():
+    return [
+        CUSTOM_RESULTS_MAP[r] for r, active
+        in settings.BATCH_API_CUSTOM_RESULTS.items() if active
+    ]
+
+
 @batch_shared_task(bind=True, ignore_result=True)
 def batch_async_generate_results(self, user, batch_request, site_url):
     """
@@ -276,30 +283,15 @@ def gather_batch_results(user, batch_request, site_url):
     # Technically the status is still generating.
     data['request']['status'] = "done"
 
-    if batch_request.type is BatchRequestType.web:
-        probes = batch_webprobes.getset()
-        url_name = 'webtest_results'
-        url_arg = ['site']
-        related_testset = 'webtest'
-        name_map = cache.get(redis_id.batch_metadata.id)['web']
-    else:
-        probes = batch_mailprobes.getset()
-        url_name = 'mailtest_results'
-        url_arg = []
-        related_testset = 'mailtest'
-        name_map = cache.get(redis_id.batch_metadata.id)['mail']
-
+    custom_instances = get_active_custom_result_instances()
+    probes, url_name, url_arg, related_fields, prefetch_fields, name_map = (
+        get_batch_request_info(batch_request, False, custom_instances))
     dom_results = {}
 
-    # Quering for the related rows upfront minimizes further DB queries and
-    # gives ~33% boost to performance.
-    related_fields = []
-    for probe in probes:
-        related_fields.append(
-            '{}__report__{}'.format(related_testset, probe.name))
-
-    batch_domains = batch_request.domains.all().select_related(*related_fields)
-    for batch_domain in batch_domains:
+    batch_domains_q = batch_request.domains.all().select_related(*related_fields)
+    if prefetch_fields:
+        batch_domains_q = batch_domains_q.prefetch_related(*prefetch_fields)
+    for batch_domain in batch_domains_q:
         result = {}
         domain_name_idna = pretty_domain_name(batch_domain.domain)
         dom_results[domain_name_idna] = result
@@ -354,17 +346,255 @@ def gather_batch_results(user, batch_request, site_url):
                         "technical_details": {"data_matrix": res},
                     }
 
-        for custom_result in (
-                r for r, active
-                in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
-            custom_instance = CUSTOM_RESULTS_MAP[custom_result]
-            custom_data = custom_instance.get_data(
-                batch_request.type, batch_domain)
+        for custom_instance in custom_instances:
+            custom_data = custom_instance.get_data(report_table)
             if custom_data is not None:
                 customs[custom_instance.name] = custom_data
 
     data['domains'] = dom_results
     return data
+
+
+def get_batch_request_info(batch_request, prefetch_related, custom_instances):
+    if batch_request.type is BatchRequestType.web:
+        webtest = True
+        probes = batch_webprobes.getset()
+        url_name = 'webtest_results'
+        url_arg = ['site']
+        related_testset = 'webtest'
+        name_map = cache.get(redis_id.batch_metadata.id)['web']
+    else:
+        webtest = False
+        probes = batch_mailprobes.getset()
+        url_name = 'mailtest_results'
+        url_arg = []
+        related_testset = 'mailtest'
+        name_map = cache.get(redis_id.batch_metadata.id)['mail']
+
+    # Quering for the related rows upfront minimizes further DB queries and
+    # gives ~33% boost to performance.
+    related_fields = set()
+    prefetch_fields = set()
+    for probe in probes:
+        inter_table_relation = f'{related_testset}__report__{probe.name}'
+        related_fields.add(inter_table_relation)
+        if prefetch_related:
+            # Here we add the OneToMany relations (if needed) that cannot be
+            # queried with one complex query as with the related_fields above
+            # (OneToOne relation).
+            # For each such connection an additional query will be issued
+            # regardless of the number of actual items in the DB.
+            if webtest:
+                if probe.name == 'tls':
+                    prefetch_fields.add(f'{inter_table_relation}__webtestset')
+                elif probe.name == 'ipv6':
+                    prefetch_fields.add(f'{inter_table_relation}__nsdomains')
+                    prefetch_fields.add(f'{inter_table_relation}__webdomains')
+                elif probe.name == 'appsecpriv':
+                    prefetch_fields.add(f'{inter_table_relation}__webtestset')
+            else:
+                if probe.name == 'tls':
+                    prefetch_fields.add(f'{inter_table_relation}__testset')
+                elif probe.name == 'ipv6':
+                    prefetch_fields.add(f'{inter_table_relation}__nsdomains')
+                    prefetch_fields.add(f'{inter_table_relation}__mxdomains')
+                elif probe.name == 'dnssec':
+                    prefetch_fields.add(f'{inter_table_relation}__testset')
+
+    for custom_instance in custom_instances:
+        custom_prefetch = custom_instance.related_db_tables(batch_request.type)
+        if custom_prefetch:
+            prefetch_fields.update(
+                {f'{related_testset}__report__{c}' for c in custom_prefetch})
+
+    return probes, url_name, url_arg, related_fields, prefetch_fields, name_map
+
+
+class DomainTechnicalResults:
+    """
+    Class to group all the functions needed for generating the technical
+    results endpoint together.
+
+    """
+
+    @classmethod
+    def _get_addresses_info(cls, domain_table):
+        addr4 = []
+        addr6 = []
+        res = {'ipv4': {'addresses': addr4}, 'ipv6': {'addresses': addr6}}
+        for addr in domain_table.v4_good:
+            addr4.append({'address': addr, 'reachable': True})
+        for addr in domain_table.v4_bad:
+            addr4.append({'address': addr, 'reachable': False})
+        for addr in domain_table.v6_good:
+            addr6.append({'address': addr, 'reachable': True})
+        for addr in domain_table.v6_bad:
+            addr6.append({'address': addr, 'reachable': False})
+        return res
+
+    @classmethod
+    def _get_web_tls_info(cls, dttls, report_table):
+        res = {
+            'https_enabled': dttls.tls_enabled,
+            'server_reachable': dttls.server_reachable,
+            'tested_address': dttls.domain,
+        }
+        if dttls.tls_enabled and dttls.server_reachable:
+            res['details'] = dttls.get_web_api_details()
+            for dtappsecpriv in report_table.appsecpriv.webtestset.all():
+                if dtappsecpriv.domain != dttls.domain:
+                    continue
+                res['details'].update(dtappsecpriv.get_web_api_details())
+        return res
+
+    @classmethod
+    def _get_mail_tls_info(cls, dttls):
+        res = {
+            'starttls_enabled': dttls.tls_enabled,
+            'server_reachable': dttls.server_reachable,
+            'server_testable': not dttls.could_not_test_smtp_starttls
+        }
+        if (dttls.tls_enabled and dttls.server_reachable
+                and not dttls.could_not_test_smtp_starttls):
+            res['details'] = dttls.get_mail_api_details()
+        return res
+
+    @classmethod
+    def _get_web_domain(cls, report_table):
+        dtdnssec = report_table.dnssec
+        return {'dnssec': {'status': dtdnssec.status.name}}
+
+    @classmethod
+    def _get_mail_domain(cls, report_table):
+        res = {}
+
+        # dnssec
+        for dtdnssec in report_table.dnssec.testset.all():
+            # Cheap way to see if the result is for the domain
+            # or one of the mailservers.
+            if not dtdnssec.domain.endswith("."):
+                res['dnssec'] = {'status': dtdnssec.status.name}
+
+        auth = report_table.auth
+        # dkim
+        res['dkim'] = {'discovered': auth.dkim_available}
+
+        # dmarc
+        dmarc = {'records': auth.dmarc_record}
+        if auth.dmarc_available:
+            dmarc['policy_status'] = auth.dmarc_policy_status.name
+        res['dmarc'] = dmarc
+
+        # spf
+        spf = {
+            'records': auth.spf_record,
+            'discovered_records_bad': auth.spf_policy_records
+        }
+        if auth.spf_available:
+            spf['policy_status'] = auth.spf_policy_status.name
+        res['spf'] = spf
+
+        return res
+
+    @classmethod
+    def _get_web_nameservers(cls, report_table):
+        nameservers = {}
+        nsdomains = report_table.ipv6.nsdomains.all()
+        for nsdomain in nsdomains:
+            nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
+        return nameservers
+
+    @classmethod
+    def _get_mail_nameservers(cls, report_table):
+        nameservers = {}
+        nsdomains = report_table.ipv6.nsdomains.all()
+        for nsdomain in nsdomains:
+            nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
+        return nameservers
+
+    @classmethod
+    def _get_web_webservers(cls, report_table):
+        webservers = {}
+
+        distance = report_table.ipv6.web_simhash_distance
+        if (distance >= 0 and distance <= 100):
+            ip_similirarity = distance <= settings.SIMHASH_MAX
+            webservers['ip_similirarity'] = ip_similirarity
+
+        webdomain = report_table.ipv6.webdomains.all()[0]
+        webservers.update(cls._get_addresses_info(webdomain))
+
+        for dttls in report_table.tls.webtestset.all():
+            info = cls._get_web_tls_info(dttls, report_table)
+            if any(filter(
+                    lambda x: x['address'] == info['tested_address'],
+                    webservers['ipv4']['addresses'])):
+                webservers['ipv4'].update(info)
+            else:
+                webservers['ipv6'].update(info)
+
+        return webservers
+
+    @classmethod
+    def _get_mail_mailservers(cls, report_table):
+        mailservers = {}
+        for mxdomain in report_table.ipv6.mxdomains.all():
+            mailserver = {}
+            mailservers[mxdomain.domain] = mailserver
+            mailserver['addresses'] = cls._get_addresses_info(mxdomain)
+
+        for dtdnssec in report_table.dnssec.testset.all():
+            # Cheap way to see if the result is for the domain
+            # or one of the mailservers.
+            if not dtdnssec.domain.endswith("."):
+                continue
+
+            # Old results where not sharing the same MXs on all tests.
+            # This will result in partial details between the tests here.
+            if dtdnssec.domain not in mailservers:
+                mailservers[dtdnssec.domain] = {}
+            mailservers[dtdnssec.domain]['dnssec'] = {
+                'status': dtdnssec.status.name}
+
+        for dttls in report_table.tls.testset.all():
+            # Old results where not sharing the same MXs on all tests.
+            # This will result in partial details between the tests here.
+            if dttls.domain not in mailservers:
+                mailservers[dttls.domain] = {}
+
+            info = cls._get_mail_tls_info(dttls)
+            mailservers[dttls.domain].update(info)
+
+        return mailservers
+
+    @classmethod
+    def _get_web_details(cls, report_table):
+        details = {}
+        details['domain'] = cls._get_web_domain(report_table)
+        details['nameservers'] = cls._get_web_nameservers(report_table)
+        details['webservers'] = cls._get_web_webservers(report_table)
+        return details
+
+    @classmethod
+    def _get_mail_details(cls, report_table):
+        details = {}
+        details['domain'] = cls._get_mail_domain(report_table)
+        details['nameservers'] = cls._get_mail_nameservers(report_table)
+        details['receiving_mailservers'] = cls._get_mail_mailservers(report_table)
+        return details
+
+    @classmethod
+    def fill_result(cls, report_table, result):
+        """
+        Gathers all the available technical details from `report_table` and
+        updates `result` with the data.
+
+        """
+        if isinstance(report_table, DomainTestReport):
+            details = cls._get_web_details(report_table)
+        else:
+            details = cls._get_mail_details(report_table)
+        result.update(details)
 
 
 def gather_batch_results_technical(user, batch_request, site_url):
@@ -380,34 +610,15 @@ def gather_batch_results_technical(user, batch_request, site_url):
     # Technically the status is still generating.
     data['request']['status'] = "done"
 
-    if batch_request.type is BatchRequestType.web:
-        probes = batch_webprobes.getset()
-        url_name = 'webtest_results'
-        url_arg = ['site']
-        related_testset = 'webtest'
-        name_map = cache.get(redis_id.batch_metadata.id)['web']
-    else:
-        probes = batch_mailprobes.getset()
-        url_name = 'mailtest_results'
-        url_arg = []
-        related_testset = 'mailtest'
-        name_map = cache.get(redis_id.batch_metadata.id)['mail']
-
+    probes, url_name, url_arg, related_fields, prefetch_fields, name_map = (
+        get_batch_request_info(batch_request, True, []))
     dom_results = {}
 
-    # Quering for the related rows upfront minimizes further DB queries and
-    # gives ~33% boost to performance.
-    related_fields = []
-    for probe in probes:
-        related_fields.append(
-            '{}__report__{}'.format(related_testset, probe.name))
-
-    batch_domains = batch_request.domains.all().select_related(*related_fields)
-    for batch_domain in batch_domains:
-        result = {
-            'domain': {},
-            'nameservers': {},
-        }
+    batch_domains_q = batch_request.domains.all().select_related(*related_fields)
+    if prefetch_fields:
+        batch_domains_q = batch_domains_q.prefetch_related(*prefetch_fields)
+    for batch_domain in batch_domains_q:
+        result = {}
         domain_name_idna = pretty_domain_name(batch_domain.domain)
         dom_results[domain_name_idna] = result
         if batch_domain.status == BatchDomainStatus.error:
@@ -417,58 +628,7 @@ def gather_batch_results_technical(user, batch_request, site_url):
 
         batch_test = batch_domain.get_batch_test()
         report_table = batch_test.report
-        score = report_table.score
-
-        args = url_arg + [batch_domain.domain, report_table.id]
-        result['report'] = {
-            'url': "{}{}".format(site_url, reverse(url_name, args=args))
-        }
-        result['scoring'] = {"percentage": score}
-
-        tests = {}
-        categories = {}
-        customs = {}
-        result['results'] = {
-            "categories": categories,
-            "tests": tests,
-            "custom": customs
-        }
-
-        for probe in probes:
-            probe_full_name = probe.prefix + probe.name
-            category = BATCH_PROBE_NAME_TO_API_CATEGORY[probe_full_name]
-            model = getattr(report_table, probe.name)
-            _, _, verdict = probe.get_scores_and_verdict(model)
-            categories[category] = {
-                "verdict": verdict,
-                "status": verdict
-            }
-
-            report = model.report
-            for subtest, sub_data in report.items():
-                if name_map.get(subtest):
-                    status = STATUSES_API_TEXT_MAP[sub_data['status']]
-                    verdict = (
-                        verdict_regex.fullmatch(sub_data['verdict']).group(1))
-                    res = []
-                    if sub_data['tech_type']:
-                        res = render_details_table(
-                            sub_data['tech_string'],
-                            sub_data['tech_data'])['details_table_rows']
-                    tests[name_map[subtest]] = {
-                        "status": status,
-                        "verdict": verdict,
-                        "technical_details": {"data_matrix": res},
-                    }
-
-        for custom_result in (
-                r for r, active
-                in settings.BATCH_API_CUSTOM_RESULTS.items() if active):
-            custom_instance = CUSTOM_RESULTS_MAP[custom_result]
-            custom_data = custom_instance.get_data(
-                batch_request.type, batch_domain)
-            if custom_data:
-                customs[custom_instance.name] = custom_data
+        DomainTechnicalResults.fill_result(report_table, result)
 
     data['domains'] = dom_results
     return data
@@ -639,11 +799,6 @@ def list_requests(request, *args, **kwargs):
             request_dict['progress'] = f"{finished_domains}/{total_domains}"
             request_dict['num_domains'] = total_domains
         batch_info.append(request_dict)
-        # We don't need a link to the results, the API is pretty clean now
-        #        results="{}{}".format(
-        #            get_site_url(request),
-        #            reverse(
-        #                'batch_results', args=(batch_request.request_id, ))),
     return api_response({"requests": batch_info})
 
 

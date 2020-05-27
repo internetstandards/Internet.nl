@@ -121,7 +121,7 @@ class BaseTestModel(models.Model):
         abstract = True
 
     def totalscore(self, score_fields):
-        if self.score:
+        if self.score is not None:
             return self.score
 
         totalscore = 0
@@ -276,10 +276,10 @@ class DomainTestIpv6(BaseTestModel):
 
 class IPv6TestDomain(models.Model):
     domain = models.CharField(max_length=255)
-    v6_good = ListField()
-    v6_bad = ListField()
-    v4_good = ListField()
-    v4_bad = ListField()
+    v6_good = ListField(default=[])
+    v6_bad = ListField(default=[])
+    v4_good = ListField(default=[])
+    v4_bad = ListField(default=[])
     score = models.IntegerField(null=True)
 
     def __dir__(self):
@@ -290,7 +290,8 @@ class IPv6TestDomain(models.Model):
 
 
 class WebDomain(IPv6TestDomain):
-    domaintestipv6 = models.ForeignKey(DomainTestIpv6, null=True)
+    domaintestipv6 = models.ForeignKey(
+        DomainTestIpv6, null=True, related_name='webdomains')
 
     def __dir__(self):
         return super(WebDomain, self).__dir__().extend([
@@ -313,7 +314,7 @@ class DomainServersModel(models.Model):
     max_score = models.IntegerField(null=True)
 
     def totalscore(self, score_fields, testset, mailtest=False):
-        if self.score:
+        if self.score is not None:
             return self.score
 
         if len(testset) == 0:
@@ -490,6 +491,62 @@ class DomainTestTls(BaseTestModel):
             'cert_hostmatch_score', 'score',
         ]
 
+    def get_web_api_details(self):
+        return {
+            'dane_status': self.dane_status.name,
+            'dane_records': self.dane_records,
+            'kex_params_bad': self.fs_bad,
+            'kex_params_phase_out': self.fs_phase_out,
+            'ciphers_bad': self.ciphers_bad,
+            'ciphers_phase_out': self.ciphers_phase_out,
+            'cipher_order': self.cipher_order.name,
+            'cipher_order_violation': self.cipher_order_violation,
+            'protocols_bad': self.protocols_bad,
+            'protocols_phase_out': self.protocols_phase_out,
+            'compression': self.compression,
+            'secure_reneg': self.secure_reneg,
+            'client_reneg': self.client_reneg,
+            'zero_rtt': self.zero_rtt.name,
+            'ocsp_stapling': self.ocsp_stapling.name,
+            'kex_hash_func': self.kex_hash_func.name,
+            'https_redirect': self.forced_https.name,
+            'http_compression': self.http_compression_enabled,
+            'hsts': self.hsts_enabled,
+            'hsts_policies': self.hsts_policies,
+            'cert_chain': self.cert_chain,
+            'cert_trusted': self.cert_trusted,
+            'cert_pubkey_bad': self.cert_pubkey_bad,
+            'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
+            'cert_signature_bad': self.cert_signature_bad,
+            'cert_hostmatch_bad': self.cert_hostmatch_bad,
+        }
+
+    def get_mail_api_details(self):
+        return {
+            'dane_status': self.dane_status.name,
+            'dane_records': self.dane_records,
+            'dane_rollover': self.dane_rollover,
+            'kex_params_bad': self.fs_bad,
+            'kex_params_phase_out': self.fs_phase_out,
+            'ciphers_bad': self.ciphers_bad,
+            'ciphers_phase_out': self.ciphers_phase_out,
+            'cipher_order': self.cipher_order.name,
+            'cipher_order_violation': self.cipher_order_violation,
+            'protocols_bad': self.protocols_bad,
+            'protocols_phase_out': self.protocols_phase_out,
+            'compression': self.compression,
+            'secure_reneg': self.secure_reneg,
+            'client_reneg': self.client_reneg,
+            'zero_rtt': self.zero_rtt.name,
+            'kex_hash_func': self.kex_hash_func.name,
+            'cert_chain': self.cert_chain,
+            'cert_trusted': self.cert_trusted,
+            'cert_pubkey_bad': self.cert_pubkey_bad,
+            'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
+            'cert_signature_bad': self.cert_signature_bad,
+            'cert_hostmatch_bad': self.cert_hostmatch_bad,
+        }
+
 
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
@@ -544,6 +601,20 @@ class DomainTestAppsecpriv(BaseTestModel):
             'x_content_type_options_score',
         ]
 
+    def get_web_api_details(self):
+        return {
+            'content_security_policy_enabled': self.content_security_policy_enabled,
+            'content_security_policy_values': self.content_security_policy_values,
+            'referrer_policy_enabled': self.referrer_policy_enabled,
+            'referrer_policy_values': self.referrer_policy_values,
+            'x_content_type_options_enabled': self.x_content_type_options_enabled,
+            'x_content_type_options_values': self.x_content_type_options_values,
+            'x_frame_options_enabled': self.x_frame_options_enabled,
+            'x_frame_options_values': self.x_frame_options_values,
+            'x_xss_protection_enabled': self.x_xss_protection_enabled,
+            'x_xss_protection_values': self.x_xss_protection_values,
+        }
+
 
 class DomainTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -585,8 +656,10 @@ class MailTestIpv6(BaseTestModel):
 
 
 class NsDomain(IPv6TestDomain):
-    domaintestipv6 = models.ForeignKey(DomainTestIpv6, null=True)
-    mailtestipv6 = models.ForeignKey(MailTestIpv6, null=True)
+    domaintestipv6 = models.ForeignKey(
+        DomainTestIpv6, null=True, related_name='nsdomains')
+    mailtestipv6 = models.ForeignKey(
+        MailTestIpv6, null=True, related_name='nsdomains')
 
     def __dir__(self):
         return super(NsDomain, self).__dir__().extend([
@@ -596,7 +669,8 @@ class NsDomain(IPv6TestDomain):
 
 
 class MxDomain(IPv6TestDomain):
-    mailtestipv6 = models.ForeignKey(MailTestIpv6, null=True)
+    mailtestipv6 = models.ForeignKey(
+        MailTestIpv6, null=True, related_name='mxdomains')
 
     def __dir__(self):
         return super(MxDomain, self).__dir__().extend([

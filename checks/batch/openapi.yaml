@@ -690,7 +690,7 @@ components:
         http_compression:
           type: boolean
           description: If HTTP compression is used.
-        hsts_enabled:
+        hsts:
           type: string
           enum:
             - "yes"
@@ -776,16 +776,13 @@ components:
       type: object
       description: Results for the webserver.
       required:
-        - tested_address
-        - server_reachable
-        - https_enabled
-        - details
       properties:
         tested_address:
           type: string
           format: IP address
           description: >
-            The tested IP address. Empty if no addresses are available.
+            The tested IP address. If the webserver has more than one addresses
+            in this address family, only one is checked at random.
         server_reachable:
           type: boolean
           description: >
@@ -996,10 +993,6 @@ components:
       required:
         - addresses
         - dnssec
-        - server_reachable
-        - starttls_enabled
-        - server_testable
-        - details
       properties:
         addresses:
           type: object
