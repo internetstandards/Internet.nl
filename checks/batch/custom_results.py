@@ -3,7 +3,8 @@
 import re
 from abc import ABC, abstractmethod
 
-from ..models import BatchRequestType, ZeroRttStatus
+from ..models import DomainTestReport, MailTestReport, ZeroRttStatus
+from ..models import BatchRequestType
 
 
 def _create_custom_results_map(instances):
@@ -16,14 +17,33 @@ def _create_custom_results_map(instances):
 
 class CustomResult(ABC):
     """
+    Abstract class for custom results.
 
     """
     @abstractmethod
-    def get_data(self, batch_request_type, batch_domain):
+    def get_data(self, report_table):
         """
-        Returns `None` if the custom result is not relevant for the domain
-        e.g., the `batch_request_type` is of type mail and the custom result
-        is for web domains.
+        Should return `None` if the custom result is not relevant for the
+        domain e.g., the request is of type mail and the custom result is only
+        relevant for web domains.
+
+        `report_table` is one of `DomainTestReport` or `MailTestReport` for
+        web and mail tests respectively. If extra information is needed you
+        can navigate away to individual test tables from there.
+
+        """
+        pass
+
+    @abstractmethod
+    def related_db_tables(self, batch_request_type):
+        """
+        Should return a set with any related DB tables needed for the custom
+        data. These related tables are the OneToMany related tables that need
+        to be fetched with extra queries.
+
+        Related DB entries should be of the format "<testtable>__<relative_name>"
+        and they will be ultimately used to form the relation:
+            batchdomain__<webtest/mailtest>__report__<testtable>__<relative_name>
 
         """
         pass
@@ -75,7 +95,8 @@ class MailNonSendingDomain(CustomResult):
     def openapi_spec(self):
         return {
             'type': 'boolean',
-            'description': """[Only for mailtests]
+            'description': """_[Only for mailtests]_
+
 Checks if the domain is configured for *not* sending email. For this test this
 is translated as:
 * SPF record with `v=spf1 -all`, and
@@ -85,18 +106,20 @@ is translated as:
 """,
         }
 
-    def get_data(self, batch_request_type, batch_domain):
-        if batch_request_type != BatchRequestType.mail:
+    def related_db_tables(self, batch_request_type):
+        return set()
+
+    def get_data(self, report_table):
+        if not isinstance(report_table, MailTestReport):
             return None
 
-        batch_test = batch_domain.get_batch_test()
         non_sending_domain = False
         dmarc_re = re.compile(r'v=DMARC1;\ *p=reject;?')
         spf_re = re.compile(r'v=spf1\ +-all;?')
-        dmarc_available = batch_test.auth.dmarc_available
-        dmarc_record = batch_test.auth.dmarc_record
-        spf_available = batch_test.auth.spf_available
-        spf_record = batch_test.auth.spf_record
+        dmarc_available = report_table.auth.dmarc_available
+        dmarc_record = report_table.auth.dmarc_record
+        spf_available = report_table.auth.spf_available
+        spf_record = report_table.auth.spf_record
         if (dmarc_available and spf_available
                 and len(dmarc_record) == 1 and len(spf_record) == 1
                 and dmarc_re.match(dmarc_record[0])
@@ -123,24 +146,33 @@ class MailServersTestableStatus(CustomResult):
         return {
             'type': 'string',
             'enum': ['no_mx', 'unreachable', 'untestable', 'ok'],
-            'description': """[Only for mailtests]
-Checks the testability status of the mailservers:
+
+            'description': """_[Only for mailtests; relates to the STARTTLS
+category]_
+
+This result gives a clearer insight on the STARTTLS testability status:
 * `no_mx` - No mailservers are configured for the domain.
 * `unreachable` - Network connectivity was not possible with at least one
-  mailserver.
-* `untestable` - At least one mailserver stopped communicating back (e.g.,
-  ratelimit was in place). Instead of partial (and probably not correct)
-  results, that mailserver is treated as non testable.
-* `ok` - All mailservers could be tested propertly.
+  mailserver for the STARTTLS tests. That mailserver is treated as non
+  testable.
+* `untestable` - We encountered errors during testing with at least one
+  mailserver. These could be persistent SMTP errors and/or dropped connections
+  that we couldn't overcome even after several retries. Instead of partial (and
+  probably not correct) STARTTLS results, that mailserver is treated as
+  non testable.
+* `ok` - All mailservers could be tested thoroughly for all the STARTTLS
+  related tests.
 """,
         }
 
-    def get_data(self, batch_request_type, batch_domain):
-        if batch_request_type != BatchRequestType.mail:
+    def related_db_tables(self, batch_request_type):
+        return set()
+
+    def get_data(self, report_table):
+        if not isinstance(report_table, MailTestReport):
             return None
 
-        batch_test = batch_domain.get_batch_test()
-        report = batch_test.tls.report
+        report = report_table.tls.report
         verdict = report['starttls_exists']['verdict']
         if verdict == 'detail mail tls starttls-exists verdict other-2':
             status = 'no_mx'
@@ -179,20 +211,27 @@ is only available starting from TLS1.3. As there is no explicit TLS1.3
 connection during testing, the test assumes that the server chose TLS1.3 when
 given the opportunity to do so.
 * `yes` - All the servers support TLS1.3.
-* `no` - At least one of servers does not support TLS1.3.
+* `no` - At least one server does not support TLS1.3.
 * `undetermined` - We cannot properly determine TLS1.3 support for at least one
   of the servers (connection problems or we couldn't thoroughly test the
   server).
 """,
         }
 
-    def get_data(self, batch_request_type, batch_domain):
+    def related_db_tables(self, batch_request_type):
+        related = set()
+        if batch_request_type is BatchRequestType.web:
+            related.add('tls__webtestset')
+        else:
+            related.add('tls__testset')
+        return related
+
+    def get_data(self, report_table):
         status = 'yes'
-        batch_test = batch_domain.get_batch_test()
         testset = 'testset'
-        if batch_request_type == BatchRequestType.web:
+        if isinstance(report_table, DomainTestReport):
             testset = 'webtestset'
-        servers = getattr(batch_test.tls, testset).all()
+        servers = getattr(report_table.tls, testset).all()
         if not servers:
             status = 'no'
         for dttls in servers:
