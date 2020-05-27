@@ -1,5 +1,6 @@
 *.sqlite3
 /internetnl/settings.py
+__pycache__
 *.mo
 *.pyc
 *.swp
