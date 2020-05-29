@@ -2773,6 +2773,10 @@ msgid "faqs report subtest bad"
 msgstr "Fail on REQUIRED subtest ⇒ null score"
 
 #, md-format
+msgid "faqs report subtest error"
+msgstr "TODO: Error encountered during testing ⇒ null score"
+
+#, md-format
 msgid "faqs report subtest good"
 msgstr ""
 "Pass on REQUIRED, RECOMMENDED or OPTIONAL subtest ⇒ first: full score / "

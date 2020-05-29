@@ -2920,6 +2920,10 @@ msgid "faqs report subtest bad"
 msgstr "Gezakt voor VEREISTE subtest ⇒ nulscore"
 
 #, md-format
+msgid "faqs report subtest error"
+msgstr "TODO: Error encountered during testing ⇒ null score"
+
+#, md-format
 msgid "faqs report subtest good"
 msgstr ""
 "Geslaagd voor VEREISTE, AANBEVOLEN of OPTIONELE subtest ⇒ eerste: volledige "
