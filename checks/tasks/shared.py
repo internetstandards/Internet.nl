@@ -1,5 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from collections import defaultdict
 import re
 import socket
 
@@ -9,10 +10,7 @@ import unbound
 
 from . import SetupUnboundContext
 from .. import batch_shared_task
-from ..scoring import STATUS_MAX, ORDERED_STATUSES, STATUS_NOT_TESTED
-from ..scoring import STATUS_SUCCESS, STATUS_GOOD_NOT_TESTED
-
-from collections import defaultdict
+from ..scoring import STATUS_MAX, ORDERED_STATUSES
 
 
 MAX_MAILSERVERS = 10
@@ -161,15 +159,6 @@ def aggregate_subreports(subreports, report):
                     data = (server, subtechdata)
                 report[test_item]['tech_data'].append(data)
 
-            # If the results are 'good' and 'not_tested' mixed, we show the
-            # good verdict but with the good_not_tested status.
-            if (report[test_item]['status'] == STATUS_NOT_TESTED and
-                any((subreport[test_item]['status'] == STATUS_SUCCESS
-                    for _, subreport in subreports.items()))):
-                report[test_item]['status'] = STATUS_GOOD_NOT_TESTED
-                good_verdict = report[test_item]['label'].replace(
-                    ' label', ' verdict good')
-                report[test_item]['verdict'] = good_verdict
     else:
         for test_name, test_item in report.items():
             test_item['tech_type'] = ""

@@ -7,9 +7,10 @@ from .tasks import ipv6, dnssec, mail, tls, dispatcher, appsecpriv
 from .models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
 from .models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
 from .models import MailTestTls, WebTestAppsecpriv
+from .categories import WebTlsHttpsExists, MailTlsStarttlsExists
 from .scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
-from .scoring import STATUSES_HTML_CSS_TEXT_MAP
+from .scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
 
 
 class ProbeSet(object):
@@ -123,6 +124,7 @@ class Probe(object):
         count = {
             STATUS_SUCCESS: 0,
             STATUS_FAIL: 0,
+            STATUS_ERROR: 0,
             STATUS_INFO: 0,
             STATUS_NOTICE: 0,
             STATUS_GOOD_NOT_TESTED: 0,
@@ -142,7 +144,9 @@ class Probe(object):
             if status in (STATUS_GOOD_NOT_TESTED, STATUS_NOT_TESTED):
                 count[worst_status] += 1
 
-        if count[STATUS_FAIL]:
+        if count[STATUS_ERROR]:
+            verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_ERROR]
+        elif count[STATUS_FAIL]:
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_FAIL]
         elif count[STATUS_NOTICE] and not has_mandatory:
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_NOTICE]
@@ -206,11 +210,12 @@ class Probe(object):
         if not modelobj:
             return None
 
-        max_score, total_score, verdict = self.get_scores_and_verdict(modelobj)
+        max_score, total_score, verdict, text_verdict = (
+            self.get_scores_and_verdict(modelobj))
         summary = _("test {}{} {} summary".format(
-            self.prefix, self.name, verdict))
+            self.prefix, self.name, text_verdict))
         description = _("test {}{} {} description".format(
-            self.prefix, self.name, verdict))
+            self.prefix, self.name, text_verdict))
 
         return dict(
             done=True,
@@ -255,7 +260,43 @@ class Probe(object):
             verdict = self._verdict_connection(total_score)
         else:
             verdict, not_tested = self._verdict(report)
-        return max_score, total_score, verdict
+
+        text_verdict = self.get_text_verdict(verdict, modelobj, report)
+        return max_score, total_score, verdict, text_verdict
+
+    def get_text_verdict(self, verdict, modelobj, report):
+        """
+        Returns the verdict that should be used for translations. It can
+        override the default verdict if a rule matches here. That would
+        influence the text of the category in case we need to show something
+        other than the generic texts for failures.
+
+        """
+        if isinstance(modelobj, WebTestTls):
+            test_instance = WebTlsHttpsExists()
+            test_instance.result_unreachable()
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test sitetls unreachable description
+                # test sitetls unreachable summary
+                return "unreachable"
+        elif isinstance(modelobj, MailTestTls):
+            test_instance = MailTlsStarttlsExists()
+            test_instance.result_unreachable()
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test mailtls unreachable description
+                # test mailtls unreachable summary
+                return "unreachable"
+            test_instance.result_could_not_test()
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test mailtls untestable description
+                # test mailtls untestable summary
+                return "untestable"
+            test_instance.result_no_mailservers()
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test mailtls no-mx description
+                # test mailtls no-mx summary
+                return "no-mx"
+        return verdict
 
     def get_max_score(self, modelobj, maxscore):
         """

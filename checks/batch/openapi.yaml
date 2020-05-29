@@ -1097,12 +1097,20 @@ components:
             - info
             - passed
             - warning
+            - error
           description: |
             Status of a test category:
             * `passed`- All the tests in this category passed.
             * `info` - At least one optional test failed in this category.
             * `warning` - At least one recommended test failed in this category.
             * `failed` - At least one required test failed in this category.
+            * `error` - An error occured while performing tests in this
+              category that prohibits further testing. These errors are mainly
+              connectivity/communication issues between the tool and the server
+              under test and could be attributed to either party (e.g., a
+              mailserver ratelimits the tool while testing for STARTTLS
+              support). Inconclusive tests in this category are treated as not
+              tested.
         verdict:
           type: string
           description: >
@@ -1167,17 +1175,18 @@ components:
             - failed
             - info
             - warning
-            - good_not_tested
             - not_tested
+            - error
           description: |
             Status of a test:
             * `passed`- The test was successful.
             * `failed` - Failure on a required test.
             * `info` - Failure on an optional test.
             * `warning` - Failure on a recommended test.
+            * `error` - The test could not be completed due to an error (either
+              on the tool's or the server's under test side). Other tests that
+              depend on this one will therefore not be able to run.
             * `not_tested` - Not tested; a related parent test already failed.
-            * `good_not_tested` - Some servers passed this test but not all
-              servers could be tested.
         verdict:
           type: string
           description: >

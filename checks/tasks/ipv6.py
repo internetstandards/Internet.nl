@@ -216,7 +216,7 @@ def callback(results, addr, parent, parent_name, category):
                     category.subtests['mx_aaaa'].result_no_mailservers()
                 else:
                     category.subtests['mx_aaaa'].result_bad(dom_addresses)
-                    category.subtests['mx_reach'].not_tested_bad()
+                    category.subtests['mx_reach'].result_not_tested_bad()
 
             else:
                 if len(has_aaaa) == len(result.get("domains")):

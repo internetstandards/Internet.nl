@@ -11,17 +11,19 @@ STATUS_NOTICE = 2
 STATUS_GOOD_NOT_TESTED = 3
 STATUS_NOT_TESTED = 4
 STATUS_INFO = 5
+STATUS_ERROR = 6
 
 STATUS_MAX = STATUS_SUCCESS
 
 # The highest status MUST be the one defined in STATUS_MAX above.
 ORDERED_STATUSES = {
-    STATUS_FAIL: 0,
-    STATUS_NOTICE: 1,
-    STATUS_INFO: 2,
-    STATUS_GOOD_NOT_TESTED: 3,
+    STATUS_ERROR: 0,
+    STATUS_FAIL: 1,
+    STATUS_NOTICE: 2,
+    STATUS_INFO: 3,
     STATUS_NOT_TESTED: 4,
-    STATUS_SUCCESS: 5
+    STATUS_GOOD_NOT_TESTED: 5,
+    STATUS_SUCCESS: 6
 }
 
 # Text used for HTML/CSS.
@@ -29,9 +31,10 @@ STATUSES_HTML_CSS_TEXT_MAP = {
     STATUS_FAIL: 'failed',
     STATUS_SUCCESS: 'passed',
     STATUS_NOTICE: 'warning',
-    STATUS_GOOD_NOT_TESTED: 'good-not-tested',
+    STATUS_GOOD_NOT_TESTED: 'not-tested',  # same as not-tested
     STATUS_NOT_TESTED: 'not-tested',
     STATUS_INFO: 'info',
+    STATUS_ERROR: 'error',
 }
 # Text used for the API output.
 STATUSES_API_TEXT_MAP = {

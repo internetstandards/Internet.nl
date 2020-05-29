@@ -3399,9 +3399,6 @@ msgstr "Error"
 msgid "results no-icon-status failed"
 msgstr "Gezakt"
 
-msgid "results no-icon-status good-not-tested"
-msgstr "Gedeeltelijk geslaagd, gedeeltelijk niet-testbaar"
-
 msgid "results no-icon-status info"
 msgstr "Informatie"
 
@@ -3731,6 +3728,14 @@ msgstr ""
 msgid "test mailtls label"
 msgstr "Beveiligde mailserver-verbinding (STARTTLS en DANE)"
 
+msgid "test mailtls no-mx description"
+msgstr ""
+"TODO: There are no mailservers available for this domain."
+
+msgid "test mailtls no-mx summary"
+msgstr ""
+"TODO: No mailservers availablei (STARTTLS en DANE)"
+
 msgid "test mailtls passed description"
 msgstr ""
 "Goed gedaan! Verzendende mailservers die beveiligd e-mailtransport ([STARTTLS en DANE](/faqs/starttls/)) ondersteunen, kunnen met \n"
@@ -3742,6 +3747,26 @@ msgstr "Mailserver-verbinding voldoende beveiligd (STARTTLS en DANE)"
 
 msgid "test mailtls title"
 msgstr "Beveiligde mailserver-verbinding?"
+
+msgid "test mailtls unreachable description"
+msgstr ""
+"TODO: At least one of the mailservers was not reachable. This could be \n"
+"because of network connectivity problems or the mailserver is not \n"
+"accepting connections."
+
+msgid "test mailtls unreachable summary"
+msgstr ""
+"TODO: Unreachable mailserver (STARTTLS en DANE)"
+
+msgid "test mailtls untestable description"
+msgstr ""
+"TODO: We were not able to test at least one of the mailservers. Causes for \n"
+"this include SMTP errors or ratelimiting measures engaging and dropping \n"
+"connections."
+
+msgid "test mailtls untestable summary"
+msgstr ""
+"TODO: Untestable mailserver (STARTTLS en DANE)"
 
 msgid "test mailtls warning description"
 msgstr ""
@@ -3950,6 +3975,14 @@ msgstr "Verbinding voldoende beveiligd (HTTPS)"
 
 msgid "test sitetls title"
 msgstr "Beveiligde verbinding?"
+
+msgid "test sitetls unreachable description"
+msgstr ""
+"TODO: The webserver was not reachable for all the tests in this category."
+
+msgid "test sitetls unreachable summary"
+msgstr ""
+"TODO: Unreachable webserver (HTTPS)"
 
 msgid "test sitetls warning description"
 msgstr ""

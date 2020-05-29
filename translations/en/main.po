@@ -3241,9 +3241,6 @@ msgstr "Error"
 msgid "results no-icon-status failed"
 msgstr "Failed"
 
-msgid "results no-icon-status good-not-tested"
-msgstr "Partly passed, partly not testable"
-
 msgid "results no-icon-status info"
 msgstr "Information"
 
@@ -3563,6 +3560,14 @@ msgstr ""
 msgid "test mailtls label"
 msgstr "Secure mail server connection (STARTTLS and DANE)"
 
+msgid "test mailtls no-mx description"
+msgstr ""
+"TODO: There are no mailservers available for this domain."
+
+msgid "test mailtls no-mx summary"
+msgstr ""
+"TODO: No mailservers available (STARTTLS and DANE)"
+
 msgid "test mailtls passed description"
 msgstr ""
 "Well done! Sending mail servers supporting secure email transport ([STARTTLS and DANE](/faqs/starttls/)) can establish a secure \n"
@@ -3573,6 +3578,26 @@ msgstr "Mail server connection sufficiently secured (STARTTLS and DANE)"
 
 msgid "test mailtls title"
 msgstr "Secure mail server connection?"
+
+msgid "test mailtls unreachable description"
+msgstr ""
+"TODO: At least one of the mailservers was not reachable. This could be \n"
+"because of network connectivity problems or the mailserver is not \n"
+"accepting connections."
+
+msgid "test mailtls unreachable summary"
+msgstr ""
+"TODO: Unreachable mailserver (STARTTLS and DANE)"
+
+msgid "test mailtls untestable description"
+msgstr ""
+"TODO: We were not able to test at least one of the mailservers. Causes for \n"
+"this include SMTP errors or ratelimiting measures engaging and dropping \n"
+"connections."
+
+msgid "test mailtls untestable summary"
+msgstr ""
+"TODO: Untestable mailserver (STARTTLS and DANE)"
 
 msgid "test mailtls warning description"
 msgstr ""
@@ -3772,6 +3797,14 @@ msgstr "Connection sufficiently secured (HTTPS)"
 
 msgid "test sitetls title"
 msgstr "Secure connection?"
+
+msgid "test sitetls unreachable description"
+msgstr ""
+"TODO: The webserver was not reachable for all the tests in this category."
+
+msgid "test sitetls unreachable summary"
+msgstr ""
+"TODO: Unreachable webserver (HTTPS)"
 
 msgid "test sitetls warning description"
 msgstr ""

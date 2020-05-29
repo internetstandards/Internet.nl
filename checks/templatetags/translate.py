@@ -9,7 +9,7 @@ from django.utils.translation import ugettext as _
 
 from ..scoring import STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED
 from ..scoring import STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL
-from ..scoring import STATUSES_HTML_CSS_TEXT_MAP
+from ..scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
 
 register = template.Library()
 
@@ -144,7 +144,7 @@ def get_testitem_div_class_and_text_status(testitem):
     status = testitem['status']
     if status not in (
             STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED,
-            STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL):
+            STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL, STATUS_ERROR):
         status = STATUS_FAIL
     div_class = STATUSES_HTML_CSS_TEXT_MAP[status]
     text_status = _(f"results no-icon-status {div_class}")

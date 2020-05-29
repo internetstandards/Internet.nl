@@ -323,9 +323,9 @@ def gather_batch_results(user, batch_request, site_url):
             probe_full_name = probe.prefix + probe.name
             category = BATCH_PROBE_NAME_TO_API_CATEGORY[probe_full_name]
             model = getattr(report_table, probe.name)
-            _, _, verdict = probe.get_scores_and_verdict(model)
+            _, _, verdict, text_verdict = probe.get_scores_and_verdict(model)
             categories[category] = {
-                "verdict": verdict,
+                "verdict": text_verdict,
                 "status": verdict
             }
 

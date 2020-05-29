@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
 from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
-from .scoring import STATUS_NOTICE, STATUS_INFO
+from .scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
 
@@ -76,12 +76,16 @@ class Subtest(object):
         self.tech_type = init_tech_type
         self.tech_data = init_tech_data
 
-    def _status(self, status):
+    def _status(self, status, override=False):
         """
         Make sure that the status assigned while testing does not overcome the
         _WORST_STATUS configured for this subtest.
 
         """
+        if override:
+            self.status = status
+            return
+
         if ORDERED_STATUSES[status] >= ORDERED_STATUSES[self.worst_status]:
             self.status = status
         else:
@@ -388,7 +392,7 @@ class MailIpv6MxReach(Subtest):
     def was_tested(self):
         self.worst_status = scoring.MAIL_IPV6_MX_CONN_WORST_STATUS
 
-    def not_tested_bad(self):
+    def result_not_tested_bad(self):
         self.worst_status = scoring.MAIL_IPV6_MX_CONN_WORST_STATUS
 
     def result_good(self):
@@ -633,7 +637,7 @@ class WebTlsHttpsExists(Subtest):
         self.tech_data = "detail tech data no"
 
     def result_unreachable(self):
-        self._status(STATUS_NOTICE)
+        self._status(STATUS_ERROR, override=True)
         self.verdict = "detail web tls https-exists verdict other"
 
 
@@ -1188,12 +1192,12 @@ class MailTlsStarttlsExists(Subtest):
 
     def result_unreachable(self):
         self.was_tested()
-        self._status(STATUS_NOTICE)
+        self._status(STATUS_ERROR, override=True)
         self.verdict = "detail mail tls starttls-exists verdict other"
 
     def result_could_not_test(self):
         self.was_tested()
-        self._status(STATUS_FAIL)
+        self._status(STATUS_ERROR, override=True)
         self.verdict = "detail verdict could-not-test"
 
     def result_no_mailservers(self):
