@@ -335,15 +335,9 @@ def gather_batch_results(user, batch_request, site_url):
                     status = STATUSES_API_TEXT_MAP[sub_data['status']]
                     verdict = (
                         verdict_regex.fullmatch(sub_data['verdict']).group(1))
-                    res = []
-                    if sub_data['tech_type']:
-                        res = render_details_table(
-                            sub_data['tech_string'],
-                            sub_data['tech_data'])['details_table_rows']
                     tests[name_map[subtest]] = {
                         "status": status,
                         "verdict": verdict,
-                        "technical_details": {"data_matrix": res},
                     }
 
         for custom_instance in custom_instances:

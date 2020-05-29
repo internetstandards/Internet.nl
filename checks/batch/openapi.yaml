@@ -1166,7 +1166,6 @@ components:
       required:
         - status
         - verdict
-        - technical_details
       properties:
         status:
           type: string
@@ -1192,22 +1191,6 @@ components:
           description: >
             Verdict of the test; only useful for translation when combined
             with the information on the `/metadata/report` endpoint.
-        technical_details:
-          type: object
-          properties:
-            data_matrix:
-              type: array
-              description: >
-                A table with data (if any). Essentially a list of the rows as
-                presented visually on the report. Each row is a list containing
-                the column values. You can use the `/metadata/report` endpoint
-                to get the headers of the tables for each test.
-              items:
-                type: array
-                description: The rows of the table.
-                items:
-                  type: string
-                  description: The cell values of each row.
 
     Tests:
       description: Results per test for the domain.
