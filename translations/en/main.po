@@ -2791,12 +2791,6 @@ msgid "faqs report subtest not-tested"
 msgstr ""
 "Not tested, because already failed related parent subtest ⇒ null score"
 
-#, md-format
-msgid "faqs report subtest partly-tested"
-msgstr ""
-"Some servers passed subtest, but not all servers could be tested ⇒ null \n"
-"score"
-
 msgid "faqs report subtest title"
 msgstr "Icons per subtest"
 

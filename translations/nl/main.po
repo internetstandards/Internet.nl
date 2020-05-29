@@ -2939,12 +2939,6 @@ msgstr ""
 "Niet getest, want al gezakt voor gerelateerde bovenliggende subtest ⇒ \n"
 "nulscore"
 
-#, md-format
-msgid "faqs report subtest partly-tested"
-msgstr ""
-"Sommige servers geslaagd voor subtest, maar niet alle servers konden worden \n"
-"getest ⇒ nulscore"
-
 msgid "faqs report subtest title"
 msgstr "Iconen per subtest"
 
