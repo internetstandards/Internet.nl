@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2020-02-04 13:18:47.171037\n"
+"PO-Revision-Date: 2020-06-03 12:23:05.663557\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -607,8 +607,10 @@ msgstr "Al je mailserverdomeinen zijn ondertekend met DNSSEC."
 
 msgid "detail mail dnssec mx-exists verdict no-mailservers"
 msgstr ""
-"Voor jouw domein zijn geen mailservers ingesteld. De test valt niet terug op"
-" A/AAAA-records voor mailservers als een MX-record afwezig is."
+"Voor jouw domein zijn geen ontvangende mailservers ingesteld. We adviseren "
+"je om \"Null MX\" (RFC 7505) te gebruiken voor domeinen zonder mailservers. "
+"De test valt niet terug op A/AAAA-records voor mailservers als een MX-record"
+" afwezig is. "
 
 msgid "detail mail dnssec mx-exists verdict resolver-error"
 msgstr ""
@@ -715,8 +717,10 @@ msgstr ""
 
 msgid "detail mail ipv6 mx-AAAA verdict other"
 msgstr ""
-"Voor jouw domein zijn geen mailservers ingesteld. De test valt niet terug op"
-" A/AAAA-records voor mailservers als een MX-record afwezig is."
+"Voor jouw domein zijn geen ontvangende mailservers ingesteld. We adviseren "
+"je om \"Null MX\" (RFC 7505) te gebruiken voor domeinen zonder mailservers. "
+"De test valt niet terug op A/AAAA-records voor mailservers als een MX-record"
+" afwezig is. "
 
 msgid "detail mail ipv6 mx-reach exp"
 msgstr ""
@@ -1470,9 +1474,9 @@ msgstr "Testfout. Graag later opnieuw proberen."
 
 msgid "detail verdict not-tested"
 msgstr ""
-"Deze test is niet uitgevoerd, omdat een hogergelegen test waarvan deze test "
-"afhankelijk is al een negatief testresultaat ('gezakt') gaf, of omdat "
-"onvoldoende informatie beschikbaar was om de test uit te kunnen voeren. "
+"Deze subtest is niet uitgevoerd, omdat een bovenliggende test waarvan deze "
+"subtest afhankelijk is een negatief testresultaat gaf, of omdat onvoldoende "
+"informatie beschikbaar was om de subtest uit te kunnen voeren. "
 
 msgid "detail web appsecpriv http-csp exp"
 msgstr ""
@@ -2917,21 +2921,21 @@ msgstr "Norm en score"
 
 #, md-format
 msgid "faqs report subtest bad"
-msgstr "Gezakt voor VEREISTE subtest ⇒ nulscore"
+msgstr "Slecht: gezakt voor VEREISTE subtest ⇒ nulscore"
 
 #, md-format
 msgid "faqs report subtest error"
-msgstr "TODO: Error encountered during testing ⇒ null score"
+msgstr "Testfout: uitvoeringsfout tijdens testen ⇒ nulscore"
 
 #, md-format
 msgid "faqs report subtest good"
 msgstr ""
-"Geslaagd voor VEREISTE, AANBEVOLEN of OPTIONELE subtest ⇒ eerste: volledige "
-"score / laatste twee: geen impact op score"
+"Goed: geslaagd voor VEREISTE, AANBEVOLEN of OPTIONELE subtest ⇒ eerste: "
+"volledige score / laatste twee: geen impact op score"
 
 #, md-format
 msgid "faqs report subtest info"
-msgstr "Gezakt voor OPTIONELE subtest ⇒ geen impact op score"
+msgstr "Ter informatie: gezakt voor OPTIONELE subtest ⇒ geen impact op score"
 
 #, md-format
 msgid "faqs report subtest not-tested"
@@ -2944,29 +2948,30 @@ msgstr "Iconen per subtest"
 
 #, md-format
 msgid "faqs report subtest warning"
-msgstr "Gezakt voor AANBEVOLEN subtest ⇒ geen impact op score"
+msgstr "Waarschuwing: gezakt voor AANBEVOLEN subtest ⇒ geen impact op score"
 
 #, md-format
 msgid "faqs report test bad"
 msgstr ""
-"Gezakt voor tenminste één VEREISTE subtest ⇒ geen volledige score voor "
-"testcategorie"
+"Slecht: gezakt voor tenminste één VEREISTE subtest ⇒ geen volledige score "
+"voor testcategorie"
 
 #, md-format
 msgid "faqs report test error"
 msgstr ""
-"Uitvoeringsfout voor tenminste één subtest ⇒ geen resultaat voor "
+"Testfout: uitvoeringsfout voor tenminste één subtest ⇒ geen resultaat voor "
 "testcategorie"
 
 #, md-format
 msgid "faqs report test good"
-msgstr "Geslaagd voor alle subtesten ⇒ volledige score voor testcategorie "
+msgstr ""
+"Goed: geslaagd voor alle subtesten ⇒ volledige score voor testcategorie "
 
 #, md-format
 msgid "faqs report test info"
 msgstr ""
-"Gezakt voor tenminste één OPTIONELE subtest ⇒ volledige score voor "
-"testcategorie"
+"Ter informatie: gezakt voor tenminste één OPTIONELE subtest ⇒ volledige "
+"score voor testcategorie"
 
 msgid "faqs report test title"
 msgstr "Iconen per testcategorie"
@@ -2974,8 +2979,8 @@ msgstr "Iconen per testcategorie"
 #, md-format
 msgid "faqs report test warning"
 msgstr ""
-"Gezakt voor tenminste één AANBEVOLEN subtest ⇒ volledige score voor "
-"testcategorie "
+"Waarschuwing: gezakt voor tenminste één AANBEVOLEN subtest ⇒ volledige score"
+" voor testcategorie "
 
 msgid "faqs report title"
 msgstr "Toelichting op testrapport"
@@ -3728,11 +3733,11 @@ msgstr "Beveiligde mailserver-verbinding (STARTTLS en DANE)"
 
 msgid "test mailtls no-mx description"
 msgstr ""
-"TODO: There are no mailservers available for this domain."
+"Voor jouw domein zijn geen ontvangende mailservers (MX) ingesteld. Daardoor "
+"is de test voor STARTTLS en DANE niet van toepassing. "
 
 msgid "test mailtls no-mx summary"
-msgstr ""
-"TODO: No mailservers availablei (STARTTLS en DANE)"
+msgstr "Geen ontvangende mailservers ingesteld (STARTTLS en DANE)"
 
 msgid "test mailtls passed description"
 msgstr ""
@@ -3748,23 +3753,25 @@ msgstr "Beveiligde mailserver-verbinding?"
 
 msgid "test mailtls unreachable description"
 msgstr ""
-"TODO: At least one of the mailservers was not reachable. This could be \n"
-"because of network connectivity problems or the mailserver is not \n"
-"accepting connections."
+"Testfout: tenminste één van jouw ontvangende mailservers was niet bereikbaar"
+" voor ons. Daardoor was het onmogelijk om de test voor STARTTLS en DANE "
+"(volledig) uit te voeren. Dit kan worden veroorzaakt door "
+"netwerkconnectiviteitsproblemen of door het niet accepteren van connecties "
+"door jouw mailserver(s)."
 
 msgid "test mailtls unreachable summary"
-msgstr ""
-"TODO: Unreachable mailserver (STARTTLS en DANE)"
+msgstr "Onbereikbare ontvangende mailserver (STARTTLS en DANE)"
 
 msgid "test mailtls untestable description"
 msgstr ""
-"TODO: We were not able to test at least one of the mailservers. Causes for \n"
-"this include SMTP errors or ratelimiting measures engaging and dropping \n"
-"connections."
+"Testfout: tenminste één van jouw ontvangende mailservers was niet testbaar "
+"voor ons. Daardoor was het niet mogelijk om de test voor STARTTLS en DANE "
+"(volledig) uit te voeren. Dit kan worden veroorzaakt door onder meer SMTP "
+"errors en geactiveerde ratelimiting-maatregelen die verbindingen "
+"tegenhouden."
 
 msgid "test mailtls untestable summary"
-msgstr ""
-"TODO: Untestable mailserver (STARTTLS en DANE)"
+msgstr "Niet-testbare mailserver (STARTTLS en DANE)"
 
 msgid "test mailtls warning description"
 msgstr ""
@@ -3976,11 +3983,13 @@ msgstr "Beveiligde verbinding?"
 
 msgid "test sitetls unreachable description"
 msgstr ""
-"TODO: The webserver was not reachable for all the tests in this category."
+"Je webserver was niet bereikbaar voor ons. Daardoor was het onmogelijk om de"
+" test voor HTTPS (volledig) uit te voeren. Dit kan worden veroorzaakt door "
+"netwerkconnectiviteitsproblemen of door het niet accepteren van connecties "
+"door jouw webserver."
 
 msgid "test sitetls unreachable summary"
-msgstr ""
-"TODO: Unreachable webserver (HTTPS)"
+msgstr "Onbereikbare webserver (HTTPS)"
 
 msgid "test sitetls warning description"
 msgstr ""

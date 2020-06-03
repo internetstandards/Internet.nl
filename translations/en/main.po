@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2020-02-04 13:18:47.088287\n"
+"PO-Revision-Date: 2020-06-03 12:23:05.593169\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -598,8 +598,10 @@ msgstr "All your mail server domains are DNSSEC signed."
 
 msgid "detail mail dnssec mx-exists verdict no-mailservers"
 msgstr ""
-"No mail servers are set on your domain. The test does not fall back to "
-"A/AAAA records for mail servers in case of absence of an MX record."
+"No receiving mail servers are set on your domain. We advise you to use "
+"\"Null MX\" (RFC 7505) for domains without mail servers. The test does not "
+"fall back to A/AAAA records for mail servers in case of absence of an MX "
+"record. "
 
 msgid "detail mail dnssec mx-exists verdict resolver-error"
 msgstr ""
@@ -700,8 +702,10 @@ msgstr "All receiving mail servers on your domain have an IPv6 address."
 
 msgid "detail mail ipv6 mx-AAAA verdict other"
 msgstr ""
-"No mail servers are set on your domain. The test does not fall back to "
-"A/AAAA records for mail servers in case of absence of an MX record."
+"No receiving mail servers are set on your domain. We advise you to use "
+"\"Null MX\" (RFC 7505) for domains without mail servers. The test does not "
+"fall back to A/AAAA records for mail servers in case of absence of an MX "
+"record. "
 
 msgid "detail mail ipv6 mx-reach exp"
 msgstr ""
@@ -1461,9 +1465,9 @@ msgstr "Test error. Please try again later."
 
 msgid "detail verdict not-tested"
 msgstr ""
-"This test did not run, because either a parent test that this test depends "
-"on gave a negative result ('fail') or not enough information was available "
-"to run this test."
+"This subtest did not run, because either a parent test that this subtest "
+"depends on gave a negative result, or not enough information was available "
+"to run this subtest."
 
 msgid "detail web appsecpriv http-csp exp"
 msgstr ""
@@ -2752,11 +2756,11 @@ msgstr ""
 "- Internet.nl contains **three main tests**, i.e. for websites, mail services and internet connections. \n"
 "- These main tests consist of **test categories** that include **subtests**. For example, one of the main tests is the website test which contains a test category on HTTPS that has a subtest on HSTS.\n"
 "- A subtest can have one of the following three requirement levels (in conformance with [RFC 2119](https://tools.ietf.org/html/rfc2119)):\n"
-"\n"
+"  \n"
 "  - REQUIRED ('must')\n"
 "  - RECOMMENDED ('should')\n"
 "  - OPTIONAL ('may')\n"
-"  \n"
+"\n"
 "- When a subtest is either 'RECOMMENDED' or 'OPTIONAL', this is mentioned in the test explanation.\n"
 "\n"
 "### How is the percentage score calculated?\n"
@@ -2770,21 +2774,21 @@ msgstr "Norm and score"
 
 #, md-format
 msgid "faqs report subtest bad"
-msgstr "Fail on REQUIRED subtest ⇒ null score"
+msgstr "Bad: fail on REQUIRED subtest ⇒ null score"
 
 #, md-format
 msgid "faqs report subtest error"
-msgstr "TODO: Error encountered during testing ⇒ null score"
+msgstr "Test error: error encountered during testing ⇒ null score"
 
 #, md-format
 msgid "faqs report subtest good"
 msgstr ""
-"Pass on REQUIRED, RECOMMENDED or OPTIONAL subtest ⇒ first: full score / "
-"latter two: no score impact"
+"Good: pass on REQUIRED, RECOMMENDED or OPTIONAL subtest ⇒ first: full score "
+"/ latter two: no score impact"
 
 #, md-format
 msgid "faqs report subtest info"
-msgstr "Fail on OPTIONAL subtest ⇒ no score impact"
+msgstr "Informational: fail on OPTIONAL subtest ⇒ no score impact"
 
 #, md-format
 msgid "faqs report subtest not-tested"
@@ -2796,23 +2800,28 @@ msgstr "Icons per subtest"
 
 #, md-format
 msgid "faqs report subtest warning"
-msgstr "Fail on RECOMMENDED subtest ⇒ no score impact"
+msgstr "Warning: fail on RECOMMENDED subtest ⇒ no score impact"
 
 #, md-format
 msgid "faqs report test bad"
-msgstr "Failed at least one REQUIRED subtest ⇒ no full score in test category"
+msgstr ""
+"Bad: failed at least one REQUIRED subtest ⇒ no full score in test category"
 
 #, md-format
 msgid "faqs report test error"
-msgstr "Execution error for at least one subtest ⇒ no result in test category"
+msgstr ""
+"Test error: execution error for at least one subtest ⇒ no result in test "
+"category"
 
 #, md-format
 msgid "faqs report test good"
-msgstr "Passed all subtests ⇒ full score in test category"
+msgstr "Good: passed all subtests ⇒ full score in test category"
 
 #, md-format
 msgid "faqs report test info"
-msgstr "Failed at least one OPTIONAL subtest ⇒ full score in test category "
+msgstr ""
+"Informational: failed at least one OPTIONAL subtest ⇒ full score in test "
+"category "
 
 msgid "faqs report test title"
 msgstr "Icons per test category"
@@ -2820,7 +2829,8 @@ msgstr "Icons per test category"
 #, md-format
 msgid "faqs report test warning"
 msgstr ""
-"Failed at least one RECOMMENDED subtest ⇒ full score in test category "
+"Warning: failed at least one RECOMMENDED subtest ⇒ full score in test "
+"category "
 
 msgid "faqs report title"
 msgstr "Explanation of test report"
@@ -3560,11 +3570,11 @@ msgstr "Secure mail server connection (STARTTLS and DANE)"
 
 msgid "test mailtls no-mx description"
 msgstr ""
-"TODO: There are no mailservers available for this domain."
+"Informational: no receiving mail servers (MX) are set on your domain making "
+"the STARTTLS and DANE test not applicable. "
 
 msgid "test mailtls no-mx summary"
-msgstr ""
-"TODO: No mailservers available (STARTTLS and DANE)"
+msgstr "No receiving mailservers set (STARTTLS and DANE)"
 
 msgid "test mailtls passed description"
 msgstr ""
@@ -3579,23 +3589,23 @@ msgstr "Secure mail server connection?"
 
 msgid "test mailtls unreachable description"
 msgstr ""
-"TODO: At least one of the mailservers was not reachable. This could be \n"
-"because of network connectivity problems or the mailserver is not \n"
+"Test error: at least one of your receiving mail servers was not reachable "
+"for us, making it impossible to (fully) test for STARTTLS and DANE. This "
+"could be caused by network connectivity problems or by the mailsever(s) not "
 "accepting connections."
 
 msgid "test mailtls unreachable summary"
-msgstr ""
-"TODO: Unreachable mailserver (STARTTLS and DANE)"
+msgstr "Unreachable receiving mail server (STARTTLS and DANE)"
 
 msgid "test mailtls untestable description"
 msgstr ""
-"TODO: We were not able to test at least one of the mailservers. Causes for \n"
-"this include SMTP errors or ratelimiting measures engaging and dropping \n"
-"connections."
+"Test error: at least one of your receiving mail servers was not testable for"
+" us,  making it impossible to (fully) test for STARTTLS and DANE. This could"
+" be caused by, among other things, SMTP errors and ratelimiting measures "
+"engaging and dropping connections."
 
 msgid "test mailtls untestable summary"
-msgstr ""
-"TODO: Untestable mailserver (STARTTLS and DANE)"
+msgstr "Untestable mail server (STARTTLS and DANE)"
 
 msgid "test mailtls warning description"
 msgstr ""
@@ -3798,11 +3808,12 @@ msgstr "Secure connection?"
 
 msgid "test sitetls unreachable description"
 msgstr ""
-"TODO: The webserver was not reachable for all the tests in this category."
+"Your webserver was not reachable for us, making it impossible to (fully) "
+"test for HTTPS. This could be caused by network connectivity problems or by "
+"the webserver not accepting connections."
 
 msgid "test sitetls unreachable summary"
-msgstr ""
-"TODO: Unreachable webserver (HTTPS)"
+msgstr "Unreachable webserver (HTTPS)"
 
 msgid "test sitetls warning description"
 msgstr ""
