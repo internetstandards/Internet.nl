@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 from ..models import DomainTestReport, MailTestReport, ZeroRttStatus
 from ..models import BatchRequestType
+from ..categories import MailTlsStarttlsExists
 
 
 def _create_custom_results_map(instances):
@@ -41,9 +42,11 @@ class CustomResult(ABC):
         data. These related tables are the OneToMany related tables that need
         to be fetched with extra queries.
 
-        Related DB entries should be of the format "<testtable>__<relative_name>"
-        and they will be ultimately used to form the relation:
-            batchdomain__<webtest/mailtest>__report__<testtable>__<relative_name>
+        Related DB entries should be of the format
+        "<testtable>__<relative_name>" and they will be ultimately used to form
+        the relation:
+
+        batchdomain__<webtest/mailtest>__report__<testtable>__<relative_name>
 
         """
         pass
@@ -173,17 +176,17 @@ This result gives a clearer insight on the STARTTLS testability status:
             return None
 
         report = report_table.tls.report
-        verdict = report['starttls_exists']['verdict']
-        if verdict == 'detail mail tls starttls-exists verdict other-2':
-            status = 'no_mx'
-        elif verdict == 'detail verdict could-not-test':
-            status = 'untestable'
-        elif verdict == 'detail mail tls starttls-exists verdict other':
-            status = 'unreachable'
-        else:
-            status = 'ok'
-
-        return status
+        test_instance = MailTlsStarttlsExists()
+        test_instance.result_no_mailservers()
+        if report[test_instance.name]['verdict'] == test_instance.verdict:
+            return 'no_mx'
+        test_instance.result_could_not_test()
+        if report[test_instance.name]['verdict'] == test_instance.verdict:
+            return 'untestable'
+        test_instance.result_unreachable()
+        if report[test_instance.name]['verdict'] == test_instance.verdict:
+            return 'unreachable'
+        return 'ok'
 
 
 class Tls13Support(CustomResult):
