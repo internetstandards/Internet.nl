@@ -1,5 +1,6 @@
 *.sqlite3
 /internetnl/settings.py
+/internetnl/batch_api_doc_conf.py
 __pycache__
 *.mo
 *.pyc
