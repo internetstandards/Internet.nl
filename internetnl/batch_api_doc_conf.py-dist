@@ -31,7 +31,7 @@ SERVERS = [
 #
 # These values will replace text in the documentation.
 #
-DESC_INTRO_REDOCLY_LINK = "https://batch.internet.nl/api/batch/v2/openapi.yaml"
+DESC_INTRO_REDOCLY_LINK = "https://batch.internet.nl/api/batch/openapi.yaml"
 DESC_INTRO_EXTRA = """
 ## Requesting access
 
