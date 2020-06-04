@@ -90,7 +90,6 @@ def endpoint_metadata_report(request, *args, **kwargs):
     return api_response({"report": APIMetadata.get_report_metadata()})
 
 
-@check_valid_user
 def documentation(request, *args, **kwargs):
     return HttpResponseRedirect('/static/openapi.yaml')
 
