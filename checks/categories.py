@@ -639,6 +639,7 @@ class WebTlsHttpsExists(Subtest):
     def result_unreachable(self):
         self._status(STATUS_ERROR, override=True)
         self.verdict = "detail web tls https-exists verdict other"
+        self.tech_data = "detail tech data not-reachable"
 
 
 class WebTlsHttpsForced(Subtest):
@@ -1194,11 +1195,13 @@ class MailTlsStarttlsExists(Subtest):
         self.was_tested()
         self._status(STATUS_ERROR, override=True)
         self.verdict = "detail mail tls starttls-exists verdict other"
+        self.tech_data = "detail tech data not-reachable"
 
     def result_could_not_test(self):
         self.was_tested()
         self._status(STATUS_ERROR, override=True)
         self.verdict = "detail verdict could-not-test"
+        self.tech_data = "detail tech data not-testable"
 
     def result_no_mailservers(self):
         self._status(STATUS_INFO)

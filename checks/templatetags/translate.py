@@ -102,6 +102,8 @@ def render_details_table(headers, arguments):
                             'detail tech data bogus',
                             'detail tech data not-applicable',
                             'detail tech data not-tested',
+                            'detail tech data not-testable',
+                            'detail tech data not-reachable',
                             'detail tech data phase-out',
                             'detail tech data insufficient']:
                         value = _(value)

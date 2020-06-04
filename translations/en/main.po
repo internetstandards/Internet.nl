@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2020-06-03 12:23:05.593169\n"
+"PO-Revision-Date: 2020-06-04 13:31:13.905374\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -1444,6 +1444,12 @@ msgstr "no"
 
 msgid "detail tech data not-applicable"
 msgstr "not applicable"
+
+msgid "detail tech data not-reachable"
+msgstr "TODO: not reachable"
+
+msgid "detail tech data not-testable"
+msgstr "TODO: not testable"
 
 msgid "detail tech data not-tested"
 msgstr "not tested"
