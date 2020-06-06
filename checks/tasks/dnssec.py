@@ -138,8 +138,7 @@ def registrar_lookup(addr):
                 if (whois and isinstance(whois, dict)
                         and whois.get("registrar")):
                     res = ", ".join(whois["registrar"])[:250]
-            except (
-                    socket.error, pythonwhois.shared.WhoisException,
+            except (socket.error, pythonwhois.shared.WhoisException,
                     UnicodeDecodeError, IndexError):
                 pass
 
