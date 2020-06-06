@@ -5,6 +5,7 @@ from helpers import DomainConfig, GoodDomain, BadDomain
 from helpers import domainconfig_id_generator, TESTS, UX
 from helpers import IMPERFECT_SCORE, PERFECT_SCORE
 from helpers import INSUFFICIENT_TEXT, PHASE_OUT_TEXT, PHASE_OUT_TEXT_NL, ANY
+from helpers import NOTTESTABLE_TEXT, NOTREACHABLE_TEXT
 from selenium.common.exceptions import ElementNotInteractableException
 
 
@@ -184,8 +185,8 @@ ncsc_20_tests = [
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
             ]
         }),
 
@@ -193,8 +194,8 @@ ncsc_20_tests = [
         'tls10onlyhonorclientcipherorder.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
             ]
         },
         expected_failures={
@@ -206,8 +207,8 @@ ncsc_20_tests = [
         'tls10onlyinsecurereneg.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
             ],
         },
         expected_failures={
@@ -225,8 +226,8 @@ ncsc_20_tests = [
         'tls11only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6/IPv4
             ],
         }),
 
@@ -234,10 +235,10 @@ ncsc_20_tests = [
         'tls1011.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv4
-                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT],  # IPv6/IPv4
             ],
         }),
 
@@ -245,8 +246,8 @@ ncsc_20_tests = [
         'tls1112.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION: [
-                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6
-                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['TLS 1.1', PHASE_OUT_TEXT],  # IPv6/IPv4
             ]
         }),
 
@@ -285,8 +286,11 @@ ncsc_20_tests = [
 
     DomainConfig('NCSC20-Table1:None',
         'nossl.test.nlnetlabs.tk',
-        expected_failures={
-            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE
+        expected_error={
+            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE: [
+                [NOTREACHABLE_TEXT],  # IPv6/IPv4
+                [NOTREACHABLE_TEXT],  # IPv6/IPv4
+            ]
         },
         expected_not_tested={
             TESTS.DANE_EXISTS,
@@ -326,10 +330,10 @@ ncsc_20_tests = [
         'tls12onlynotprescribedorder1.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CIPHER_ORDER: [
-                [MustMatch(r'.+'), ''],   # IPv6
-                [MustMatch(r'.+'), '1'],  # IPv6
-                [MustMatch(r'.+'), ''],   # IPv4
-                [MustMatch(r'.+'), '1'],  # IPv4
+                [MustMatch(r'.+'), ''],   # IPv6/IPv4
+                [MustMatch(r'.+'), '1'],  # IPv6/IPv4
+                [MustMatch(r'.+'), ''],   # IPv6/IPv4
+                [MustMatch(r'.+'), '1'],  # IPv6/IPv4
             ]
         }),
 
@@ -337,10 +341,10 @@ ncsc_20_tests = [
         'tls12onlynotprescribedorder4.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_CIPHER_ORDER: [
-                [MustMatch(r'.+'), ''],   # IPv6
-                [MustMatch(r'.+'), '4'],  # IPv6
-                [MustMatch(r'.+'), ''],   # IPv4
-                [MustMatch(r'.+'), '4'],  # IPv4
+                [MustMatch(r'.+'), ''],   # IPv6/IPv4
+                [MustMatch(r'.+'), '4'],  # IPv6/IPv4
+                [MustMatch(r'.+'), ''],   # IPv6/IPv4
+                [MustMatch(r'.+'), '4'],  # IPv6/IPv4
             ]
         }),
 
@@ -351,10 +355,10 @@ ncsc_20_tests = [
         },
         expected_failures={
             TESTS.TLS_CIPHER_ORDER: [
-                [MustMatch(r'.+'), ''],   # IPv6
-                [MustMatch(r'.+'), 'None'],  # IPv6
-                [MustMatch(r'.+'), ''],   # IPv4
-                [MustMatch(r'.+'), 'None'],  # IPv4
+                [MustMatch(r'.+'), ''],   # IPv6/IPv4
+                [MustMatch(r'.+'), 'None'],  # IPv6/IPv4
+                [MustMatch(r'.+'), ''],   # IPv6/IPv4
+                [MustMatch(r'.+'), 'None'],  # IPv6/IPv4
             ]
         }),
 
@@ -411,8 +415,8 @@ ncsc_20_tests = [
         'tls12onlyffdhe2048.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_KEY_EXCHANGE: [
-                ['DH-2048', PHASE_OUT_TEXT],  # IPv6
-                ['DH-2048', PHASE_OUT_TEXT],  # IPv4
+                ['DH-2048', PHASE_OUT_TEXT],  # IPv6/IPv4
+                ['DH-2048', PHASE_OUT_TEXT],  # IPv6/IPv4
             ]
         }),
 
@@ -428,8 +432,8 @@ ncsc_20_tests = [
         'tls12onlyffother.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_KEY_EXCHANGE: [
-                ['DH-4096', INSUFFICIENT_TEXT], # IPv6
-                ['DH-4096', INSUFFICIENT_TEXT], # IPv4
+                ['DH-4096', INSUFFICIENT_TEXT], # IPv6/IPv4
+                ['DH-4096', INSUFFICIENT_TEXT], # IPv6/IPv4
             ]
         }),
 
@@ -443,8 +447,8 @@ ncsc_20_tests = [
         'tls12onlydhlongg.test.nlnetlabs.tk',
         expected_failures={
             TESTS.TLS_KEY_EXCHANGE: [
-                ['DH-1024', INSUFFICIENT_TEXT], # IPv6
-                ['DH-1024', INSUFFICIENT_TEXT], # IPv4
+                ['DH-1024', INSUFFICIENT_TEXT], # IPv6/IPv4
+                ['DH-1024', INSUFFICIENT_TEXT], # IPv6/IPv4
             ]
         }),
 
@@ -461,8 +465,8 @@ ncsc_20_tests = [
         'tls1213nosha2.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_HASH_FUNC: [
-                ['no'],  # IPv6
-                ['no'],  # IPv4
+                ['no'],  # IPv6/IPv4
+                ['no'],  # IPv6/IPv4
             ]
         }),
 
@@ -503,8 +507,8 @@ ncsc_20_tests = [
         'tls1213noocspstaple.test.nlnetlabs.tk',
         expected_info={
             TESTS.TLS_OCSP_STAPLING: [
-                ['no'],  # IPv6
-                ['no'],  # IPv4
+                ['no'],  # IPv6/IPv4
+                ['no'],  # IPv6/IPv4
             ]
         },
         expected_score=PERFECT_SCORE),
@@ -529,8 +533,8 @@ ncsc_20_tests = [
         'tls13invalidocsp.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_OCSP_STAPLING: [
-                ['no'],  # IPv6
-                ['no'],  # IPv4
+                ['no'],  # IPv6/IPv4
+                ['no'],  # IPv6/IPv4
             ]
         }),
 
@@ -555,16 +559,21 @@ other_tests = [
         'tls1213shorthsts.test.nlnetlabs.tk',
         expected_failures={
             TESTS.HTTPS_HTTP_HSTS: [
-                ['max-age=1000; includeSubdomains;'],  # IPv6
-                ['max-age=1000; includeSubdomains;']   # IPv4
+                ['max-age=1000; includeSubdomains;'],  # IPv6/IPv4
+                ['max-age=1000; includeSubdomains;']   # IPv6/IPv4
             ]
         }),
 
     # This domain deliberately has no server listening on ipv6
     DomainConfig('IPV6:NONE',
         'tls13ipv4only.test.nlnetlabs.tk',
+        expected_error={
+            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE: [
+                [MustMatch(fr'({NOTREACHABLE_TEXT}|yes)')],  # IPv6/IPv4
+                [MustMatch(fr'({NOTREACHABLE_TEXT}|yes)')],  # IPv6/IPv4
+            ]
+        },
         expected_failures={
-            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE,
             TESTS.IPV6_WEB_REACHABILITY,
         },
         expected_not_tested={
@@ -621,8 +630,8 @@ nl_translation_tests = [
         'tls10only.test.nlnetlabs.tk',
         expected_warnings={
             TESTS.TLS_VERSION_NL: [
-                ['TLS 1.0', PHASE_OUT_TEXT_NL],  # IPv6
-                ['TLS 1.0', PHASE_OUT_TEXT_NL],  # IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT_NL],  # IPv6/IPv4
+                ['TLS 1.0', PHASE_OUT_TEXT_NL],  # IPv6/IPv4
             ]
         },
         lang='nl'),
@@ -691,9 +700,13 @@ mail_tests = [
 
     DomainConfig(
         'mail test', 'tls12onlynoip.test.nlnetlabs.tk',
+        expected_error={
+            TESTS.STARTTLS_AVAILABLE: [
+                [NOTREACHABLE_TEXT],  # IPv6/IPv4
+            ]
+        },
         expected_failures={
             TESTS.IPV6_MAIL_ADDRESS,
-            TESTS.STARTTLS_AVAILABLE,
         },
         expected_not_tested={
             TESTS.IPV6_MAIL_REACHABILITY,
@@ -838,6 +851,7 @@ def run_assessment(selenium, domain_config, lang, mail=False, base_urls=None, re
         warning_tests = UX.get_warning_tests(selenium)
         info_tests = UX.get_info_tests(selenium)
         nottested_tests = UX.get_nottested_tests(selenium)
+        error_tests = UX.get_error_tests(selenium)
         passed_tests = UX.get_passed_tests(selenium)
 
         score_as_percentage_str = UX.get_score(selenium)
@@ -849,6 +863,7 @@ def run_assessment(selenium, domain_config, lang, mail=False, base_urls=None, re
             subresults.update({k: '!' for k in warning_tests})
             subresults.update({k: '.' for k in info_tests})
             subresults.update({k: '_' for k in nottested_tests})
+            subresults.update({k: '%' for k in error_tests})
             subresults.update({k: '/' for k in passed_tests})
             request.node._score.append(score_as_int)
             request.node._subresults.append(subresults)
@@ -871,9 +886,11 @@ def run_assessment(selenium, domain_config, lang, mail=False, base_urls=None, re
             assert (warning_tests == set(domain_config.expected_warnings.keys()))
             assert (info_tests == set(domain_config.expected_info.keys()))
             assert (nottested_tests == set(domain_config.expected_not_tested.keys()))
+            assert (error_tests == set(domain_config.expected_error.keys()))
 
             check_table(selenium, domain_config.expected_failures)
             check_table(selenium, domain_config.expected_not_tested)
+            check_table(selenium, domain_config.expected_error)
             check_table(selenium, domain_config.expected_info)
             check_table(selenium, domain_config.expected_warnings)
             check_table(selenium, domain_config.expected_passes)
@@ -961,8 +978,8 @@ def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
         iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
         expected_warnings={
             TESTS.TLS_CIPHER_SUITES: [
-                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv6
-                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv4
+                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv6/IPv4
+                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv6/IPv4
             ]
         })
 
