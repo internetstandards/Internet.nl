@@ -11,6 +11,9 @@ ENV BRANCH ${BRANCH:-master}
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
 
+# 19.04 is not supported anymore, use old-releases.ubuntu.com for the package maamger.
+RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
 # Install required dependencies
 # swig is needed to build Unbound with Python bindings
 # gettext is needed by python manage.py compilemessages

@@ -37,7 +37,7 @@ RUN ln -s linux64 lib
 # Then build Apache using our new OpenSSL
 ENV APACHE_SERVERROOT_OPENSSL_LEGACY /opt/apache-2.4-openssl-legacy
 WORKDIR /tmp/build/apache-2.4-openssl-legacy
-RUN curl -fsSLo- 'http://apache.hippo.nl//httpd/httpd-2.4.39.tar.bz2' | tar jx --strip-components 1 && \
+RUN curl -fsSLo- 'https://archive.apache.org/dist/httpd/httpd-2.4.39.tar.bz2' | tar jx --strip-components 1 && \
     ./configure --prefix=${APACHE_SERVERROOT_OPENSSL_LEGACY} \
                 --with-ssl=/tmp/build/nassl/bin/openssl-legacy \
                 --enable-rewrite
@@ -62,7 +62,7 @@ RUN curl -fsSLo- 'https://www.openssl.org/source/openssl-1.1.1c.tar.gz' | tar zx
 # Then build Apache using our new OpenSSL
 ENV APACHE_SERVERROOT_OPENSSL_MODERN /opt/apache-2.4-openssl-modern
 WORKDIR /tmp/build/apache-2.4-openssl-modern
-RUN curl -fsSLo- 'http://apache.hippo.nl//httpd/httpd-2.4.39.tar.bz2' | tar jx --strip-components 1 && \
+RUN curl -fsSLo- 'https://archive.apache.org/dist/httpd/httpd-2.4.39.tar.bz2' | tar jx --strip-components 1 && \
     ./configure --prefix=${APACHE_SERVERROOT_OPENSSL_MODERN} \
                 --with-ssl=/opt/openssl-modern \
                 --enable-rewrite && \
