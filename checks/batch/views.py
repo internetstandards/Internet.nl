@@ -41,7 +41,7 @@ def endpoint_request(request, request_id, *args, **kwargs):
         return patch_request(request, batch_request)
 
 
-def results(request, request_id, *args, **kwargs):
+def results(request, request_id, *args, technical=False, **kwargs):
     user = kwargs['batch_user']
     try:
         batch_request = BatchRequest.objects.get(
@@ -61,14 +61,15 @@ def results(request, request_id, *args, **kwargs):
                 "The request is not yet `done`.")
 
         else:
+            report_file = batch_request.get_report_file(technical)
             try:
-                batch_request.report_file.open('r')
-                data = json.load(batch_request.report_file)
+                report_file.open('r')
+                data = json.load(report_file)
             except Exception:
                 return general_server_error_response(
                     "Report could not be generated.")
             finally:
-                batch_request.report_file.close()
+                report_file.close()
             return api_response(data)
 
 
@@ -81,7 +82,7 @@ def endpoint_results(request, request_id, *args, **kwargs):
 @require_http_methods(['GET'])
 @check_valid_user
 def endpoint_results_technical(request, request_id, *args, **kwargs):
-    return results(request, request_id, *args, **kwargs)
+    return results(request, request_id, *args, technical=True, **kwargs)
 
 
 @require_http_methods(['GET'])
@@ -90,6 +91,7 @@ def endpoint_metadata_report(request, *args, **kwargs):
     return api_response({"report": APIMetadata.get_report_metadata()})
 
 
+@require_http_methods(['GET'])
 def documentation(request, *args, **kwargs):
     return HttpResponseRedirect('/static/openapi.yaml')
 

@@ -166,7 +166,8 @@ class WebAppsecpriv(Category):
             WebAppsecprivHttpReferrerPolicy,
             WebAppsecprivHttpCsp,
             WebAppsecprivHttpXContentType,
-            WebAppsecprivHttpXXss,
+            # TODO: To be removed in the future.
+            #WebAppsecprivHttpXXss,
         ]
         super(WebAppsecpriv, self).__init__(name, subtests)
 

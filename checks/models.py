@@ -611,8 +611,9 @@ class DomainTestAppsecpriv(BaseTestModel):
             'x_content_type_options_values': self.x_content_type_options_values,
             'x_frame_options_enabled': self.x_frame_options_enabled,
             'x_frame_options_values': self.x_frame_options_values,
-            'x_xss_protection_enabled': self.x_xss_protection_enabled,
-            'x_xss_protection_values': self.x_xss_protection_values,
+            # TODO: to be removed in the future.
+            #'x_xss_protection_enabled': self.x_xss_protection_enabled,
+            #'x_xss_protection_values': self.x_xss_protection_values,
         }
 
 
@@ -810,11 +811,12 @@ class BatchRequest(models.Model):
     request_id = models.CharField(
         unique=True, db_index=True, max_length=32, default=batch_request_id)
     report_file = models.FileField(upload_to='batch_results/')
+    report_technical_file = models.FileField(upload_to='batch_results/', null=True)
 
     def __dir__(self):
         return [
             'user', 'name', 'submit_date', 'finished_date', 'type', 'status',
-            'request_id', 'report_file'
+            'request_id', 'report_file', 'report_technical_file'
         ]
 
     def _api_status(self):
@@ -833,7 +835,15 @@ class BatchRequest(models.Model):
         return "-"
 
     def has_report_file(self):
-        return self.report_file and os.path.isfile(self.report_file.path)
+        return (self.report_file
+                and os.path.isfile(self.report_file.path)
+                and self.report_technical_file
+                and os.path.isfile(self.report_technical_file.path))
+
+    def get_report_file(self, technical=False):
+        if technical:
+            return self.report_technical_file
+        return self.report_file
 
     def to_api_dict(self):
         finished_date = self.finished_date

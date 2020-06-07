@@ -894,6 +894,7 @@ components:
                     type: string
                     format: DMARC TXT record
                 policy_status:
+                  type: string
                   enumClass: DmarcPolicyStatus
                   description: |
                     The validation status of the DMARC policy:
@@ -934,6 +935,7 @@ components:
                     items:
                       type: string
                 policy_status:
+                  type: string
                   enumClass: SpfPolicyStatus
                   description: |
                     The validation status of the DMARC policy:

@@ -268,6 +268,9 @@ def batch_async_generate_results(self, user, batch_request, site_url):
             if acquired:
                 results = gather_batch_results(user, batch_request, site_url)
                 save_batch_results_to_file(user, batch_request, results)
+                del results
+                results = gather_batch_results_technical(user, batch_request, site_url)
+                save_batch_results_to_file(user, batch_request, results, technical=True)
 
 
 def gather_batch_results(user, batch_request, site_url):
@@ -628,14 +631,17 @@ def gather_batch_results_technical(user, batch_request, site_url):
     return data
 
 
-def save_batch_results_to_file(user, batch_request, results):
+def save_batch_results_to_file(user, batch_request, results, technical=False):
     """
     Save results to file using the Django's ORM utilities.
 
     """
-    filename = '{}-{}-{}.json'.format(
-        user.username, batch_request.type.label, batch_request.id)
-    batch_request.report_file.save(filename, ContentFile(json.dumps(results)))
+    technical_text = '-technical' if technical else ''
+    filename = '{}-{}-{}{}.json'.format(
+        user.username, batch_request.type.label, batch_request.id,
+        technical_text)
+    batch_request.get_report_file(technical).save(
+        filename, ContentFile(json.dumps(results)))
 
 
 @batch_shared_task(bind=True, ignore_result=True)
@@ -730,7 +736,7 @@ def register_request(request, *args, **kwargs):
                 "'type' is missing from the request.")
 
         domains = json_req.get('domains')
-        if not domains:
+        if not domains or type(domains) is not list:
             return bad_client_request_response(
                 "'domains' is missing from the request.")
         name = json_req.get('name', 'no-name')
