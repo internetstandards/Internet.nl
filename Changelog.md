@@ -10,6 +10,7 @@ Bug Fixes
 - Fix breaking bug when the cert chain could not be received.
 - Fix breaking bug for daneTA hack.
 - Only use the translated local name from Django for configured languages.
+- Fix arbitrary text injection in news and FAQ articles.
 - Typos.
 
 ## 1.1.2

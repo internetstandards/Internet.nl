@@ -155,6 +155,10 @@ def faqreport(request):
 
 def faqarticlepage(request, subject):
     title = "faqs " + subject + " title"
+    # If there is no such translated article give a 404.
+    if _(title) == title:
+        return page404(request)
+
     content = "faqs " + subject + " content"
     return render(
         request, 'faqarticle.html',
@@ -204,9 +208,13 @@ def articleindexpage(request):
 
 
 def articlepage(request, article):
+    title = "article " + article + " title"
+    # If there is no such translated article give a 404.
+    if _(title) == title:
+        return page404(request)
+
     articles = _("article .index").split()
     articles = articles[0:6]
-    title = "article " + article + " title"
     date = "article " + article + " date"
     lead = "article " + article + " lead"
     body = "article " + article + " body"
