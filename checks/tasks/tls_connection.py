@@ -643,6 +643,13 @@ def http_fetch(
             except (socket.error, http.client.HTTPException):
                 pass
             raise
+        except _nassl.OpenSSLError:
+            try:
+                if conn:
+                    conn.close()
+            except (socket.error, http.client.HTTPException):
+                pass
+            raise ConnectionHandshakeException
 
     if not ret_headers:
         ret_headers = {}

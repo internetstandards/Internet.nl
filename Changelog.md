@@ -11,6 +11,7 @@ Bug Fixes
 - Fix breaking bug for daneTA hack.
 - Only use the translated local name from Django for configured languages.
 - Fix arbitrary text injection in news and FAQ articles.
+- Fix uncaught exception when decrypting HTTPS data.
 - Typos.
 
 ## 1.1.2
