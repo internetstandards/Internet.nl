@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2020-02-04 13:18:47.171037\n"
+"PO-Revision-Date: 2020-06-16 18:05:27.289927\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -3053,6 +3053,24 @@ msgstr "De {{count}} onderstaande domeinnamen scoren 100% in de e-mailtest."
 
 msgid "halloffame mail title"
 msgstr "Hall of Fame - E-mail"
+
+msgid "halloffame manual badge"
+msgstr "Badge met tekst: 100%-score in hostertest"
+
+msgid "halloffame manual menu"
+msgstr "Hosters"
+
+msgid "halloffame manual subtitle"
+msgstr "100% in hostertest"
+
+msgid "halloffame manual text"
+msgstr ""
+"De {{count}} hosters die zijn opgenomen in deze Hall of Fame zijn Internet.nl compliant omdat ze voldoen aan de volgende criteria. Ten eerste scoren deze hosters 100% in zowel de website als de e-mail test voor het eigen domein. Ten tweede bieden deze hosters kun klanten de mogelijkheid om ook 100% te score in zowel de website als e-mail test, en ze melden dit expliciet op hun website met behulp van het Internet.nl compliant logo.\n"
+"\n"
+"Deze Hall of Fame wordt niet automatisch gegenereerd. Hosters worden uitsluitend toegevoegd op vrijwillige basis. Stuur voor opname in deze Hall of Fame een e-mail naar vraag@internet.nl. Zie je een hoster in deze Hall of Fame die niet voldoet aan de bovenstaande criteria? Laat het ons dan weten."
+
+msgid "halloffame manual title"
+msgstr "Hall of Fame - Hosters"
 
 msgid "halloffame web badge"
 msgstr "Badge met tekst: 100%-score in websitetest"

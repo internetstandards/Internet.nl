@@ -331,3 +331,23 @@ MATOMO_SUBDOMAIN_TRACKING = ""
 # provide the id of the first *new* report for each test.
 DATED_REPORT_ID_THRESHOLD_WEB = None
 DATED_REPORT_ID_THRESHOLD_MAIL = None
+
+
+# --- Extra manual HoF page
+#
+# This is intended to read domains from a file and present them in a separate
+# page as part of the Hall of Fame menu.
+# MANUAL_HOF_URL_PART is the url part for the page i.e., /halloffame/<url_part>
+#  and the setting that enables the manual HoF.
+# MANUAL_HOF_ENTRIES_FILEPATH is the filepath to a yaml file containing a list
+# of domains with the following format:
+# - domaim: "internet.nl"
+#   permalink: "https://internet.nl"
+# - domaim: "example.nl"
+#   permalink: "https://example.nl"
+#
+# As an example, what triggered this page was the incentive from intenret.nl
+# to be approached by hosters in order (after manual testing and agreement) to
+# be included in  a hosters HoF.
+MANUAL_HOF_URL_PART = ''
+MANUAL_HOF_ENTRIES_FILEPATH = ''

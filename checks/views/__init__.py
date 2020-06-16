@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 
 from checks import redis_id, simple_cache_page
 from checks.views.shared import get_hof_champions, get_hof_web, get_hof_mail
-from checks.views.shared import update_base_stats
+from checks.views.shared import update_base_stats, get_hof_manual
 
 
 def page404(request):
@@ -237,61 +237,82 @@ def articlepage(request, article):
         ))
 
 
+def _update_hof_with_manual(template_dict):
+    if settings.MANUAL_HOF_URL_PART:
+        template_dict.update(dict(
+            show_manual=True,
+            manual_url=settings.MANUAL_HOF_URL_PART))
+
+
 @simple_cache_page
 def hofchampionspage(request):
     hof_date, hof_count, hof_entries = get_hof_champions()
-    return render(
-        request, 'halloffame.html',
-        dict(
-            pageclass="hall-of-fame",
-            pagetitle=_("base halloffame champions"),
-            pagemenu="halloffame",
-            hof_title="halloffame champions title",
-            cpage="champions",
-            hof_text="halloffame champions text",
-            hof_subtitle="halloffame champions subtitle",
-            latest=hof_date,
-            count=hof_count,
-            halloffame=hof_entries
-        ))
+    template_dict = dict(
+        pageclass="hall-of-fame",
+        pagetitle=_("base halloffame champions"),
+        pagemenu="halloffame",
+        hof_title="halloffame champions title",
+        cpage="champions",
+        hof_text="halloffame champions text",
+        hof_subtitle="halloffame champions subtitle",
+        latest=hof_date,
+        count=hof_count,
+        halloffame=hof_entries)
+    _update_hof_with_manual(template_dict)
+    return render(request, 'halloffame.html', template_dict)
 
 
 @simple_cache_page
 def hofwebpage(request):
     hof_date, hof_count, hof_entries = get_hof_web()
-    return render(
-        request, 'halloffame.html',
-        dict(
-            pageclass="hall-of-fame",
-            pagetitle=_("base halloffame web"),
-            pagemenu="halloffame",
-            hof_title="halloffame web title",
-            cpage="web",
-            hof_text="halloffame web text",
-            hof_subtitle="halloffame web subtitle",
-            latest=hof_date,
-            count=hof_count,
-            halloffame=hof_entries
-        ))
+    template_dict = dict(
+        pageclass="hall-of-fame",
+        pagetitle=_("base halloffame web"),
+        pagemenu="halloffame",
+        hof_title="halloffame web title",
+        cpage="web",
+        hof_text="halloffame web text",
+        hof_subtitle="halloffame web subtitle",
+        latest=hof_date,
+        count=hof_count,
+        halloffame=hof_entries)
+    _update_hof_with_manual(template_dict)
+    return render(request, 'halloffame.html', template_dict)
 
 
 @simple_cache_page
 def hofmailpage(request):
     hof_date, hof_count, hof_entries = get_hof_mail()
-    return render(
-        request, 'halloffame.html',
-        dict(
-            pageclass="hall-of-fame",
-            pagetitle=_("base halloffame mail"),
-            pagemenu="halloffame",
-            hof_title="halloffame mail title",
-            cpage="mail",
-            hof_text="halloffame mail text",
-            hof_subtitle="halloffame mail subtitle",
-            latest=hof_date,
-            count=hof_count,
-            halloffame=hof_entries
-        ))
+    template_dict = dict(
+        pageclass="hall-of-fame",
+        pagetitle=_("base halloffame mail"),
+        pagemenu="halloffame",
+        hof_title="halloffame mail title",
+        cpage="mail",
+        hof_text="halloffame mail text",
+        hof_subtitle="halloffame mail subtitle",
+        latest=hof_date,
+        count=hof_count,
+        halloffame=hof_entries)
+    _update_hof_with_manual(template_dict)
+    return render(request, 'halloffame.html', template_dict)
+
+
+@simple_cache_page
+def hofmanualpage(request):
+    hof_count, hof_entries = get_hof_manual()
+    template_dict = dict(
+        pageclass="hall-of-fame",
+        pagetitle=_("base halloffame manual"),
+        pagemenu="halloffame",
+        hof_title="halloffame manual title",
+        cpage=settings.MANUAL_HOF_URL_PART,
+        hof_text="halloffame manual text",
+        hof_subtitle="halloffame manual subtitle",
+        count=hof_count,
+        halloffame=hof_entries)
+    _update_hof_with_manual(template_dict)
+    return render(request, 'halloffame.html', template_dict)
 
 
 def change_language(request):

@@ -80,6 +80,11 @@ urlpatterns = [
     url(r'^change_language/$', views.change_language, name='change_language'),
 ]
 
+if settings.MANUAL_HOF_URL_PART:
+    urlpatterns += [
+        url(r'^halloffame/{}/$'.format(settings.MANUAL_HOF_URL_PART), views.hofmanualpage),
+    ]
+
 
 if settings.ENABLE_BATCH is True:
     urlpatterns += [
