@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2020-06-16 18:05:27.210802\n"
+"PO-Revision-Date: 2020-06-16 20:03:12.369467\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -116,6 +116,9 @@ msgstr "To Hall of Fame - Champions!"
 
 msgid "base halloffame mail"
 msgstr "Hall of Fame - Email"
+
+msgid "base halloffame manual"
+msgstr "Hall of Fame - Hosters"
 
 msgid "base halloffame web"
 msgstr "Hall of Fame - Websites"
