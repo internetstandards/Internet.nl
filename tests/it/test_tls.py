@@ -67,7 +67,6 @@ class OpenSSLServerDomainConfig(DomainConfig):
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
-            TESTS.SECURITY_HTTP_XXSS
         ):
             self.expected_warnings.setdefault(test, ANY)
 
@@ -151,7 +150,6 @@ ncsc_20_tests = [
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
-            TESTS.SECURITY_HTTP_XXSS,
             TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CLIENT_RENEG,
@@ -306,7 +304,6 @@ ncsc_20_tests = [
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
-            TESTS.SECURITY_HTTP_XXSS,
             TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CLIENT_RENEG,
@@ -591,7 +588,6 @@ other_tests = [
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
-            TESTS.SECURITY_HTTP_XXSS,
             TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CLIENT_RENEG,
