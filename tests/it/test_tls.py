@@ -722,6 +722,9 @@ mail_tests = [
         }),
 
     PostfixTLS13Config(
+        'mail', 'tls13ipv6onlynoipv4.test.nlnetlabs.tk',),
+
+    PostfixTLS13Config(
         'mail', 'tls13ipv4onlynoipv6.test.nlnetlabs.tk',
         expected_failures={
             TESTS.IPV6_MAIL_ADDRESS,

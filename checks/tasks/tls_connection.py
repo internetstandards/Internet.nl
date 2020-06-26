@@ -237,19 +237,27 @@ class ConnectionCommon:
     def dup(self, *args, **kwargs):
         return self.from_conn(self, *args, **kwargs)
 
-    def sock_connect(self):
-        if sslConnectLogger.isEnabledFor(logging.DEBUG):
-            sslConnectLogger.debug(
-                f"SSL connect with {type(self).__name__}"
-                f" to host '{self.server_name}'"
-                f" at IP:port {self.ip_address}:{self.port}"
-                f" using SSL version {self.version.name}"
-                f" invoked by {inspect.stack()[4].function}"
-                f" > {inspect.stack()[5].function}"
-                f" > {inspect.stack()[6].function}")
-        (self.ip_address, self.sock) = sock_connect(
-            self.server_name, self.ip_address, self.port, self.ipv6,
-            self.task, self.timeout)
+    def sock_connect(self, any_af=False):
+        try:
+            if sslConnectLogger.isEnabledFor(logging.DEBUG):
+                sslConnectLogger.debug(
+                    f"SSL connect with {type(self).__name__}"
+                    f" to host '{self.server_name}'"
+                    f" at IP:port {self.ip_address}:{self.port}"
+                    f" using SSL version {self.version.name}"
+                    f" invoked by {inspect.stack()[4].function}"
+                    f" > {inspect.stack()[5].function}"
+                    f" > {inspect.stack()[6].function}")
+            (self.ip_address, self.sock) = sock_connect(
+                self.server_name, self.ip_address, self.port, self.ipv6,
+                self.task, self.timeout)
+        except (OSError, NoIpError):
+            if not (any_af or self.ip_address):
+                raise
+            self.ipv6 = not self.ipv6
+            (self.ip_address, self.sock) = sock_connect(
+                self.server_name, self.ip_address, self.port, self.ipv6,
+                self.task, self.timeout)
 
     def connect(self, do_handshake_on_connect):
         if self.sock:

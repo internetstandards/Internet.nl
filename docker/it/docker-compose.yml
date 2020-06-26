@@ -548,6 +548,21 @@ services:
       - POSTFIX_VERSION=custom-modern
       - POSTFIX_CONFIG=tls13ipv4only
 
+  targettls13onlyipv6only:
+    image: targetbase
+    entrypoint: /opt/run-nginx-server.sh
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS13ONLYIPV6ONLY_IP}
+        ipv6_address: ${TARGET_TLS13ONLYIPV6ONLY_IPV6}
+    depends_on:
+      - targetbase
+    environment:
+      - NGINX_SITES=nginx-ipv4only
+      - POSTFIX_VERSION=custom-modern
+      - POSTFIX_CONFIG=tls13ipv6only
+
   targetssl2only:
     image: targetbase
     command: /opt/run-openssl-server.sh -ssl2 -dhparam /etc/ssl/certs/dh_params/ffdhe4096.txt
@@ -685,6 +700,8 @@ services:
       - TARGET_TLS13INVALIDOCSP_IPV6
       - TARGET_TLS13ONLYIPV4ONLY_IP
       - TARGET_TLS13ONLYIPV4ONLY_IPV6
+      - TARGET_TLS13ONLYIPV6ONLY_IP
+      - TARGET_TLS13ONLYIPV6ONLY_IPV6
 
   # An NSD authoratitive container responsible for the tk. TLD zone
   master:
