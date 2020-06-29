@@ -85,7 +85,8 @@ SELECT
                         logger.warning(
                             'ENABLE_BATCH is set for this server but the '
                             'database is lacking the required indexes. '
-                            'Consider running `manage.py api_create_indexes`.')
+                            'Consider running '
+                            '`manage.py api_create_db_indexes`.')
                         break
                     elif len(res) > 1:
                         logger.warning(
