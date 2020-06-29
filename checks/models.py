@@ -759,20 +759,6 @@ class BatchUser(models.Model):
         return ['username', 'name', 'organization', 'email']
 
 
-class BatchCustomView(models.Model):
-    """
-    Custom views per domain for batch results.
-    These can be enabled per user for all future batch requests.
-
-    """
-    name = models.CharField(unique=True, max_length=255)
-    description = models.TextField()
-    users = models.ManyToManyField(BatchUser, related_name="custom_views")
-
-    def __dir__(self):
-        return ['name', 'description', 'users']
-
-
 class BatchRequestType(LabelEnum):
     web = 0
     mail = 1
