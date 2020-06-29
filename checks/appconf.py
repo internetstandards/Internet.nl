@@ -102,7 +102,6 @@ class ChecksAppConfig(AppConfig):
     name = 'checks'
 
     def ready(self):
-        pass
         _load_padded_macs_in_cache()
         _clear_cached_pages()
         _batch_startup_checks()

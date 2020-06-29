@@ -89,6 +89,14 @@ if ENABLE_BATCH:
         'checks.batch.util.batch_async_register': {'queue': 'worker_slow'},
     }
 
+    # Custom results for the /results endpoint.
+    # Set to `True` to activate, `False` to deactivate.
+    BATCH_API_CUSTOM_RESULTS = {
+        "MailNonSendingDomain": True,
+        "MailServersTestableStatus": True,
+        "Tls13Support": True,
+    }
+
 
 # --- Application definition
 #
