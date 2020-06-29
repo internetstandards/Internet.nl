@@ -1393,7 +1393,7 @@ def starttls_sock_setup(conn):
         retry = False
         try:
             # 1
-            conn.sock_connect(any_af=False)
+            conn.sock_connect(any_af=True)
 
             # 2
             fd = conn.sock.makefile("rb")
