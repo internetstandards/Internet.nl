@@ -7,7 +7,8 @@ from enumfields import EnumField, EnumIntegerField
 from enumfields import Enum as LabelEnum
 from uuid import uuid4 as uuid
 
-from django.db import models
+from django.core.exceptions import SuspiciousFileOperation
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
@@ -758,6 +759,16 @@ class BatchUser(models.Model):
     def __dir__(self):
         return ['username', 'name', 'organization', 'email']
 
+    @transaction.atomic
+    def delete_related_data(self, delete_self=False):
+        for request in BatchRequest.objects.filter(user=self).all():
+            # Delete the request's related data but not the request itself.
+            # They will be deleted by the DB when the user gets deleted later.
+            request.delete_related_data()
+
+        if delete_self:
+            self.delete()
+
 
 class BatchRequestType(LabelEnum):
     web = 0
@@ -842,6 +853,28 @@ class BatchRequest(models.Model):
             request_type=self.type.label.lower(),
             status=self._api_status(),
             request_id=self.request_id)
+
+    @transaction.atomic
+    def delete_related_data(self, delete_self=False):
+        # Remove the generated files.
+        try:
+            self.report_file.delete()
+            self.report_technical_file.delete()
+        except (IOError, SuspiciousFileOperation):
+            pass
+
+        # Remove the related BatchWebTest and BatchMailTest entries.
+        batch_webtest_ids = {
+            d.webtest_id for d in
+            BatchDomain.objects.filter(batch_request=self).all()}
+        batch_mailtest_ids = {
+            d.mailtest_id for d in
+            BatchDomain.objects.filter(batch_request=self).all()}
+        BatchWebTest.objects.filter(id__in=batch_webtest_ids).delete()
+        BatchMailTest.objects.filter(id__in=batch_mailtest_ids).delete()
+
+        if delete_self:
+            self.delete()
 
 
 class BatchDomainStatus(LabelEnum):

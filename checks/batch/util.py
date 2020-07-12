@@ -30,7 +30,6 @@ from ..models import BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..models import DomainTestReport
 from ..scoring import STATUSES_API_TEXT_MAP
-from ..templatetags.translate import render_details_table
 from ..views.shared import pretty_domain_name, validate_dname
 
 
@@ -700,31 +699,19 @@ def batch_async_register(self, batch_request, test_type, domains):
     batch_request.save()
 
 
-@transaction.atomic
-def delete_batch_request(batch_request):
-    """
-    Remove the batch request together with all the batch related tables'
-    entries.
-
-    .. note:: It DOES NOT remove any entries from the vanilla tables.
-
-    """
-    batch_domains = batch_request.domains.all()
-    for batch_domain in batch_domains:
-        batch_domain.get_batch_test().delete()
-        batch_domain.delete()
-    batch_request.delete()
-
-
 def create_batch_user(username, name, organization, email):
     """
     Create a batch user in the DB.
 
     """
-    user = BatchUser(
-        username=username, name=name, organization=organization, email=email)
-    user.save()
-    return user
+    try:
+        user = BatchUser.objects.get(username=username)
+        return None
+    except BatchUser.DoesNotExist:
+        user = BatchUser(
+            username=username, name=name, organization=organization, email=email)
+        user.save()
+        return user
 
 
 def register_request(request, *args, **kwargs):
