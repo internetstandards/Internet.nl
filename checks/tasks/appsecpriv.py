@@ -152,12 +152,14 @@ def build_report(model, category):
             category.subtests['http_x_frame'].result_bad(
                 model.x_frame_options_values)
 
-        if model.x_xss_protection_enabled:
-            category.subtests['http_x_xss'].result_good(
-                model.x_xss_protection_values)
-        else:
-            category.subtests['http_x_xss'].result_bad(
-                model.x_xss_protection_values)
+        # Do not include XSS in the report.
+        # TODO: Will be removed altogether in the future.
+        #if model.x_xss_protection_enabled:
+        #    category.subtests['http_x_xss'].result_good(
+        #        model.x_xss_protection_values)
+        #else:
+        #    category.subtests['http_x_xss'].result_bad(
+        #        model.x_xss_protection_values)
 
         if model.referrer_policy_enabled:
             category.subtests['http_referrer_policy'].result_good(

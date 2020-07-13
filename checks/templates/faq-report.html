@@ -64,17 +64,17 @@
           </span>
         {% include "string.html" with name="faqs report subtest info" %}
       </div>
+      <div class="faq-subtest error">
+          <span class="visuallyhidden">
+            {% include "string.html" with name="results no-icon-status error" %}:
+          </span>
+        {% include "string.html" with name="faqs report subtest error" %}
+      </div>
       <div class="faq-subtest not-tested">
           <span class="visuallyhidden">
             {% include "string.html" with name="results no-icon-status not-tested" %}:
           </span>
         {% include "string.html" with name="faqs report subtest not-tested" %}
-      </div>
-      <div class="faq-subtest good-not-tested">
-          <span class="visuallyhidden">
-            {% include "string.html" with name="results no-icon-status good-not-tested" %}:
-          </span>
-        {% include "string.html" with name="faqs report subtest partly-tested" %}
       </div>
 
     </div>

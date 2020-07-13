@@ -1361,8 +1361,8 @@ def starttls_sock_setup(conn):
 
     """
     def readline(fd, maximum_bytes=4096):
-        line = fd.readline(maximum_bytes)
-        return line.decode("ascii")
+        line = fd.readline(maximum_bytes).decode('ascii')
+        return line
 
     conn.sock = None
 
@@ -1444,7 +1444,7 @@ def starttls_sock_setup(conn):
             # limiting mechanism was in place. Skip the test.
             if conn.sock:
                 conn.safe_shutdown()
-            raise SMTPConnectionCouldNotTestException()
+            raise ConnectionSocketException()
         except IOError as e:
             # We can't reach the server.
             if conn.sock:
@@ -1452,16 +1452,16 @@ def starttls_sock_setup(conn):
             if e.errno in [
                     errno.ENETUNREACH, errno.EHOSTUNREACH,
                     errno.ECONNREFUSED, errno.ENOEXEC]:
-                raise SMTPConnectionCouldNotTestException()
+                raise ConnectionSocketException()
             raise e
         except NoIpError:
-            raise SMTPConnectionCouldNotTestException()
+            raise ConnectionSocketException()
 
 
 class SMTPConnection(SSLConnectionWrapper):
-    def __init__(self, *args, timeout=24, **kwargs):
+    def __init__(self, *args, port=25, timeout=24, **kwargs):
         super().__init__(
-            *args, timeout=timeout, port=25,
+            *args, timeout=timeout, port=port,
             sock_setup=starttls_sock_setup, **kwargs)
 
 
@@ -1602,7 +1602,8 @@ def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     except SoftTimeLimitExceeded:
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
-                results[af_ip_pair[1]] = dict(tls_enabled=False)
+                results[af_ip_pair[1]] = dict(
+                    server_reachable=False, tls_enabled=False)
 
     return ('tls_conn', results)
 
@@ -1622,6 +1623,9 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # Cheap counteraction for some mailservers that allow only one
         # concurrent connection per IP.
         time.sleep(5)
+
+        # Always try to get cached results (within the allowed time frame) to
+        # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
         while timer() - start < cache_ttl and not all(results.values()) > 0:
             for server, dane_cb_data in mailservers:
@@ -1683,78 +1687,95 @@ def check_mail_tls(server, dane_cb_data, task):
             dane_cb_data.get('data')
             and dane_cb_data.get('secure'))
 
-        try:
-            with SMTPConnection(server_name=server, send_SNI=send_SNI).conn as conn:
-                with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
-                    # OCSP disabled for mail.
-                    # ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
-                    secure_reneg_score, secure_reneg = checker.check_secure_reneg()
-                    client_reneg_score, client_reneg = checker.check_client_reneg()
-                    compression_score, compression = checker.check_compression()
-                    ciphers_score, ciphers_result = checker.check_cipher_sec_level()
-                    zero_rtt_score, zero_rtt = checker.check_zero_rtt()
-                    prots_score, prots_result = checker.check_protocol_versions()
-                    fs_score, fs_result = checker.check_dh_params()
-                    kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
-                    cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
-
-                    starttls_details.trusted_score = checker.check_cert_trust()
-                    starttls_details.debug_chain = DebugCertChainMail(
-                        conn.get_peer_certificate_chain())
-                    starttls_details.conn_port = conn.port
-
-                    # Check the certificates.
-                    cert_results = cert_checks(
-                        server, ChecksMode.MAIL, task,
-                        starttls_details=starttls_details)
-
-                    # HACK for DANE-TA(2) and hostname mismatch!
-                    # Give a good hosmatch score if DANE-TA *is not* present.
-                    if (cert_results['tls_cert']
-                            and not has_daneTA(cert_results['dane_records'])
-                            and cert_results['hostmatch_bad']):
-                        cert_results['hostmatch_score'] = scoring.MAIL_TLS_HOSTMATCH_GOOD
-
-            results = dict(
-                tls_enabled=True,
-                tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
-                prots_bad=prots_result['bad'],
-                prots_phase_out=prots_result['phase_out'],
-                prots_score=prots_score,
-
-                ciphers_bad=ciphers_result['bad'],
-                ciphers_phase_out=ciphers_result['phase_out'],
-                ciphers_score=ciphers_score,
-                cipher_order_score=cipher_order_score,
-                cipher_order=cipher_order,
-                cipher_order_violation=cipher_order_violation,
-
-                secure_reneg=secure_reneg,
-                secure_reneg_score=secure_reneg_score,
-                client_reneg=client_reneg,
-                client_reneg_score=client_reneg_score,
-                compression=compression,
-                compression_score=compression_score,
-
-                dh_param=fs_result['dh_param'],
-                ecdh_param=fs_result['ecdh_param'],
-                fs_bad=fs_result['bad'],
-                fs_phase_out=fs_result['phase_out'],
-                fs_score=fs_score,
-
-                zero_rtt_score=zero_rtt_score,
-                zero_rtt=zero_rtt,
+        with SMTPConnection(server_name=server, send_SNI=send_SNI).conn as conn:
+            with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
+                # Record the starttls_details with the current connection.
+                # It will skip a further connection for the cert_checks
+                # later on.
+                starttls_details.trusted_score = checker.check_cert_trust()
+                starttls_details.debug_chain = DebugCertChainMail(
+                    conn.get_peer_certificate_chain())
+                starttls_details.conn_port = conn.port
 
                 # OCSP disabled for mail.
-                # ocsp_stapling=ocsp_stapling,
-                # ocsp_stapling_score=ocsp_stapling_score,
+                # ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
 
-                kex_hash_func=kex_hash_func,
-                kex_hash_func_score=kex_hash_func_score,
-            )
-            results.update(cert_results)
-        except (ConnectionSocketException, ConnectionHandshakeException):
-            return dict(server_reachable=False)
+                # check_zero_rtt closes and reopens the main connection.
+                # Close the main connection after testing, not needed anymore.
+                # Tests below open their own connections.
+                zero_rtt_score, zero_rtt = checker.check_zero_rtt()
+                checker._conn.safe_shutdown()
+
+                # check_compression and check_secure_reneg use a debug_conn.
+                # Close it after testing.
+                compression_score, compression = checker.check_compression()
+                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
+                checker.close()
+
+                # Checks here manage their own connections.
+                client_reneg_score, client_reneg = checker.check_client_reneg()
+                ciphers_score, ciphers_result = checker.check_cipher_sec_level()
+                prots_score, prots_result = checker.check_protocol_versions()
+                fs_score, fs_result = checker.check_dh_params()
+                kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
+                cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
+
+        # Check the certificates.
+        cert_results = cert_checks(
+            server, ChecksMode.MAIL, task,
+            starttls_details=starttls_details)
+
+        # HACK for DANE-TA(2) and hostname mismatch!
+        # Give a good hosmatch score if DANE-TA *is not* present.
+        if (cert_results['tls_cert']
+                and not has_daneTA(cert_results['dane_records'])
+                and cert_results['hostmatch_bad']):
+            cert_results['hostmatch_score'] = scoring.MAIL_TLS_HOSTMATCH_GOOD
+
+        results = dict(
+            tls_enabled=True,
+            tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
+            prots_bad=prots_result['bad'],
+            prots_phase_out=prots_result['phase_out'],
+            prots_score=prots_score,
+
+            ciphers_bad=ciphers_result['bad'],
+            ciphers_phase_out=ciphers_result['phase_out'],
+            ciphers_score=ciphers_score,
+            cipher_order_score=cipher_order_score,
+            cipher_order=cipher_order,
+            cipher_order_violation=cipher_order_violation,
+
+            secure_reneg=secure_reneg,
+            secure_reneg_score=secure_reneg_score,
+            client_reneg=client_reneg,
+            client_reneg_score=client_reneg_score,
+            compression=compression,
+            compression_score=compression_score,
+
+            dh_param=fs_result['dh_param'],
+            ecdh_param=fs_result['ecdh_param'],
+            fs_bad=fs_result['bad'],
+            fs_phase_out=fs_result['phase_out'],
+            fs_score=fs_score,
+
+            zero_rtt_score=zero_rtt_score,
+            zero_rtt=zero_rtt,
+
+            # OCSP disabled for mail.
+            # ocsp_stapling=ocsp_stapling,
+            # ocsp_stapling_score=ocsp_stapling_score,
+
+            kex_hash_func=kex_hash_func,
+            kex_hash_func_score=kex_hash_func_score,
+        )
+        results.update(cert_results)
+
+    except ConnectionSocketException:
+        return dict(server_reachable=False)
+
+    except ConnectionHandshakeException:
+        return dict(tls_enabled=False)
 
     except SMTPConnectionCouldNotTestException:
         # If we could not test something, fail the starttls test.
@@ -1843,12 +1864,28 @@ class ConnectionChecker:
             raise ValueError
 
         self._note_conn_details(self._conn)
+        self.record_main_connection()
 
     def __enter__(self):
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
         self.close()
+
+    def record_main_connection(self):
+        """
+        Records the results of methods called for the main connection
+        `self._conn`. These will be used instead of calling these methods
+        later. Useful for the mail test where the main connection will be
+        shutdown as soon as it is not needed anymore; we don't want parallel
+        connections left open and mailservers blocking connections as a result.
+
+        """
+        self._conn__get_ssl_version = self._conn.get_ssl_version()
+        self._conn__get_certificate_chain_verify_result = self._conn.get_certificate_chain_verify_result()
+        self._conn__get_tlsext_status_ocsp_resp = self._conn.get_tlsext_status_ocsp_resp()
+        self._conn__is_handshake_completed = self._conn.is_handshake_completed()
+        self._conn__get_session = self._conn.get_session()
 
     @property
     def debug_conn(self):
@@ -1858,9 +1895,13 @@ class ConnectionChecker:
         # debug connection.
         if not self._debug_conn:
             if isinstance(self._conn, DebugConnection):
-                self._debug_conn = self._conn
+                # If the connection is not open, supply a new connection.
+                if not self._conn.sock:
+                    self._debug_conn = DebugConnection.from_conn(self._conn)
+                else:
+                    self._debug_conn = self._conn
             elif (isinstance(self._conn, ModernConnection)
-                  and self._conn.get_ssl_version() == TLSV1_2):
+                  and self._conn__get_ssl_version == TLSV1_2):
                 # Don't waste time trying to connect with DebugConnection as
                 # we already know it won't work, that's how we ended up with
                 # a TLS 1.2 ModernConnection. The only other time we use
@@ -1927,7 +1968,7 @@ class ConnectionChecker:
         Verify the certificate chain.
 
         """
-        verify_result, _ = self._conn.get_certificate_chain_verify_result()
+        verify_result, _ = self._conn__get_certificate_chain_verify_result
         if verify_result != 0:
             return self._score_trusted_bad, verify_result
         else:
@@ -1936,7 +1977,7 @@ class ConnectionChecker:
     def check_ocsp_stapling(self):
         # This will only work if SNI is in use and the handshake has already
         # been done.
-        ocsp_response = self._conn.get_tlsext_status_ocsp_resp()
+        ocsp_response = self._conn__get_tlsext_status_ocsp_resp
         if ocsp_response is not None and ocsp_response.status == 0:
             try:
                 ocsp_response.verify(settings.CA_CERTIFICATES)
@@ -2024,17 +2065,17 @@ class ConnectionChecker:
 
     def check_zero_rtt(self):
         # This check isn't relevant to anything less than TLS 1.3.
-        if self._conn.get_ssl_version() < TLSV1_3:
+        if self._conn__get_ssl_version < TLSV1_3:
             return self._score_zero_rtt_good, ZeroRttStatus.na
 
         # we require an existing connection, as 0-RTT is only possible with
         # connections after the first so that the SSL session can be re-used.
         # is_handshake_completed() will be false if we didn't complete the
         # connection handshake yet or we subsequently shutdown the connection.
-        if not self._conn.is_handshake_completed():
-            raise ValueError()
+        if not self._conn__is_handshake_completed:
+            raise ValueError('0-RTT test without a completed handshake')
 
-        session = self._conn.get_session()
+        session = self._conn__get_session
 
         # does the server announce support for early data?
         # assumes that at least some data was already exchanged because, with
@@ -2500,7 +2541,7 @@ class ConnectionChecker:
         try:
             # If we haven't yet connected with a second cipher, do so now.
             if not second_cipher:
-                if self._conn.get_ssl_version() < TLSV1_3:
+                if self._conn__get_ssl_version < TLSV1_3:
                     with self._conn.dup(
                             cipher_list_action=CipherListAction.PREPEND,
                             ciphers=f'!{first_cipher}') as new_conn:
@@ -2527,7 +2568,7 @@ class ConnectionChecker:
                 # confirm that the server instead continues to impose its own
                 # order preference on the cipher selection process:
                 cipher_string = f'{second_cipher}:{first_cipher}'
-                if self._conn.get_ssl_version() < TLSV1_3:
+                if self._conn__get_ssl_version < TLSV1_3:
                     with self._conn.dup(ciphers=cipher_string) as new_conn:
                         self._note_conn_details(new_conn)
                         newly_selected_cipher = new_conn.get_current_cipher_name()
@@ -2685,9 +2726,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             kex_hash_func=kex_hash_func,
             kex_hash_func_score=kex_hash_func_score,
         )
-    except (socket.error, http.client.BadStatusLine, NoIpError,
-            ConnectionHandshakeException,
-            ConnectionSocketException):
+    except (socket.error, NoIpError, ConnectionSocketException):
+        return dict(server_reachable=False, tls_enabled=False)
+    except (http.client.BadStatusLine, ConnectionHandshakeException):
         return dict(tls_enabled=False)
 
 
@@ -2749,7 +2790,8 @@ def forced_http_check(af_ip_pair, url, task):
             url, af=af_ip_pair[0], path="", port=80, task=task,
             ip_address=af_ip_pair[1])
 
-    except (socket.error, http.client.BadStatusLine, NoIpError):
+    except (socket.error, http.client.BadStatusLine, NoIpError,
+            ConnectionHandshakeException, ConnectionSocketException):
         # If we got refused on port 80 the first time
         # return the FORCED_HTTPS_NO_HTTP status and score
         return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http

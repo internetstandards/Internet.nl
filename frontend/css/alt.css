@@ -143,6 +143,11 @@
   background-image: url('/static/icon-not-tested.png');
   background-image: url('/static/icon-not-tested.svg'), none; /* browsers that do not understand this will show the png-based image */
 }
+.testresult.error,
+.faq-subtest.error {
+  background-image: url('/static/icon-not-tested-bolt.png');
+  background-image: url('/static/icon-not-tested-bolt.svg'), none; /* browsers that do not understand this will show the png-based image */
+}
 .testresult.not-tested h3 a {
   color: #6D6D6D;
 }
@@ -163,6 +168,7 @@
 }
 .testresults h2.error,
 .faq-test.error,
+.test-header .test-title h2.error,
 #testresults-overview ul li.error {
   background-image: url('/static/probe-error.png');
   background-image: url('/static/probe-error.svg'), none; /* browsers that do not understand this will show the png-based image */

@@ -14,6 +14,8 @@ PERFECT_SCORE = '100%'
 INSUFFICIENT_TEXT = 'insufficient'
 PHASE_OUT_TEXT = 'phase out'
 PHASE_OUT_TEXT_NL = 'uit te faseren'
+NOTTESTABLE_TEXT = 'not testable'
+NOTREACHABLE_TEXT = 'not reachable'
 ANY = None
 
 LOCATOR_REPORT_SHOW_DETAILS_BUTTON_CLASS = 'panel-button-show'
@@ -21,6 +23,7 @@ LOCATOR_WARNING_TEST_CLASS = 'testresult warning'
 LOCATOR_INFO_TEST_CLASS = 'testresult info'
 LOCATOR_FAILED_TEST_CLASS = 'testresult failed'
 LOCATOR_NOTTESTED_TEST_CLASS = 'testresult not-tested'
+LOCATOR_ERROR_TEST_CLASS = 'testresult error'
 LOCATOR_GOOD_NOTTESTED_TEST_CLASS = 'testresult good-not-tested'
 LOCATOR_PASSED_TEST_CLASS = 'testresult passed'
 
@@ -91,7 +94,6 @@ class TESTS:
     IPV6_WEB_SAME_WEBSITE = 'Same website on IPv6 and IPv4'
     SECURITY_HTTP_XFRAME = 'X-Frame-Options'
     SECURITY_HTTP_XCONTYPE = 'X-Content-Type-Options'
-    SECURITY_HTTP_XXSS = 'X-XSS-Protection'
     SECURITY_HTTP_CSP = 'Content-Security-Policy existence'
     SECURITY_HTTP_REFERRER = 'Referrer-Policy existence'
 
@@ -154,6 +156,10 @@ class UX:
     def get_nottested_tests(selenium):
         return (UX._get_matching_tests(selenium, LOCATOR_NOTTESTED_TEST_CLASS) |
                 UX._get_matching_tests(selenium, LOCATOR_GOOD_NOTTESTED_TEST_CLASS))
+
+    @staticmethod
+    def get_error_tests(selenium):
+        return UX._get_matching_tests(selenium, LOCATOR_ERROR_TEST_CLASS)
 
     @staticmethod
     def get_passed_tests(selenium):
@@ -267,6 +273,7 @@ class DomainConfig:
                  expected_warnings=None,
                  expected_info=None,
                  expected_not_tested=None,
+                 expected_error=None,
                  expected_passes=None,
                  expected_score=None):
         self.test_id = test_id
@@ -275,12 +282,13 @@ class DomainConfig:
         self.expected_warnings = self.clone_as_dict(expected_warnings)
         self.expected_info = self.clone_as_dict(expected_info)
         self.expected_not_tested = self.clone_as_dict(expected_not_tested)
+        self.expected_error = self.clone_as_dict(expected_error)
         self.expected_passes = self.clone_as_dict(expected_passes)
         self.expected_score = expected_score
 
         self.override_defaults()
 
-        if not expected_score and not self.expected_failures:
+        if not expected_score and not (self.expected_failures or self.expected_error):
             self.expected_score = PERFECT_SCORE
 
     @staticmethod

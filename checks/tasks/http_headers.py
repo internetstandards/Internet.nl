@@ -4,6 +4,8 @@ import http.client
 import socket
 
 from .tls_connection import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
+from .tls_connection import ConnectionSocketException
+from .tls_connection import ConnectionHandshakeException
 from .. import scoring
 
 
@@ -339,7 +341,8 @@ def http_headers_check(af_ip_pair, url, header_checkers, task):
             ip_address=af_ip_pair[1], put_headers=put_headers,
             depth=MAX_REDIRECT_DEPTH,
             needed_headers=get_headers)
-    except (socket.error, http.client.BadStatusLine, NoIpError):
+    except (socket.error, http.client.BadStatusLine, NoIpError,
+            ConnectionHandshakeException, ConnectionSocketException):
         # Not able to connect, return negative values
         for h in header_checkers:
             results.update(h.get_negative_values())

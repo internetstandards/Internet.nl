@@ -10,6 +10,7 @@ subresult_mappings = {
     '!': ('warning', 'orange'),
     '.': ('info', 'blue'),
     '_': ('not tested', 'grey'),
+    '%': ('error', 'grey'),
     '/': ('passed', 'green'),
     None: {'missing', 'white' },
 }

@@ -3,6 +3,9 @@
 ## Unreleased next version
 
 New
+- Batch API updated to v2. [(#337)] [(#395)] [(#336)] [(#436)]
+- No MX configured: informational status/icons and more suitable category verdict. [(#455)]
+- Remove test for X-XSS-Protection. [(#456)]
 
 Dependencies
 
@@ -11,8 +14,27 @@ Bug Fixes
 - Fix breaking bug for daneTA hack.
 - Only use the translated local name from Django for configured languages.
 - Fix arbitrary text injection in news and FAQ articles.
+- Make sure to pick and test the same mailservers when the number of configured
+  mailservers is greater than the allowed one.
+- Mailservers without STARTTLS support give wrong verdict. [(#437)]
+- IPv6 connectivity for nameservers. [(#411)]
+- Make sure only one SMTP connection is active at a time.
 - Fix uncaught exception when decrypting HTTPS data.
+- Fix for statistics page (days are missing). [(#417)]
+- Fix for connecting to either IPv4 or IPv6 for the mail test.
+- mail_starttls_tls_available icon when a server is not tested. [(#457)]
 - Typos.
+
+[(#336)]: https://github.com/NLnetLabs/Internet.nl/issues/336
+[(#337)]: https://github.com/NLnetLabs/Internet.nl/issues/337
+[(#395)]: https://github.com/NLnetLabs/Internet.nl/issues/395
+[(#411)]: https://github.com/NLnetLabs/Internet.nl/issues/411
+[(#417)]: https://github.com/NLnetLabs/Internet.nl/issues/417
+[(#437)]: https://github.com/NLnetLabs/Internet.nl/issues/437
+[(#436)]: https://github.com/NLnetLabs/Internet.nl/issues/436
+[(#455)]: https://github.com/NLnetLabs/Internet.nl/issues/455
+[(#456)]: https://github.com/NLnetLabs/Internet.nl/issues/456
+[(#457)]: https://github.com/NLnetLabs/Internet.nl/issues/457
 
 ## 1.1.2
 
