@@ -1459,9 +1459,9 @@ def starttls_sock_setup(conn):
 
 
 class SMTPConnection(SSLConnectionWrapper):
-    def __init__(self, *args, timeout=24, **kwargs):
+    def __init__(self, *args, port=25, timeout=24, **kwargs):
         super().__init__(
-            *args, timeout=timeout, port=25,
+            *args, timeout=timeout, port=port,
             sock_setup=starttls_sock_setup, **kwargs)
 
 
