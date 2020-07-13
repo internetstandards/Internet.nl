@@ -3,8 +3,9 @@
 from difflib import SequenceMatcher
 import http.client
 import socket
+import time
 
-from unbound import RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS
+from unbound import ub_ctx, RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS, RR_CLASS_IN
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -260,7 +261,38 @@ def callback(results, addr, parent, parent_name, category):
     return parent
 
 
-def test_connectivity(ips, af, sock_type, ports):
+def test_ns_connectivity(ip, port, domain):
+    # NS connectivity is first tried with TCP (in test_connectivity).
+    # If that fails, maybe the NS is not doing TCP. As a last resort
+    # (expensive) we initiate an unbound context that will ask the NS a
+    # question he can't refuse.
+    def ub_callback(data, status, result):
+        if status != 0:
+            data['result'] = False
+        elif result.rcode == 2:  # SERVFAIL
+            data['result'] = False
+        else:
+            data['result'] = True
+        data['done'] = True
+
+    ctx = ub_ctx()
+    ctx.set_async(True)
+    ctx.set_fwd(ip)
+    cb_data = dict(done=False)
+    try:
+        retval, async_id = ctx.resolve_async(
+            domain, cb_data, ub_callback, RR_TYPE_NS, RR_CLASS_IN)
+        while retval == 0 and not cb_data['done']:
+            time.sleep(0.1)
+            retval = ctx.process()
+    except SoftTimeLimitExceeded:
+        if async_id:
+            ctx.cancel(async_id)
+        raise
+    return cb_data['result']
+
+
+def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
     good = set()
     bad = set()
     reachable_ports = set()
@@ -273,29 +305,34 @@ def test_connectivity(ips, af, sock_type, ports):
                 sock.connect((ip, port))
                 good.add(ip)
                 reachable_ports.add(port)
-                # break
+                continue
             except socket.error:
                 pass
             finally:
                 if sock:
                     sock.close()
 
+            if is_ns and test_ns_connectivity(ip, port, test_domain):
+                good.add(ip)
+                reachable_ports.add(port)
+
     bad = set(ips) - set(good)
     return list(good), list(bad), reachable_ports
 
 
 def get_domain_results(
-        domain, sock_type, ports, task, score_good, score_bad, score_partial):
+        domain, sock_type, ports, task, score_good, score_bad, score_partial,
+        is_ns=False, test_domain=""):
     """
     Resolve IPv4 and IPv6 addresses and check connectivity.
 
     """
     v6 = task.resolve(domain, RR_TYPE_AAAA)
     v6_good, v6_bad, v6_ports = test_connectivity(
-        v6, socket.AF_INET6, sock_type, ports)
+        v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
     v4 = task.resolve(domain, RR_TYPE_A)
     v4_good, v4_bad, v4_ports = test_connectivity(
-        v4, socket.AF_INET, sock_type, ports)
+        v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
     v6_conn_diff = v4_ports - v6_ports
 
     score = score_good
@@ -364,18 +401,19 @@ def do_ns(self, url, *args, **kwargs):
         rrset = self.resolve(url, RR_TYPE_NS)
         next_label = url
         while not rrset and "." in next_label:
-            rrset = self.resolve(next_label, RR_TYPE_NS)
             next_label = next_label[next_label.find(".")+1:]
+            rrset = self.resolve(next_label, RR_TYPE_NS)
 
         has_a = set()  # Name servers that have IPv4.
         has_aaaa = set()  # Name servers that have IPv6.
         if rrset:
             for domain in rrset:
                 d = get_domain_results(
-                    domain, socket.SOCK_DGRAM, [53], self,
+                    domain, socket.SOCK_STREAM, [53], self,
                     score_good=scoring.IPV6_NS_CONN_GOOD,
                     score_bad=scoring.IPV6_NS_CONN_FAIL,
-                    score_partial=scoring.IPV6_NS_CONN_PARTIAL)
+                    score_partial=scoring.IPV6_NS_CONN_PARTIAL,
+                    is_ns=True, test_domain=next_label)
                 if len(d["v4_good"]) + len(d["v4_bad"]) > 0:
                     has_a.add(d["domain"])
                 if len(d["v6_good"]) + len(d["v6_bad"]) > 0:

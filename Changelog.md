@@ -16,6 +16,7 @@ Bug Fixes
 - Make sure to pick and test the same mailservers when the number of configured
   mailservers is greater than the allowed one.
 - Mailservers without STARTTLS support give wrong verdict. [(#437)]
+- IPv6 connectivity for nameservers. [(#411)]
 - Make sure only one SMTP connection is active at a time.
 - Fix uncaught exception when decrypting HTTPS data.
 - Fix for statistics page (days are missing). [(#417)]
@@ -26,6 +27,7 @@ Bug Fixes
 [(#336)]: https://github.com/NLnetLabs/Internet.nl/issues/336
 [(#337)]: https://github.com/NLnetLabs/Internet.nl/issues/337
 [(#395)]: https://github.com/NLnetLabs/Internet.nl/issues/395
+[(#411)]: https://github.com/NLnetLabs/Internet.nl/issues/411
 [(#417)]: https://github.com/NLnetLabs/Internet.nl/issues/417
 [(#437)]: https://github.com/NLnetLabs/Internet.nl/issues/437
 [(#436)]: https://github.com/NLnetLabs/Internet.nl/issues/436
