@@ -7,12 +7,34 @@ from django.apps import AppConfig
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.core.cache import cache
-from django.db import connection
+from django.db import connection, utils
 
 from checks import redis_id
 
 
 logger = logging.getLogger(__name__)
+
+
+def _load_autoconf_in_cache():
+    """
+    Loads any autoconf option in cache to avoid repeated DB access.
+
+    """
+    from checks.models import AutoConf, AutoConfOption
+    try:
+        for option in (
+                AutoConfOption.DATED_REPORT_ID_THRESHOLD_WEB,
+                AutoConfOption.DATED_REPORT_ID_THRESHOLD_MAIL):
+            cache_id = redis_id.autoconf.id.format(option.value)
+            cache_ttl = redis_id.autoconf.ttl
+            value = AutoConf.get_option(option)
+            if value:
+                value = int(value)
+            cache.set(cache_id, value, cache_ttl)
+    except utils.ProgrammingError:
+        # Avoid the chicken-egg problem when trying to migrate(start the app)
+        # when the table is not there yet.
+        pass
 
 
 def _load_padded_macs_in_cache():
@@ -103,6 +125,7 @@ class ChecksAppConfig(AppConfig):
     name = 'checks'
 
     def ready(self):
+        _load_autoconf_in_cache()
         _load_padded_macs_in_cache()
         _clear_cached_pages()
         _batch_startup_checks()

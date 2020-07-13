@@ -3,13 +3,14 @@
 import re
 import json
 
-from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.translation import ugettext as _
 
+from checks import redis_id
 from checks.models import MailTestIpv6, MailTestDnssec, MailTestAuth
-from checks.models import MailTestTls, MailTestReport
+from checks.models import MailTestTls, MailTestReport, AutoConfOption
 from checks.probes import mailprobes
 from checks.views.shared import proberesults, process, pretty_domain_name
 from checks.views.shared import redirect_invalid_domain, add_score_to_report
@@ -150,8 +151,10 @@ def resultsstored(request, dname, id):
     If the report id belongs to dated results start a new test.
 
     """
-    if (settings.DATED_REPORT_ID_THRESHOLD_MAIL
-            and int(id) < settings.DATED_REPORT_ID_THRESHOLD_MAIL):
+    option = AutoConfOption.DATED_REPORT_ID_THRESHOLD_MAIL
+    cache_id = redis_id.autoconf.id.format(option.value)
+    id_threshold = cache.get(cache_id)
+    if id_threshold and int(id) <= id_threshold:
         return HttpResponseRedirect("/mail/{}/".format(dname))
 
     try:

@@ -1000,3 +1000,39 @@ class BatchMailTest(models.Model):
             'dnssec_status', 'dnssec_errors', 'auth', 'auth_status',
             'auth_errors', 'tls', 'tls_status', 'tls_errors'
         ]
+
+
+class AutoConfOption(Enum):
+    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
+    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
+
+
+class AutoConf(models.Model):
+    """
+    Various configuration options that need to be applied automatically
+    (e.g., through migrations).
+
+    Any available options are defined in AutoConfOption above.
+
+    """
+    name = EnumField(AutoConfOption, max_length=255, primary_key=True)
+    value = models.CharField(max_length=255, default=None)
+
+    @classmethod
+    def get_option(cls, option, default=None):
+        try:
+            return cls.objects.get(name=option).value
+        except cls.DoesNotExist:
+            return default
+
+    @classmethod
+    def set_option(cls, option, value):
+        try:
+            op = cls.objects.get(name=option)
+            op.value = value
+        except cls.DoesNotExist:
+            op = cls(name=option, value=value)
+        op.save()
+
+    def __dir__(self):
+        return ['name', 'value']

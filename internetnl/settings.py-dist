@@ -331,11 +331,3 @@ MATOMO_URL = "//matomo_url/"
 MATOMO_SITEID = "site_id"
 # Used for subdomain tracking eg. *.internet.nl
 MATOMO_SUBDOMAIN_TRACKING = ""
-
-
-# --- Dated reports settings
-#
-# If you want to hide dated reports because of major changes in UI
-# provide the id of the first *new* report for each test.
-DATED_REPORT_ID_THRESHOLD_WEB = None
-DATED_REPORT_ID_THRESHOLD_MAIL = None
