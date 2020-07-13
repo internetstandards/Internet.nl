@@ -13,6 +13,7 @@ Bug Fixes
 - Fix breaking bug when the cert chain could not be received.
 - Fix breaking bug for daneTA hack.
 - Only use the translated local name from Django for configured languages.
+- Fix arbitrary text injection in news and FAQ articles.
 - Make sure to pick and test the same mailservers when the number of configured
   mailservers is greater than the allowed one.
 - Mailservers without STARTTLS support give wrong verdict. [(#437)]
