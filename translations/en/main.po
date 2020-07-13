@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2020-07-13 15:13:37.794648\n"
+"PO-Revision-Date: 2020-07-13 15:28:55.225399\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -116,6 +116,9 @@ msgstr "To Hall of Fame - Champions!"
 
 msgid "base halloffame mail"
 msgstr "Hall of Fame - Email"
+
+msgid "base halloffame manual"
+msgstr "Hall of Fame - Hosters"
 
 msgid "base halloffame web"
 msgstr "Hall of Fame - Websites"
@@ -2916,6 +2919,24 @@ msgstr "The {{count}} domains below score 100% in the email test."
 #, md-format
 msgid "halloffame mail title"
 msgstr "Hall of Fame - Email"
+
+msgid "halloffame manual badge"
+msgstr "Badge with text: 100% score in hoster test"
+
+msgid "halloffame manual menu"
+msgstr "Hosters"
+
+msgid "halloffame manual subtitle"
+msgstr "100% in hoster test"
+
+msgid "halloffame manual text"
+msgstr ""
+"The {{count}} hosters mentioned in this Hall of Fame are Internet.nl compliant because they meet the following criteria. First of all they score 100% in both the website test and the email test for their own domain. Secondly, they offer their clients the possiblity to also score 100% in both the website test and email test, and they explicitly state this on their website by means of the Internet.nl compliant logo.\n"
+"\n"
+"This Hall of Fame is not generated automatically. Hosters are added on a voluntary basis only. Inclusion in this Hall of Fame can be requested by sending an e-mail to question@internet.nl. Do you see a hoster in this Hall of Fame that does not meet the criteria described above? Please let us know."
+
+msgid "halloffame manual title"
+msgstr "Hall of Fame - Hosters"
 
 msgid "halloffame web badge"
 msgstr "Badge with text: 100% score in website test"
