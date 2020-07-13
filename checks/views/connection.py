@@ -519,7 +519,8 @@ def aaaa_ipv6(request):
 
 
 @jsonp
-def addr_ipv6(request, testid):
+def addr_ipv6(request, request_id):
+    testid = request_id
     cache_id = redis_id.conn_test_v6_reach.id.format(testid)
     cache_ttl = redis_id.conn_test_v6_reach.ttl
     cache.set(cache_id, True, cache_ttl)

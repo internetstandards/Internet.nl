@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.2.1
+
+Bug Fixes
+- Fix broken connection test from 1.2.0; wrong variable name.
+
 ## 1.2.0
 
 New
