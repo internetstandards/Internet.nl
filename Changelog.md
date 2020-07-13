@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased next version
+
+New
+
+Dependencies
+
+Bug Fixes
+
 ## 1.2.1
 
 Bug Fixes
