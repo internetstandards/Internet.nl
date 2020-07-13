@@ -1,13 +1,11 @@
 # Change Log
 
-## Unreleased next version
+## 1.2.0
 
 New
 - Batch API updated to v2. [(#337)] [(#395)] [(#336)] [(#436)]
 - No MX configured: informational status/icons and more suitable category verdict. [(#455)]
 - Remove test for X-XSS-Protection. [(#456)]
-
-Dependencies
 
 Bug Fixes
 - Fix breaking bug when the cert chain could not be received.
