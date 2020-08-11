@@ -7,6 +7,7 @@ New
 Dependencies
 
 Bug Fixes
+- Fix indefinite locks in cache (not a current problem).
 
 ## 1.2.1
 

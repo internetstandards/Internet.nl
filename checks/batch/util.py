@@ -214,8 +214,12 @@ def memcache_lock(lock_id, lock_duration=60*5):
     .. note:: Mostly as documented in the celery documentation.
 
     """
-    if lock_duration is not None:
-        timeout_at = monotonic() + lock_duration - 3
+    if lock_duration is None:
+        # Locking something indefinitely is not a good idea;
+        # give a high duration instead.
+        lock_duration = 60*60*12  # half a day
+
+    timeout_at = monotonic() + lock_duration - 3
     # cache.add fails if the key already exists
     status = cache.add(lock_id, True, lock_duration)
     try:
@@ -223,7 +227,7 @@ def memcache_lock(lock_id, lock_duration=60*5):
     finally:
         # memcache delete is very slow, but we have to use it to take
         # advantage of using add() for atomic locking
-        if lock_duration is None or (monotonic() < timeout_at and status):
+        if status and monotonic() < timeout_at:
             # don't release the lock if we exceeded the timeout
             # to lessen the chance of releasing an expired lock
             # owned by someone else
