@@ -124,9 +124,6 @@ def aggregate_subreports(subreports, report):
     This makes sure that the final verdict and status of a subtest is the worst
     one.
 
-    In case of mixed 'good' and 'not_tested' results we show the good verdict
-    but with the 'good_not_tested' status.
-
     """
     if subreports:
         for test_item in report:
