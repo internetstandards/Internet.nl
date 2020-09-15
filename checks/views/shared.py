@@ -231,10 +231,10 @@ def get_hof_mail(count=100000):
     return get_hof_cache(redis_id.hof_mail.id, count)
 
 
-def get_hof_manual():
+def get_hof_manual(manual):
     hof_entries = []
     try:
-        with open(settings.MANUAL_HOF_ENTRIES_FILEPATH, 'r') as f:
+        with open(settings.MANUAL_HOF[manual]['entries_file'], 'r') as f:
             hof_entries = yaml.load(f, Loader=yaml.Loader)
     except Exception:
         pass

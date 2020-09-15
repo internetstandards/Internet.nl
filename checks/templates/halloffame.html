@@ -11,23 +11,27 @@
             <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
             <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
             <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
-            {% if show_manual %}
-            <li><a href="/halloffame/{{manual_url}}/" {% if cpage == manual_url %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame manual menu" %}</a></li>
-            {% endif %}
+            {% for manual in manuals %}
+            <li><a href="/halloffame/{{manual.0}}/" {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a></li>
+            {% endfor %}
           </ul>
       </div>
       <div class="flexblock">
-      {% if cpage == 'champions' or cpage == manual_url %}
+      {% if cpage == 'champions' %}
         <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
         <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
       {% elif cpage == 'web' %}
         <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
       {% elif cpage == 'mail' %}
         <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
+      {% else %}
+        {% if manual_icon and manual_icon_alt %}
+        <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}">
+        {% endif %}
       {% endif %}
       </div>
     </div>
-    {% include "content.html" with name=hof_text %}
+    <span class="hof-content">{% include "content.html" with name=hof_text %}</span>
   </div>
   <div class="perfect-scores-list">
     <h2>{% include "string.html" with name=hof_subtitle %}</h2>

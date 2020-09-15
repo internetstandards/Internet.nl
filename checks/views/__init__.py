@@ -237,11 +237,17 @@ def articlepage(request, article):
         ))
 
 
-def _update_hof_with_manual(template_dict):
-    if settings.MANUAL_HOF_URL_PART:
+def _update_hof_with_manual(template_dict, current=None):
+    if settings.MANUAL_HOF:
         template_dict.update(dict(
-            show_manual=True,
-            manual_url=settings.MANUAL_HOF_URL_PART))
+            manuals=[
+                (k, f"manual halloffame {'translate_key' in v and v['translate_key'] or k} menu")
+                for k, v in settings.MANUAL_HOF.items()]))
+        if current:
+            if 'icon_file' in settings.MANUAL_HOF[current]:
+                template_dict.update(dict(
+                    manual_icon=f"{settings.MANUAL_HOF[current]['icon_file']}",
+                    manual_icon_alt=f"manual halloffame {'translate_key' in settings.MANUAL_HOF[current] and settings.MANUAL_HOF[current]['translate_key'] or current} badge"))
 
 
 @simple_cache_page
@@ -299,20 +305,28 @@ def hofmailpage(request):
 
 
 @simple_cache_page
-def hofmanualpage(request):
-    hof_count, hof_entries = get_hof_manual()
+def hofmanualpage(request, manual_url):
+    translate_key = (
+        ('translate_key' in settings.MANUAL_HOF[manual_url]
+            and settings.MANUAL_HOF[manual_url]['translate_key'])
+        or manual_url)
+    template_file = (
+        ('template_file' in settings.MANUAL_HOF[manual_url]
+            and settings.MANUAL_HOF[manual_url]['template_file'])
+        or 'halloffame.html')
+    hof_count, hof_entries = get_hof_manual(manual_url)
     template_dict = dict(
         pageclass="hall-of-fame",
-        pagetitle=_("base halloffame manual"),
+        pagetitle=_(f"manual halloffame {translate_key} title"),
         pagemenu="halloffame",
-        hof_title="halloffame manual title",
-        cpage=settings.MANUAL_HOF_URL_PART,
-        hof_text="halloffame manual text",
-        hof_subtitle="halloffame manual subtitle",
+        hof_title=f"manual halloffame {translate_key} title",
+        cpage=manual_url,
+        hof_text=f"manual halloffame {translate_key} text",
+        hof_subtitle=f"manual halloffame {translate_key} subtitle",
         count=hof_count,
         halloffame=hof_entries)
-    _update_hof_with_manual(template_dict)
-    return render(request, 'halloffame.html', template_dict)
+    _update_hof_with_manual(template_dict, current=manual_url)
+    return render(request, template_file, template_dict)
 
 
 def change_language(request):

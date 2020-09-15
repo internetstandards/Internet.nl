@@ -333,21 +333,42 @@ DATED_REPORT_ID_THRESHOLD_WEB = None
 DATED_REPORT_ID_THRESHOLD_MAIL = None
 
 
-# --- Extra manual HoF page
+# --- Extra manual HoF page(s)
 #
 # This is intended to read domains from a file and present them in a separate
 # page as part of the Hall of Fame menu.
-# MANUAL_HOF_URL_PART is the url part for the page i.e., /halloffame/<url_part>
-#  and the setting that enables the manual HoF.
-# MANUAL_HOF_ENTRIES_FILEPATH is the filepath to a yaml file containing a list
-# of domains with the following format:
-# - domaim: "internet.nl"
-#   permalink: "https://internet.nl"
-# - domaim: "example.nl"
-#   permalink: "https://example.nl"
+# The configuration is:
+#   MANUAL_HOF = {
+#       '<url_part>': {
+#           'translate_key': '',
+#           'entries_file': '/path/to/yaml/file',
+#           'template_file': '/path/to/html/template/file',
+#           'icon_file': '/path/to/icon'
+#       },
+#   }
+# * <url_part>, is the url part for the page i.e., /halloffame/<url_part>
+# * translate_key, is the translate key to be used when translating text.
+#   By default it is the same as <url_part>.
+#   The final translate ids would then be:
+#   - manual halloffame <translate_key> *
+#   These ids need to be available in the translations/*/manual_hof.po files.
+# * template_file, is an alternate template HTML file to be used if desired.
+#   Leave empty if you want to use the default template file (the same as with
+#   standard HoF).
+# * entries_file, is the filepath to a *yaml* file
+#   containing a list of domains with the following format:
+#   - domain: "internet.nl"
+#     permalink: "https://internet.nl"
+#   - domain: "example.nl"
+#     permalink: "https://example.nl"
+# * icon_file, is the filepath to an icon to be used for this HoF.
 #
-# As an example, what triggered this page was the incentive from intenret.nl
-# to be approached by hosters in order (after manual testing and agreement) to
-# be included in  a hosters HoF.
-MANUAL_HOF_URL_PART = ''
-MANUAL_HOF_ENTRIES_FILEPATH = ''
+# You can add more <url_part> in the MANUAL_HOF dictionary for additional
+# manual HoFs.
+#
+# Leaving the MANUAL_HOF dictionary empty disables the manual HoF functionality.
+#
+# As an example, what triggered the manual HoF was the incentive from
+# internet.nl to be approached by hosters in order (after manual testing and
+# agreement) to be included in a hosters HoF.
+MANUAL_HOF = {}
