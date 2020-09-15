@@ -1,0 +1,17 @@
+msgid "manual halloffame hosters badge"
+msgstr "Badge met tekst: 100%-score in hostertest"
+
+msgid "manual halloffame hosters menu"
+msgstr "Hosters"
+
+msgid "manual halloffame hosters subtitle"
+msgstr "100% in hostertest"
+
+msgid "manual halloffame hosters text"
+msgstr ""
+"De {{count}} hosters die zijn opgenomen in deze Hall of Fame zijn Internet.nl compliant omdat ze voldoen aan de volgende criteria. Ten eerste scoren deze hosters 100% in zowel de website als de e-mail test voor het eigen domein. Ten tweede bieden deze hosters kun klanten de mogelijkheid om ook 100% te score in zowel de website als e-mail test, en ze melden dit expliciet op hun website met behulp van het Internet.nl compliant logo.\n"
+"\n"
+"Deze Hall of Fame wordt niet automatisch gegenereerd. Hosters worden uitsluitend toegevoegd op vrijwillige basis. Stuur voor opname in deze Hall of Fame een e-mail naar vraag@internet.nl. Zie je een hoster in deze Hall of Fame die niet voldoet aan de bovenstaande criteria? Laat het ons dan weten."
+
+msgid "manual halloffame hosters title"
+msgstr "Hall of Fame - Hosters"
