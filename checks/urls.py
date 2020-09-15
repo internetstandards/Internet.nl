@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from checks import views
-from checks.batch import BATCH_API_VERSION
+from checks.batch import BATCH_API_MAJOR_VERSION
 from checks.batch import views as batch
 from checks.views import connection
 from checks.views import domain
@@ -15,7 +15,7 @@ from checks.views import stats
 
 regex_tld = r'(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)'
 regex_dname = r'(?P<dname>([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+' + regex_tld + ')'
-regex_testid = r'(?P<testid>[a-zA-Z0-9]{1,35})'
+regex_testid = r'(?P<request_id>[a-zA-Z0-9]{1,35})'
 regex_mailaddr = r'(?P<mailaddr>([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+' + regex_tld + ')'
 
 urlpatterns = [
@@ -89,12 +89,22 @@ if settings.MANUAL_HOF:
 
 if settings.ENABLE_BATCH is True:
     urlpatterns += [
-        url(r'^api/batch/v{}/web/$'.format(BATCH_API_VERSION), batch.register_web_test, name='batch_web_test'),
-        url(r'^api/batch/v{}/mail/$'.format(BATCH_API_VERSION), batch.register_mail_test, name='batch_email_test'),
-        url(r'^api/batch/v{}/results/{}/$'.format(BATCH_API_VERSION, regex_testid), batch.get_results, name='batch_results'),
-        url(r'^api/batch/v{}/list/$'.format(BATCH_API_VERSION), batch.list_tests, name='batch_list'),
-        url(r'^api/batch/v{}/cancel/{}/$'.format(BATCH_API_VERSION, regex_testid), batch.cancel_test, name='batch_cancel'),
-        url(r'^api/batch/documentation/?$', batch.documentation, name='batch_documentation'),
+        url(r'^api/batch/v{}/requests$'.format(BATCH_API_MAJOR_VERSION),
+            batch.endpoint_requests, name='batch_endpoint_requests'),
+        url(r'^api/batch/v{}/requests/{}$'.format(
+            BATCH_API_MAJOR_VERSION, regex_testid), batch.endpoint_request,
+            name='batch_endpoint_request'),
+        url(r'^api/batch/v{}/requests/{}/results$'.format(
+            BATCH_API_MAJOR_VERSION, regex_testid), batch.endpoint_results,
+            name='batch_endpoint_results'),
+        url(r'^api/batch/v{}/requests/{}/results_technical$'.format(
+            BATCH_API_MAJOR_VERSION, regex_testid), batch.endpoint_results_technical,
+            name='batch_endpoint_results_technical'),
+        url(r'^api/batch/v{}/metadata/report$'.format(BATCH_API_MAJOR_VERSION),
+            batch.endpoint_metadata_report,
+            name='batch_endpoint_metadata_report'),
+        url(r'^api/batch/openapi.yaml$', batch.documentation, name='batch_documentation'),
+
         # The following should always be the last to catch now-invalid urls.
         url(r'^api/batch/', batch.old_url, name='batch_old'),
     ]

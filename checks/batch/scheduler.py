@@ -125,13 +125,12 @@ def get_live_requests():
     return live_requests
 
 
-def get_user_and_request():
+def get_user_and_request(live_requests):
     """
-    Pick a user and his oldest live batch_request.
+    Pick a user and his request from the available live_requests.
     Users are fairly chosen regardless of the number of submitted tests.
 
     """
-    live_requests = get_live_requests()
     if not live_requests:
         return None, None
 
@@ -146,8 +145,11 @@ def pick_domain(batch_request):
     Selects the first available domain.
 
     """
-    return BatchDomain.objects.filter(
-        status=BatchDomainStatus.waiting, batch_request=batch_request).first()
+    try:
+        return BatchDomain.objects.filter(
+            status=BatchDomainStatus.waiting, batch_request=batch_request)[:1].get()  #.first()
+    except BatchDomain.DoesNotExist:
+        return None
 
 
 def check_for_result_or_start_test(batch_domain, batch_test, subtest, taskset):
@@ -535,10 +537,16 @@ def _run_scheduler():
     update_batch_request_status()
     logger.info("Update status duration: {}".format(timer() - start_time))
 
+    submitted = 0
+    found = 0
     if not is_queue_loaded(client):
         start_time = timer()
+        live_requests = get_live_requests()
         while domains_to_test > 0:
-            user, batch_request = get_user_and_request()
+            user, batch_request = get_user_and_request(live_requests)
+            if not (user or batch_request):
+                break
+
             batch_domain = pick_domain(batch_request)
             if not batch_domain:
                 break
@@ -560,12 +568,18 @@ def _run_scheduler():
                         subtests_started += 1
 
             if subtests_started > 0:
+                submitted += 1
                 domains_to_test -= 1
+            else:
+                found += 1
             update_domain_status(batch_domain)
         logger.info("Submission duration: {}".format(timer() - start_time))
 
     submitted_domains = settings.BATCH_SCHEDULER_DOMAINS - domains_to_test
+    submitted_domains = submitted
+    found_domains = found
     logger.info("Submitted {} domains".format(submitted_domains))
+    logger.info("Found {} domains".format(found_domains))
 
 
 if settings.ENABLE_BATCH:

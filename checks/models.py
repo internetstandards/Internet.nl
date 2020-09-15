@@ -1,12 +1,14 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import ast
+import os
 from enum import Enum
 from enumfields import EnumField, EnumIntegerField
 from enumfields import Enum as LabelEnum
 from uuid import uuid4 as uuid
 
-from django.db import models
+from django.core.exceptions import SuspiciousFileOperation
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
@@ -120,7 +122,7 @@ class BaseTestModel(models.Model):
         abstract = True
 
     def totalscore(self, score_fields):
-        if self.score:
+        if self.score is not None:
             return self.score
 
         totalscore = 0
@@ -275,10 +277,10 @@ class DomainTestIpv6(BaseTestModel):
 
 class IPv6TestDomain(models.Model):
     domain = models.CharField(max_length=255)
-    v6_good = ListField()
-    v6_bad = ListField()
-    v4_good = ListField()
-    v4_bad = ListField()
+    v6_good = ListField(default=[])
+    v6_bad = ListField(default=[])
+    v4_good = ListField(default=[])
+    v4_bad = ListField(default=[])
     score = models.IntegerField(null=True)
 
     def __dir__(self):
@@ -289,7 +291,8 @@ class IPv6TestDomain(models.Model):
 
 
 class WebDomain(IPv6TestDomain):
-    domaintestipv6 = models.ForeignKey(DomainTestIpv6, null=True)
+    domaintestipv6 = models.ForeignKey(
+        DomainTestIpv6, null=True, related_name='webdomains')
 
     def __dir__(self):
         return super(WebDomain, self).__dir__().extend([
@@ -312,7 +315,7 @@ class DomainServersModel(models.Model):
     max_score = models.IntegerField(null=True)
 
     def totalscore(self, score_fields, testset, mailtest=False):
-        if self.score:
+        if self.score is not None:
             return self.score
 
         if len(testset) == 0:
@@ -489,6 +492,62 @@ class DomainTestTls(BaseTestModel):
             'cert_hostmatch_score', 'score',
         ]
 
+    def get_web_api_details(self):
+        return {
+            'dane_status': self.dane_status.name,
+            'dane_records': self.dane_records,
+            'kex_params_bad': self.fs_bad,
+            'kex_params_phase_out': self.fs_phase_out,
+            'ciphers_bad': self.ciphers_bad,
+            'ciphers_phase_out': self.ciphers_phase_out,
+            'cipher_order': self.cipher_order.name,
+            'cipher_order_violation': self.cipher_order_violation,
+            'protocols_bad': self.protocols_bad,
+            'protocols_phase_out': self.protocols_phase_out,
+            'compression': self.compression,
+            'secure_reneg': self.secure_reneg,
+            'client_reneg': self.client_reneg,
+            'zero_rtt': self.zero_rtt.name,
+            'ocsp_stapling': self.ocsp_stapling.name,
+            'kex_hash_func': self.kex_hash_func.name,
+            'https_redirect': self.forced_https.name,
+            'http_compression': self.http_compression_enabled,
+            'hsts': self.hsts_enabled,
+            'hsts_policies': self.hsts_policies,
+            'cert_chain': self.cert_chain,
+            'cert_trusted': self.cert_trusted,
+            'cert_pubkey_bad': self.cert_pubkey_bad,
+            'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
+            'cert_signature_bad': self.cert_signature_bad,
+            'cert_hostmatch_bad': self.cert_hostmatch_bad,
+        }
+
+    def get_mail_api_details(self):
+        return {
+            'dane_status': self.dane_status.name,
+            'dane_records': self.dane_records,
+            'dane_rollover': self.dane_rollover,
+            'kex_params_bad': self.fs_bad,
+            'kex_params_phase_out': self.fs_phase_out,
+            'ciphers_bad': self.ciphers_bad,
+            'ciphers_phase_out': self.ciphers_phase_out,
+            'cipher_order': self.cipher_order.name,
+            'cipher_order_violation': self.cipher_order_violation,
+            'protocols_bad': self.protocols_bad,
+            'protocols_phase_out': self.protocols_phase_out,
+            'compression': self.compression,
+            'secure_reneg': self.secure_reneg,
+            'client_reneg': self.client_reneg,
+            'zero_rtt': self.zero_rtt.name,
+            'kex_hash_func': self.kex_hash_func.name,
+            'cert_chain': self.cert_chain,
+            'cert_trusted': self.cert_trusted,
+            'cert_pubkey_bad': self.cert_pubkey_bad,
+            'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
+            'cert_signature_bad': self.cert_signature_bad,
+            'cert_hostmatch_bad': self.cert_hostmatch_bad,
+        }
+
 
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
@@ -543,6 +602,21 @@ class DomainTestAppsecpriv(BaseTestModel):
             'x_content_type_options_score',
         ]
 
+    def get_web_api_details(self):
+        return {
+            'content_security_policy_enabled': self.content_security_policy_enabled,
+            'content_security_policy_values': self.content_security_policy_values,
+            'referrer_policy_enabled': self.referrer_policy_enabled,
+            'referrer_policy_values': self.referrer_policy_values,
+            'x_content_type_options_enabled': self.x_content_type_options_enabled,
+            'x_content_type_options_values': self.x_content_type_options_values,
+            'x_frame_options_enabled': self.x_frame_options_enabled,
+            'x_frame_options_values': self.x_frame_options_values,
+            # TODO: to be removed in the future.
+            #'x_xss_protection_enabled': self.x_xss_protection_enabled,
+            #'x_xss_protection_values': self.x_xss_protection_values,
+        }
+
 
 class DomainTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -584,8 +658,10 @@ class MailTestIpv6(BaseTestModel):
 
 
 class NsDomain(IPv6TestDomain):
-    domaintestipv6 = models.ForeignKey(DomainTestIpv6, null=True)
-    mailtestipv6 = models.ForeignKey(MailTestIpv6, null=True)
+    domaintestipv6 = models.ForeignKey(
+        DomainTestIpv6, null=True, related_name='nsdomains')
+    mailtestipv6 = models.ForeignKey(
+        MailTestIpv6, null=True, related_name='nsdomains')
 
     def __dir__(self):
         return super(NsDomain, self).__dir__().extend([
@@ -595,7 +671,8 @@ class NsDomain(IPv6TestDomain):
 
 
 class MxDomain(IPv6TestDomain):
-    mailtestipv6 = models.ForeignKey(MailTestIpv6, null=True)
+    mailtestipv6 = models.ForeignKey(
+        MailTestIpv6, null=True, related_name='mxdomains')
 
     def __dir__(self):
         return super(MxDomain, self).__dir__().extend([
@@ -682,19 +759,15 @@ class BatchUser(models.Model):
     def __dir__(self):
         return ['username', 'name', 'organization', 'email']
 
+    @transaction.atomic
+    def delete_related_data(self, delete_self=False):
+        for request in BatchRequest.objects.filter(user=self).all():
+            # Delete the request's related data but not the request itself.
+            # They will be deleted by the DB when the user gets deleted later.
+            request.delete_related_data()
 
-class BatchCustomView(models.Model):
-    """
-    Custom views per domain for batch results.
-    These can be enabled per user for all future batch requests.
-
-    """
-    name = models.CharField(unique=True, max_length=255)
-    description = models.TextField()
-    users = models.ManyToManyField(BatchUser, related_name="custom_views")
-
-    def __dir__(self):
-        return ['name', 'description', 'users']
+        if delete_self:
+            self.delete()
 
 
 class BatchRequestType(LabelEnum):
@@ -735,12 +808,73 @@ class BatchRequest(models.Model):
     request_id = models.CharField(
         unique=True, db_index=True, max_length=32, default=batch_request_id)
     report_file = models.FileField(upload_to='batch_results/')
+    report_technical_file = models.FileField(upload_to='batch_results/', null=True)
 
     def __dir__(self):
         return [
             'user', 'name', 'submit_date', 'finished_date', 'type', 'status',
-            'request_id', 'report_file'
+            'request_id', 'report_file', 'report_technical_file'
         ]
+
+    def _api_status(self):
+        if self.status == BatchRequestStatus.registering:
+            return "registering"
+        elif self.status in (BatchRequestStatus.live, BatchRequestStatus.running):
+            return "running"
+        elif self.status == BatchRequestStatus.error:
+            return "error"
+        elif self.status == BatchRequestStatus.done:
+            if self.has_report_file():
+                return "done"
+            return "generating"
+        elif self.status == BatchRequestStatus.cancelled:
+            return "cancelled"
+        return "-"
+
+    def has_report_file(self):
+        return (self.report_file
+                and os.path.isfile(self.report_file.path)
+                and self.report_technical_file
+                and os.path.isfile(self.report_technical_file.path))
+
+    def get_report_file(self, technical=False):
+        if technical:
+            return self.report_technical_file
+        return self.report_file
+
+    def to_api_dict(self):
+        finished_date = self.finished_date
+        if finished_date:
+            finished_date = finished_date.isoformat()
+        return dict(
+            name=self.name,
+            submit_date=self.submit_date.isoformat(),
+            finished_date=finished_date,
+            request_type=self.type.label.lower(),
+            status=self._api_status(),
+            request_id=self.request_id)
+
+    @transaction.atomic
+    def delete_related_data(self, delete_self=False):
+        # Remove the generated files.
+        try:
+            self.report_file.delete()
+            self.report_technical_file.delete()
+        except (IOError, SuspiciousFileOperation):
+            pass
+
+        # Remove the related BatchWebTest and BatchMailTest entries.
+        batch_webtest_ids = {
+            d.webtest_id for d in
+            BatchDomain.objects.filter(batch_request=self).all()}
+        batch_mailtest_ids = {
+            d.mailtest_id for d in
+            BatchDomain.objects.filter(batch_request=self).all()}
+        BatchWebTest.objects.filter(id__in=batch_webtest_ids).delete()
+        BatchMailTest.objects.filter(id__in=batch_mailtest_ids).delete()
+
+        if delete_self:
+            self.delete()
 
 
 class BatchDomainStatus(LabelEnum):
@@ -866,3 +1000,39 @@ class BatchMailTest(models.Model):
             'dnssec_status', 'dnssec_errors', 'auth', 'auth_status',
             'auth_errors', 'tls', 'tls_status', 'tls_errors'
         ]
+
+
+class AutoConfOption(Enum):
+    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
+    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
+
+
+class AutoConf(models.Model):
+    """
+    Various configuration options that need to be applied automatically
+    (e.g., through migrations).
+
+    Any available options are defined in AutoConfOption above.
+
+    """
+    name = EnumField(AutoConfOption, max_length=255, primary_key=True)
+    value = models.CharField(max_length=255, default=None)
+
+    @classmethod
+    def get_option(cls, option, default=None):
+        try:
+            return cls.objects.get(name=option).value
+        except cls.DoesNotExist:
+            return default
+
+    @classmethod
+    def set_option(cls, option, value):
+        try:
+            op = cls.objects.get(name=option)
+            op.value = value
+        except cls.DoesNotExist:
+            op = cls(name=option, value=value)
+        op.save()
+
+    def __dir__(self):
+        return ['name', 'value']

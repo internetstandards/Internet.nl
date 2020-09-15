@@ -7,7 +7,11 @@ from django.conf import settings
 # .. note:: None ttl means cache indefinitely.
 REDIS_RECORD = namedtuple("REDIS_RECORD", "id ttl")
 
+# Autoconf
+autoconf = REDIS_RECORD("autoconf:{}", None)
+
 # Padded MACs
+# .. note:: The TTL value is not used and set explicitly to not expire.
 padded_macs = REDIS_RECORD("conn:lookup:padded_macs", None)
 
 # WHOIS requests
@@ -88,3 +92,11 @@ batch_scheduler_lock = REDIS_RECORD("batch:scheduler:lock", 60*5)
 
 # Running batch test id
 running_batch_test = REDIS_RECORD("batch:task_id:{}", 60*10)
+
+# Report metadata
+# .. note:: The TTL value is not used and set explicitly to not expire.
+report_metadata = REDIS_RECORD("batch:report_metadata", None)
+
+# Batch metadata for test name map
+# .. note:: The TTL value is not used and set explicitly to not expire.
+batch_metadata = REDIS_RECORD("batch:name_map_metadata", None)

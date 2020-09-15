@@ -5,7 +5,7 @@ instructions are not given because they rely heavily on the preferred chosen
 environment of one's installation._
 
 When deploying make sure to follow these steps on your local environment and
-pushthe changes to the server:
+push the changes to the server:
 
 1. If there was a change in the frontend (CSS or javascript) run the following:
    ```
@@ -18,6 +18,8 @@ pushthe changes to the server:
    make update_padded_macs
    make update_root_key_file
    ```
+   This is already done with each release, but in case you are not using the
+   latest release.
 On the server you need to:
 
 1. Create the latest translation files and compile them:

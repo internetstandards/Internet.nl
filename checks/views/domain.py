@@ -3,14 +3,15 @@
 import re
 import json
 
-from django.conf import settings
+from django.core.cache import cache
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from checks import simple_cache_page
+from checks import simple_cache_page, redis_id
 from checks.models import DomainTestIpv6, DomainTestDnssec
 from checks.models import WebTestTls, DomainTestReport, WebTestAppsecpriv
+from checks.models import AutoConfOption
 from checks.probes import webprobes
 from checks.views.shared import redirect_invalid_domain
 from checks.views.shared import proberesults, add_registrar_to_report
@@ -154,8 +155,10 @@ def resultsstored(request, dname, id):
     If the report id belongs to dated results start a new test.
 
     """
-    if (settings.DATED_REPORT_ID_THRESHOLD_WEB
-            and int(id) < settings.DATED_REPORT_ID_THRESHOLD_WEB):
+    option = AutoConfOption.DATED_REPORT_ID_THRESHOLD_WEB
+    cache_id = redis_id.autoconf.id.format(option.value)
+    id_threshold = cache.get(cache_id)
+    if id_threshold and int(id) <= id_threshold:
         return HttpResponseRedirect("/site/{}/".format(dname))
 
     try:

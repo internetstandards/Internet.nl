@@ -2,6 +2,9 @@ FROM ubuntu:19.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
+# 19.04 is not supported anymore, use old-releases.ubuntu.com for the package maamger
+RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
 # install helper packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bsdmainutils \

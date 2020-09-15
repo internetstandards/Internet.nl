@@ -1,5 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from collections import defaultdict
 import re
 import socket
 
@@ -9,10 +10,7 @@ import unbound
 
 from . import SetupUnboundContext
 from .. import batch_shared_task
-from ..scoring import STATUS_MAX, ORDERED_STATUSES, STATUS_NOT_TESTED
-from ..scoring import STATUS_SUCCESS, STATUS_GOOD_NOT_TESTED
-
-from collections import defaultdict
+from ..scoring import STATUS_MAX, ORDERED_STATUSES
 
 
 MAX_MAILSERVERS = 10
@@ -77,7 +75,10 @@ def do_mail_get_servers(self, url, *args, **kwargs):
                 continue
             dane_cb_data = resolve_dane(self, 25, rdata)
             mailservers.append((rdata, dane_cb_data))
-    return mailservers[:MAX_MAILSERVERS]
+    # Sort the mailsevers on their name so that the same ones are tested for
+    # all related tests.
+    mailservers = sorted(mailservers, key=lambda x: x[0])[:MAX_MAILSERVERS]
+    return mailservers
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):
@@ -123,9 +124,6 @@ def aggregate_subreports(subreports, report):
     This makes sure that the final verdict and status of a subtest is the worst
     one.
 
-    In case of mixed 'good' and 'not_tested' results we show the good verdict
-    but with the 'good_not_tested' status.
-
     """
     if subreports:
         for test_item in report:
@@ -158,15 +156,6 @@ def aggregate_subreports(subreports, report):
                     data = (server, subtechdata)
                 report[test_item]['tech_data'].append(data)
 
-            # If the results are 'good' and 'not_tested' mixed, we show the
-            # good verdict but with the good_not_tested status.
-            if (report[test_item]['status'] == STATUS_NOT_TESTED and
-                any((subreport[test_item]['status'] == STATUS_SUCCESS
-                    for _, subreport in subreports.items()))):
-                report[test_item]['status'] = STATUS_GOOD_NOT_TESTED
-                good_verdict = report[test_item]['label'].replace(
-                    ' label', ' verdict good')
-                report[test_item]['verdict'] = good_verdict
     else:
         for test_name, test_item in report.items():
             test_item['tech_type'] = ""

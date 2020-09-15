@@ -49,8 +49,7 @@ intended as an internet standards compliance test and not as a security test.
 Internet.nl is a [Django](https://www.djangoproject.com/)
 based application.
 
-Current install base is Django 1.11 with Python 3.5+
-(Python 3.7+ is not currently supported).
+Current install base is Django 1.11 with Python 3.7+.
 
 
 ### Quick start

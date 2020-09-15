@@ -1,10 +1,13 @@
-from django.core.management.base import BaseCommand
-from checks.tasks.connection import SSLConnectionWrapper, DebugConnection
-from checks.tasks.connection import ModernConnection
-from checks.tasks.connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1
-from checks.tasks.connection import http_get, TLSV1_2, TLSV1_3
-from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
 from sys import exit
+
+from django.core.management.base import BaseCommand
+
+from checks.tasks.tls import SMTPConnection
+from checks.tasks.tls_connection import SSLConnectionWrapper, DebugConnection
+from checks.tasks.tls_connection import ModernConnection
+from checks.tasks.tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1
+from checks.tasks.tls_connection import http_get, TLSV1_2, TLSV1_3
+from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
 
 
 class Command(BaseCommand):
@@ -18,7 +21,7 @@ class Command(BaseCommand):
                 'connect and print openssl s_client -connect like output.'))
         parser.add_argument('--port', type=int, default=443)
         parser.add_argument(
-            '--conn', choices=['auto', 'debug', 'modern'], default='auto')
+            '--conn', choices=['auto', 'debug', 'modern', 'auto_starttls'], default='auto')
         parser.add_argument(
             '--tls-version', choices=[
                 'auto', 'SSLv2', 'SSLv3', 'TLSv1.0', 'TLSv1.1', 'TLSv1.2',
@@ -51,6 +54,7 @@ class Command(BaseCommand):
             'auto': SSLConnectionWrapper,
             'debug': DebugConnection,
             'modern': ModernConnection,
+            'auto_starttls': SMTPConnection,
         }.get(options['conn'])
 
         kwargs = {
@@ -58,7 +62,7 @@ class Command(BaseCommand):
             'port': options['port'],
         }
 
-        if not options['conn'] == 'auto':
+        if conn_class not in (SSLConnectionWrapper, SMTPConnection):
             kwargs['version'] = tls_version
 
         with conn_class(**kwargs) as conn:

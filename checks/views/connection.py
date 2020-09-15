@@ -84,9 +84,9 @@ def gettestid(request, *arg, **kw):
     return HttpResponse(json.dumps(dict(test_id=ct.test_id)))
 
 
-def results(request, testid):
+def results(request, request_id):
     try:
-        ct = ConnectionTest.objects.filter(test_id=testid).get(finished=True)
+        ct = ConnectionTest.objects.filter(test_id=request_id).get(finished=True)
     except ConnectionTest.DoesNotExist:
         return HttpResponseRedirect('/connection/')
 
@@ -100,7 +100,7 @@ def results(request, testid):
     return render(
         request, 'connection-results.html',
         dict(
-            addr=testid,
+            addr=request_id,
             pageclass="connectiontest",
             pagetitle=_("connection pagetitle"),
             probes=probereports,
@@ -173,19 +173,19 @@ def init_dnssec_report():
 
 
 # Save results after executing browser tests
-def finished(request, testid):
+def finished(request, request_id):
     try:
-        ct = ConnectionTest.objects.filter(test_id=testid).get(finished=False)
+        ct = ConnectionTest.objects.filter(test_id=request_id).get(finished=False)
     except ConnectionTest.DoesNotExist:
         return HttpResponse(status=500)
 
     red = get_redis_connection("default")
     resolv = []
     resolv_owner = set()
-    resolvers = red.smembers(redis_id.conn_test_resolvers.id.format(testid))
+    resolvers = red.smembers(redis_id.conn_test_resolvers.id.format(request_id))
     for resolver in resolvers:
         resolver = resolver.decode("ascii")
-        cache_id = redis_id.conn_test_resolver_as.id.format(testid, resolver)
+        cache_id = redis_id.conn_test_resolver_as.id.format(request_id, resolver)
         as_record = cache.get(cache_id)
         res = Resolver(
             connectiontest=ct,
@@ -204,7 +204,7 @@ def finished(request, testid):
 
     report = init_ipv6_report()
     reportdnssec = init_dnssec_report()
-    ns6 = cache.get(redis_id.conn_test_ns6.id.format(testid))
+    ns6 = cache.get(redis_id.conn_test_ns6.id.format(request_id))
     if ns6:
         ct.resolv_ipv6 = True
         report['resolver_conn']['status'] = STATUS_SUCCESS
@@ -215,7 +215,7 @@ def finished(request, testid):
         report['resolver_conn']['verdict'] = (
             "detail conn ipv6 resolver-conn verdict bad")
 
-    if cache.get(redis_id.conn_test_aaaa.id.format(testid)):
+    if cache.get(redis_id.conn_test_aaaa.id.format(request_id)):
         ct.aaaa_ipv6 = True
         report['dns_conn']['status'] = STATUS_SUCCESS
         report['dns_conn']['verdict'] = (
@@ -225,7 +225,7 @@ def finished(request, testid):
         report['dns_conn']['verdict'] = (
             "detail conn ipv6 dns-conn verdict bad")
 
-    v6 = cache.get(redis_id.conn_test_v6.id.format(testid))
+    v6 = cache.get(redis_id.conn_test_v6.id.format(request_id))
     if v6:
         v6['ip'] = anonymize_IP(v6.get("ip"))
         v6['reverse'] = anonymize_reverse_name(v6.get("reverse"))
@@ -240,7 +240,7 @@ def finished(request, testid):
         else:
             owner = ""
 
-        if cache.get(redis_id.conn_test_v6_reach.id.format(testid)):
+        if cache.get(redis_id.conn_test_v6_reach.id.format(request_id)):
             ct.addr_ipv6 = True
             report['connection']['status'] = STATUS_SUCCESS
             report['connection']['verdict'] = (
@@ -263,7 +263,7 @@ def finished(request, testid):
             report['privacy']['verdict'] = (
                 "detail conn ipv6 privacy verdict good")
 
-    v4 = cache.get(redis_id.conn_test_v4.id.format(testid))
+    v4 = cache.get(redis_id.conn_test_v4.id.format(request_id))
     if v4:
         v4['ip'] = anonymize_IP(v4.get("ip")[:16])
         v4['reverse'] = anonymize_reverse_name(v4.get("reverse"))
@@ -289,7 +289,7 @@ def finished(request, testid):
             "detail conn ipv6 ipv4-conn verdict bad")
         report['ipv4_conn']['tech_type'] = ""
 
-    bogus = cache.get(redis_id.conn_test_bogus.id.format(testid))
+    bogus = cache.get(redis_id.conn_test_bogus.id.format(request_id))
     if not bogus:
         if (report['ipv4_conn']['status'] == STATUS_SUCCESS
                 or report['dns_conn']['status'] == STATUS_SUCCESS):
@@ -519,11 +519,11 @@ def aaaa_ipv6(request):
 
 
 @jsonp
-def addr_ipv6(request, testid):
-    cache_id = redis_id.conn_test_v6_reach.id.format(testid)
+def addr_ipv6(request, request_id):
+    cache_id = redis_id.conn_test_v6_reach.id.format(request_id)
     cache_ttl = redis_id.conn_test_v6_reach.ttl
     cache.set(cache_id, True, cache_ttl)
-    return network_ipv6(request, testid)
+    return network_ipv6(request, request_id)
 
 
 def network_ipv6(request, test_id):

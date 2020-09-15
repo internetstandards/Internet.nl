@@ -102,30 +102,26 @@ def sock_connect(
     # Return the connection details for the first IP address that we can
     # successfully connect to.
     af = socket.AF_INET6 if ipv6 else socket.AF_INET
-    try:
-        for this_ip in ips:
-            try:
-                s = socket.socket(af, socket.SOCK_STREAM, 0)
-                s.settimeout(timeout)
-                s.connect((this_ip, port))
-                return (this_ip, s)
-            except OSError as e:
-                if s:
-                    s.close()
-                err = e
-    except Exception as e:
-        raise e
-
+    for this_ip in ips:
+        try:
+            s = socket.socket(af, socket.SOCK_STREAM, 0)
+            s.settimeout(timeout)
+            s.connect((this_ip, port))
+            return (this_ip, s)
+        except OSError as e:
+            if s:
+                s.close()
+            err = e
     raise err
 
 
 # TODO: factor out TLS test specific functionality (used in tls.py) from basic
 # connectivity (used here by http_fetch and also by tls.py).
-class ConnectionHandshakeException(socket.error):
+class ConnectionHandshakeException(Exception):
     pass
 
 
-class ConnectionSocketException(socket.error):
+class ConnectionSocketException(Exception):
     pass
 
 
@@ -237,19 +233,27 @@ class ConnectionCommon:
     def dup(self, *args, **kwargs):
         return self.from_conn(self, *args, **kwargs)
 
-    def sock_connect(self):
-        if sslConnectLogger.isEnabledFor(logging.DEBUG):
-            sslConnectLogger.debug(
-                f"SSL connect with {type(self).__name__}"
-                f" to host '{self.server_name}'"
-                f" at IP:port {self.ip_address}:{self.port}"
-                f" using SSL version {self.version.name}"
-                f" invoked by {inspect.stack()[4].function}"
-                f" > {inspect.stack()[5].function}"
-                f" > {inspect.stack()[6].function}")
-        (self.ip_address, self.sock) = sock_connect(
-            self.server_name, self.ip_address, self.port, self.ipv6,
-            self.task, self.timeout)
+    def sock_connect(self, any_af=False):
+        try:
+            if sslConnectLogger.isEnabledFor(logging.DEBUG):
+                sslConnectLogger.debug(
+                    f"SSL connect with {type(self).__name__}"
+                    f" to host '{self.server_name}'"
+                    f" at IP:port {self.ip_address}:{self.port}"
+                    f" using SSL version {self.version.name}"
+                    f" invoked by {inspect.stack()[4].function}"
+                    f" > {inspect.stack()[5].function}"
+                    f" > {inspect.stack()[6].function}")
+            (self.ip_address, self.sock) = sock_connect(
+                self.server_name, self.ip_address, self.port, self.ipv6,
+                self.task, self.timeout)
+        except (OSError, NoIpError):
+            if not (any_af or self.ip_address):
+                raise
+            self.ipv6 = not self.ipv6
+            (self.ip_address, self.sock) = sock_connect(
+                self.server_name, self.ip_address, self.port, self.ipv6,
+                self.task, self.timeout)
 
     def connect(self, do_handshake_on_connect):
         if self.sock:

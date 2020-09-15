@@ -168,6 +168,9 @@ tls13ipv4only                                                     IN  TXT    "v=
 tls13ipv4onlynoipv6                                               IN  A      {{TARGET_TLS13ONLYDIFFIPV4IPV6_IP}}
 tls13ipv4onlynoipv6                                               IN  MX     10   tls13ipv4onlynoipv6
 tls13ipv4onlynoipv6                                               IN  TXT    "v=spf1 mx -all"
+tls13ipv6onlynoipv4                                               IN  AAAA   {{TARGET_TLS13ONLYIPV6ONLY_IPV6}}
+tls13ipv6onlynoipv4                                               IN  MX     10   tls13ipv6onlynoipv4
+tls13ipv6onlynoipv4                                               IN  TXT    "v=spf1 mx -all"
 
 ; TLSA records generated using https://www.huque.com/bin/gen_tlsa
 ; using options:
@@ -253,6 +256,7 @@ _25._tcp.tls13only.test.nlnetlabs.tk.                             IN  TLSA   3 1
 _25._tcp.tls130rtt.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _25._tcp.tls13ipv4only.test.nlnetlabs.tk.                         IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 _25._tcp.tls13ipv4onlynoipv6.test.nlnetlabs.tk.                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
+_25._tcp.tls13ipv6onlynoipv4.test.nlnetlabs.tk.                   IN  TLSA   3 1 1 f58f7492351360e3855bcd064f545cbc365df7518dab2c7a4b843ec3b449af5c
 
 _dmarc.tls12only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12only.test.nlnetlabs.tk"
 _dmarc.tls12onlynoip                                              IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12onlynoip.test.nlnetlabs.tk"
@@ -260,6 +264,7 @@ _dmarc.tls13only                                                  IN  TXT    "v=
 _dmarc.tls130rtt                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls130rtt.test.nlnetlabs.tk"
 _dmarc.tls13ipv4only                                              IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13ipv4only.test.nlnetlabs.tk"
 _dmarc.tls13ipv4onlynoipv6                                        IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13ipv4onlynoipv6.test.nlnetlabs.tk"
+_dmarc.tls13ipv6onlynoipv4                                        IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13ipv6onlynoipv4.test.nlnetlabs.tk"
 
 ; Created using https://dkimcore.org
 1566421634.nlnetlabs._domainkey.tls12only.test.nlnetlabs.tk. IN TXT (
@@ -288,6 +293,11 @@ _dmarc.tls13ipv4onlynoipv6                                        IN  TXT    "v=
         "Pb5W2fF7jVqeJ5nLIVqgWrNeluxbXtHYm8zoQo2NXk6ulgJHStnGxaDArKh87NtC"
         "RpS2Ta1obPjf7gCn6wIDAQAB")
 1568637621.nlnetlabs._domainkey.tls13ipv4onlynoipv6.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6GAoWox5bO/QIRJYFtyabk/Xf"
+        "l+7JtJBQPHSvGCVdiwsLjyveeEERuAHvFiJEsn4grWL+adZ0CftwlGO2VZshNt/B"
+        "+GnMLA9Qcz0jMtRHdxiZShyEnLDtWJ3hxOqo865Bdgqic2ETKp8144vM6VFkE+QY"
+        "weNIWktz5eYo9gcdkwIDAQAB")
+1568637621.nlnetlabs._domainkey.tls13ipv6onlynoipv4.test.nlnetlabs.tk. IN TXT (
         "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6GAoWox5bO/QIRJYFtyabk/Xf"
         "l+7JtJBQPHSvGCVdiwsLjyveeEERuAHvFiJEsn4grWL+adZ0CftwlGO2VZshNt/B"
         "+GnMLA9Qcz0jMtRHdxiZShyEnLDtWJ3hxOqo865Bdgqic2ETKp8144vM6VFkE+QY"

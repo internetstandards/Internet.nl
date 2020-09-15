@@ -1,0 +1,1574 @@
+DISCLAIMER: |
+  IMPORTANT:
+
+  This is a partial file. The complete OPENAPI specification can be generated
+  by using the `api_generate_doc` django command. The command will complete this specification
+  by:
+  * updating values/text based on configuration,
+  * documenting enabled features,
+  * adding enum values based on source code and checking the existence of their
+    documentation.
+
+  This DISCLAIMER field is also removed in the process.
+
+openapi: "3.0.3"
+
+info:
+  version: 2.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  termsOfService: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  contact: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  x-logo: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+  description: |
+    # Introduction
+    Welcome to the batch API documentation, a JSON based REST-like API for
+    batch testing multiple domains for compliance with modern internet
+    standards.
+
+    For a visual representation of this specification you can use
+    [https://redocly.github.io/redoc/](https://redocly.github.io/redoc/?url=@@DESC_INTRO_REDOCLY_LINK@@).
+
+    @@DESC_INTRO_EXTRA@@
+
+    ## Versioning
+    The API uses semantic versioning (`major.minor.patch`).
+
+    Changes to the `.major` version introduce and/or remove
+    semantics/paths/features to the API and that could lead to breaking changes.
+
+    Changes to the `.minor` version introduce new fields that don't break the
+    current API but you would need extra parsing code to get the new values.
+
+    Changes to the `.patch` version denote changes to the text of this document
+    but not to the API functionality eg. typos.
+
+    The `.major` version is part of the API path. In case the user requests a
+    path with a previous version, a message to check the version number will be
+    returned as the result to the API call.
+
+    This API only supports the current version.
+
+    # Authentication
+    All batch API endpoints are protected by HTTP Basic Authentication.
+    To use the endpoints the client must supply an HTTP Basic Authentication
+    header of the form:
+    ```
+    Authorization: Basic(base64)
+    ```
+    where `base64` is the base64-encoding of the string `<username>:<password>`.
+
+servers: OVERRIDE THIS VALUE IN internetnl/batch_api_doc_conf.py
+
+security:
+  - BATCH_HTTP_AUTH: []
+
+tags:
+  - name: Requests
+  - name: Metadata
+
+paths:
+  /requests:
+    post:
+      operationId: register_request
+      tags:
+        - Requests
+      summary: New request
+      description: |
+        Registers a new batch request for the given domains. You can use the
+        returned id in a status request to track progress.
+
+        _A note on the domain list_: After the initial validation of the
+        domains' name, domains are used as-is. No extra logic is used to
+        produce more test targets e.g, web testing the bare and the www
+        version of a domain requires both domain names to be present in the
+        domain list.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/RegisterResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/request_limit'
+      operationId: list_requests
+      tags:
+        - Requests
+      summary: List requests
+      description: >
+        Lists the user's requests in descending order; newest first. You can
+        limit the number of returned entries (defautls to 10).
+      responses:
+        "200":
+          $ref: '#/components/responses/ListRequestsResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+  /requests/{request_id}:
+    parameters:
+      - $ref: '#/components/parameters/request_id'
+    get:
+      operationId: status_request
+      tags:
+        - Requests
+      summary: Request status
+      description: >
+        Retrieves information about the progress of the request. When the
+        status of the request is `done`, results are available.
+      responses:
+        "200":
+          $ref: '#/components/responses/StatusResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+    patch:
+      operationId: patch_request
+      tags:
+        - Requests
+      summary: Cancel request
+      description: >
+        Cancels the request. No resuming is possible. Allows to cancel a
+        request that was incorrectly submitted in order to give way to
+        subsequent requests to start testing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [cancelled]
+      responses:
+        "200":
+          $ref: '#/components/responses/CancelResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+
+  /requests/{request_id}/results:
+    parameters:
+      - $ref: '#/components/parameters/request_id'
+    get:
+      operationId: results
+      tags:
+        - Requests
+      summary: Results
+      description: Retrieves the results for this request. The request needs to
+        be `done` in order for results to be available.
+      responses:
+        "200":
+          $ref: '#/components/responses/ResultsResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+  /requests/{request_id}/results_technical:
+    parameters:
+      - $ref: '#/components/parameters/request_id'
+    get:
+      operationId: results_technical
+      tags:
+        - Requests
+      summary: Technical results
+      description: >
+        Retrieves the results for this request. These results are
+        focused on the technical details of the domains instead of the
+        compliance-centric view of the base results. The request needs
+        to be `done` in order for results to be available.
+      responses:
+        "200":
+          $ref: '#/components/responses/ResultsTechnicalResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "404":
+          $ref: '#/components/responses/UnknownRequestErrorResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+  /metadata/report:
+    get:
+      operationId: metadata_report
+      tags:
+        - Metadata
+      summary: Report metadata
+      description: >
+        Machine readable metadata on report related information like
+        documentation, translation, display, etc. This can be used to create
+        reports equivalent to the main application.
+      responses:
+        "200":
+          $ref: '#/components/responses/MetadataReportResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorisedResponse'
+        "500":
+          $ref: '#/components/responses/ServerErrorResponse'
+
+components:
+  securitySchemes:
+    BATCH_HTTP_AUTH:
+      type: http
+      scheme: basic
+
+  parameters:
+    request_id:
+      in: path
+      name: request_id
+      schema:
+        $ref: '#/components/schemas/RequestId'
+      required: true
+    request_limit:
+      in: query
+      name: limit
+      description: >
+        Limits the number of returned entries. Defaults to `10`. Use `0` for no
+        limit.
+      schema:
+        type: integer
+
+  schemas:
+    #
+    # Types
+    #
+    Handle:
+      type: string
+      maxLength: 255
+      description: >
+         A free form string that only serves as a reference for the requester.
+         Does not need to be unique.
+      example: "Web test - 1/1/1970"
+
+    RequestType:
+      type: string
+      enum:
+        - web
+        - mail
+
+    RequestId:
+      type: string
+      description: UUID of the request.
+      pattern: '^[a-f0-9]{32}$'
+      example: 'e94251da69c54da7b16fc5202a69c5c2'
+
+    ApiVersion:
+        type: string
+        pattern: '[0-9]+.[0-9]+.[0-9]+'
+        example: '2.0.0'
+
+    ListOfDomains:
+      type: array
+      items:
+        type: string
+      description: List of domains to test.
+      example:
+        - internet.nl
+        - batch.internet.nl
+        - dashboard.internet.nl
+        - nic.商标
+
+    ApiReply:
+      type: object
+      required:
+        - api_version
+      properties:
+        api_version:
+          $ref: '#/components/schemas/ApiVersion'
+
+    RequestReply:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - request
+          properties:
+            request:
+              $ref: '#/components/schemas/Request'
+
+    ResultsReply:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - request
+          properties:
+            request:
+              $ref: '#/components/schemas/Request'
+        - type: object
+          required:
+            - domains
+          properties:
+            domains:
+              type: object
+              additionalProperties:
+                x-additionalPropertiesName: <domain.name>
+                $ref: '#/components/schemas/Domain'
+
+    ResultsTechnicalReply:
+      oneOf:
+        - $ref: '#/components/schemas/DomainWebTechnicalReply'
+        - $ref: '#/components/schemas/DomainMailTechnicalReply'
+
+    DomainWebTechnicalReply:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - request
+          properties:
+            request:
+              $ref: '#/components/schemas/Request'
+        - type: object
+          required:
+            - domains
+          properties:
+            domains:
+              type: object
+              additionalProperties:
+                x-additionalPropertiesName: <domain.name>
+                $ref: '#/components/schemas/DomainWebTechnical'
+
+    DomainMailTechnicalReply:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - request
+          properties:
+            request:
+              $ref: '#/components/schemas/Request'
+        - type: object
+          required:
+            - domains
+          properties:
+            domains:
+              type: object
+              additionalProperties:
+                x-additionalPropertiesName: <domain.name>
+                $ref: '#/components/schemas/DomainMailTechnical'
+
+    Request:
+      type: object
+      required:
+        - request_id
+        - name
+        - request_type
+        - status
+        - submit_date
+        - finished_date
+      properties:
+        request_id:
+          $ref: '#/components/schemas/RequestId'
+        name:
+          $ref: '#/components/schemas/Handle'
+        request_type:
+          $ref: '#/components/schemas/RequestType'
+        status:
+          type: string
+          enum:
+            - registering
+            - running
+            - generating
+            - done
+            - cancelled
+            - error
+          description: |
+            * `registering` - Registering domains.
+            * `running` - Domains are being tested.
+            * `generating` - Report is being generated.
+            * `done` - Results ready.
+            * `cancelled` - Cancelled by the user.
+            * `error` - Error registering domains.
+        submit_date:
+          type: string
+          format: date-time
+        finished_date:
+          type: string
+          format: date-time
+          description: Only set when the tests are completed.
+
+    Domain:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/DomainStatus'
+        scoring:
+          $ref: '#/components/schemas/DomainScoring'
+        report:
+          $ref: '#/components/schemas/DomainReport'
+        results:
+          $ref: '#/components/schemas/DomainResults'
+
+    TechnicalIpv4:
+      type: object
+      required:
+        - address
+        - reachable
+      properties:
+        address:
+          type: string
+          format: IPv4 address
+          description: The IPv4 address.
+        reachable:
+          type: boolean
+          description: >
+            If connectivity to this address was possible.
+
+    TechnicalIpv6:
+      type: object
+      required:
+        - address
+        - reachable
+      properties:
+        address:
+          type: string
+          format: IPv6 address
+          description: The IPv6 address.
+        reachable:
+          type: boolean
+          description: >
+            If connectivity to this address was possible.
+
+    TechnicalNameServer:
+      type: object
+      required:
+        - ipv4
+        - ipv6
+      properties:
+        ipv4:
+          type: object
+          description: Details for the IPv4 side.
+          required: addresses
+          properties:
+            addresses:
+              type: array
+              description: The available IPv4 addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv4'
+        ipv6:
+          type: object
+          description: Details for the IPv6 side.
+          required: addresses
+          properties:
+            addresses:
+              type: array
+              description: The available IPv6 addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv6'
+
+    TechnicalDnssec:
+      description: DNSSEC results for the tested domain.
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - secure
+            - insecure
+            - bogus
+            - unknown_ds_algo
+            - error
+          description: |
+            Status of DNSSEC for the domain:
+            * `secure` - DNSSEC signed domain.
+            * `insecure` - No DNNSEC configured.
+            * `bogus` - DNSSEC configured but bogus.
+            * `unknown_ds_algo` - The algorithm used to sign the DS
+              record is not supported by the resolver, this is treated
+              the same as insecure.
+            * `error` - Resolver error.
+
+    TechnicalSharedDetails:
+      type: object
+      properties:
+        kex_params_bad:
+          type: array
+          description: List of BAD key exchange parameters.
+          items:
+            type: string
+            pattern: '^[ECDH|DH]-[0-9]+$'
+        kex_params_phase_out:
+          type: array
+          description: List of PHASE OUT key exchange parameters.
+          items:
+            type: string
+            pattern: '^[ECDH|DH]-[0-9]+$'
+        ciphers_bad:
+          type: array
+          description: List of BAD ciphers.
+          items:
+            type: string
+        ciphers_phase_out:
+          type: array
+          description: List of PHASE OUT ciphers.
+          items:
+            type: string
+        cipher_order:
+          type: string
+          enumClass: CipherOrderStatus
+          description: |
+            Cipher order preference of the server:
+            * `bad` - The server does not enforce his own preference.
+            * `good` - The server enforces his own preference.
+            * `not_prescribed` - The server enforces his own preference but
+              the cipher order is not based on prescribed ordering.
+            * `not_seclevel` - The server enforces his own preference but
+              the configured order is not based on security level.
+            * `na` - The server only supports GOOD ciphers; cipher order is
+              not relevant.
+        cipher_order_violation:
+          type: array
+          description: |
+            A tuple of the cipher order violation (if any) formatted as an
+            array like:
+            `[<previous cipher>, <current cipher (violation)>, <violation rule>]`.
+
+            `violation rule` can be one of:
+            * `''` - Security level violation (the current cipher has
+              higher security level than the previous one).
+            * `<a number>` - Prescribed ordering violation. The number is
+              the prescribed ordering rule that got violated.
+          minItems: 3
+          maxItems: 3
+          items:
+            type: string
+        protocols_bad:
+          type: array
+          description: List of BAD protocols.
+          items:
+            type: string
+        protocols_phase_out:
+          type: array
+          description: List of PHASE OUT protocols.
+          items:
+            type: string
+        compression:
+          type: boolean
+          description: >
+            If TLS compression is used. (TLS1.3 does not use compression)
+        secure_reneg:
+          type: boolean
+          description: >
+            If secure renegotiation is supported by the server. (TLS1.3
+            offers only secure renegotiation)
+        client_reneg:
+          type: boolean
+          description: >
+            If client initiated renegotiation is supported by the server.
+            (TLS1.3 does not support client renegotiation).
+        kex_hash_func:
+          type: string
+          enumClass: KexHashFuncStatus
+          description: |
+            SHA2 support for signatures of the server:
+            * `bad` - SHA2 is not supported.
+            * `good` - SHA2 is supported.
+            * `unknown` - SHA2 support could not be determined (the server
+              uses RSA key exchange or anonymous ciphers).
+        zero_rtt:
+          type: string
+          enumClass: ZeroRttStatus
+          description: |
+            0-RTT support of the server:
+            * `bad` - 0-RTT is supported.
+            * `good` - 0-RTT is not supported.
+            * `na` - No TLS1.3 on the server; test is not relevant.
+
+        cert_chain:
+          type: array
+          description: >
+            The certificate chain built given the server's certificate.
+            Leaf to root.
+          items:
+            type: string
+        cert_trusted:
+          type: boolean
+          description: If the certificate is PKIX validated.
+        cert_pubkey_bad:
+          type: array
+          description: List of BAD certificate public keys.
+          items:
+            type: string
+            format: "<certificate common name>: <reason>"
+        cert_pubkey_phase_out:
+          type: array
+          description: List of PHASE_OUT certificate public keys.
+          items:
+            type: string
+            format: "<certificate common name>: <reason>"
+        cert_signature_bad:
+          type: object
+          description: >
+            Collection of BAD hashes used for certificate signing.
+          additionalProperties:
+            x-additionalPropertiesName: <certificate common name>
+            type: string
+            description: BAD hash description.
+        cert_hostmatch_bad:
+          type: array
+          description: >
+            List of all available names (CommonName and
+            SubjectAlternativeNames) on the certificate that do not match
+            the server name. This list is only available when the server
+            name could not be matched with any name on the certificate
+            names. The first element is always the CommonName.
+          items:
+            type: string
+
+        dane_status:
+          type: string
+          enumClass: DaneStatus
+          description: |
+            DANE status of the domain:
+            * `validated` - TLSA records exist and are valid.
+            * `failed` - TLSA records exist but are not valid.
+            * `none` - No TLSA records.
+            * `none_bogus` - No TLSA records but proof of non-existence is
+              bogus.
+        dane_records:
+          type: array
+          description: List of TLSA records.
+          items:
+            type: string
+
+    TechnicalWebServerDetails:
+      type: object
+      description: >
+        Details for this server. If any of `server_reachable` or
+        `https_enabled` is `false`, this is an empty object.
+      properties:
+        https_redirect:
+          type: string
+          enumClass: ForcedHttpsStatus
+          description: |
+            HTTPS redirect status of the server:
+            * `good` - HTTPS redirection is enforced.
+            * `bad` - HTTPS redirection is not enforced.
+            * `no_http` - No HTTP connection; test is not relevant.
+        http_compression:
+          type: boolean
+          description: If HTTP compression is used.
+        hsts:
+          type: string
+          enum:
+            - "yes"
+            - max_age
+            - "no"
+          description: |
+            If the server sets the HSTS header properly:
+            * `yes` - The server sets the HSTS header.
+            * `max_age` - The server sets the HSTS header but the presented
+              'max-age' value is less than compliant.
+            * `no` - The server does not set the HSTS header.
+        hsts_policies:
+          type: array
+          description: >
+            List of HSTS headers received. Only the first one is evaluated
+            as with browser behavior.
+          items:
+            type: string
+
+        ocsp_stapling:
+          type: string
+          enumClass: OcspStatus
+          description: |
+            OCSP support of the server:
+            * `good` - OCSP is supported.
+            * `ok` - OCSP is not supported,
+            * `not_trusted` - OCSP is supported but the returned data is invalid.
+
+        x_frame_options_enabled:
+          type: boolean
+          description: If the X-Frame-Options header is set by the server.
+        x_frame_options_values:
+          type: array
+          description: >
+            List of headers. Only the first one is evaluated as per browser
+            behavior.
+          items:
+            type: string
+        x_xss_protection_enabled:
+          type: boolean
+          description: If the X-Xss-Protection header is set by the server.
+        x_xss_protection_values:
+          type: array
+          description: >
+            List of headers. Only the first one is evaluated as per browser
+            behavior.
+          items:
+            type: string
+        referrer_policy_enabled:
+          type: boolean
+          description: If the Referrer-Policy header is set by the server.
+        referrer_policy_values:
+          type: array
+          description: >
+            List of headers. Only the first one is evaluated as per browser
+            behavior.
+          items:
+            type: string
+        content_security_policy_enabled:
+          type: boolean
+          description: >
+            If the Content-Security-Policy header is set by the server.
+        content_security_policy_values:
+          type: array
+          description: >
+            List of headers. Only the first one is evaluated as per browser
+            behavior.
+          items:
+            type: string
+        x_content_type_options_enabled:
+          type: boolean
+          description: >
+            If the X-Content-Type-OPTIONS header is set by the server.
+        x_content_type_options_values:
+          type: array
+          description: >
+            List of headers. Only the first one is evaluated as per browser
+            behavior.
+          items:
+            type: string
+
+    TechnicalWebServer:
+      type: object
+      description: Results for the webserver.
+      required:
+      properties:
+        tested_address:
+          type: string
+          format: IP address
+          description: >
+            The tested IP address. If the webserver has more than one addresses
+            in this address family, only one is checked at random.
+        server_reachable:
+          type: boolean
+          description: >
+            If the server could be reached. If this is `false`, `details` will
+            be empty.
+        https_enabled:
+          type: boolean
+          description: >
+            If the server offers HTTPS. If this is `false`, `details` will be
+            empty.
+        details:
+          allOf:
+            - $ref: '#/components/schemas/TechnicalSharedDetails'
+            - $ref: '#/components/schemas/TechnicalWebServerDetails'
+
+    TechnicalWebServerV4:
+      allOf:
+        - $ref: '#/components/schemas/TechnicalWebServer'
+        - type: object
+          required: addresses
+          properties:
+            addresses:
+              type: array
+              description: Available IP addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv4'
+
+    TechnicalWebServerV6:
+      allOf:
+        - $ref: '#/components/schemas/TechnicalWebServer'
+        - type: object
+          required: addresses
+          properties:
+            addresses:
+              type: array
+              description: Available IP addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv6'
+
+    DomainWebTechnical:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/DomainStatus'
+        domain:
+          type: object
+          description: Results that apply to the tested domain as a whole.
+          required:
+            - dnssec
+          properties:
+            dnssec:
+              $ref: '#/components/schemas/TechnicalDnssec'
+        nameservers:
+          type: object
+          description: Results per nameserver.
+          additionalProperties:
+            x-additionalPropertiesName: <nameserver.name>
+            $ref: '#/components/schemas/TechnicalNameServer'
+        webservers:
+          description: Results per webserver.
+          type: object
+          required:
+            - ipv4
+            - ipv6
+          properties:
+            ip_similarity:
+              type: booelan
+              description: >
+                If the webserver returns similar pages on IPv4 and IPv6. Only
+                available when both IPv4 and IPv6 are configured and reachable
+                on the webserver.
+            ipv4:
+              $ref: '#/components/schemas/TechnicalWebServerV4'
+            ipv6:
+              $ref: '#/components/schemas/TechnicalWebServerV6'
+
+    DomainMailTechnical:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/DomainStatus'
+        domain:
+          type: object
+          description: Results that apply to the tested domain as a whole.
+          required:
+            - dnssec
+            - dmarc
+            - dkim
+            - spf
+          properties:
+            dnssec:
+              $ref: '#/components/schemas/TechnicalDnssec'
+            dmarc:
+              type: object
+              description: DMARC details of the domain.
+              required:
+                - records
+              properties:
+                records:
+                  description: >
+                    List of DMARC TXT records. Having more than one record is
+                    considered an error.
+                  type: array
+                  items:
+                    type: string
+                    format: DMARC TXT record
+                policy_status:
+                  type: string
+                  enumClass: DmarcPolicyStatus
+                  description: |
+                    The validation status of the DMARC policy:
+                    * `valid` - The policy is valid and compliant.
+                    * `invalid_syntax` - The policy is not syntactically correct.
+                    * `invalid_p_sp` - The 'p=' or 'sp=' tag result in a less
+                      than compliant policy.
+                    * `invalid_external` - The external destinations specified
+                      in 'rua=' and/or 'ruf=' are not valid.
+
+                    Only available when there is a DMARC record.
+            spf:
+              type: object
+              description: SPF details of the domain.
+              required:
+                - records
+              properties:
+                records:
+                  description: >
+                    List of SPF TXT records. Having more than one record is
+                    considered an error.
+                  type: array
+                  items:
+                    type: string
+                    format: SPF TXT record
+                discovered_records_bad:
+                  description: >
+                    List of BAD SPF TXT records discovered through the
+                    'include' mechanism and/or 'redirect' modifier. Each entry
+                    is a tuple in an array format of:
+                    `[<domain.name>, <SPF TXT record>]`.
+                  type: array
+                  items:
+                    type: array
+                    description: The pre-described tuple.
+                    minItems: 2
+                    maxItems: 2
+                    items:
+                      type: string
+                policy_status:
+                  type: string
+                  enumClass: SpfPolicyStatus
+                  description: |
+                    The validation status of the DMARC policy:
+                    * `valid` - The policy is valid and compliant.
+                    * `invalid_syntax` - The policy is not syntactically correct.
+                    * `max_dns_lookups` - The maximum number of allowed DNS
+                      lookups (10) was exceeded while trying to evaluate the
+                      policy.
+                    * `invalid_all` - The 'all' mechanism is less than compliant.
+                    * `invalid_include` - The policies included with 'include'
+                      mechanism are less than compliant.
+                    * `invalid_redirect` - The external destinations specified
+                      in 'rua=' and/or 'ruf=' are not valid.
+
+                    Only available when there is an SPF record.
+            dkim:
+              type: object
+              description: DKIM details of the domain.
+              required:
+                - discovered
+              properties:
+                discovered:
+                  type: boolean
+                  description: >
+                    If DKIM support was discovered on the domain. The test
+                    expects `_domainkey` to be an Empty Non Terminal under the
+                    domain name.
+
+        nameservers:
+          type: object
+          description: Results per nameserver.
+          additionalProperties:
+            x-additionalPropertiesName: <nameserver.name>
+            $ref: '#/components/schemas/TechnicalNameServer'
+        receiving_mailservers:
+          description: Results per receiving mailserver.
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: <mailserver.name>
+            $ref: '#/components/schemas/TechnicalReceivingMailServer'
+
+    TechnicalReceivingMailServerDetails:
+      type: object
+      description: >
+        Details for this server. If any of `server_reachable`,
+        `starttls_enabled` or `server_testable` is `false`, this is an
+        empty object.
+      properties:
+        dane_rollover:
+          type: boolean
+          description: >
+            If a rollover scheme is detected for the DANE configuration of the
+            mailserver.
+
+    TechnicalReceivingMailServer:
+      type: object
+      required:
+        - addresses
+        - dnssec
+      properties:
+        addresses:
+          type: object
+          description: Available IP addresses.
+          required:
+            - ipv4
+            - ipv6
+          properties:
+            ipv4:
+              type: array
+              items:
+                $ref: '#/components/schemas/TechnicalIpv4'
+            ipv6:
+              type: array
+              items:
+                $ref: '#/components/schemas/TechnicalIpv6'
+        dnssec:
+          $ref: '#/components/schemas/TechnicalDnssec'
+        server_reachable:
+          type: boolean
+          description: >
+            If the server could be reached. If this is `false`, `details` will
+            be empty.
+        starttls_enabled:
+          type: boolean
+          description: >
+            If the server offers STARTTLS. If this is `false`, `details` will
+            be empty.
+        server_testable:
+          type: boolean
+          description: >
+            If the STARTTLS test could be completed. Ratelimiting and other
+            server behavior may prohibit completion of the STARTTLS testing
+            suite. If this is `false`, `details` will be empty.
+        details:
+          allOf:
+            - $ref: '#/components/schemas/TechnicalSharedDetails'
+            - $ref: '#/components/schemas/TechnicalReceivingMailServerDetails'
+
+    DomainStatus:
+      type: string
+      enum:
+        - ok
+        - error
+      description: |
+        Status of the tested domain.
+        * `ok` - The domain was tested succesfully. All other keys in this
+          structure are available.
+        * `error` - The domain was partially tested because of errors during
+          testing. No results are available for this domain and no other keys
+          in this structure are present.
+
+    DomainScoring:
+      type: object
+      required:
+        - percentage
+      properties:
+        percentage:
+          type: integer
+          description: >
+            The score of a domain in percentage. It ranges from `0`
+            to `100` (perfect score). The score is a complex calculation based
+            on all test results included. This calculation can change
+            over time when tests are adjusted or new tests are introduced.
+          example: 100
+
+    DomainReport:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: url
+          description: >
+            URL to the visual report on the testing server. Accessing these reports
+            does not require HTTP authentication.
+          example: "https://<batch.server>/site/example.nl/1234/"
+
+    CustomResults:
+      type: object
+      description: >
+       Results that are not tied to any one of the tests. A custom result may
+       be derived from a combination of results, a combination of technical
+       data or other logic. They exist because they may facilitate further
+       interpretation of a domain's compliance. If custom results are
+       configured on the server they will be available here per domain.
+       Custom results don't need to share attributes like categories and tests.
+       Each available one is documented here.
+      nullable: true
+
+    Category:
+      type: object
+      required:
+        - status
+        - verdict
+      properties:
+        status:
+          type: string
+          enum:
+            - failed
+            - info
+            - passed
+            - warning
+            - error
+          description: |
+            Status of a test category:
+            * `passed`- All the tests in this category passed.
+            * `info` - At least one optional test failed in this category.
+            * `warning` - At least one recommended test failed in this category.
+            * `failed` - At least one required test failed in this category.
+            * `error` - An error occured while performing tests in this
+              category that prohibits further testing. These errors are mainly
+              connectivity/communication issues between the tool and the server
+              under test and could be attributed to either party (e.g., a
+              mailserver ratelimits the tool while testing for STARTTLS
+              support). Inconclusive tests in this category are treated as not
+              tested.
+        verdict:
+          type: string
+          description: >
+            Verdict of the category; only useful for translation when combined
+            with the information on the `/metadata/report` endpoint.
+
+    WebCategories:
+      type: object
+      description: Web categories.
+      required:
+        - web_ipv6
+        - web_dnssec
+        - web_https
+        - web_appsecpriv
+      properties:
+        web_ipv6:
+          $ref: '#/components/schemas/Category'
+        web_dnssec:
+          $ref: '#/components/schemas/Category'
+        web_https:
+          $ref: '#/components/schemas/Category'
+        web_appsecpriv:
+          $ref: '#/components/schemas/Category'
+
+    MailCategories:
+      type: object
+      description: Mail categories.
+      required:
+        - mail_ipv6
+        - mail_dnssec
+        - mail_auth
+        - mail_starttls
+      properties:
+        mail_ipv6:
+          $ref: '#/components/schemas/Category'
+        mail_dnssec:
+          $ref: '#/components/schemas/Category'
+        mail_auth:
+          $ref: '#/components/schemas/Category'
+        mail_starttls:
+          $ref: '#/components/schemas/Category'
+
+    Categories:
+      description: Results per main categories for the domain.
+      type: object
+      additionalProperties:
+        x-additionalPropertiesName: <category>
+        description: Category name
+        pattern: '^[a-z0-9_]+$'
+        $ref: '#/components/schemas/Category'
+
+    Test:
+      required:
+        - status
+        - verdict
+      properties:
+        status:
+          type: string
+          enum:
+            - passed
+            - failed
+            - info
+            - warning
+            - not_tested
+            - error
+          description: |
+            Status of a test:
+            * `passed`- The test was successful.
+            * `failed` - Failure on a required test.
+            * `info` - Failure on an optional test.
+            * `warning` - Failure on a recommended test.
+            * `error` - The test could not be completed due to an error (either
+              on the tool's or the server's under test side). Other tests that
+              depend on this one will therefore not be able to run.
+            * `not_tested` - Not tested; a related parent test already failed.
+        verdict:
+          type: string
+          description: >
+            Verdict of the test; only useful for translation when combined
+            with the information on the `/metadata/report` endpoint.
+
+    Tests:
+      description: Results per test for the domain.
+      type: object
+      additionalProperties:
+        x-additionalPropertiesName: <test>
+        pattern: '^[a-z0-9_]+$'
+        $ref: '#/components/schemas/Test'
+
+    DomainResults:
+      type: object
+      required:
+        - categories
+        - tests
+        - custom
+      properties:
+        categories:
+          $ref: '#/components/schemas/Categories'
+        tests:
+          $ref: '#/components/schemas/Tests'
+        custom:
+          $ref: '#/components/schemas/CustomResults'
+
+    MetadataReportTest:
+      type: object
+      required:
+        - type
+        - translation_key
+        - status_verdict_map
+      properties:
+        type:
+          type: string
+          enum: [test]
+        translation_key:
+          type: string
+          description: |
+            This key can be used to build a msgid in order to fetch
+            translations from the application's .po files for this item.
+            For some of them you would need the `<verdict>` from a result.
+            Related translations for tests:
+              * `detail <key> label` - Title of the test.
+              * `detail <key> exp` - Explanation of the test.
+              * `detail <key> verdict <verdict>` - Verdict of the test.
+              * `detail <key> tech table` - Headers of the technical table
+                (if any).
+
+            If the verdict you have starts with `detail verdict` then it
+            is an exception to the above and can be translated on its own,
+            no need for the key.
+        status_verdict_map:
+          type: object
+          description: >
+            Mapping of the various status/verdict combinations for the test.
+            The keys are the various statuses and the value is a list of
+            applicable verdicts.
+          additionalProperties:
+            x-additionalPropertiesName: <status>
+            description: A list of verdicts applicable for this status.
+            type: array
+            items:
+              type: string
+
+    MetadataReportCategory:
+      type: object
+      required:
+        - type
+        - translation_key
+      properties:
+        type:
+          type: string
+          enum: [category]
+        translation_key:
+          type: string
+          description: |
+            This key can be used to build a msgid in order to fetch
+            translations from the application's .po files for this item.
+            For some of them you would need the `<verdict>` from a result.
+            Related translations for tests:
+              * `test <key> label` - Title of the category.
+              * `test <key> <verdict> description` - Description of the
+                verdict.
+              * `test <key> <verdict> summary` - Summary of the verdict.
+
+    MetadataReportSection:
+      type: object
+      required:
+        - type
+        - translation_key
+      properties:
+        type:
+          type: string
+          enum: [section]
+        translation_key:
+          type: string
+          description: |
+            This key can be used to build a msgid in order to fetch
+            translations from the application's .po files for this item.
+            Related translations for tests:
+              * `results <key> label` - Title of the section.
+
+    MetadataReportHierarchyItem:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: >
+            The item's name. Same as `<item_name>` in the outer `data`
+            structure.
+          pattern: "^[a-z0-9_]+$"
+        children:
+          description: This key is only present if this item has items below it.
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataReportHierarchyItem'
+
+    #
+    # Request bodies
+    #
+    RegisterRequest:
+      type: object
+      required:
+        - domains
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/RequestType'
+        name:
+          $ref: '#/components/schemas/Handle'
+        domains:
+          $ref: '#/components/schemas/ListOfDomains'
+
+    #
+    # Response bodies
+    #
+    RegisterResponse:
+      $ref: '#/components/schemas/RequestReply'
+
+    ListRequestsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - requests
+          properties:
+            requests:
+              type: array
+              items:
+                $ref: '#/components/schemas/Request'
+
+    MetadataReportResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - report
+          properties:
+            report:
+              type: object
+              required:
+                - hierarchy
+                - data
+              properties:
+                data:
+                  type: object
+                  description: A collection of the report's items.
+                  additionalProperties:
+                    x-additionalPropertiesName: <item_name>
+                    pattern: "^[a-z0-9_]+$"
+                    description: >
+                      If an item is also part of the results (categories and
+                      tests) the same name is used both here and in the results.
+                      Same as `name` in the outer `hierarchy` structure.
+                    anyOf:
+                      - $ref: '#/components/schemas/MetadataReportCategory'
+                      - $ref: '#/components/schemas/MetadataReportTest'
+                      - $ref: '#/components/schemas/MetadataReportSection'
+                hierarchy:
+                  type: object
+                  description: >
+                    A hierarchical representation of the report's items.
+                    Divided based on the report type (web or email). The item
+                    names are the same as the `data` structure.
+                  required:
+                    - web
+                    - mail
+                  properties:
+                    web:
+                      description: Items present in the web report.
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MetadataReportHierarchyItem'
+                    mail:
+                      description: Items present in the mail report.
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MetadataReportHierarchyItem'
+
+    BadRequestResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - label
+                - msg
+              properties:
+                label:
+                  type: string
+                  enum:
+                    - bad-request
+                    - invalid-url
+                msg:
+                  type: string
+                  description: Verbose description of the error.
+                  example: "Could not parse domains. Make sure the domain list
+                    is properly formatted."
+
+    UnknownRequestErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - label
+                - msg
+              properties:
+                label:
+                  type: string
+                  enum: [unknown-request]
+                msg:
+                  type: string
+                  description: Verbose description of the error.
+                  example: "This request_id does not exist for the user."
+
+    StatusResponse:
+      $ref: '#/components/schemas/RequestReply'
+
+    CancelResponse:
+      $ref: '#/components/schemas/RequestReply'
+
+    ResultsResponse:
+      $ref: '#/components/schemas/ResultsReply'
+
+    ResultsTechnicalResponse:
+      $ref: '#/components/schemas/ResultsTechnicalReply'
+
+    ResultsCategoriesResponse:
+      oneOf:
+        - $ref: '#/components/schemas/WebCategories'
+        - $ref: '#/components/schemas/MailCategories'
+
+    ServerErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiReply'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - label
+                - msg
+              properties:
+                label:
+                  type: string
+                  enum: [server-error]
+                msg:
+                  type: string
+                  description: Verbose description of the error.
+                  example: "General server error. Please report this if it
+                    keeps happening."
+
+  responses:
+    UnauthorisedResponse:
+      description: Unauthorised
+
+    RegisterResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterResponse'
+      links:
+        status:
+          operationId: status_request
+          parameters:
+            request_id: '$response.body#/request/id'
+          description: >
+            The request_id in the answer can be used to retrieve the request's
+            status.
+
+    ListRequestsResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListRequestsResponse'
+
+    StatusResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+      links:
+        results:
+          operationId: results
+          parameters:
+            request_id: '$response.body#/request/id'
+          description: >
+            The request_id in the answer can be used to retrieve the request's
+            results when the request is `done`.
+
+    CancelResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CancelResponse'
+
+    ResultsResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsResponse'
+
+    ResultsTechnicalResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsTechnicalResponse'
+
+    ResultsCategoriesResponse:
+      description: NOT A RESPONSE. Overview of the available CATEGORIES.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultsCategoriesResponse'
+
+    MetadataReportResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MetadataReportResponse'
+
+    BadRequestResponse:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequestResponse'
+
+    UnknownRequestErrorResponse:
+      description: Unknown request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnknownRequestErrorResponse'
+
+    ServerErrorResponse:
+      description: General server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerErrorResponse'

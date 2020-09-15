@@ -23,30 +23,35 @@ def statistics(request, start_date, end_date):
     with connection.cursor() as c:
         c.execute(
             """
-            select coalesce(c.res, w.res, m.res), c.cc, w.cc, m.cc
-            from
-            (select date_trunc('day', timestamp)::date as res, count(*) as cc
-            from checks_connectiontest
-            where timestamp >= %s
-              and timestamp < %s
-              and finished = True
-            group by res) c
+select res, sum(cc), sum(cw), sum(cm)
+from (
+    select date_trunc('day', timestamp)::date as res,
+        count(*) as cc, null::bigint as cw, null::bigint as cm
+    from checks_connectiontest
+    where timestamp >= %s
+        and timestamp < %s
+        and finished = True
+    group by res
 
-            full join
-            (select date_trunc('day', timestamp)::date as res, count(*) as cc
-            from checks_domaintestreport
-            where timestamp >= %s
-              and timestamp < %s
-            group by res) w on c.res = w.res
+    union
+    select date_trunc('day', timestamp)::date as res,
+        null::bigint as cc, count(*) as cw, null::bigint as cm
+    from checks_domaintestreport
+    where timestamp >= %s
+        and timestamp < %s
+    group by res
 
-            full join
-            (select date_trunc('day', timestamp)::date as res, count(*) as cc
-            from checks_mailtestreport
-            where timestamp >= %s
-              and timestamp < %s
-            group by res) m on c.res = m.res
-            """,
-            [start_date, end_date, start_date, end_date, start_date, end_date])
+    union
+    select date_trunc('day', timestamp)::date as res,
+        null::bigint as cc, null::bigint as cw, count(*) as cm
+    from checks_mailtestreport
+    where timestamp >= %s
+        and timestamp < %s
+    group by res
+) as t
+group by res
+order by res asc
+""", [start_date, end_date, start_date, end_date, start_date, end_date])
         table_content = c.fetchall()
     return render(
         request, 'statistics.html',
