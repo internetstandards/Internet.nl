@@ -558,23 +558,28 @@ textarea#css-block {
   height: 180px;
 }
 /* content styling */
-article ol {
+article ol,
+.hall-of-fame .intro .hof-content ol {
   padding-left: 1.5em;
   list-style-type: decimal;
   line-height: 1.5;
 }
-article ul {
+article ul,
+.hall-of-fame .intro .hof-content ul {
   padding-left: 1.5em;
   list-style-type: disc;
 }
-article ul ul {
+article ul ul,
+.hall-of-fame .intro .hof-content ul ul {
   list-style-type: circle;
   margin-bottom: 0;
 }
-article ul ul ul {
+article ul ul ul,
+.hall-of-fame .intro .hof-content ul ul ul {
   list-style-type: square;
 }
-article ul ul ul ul {
+article ul ul ul ul,
+.hall-of-fame .intro .hof-content ul ul ul ul {
   list-style-type: circle;
 }
 article img {
