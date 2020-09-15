@@ -1,3 +1,7 @@
+#
+msgid ""
+msgstr ""
+
 msgid "manual halloffame hosters badge"
 msgstr "Badge with text: 100% score in hoster test"
 
@@ -9,9 +13,16 @@ msgstr "100% in hoster test"
 
 msgid "manual halloffame hosters text"
 msgstr ""
-"The {{count}} hosters mentioned in this Hall of Fame are Internet.nl compliant because they meet the following criteria. First of all they score 100% in both the website test and the email test for their own domain. Secondly, they offer their clients the possiblity to also score 100% in both the website test and email test, and they explicitly state this on their website by means of the Internet.nl compliant logo.\n"
+"The {{count}} hosting providers mentioned in this Hall of Fame are Internet.nl compliant because they meet the following criteria:\n"
 "\n"
-"This Hall of Fame is not generated automatically. Hosters are added on a voluntary basis only. Inclusion in this Hall of Fame can be requested by sending an e-mail to question@internet.nl. Do you see a hoster in this Hall of Fame that does not meet the criteria described above? Please let us know."
+"- Their own domain, hosting the company website, scores 100% in both the website test and the email test;\n"
+"- Clients are offered the possibility to score 100% in both the website test and email test;\n"
+"- The company name is officially mentioned as a **trade name** in the Trade Register of the Chamber of Commerce;\n"
+"- The company website explicitly offers hosting services;\n"
+"- Inclusion in this Hall of Fame is voluntary and can be requested by sending an e-mail to question@internet.nl;\n"
+"- Companies listed in this hall of fame are allowed to use the Internet.nl compliant logo on their website. \n"
+"\n"
+"Do you see a hoster in this Hall of Fame that does not meet the criteria described above? Please let us know by providing convincing argumentation."
 
 msgid "manual halloffame hosters title"
-msgstr "Hall of Fame - Hosters"
+msgstr "Hall of Fame - Hosting Providers"

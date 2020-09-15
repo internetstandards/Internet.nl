@@ -1,3 +1,7 @@
+#
+msgid ""
+msgstr ""
+
 msgid "manual halloffame hosters badge"
 msgstr "Badge met tekst: 100%-score in hostertest"
 
@@ -9,9 +13,16 @@ msgstr "100% in hostertest"
 
 msgid "manual halloffame hosters text"
 msgstr ""
-"De {{count}} hosters die zijn opgenomen in deze Hall of Fame zijn Internet.nl compliant omdat ze voldoen aan de volgende criteria. Ten eerste scoren deze hosters 100% in zowel de website als de e-mail test voor het eigen domein. Ten tweede bieden deze hosters kun klanten de mogelijkheid om ook 100% te score in zowel de website als e-mail test, en ze melden dit expliciet op hun website met behulp van het Internet.nl compliant logo.\n"
+"De {{count}} hosting providers die zijn opgenomen in deze Hall of Fame zijn Internet.nl compliant omdat ze voldoen aan de volgende criteria:\n"
 "\n"
-"Deze Hall of Fame wordt niet automatisch gegenereerd. Hosters worden uitsluitend toegevoegd op vrijwillige basis. Stuur voor opname in deze Hall of Fame een e-mail naar vraag@internet.nl. Zie je een hoster in deze Hall of Fame die niet voldoet aan de bovenstaande criteria? Laat het ons dan weten."
+"* Het eigen domein, waarop de bedrijfswebsite actief is, scoort 100% in zowel de website als de e-mail test;\n"
+"* Klanten hebben de mogelijkheid om ook 100% te scoren voor zowel de website als de e-mail test;\n"
+"* De bedrijfsnaam wordt genoemd als handelsnaam in het Handelsregister van de Kamer van Koophandel;\n"
+"* Op de bedrijfswebsite worden expliciet hosting diensten aangeboden;\n"
+"* Opname in deze Hall of Fame is vrijwillig en kan aangevraagd worden via vraag@internet.nl;\n"
+"* Bedrijven die in deze Hall of Fame zijn opgenomen mogen het Internet.nl compliant logo gebruiken op hun eigen website.\n"
+"\n"
+"Zie je een hoster in deze Hall of Fame die niet voldoet aan de bovenstaande criteria? Laat het ons dan weten met overtuigende argumenten."
 
 msgid "manual halloffame hosters title"
-msgstr "Hall of Fame - Hosters"
+msgstr "Hall of Fame - Hosting Providers"
