@@ -2917,24 +2917,6 @@ msgstr "The {{count}} domains below score 100% in the email test."
 msgid "halloffame mail title"
 msgstr "Hall of Fame - Email"
 
-msgid "halloffame manual badge"
-msgstr "Badge with text: 100% score in hoster test"
-
-msgid "halloffame manual menu"
-msgstr "Hosters"
-
-msgid "halloffame manual subtitle"
-msgstr "100% in hoster test"
-
-msgid "halloffame manual text"
-msgstr ""
-"The {{count}} hosters mentioned in this Hall of Fame are Internet.nl compliant because they meet the following criteria. First of all they score 100% in both the website test and the email test for their own domain. Secondly, they offer their clients the possiblity to also score 100% in both the website test and email test, and they explicitly state this on their website by means of the Internet.nl compliant logo.\n"
-"\n"
-"This Hall of Fame is not generated automatically. Hosters are added on a voluntary basis only. Inclusion in this Hall of Fame can be requested by sending an e-mail to question@internet.nl. Do you see a hoster in this Hall of Fame that does not meet the criteria described above? Please let us know."
-
-msgid "halloffame manual title"
-msgstr "Hall of Fame - Hosters"
-
 msgid "halloffame web badge"
 msgstr "Badge with text: 100% score in website test"
 
