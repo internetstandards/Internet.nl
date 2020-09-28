@@ -342,8 +342,8 @@ MATOMO_SUBDOMAIN_TRACKING = ""
 #       '<url_part>': {
 #           'translate_key': '',
 #           'entries_file': '/path/to/yaml/file',
-#           'template_file': '/path/to/html/template/file',
-#           'icon_file': '/path/to/icon'
+#           'template_file': 'filename.html',
+#           'icon_file': 'filename.svg'
 #       },
 #   }
 # * <url_part>, is the url part for the page i.e., /halloffame/<url_part>
@@ -353,6 +353,7 @@ MATOMO_SUBDOMAIN_TRACKING = ""
 #   - manual halloffame <translate_key> *
 #   These ids need to be available in the translations/*/manual_hof.po files.
 # * template_file, is an alternate template HTML file to be used if desired.
+#   MUST live inside the checks/templates folder.
 #   Leave empty if you want to use the default template file (the same as with
 #   standard HoF).
 # * entries_file, is the filepath to a *yaml* file
@@ -361,7 +362,8 @@ MATOMO_SUBDOMAIN_TRACKING = ""
 #     permalink: "https://internet.nl"
 #   - domain: "example.nl"
 #     permalink: "https://example.nl"
-# * icon_file, is the filepath to an icon to be used for this HoF.
+# * icon_file, is the filepath to an icon to be used for this HoF; MUST live
+#   inside the checks/static/icons folder.
 #
 # You can add more <url_part> in the MANUAL_HOF dictionary for additional
 # manual HoFs.

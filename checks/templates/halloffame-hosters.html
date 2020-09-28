@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{%load translate %}
+
+{% block maincontent %}
+<article class="block fullwidth">
+  <div class="intro">
+    <div class="flexblocks champions">
+      <div class="flexblock">
+        <h1>{% include "string.html" with name=hof_title %}</h1>
+          <ul class="hall-of-fame menu">
+            <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
+            <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
+            <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
+            {% for manual in manuals %}
+            <li><a href="/halloffame/{{manual.0}}/" {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a></li>
+            {% endfor %}
+          </ul>
+      </div>
+    </div>
+    <span class="hof-content">
+    {% if manual_icon and manual_icon_alt %}
+      <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}" align="right">
+    {% endif %}
+      {% include "content.html" with name=hof_text %}
+    </span>
+  </div>
+  <div class="perfect-scores-list">
+    <h2>{% include "string.html" with name=hof_subtitle %}</h2>
+    <ul class="list-column column-3">
+    {% for member in halloffame %}
+      <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
+    {% endfor %}
+    </ul>
+  </div>
+</article>
+{% endblock %}
