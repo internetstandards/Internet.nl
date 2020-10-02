@@ -24,6 +24,7 @@ msgstr ""
 "* **Gebruik van onze badge:** Alleen hosters die in deze Hall of Fame staan, mogen de bovenstaande *Internet.nl compliant badge* gebruiken in hun eigen communicatie-uitingen.\n"
 "* **Onterechte vermelding?** Stuur ons een mail met onderbouwing, als volgens jou een in deze Hall of Fame opgenomen hoster niet aan alle criteria voldoet.\n"
 "* **Volgorde:** De namen van de hosters in de Hall of Fame worden telkens getoond in willekeurige volgorde.\n"
+"\n"
 "---"
 
 msgid "manual halloffame hosters title"
