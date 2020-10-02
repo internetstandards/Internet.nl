@@ -1,4 +1,4 @@
-# Internet.nl
+# Internet.nl- best website ever
 
 Internet.nl is an initiative of the Dutch Internet Standards Platform that
 helps you to check whether your website, email and internet connection use
