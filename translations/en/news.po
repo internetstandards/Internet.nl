@@ -4,6 +4,7 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"hall-of-fame-for-hosters\n"
 "x-xss-protection-removed-and-improvement-for-no-mx-domains\n"
 "introducing-new-TLS-guidelines\n"
 "next-major-release-will-use-new-TLS-guidelines\n"
@@ -63,6 +64,18 @@ msgstr ""
 
 msgid "article email-test-on-internetnl-extended title"
 msgstr "Email test on Internet.nl extended"
+
+msgid "article hall-of-fame-for-hosters body"
+msgstr ""
+
+msgid "article hall-of-fame-for-hosters date"
+msgstr ""
+
+msgid "article hall-of-fame-for-hosters lead"
+msgstr ""
+
+msgid "article hall-of-fame-for-hosters title"
+msgstr ""
 
 msgid "article improved-internetnl-test-for-modern-internet-standards body"
 msgstr ""
