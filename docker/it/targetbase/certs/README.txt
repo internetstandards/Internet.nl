@@ -1,3 +1,7 @@
+UPDATE: The certificates in this directory can now be auto-updated/generated
+via the docker/it/targetbase/recreate_certificates.sh script. It is preferred
+over the manual way as it also updates any matching TLSA records.
+
 The certificates in this directory were generated according to the
 instructions in the docker/it/targetbase/ca-ocsp/README.txt file, e.g.
 
@@ -11,6 +15,7 @@ DOMAINNAME=*.test.nlnetlabs.tk
 BASEFILENAME=../certs/wildcard.test.nlnetlabs.tk
 
 Now follow the instructions in the ca-ocsp/README.txt file.
+
 
 some.other.domain.der:
 ----------------------

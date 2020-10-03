@@ -3,6 +3,8 @@
 ## Unreleased next version
 
 New
+- docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
+  the IT related certificates.
 
 Dependencies
 
