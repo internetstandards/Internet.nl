@@ -2506,6 +2506,33 @@ class ConnectionChecker:
         def _get_nth_or_default(collection, index, default):
             return collection[index] if index < len(collection) else default
 
+        def _get_another_cipher(self, ignore_ciphers):
+            try:
+                if self._conn__get_ssl_version < TLSV1_3:
+                    with self._conn.dup(
+                            cipher_list_action=CipherListAction.PREPEND,
+                            ciphers=':'.join(
+                                [f'!{cipher}' for cipher in ignore_ciphers])
+                            ) as new_conn:
+                        self._note_conn_details(new_conn)
+                        another_cipher = new_conn.get_current_cipher_name()
+                else:
+                    # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
+                    # support '!' thus we must instead manually exclude the
+                    # current cipher using the known small set of allowed TLS
+                    # 1.3 ciphers. See '-ciphersuites' at:
+                    #   https://www.openssl.org/docs/man1.1.1/man1/ciphers.html
+                    remaining_ciphers = set(
+                        ModernConnection.ALL_TLS13_CIPHERS.split(':'))
+                    remaining_ciphers.difference_update(ignore_ciphers)
+                    cipher_string = ':'.join(remaining_ciphers)
+                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
+                        self._note_conn_details(new_conn)
+                        another_cipher = new_conn.get_current_cipher_name()
+            except ConnectionHandshakeException:
+                another_cipher = None
+            return another_cipher
+
         cipher_order_score = self._score_tls_cipher_order_good
         cipher_order = CipherOrderStatus.good
 
@@ -2536,32 +2563,22 @@ class ConnectionChecker:
 
         # Get the cipher name of at least one cipher that works with self._conn
         first_cipher = relevant_ciphers[0]
-        second_cipher = _get_nth_or_default(relevant_ciphers, 1, None)
+        ignore_ciphers = [first_cipher]
+        second_cipher = _get_nth_or_default(
+            relevant_ciphers, 1, _get_another_cipher(self, ignore_ciphers))
 
-        try:
-            # If we haven't yet connected with a second cipher, do so now.
-            if not second_cipher:
-                if self._conn__get_ssl_version < TLSV1_3:
-                    with self._conn.dup(
-                            cipher_list_action=CipherListAction.PREPEND,
-                            ciphers=f'!{first_cipher}') as new_conn:
-                        self._note_conn_details(new_conn)
-                        second_cipher = new_conn.get_current_cipher_name()
-                else:
-                    # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
-                    # support '!' thus we must instead manually exclude the
-                    # current cipher using the known small set of allowed TLS
-                    # 1.3 ciphers. See '-ciphersuites' at:
-                    #   https://www.openssl.org/docs/man1.1.1/man1/ciphers.html
-                    remaining_ciphers = set(
-                        ModernConnection.ALL_TLS13_CIPHERS.split(':'))
-                    remaining_ciphers.remove(first_cipher)
-                    cipher_string = ':'.join(remaining_ciphers)
-                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
-                        self._note_conn_details(new_conn)
-                        second_cipher = new_conn.get_current_cipher_name()
+        # Try to get a non CHACHA cipher to avoid the possible
+        # PRIORITIZE_CHACHA server option.
+        # https://github.com/NLnetLabs/Internet.nl/issues/461
+        while second_cipher:
+            ci = cipher_infos.get(second_cipher, None)
+            if ci and "CHACHA" not in ci.bulk_enc_alg:
+                break
+            ignore_ciphers.append(second_cipher)
+            second_cipher = _get_another_cipher(self, ignore_ciphers)
 
-            if first_cipher != second_cipher:
+        if second_cipher and first_cipher != second_cipher:
+            try:
                 # Now that we know of two ciphers that can be used to connect
                 # to the server, one of which was chosen in preference to the
                 # other, ask the server to use them in reverse order and
@@ -2580,10 +2597,10 @@ class ConnectionChecker:
                 if newly_selected_cipher == second_cipher:
                     cipher_order_score = self._score_tls_cipher_order_bad
                     cipher_order = CipherOrderStatus.bad
-        except ConnectionHandshakeException:
-            # Unable to connect with a second cipher or with reversed cipher
-            # order.
-            pass
+
+            except ConnectionHandshakeException:
+                # Unable to connect with reversed cipher order.
+                pass
 
         # Did a previous call to self.check_cipher_sec_level() discover a
         # prescribed order violation?

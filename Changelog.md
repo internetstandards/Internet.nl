@@ -5,6 +5,7 @@
 New
 - docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
   the IT related certificates.
+- Support for SSL_OP_PRIORITIZE_CHACHA. [(#461)]
 
 Dependencies
 - Updated python-pip-requirements.txt:
@@ -14,6 +15,8 @@ Dependencies
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
+
+[(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 
 ## 1.2.1
 

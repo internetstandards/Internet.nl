@@ -129,6 +129,10 @@ tls12onlyPHASEOUTTLSECDHEECDSAWITH3DESEDECBCSHA.ec                IN  A      {{T
 tls12onlyPHASEOUTTLSECDHEECDSAWITH3DESEDECBCSHA.ec                IN  AAAA   {{TARGET_TLS12ONLYLEGACYPHASEOUTCIPHERS_IPV6}}
 tls1213                                                           IN  A      {{TARGET_TLS1213_IP}}
 tls1213                                                           IN  AAAA   {{TARGET_TLS1213_IPV6}}
+tls1213prioritizechacha                                           IN  A      {{TARGET_TLS1213PRIORITIZECHACHA_IP}}
+tls1213prioritizechacha                                           IN  AAAA   {{TARGET_TLS1213PRIORITIZECHACHA_IPV6}}
+tls1213prioritizechacha                                           IN  MX     10   tls1213prioritizechacha
+tls1213prioritizechacha                                           IN  TXT    "v=spf1 mx -all"
 tls1213defaultvhost                                               IN  A      {{TARGET_TLS1213_IP}}
 tls1213defaultvhost                                               IN  AAAA   {{TARGET_TLS1213_IPV6}}
 tls1213modernphaseoutciphers                                      IN  A      {{TARGET_TLS1213_IP}}
@@ -235,6 +239,7 @@ _443._tcp.tls12onlySUFFICIENTTLSECDHEECDSAWITHAES256CBCSHA.ec     IN  TLSA   3 1
 _443._tcp.tls12onlySUFFICIENTTLSECDHEECDSAWITHAES128CBCSHA256.ec  IN  TLSA   3 1 1 418c755ccedef4e3d771cf2d70d31da62d2b8b4de56612fbd02de65e992a8bb0
 _443._tcp.tls12onlySUFFICIENTTLSECDHEECDSAWITHAES256CBCSHA384.ec  IN  TLSA   3 1 1 418c755ccedef4e3d771cf2d70d31da62d2b8b4de56612fbd02de65e992a8bb0
 _443._tcp.tls1213                                                 IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
+_443._tcp.tls1213prioritizechacha                                 IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _443._tcp.tls1213modernphaseoutciphers                            IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _443._tcp.tls1213nohsts                                           IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _443._tcp.tls1213noocspstaple                                     IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
@@ -250,6 +255,7 @@ _443._tcp.tls13ipv4onlynoipv6                                     IN  TLSA   3 1
 _443._tcp.tls13onlydiffipv4ipv6                                   IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _443._tcp.tls13onlyhonorclientcipherorder                         IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 
+_25._tcp.tls1213prioritizechacha                                  IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _25._tcp.tls12only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _25._tcp.tls12onlynoip.test.nlnetlabs.tk.                         IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _25._tcp.tls13only.test.nlnetlabs.tk.                             IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
@@ -258,6 +264,7 @@ _25._tcp.tls13ipv4only.test.nlnetlabs.tk.                         IN  TLSA   3 1
 _25._tcp.tls13ipv4onlynoipv6.test.nlnetlabs.tk.                   IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 _25._tcp.tls13ipv6onlynoipv4.test.nlnetlabs.tk.                   IN  TLSA   3 1 1 13dd5f6c0a60a4d89cbcbfd38673d629afa3ea6974e60c3a7e21d0c14dc765d8
 
+_dmarc.tls1213prioritizechacha                                    IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls1213prioritizechacha.test.nlnetlabs.tk"
 _dmarc.tls12only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12only.test.nlnetlabs.tk"
 _dmarc.tls12onlynoip                                              IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls12onlynoip.test.nlnetlabs.tk"
 _dmarc.tls13only                                                  IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13only.test.nlnetlabs.tk"
@@ -267,6 +274,11 @@ _dmarc.tls13ipv4onlynoipv6                                        IN  TXT    "v=
 _dmarc.tls13ipv6onlynoipv4                                        IN  TXT    "v=DMARC1; p=reject; rua=mailto:dmarc-reports@tls13ipv6onlynoipv4.test.nlnetlabs.tk"
 
 ; Created using https://dkimcore.org
+1566421634.nlnetlabs._domainkey.tls1213prioritizechacha.test.nlnetlabs.tk. IN TXT (
+        "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGPFUGQRVxTYqSSjLCbs4dXCOl"
+        "U6HRa8eTli7987Chweph5k8HSB3HOoaOYbpec3WYdqjTLIEiOnGXyu5ai5+BePbp"
+        "YALesZgfWsSLCKjFH5tDVwJwKPciT5Jk4b7Fi6ZPLFESQeW4UAre1y5iLCS+PHFw"
+        "qcM7zmbgj4gNCvUPpwIDAQAB")
 1566421634.nlnetlabs._domainkey.tls12only.test.nlnetlabs.tk. IN TXT (
         "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGPFUGQRVxTYqSSjLCbs4dXCOl"
         "U6HRa8eTli7987Chweph5k8HSB3HOoaOYbpec3WYdqjTLIEiOnGXyu5ai5+BePbp"

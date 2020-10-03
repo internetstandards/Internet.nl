@@ -473,6 +473,19 @@ services:
       - POSTFIX_VERSION=custom-modern
       - POSTFIX_CONFIG=tls13only
 
+  targettls1213prioritizechacha:
+    image: targetbase
+    dns: ${RESOLVER_IP}
+    networks:
+      test_net:
+        ipv4_address: ${TARGET_TLS1213PRIORITIZECHACHA_IP}
+        ipv6_address: ${TARGET_TLS1213PRIORITIZECHACHA_IPV6}
+    depends_on:
+      - targetbase
+    environment:
+      - POSTFIX_VERSION=custom-modern
+      - POSTFIX_CONFIG=tls1213prioritizechacha
+
   targettls130rtt:
     image: targetbase
     entrypoint: /opt/run-nginx-server.sh
@@ -676,6 +689,8 @@ services:
       - TARGET_TLS1112_IPV6
       - TARGET_TLS12ONLY_IP
       - TARGET_TLS12ONLY_IPV6
+      - TARGET_TLS1213PRIORITIZECHACHA_IP
+      - TARGET_TLS1213PRIORITIZECHACHA_IPV6
       - TARGET_TLS12ONLYLEGACYBADCIPHERS_IP
       - TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6
       - TARGET_TLS12ONLYMODERNBADCIPHERS_IP
@@ -744,6 +759,8 @@ services:
       - TARGET_TLS1112_IPV6
       - TARGET_TLS12ONLY_IP
       - TARGET_TLS12ONLY_IPV6
+      - TARGET_TLS1213PRIORITIZECHACHA_IP
+      - TARGET_TLS1213PRIORITIZECHACHA_IPV6
       - TARGET_TLS12ONLYLEGACYBADCIPHERS_IP
       - TARGET_TLS12ONLYLEGACYBADCIPHERS_IPV6
       - TARGET_TLS12ONLYMODERNBADCIPHERS_IP

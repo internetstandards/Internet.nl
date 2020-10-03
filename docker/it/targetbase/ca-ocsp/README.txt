@@ -15,7 +15,7 @@ preferred over the manual way as it also updates any matching TLSA records.
 You can still follow the instructions below if you want to do something
 manually but be prepared to manually update several places after certificate
 creation e.g., the CA database, the TLSA records at
-docker/it/dns/nsd/submaster/test.nlnetlabs.tk.
+docker/it/dns/submaster/nsd/test.nlnetlabs.tk.
 
 1. HOW TO GENERATE A PRIVATE KEY AND CERTIFICATE SIGNED BY OUR CA
 
