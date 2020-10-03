@@ -7,6 +7,10 @@ New
   the IT related certificates.
 
 Dependencies
+- Updated python-pip-requirements.txt:
+  - django-redis pinned to 4.10
+  - celery bumped to 4.3.1 (vine dependency)
+  - vine pinned to 1.3.0
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
