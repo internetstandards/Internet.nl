@@ -694,6 +694,9 @@ mail_tests = [
             TESTS.TLS_CLIENT_RENEG
         }),
 
+    PostfixTLS12Config(
+        'mail test', 'tls1213prioritizechacha.test.nlnetlabs.tk'),
+
     DomainConfig(
         'mail test', 'tls12onlynoip.test.nlnetlabs.tk',
         expected_error={

@@ -1,10 +1,21 @@
 CONTENTS:
+0. HOW TO AUTO-UPDATE/GENERATE ALL IT RELATED CERTIFICATES
 1. HOW TO GENERATE A PRIVATE KEY AND CERTIFICATE SIGNED BY OUR CA
 2. HOW TO VERIFY THAT THE OCSP SERVER IS WORKING CORRECTLY
 3. HOW TO BUILD THE CA AND OCSP SERVER
 4. REFERENCES
 
 ------------------------------------------------------------------------------
+
+0. HOW TO AUTO-UPDATE/GENERATE ALL IT RELATED CERTIFICATES
+
+Use the script at docker/it/targetbase/recreate_certificates.sh script. It is
+preferred over the manual way as it also updates any matching TLSA records.
+
+You can still follow the instructions below if you want to do something
+manually but be prepared to manually update several places after certificate
+creation e.g., the CA database, the TLSA records at
+docker/it/dns/submaster/nsd/test.nlnetlabs.tk.
 
 1. HOW TO GENERATE A PRIVATE KEY AND CERTIFICATE SIGNED BY OUR CA
 
@@ -114,7 +125,7 @@ This requires the support of OpenSSL in your machine. So please install OpenSSL 
 cd docker/it/targetbase/ca-ocsp
 mkdir -p ca/newcerts
 touch ca/index.txt
-echo ‘01’ > ca/serial
+echo 01 > ca/serial
 
 2. [XIMON] There is no step 2.
 

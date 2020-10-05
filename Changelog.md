@@ -3,12 +3,21 @@
 ## Unreleased next version
 
 New
+- docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
+  the IT related certificates.
+- Support for SSL_OP_PRIORITIZE_CHACHA. [(#461)]
 - Introduce manual HoF page(s).
 
 Dependencies
+- Updated python-pip-requirements.txt:
+  - django-redis pinned to 4.10
+  - celery bumped to 4.3.1 (vine dependency)
+  - vine pinned to 1.3.0
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
+
+[(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 
 ## 1.2.1
 
