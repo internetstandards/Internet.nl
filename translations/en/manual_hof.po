@@ -13,7 +13,7 @@ msgstr "100% Internet.nl compliant hosters"
 
 msgid "manual halloffame hosters text"
 msgstr ""
-"The {{count}} hosters mentioned below are included in the Hall of Fame for Hosters, because they meet the following criteria:\n"
+"The {{count}} hosters mentioned below are included in the Hall of Fame for Hosters, because they meet the following **criteria**:\n"
 "\n"
 "1. **Own domain 2x 100%**: The hoster's own domain name, on which the company website is active, scores 100% in both the website test and the email test on Internet.nl; \n"
 "2. **Customer domains 2x 100%**: The hoster explicitly offers hosting services for websites and e-mail, and offers its customers the possibility to score 100% in both the website test and email test on Internet.nl;\n"
