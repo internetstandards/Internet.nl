@@ -23,6 +23,7 @@ else:
 KNOWN_PO_FILES = [
     ("main.po", []),
     ("news.po", ['article', 'author']),
+    ("manual_hof.po", ['manual halloffame']),
 ]
 PO_FILES_DIR = "translations"
 PO_FILES_LOCALES = PO_FILES_DIR + "/{}"
@@ -167,7 +168,7 @@ def build_django_files(args=None):
             # <p>text</p>
             # Remove the <p> tag for these cases.
             if (md.startswith("<p>") and md.endswith("</p>")
-                    and md[3:].find("<p>")):
+                    and md[3:].find("<p>") == -1):
                 md = md.split("<p>", 1)[1].rsplit("</p>", 1)[0]
             entry.msgstr = md
 

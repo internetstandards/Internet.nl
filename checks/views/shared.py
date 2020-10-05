@@ -1,10 +1,12 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from datetime import datetime
+import random
 import re
 from urllib.parse import urlparse
 import time
 from timeit import default_timer as timer
+import yaml
 
 from celery import shared_task
 from django.core.cache import cache
@@ -227,6 +229,17 @@ def get_hof_web(count=100000):
 
 def get_hof_mail(count=100000):
     return get_hof_cache(redis_id.hof_mail.id, count)
+
+
+def get_hof_manual(manual):
+    hof_entries = []
+    try:
+        with open(settings.MANUAL_HOF[manual]['entries_file'], 'r') as f:
+            hof_entries = yaml.load(f, Loader=yaml.Loader)
+    except Exception:
+        pass
+    random.shuffle(hof_entries)
+    return (len(hof_entries), hof_entries)
 
 
 def get_retest_time(report):

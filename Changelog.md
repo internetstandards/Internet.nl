@@ -6,6 +6,7 @@ New
 - docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
   the IT related certificates.
 - Support for SSL_OP_PRIORITIZE_CHACHA. [(#461)]
+- Introduce manual HoF page(s).
 
 Dependencies
 - Updated python-pip-requirements.txt:

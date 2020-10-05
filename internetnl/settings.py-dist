@@ -331,3 +331,46 @@ MATOMO_URL = "//matomo_url/"
 MATOMO_SITEID = "site_id"
 # Used for subdomain tracking eg. *.internet.nl
 MATOMO_SUBDOMAIN_TRACKING = ""
+
+
+# --- Extra manual HoF page(s)
+#
+# This is intended to read domains from a file and present them in a separate
+# page as part of the Hall of Fame menu.
+# The configuration is:
+#   MANUAL_HOF = {
+#       '<url_part>': {
+#           'translate_key': '',
+#           'entries_file': '/path/to/yaml/file',
+#           'template_file': 'filename.html',
+#           'icon_file': 'filename.svg'
+#       },
+#   }
+# * <url_part>, is the url part for the page i.e., /halloffame/<url_part>
+# * translate_key, is the translate key to be used when translating text.
+#   By default it is the same as <url_part>.
+#   The final translate ids would then be:
+#   - manual halloffame <translate_key> *
+#   These ids need to be available in the translations/*/manual_hof.po files.
+# * template_file, is an alternate template HTML file to be used if desired.
+#   MUST live inside the checks/templates folder.
+#   Leave empty if you want to use the default template file (the same as with
+#   standard HoF).
+# * entries_file, is the filepath to a *yaml* file
+#   containing a list of domains with the following format:
+#   - domain: "internet.nl"
+#     permalink: "https://internet.nl"
+#   - domain: "example.nl"
+#     permalink: "https://example.nl"
+# * icon_file, is the filepath to an icon to be used for this HoF; MUST live
+#   inside the checks/static/icons folder.
+#
+# You can add more <url_part> in the MANUAL_HOF dictionary for additional
+# manual HoFs.
+#
+# Leaving the MANUAL_HOF dictionary empty disables the manual HoF functionality.
+#
+# As an example, what triggered the manual HoF was the incentive from
+# internet.nl to be approached by hosters in order (after manual testing and
+# agreement) to be included in a hosters HoF.
+MANUAL_HOF = {}
