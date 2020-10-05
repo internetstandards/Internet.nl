@@ -3,6 +3,7 @@
 ## Unreleased next version
 
 New
+- Introduce manual HoF page(s).
 
 Dependencies
 
