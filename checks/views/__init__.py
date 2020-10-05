@@ -238,7 +238,7 @@ def articlepage(request, article):
 
 
 def _update_hof_with_manual(template_dict, current=None):
-    if settings.MANUAL_HOF:
+    if hasattr(settings, 'MANUAL_HOF') and settings.MANUAL_HOF:
         template_dict.update(dict(
             manuals=[
                 (k, f"manual halloffame {'translate_key' in v and v['translate_key'] or k} menu")

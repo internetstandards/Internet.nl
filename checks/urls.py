@@ -80,7 +80,7 @@ urlpatterns = [
     url(r'^change_language/$', views.change_language, name='change_language'),
 ]
 
-if settings.MANUAL_HOF:
+if hasattr(settings, 'MANUAL_HOF') and settings.MANUAL_HOF:
     for key in settings.MANUAL_HOF:
         urlpatterns += [
             url(r'^halloffame/(?P<manual_url>{})/$'.format(key), views.hofmanualpage),
