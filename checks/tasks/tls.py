@@ -1984,6 +1984,8 @@ class ConnectionChecker:
                 return self._score_ocsp_staping_good, OcspStatus.good
             except OcspResponseNotTrustedError:
                 return self._score_ocsp_staping_bad, OcspStatus.not_trusted
+            except _nassl.OpenSSLError:
+                return self._score_ocsp_staping_bad, OcspStatus.not_trusted
         else:
             return self._score_ocsp_staping_ok, OcspStatus.ok
 

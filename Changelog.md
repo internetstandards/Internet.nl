@@ -18,6 +18,7 @@ Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
 - Fix ip_similarity for batch results where no IPv6 nor Ipv4 connection was
   possible.
+- Better exception handling for untrusted certificate in OCSP check.
 
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 
