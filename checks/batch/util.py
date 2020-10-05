@@ -517,7 +517,7 @@ class DomainTechnicalResults:
         webservers = {}
 
         distance = report_table.ipv6.web_simhash_distance
-        if (distance >= 0 and distance <= 100):
+        if (distance and distance >= 0 and distance <= 100):
             ip_similarity = distance <= settings.SIMHASH_MAX
             webservers['ip_similarity'] = ip_similarity
 
