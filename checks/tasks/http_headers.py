@@ -97,6 +97,7 @@ class HeaderCheckerStrictTransportSecurity(object):
     def __init__(self):
         self.name = "Strict-Transport-Security"
         self.first_time_seen = True
+        self.min_allowed = 36817200  # 14 months
 
     def check(self, value, results):
         """
@@ -112,8 +113,7 @@ class HeaderCheckerStrictTransportSecurity(object):
             try:
                 max_age = header_values[0].lower().split(
                     'max-age=')[1].split(';')[0]
-                # Check if lower than 6 months.
-                if self.first_time_seen and int(max_age) < 15552000:
+                if self.first_time_seen and int(max_age) < self.min_allowed:
                     results['hsts_score'] = scoring.WEB_TLS_HSTS_PARTIAL
                     self.first_time_seen = False
             except (ValueError, IndexError):

@@ -10,6 +10,9 @@ New
 - Support non email sending domains in mailtest for DKIM test. [(#249)]
 - Keep and display the organizational domain for DMARC.
 
+Changes
+- Minimum max-age for HSTS is now 14 months. [(#421)]
+
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
 - Fix ip_similarity for batch results where no IPv6 nor Ipv4 connection was
@@ -27,10 +30,10 @@ Migrations
 - New column in DB (mailtestauth_dmarc_record_org_domain).
 
 Settings
-- Make the EHLO message configurable [(#483)]
-  - New SMTP_EHLO_DOMAIN setting in settings.py
+- New SMTP_EHLO_DOMAIN setting in settings.py. [(#483)]
 
 [(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
+[(#421)]: https://github.com/NLnetLabs/Internet.nl/issues/421
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 
