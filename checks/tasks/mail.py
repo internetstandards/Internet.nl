@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import time
+import re
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -17,6 +18,10 @@ from .spf_parser import parse as spf_parse
 from .. import scoring, categories, redis_id
 from .. import batch, batch_shared_task
 from ..models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
+
+DMARC_NON_SENDING_POLICY = re.compile(r'v=DMARC1;\ *p=reject;?')
+DMARC_NON_SENDING_POLICY_ORG = re.compile(r'v=DMARC1;.*sp=reject;?')
+SPF_NON_SENDING_POLICY = re.compile(r'v=spf1\ +-all;?')
 
 
 @shared_task(bind=True)
@@ -104,6 +109,26 @@ def batch_spf(self, url, *args, **kwargs):
     return do_spf(self, url, *args, **kwargs)
 
 
+def skip_dkim_for_non_sending_domain(mtauth):
+    """
+    If there is no DKIM, check if DMARC and SPF are hinting for a non email
+    sending domain and skip the DKIM results.
+    """
+    is_org = mtauth.dmarc_record_org_domain
+    if (not mtauth.dkim_available
+            and mtauth.dmarc_available
+            and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
+            and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
+                    mtauth.dmarc_record[0]))
+                 or (not is_org and DMARC_NON_SENDING_POLICY.match(
+                     mtauth.dmarc_record[0])))
+            and mtauth.spf_available
+            and mtauth.spf_policy_status == SpfPolicyStatus.valid
+            and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])):
+        return True
+    return False
+
+
 def callback(results, addr, category):
     subtests = category.subtests
     mtauth = MailTestAuth(domain=addr)
@@ -123,29 +148,32 @@ def callback(results, addr, category):
             dmarc_score = result.get("score")
             dmarc_policy_status = result.get("policy_status")
             dmarc_policy_score = result.get("policy_score")
+            dmarc_record_org_domain = result.get("org_domain")
             mtauth.dmarc_available = dmarc_available
             mtauth.dmarc_record = dmarc_record
             mtauth.dmarc_score = dmarc_score
             mtauth.dmarc_policy_status = dmarc_policy_status
             mtauth.dmarc_policy_score = dmarc_policy_score
+            mtauth.dmarc_record_org_domain = dmarc_record_org_domain
+
+            dmarc_domain = dmarc_record_org_domain or addr
+            tech_data = [[r, dmarc_domain] for r in dmarc_record]
+
             if dmarc_available:
-                subtests['dmarc'].result_good(dmarc_record)
+                subtests['dmarc'].result_good(tech_data)
 
                 if dmarc_policy_status == DmarcPolicyStatus.valid:
                     subtests['dmarc_policy'].result_good()
                 elif dmarc_policy_status == DmarcPolicyStatus.invalid_external:
-                    subtests['dmarc_policy'].result_invalid_external(
-                        dmarc_record)
+                    subtests['dmarc_policy'].result_invalid_external(tech_data)
                 else:
                     if dmarc_policy_status == DmarcPolicyStatus.invalid_syntax:
-                        subtests['dmarc_policy'].result_bad_syntax(
-                            dmarc_record)
+                        subtests['dmarc_policy'].result_bad_syntax(tech_data)
                     elif dmarc_policy_status == DmarcPolicyStatus.invalid_p_sp:
-                        subtests['dmarc_policy'].result_bad_policy(
-                            dmarc_record)
+                        subtests['dmarc_policy'].result_bad_policy(tech_data)
 
             else:
-                subtests['dmarc'].result_bad(dmarc_record)
+                subtests['dmarc'].result_bad(tech_data)
 
         elif testname == 'spf':
             spf_available = result.get("available")
@@ -187,6 +215,10 @@ def callback(results, addr, category):
 
             else:
                 subtests['spf'].result_bad(spf_record)
+
+    if (skip_dkim_for_non_sending_domain(mtauth)):
+        mtauth.dkim_score = scoring.MAIL_AUTH_DKIM_PASS
+        subtests['dkim'].result_no_email()
 
     mtauth.report = category.gen_report()
     mtauth.save()
@@ -499,7 +531,7 @@ def dmarc_callback(data, status, r):
 def do_dmarc(self, url, *args, **kwargs):
     try:
         cb_data = dict(cont=True)
-        is_organizational_domain = False
+        is_org_domain = False
         public_suffix_list = dmarc_get_public_suffix_list()
         if not public_suffix_list:
             # We don't have the public suffix list.
@@ -512,17 +544,18 @@ def do_dmarc(self, url, *args, **kwargs):
             url = dmarc_find_organizational_domain(url, public_suffix_list)
             cb_data = self.async_resolv(
                 "_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
-            is_organizational_domain = True
+            is_org_domain = True
 
         available = 'available' in cb_data and cb_data['available']
         score = cb_data["score"]
         record = cb_data["record"]
         policy_status = None
         policy_score = scoring.MAIL_AUTH_DMARC_POLICY_FAIL
+        org_domain = is_org_domain and url or None
 
         if len(record) == 1:
             policy_status, policy_score = dmarc_check_policy(
-                record[0], url, self, is_organizational_domain,
+                record[0], url, self, is_org_domain,
                 public_suffix_list)
 
         result = dict(
@@ -530,7 +563,8 @@ def do_dmarc(self, url, *args, **kwargs):
             score=score,
             record=record,
             policy_status=policy_status,
-            policy_score=policy_score)
+            policy_score=policy_score,
+            org_domain=org_domain)
 
     except SoftTimeLimitExceeded:
         result = dict(
@@ -538,13 +572,14 @@ def do_dmarc(self, url, *args, **kwargs):
             score=scoring.MAIL_AUTH_DMARC_FAIL,
             record=[],
             policy_status=None,
-            policy_score=scoring.MAIL_AUTH_DMARC_POLICY_FAIL)
+            policy_score=scoring.MAIL_AUTH_DMARC_POLICY_FAIL,
+            org_domain=None)
 
     return ("dmarc", result)
 
 
 def dmarc_check_policy(
-        dmarc_record, domain, task, is_organizational_domain,
+        dmarc_record, domain, task, is_org_domain,
         public_suffix_list):
     """
     Check the DMARC record for syntax and efficiency.
@@ -557,7 +592,7 @@ def dmarc_check_policy(
     domain = domain.lower().rstrip('.')
     parsed = dmarc_parse(dmarc_record)
     status, score = dmarc_verify_sufficient_policy(
-        parsed, is_organizational_domain, public_suffix_list)
+        parsed, is_org_domain, public_suffix_list)
 
     if status == DmarcPolicyStatus.valid and parsed.get('directives'):
         status, score = dmarc_verify_external_destinations(
@@ -566,7 +601,7 @@ def dmarc_check_policy(
 
 
 def dmarc_verify_sufficient_policy(
-        parsed, is_organizational_domain, public_suffix_list):
+        parsed, is_org_domain, public_suffix_list):
     """
     Verify that the s=(sp=) policy is not 'none'.
 
@@ -583,7 +618,7 @@ def dmarc_verify_sufficient_policy(
             status = DmarcPolicyStatus.invalid_p_sp
             score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
         else:
-            if is_organizational_domain:
+            if is_org_domain:
                 if (not parsed['directives'].get('srequest')
                         and not parsed['directives'].get('request')):
                     status = DmarcPolicyStatus.invalid_p_sp

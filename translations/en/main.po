@@ -422,6 +422,11 @@ msgstr "Your domain does *not* support DKIM records."
 msgid "detail mail auth dkim verdict good"
 msgstr "Your domain supports DKIM records."
 
+msgid "detail mail auth dkim verdict no-email"
+msgstr "Your domain does *not* support DKIM records. However because your "
+"DMARC and SPF records hint that this domain is a non email sending one, this "
+"subtest is skipped."
+
 msgid "detail mail auth dmarc exp"
 msgstr ""
 "We check if DMARC is available for your domain. A receiving mail server may \n"
@@ -437,7 +442,7 @@ msgid "detail mail auth dmarc label"
 msgstr "DMARC existence"
 
 msgid "detail mail auth dmarc tech table"
-msgstr "DMARC record"
+msgstr "DMARC record|Found on"
 
 msgid "detail mail auth dmarc verdict bad"
 msgstr "Your domain does *not* have a DMARC record."

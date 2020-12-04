@@ -1,11 +1,12 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import re
 from abc import ABC, abstractmethod
 
 from ..models import DomainTestReport, MailTestReport, ZeroRttStatus
-from ..models import BatchRequestType
+from ..models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
 from ..categories import MailTlsStarttlsExists
+from ..tasks.mail import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG
+from ..tasks.mail import SPF_NON_SENDING_POLICY
 
 
 def _create_custom_results_map(instances):
@@ -116,19 +117,19 @@ is translated as:
         if not isinstance(report_table, MailTestReport):
             return None
 
-        non_sending_domain = False
-        dmarc_re = re.compile(r'v=DMARC1;\ *p=reject;?')
-        spf_re = re.compile(r'v=spf1\ +-all;?')
-        dmarc_available = report_table.auth.dmarc_available
-        dmarc_record = report_table.auth.dmarc_record
-        spf_available = report_table.auth.spf_available
-        spf_record = report_table.auth.spf_record
-        if (dmarc_available and spf_available
-                and len(dmarc_record) == 1 and len(spf_record) == 1
-                and dmarc_re.match(dmarc_record[0])
-                and spf_re.fullmatch(spf_record[0])):
-            non_sending_domain = True
-        return non_sending_domain
+        mtauth = report_table.auth
+        is_org = mtauth.dmarc_record_org_domain
+        if (mtauth.dmarc_available
+                and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
+                and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
+                        mtauth.dmarc_record[0]))
+                     or (not is_org and DMARC_NON_SENDING_POLICY.match(
+                         mtauth.dmarc_record[0])))
+                and mtauth.spf_available
+                and mtauth.spf_policy_status == SpfPolicyStatus.valid
+                and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])):
+            return True
+        return False
 
 
 class MailServersTestableStatus(CustomResult):

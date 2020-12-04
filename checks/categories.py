@@ -1786,6 +1786,10 @@ class MailAuthDkim(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth dkim verdict bad"
 
+    def result_no_email(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail auth dkim verdict no-email"
+
 
 class MailAuthDmarc(Subtest):
     def __init__(self):
@@ -1797,20 +1801,20 @@ class MailAuthDmarc(Subtest):
             worst_status=scoring.MAIL_AUTH_DMARC_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DMARC_PASS,
             model_score_field="dmarc_score")
-        # Fix for one line, one value data.
+        # Fix for one line, one value data (not-tested case)
         self.tech_data = [[self.tech_data]]
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail auth dmarc verdict good"
-        self.tech_data = [[tech_data]]
+        self.tech_data = tech_data
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth dmarc verdict bad"
         if tech_data:
             # More than one dmarc record. Show the records.
-            self.tech_data = [[tech_data]]
+            self.tech_data = tech_data
         else:
             self.tech_data = ""
             self.tech_type = ""
@@ -1826,7 +1830,7 @@ class MailAuthDmarcPolicy(Subtest):
             worst_status=scoring.MAIL_AUTH_DMARC_POLICY_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DMARC_POLICY_PASS,
             model_score_field="dmarc_policy_score")
-        # Fix for one line, one value data.
+        # Fix for one line, one value data (not-tested case)
         self.tech_data = [[self.tech_data]]
 
     def result_good(self):
@@ -1837,17 +1841,17 @@ class MailAuthDmarcPolicy(Subtest):
     def result_bad_syntax(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth dmarc-policy verdict bad"
-        self.tech_data = [[tech_data]]
+        self.tech_data = tech_data
 
     def result_bad_policy(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth dmarc-policy verdict policy"
-        self.tech_data = [[tech_data]]
+        self.tech_data = tech_data
 
     def result_invalid_external(self, tech_data):
         self._status(STATUS_NOTICE)
         self.verdict = "detail mail auth dmarc-policy verdict external"
-        self.tech_data = [[tech_data]]
+        self.tech_data = tech_data
 
 
 class MailAuthSpf(Subtest):
@@ -1872,7 +1876,7 @@ class MailAuthSpf(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth spf verdict bad"
         if tech_data:
-            # More than one dmarc record. Show the records.
+            # More than one spf record. Show the records.
             self.tech_data = [[tech_data]]
         else:
             self.tech_data = ""

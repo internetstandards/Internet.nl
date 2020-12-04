@@ -57,7 +57,7 @@ class CipherOrderStatus(Enum):
     good = 1
     not_prescribed = 2
     not_seclevel = 3
-    na = 4  # Only GOOD ciphers; don't care about order.
+    na = 4  # Don't care about order; only GOOD ciphers.
 
 
 def conn_test_id():
@@ -706,6 +706,7 @@ class MailTestAuth(BaseTestModel):
     dmarc_score = models.IntegerField(null=True)
     dmarc_available = models.BooleanField(default=False)
     dmarc_record = ListField(default=[])
+    dmarc_record_org_domain = models.CharField(max_length=255, null=True)
     dmarc_policy_status = EnumIntegerField(DmarcPolicyStatus, null=True)
     dmarc_policy_score = models.IntegerField(null=True)
     spf_score = models.IntegerField(null=True)

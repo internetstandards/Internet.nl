@@ -7,6 +7,8 @@ New
   the IT related certificates.
 - Support for SSL_OP_PRIORITIZE_CHACHA. [(#461)]
 - Introduce manual HoF page(s).
+- Support non email sending domains in mailtest for DKIM test. [(#249)]
+- Keep and display the organizational domain for DMARC.
 
 Dependencies
 - Updated python-pip-requirements.txt:
@@ -14,12 +16,16 @@ Dependencies
   - celery bumped to 4.3.1 (vine dependency)
   - vine pinned to 1.3.0
 
+Migrations
+- New column in DB (mailtestauth_dmarc_record_org_domain).
+
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
 - Fix ip_similarity for batch results where no IPv6 nor Ipv4 connection was
   possible.
 - Better exception handling for untrusted certificate in OCSP check.
 
+[(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 
 ## 1.2.1
