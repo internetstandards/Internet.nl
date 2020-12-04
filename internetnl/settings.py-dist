@@ -106,6 +106,7 @@ ADMINS = (('Administrator', 'django@internet.nl'))
 SERVER_EMAIL = 'django@internet.nl'
 INTERNAL_IPS = [ "localhost", "127.0.0.1" ]
 CONN_TEST_DOMAIN = "internet.nl"
+SMTP_EHLO_DOMAIN = "internet.nl"  # MUST be ASCII; A-label for IDNs (i.e., xn--)
 
 INSTALLED_APPS = [
     'django.contrib.admin',

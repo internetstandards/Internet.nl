@@ -1416,7 +1416,8 @@ def starttls_sock_setup(conn):
                 line = readline(fd)
 
             # 3
-            conn.sock.sendall(b"EHLO internet.nl\r\n")
+            conn.sock.sendall(bytes(
+                f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", 'ascii'))
 
             starttls = False
 
@@ -2100,7 +2101,8 @@ class ConnectionChecker:
                     http_client.putrequest('GET', '/')
                     http_client.endheaders()
                 elif self._checks_mode == ChecksMode.MAIL:
-                    self._conn.write(b"EHLO internet.nl\r\n")
+                    self._conn.write(
+                        bytes(f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", 'ascii'))
                     self._conn.read(4096)
 
                 if (self._conn._ssl.get_early_data_status() == 1 and
@@ -2286,7 +2288,8 @@ class ConnectionChecker:
                         http_client.endheaders()
                         http_client.getresponse()
                     elif self._checks_mode == ChecksMode.MAIL:
-                        new_conn.write(b"EHLO internet.nl\r\n")
+                        new_conn.write(bytes(
+                            f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", 'ascii'))
                         new_conn.read(4096)
 
                     # From: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_nid.html

@@ -10,6 +10,12 @@ New
 - Support non email sending domains in mailtest for DKIM test. [(#249)]
 - Keep and display the organizational domain for DMARC.
 
+Bug Fixes
+- Fix indefinite locks in cache (not a current problem).
+- Fix ip_similarity for batch results where no IPv6 nor Ipv4 connection was
+  possible.
+- Better exception handling for untrusted certificate in OCSP check.
+
 Dependencies
 - Updated python-pip-requirements.txt:
   - django-redis pinned to 4.10
@@ -19,14 +25,13 @@ Dependencies
 Migrations
 - New column in DB (mailtestauth_dmarc_record_org_domain).
 
-Bug Fixes
-- Fix indefinite locks in cache (not a current problem).
-- Fix ip_similarity for batch results where no IPv6 nor Ipv4 connection was
-  possible.
-- Better exception handling for untrusted certificate in OCSP check.
+Settings
+- Make the EHLO message configurable [(#483)]
+  - New SMTP_EHLO_DOMAIN setting in settings.py
 
 [(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
+[(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 
 ## 1.2.1
 
