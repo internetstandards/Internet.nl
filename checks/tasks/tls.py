@@ -1059,18 +1059,17 @@ def dane(
 
     # Record TLSA data and also check for DANE rollover types.
     # Accepted pairs are:
-    # * 3 1 x - 3 1 x
-    # * 3 1 x - 2 1 x
-    two_one_x = 0
-    three_one_x = 0
+    # * 3 x x - 3 x x
+    # * 3 x x - 2 x x
+    two_x_x = 0
+    three_x_x = 0
     for cert_usage, selector, match, data in cb_data["data"]:
         records.append("{} {} {} {}".format(cert_usage, selector, match, data))
-        if selector == 1:
-            if cert_usage == 2:
-                two_one_x += 1
-            elif cert_usage == 3:
-                three_one_x += 1
-    if three_one_x > 1 or (three_one_x and two_one_x):
+        if cert_usage == 2:
+            two_x_x += 1
+        elif cert_usage == 3:
+            three_x_x += 1
+    if three_x_x > 1 or (three_x_x and two_x_x):
         rollover = True
 
     # Remove the trailing dot if any.
