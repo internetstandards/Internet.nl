@@ -376,6 +376,7 @@ class ModernConnection(ConnectionCommon, SslClient):
             server_name=conn.server_name,
             ip_address=conn.ip_address, port=conn.port, ipv6=conn.ipv6,
             send_SNI=conn.send_SNI, task=conn.task, sock_setup=conn.sock_setup,
+            timeout=conn.timeout,
             *args, **kwargs)
 
     def _set_ciphers(self):
@@ -401,6 +402,7 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
             server_name=conn.server_name,
             ip_address=conn.ip_address, port=conn.port, ipv6=conn.ipv6,
             send_SNI=conn.send_SNI, task=conn.task, sock_setup=conn.sock_setup,
+            timeout=conn.timeout,
             *args, **kwargs)
 
     def _set_ciphers(self):

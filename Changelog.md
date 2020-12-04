@@ -15,6 +15,7 @@ Bug Fixes
 - Fix ip_similarity for batch results where no IPv6 nor Ipv4 connection was
   possible.
 - Better exception handling for untrusted certificate in OCSP check.
+- Keep the same configured socket timeout for subsequent TLS connections.
 
 Dependencies
 - Updated python-pip-requirements.txt:
