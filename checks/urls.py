@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^privacy/$', views.privacypage),
     url(r'^faqs/$', views.faqindexpage),
     url(r'^faqs/report/$', views.faqreport, name="faqs_report"),
+    url(r'^faqs/badges/$', views.faqbadges, name="faqs_badges"),
     url(r'^faqs/(?P<subject>[a-zA-Z0-9\-]{1,40})/$', views.faqarticlepage),
     url(r'^usage/$', views.indexpage),
     url(r'^about/$', views.aboutpage),

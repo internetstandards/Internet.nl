@@ -2624,7 +2624,8 @@ msgstr ""
 "* [Secure email transport (STARTTLS and DANE)](/faqs/starttls/)\n"
 "\n"
 "## Test report\n"
-"* [Explanation of test report](/faqs/report/)"
+"* [Explanation of test report](/faqs/report/)\n"
+"* [100% badges](/faqs/badges/)"
 
 #, md-format
 msgid "faqs dnssec content"
@@ -2849,6 +2850,24 @@ msgstr ""
 
 msgid "faqs report title"
 msgstr "Explanation of test report"
+
+msgid "faqs badges title"
+msgstr ""
+"100% badges op je website"
+
+msgid "faqs badges pre-badge content"
+msgstr ""
+"Als jouw website of e-mail 100% scoort in de test op Internet.nl, dan mag je "
+"de onderstaande badges gebruiken op je website."
+
+msgid "faqs badges post-badge content"
+msgstr ""
+"##Opmerkingen\n"
+"We raden aan om de SVG-bestanden op je eigen webserver op te slaan en te \n"
+"gebruiken. Op die manier is er geen contact met onze webserver als je \n"
+"website wordt bezocht. We verzoeken je om iedere badge te hyperlinken naar \n"
+"de test van jouw website of e-mail (bijv. https://internet.nl/site/example.nl/ \n"
+"of https://internet.nl/mail/example.nl/)."
 
 #, md-format
 msgid "faqs starttls content"
@@ -3585,9 +3604,9 @@ msgstr "Secure mail server connection (STARTTLS and DANE)"
 
 msgid "test mailtls no-mx description"
 msgstr ""
-"Informational: no receiving mail servers (MX) are set on your domain. That "
-"is is fine if you do not want to receive email on your domain. This makes "
-"the STARTTLS and DANE test not applicable. "
+"Informational: no receiving mail servers (MX) are set on your domain. This "
+"is fine if you do not want to receive email on your domain. This makes "
+"the STARTTLS and DANE test not applicable."
 
 msgid "test mailtls no-mx summary"
 msgstr "No receiving mailservers set (STARTTLS and DANE)"

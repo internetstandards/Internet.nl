@@ -9,6 +9,7 @@ New
 - Introduce manual HoF page(s).
 - Support non email sending domains in mailtest for DKIM test. [(#249)]
 - Keep and display the organizational domain for DMARC.
+- 100% badges page in knowledge base. [(#443)]
 
 Changes
 - Minimum max-age for HSTS is now 14 months. [(#421)]
@@ -36,6 +37,7 @@ Settings
 [(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
 [(#341)]: https://github.com/NLnetLabs/Internet.nl/issues/341
 [(#421)]: https://github.com/NLnetLabs/Internet.nl/issues/421
+[(#443)]: https://github.com/NLnetLabs/Internet.nl/issues/443
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 

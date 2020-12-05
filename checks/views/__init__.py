@@ -153,6 +153,16 @@ def faqreport(request):
         ))
 
 
+def faqbadges(request):
+    return render(
+        request, 'faq-badges.html',
+        dict(
+            pagemenu="faqs",
+            pageclass="faqs",
+            pagetitle=_("faqs badges title")
+        ))
+
+
 def faqarticlepage(request, subject):
     title = "faqs " + subject + " title"
     # If there is no such translated article give a 404.
