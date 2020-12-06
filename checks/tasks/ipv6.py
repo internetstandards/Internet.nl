@@ -212,10 +212,14 @@ def callback(results, addr, parent, parent_name, category):
 
         elif testname == "mx":
             parent.mx_score = result.get("score")
+            parent.has_null_mx = result.get("has_null_mx")
 
             if len(no_conn) + len(good_conn) == 0:
                 if len(result.get("domains")) == 0:
-                    category.subtests['mx_aaaa'].result_no_mailservers()
+                    if result.get("has_null_mx"):
+                        category.subtests['mx_aaaa'].result_null_mx()
+                    else:
+                        category.subtests['mx_aaaa'].result_no_mailservers()
                 else:
                     category.subtests['mx_aaaa'].result_bad(dom_addresses)
                     category.subtests['mx_reach'].result_not_tested_bad()
@@ -357,8 +361,11 @@ def do_mx(self, url, *args, **kwargs):
         domains = []
         mailservers = shared.do_mail_get_servers(self, url, *args, **kwargs)
         score = scoring.MAIL_IPV6_MX_CONN_FAIL
-        skipped = False
-        for mailserver, _ in mailservers:
+        has_null_mx = shared.mail_servers_is_null_mx(mailservers)
+        if has_null_mx:
+            mailservers = []
+
+        for mailserver, _, _ in mailservers:
             # Check if we already have cached results.
             cache_id = redis_id.mail_ipv6.id.format(mailserver)
             cache_ttl = redis_id.mail_ipv6.ttl
@@ -379,19 +386,17 @@ def do_mx(self, url, *args, **kwargs):
                 float(score) / (len(domains) * scoring.MAIL_IPV6_MX_CONN_GOOD)
                 * scoring.MAIL_IPV6_MX_CONN_GOOD)
         else:
-            # No MX records means full IPv6 score
+            # No MX records or NULL MX means full IPv6 score.
             score = scoring.MAIL_IPV6_MX_CONN_GOOD
-            skipped = True
 
     except SoftTimeLimitExceeded:
         domains = []
         score = scoring.MAIL_IPV6_MX_CONN_FAIL
-        skipped = False
 
     return ("mx", dict(
         domains=domains,
         score=int(score),
-        skipped=skipped))
+        has_null_mx=has_null_mx))
 
 
 def do_ns(self, url, *args, **kwargs):

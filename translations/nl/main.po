@@ -3778,6 +3778,14 @@ msgstr ""
 msgid "test mailtls no-mx summary"
 msgstr "Geen ontvangende mailservers ingesteld (STARTTLS en DANE)"
 
+msgid "test mailtls null-mx description"
+msgstr ""
+"You have configured NULL MX on your domain signaling that this domain does "
+"not do email. This is fine and makes the STARTTLS and DANE test not applicable."
+
+msgid "test mailtls null-mx summary"
+msgstr "NULL MX record set (STARTTLS and DANE)"
+
 msgid "test mailtls passed description"
 msgstr ""
 "Goed gedaan! Verzendende mailservers die beveiligd e-mailtransport ([STARTTLS en DANE](/faqs/starttls/)) ondersteunen, kunnen met \n"

@@ -31,7 +31,7 @@ from . import SetupUnboundContext
 from .dispatcher import check_registry, post_callback_hook
 from .http_headers import HeaderCheckerContentEncoding, http_headers_check
 from .http_headers import HeaderCheckerStrictTransportSecurity
-from .shared import resolve_dane
+from .shared import resolve_dane, mail_servers_is_null_mx
 from .shared import results_per_domain, aggregate_subreports
 from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
 from .shared import mail_get_servers, batch_mail_get_servers
@@ -390,6 +390,8 @@ def batch_mail_callback(self, results, domain):
 @transaction.atomic
 def callback(results, domain, test_type):
     results = results_per_domain(results)
+    if 'null_mx' in results.keys():
+        return callback_null_mx(results, domain, test_type)
     testdomain = test_map[test_type]['model'](domain=domain)
     testdomain.save()
     category = test_map[test_type]['category']
@@ -403,6 +405,16 @@ def callback(results, domain, test_type):
             build_report(dttls, category)
             dttls.save()
             getattr(testdomain, test_map[test_type]['testset_name']).add(dttls)
+    build_summary_report(testdomain, category)
+    testdomain.save()
+    return testdomain, results
+
+
+def callback_null_mx(results, domain, test_type):
+    testdomain = test_map[test_type]['model'](domain=domain)
+    testdomain.has_null_mx = True
+    testdomain.save()
+    category = test_map[test_type]['category']
     build_summary_report(testdomain, category)
     testdomain.save()
     return testdomain, results
@@ -997,7 +1009,10 @@ def build_summary_report(testtls, category):
         server_set = testtls.webtestset
 
     elif isinstance(category, categories.MailTls):
-        category.subtests['starttls_exists'].result_no_mailservers()
+        if testtls.has_null_mx:
+            category.subtests['starttls_exists'].result_null_mx()
+        else:
+            category.subtests['starttls_exists'].result_no_mailservers()
         server_set = testtls.testset
 
     report = category.gen_report()
@@ -1616,7 +1631,11 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
     test use those to avoid contacting well known mailservers all the time.
 
     """
-    results = {server: False for server, _ in mailservers}
+    # Check for NULL MX and return immediately.
+    if mail_servers_is_null_mx(mailservers):
+        return ('smtp_starttls', {'null_mx': {}})
+
+    results = {server: False for server, _, null_mx in mailservers}
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.
@@ -1628,7 +1647,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
         while timer() - start < cache_ttl and not all(results.values()) > 0:
-            for server, dane_cb_data in mailservers:
+            for server, dane_cb_data, _ in mailservers:
                 if results[server]:
                     continue
                 # Check if we already have cached results.

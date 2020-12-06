@@ -158,6 +158,17 @@ class Probe(object):
         if len(report) == count[STATUS_NOT_TESTED]:
             not_tested = True
 
+        # TLS is kind of an anomally as the first test has no score but
+        # reflects the overall verdict of the category if it is the only
+        # result present.
+        if self.name == 'tls':
+            if len(report) - 1 == count[STATUS_NOT_TESTED]:
+                if self.prefix == 'mail':
+                    status = report['starttls_exists']['status']
+                else:
+                    status = report['https_exists']['status']
+                verdict = STATUSES_HTML_CSS_TEXT_MAP[status]
+
         return verdict, not_tested
 
     def _verdict_connection(self, total_score):
@@ -296,6 +307,11 @@ class Probe(object):
                 # test mailtls no-mx description
                 # test mailtls no-mx summary
                 return "no-mx"
+            test_instance.result_null_mx()
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test mailtls null-mx description
+                # test mailtls null-mx summary
+                return "null-mx"
         return verdict
 
     def get_max_score(self, modelobj, maxscore):

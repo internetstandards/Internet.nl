@@ -338,6 +338,8 @@ class DomainServersModel(models.Model):
 
 
 class MailTestTls(DomainServersModel):
+    has_null_mx = models.BooleanField(default=False)
+
     def totalscore(self, score_fields):
         Q_filter = (Q(server_reachable=True)
                     | Q(could_not_test_smtp_starttls=True))
@@ -348,14 +350,22 @@ class MailTestTls(DomainServersModel):
     def details_set(self, probe):
         return super(MailTestTls, self).details_set(probe, self.testset)
 
+    def __dir__(self):
+        return ['has_null_mx'] + super(MailTestTls, self).__dir__()
+
 
 class MailTestDnssec(DomainServersModel):
+    has_null_mx = models.BooleanField(default=False)
+
     def totalscore(self, score_fields):
         return super(MailTestDnssec, self).totalscore(
             score_fields, self.testset.all(), mailtest=True)
 
     def details_set(self, probe):
         return super(MailTestDnssec, self).details_set(probe, self.testset)
+
+    def __dir__(self):
+        return ['has_null_mx'] + super(MailTestDnssec, self).__dir__()
 
 
 # DNSSEC
@@ -649,11 +659,12 @@ class MailTestIpv6(BaseTestModel):
     ns_score = models.IntegerField(null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
+    has_null_mx = models.BooleanField(default=False)
 
     def __dir__(self):
         return [
             'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
-            'max_score'
+            'max_score', 'has_null_mx'
         ]
 
 
@@ -722,9 +733,10 @@ class MailTestAuth(BaseTestModel):
         return [
             'timestamp', 'domain', 'report', 'dkim_score', 'dkim_available',
             'dmarc_score', 'dmarc_available', 'dmarc_record',
-            'dmarc_policy_status', 'dmarc_policy_score', 'spf_score',
-            'spf_available', 'spf_record', 'spf_policy_status',
-            'spf_policy_score', 'spf_policy_records', 'score', 'max_score'
+            'dmarc_record_org_domain', 'dmarc_policy_status',
+            'dmarc_policy_score', 'spf_score', 'spf_available', 'spf_record',
+            'spf_policy_status', 'spf_policy_score', 'spf_policy_records',
+            'score', 'max_score'
         ]
 
 

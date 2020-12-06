@@ -180,10 +180,13 @@ def save_results_mail(addr, results, category):
 
     # Build the summary report for the MX.
     category = category.__class__()
+    # Handle the case where there are no mailservers or NULL MX.
     if i == 0:
-        # Give a warning for the mailserver part of the DNSSEC test when there
-        # are no mailservers.
-        category.subtests['dnssec_mx_exists'].result_no_mailservers()
+        if r.get('has_null_mx'):
+            mailtdnssec.has_null_mx = True
+            category.subtests['dnssec_mx_exists'].result_null_mx()
+        else:
+            category.subtests['dnssec_mx_exists'].result_no_mailservers()
     mx_report = category.gen_report()
     shared.aggregate_subreports(subreports, mx_report)
 
@@ -345,7 +348,7 @@ def unbound_callback(data, status, r):
 def do_web_is_secure(self, url, *args, **kwargs):
     try:
         dnssec_result = dnssec_status(
-            url, self,
+            url, self, False,
             score_secure=scoring.WEB_DNSSEC_SECURE,
             score_insecure=scoring.WEB_DNSSEC_INSECURE,
             score_bogus=scoring.WEB_DNSSEC_BOGUS,
@@ -362,31 +365,36 @@ def do_web_is_secure(self, url, *args, **kwargs):
 
 def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
     try:
-        mailservers.insert(0, (url, None))
+        if shared.mail_servers_is_null_mx(mailservers):
+            mailservers = [(url, None, True)]
+        else:
+            mailservers.insert(0, (url, None, False))
+
         res = OrderedDict()
-        for domain, _ in mailservers:
+        for domain, _, has_null_mx in mailservers:
             if domain != "":
                 res[domain] = dnssec_status(
-                    domain, self,
+                    domain, self, has_null_mx,
                     score_secure=scoring.MAIL_DNSSEC_SECURE,
                     score_insecure=scoring.MAIL_DNSSEC_INSECURE,
                     score_bogus=scoring.MAIL_DNSSEC_BOGUS,
                     score_error=scoring.MAIL_DNSSEC_ERROR)
 
     except SoftTimeLimitExceeded:
-        for domain, _ in mailservers:
+        for domain, _, has_null_mx in mailservers:
             if domain != "" and not res.get(domain):
                 res[domain] = dict(
                     status=DnssecStatus.dnserror.value,
                     score=scoring.MAIL_DNSSEC_ERROR,
-                    log="Timed out")
+                    log="Timed out",
+                    has_null_mx=has_null_mx)
 
     return ('is_secure', res)
 
 
 def dnssec_status(
-        domain, ub_task, score_secure, score_insecure, score_bogus,
-        score_error):
+        domain, ub_task, has_null_mx, score_secure, score_insecure,
+        score_bogus, score_error):
     """
     Check the DNSSEC status of the domain.
 
@@ -417,4 +425,5 @@ def dnssec_status(
     return dict(
         status=status,
         score=cb_data["score"],
-        log=cb_data["log"])
+        log=cb_data["log"],
+        has_null_mx=has_null_mx)

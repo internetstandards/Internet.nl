@@ -10,6 +10,7 @@ New
 - Support non email sending domains in mailtest for DKIM test. [(#249)]
 - Keep and display the organizational domain for DMARC.
 - 100% badges page in knowledge base. [(#443)]
+- Expliciltly test for NULL MX. [(#468)]
 
 Changes
 - Minimum max-age for HSTS is now 14 months. [(#421)]
@@ -29,7 +30,8 @@ Dependencies
   - vine pinned to 1.3.0
 
 Migrations
-- New column in DB (mailtestauth_dmarc_record_org_domain).
+- New column in DB (mailtestauth_dmarc_record_org_domain). [(#249)]
+- New columns in DB for NULL MX. [(#468)]
 
 Settings
 - New SMTP_EHLO_DOMAIN setting in settings.py. [(#483)]
@@ -39,6 +41,7 @@ Settings
 [(#421)]: https://github.com/NLnetLabs/Internet.nl/issues/421
 [(#443)]: https://github.com/NLnetLabs/Internet.nl/issues/443
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
+[(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 
 ## 1.2.1

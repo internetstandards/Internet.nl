@@ -59,6 +59,11 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
 
 
 def do_mail_get_servers(self, url, *args, **kwargs):
+    """
+    Resovle the domain's mailservers and TLSA records.
+    Returns [mailserver, dane_data, is_null_mx].
+
+    """
     # for MX for url
     mailservers = []
     mxlist = self.resolve(url, unbound.RR_TYPE_MX)
@@ -66,19 +71,31 @@ def do_mail_get_servers(self, url, *args, **kwargs):
         # Treat nullmx (RFC7505)
         # as "no MX available"
         is_null_mx = prio == 0 and rdata == ''
-        if not is_null_mx:
-            rdata = rdata.lower().strip()
-            if rdata == '':
-                rdata = '.'
-            # Treat 'localhost' as "no MX available"
-            elif re.match(MX_LOCALHOST_RE, rdata):
-                continue
-            dane_cb_data = resolve_dane(self, 25, rdata)
-            mailservers.append((rdata, dane_cb_data))
-    # Sort the mailsevers on their name so that the same ones are tested for
+        if is_null_mx:
+            if len(mxlist) > 1:
+                # NULL MX next to other MX records; treat as no MX.
+                return []
+            return [('.', None, True)]
+
+        rdata = rdata.lower().strip()
+        if rdata == '':
+            rdata = '.'
+        # Treat 'localhost' as "no MX available"
+        elif re.match(MX_LOCALHOST_RE, rdata):
+            continue
+        dane_cb_data = resolve_dane(self, 25, rdata)
+        mailservers.append((rdata, dane_cb_data, False))
+    # Sort the mailservers on their name so that the same ones are tested for
     # all related tests.
     mailservers = sorted(mailservers, key=lambda x: x[0])[:MAX_MAILSERVERS]
+    #  return mailservers[2:3]
     return mailservers
+
+
+def mail_servers_is_null_mx(mailservers):
+    if len(mailservers) == 1 and mailservers[0][2]:
+        return True
+    return False
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):

@@ -377,6 +377,11 @@ class MailIpv6MxAaaa(Subtest):
         self.verdict = "detail mail ipv6 mx-AAAA verdict other"
         self.tech_type = ""
 
+    def result_null_mx(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail ipv6 mx-AAAA verdict mull-mx"
+        self.tech_type = ""
+
 
 class MailIpv6MxReach(Subtest):
     def __init__(self):
@@ -557,6 +562,10 @@ class MailDnssecMxExists(Subtest):
     def result_no_mailservers(self):
         self._status(STATUS_INFO)
         self.verdict = "detail mail dnssec mx-exists verdict no-mailservers"
+
+    def result_null_mx(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail dnssec mx-exists verdict null-mx"
 
     def result_good(self):
         self.was_tested()
@@ -1207,6 +1216,11 @@ class MailTlsStarttlsExists(Subtest):
     def result_no_mailservers(self):
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls starttls-exists verdict other-2"
+        self.tech_type = ""
+
+    def result_null_mx(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls starttls-exists verdict null-mx"
         self.tech_type = ""
 
 
