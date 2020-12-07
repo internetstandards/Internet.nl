@@ -1079,11 +1079,25 @@ def dane(
     two_x_x = 0
     three_x_x = 0
     for cert_usage, selector, match, data in cb_data["data"]:
+        if port == 25 and cert_usage in (0, 1):
+            # Ignore PKIX TLSA records for mail.
+            continue
+
         records.append("{} {} {} {}".format(cert_usage, selector, match, data))
         if cert_usage == 2:
             two_x_x += 1
         elif cert_usage == 3:
             three_x_x += 1
+
+    if not records:
+        return dict(
+            dane_score=score,
+            dane_status=status,
+            dane_log=stdout,
+            dane_records=records,
+            dane_rollover=rollover,
+        )
+
     if three_x_x > 1 or (three_x_x and two_x_x):
         rollover = True
 

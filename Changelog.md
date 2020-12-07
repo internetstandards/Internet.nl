@@ -15,6 +15,7 @@ New
 Changes
 - Minimum max-age for HSTS is now 14 months. [(#421)]
 - Accept all 3xx+3xx and 3xx+2xx DANE rollover schemes. [(#341)]
+- Certificate Usage Field on TLSA records for email test. [(#329)]
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
@@ -41,6 +42,7 @@ Settings
 
 [(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
 [(#341)]: https://github.com/NLnetLabs/Internet.nl/issues/341
+[(#329)]: https://github.com/NLnetLabs/Internet.nl/issues/329
 [(#421)]: https://github.com/NLnetLabs/Internet.nl/issues/421
 [(#443)]: https://github.com/NLnetLabs/Internet.nl/issues/443
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
