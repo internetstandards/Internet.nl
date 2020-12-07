@@ -7,6 +7,7 @@ import time
 
 from unbound import ub_ctx, RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS, RR_CLASS_IN
 
+from bs4 import BeautifulSoup
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -463,6 +464,19 @@ def simhash(url, task=None):
     It uses SequenceMatcher to compare the contents.
 
     """
+    def strip_irrelevant_html(html):
+        """
+        Strip irrelevant HTML for correct comparison.
+
+        This currently strips nonces from script and style tags.
+
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+        for tag in soup.select(','.join([
+                f'{t}[nonce]' for t in ('script', 'style')])):
+            del tag['nonce']
+        return str(soup)
+
     simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
     distance = settings.SIMHASH_MAX + 100
 
@@ -505,6 +519,8 @@ def simhash(url, task=None):
             v6_conn.close()
         return simhash_score, distance
 
+    html_v4 = strip_irrelevant_html(html_v4)
+    html_v6 = strip_irrelevant_html(html_v6)
     sim = SequenceMatcher(None, html_v4, html_v6)
     distance = 100 - sim.quick_ratio() * 100
     if distance <= settings.SIMHASH_MAX:

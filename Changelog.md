@@ -10,7 +10,7 @@ New
 - Support non email sending domains in mailtest for DKIM test. [(#249)]
 - Keep and display the organizational domain for DMARC.
 - 100% badges page in knowledge base. [(#443)]
-- Expliciltly test for NULL MX. [(#468)]
+- Explicitly test for NULL MX. [(#468)]
 
 Changes
 - Minimum max-age for HSTS is now 14 months. [(#421)]
@@ -22,12 +22,14 @@ Bug Fixes
   possible.
 - Better exception handling for untrusted certificate in OCSP check.
 - Keep the same configured socket timeout for subsequent TLS connections.
+- Nonces cause IPv4 vs IPv6 comparison to fail. [(#463)]
 
 Dependencies
 - Updated python-pip-requirements.txt:
   - django-redis pinned to 4.10
   - celery bumped to 4.3.1 (vine dependency)
   - vine pinned to 1.3.0
+  - beautifulsoup4 added [(#463)]
 
 Migrations
 - New column in DB (mailtestauth_dmarc_record_org_domain). [(#249)]
@@ -41,6 +43,7 @@ Settings
 [(#421)]: https://github.com/NLnetLabs/Internet.nl/issues/421
 [(#443)]: https://github.com/NLnetLabs/Internet.nl/issues/443
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
+[(#463)]: https://github.com/NLnetLabs/Internet.nl/issues/463
 [(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 
