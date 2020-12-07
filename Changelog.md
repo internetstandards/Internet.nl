@@ -23,6 +23,7 @@ Bug Fixes
 - Better exception handling for untrusted certificate in OCSP check.
 - Keep the same configured socket timeout for subsequent TLS connections.
 - Nonces cause IPv4 vs IPv6 comparison to fail. [(#463)]
+- Can't test site with invalid IDN. [(#484)]
 
 Dependencies
 - Updated python-pip-requirements.txt:
@@ -46,6 +47,7 @@ Settings
 [(#463)]: https://github.com/NLnetLabs/Internet.nl/issues/463
 [(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
+[(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
 
 ## 1.2.1
 

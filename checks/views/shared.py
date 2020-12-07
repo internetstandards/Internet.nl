@@ -140,7 +140,11 @@ def pretty_domain_name(dname):
     If *dname* is in punnycode, decode it.
 
     """
-    return dname.encode("ascii").decode("idna")
+    try:
+        pretty = dname
+        pretty = dname.encode("ascii").decode("idna")
+    except UnicodeError:
+        return pretty
 
 
 # Page calling/displaying JSON API
