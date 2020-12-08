@@ -144,7 +144,8 @@ def pretty_domain_name(dname):
         pretty = dname
         pretty = dname.encode("ascii").decode("idna")
     except UnicodeError:
-        return pretty
+        pass
+    return pretty
 
 
 # Page calling/displaying JSON API
