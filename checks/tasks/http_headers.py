@@ -1,6 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from collections import namedtuple, defaultdict
 import http.client
+import re
 import socket
 
 from .tls_connection import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
@@ -56,12 +58,186 @@ class HeaderCheckerContentSecurityPolicy(object):
     Class for checking the Content-Security-Policy HTTP header.
 
     """
+    Directive = namedtuple('Directive', [
+        'default', 'values', 'values_optional', 'values_regex_all'],
+        defaults=[[], [], False, False])
+    host_source_regex = re.compile(
+        r'(?P<scheme>[^:]+://)?(?P<host>[^:]+\.[^:]+)(:(?P<port>\d+))?')
+    scheme_source_regex = re.compile(
+        r'(?:https?|data|mediastream|blob|filesystem):')
+    self_none_regex = re.compile(r"(?:'self'|'none')")
+    other_source_regex = re.compile(
+        r"(?:"
+        r"'self'|'unsafe-eval'|'unsafe-hashes'|'unsafe-inline'|'none'"
+        r"|'nonce-[+a-zA-Z0-9/]+=*'"
+        r"|'(?:sha256|sha384|sha512)-[+a-zA-Z0-9/]+=*')")
+    strict_dynamic_regex = re.compile(r"'strict-dynamic'")
+    report_sample_regex = re.compile(r"'report-sample'")
+    plugin_types_regex = re.compile(r'[^/]+/[^/]+')
+    sandox_values_regex = re.compile(
+        r'(?:allow-downloads-without-user-activation|allow-forms|allow-modals'
+        r'|allow-orientation-lock|allow-pointer-lock|allow-popups'
+        r'|allow-popups-to-escape-sandbox|allow-presentation|allow-same-origin'
+        r'|allow-scripts|allow-storage-access-by-user-activation'
+        r'|allow-top-navigation|allow-top-navigation-by-user-activation)')
+    directives = {
+        'child-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex]
+        ),
+        'connect-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'default-src': Directive(
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'font-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'frame-src': Directive(
+            default=['child-src', 'default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'img-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'manifest-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'media-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'object-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'prefetch-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'script-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'script-src-elem': Directive(
+            default=['script-src', 'default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'script-src-attr': Directive(
+            default=['script-src', 'default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'style-src': Directive(
+            default=['default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'style-src-elem': Directive(
+            default=['style-src', 'default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                report_sample_regex],
+        ),
+        'style-src-attr': Directive(
+            default=['style-src', 'default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                report_sample_regex],
+        ),
+        'worker-src': Directive(
+            default=['child-src', 'script-src', 'default-src'],
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex],
+        ),
+        'base-uri': Directive(
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'plugin-types': Directive(
+            values=[plugin_types_regex],
+        ),
+        'sandbox': Directive(
+            values=[sandox_values_regex],
+            values_optional=True,
+        ),
+        'form-action': Directive(
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'frame-ancestors': Directive(
+            values=[self_none_regex],
+        ),
+        'navigate-to': Directive(
+            values=[
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
+        ),
+        'report-to': Directive(
+            # It could be anything in the Report-To header.
+            values=[re.compile(r'.+')],
+        ),
+        'block-all-mixed-content': Directive(
+        ),
+        'trusted-types': Directive(
+            values=[re.compile(
+                r"^(?:'none'|"
+                r"(?:\*|[\w\-#=\/@.%]+)"
+                r"(?:(?: (?:\*|[\w\-#=\/@.%]+))+"
+                r"(?: 'allow-duplicates')?)?)$")],
+            values_optional=True,
+            values_regex_all=True,
+        ),
+        'upgrade-insecure-requests': Directive(),
+    }
+
     def __init__(self):
         self.name = "Content-Security-Policy"
 
+    def _check_parsed_for_self_or_none(self, name):
+        found = False
+        if name in self.parsed:
+            if "'self'" in self.parsed[name] or "'none'" in self.parsed[name]:
+                found = True
+        else:
+            for parent in self.directives[name].default:
+                found = self._check_parsed_for_self_or_none(parent)
+                if found:
+                    break
+        return found
+
     def check(self, value, results):
         """
-        Check if the header has any value.
+        Check if the header respects the following:
+            - No `unsafe-invalid`;
+            - No `unsafe-eval`;
+            - `default-src`, `frame-src` and `frame-ancestors` need to defined
+              and be `'self'` or `'none'`;
+            - `http:` should not be used as a scheme.
 
         """
         if not value:
@@ -71,6 +247,66 @@ class HeaderCheckerContentSecurityPolicy(object):
         else:
             values = get_multiple_values_from_header(value)
             results['content_security_policy_values'].extend(values)
+
+            self.parsed = defaultdict(list)
+            has_unsafe_inline = False
+            has_unsafe_eval = False
+            has_http = False
+            has_default_src = False
+            has_frame_src = False
+            has_frame_ancestors = False
+
+            for header in values:
+                dirs = filter(None, header.split(';'))
+                for content in dirs:
+                    content = content.strip().split()
+                    dir = content[0]
+                    values = content[1:]
+                    # Only care for known directives.
+                    if dir in self.directives:
+                        if (not values and self.directives[dir].values
+                                and not self.directives[dir].values_optional):
+                            continue
+
+                        if self.directives[dir].values_regex_all:
+                            matched = min(1, len(values))
+                            test_values = [' '.join(values)]
+                        else:
+                            matched = len(values)
+                            test_values = values
+
+                        for value in test_values:
+                            for exp_value in self.directives[dir].values:
+                                if exp_value.match(value):
+                                    if (not has_http and exp_value in (
+                                            self.host_source_regex,
+                                            self.scheme_source_regex)):
+                                        if 'http:' in value:
+                                            has_http = True
+                                    if (not has_unsafe_inline
+                                            and 'unsafe-inline' in value):
+                                        has_unsafe_inline = True
+                                    if (not has_unsafe_eval
+                                            and 'unsafe-eval' in value):
+                                        has_unsafe_eval = True
+                                    matched -= 1
+                                    break
+                        if matched <= 0:
+                            self.parsed[dir].extend(values)
+
+            has_default_src = self._check_parsed_for_self_or_none(
+                'default-src')
+            has_frame_src = self._check_parsed_for_self_or_none(
+                'frame-src')
+            has_frame_ancestors = self._check_parsed_for_self_or_none(
+                'frame-ancestors')
+
+            if (has_unsafe_inline or has_unsafe_eval or has_http or not (
+                    has_default_src and has_frame_src
+                    and has_frame_ancestors)):
+                results['content_security_policy_enabled'] = False
+                score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
+                results['content_security_policy_score'] = score
 
     def get_positive_values(self):
         score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD
