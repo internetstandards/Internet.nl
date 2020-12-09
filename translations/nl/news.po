@@ -4,6 +4,7 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"new-internetnl-release-with-improved-support-for-non-sending-mail-domains-and-CSP\n"
 "hall-of-fame-for-hosters\n"
 "x-xss-protection-removed-and-improvement-for-no-mx-domains\n"
 "introducing-new-TLS-guidelines\n"
@@ -759,6 +760,28 @@ msgstr ""
 
 msgid "article nederland-voor-veilig-emailverkeer title"
 msgstr "Nederland zorgt voor veilig e-mailverkeer"
+
+msgid ""
+"article new-internetnl-release-with-improved-support-for-non-sending-mail-"
+"domains-and-CSP body"
+msgstr "## TODO"
+
+msgid ""
+"article new-internetnl-release-with-improved-support-for-non-sending-mail-"
+"domains-and-CSP date"
+msgstr "TBD"
+
+msgid ""
+"article new-internetnl-release-with-improved-support-for-non-sending-mail-"
+"domains-and-CSP lead"
+msgstr "TODO"
+
+msgid ""
+"article new-internetnl-release-with-improved-support-for-non-sending-mail-"
+"domains-and-CSP title"
+msgstr ""
+"New Internet.nl release with improved support for non-sending mail domains "
+"and CSP"
 
 msgid "article next-major-release-will-use-new-TLS-guidelines body"
 msgstr ""
