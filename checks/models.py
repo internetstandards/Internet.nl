@@ -9,7 +9,6 @@ from uuid import uuid4 as uuid
 
 from django.core.exceptions import SuspiciousFileOperation
 from django.db import models, transaction
-from django.db.models import Q
 from django.utils import timezone
 
 
@@ -341,9 +340,7 @@ class MailTestTls(DomainServersModel):
     has_null_mx = models.BooleanField(default=False)
 
     def totalscore(self, score_fields):
-        Q_filter = (Q(server_reachable=True)
-                    | Q(could_not_test_smtp_starttls=True))
-        tests_subset = self.testset.all().filter(Q_filter)
+        tests_subset = self.testset.all()
         return super(MailTestTls, self).totalscore(
             score_fields, tests_subset, mailtest=True)
 
@@ -389,7 +386,7 @@ class DomainTestDnssec(BaseTestModel):
 
 class WebTestTls(DomainServersModel):
     def totalscore(self, score_fields):
-        tests_subset = self.webtestset.all().filter(server_reachable=True)
+        tests_subset = self.webtestset.all()
         return super(WebTestTls, self).totalscore(score_fields, tests_subset)
 
     def details_set(self, probe):
@@ -561,7 +558,7 @@ class DomainTestTls(BaseTestModel):
 
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
-        tests_subset = self.webtestset.all().filter(server_reachable=True)
+        tests_subset = self.webtestset.all()
         return super(WebTestAppsecpriv, self).totalscore(
             score_fields, tests_subset)
 
