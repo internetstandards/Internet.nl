@@ -2720,7 +2720,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
 
     def connect_to_web_server():
-        http_client, *unused = http_fetch(
+        http_client, *_ = http_fetch(
             url, af=af_ip_pair[0], path="", port=443, ip_address=af_ip_pair[1],
             depth=MAX_REDIRECT_DEPTH, task=web_conn, keep_conn_open=True)
         return http_client.conn
@@ -2840,15 +2840,24 @@ def forced_http_check(af_ip_pair, url, task):
     """
     # First connect on port 80 and see if we get refused
     try:
+        has_443 = False
+        conn, res, headers, visited_hosts = http_fetch(
+            url, af=af_ip_pair[0], path="", port=443, task=task,
+            ip_address=af_ip_pair[1],
+            depth=MAX_REDIRECT_DEPTH)
+        has_443 = True
         conn, res, headers, visited_hosts = http_fetch(
             url, af=af_ip_pair[0], path="", port=80, task=task,
             ip_address=af_ip_pair[1])
-
     except (socket.error, http.client.BadStatusLine, NoIpError,
             ConnectionHandshakeException, ConnectionSocketException):
-        # If we got refused on port 80 the first time
-        # return the FORCED_HTTPS_NO_HTTP status and score
-        return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
+        if has_443:
+            # If we got refused on port 80 the first time
+            # return the FORCED_HTTPS_NO_HTTP status and score
+            return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
+        else:
+            # No connection anywhere; return failure.
+            return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
 
     # Valid if same domain, or *higher* domain. Use case:
     # www.example.com:80 -> example.com:443. Example.com:443 can set HSTS
