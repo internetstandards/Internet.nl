@@ -84,6 +84,8 @@ class Command(BaseCommand):
             if isinstance(conn, DebugConnection):
                 self.stdout.write(
                     f'Compression: {conn.get_current_compression_method()}')
+                self.stdout.write(
+                    f'Secure Renegotiation: {conn.get_secure_renegotiation_support()}')
 
             self.stdout.write(conn.get_session().as_text())
 
