@@ -19,9 +19,9 @@ from .. import scoring, categories, redis_id
 from .. import batch, batch_shared_task
 from ..models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
 
-DMARC_NON_SENDING_POLICY = re.compile(r'v=DMARC1;\ *p=reject;?')
+DMARC_NON_SENDING_POLICY = re.compile(r'^v=DMARC1;\ *p=reject;?$')
 DMARC_NON_SENDING_POLICY_ORG = re.compile(r'v=DMARC1;.*sp=reject;?')
-SPF_NON_SENDING_POLICY = re.compile(r'v=spf1\ +-all;?')
+SPF_NON_SENDING_POLICY = re.compile(r'^v=spf1\ +(?:exp=[^ ]+\ +)?-all;?(?:\ +exp=[^ ]+)?$')
 
 
 @shared_task(bind=True)
