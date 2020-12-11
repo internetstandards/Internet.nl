@@ -333,7 +333,7 @@ class HeaderCheckerStrictTransportSecurity(object):
     def __init__(self):
         self.name = "Strict-Transport-Security"
         self.first_time_seen = True
-        self.min_allowed = 36817200  # 14 months
+        self.min_allowed = 31557600  # 12 months
 
     def check(self, value, results):
         """
