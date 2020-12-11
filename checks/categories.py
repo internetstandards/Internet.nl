@@ -1801,6 +1801,7 @@ class MailAuthDkim(Subtest):
         self.verdict = "detail mail auth dkim verdict bad"
 
     def result_no_email(self):
+        self.worst_status = STATUS_NOT_TESTED
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail auth dkim verdict no-email"
 
