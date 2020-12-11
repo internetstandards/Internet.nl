@@ -67,6 +67,7 @@ class OpenSSLServerDomainConfig(DomainConfig):
             TESTS.SECURITY_HTTP_REFERRER,
             TESTS.SECURITY_HTTP_XCONTYPE,
             TESTS.SECURITY_HTTP_XFRAME,
+            TESTS.SECURITY_HTTP_CSP,
         ):
             self.expected_warnings.setdefault(test, ANY)
 
