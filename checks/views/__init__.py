@@ -131,12 +131,6 @@ def widgetmailpage(request):
             pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget mail")))
 
 
-def partnerspage(request):
-    return render(
-        request, 'partners.html',
-        dict(pagemenu="about", pagetitle=_("base partners")))
-
-
 def faqindexpage(request):
     return render(
         request, 'faqindex.html',

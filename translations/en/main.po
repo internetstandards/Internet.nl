@@ -134,9 +134,6 @@ msgstr "News"
 msgid "base newslink"
 msgstr "To the news overview"
 
-msgid "base partners"
-msgstr "Partners"
-
 msgid "base privacy"
 msgstr "Privacy statement"
 

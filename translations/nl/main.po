@@ -133,9 +133,6 @@ msgstr "Nieuws"
 msgid "base newslink"
 msgstr "Naar nieuwsoverzicht"
 
-msgid "base partners"
-msgstr "Partners"
-
 msgid "base privacy"
 msgstr "Privacyverklaring"
 

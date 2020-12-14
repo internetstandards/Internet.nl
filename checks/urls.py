@@ -33,7 +33,6 @@ urlpatterns = [
     url(r'^about/$', views.aboutpage),
     url(r'^widget-site/$', views.widgetsitepage),
     url(r'^widget-mail/$', views.widgetmailpage),
-    url(r'^partners/$', views.partnerspage),
     url(r'^blogs/$', views.blogindexpage),
     url(r'^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$', views.blogarticlepage),
     url(r'^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$', views.blogarticlepage),
