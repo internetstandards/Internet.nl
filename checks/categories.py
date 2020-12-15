@@ -379,7 +379,7 @@ class MailIpv6MxAaaa(Subtest):
 
     def result_null_mx(self):
         self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail mail ipv6 mx-AAAA verdict mull-mx"
+        self.verdict = "detail mail ipv6 mx-AAAA verdict null-mx"
         self.tech_type = ""
 
 
