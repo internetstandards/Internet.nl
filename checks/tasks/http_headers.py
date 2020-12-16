@@ -233,7 +233,7 @@ class HeaderCheckerContentSecurityPolicy(object):
     def check(self, value, results):
         """
         Check if the header respects the following:
-            - No `unsafe-invalid`;
+            - No `unsafe-inline`;
             - No `unsafe-eval`;
             - `default-src`, `frame-src` and `frame-ancestors` need to defined
               and be `'self'` or `'none'`;
@@ -333,7 +333,7 @@ class HeaderCheckerStrictTransportSecurity(object):
     def __init__(self):
         self.name = "Strict-Transport-Security"
         self.first_time_seen = True
-        self.min_allowed = 31557600  # 12 months
+        self.min_allowed = 31536000  # 1 year
 
     def check(self, value, results):
         """
