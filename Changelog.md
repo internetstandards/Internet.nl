@@ -26,6 +26,8 @@ Bug Fixes
 - Keep the same configured socket timeout for subsequent TLS connections.
 - Nonces cause IPv4 vs IPv6 comparison to fail. [(#463)]
 - Can't test site with invalid IDN. [(#484)]
+- set_async(True) causes libunbound under celery to not honor config options
+  set notable cache-max-ttl; remove for now.
 
 Dependencies
 - Updated python-pip-requirements.txt:

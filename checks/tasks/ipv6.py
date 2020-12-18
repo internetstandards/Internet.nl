@@ -281,7 +281,8 @@ def test_ns_connectivity(ip, port, domain):
         data['done'] = True
 
     ctx = ub_ctx()
-    ctx.set_async(True)
+    # XXX: Remove for now; inconsistency with applying settings on celery.
+    # ctx.set_async(True)
     ctx.set_fwd(ip)
     cb_data = dict(done=False)
     try:
