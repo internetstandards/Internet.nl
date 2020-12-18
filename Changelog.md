@@ -13,7 +13,7 @@ New
 - Explicitly test for NULL MX. [(#468)]
 
 Changes
-- Minimum max-age for HSTS is now 14 months. [(#421)]
+- Minimum max-age for HSTS is now 1 year. [(#421)]
 - Accept all 3xx+3xx and 3xx+2xx DANE rollover schemes. [(#341)]
 - Certificate Usage Field on TLSA records for email test. [(#329)]
 - Validate CSP directives. [(#325)]
