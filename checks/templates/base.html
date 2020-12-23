@@ -111,6 +111,9 @@
         <li><a class="footlink" href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a></li>
         <li><a class="footlink" href="/privacy/">{% include "string.html" with name="base privacy" %}</a></li>
         <li><a class="footlink" href="/copyright/">{% include "string.html" with name="base copyright" %}</a></li>
+        {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
+        <li><a class="footlink" href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a></li>
+        {% endif %}
         <li class="follow-us"><a class="footlink twitterfollow" href="https://twitter.com/internet_nl">{% include "string.html" with name="base followtwitter" %}</a></li>
       </ul>
     </div>

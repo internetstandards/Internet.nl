@@ -11,6 +11,7 @@ New
 - Keep and display the organizational domain for DMARC.
 - 100% badges page in knowledge base. [(#443)]
 - Explicitly test for NULL MX. [(#468)]
+- Accessibility statement page. [(#290)]
 
 Changes
 - Minimum max-age for HSTS is now 1 year. [(#421)]
@@ -42,8 +43,10 @@ Migrations
 
 Settings
 - New SMTP_EHLO_DOMAIN setting in settings.py. [(#483)]
+- New optional HAS_ACCESSIBILITY_PAGE setting in settings.py. [(#290)]
 
 [(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
+[(#290)]: https://github.com/NLnetLabs/Internet.nl/issues/290
 [(#329)]: https://github.com/NLnetLabs/Internet.nl/issues/329
 [(#325)]: https://github.com/NLnetLabs/Internet.nl/issues/325
 [(#341)]: https://github.com/NLnetLabs/Internet.nl/issues/341

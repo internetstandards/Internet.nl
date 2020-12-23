@@ -86,6 +86,10 @@ if hasattr(settings, 'MANUAL_HOF') and settings.MANUAL_HOF:
             url(r'^halloffame/(?P<manual_url>{})/$'.format(key), views.hofmanualpage),
         ]
 
+if hasattr(settings, 'HAS_ACCESSIBILITY_PAGE') and settings.HAS_ACCESSIBILITY_PAGE:
+    urlpatterns += [
+        url(r'^accessibility/$', views.accessibility),
+    ]
 
 if settings.ENABLE_BATCH is True:
     urlpatterns += [

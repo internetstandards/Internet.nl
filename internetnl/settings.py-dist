@@ -323,6 +323,7 @@ PAGE_CACHE_TIME = 60 * 5  # seconds
 SIMHASH_MAX = 10
 PUBLIC_SUFFIX_LIST_URL = "https://publicsuffix.org/list/public_suffix_list.dat"
 PUBLIC_SUFFIX_LIST_RENEWAL = 86400  # 24h
+HAS_ACCESSIBILITY_PAGE = False
 
 
 # --- Matomo settings

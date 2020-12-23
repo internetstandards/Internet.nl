@@ -175,6 +175,12 @@ def faqarticlepage(request, subject):
         ))
 
 
+def accessibility(request):
+    return render(
+        request, 'accessibility.html',
+        dict(pagemenu="home", pagetitle=_("base accessibility")))
+
+
 def blogindexpage(request):
     return redirect('/articles/')
 
