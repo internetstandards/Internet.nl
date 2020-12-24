@@ -30,7 +30,7 @@ class HeaderCheckerContentEncoding(object):
     def __init__(self):
         self.name = "Content-Encoding"
 
-    def check(self, value, results):
+    def check(self, value, results, domain):
         """
         Check if the header has any value.
 
@@ -58,21 +58,47 @@ class HeaderCheckerContentSecurityPolicy(object):
     Class for checking the Content-Security-Policy HTTP header.
 
     """
+    class ParseResult():
+        def __init__(self):
+            self.has_unsafe_inline = False
+            self.has_unsafe_eval = False
+            self.has_unsafe_hashes = False
+            self.has_http = False
+            self.has_data = False
+            self.has_default_src = False
+            self.has_frame_src = False
+            self.has_frame_ancestors = False
+            self.has_invalid_host = False
+
+        def failed(self):
+            if (self.has_unsafe_inline or self.has_unsafe_eval or self.has_http
+                    or self.has_data or self.has_invalid_host
+                    or self.has_unsafe_hashes
+                    or not (self.has_default_src and self.has_frame_src
+                            and self.has_frame_ancestors)):
+                return True
+            return False
+
     Directive = namedtuple('Directive', [
         'default', 'values', 'values_optional', 'values_regex_all'],
         defaults=[[], [], False, False])
     host_source_regex = re.compile(
-        r'(?P<scheme>[^:]+://)?(?P<host>[^:]+\.[^:]+)(:(?P<port>\d+))?')
+        r"^(?:(?P<scheme>.+)://)?"
+        r"(?P<host>[^:/']+|\[.+\])"
+        r"(?::(?P<port>\d+|\*))?"
+        r"(?P<path>\/.*)?$")
     scheme_source_regex = re.compile(
-        r'(?:https?|data|mediastream|blob|filesystem):')
-    self_none_regex = re.compile(r"(?:'self'|'none')")
+        r'^(?P<scheme>https?|data|mediastream|blob|filesystem):$')
+    self_none_regex = re.compile(r"^(?:(?P<self>'self')|(?P<none>'none'))$")
     other_source_regex = re.compile(
         r"(?:"
-        r"'self'|'unsafe-eval'|'unsafe-hashes'|'unsafe-inline'|'none'"
+        r"(?P<self>'self')|(?P<unsafe_eval>'unsafe-eval')"
+        r"|(?P<unsafe_hashes>'unsafe-hashes')"
+        r"|(?P<unsafe_inline>'unsafe-inline')|(?P<none>'none')"
         r"|'nonce-[+a-zA-Z0-9/]+=*'"
         r"|'(?:sha256|sha384|sha512)-[+a-zA-Z0-9/]+=*')")
     strict_dynamic_regex = re.compile(r"'strict-dynamic'")
-    report_sample_regex = re.compile(r"'report-sample'")
+    report_sample_regex = re.compile(r"(?P<report_sample>'report-sample')")
     plugin_types_regex = re.compile(r'[^/]+/[^/]+')
     sandox_values_regex = re.compile(
         r'(?:allow-downloads-without-user-activation|allow-forms|allow-modals'
@@ -84,7 +110,8 @@ class HeaderCheckerContentSecurityPolicy(object):
         'child-src': Directive(
             default=['default-src'],
             values=[
-                host_source_regex, scheme_source_regex, other_source_regex]
+                host_source_regex, scheme_source_regex, other_source_regex,
+                strict_dynamic_regex, report_sample_regex],
         ),
         'connect-src': Directive(
             default=['default-src'],
@@ -93,8 +120,7 @@ class HeaderCheckerContentSecurityPolicy(object):
         ),
         'default-src': Directive(
             values=[
-                host_source_regex, scheme_source_regex, other_source_regex,
-                strict_dynamic_regex, report_sample_regex],
+                host_source_regex, scheme_source_regex, other_source_regex],
         ),
         'font-src': Directive(
             default=['default-src'],
@@ -190,7 +216,7 @@ class HeaderCheckerContentSecurityPolicy(object):
                 strict_dynamic_regex, report_sample_regex],
         ),
         'frame-ancestors': Directive(
-            values=[self_none_regex],
+            values=[host_source_regex, scheme_source_regex, self_none_regex],
         ),
         'navigate-to': Directive(
             values=[
@@ -217,27 +243,124 @@ class HeaderCheckerContentSecurityPolicy(object):
 
     def __init__(self):
         self.name = "Content-Security-Policy"
+        self.parsed = None
+        self.result = None
 
-    def _check_parsed_for_self_or_none(self, name):
-        found = False
-        if name in self.parsed:
-            if "'self'" in self.parsed[name] or "'none'" in self.parsed[name]:
-                found = True
-        else:
-            for parent in self.directives[name].default:
-                found = self._check_parsed_for_self_or_none(parent)
-                if found:
-                    break
-        return found
+    def _get_directives(self, directives):
+        if not directives:
+            return self.parsed.keys()
+        res = []
+        for directive in directives:
+            if directive in self.parsed:
+                res.append(directive)
+            else:
+                for default in self.directives[directive].default:
+                    if default in self.parsed:
+                        res.append(default)
+                        break
+        return res
 
-    def check(self, value, results):
+    def _check_matched_for_groups(self, groups, directives=None):
+        """
+        Check the matched content for any appearance specified in groups,
+        on the specified directives (or any if not specified).
+
+        """
+        dirs = self._get_directives(directives)
+        for dir in dirs:
+            for group, values in groups.items():
+                for match in self.parsed[dir]:
+                    if group in match.groupdict() and match.group(group):
+                        if not values:
+                            return True
+                        for value in values:
+                            if value == match.group(group):
+                                return True
+        return False
+
+    def _check_default_src(self, domain):
+        directive = 'default-src'
+        domain = domain.rstrip('.')
+        expected_sources = 0
+        matched_host = 0
+        found_self = False
+        found_hosts = set()
+        for match in self.parsed[directive]:
+            if 'none' in match.groupdict() and match.group('none'):
+                # There is 'none' we don't care about the rest.
+                return True
+            elif 'self' in match.groupdict() and match.group('self'):
+                expected_sources += 1
+                found_self = True
+            elif 'report_sample' in match.groupdict() and match.group('report_sample'):
+                expected_sources += 1
+            elif 'host' in match.groupdict() and match.group('host'):
+                expected_sources += 1
+                host = match.group('host').rstrip('.')
+                found_hosts.add(host)
+                if domain == host:
+                    matched_host += 1
+                elif host.startswith('*.'):
+                    host = host.split('*.', 1)
+                    if not host[1]:
+                        return False
+                    if not domain.endswith(host[1]):
+                        return False
+                    matched_host += 1
+        if not found_self:
+            return False
+        # Check that at least one host matched and that the hosts have the same
+        # base domain.
+        if found_hosts:
+            if not matched_host:
+                return False
+            base_domain = min(found_hosts, key=len)
+            for host in found_hosts:
+                if not host.endswith(base_domain):
+                    return False
+        # Check that all the values are the expected ones.
+        if expected_sources == len(self.parsed[directive]):
+            return True
+        return False
+
+    def _verdict(self, domain):
+        self.result.has_http = self._check_matched_for_groups(
+            dict(scheme=['http', '*']))
+        self.result.has_data = self._check_matched_for_groups(
+            dict(scheme=['data', '*']),
+            directives=['object-src', 'script-src'])
+        self.result.has_invalid_host = self._check_matched_for_groups(
+            dict(host=['*', '127.0.0.1']))
+        self.result.has_unsafe_inline = self._check_matched_for_groups(
+            dict(unsafe_inline=[]))
+        self.result.has_unsafe_eval = self._check_matched_for_groups(
+            dict(unsafe_eval=[]))
+        self.result.has_unsafe_hashes = self._check_matched_for_groups(
+            dict(unsafe_hashes=[]))
+        self.result.has_default_src = self._check_default_src(domain)
+        self.result.has_frame_src = self._check_matched_for_groups(
+            dict(self=[], none=[]),
+            directives=['frame-src'])
+        self.result.has_frame_ancestors = self._check_matched_for_groups(
+            dict(self=[], none=[]),
+            directives=['frame-ancestors'])
+
+    def check(self, value, results, domain):
         """
         Check if the header respects the following:
             - No `unsafe-inline`;
             - No `unsafe-eval`;
-            - `default-src`, `frame-src` and `frame-ancestors` need to defined
-              and be `'self'` or `'none'`;
-            - `http:` should not be used as a scheme.
+            - No `unsafe-hashes`;
+            - `default-src` needs to be defined and include `'self'` or
+              `'none'`.  It can also include a host source relative to the
+              domain (to allow subdomain definitions) and `'report_sample'`;
+            - `frame-src` and `frame-ancestors` need to defined
+              and include `'self'` or `'none'`;
+            - No wildcard or '127.0.0.1' for host;
+            - `http:` should not be used as a scheme;
+            - `data:` should not be used as a scheme for `object-src`,
+              `script-src` (`default-src` cannot contain `data:` from
+              the restrains above).
 
         """
         if not value:
@@ -249,12 +372,7 @@ class HeaderCheckerContentSecurityPolicy(object):
             results['content_security_policy_values'].extend(values)
 
             self.parsed = defaultdict(list)
-            has_unsafe_inline = False
-            has_unsafe_eval = False
-            has_http = False
-            has_default_src = False
-            has_frame_src = False
-            has_frame_ancestors = False
+            self.result = self.ParseResult()
 
             for header in values:
                 dirs = filter(None, header.split(';'))
@@ -264,46 +382,28 @@ class HeaderCheckerContentSecurityPolicy(object):
                     values = content[1:]
                     # Only care for known directives.
                     if dir in self.directives:
-                        if (not values and self.directives[dir].values
-                                and not self.directives[dir].values_optional):
+                        if not values:
+                            if (not self.directives[dir].values
+                                    or self.directives[dir].values_optional):
+                                # No values allowed; keep.
+                                self.parsed[dir]
                             continue
 
                         if self.directives[dir].values_regex_all:
-                            matched = min(1, len(values))
                             test_values = [' '.join(values)]
                         else:
-                            matched = len(values)
                             test_values = values
 
+                        # Check the directives.
                         for value in test_values:
-                            for exp_value in self.directives[dir].values:
-                                if exp_value.match(value):
-                                    if (not has_http and exp_value in (
-                                            self.host_source_regex,
-                                            self.scheme_source_regex)):
-                                        if 'http:' in value:
-                                            has_http = True
-                                    if (not has_unsafe_inline
-                                            and 'unsafe-inline' in value):
-                                        has_unsafe_inline = True
-                                    if (not has_unsafe_eval
-                                            and 'unsafe-eval' in value):
-                                        has_unsafe_eval = True
-                                    matched -= 1
+                            for value_regex in self.directives[dir].values:
+                                match = value_regex.match(value)
+                                if match:
+                                    self.parsed[dir].append(match)
                                     break
-                        if matched <= 0:
-                            self.parsed[dir].extend(values)
 
-            has_default_src = self._check_parsed_for_self_or_none(
-                'default-src')
-            has_frame_src = self._check_parsed_for_self_or_none(
-                'frame-src')
-            has_frame_ancestors = self._check_parsed_for_self_or_none(
-                'frame-ancestors')
-
-            if (has_unsafe_inline or has_unsafe_eval or has_http or not (
-                    has_default_src and has_frame_src
-                    and has_frame_ancestors)):
+            self._verdict(domain)
+            if self.result.failed():
                 results['content_security_policy_enabled'] = False
                 score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
                 results['content_security_policy_score'] = score
@@ -335,7 +435,7 @@ class HeaderCheckerStrictTransportSecurity(object):
         self.first_time_seen = True
         self.min_allowed = 31536000  # 1 year
 
-    def check(self, value, results):
+    def check(self, value, results, domain):
         """
         Check if the *first* HSTS header value is more than 6 months.
 
@@ -382,7 +482,7 @@ class HeaderCheckerXFrameOptions(object):
     def __init__(self):
         self.name = "X-Frame-Options"
 
-    def check(self, value, results):
+    def check(self, value, results, domain):
         """
         Check if the header has any of the allowed values.
 
@@ -427,7 +527,7 @@ class HeaderCheckerXContentTypeOptions(object):
     def __init__(self):
         self.name = "X-Content-Type-Options"
 
-    def check(self, value, results):
+    def check(self, value, results, domain):
         """
         Check if the header has the allowed value.
 
@@ -469,7 +569,7 @@ class HeaderCheckerXXssProtection(object):
     def __init__(self):
         self.name = "X-Xss-Protection"
 
-    def check(self, value, results):
+    def check(self, value, results, domain):
         """
         Check if XSS protection is enabled.
 
@@ -512,7 +612,7 @@ class HeaderCheckerReferrerPolicy(object):
     def __init__(self):
         self.name = "Referrer-Policy"
 
-    def check(self, value, results):
+    def check(self, value, results, domain):
         """
         Check if the header has any of the allowed values.
 
@@ -561,7 +661,7 @@ class HeaderCheckerReferrerPolicy(object):
         }
 
 
-def http_headers_check(af_ip_pair, url, header_checkers, task):
+def http_headers_check(af_ip_pair, domain, header_checkers, task):
     results = dict()
     # set defaults to positive values. Header tests return negative values if
     # a test failed.
@@ -573,7 +673,7 @@ def http_headers_check(af_ip_pair, url, header_checkers, task):
     get_headers = [h.name for h in header_checkers]
     try:
         conn, res, headers, visited_hosts = http_fetch(
-            url, af=af_ip_pair[0], path="", port=443, task=task,
+            domain, af=af_ip_pair[0], path="", port=443, task=task,
             ip_address=af_ip_pair[1], put_headers=put_headers,
             depth=MAX_REDIRECT_DEPTH,
             needed_headers=get_headers)
@@ -588,7 +688,7 @@ def http_headers_check(af_ip_pair, url, header_checkers, task):
             for name, value in headers[443]:
                 for header_checker in header_checkers:
                     if name == header_checker.name:
-                        header_checker.check(value, results)
+                        header_checker.check(value, results, domain)
                         break
 
     return results
