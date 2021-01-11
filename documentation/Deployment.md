@@ -20,6 +20,7 @@ push the changes to the server:
    ```
    This is already done with each release, but in case you are not using the
    latest release.
+   
 On the server you need to:
 
 1. Create the latest translation files and compile them:
