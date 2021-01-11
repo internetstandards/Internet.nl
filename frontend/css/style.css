@@ -1404,6 +1404,18 @@ footer ul li:last-child {
   padding-left: 2em;
 }
 
+.linkedinfollow {
+  background: url('/static/icon-linkedinfollow.svg');
+  background: url('/static/icon-linkedinfollow.png');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 5px center;
+  background-size: 1.25em 1.25em;
+  padding-left: 2em;
+}
+
+
+
 /* ====================================================== */
 @media (max-width:540px) {
   .websitetest h1 {
