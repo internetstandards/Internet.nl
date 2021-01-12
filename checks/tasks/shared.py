@@ -60,7 +60,7 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
 
 def do_mail_get_servers(self, url, *args, **kwargs):
     """
-    Resovle the domain's mailservers and TLSA records.
+    Resolve the domain's mailservers and TLSA records.
     Returns [mailserver, dane_data, is_null_mx].
 
     """
