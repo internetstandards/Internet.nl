@@ -899,8 +899,8 @@ class WebTlsRenegotiationSecure(Subtest):
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web tls renegotiation-secure verdict bad"
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls renegotiation-secure verdict other"
         self.tech_data = "detail tech data no"
 
 
@@ -1433,8 +1433,8 @@ class MailTlsRenegotiationSecure(Subtest):
 
     def result_bad(self):
         self.was_tested()
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls renegotiation-secure verdict bad"
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls renegotiation-secure verdict other"
         self.tech_data = "detail tech data no"
 
 
