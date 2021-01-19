@@ -271,19 +271,26 @@ class CipherScoreAndSecLevel:
         if score1 is None or score2 is None:
             raise ValueError
 
+        # TLS guidelines v2.1 (p.23): No prescribed cipher ordering within a security level 
+        # For now this will simply return true. If prescribed cipher ordering never returns
+        # we will remove this code in the future
+        return True
+
+
         # Ignore hash size if not set in either cipher score, as some ciphers
         # do not use a hash function and thus are not comparable by hash size
         # to a cipher that does.
         #                           DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC
-        bit_mask_only_hash_size = 0b0000000000000000000000111111111111111100
+        
+        #bit_mask_only_hash_size = 0b0000000000000000000000111111111111111100
 
-        hash_size_1 = score1 & bit_mask_only_hash_size
-        hash_size_2 = score2 & bit_mask_only_hash_size
-        if not hash_size_1 or not hash_size_2:
-            score1 &= ~bit_mask_only_hash_size
-            score2 &= ~bit_mask_only_hash_size
+        #hash_size_1 = score1 & bit_mask_only_hash_size
+        #hash_size_2 = score2 & bit_mask_only_hash_size
+        #if not hash_size_1 or not hash_size_2:
+        #    score1 &= ~bit_mask_only_hash_size
+        #    score2 &= ~bit_mask_only_hash_size
 
-        return score1 >= score2
+        #	return score1 >= score2
 
     @staticmethod
     def get_violated_rule_number(score1, score2):

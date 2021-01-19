@@ -50,6 +50,12 @@ from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from ..models import KexHashFuncStatus, CipherOrderStatus
 
+from logging.handlers import SysLogHandler
+import logging
+
+
+logger = logging.getLogger('internetnl')
+logger.addHandler(logging.FileHandler("john.log"))
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
@@ -701,8 +707,7 @@ def build_report(dttls, category):
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 category.subtests['tls_cipher_order'].result_seclevel_bad([
-                        [cipher1, cipher2],
-                        [' ', violated_rule]
+                        [cipher1, cipher2]
                     ])
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
@@ -864,8 +869,7 @@ def build_report(dttls, category):
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 category.subtests['tls_cipher_order'].result_seclevel_bad([
-                        [cipher1, cipher2],
-                        [' ', violated_rule]
+                        [cipher1, cipher2]
                     ])
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
@@ -1037,15 +1041,16 @@ def dane(
     records = []
     stdout = ""
     rollover = False
-
+    #logger.info('dane called for ' + url)
     continue_testing = True
 
     cb_data = dane_cb_data or resolve_dane(task, port, url)
-
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
     if not cb_data.get('data'):
+        #logger.info('cb_data test 1')
         if cb_data.get('bogus'):
+            #logger.info('cb_data bogus')
             status = DaneStatus.none_bogus
             score = score_none_bogus
         continue_testing = False
@@ -1054,6 +1059,8 @@ def dane(
             # If there is a secure TLSA record check for the existence of
             # possible bogus (unsigned) NXDOMAIN in A.
             tmp_data = resolve_dane(task, port, url, check_nxdomain=True)
+            #logger.info('cb_data secure')
+
             if tmp_data.get('nxdomain') and tmp_data.get('bogus'):
                 status = DaneStatus.none_bogus
                 score = score_none_bogus
@@ -1062,6 +1069,7 @@ def dane(
             status = DaneStatus.failed
             score = score_failed
             continue_testing = False
+            #logger.info('cb_data bogus 2')
 
     if not continue_testing:
         return dict(
@@ -1082,6 +1090,7 @@ def dane(
         if port == 25 and cert_usage in (0, 1):
             # Ignore PKIX TLSA records for mail.
             continue
+
 
         records.append("{} {} {} {}".format(cert_usage, selector, match, data))
         if cert_usage == 2:
@@ -1613,6 +1622,7 @@ def cert_checks(
             hostmatch_bad=hostmatch_bad,
             hostmatch_score=hostmatch_score,
         )
+        #logger.info('dane_results ' + chain_str + ' ' + pubkey_score + ' ' + sigalg_score + ' ' + hostmatch_score)
         results.update(dane_results)
 
         return results
