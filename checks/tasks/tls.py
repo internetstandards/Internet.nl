@@ -3,7 +3,6 @@
 from binascii import hexlify
 import errno
 import http.client
-import logging
 import socket
 import ssl
 import time
@@ -50,13 +49,6 @@ from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from ..models import KexHashFuncStatus, CipherOrderStatus
 
-from logging.handlers import SysLogHandler
-import logging
-
-
-logger = logging.getLogger('internetnl')
-logger.addHandler(logging.FileHandler("john.log"))
-
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
 # instead of just Exception which may intervene with Celery's own exceptions.
@@ -77,7 +69,6 @@ except ImportError as e:
     else:
         raise e
 
-logger = logging.getLogger('internetnl')
 
 # Based on:
 # hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"
@@ -1041,16 +1032,13 @@ def dane(
     records = []
     stdout = ""
     rollover = False
-    #logger.info('dane called for ' + url)
     continue_testing = True
 
     cb_data = dane_cb_data or resolve_dane(task, port, url)
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
     if not cb_data.get('data'):
-        #logger.info('cb_data test 1')
         if cb_data.get('bogus'):
-            #logger.info('cb_data bogus')
             status = DaneStatus.none_bogus
             score = score_none_bogus
         continue_testing = False
@@ -1059,7 +1047,6 @@ def dane(
             # If there is a secure TLSA record check for the existence of
             # possible bogus (unsigned) NXDOMAIN in A.
             tmp_data = resolve_dane(task, port, url, check_nxdomain=True)
-            #logger.info('cb_data secure')
 
             if tmp_data.get('nxdomain') and tmp_data.get('bogus'):
                 status = DaneStatus.none_bogus
@@ -1069,7 +1056,6 @@ def dane(
             status = DaneStatus.failed
             score = score_failed
             continue_testing = False
-            #logger.info('cb_data bogus 2')
 
     if not continue_testing:
         return dict(
@@ -1622,7 +1608,6 @@ def cert_checks(
             hostmatch_bad=hostmatch_bad,
             hostmatch_score=hostmatch_score,
         )
-        #logger.info('dane_results ' + chain_str + ' ' + pubkey_score + ' ' + sigalg_score + ' ' + hostmatch_score)
         results.update(dane_results)
 
         return results
