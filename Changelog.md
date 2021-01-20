@@ -18,6 +18,7 @@ Changes
 - Accept all 3xx+3xx and 3xx+2xx DANE rollover schemes. [(#341)]
 - Certificate Usage Field on TLSA records for email test. [(#329)]
 - Validate CSP directives. [(#325)]
+- Make X-Frame-Options optional and no longer consider ALLOW-FROM as sufficiently secure. [(#503)]
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
@@ -57,6 +58,7 @@ Settings
 [(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 [(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
+[(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503
 
 ## 1.2.1
 

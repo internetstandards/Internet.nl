@@ -494,9 +494,7 @@ class HeaderCheckerXFrameOptions(object):
         else:
             values = get_multiple_values_from_header(value)
             first_header = values[0].upper()
-            if not (first_header == "DENY"
-                    or first_header == "SAMEORIGIN"
-                    or first_header.startswith("ALLOW-FROM")):
+            if first_header not in ("DENY", "SAMEORIGIN"):
                 score = scoring.WEB_APPSECPRIV_X_FRAME_OPTIONS_BAD
                 results['x_frame_options_score'] = score
                 results['x_frame_options_enabled'] = False
