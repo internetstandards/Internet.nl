@@ -3,6 +3,7 @@
 from binascii import hexlify
 import errno
 import http.client
+import logging
 import socket
 import ssl
 import time
@@ -48,6 +49,13 @@ from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from ..models import KexHashFuncStatus, CipherOrderStatus
+
+from logging.handlers import SysLogHandler
+import logging
+
+
+logger = logging.getLogger('internetnl')
+
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
