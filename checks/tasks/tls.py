@@ -1,4 +1,4 @@
-# Copyright: 2019, NLnet Labs and the Internet.nl contributors
+s# Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from binascii import hexlify
 import errno
@@ -50,12 +50,6 @@ from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from ..models import KexHashFuncStatus, CipherOrderStatus
 
-from logging.handlers import SysLogHandler
-import logging
-
-
-logger = logging.getLogger('internetnl')
-
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
@@ -77,6 +71,7 @@ except ImportError as e:
     else:
         raise e
 
+logger = logging.getLogger('internetnl')
 
 # Based on:
 # hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"
@@ -1040,9 +1035,11 @@ def dane(
     records = []
     stdout = ""
     rollover = False
+
     continue_testing = True
 
     cb_data = dane_cb_data or resolve_dane(task, port, url)
+
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
     if not cb_data.get('data'):
@@ -1055,7 +1052,6 @@ def dane(
             # If there is a secure TLSA record check for the existence of
             # possible bogus (unsigned) NXDOMAIN in A.
             tmp_data = resolve_dane(task, port, url, check_nxdomain=True)
-
             if tmp_data.get('nxdomain') and tmp_data.get('bogus'):
                 status = DaneStatus.none_bogus
                 score = score_none_bogus
@@ -1084,7 +1080,6 @@ def dane(
         if port == 25 and cert_usage in (0, 1):
             # Ignore PKIX TLSA records for mail.
             continue
-
 
         records.append("{} {} {} {}".format(cert_usage, selector, match, data))
         if cert_usage == 2:
