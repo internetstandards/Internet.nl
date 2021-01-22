@@ -1,7 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import time
+import idna
 import re
+import time
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -773,9 +774,9 @@ def dmarc_fetch_public_suffix_list():
             # Convert to punnycode.
             # This is how we are going to compare domain names later.
             try:
-                line = line.encode("idna").decode("ascii")
+                line = idna.encode(line).decode("ascii")
                 public_suffix_list.append((line.split(".")[::-1], exception))
-            except (UnicodeError, ValueError):
+            except (UnicodeError, ValueError, idna.IDNAError):
                 pass
     return public_suffix_list
 

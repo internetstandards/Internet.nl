@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
+import idna as IDNA
 
 from django import template
 from django.conf import settings
@@ -38,7 +39,7 @@ def idna(value):
     Return the IDNA; value is str and may contain punnycode.
 
     """
-    return value.encode("ascii").decode("idna")
+    return IDNA.decode(value.encode("ascii"))
 
 
 @register.simple_tag()

@@ -12,6 +12,7 @@ New
 - 100% badges page in knowledge base. [(#443)]
 - Explicitly test for NULL MX. [(#468)]
 - Accessibility statement page. [(#290)]
+- Use IDNA2008. [(#507)]
 
 Changes
 - Minimum max-age for HSTS is now 1 year. [(#421)]
@@ -59,6 +60,7 @@ Settings
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 [(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
 [(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503
+[(#507)]: https://github.com/NLnetLabs/Internet.nl/issues/507
 
 ## 1.2.1
 

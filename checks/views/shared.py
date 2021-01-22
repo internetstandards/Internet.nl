@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from datetime import datetime
+import idna
 import random
 import re
 from urllib.parse import urlparse
@@ -74,13 +75,13 @@ def validate_dname(dname):
             dname = urlp.path
 
         # Convert to punnycode
-        dname = dname.encode("idna").decode("ascii")
+        dname = idna.encode(dname).decode("ascii")
 
         if re.match(regex_dname, dname):
             return dname
         else:
             return None
-    except (UnicodeError, ValueError):
+    except (UnicodeError, ValueError, idna.IDNAError):
         return None
 
 
@@ -143,8 +144,8 @@ def pretty_domain_name(dname):
     """
     try:
         pretty = dname
-        pretty = dname.encode("ascii").decode("idna")
-    except UnicodeError:
+        pretty = idna.decode(dname.encode("ascii"))
+    except (UnicodeError, idna.IDNAError):
         pass
     return pretty
 
