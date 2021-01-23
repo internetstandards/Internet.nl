@@ -162,11 +162,16 @@ class Probe(object):
         # reflects the overall verdict of the category if it is the only
         # result present.
         if self.name == 'tls':
-            if len(report) - 1 == count[STATUS_NOT_TESTED]:
+            if len(report) - 1 <= count[STATUS_NOT_TESTED]:
                 if self.prefix == 'mail':
                     status = report['starttls_exists']['status']
                 else:
                     status = report['https_exists']['status']
+
+                # Currently we don't have NOT_TESTED for a whole category.
+                if status == STATUS_NOT_TESTED:
+                    status = STATUS_INFO
+
                 verdict = STATUSES_HTML_CSS_TEXT_MAP[status]
 
         return verdict, not_tested
@@ -312,6 +317,15 @@ class Probe(object):
                 # test mailtls null-mx description
                 # test mailtls null-mx summary
                 return "null-mx"
+            test_instance.result_no_null_mx()
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test mailtls no-null-mx description
+                # test mailtls no-null-mx summary
+                return "no-null-mx"
+            if report[test_instance.name]['verdict'] == test_instance.verdict:
+                # test mailtls invalid-null-mx description
+                # test mailtls invalid-null-mx summary
+                return "invalid-null-mx"
         return verdict
 
     def get_max_score(self, modelobj, maxscore):

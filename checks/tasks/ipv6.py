@@ -23,7 +23,7 @@ from .dispatcher import check_registry
 from .. import scoring, categories, redis_id
 from .. import batch, batch_shared_task
 from ..models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
-from ..models import WebDomain
+from ..models import WebDomain, MxStatus
 from ..views.shared import pretty_domain_name
 
 
@@ -213,11 +213,15 @@ def callback(results, addr, parent, parent_name, category):
 
         elif testname == "mx":
             parent.mx_score = result.get("score")
-            parent.has_null_mx = result.get("has_null_mx")
+            parent.mx_status = result.get("mx_status")
 
             if len(no_conn) + len(good_conn) == 0:
                 if len(result.get("domains")) == 0:
-                    if result.get("has_null_mx"):
+                    if parent.mx_status == MxStatus.no_null_mx:
+                        category.subtests['mx_aaaa'].result_no_null_mx()
+                    elif parent.mx_status == MxStatus.invalid_null_mx:
+                        category.subtests['mx_aaaa'].result_invalid_null_mx()
+                    elif parent.mx_status == MxStatus.null_mx:
                         category.subtests['mx_aaaa'].result_null_mx()
                     else:
                         category.subtests['mx_aaaa'].result_no_mailservers()
@@ -363,8 +367,8 @@ def do_mx(self, url, *args, **kwargs):
         domains = []
         mailservers = shared.do_mail_get_servers(self, url, *args, **kwargs)
         score = scoring.MAIL_IPV6_MX_CONN_FAIL
-        has_null_mx = shared.mail_servers_is_null_mx(mailservers)
-        if has_null_mx:
+        mx_status = shared.get_mail_servers_mxstatus(mailservers)
+        if mx_status != MxStatus.has_mx:
             mailservers = []
 
         for mailserver, _, _ in mailservers:
@@ -398,7 +402,7 @@ def do_mx(self, url, *args, **kwargs):
     return ("mx", dict(
         domains=domains,
         score=int(score),
-        has_null_mx=has_null_mx))
+        mx_status=mx_status))
 
 
 def do_ns(self, url, *args, **kwargs):

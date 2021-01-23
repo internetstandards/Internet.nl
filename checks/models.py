@@ -59,6 +59,14 @@ class CipherOrderStatus(Enum):
     na = 4  # Don't care about order; only GOOD ciphers.
 
 
+class MxStatus(LabelEnum):
+    has_mx = 0
+    no_mx = 1
+    no_null_mx = 2
+    invalid_null_mx = 3
+    null_mx = 4
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -337,7 +345,7 @@ class DomainServersModel(models.Model):
 
 
 class MailTestTls(DomainServersModel):
-    has_null_mx = models.BooleanField(default=False)
+    mx_status = EnumIntegerField(MxStatus, default=MxStatus.has_mx, null=True)
 
     def totalscore(self, score_fields):
         tests_subset = self.testset.all()
@@ -348,11 +356,11 @@ class MailTestTls(DomainServersModel):
         return super(MailTestTls, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['has_null_mx'] + super(MailTestTls, self).__dir__()
+        return ['mx_status'] + super(MailTestTls, self).__dir__()
 
 
 class MailTestDnssec(DomainServersModel):
-    has_null_mx = models.BooleanField(default=False)
+    mx_status = EnumIntegerField(MxStatus, default=MxStatus.has_mx, null=True)
 
     def totalscore(self, score_fields):
         return super(MailTestDnssec, self).totalscore(
@@ -362,7 +370,7 @@ class MailTestDnssec(DomainServersModel):
         return super(MailTestDnssec, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['has_null_mx'] + super(MailTestDnssec, self).__dir__()
+        return ['mx_status'] + super(MailTestDnssec, self).__dir__()
 
 
 # DNSSEC
@@ -656,12 +664,12 @@ class MailTestIpv6(BaseTestModel):
     ns_score = models.IntegerField(null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
-    has_null_mx = models.BooleanField(default=False)
+    mx_status = EnumIntegerField(MxStatus, default=MxStatus.has_mx, null=True)
 
     def __dir__(self):
         return [
             'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
-            'max_score', 'has_null_mx'
+            'max_score', 'mx_status'
         ]
 
 

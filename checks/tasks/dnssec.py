@@ -20,6 +20,7 @@ from .dispatcher import check_registry, post_callback_hook
 from .. import batch, batch_shared_task
 from .. import scoring, categories, redis_id
 from ..models import DomainTestDnssec, DnssecStatus, MailTestDnssec
+from ..models import MxStatus
 
 
 UNBOUND_PATCHED_DS_LOG = "internetnl - DS unsupported"
@@ -164,6 +165,7 @@ def save_results_mail(addr, results, category):
         if i == 0:
             report, status, score, log = get_domain_results(
                 domain, r, category)
+            mailtdnssec.mx_status = r.get('mx_status')
             # We get the domain results here, domain does not belong to a
             # summary report like the MX.
             domain_report['dnssec_exists'] = report['dnssec_exists']
@@ -180,13 +182,17 @@ def save_results_mail(addr, results, category):
 
     # Build the summary report for the MX.
     category = category.__class__()
-    # Handle the case where there are no mailservers or NULL MX.
-    if i == 0:
-        if r.get('has_null_mx'):
-            mailtdnssec.has_null_mx = True
-            category.subtests['dnssec_mx_exists'].result_null_mx()
-        else:
-            category.subtests['dnssec_mx_exists'].result_no_mailservers()
+
+    # Handle the case where there are no mailservers or NULL MX variants.
+    if mailtdnssec.mx_status == MxStatus.no_mx:
+        category.subtests['dnssec_mx_exists'].result_no_mailservers()
+    elif mailtdnssec.mx_status == MxStatus.no_null_mx:
+        category.subtests['dnssec_mx_exists'].result_no_null_mx()
+    elif mailtdnssec.mx_status == MxStatus.invalid_null_mx:
+        category.subtests['dnssec_mx_exists'].result_invalid_null_mx()
+    elif mailtdnssec.mx_status == MxStatus.null_mx:
+        category.subtests['dnssec_mx_exists'].result_null_mx()
+
     mx_report = category.gen_report()
     shared.aggregate_subreports(subreports, mx_report)
 
@@ -365,35 +371,36 @@ def do_web_is_secure(self, url, *args, **kwargs):
 
 def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
     try:
-        if shared.mail_servers_is_null_mx(mailservers):
-            mailservers = [(url, None, True)]
+        mx_status = shared.get_mail_servers_mxstatus(mailservers)
+        if mx_status != MxStatus.has_mx:
+            mailservers = [(url, None, mx_status)]
         else:
-            mailservers.insert(0, (url, None, False))
+            mailservers.insert(0, (url, None, mx_status))
 
         res = OrderedDict()
-        for domain, _, has_null_mx in mailservers:
+        for domain, _, mx_status in mailservers:
             if domain != "":
                 res[domain] = dnssec_status(
-                    domain, self, has_null_mx,
+                    domain, self, mx_status,
                     score_secure=scoring.MAIL_DNSSEC_SECURE,
                     score_insecure=scoring.MAIL_DNSSEC_INSECURE,
                     score_bogus=scoring.MAIL_DNSSEC_BOGUS,
                     score_error=scoring.MAIL_DNSSEC_ERROR)
 
     except SoftTimeLimitExceeded:
-        for domain, _, has_null_mx in mailservers:
+        for domain, _, mx_status in mailservers:
             if domain != "" and not res.get(domain):
                 res[domain] = dict(
                     status=DnssecStatus.dnserror.value,
                     score=scoring.MAIL_DNSSEC_ERROR,
                     log="Timed out",
-                    has_null_mx=has_null_mx)
+                    mx_status=mx_status)
 
     return ('is_secure', res)
 
 
 def dnssec_status(
-        domain, ub_task, has_null_mx, score_secure, score_insecure,
+        domain, ub_task, mx_status, score_secure, score_insecure,
         score_bogus, score_error):
     """
     Check the DNSSEC status of the domain.
@@ -426,4 +433,4 @@ def dnssec_status(
         status=status,
         score=cb_data["score"],
         log=cb_data["log"],
-        has_null_mx=has_null_mx)
+        mx_status=mx_status)

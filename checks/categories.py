@@ -373,13 +373,23 @@ class MailIpv6MxAaaa(Subtest):
         self.tech_data = tech_data
 
     def result_no_mailservers(self):
-        self._status(STATUS_INFO)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail ipv6 mx-AAAA verdict other"
         self.tech_type = ""
 
     def result_null_mx(self):
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail ipv6 mx-AAAA verdict null-mx"
+        self.tech_type = ""
+
+    def result_no_null_mx(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail ipv6 mx-AAAA verdict no-null-mx"
+        self.tech_type = ""
+
+    def result_invalid_null_mx(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail ipv6 mx-AAAA verdict invalid-null-mx"
         self.tech_type = ""
 
 
@@ -560,12 +570,20 @@ class MailDnssecMxExists(Subtest):
         self.worst_status = scoring.MAIL_DNSSEC_WORST_STATUS
 
     def result_no_mailservers(self):
-        self._status(STATUS_INFO)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail dnssec mx-exists verdict no-mailservers"
 
     def result_null_mx(self):
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail dnssec mx-exists verdict null-mx"
+
+    def result_no_null_mx(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail dnssec mx-exists verdict no-null-mx"
+
+    def result_invalid_null_mx(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail dnssec mx-exists verdict invalid-null-mx"
 
     def result_good(self):
         self.was_tested()
@@ -1214,13 +1232,23 @@ class MailTlsStarttlsExists(Subtest):
         self.tech_data = "detail tech data not-testable"
 
     def result_no_mailservers(self):
-        self._status(STATUS_INFO)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls starttls-exists verdict other-2"
         self.tech_type = ""
 
     def result_null_mx(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls starttls-exists verdict null-mx"
+        self.tech_type = ""
+
+    def result_no_null_mx(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls starttls-exists verdict no-null-mx"
+        self.tech_type = ""
+
+    def result_invalid_null_mx(self):
+        self._status(STATUS_NOTICE, override=True)
+        self.verdict = "detail mail tls starttls-exists verdict invalid-null-mx"
         self.tech_type = ""
 
 

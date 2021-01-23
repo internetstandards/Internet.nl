@@ -31,7 +31,7 @@ from . import SetupUnboundContext
 from .dispatcher import check_registry, post_callback_hook
 from .http_headers import HeaderCheckerContentEncoding, http_headers_check
 from .http_headers import HeaderCheckerStrictTransportSecurity
-from .shared import resolve_dane, mail_servers_is_null_mx
+from .shared import resolve_dane, get_mail_servers_mxstatus
 from .shared import results_per_domain, aggregate_subreports
 from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
 from .shared import mail_get_servers, batch_mail_get_servers
@@ -48,7 +48,7 @@ from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
 from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
-from ..models import KexHashFuncStatus, CipherOrderStatus
+from ..models import KexHashFuncStatus, CipherOrderStatus, MxStatus
 
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
@@ -390,9 +390,11 @@ def batch_mail_callback(self, results, domain):
 @transaction.atomic
 def callback(results, domain, test_type):
     results = results_per_domain(results)
-    if 'null_mx' in results.keys():
+    if 'mx_status' in results:
         return callback_null_mx(results, domain, test_type)
     testdomain = test_map[test_type]['model'](domain=domain)
+    if testdomain is MailTestTls:
+        testdomain.mx_status = MxStatus.has_mx
     testdomain.save()
     category = test_map[test_type]['category']
     if len(results.keys()) > 0:
@@ -412,7 +414,9 @@ def callback(results, domain, test_type):
 
 def callback_null_mx(results, domain, test_type):
     testdomain = test_map[test_type]['model'](domain=domain)
-    testdomain.has_null_mx = True
+    # Since we are here for the mail test and we have a variation of
+    # the NULL MX record, we are pretty sure where to find the status.
+    testdomain.mx_status = results['mx_status'][0][1]
     testdomain.save()
     category = test_map[test_type]['category']
     build_summary_report(testdomain, category)
@@ -1009,8 +1013,12 @@ def build_summary_report(testtls, category):
         server_set = testtls.webtestset
 
     elif isinstance(category, categories.MailTls):
-        if testtls.has_null_mx:
+        if testtls.mx_status == MxStatus.null_mx:
             category.subtests['starttls_exists'].result_null_mx()
+        elif testtls.mx_status == MxStatus.no_null_mx:
+            category.subtests['starttls_exists'].result_no_null_mx()
+        elif testtls.mx_status == MxStatus.invalid_null_mx:
+            category.subtests['starttls_exists'].result_invalid_null_mx()
         else:
             category.subtests['starttls_exists'].result_no_mailservers()
         server_set = testtls.testset
@@ -1646,10 +1654,11 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 
     """
     # Check for NULL MX and return immediately.
-    if mail_servers_is_null_mx(mailservers):
-        return ('smtp_starttls', {'null_mx': {}})
+    mx_status = get_mail_servers_mxstatus(mailservers)
+    if mx_status != MxStatus.has_mx:
+        return ('smtp_starttls', {'mx_status': mx_status})
 
-    results = {server: False for server, _, null_mx in mailservers}
+    results = {server: False for server, _, _ in mailservers}
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.

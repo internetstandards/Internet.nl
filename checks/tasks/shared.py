@@ -11,6 +11,7 @@ import unbound
 from . import SetupUnboundContext
 from .. import batch_shared_task
 from ..scoring import STATUS_MAX, ORDERED_STATUSES
+from ..models import MxStatus
 
 
 MAX_MAILSERVERS = 10
@@ -61,41 +62,41 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
 def do_mail_get_servers(self, url, *args, **kwargs):
     """
     Resolve the domain's mailservers and TLSA records.
-    Returns [mailserver, dane_data, is_null_mx].
+    Returns [mailserver, dane_data, MxStatus].
 
     """
-    # for MX for url
     mailservers = []
     mxlist = self.resolve(url, unbound.RR_TYPE_MX)
     for prio, rdata in mxlist:
-        # Treat nullmx (RFC7505)
-        # as "no MX available"
         is_null_mx = prio == 0 and rdata == ''
         if is_null_mx:
-            if len(mxlist) > 1:
-                # NULL MX next to other MX records; treat as no MX.
-                return []
-            return [('.', None, True)]
+            if len(mxlist) > 1 or not do_resolve_a_aaaa(self, url):
+                # Invalid NULL MX next to other MX or no A/AAAA.
+                return [(None, None, MxStatus.invalid_null_mx)]
+            return [(None, None, MxStatus.null_mx)]
 
         rdata = rdata.lower().strip()
         if rdata == '':
             rdata = '.'
-        # Treat 'localhost' as "no MX available"
         elif re.match(MX_LOCALHOST_RE, rdata):
+            # Ignore "localhost".
             continue
         dane_cb_data = resolve_dane(self, 25, rdata)
-        mailservers.append((rdata, dane_cb_data, False))
+        mailservers.append((rdata, dane_cb_data, MxStatus.has_mx))
+
+    if not mailservers:
+        if not do_resolve_a_aaaa(self, url):
+            return [(None, None, MxStatus.no_mx)]
+        return [(None, None, MxStatus.no_null_mx)]
+
     # Sort the mailservers on their name so that the same ones are tested for
     # all related tests.
     mailservers = sorted(mailservers, key=lambda x: x[0])[:MAX_MAILSERVERS]
-    #  return mailservers[2:3]
     return mailservers
 
 
-def mail_servers_is_null_mx(mailservers):
-    if len(mailservers) == 1 and mailservers[0][2]:
-        return True
-    return False
+def get_mail_servers_mxstatus(mailservers):
+    return mailservers[0][2]
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):
