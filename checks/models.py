@@ -345,7 +345,7 @@ class DomainServersModel(models.Model):
 
 
 class MailTestTls(DomainServersModel):
-    mx_status = EnumIntegerField(MxStatus, default=MxStatus.has_mx, null=True)
+    mx_status = EnumIntegerField(MxStatus, null=True)
 
     def totalscore(self, score_fields):
         tests_subset = self.testset.all()
@@ -360,7 +360,7 @@ class MailTestTls(DomainServersModel):
 
 
 class MailTestDnssec(DomainServersModel):
-    mx_status = EnumIntegerField(MxStatus, default=MxStatus.has_mx, null=True)
+    mx_status = EnumIntegerField(MxStatus, null=True)
 
     def totalscore(self, score_fields):
         return super(MailTestDnssec, self).totalscore(
@@ -664,7 +664,7 @@ class MailTestIpv6(BaseTestModel):
     ns_score = models.IntegerField(null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
-    mx_status = EnumIntegerField(MxStatus, default=MxStatus.has_mx, null=True)
+    mx_status = EnumIntegerField(MxStatus, null=True)
 
     def __dir__(self):
         return [

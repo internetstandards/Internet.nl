@@ -322,6 +322,7 @@ class Probe(object):
                 # test mailtls no-null-mx description
                 # test mailtls no-null-mx summary
                 return "no-null-mx"
+            test_instance.result_invalid_null_mx()
             if report[test_instance.name]['verdict'] == test_instance.verdict:
                 # test mailtls invalid-null-mx description
                 # test mailtls invalid-null-mx summary
