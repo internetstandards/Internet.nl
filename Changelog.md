@@ -21,6 +21,7 @@ Changes
 - Validate CSP directives. [(#325)]
 - Make X-Frame-Options optional and no longer consider ALLOW-FROM as sufficiently secure. [(#503)]
 - No prescribed cipher ordering within a security level. [(#506)]
+- Update to jquery 3.5.1 [(#508)]
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
@@ -63,6 +64,7 @@ Settings
 [(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503
 [(#506)]: https://github.com/NLnetLabs/Internet.nl/issues/506
 [(#507)]: https://github.com/NLnetLabs/Internet.nl/issues/507
+[(#508)]: https://github.com/NLnetLabs/Internet.nl/issues/508
 
 ## 1.2.1
 
