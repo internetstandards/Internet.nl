@@ -705,8 +705,7 @@ def build_report(dttls, category):
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 category.subtests['tls_cipher_order'].result_seclevel_bad([
-                        [cipher1, cipher2],
-                        [' ', violated_rule]
+                        [cipher1, cipher2]
                     ])
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of
@@ -868,8 +867,7 @@ def build_report(dttls, category):
             elif dttls.cipher_order == CipherOrderStatus.not_seclevel:
                 (cipher1, cipher2, violated_rule) = dttls.cipher_order_violation
                 category.subtests['tls_cipher_order'].result_seclevel_bad([
-                        [cipher1, cipher2],
-                        [' ', violated_rule]
+                        [cipher1, cipher2]
                     ])
             elif dttls.cipher_order == CipherOrderStatus.not_prescribed:
                 # Provide tech_data that supplies values for two rows each of

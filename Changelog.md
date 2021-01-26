@@ -20,6 +20,7 @@ Changes
 - Certificate Usage Field on TLSA records for email test. [(#329)]
 - Validate CSP directives. [(#325)]
 - Make X-Frame-Options optional and no longer consider ALLOW-FROM as sufficiently secure. [(#503)]
+- No prescribed cipher ordering within a security level. [(#506)]
 
 Bug Fixes
 - Fix indefinite locks in cache (not a current problem).
@@ -60,6 +61,7 @@ Settings
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 [(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
 [(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503
+[(#506)]: https://github.com/NLnetLabs/Internet.nl/issues/506
 [(#507)]: https://github.com/NLnetLabs/Internet.nl/issues/507
 
 ## 1.2.1
