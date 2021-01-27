@@ -21,6 +21,7 @@ Changes
 - Validate CSP directives. [(#325)]
 - Make X-Frame-Options optional and no longer consider ALLOW-FROM as sufficiently secure. [(#503)]
 - No prescribed cipher ordering within a security level. [(#506)]
+- Adjusted requirement level for client initiated renegotiation (informational). [(#510)]
 - Update to jquery 3.5.1 [(#508)]
 
 Bug Fixes
