@@ -1,7 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
-import idna as IDNA
 
 from django import template
 from django.conf import settings
@@ -21,13 +20,13 @@ def translate(context, longname):
     return contenttemplate.render(context)
 
 
-@register.assignment_tag(takes_context=True)
+@register.simple_tag(takes_context=True)
 def expand(context, pattern):
     contenttemplate = Template(pattern)
     return contenttemplate.render(context)
 
 
-@register.assignment_tag(takes_context=True)
+@register.simple_tag(takes_context=True)
 def lookup(context, pattern):
     contenttemplate = Template(pattern)
     return _(contenttemplate.render(context)+" .index").split()
@@ -39,7 +38,7 @@ def idna(value):
     Return the IDNA; value is str and may contain punnycode.
 
     """
-    return IDNA.decode(value.encode("ascii"))
+    return value.encode("ascii").decode("idna")
 
 
 @register.simple_tag()
