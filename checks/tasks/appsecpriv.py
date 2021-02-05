@@ -19,6 +19,7 @@ from .. import batch, batch_shared_task
 from ..models import WebTestAppsecpriv, DomainTestAppsecpriv
 from .. import scoring
 
+
 @shared_task(bind=True)
 def web_callback(self, results, domain, req_limit_id):
     """

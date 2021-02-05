@@ -114,9 +114,6 @@ msgstr "Kennisbank"
 msgid "base followtwitter"
 msgstr "Volg ons op Twitter"
 
-msgid "base followlinkedin"
-msgstr "Volg ons op LinkedIn"
-
 msgid "base halloffame"
 msgstr "Hall of Fame"
 
