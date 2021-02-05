@@ -92,7 +92,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_default_src_2(self):
         headers = "default-src 'self' https:; frame-ancestors 'self'"
-        self._is_bad(headers)
+        self._is_good(headers)
 
     def test_default_src_3(self):
         headers = "default-src 'self' 'report_sample'; frame-ancestors 'self'"
@@ -133,6 +133,14 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     def test_default_src_12(self):
         headers = "default-src 'self' *.internet.nl; frame-ancestors 'self'"
         self._is_good(headers)
+
+    def test_default_src_13(self):
+        headers = "default-src 'self' http:; frame-ancestors 'self'"
+        self._is_bad(headers)
+
+    def test_default_src_14(self):
+        headers = "default-src 'self' somethingelse; frame-ancestors 'self'"
+        self._is_bad(headers)
 
     def test_http_1(self):
         headers = "default-src 'self'; frame-ancestors 'self', style-src http://adfadf.com/asdfh"

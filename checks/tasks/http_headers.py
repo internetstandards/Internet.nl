@@ -294,6 +294,9 @@ class HeaderCheckerContentSecurityPolicy(object):
                 found_self = True
             elif 'report_sample' in match.groupdict() and match.group('report_sample'):
                 expected_sources += 1
+            elif ('scheme' in match.groupdict() and match.group('scheme')
+                  and match.string == "https:"):
+                expected_sources += 1
             elif 'host' in match.groupdict() and match.group('host'):
                 expected_sources += 1
                 host = match.group('host').rstrip('.')
@@ -385,7 +388,7 @@ class HeaderCheckerContentSecurityPolicy(object):
                         if not values:
                             if (not self.directives[dir].values
                                     or self.directives[dir].values_optional):
-                                # No values allowed; keep.
+                                # No-values allowed; keep.
                                 self.parsed[dir]
                             continue
 
