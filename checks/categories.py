@@ -5,7 +5,6 @@ from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
 from .scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
-
 # --- Base classes
 #
 class Category(object):
@@ -917,8 +916,8 @@ class WebTlsRenegotiationSecure(Subtest):
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web tls renegotiation-secure verdict bad"
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls renegotiation-secure verdict other"
         self.tech_data = "detail tech data no"
 
 
@@ -1461,8 +1460,8 @@ class MailTlsRenegotiationSecure(Subtest):
 
     def result_bad(self):
         self.was_tested()
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls renegotiation-secure verdict bad"
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls renegotiation-secure verdict other"
         self.tech_data = "detail tech data no"
 
 
@@ -2077,6 +2076,12 @@ class WebAppsecprivHttpReferrerPolicy(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = (
             "detail web appsecpriv http-referrer-policy verdict good")
+        self.tech_data = tech_data
+
+    def result_info(self, tech_data):
+        self._status(STATUS_INFO)
+        self.verdict = (
+            "detail web appsecpriv http-referrer-policy verdict info")
         self.tech_data = tech_data
 
     def result_bad(self, tech_data):

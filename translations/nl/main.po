@@ -114,6 +114,9 @@ msgstr "Kennisbank"
 msgid "base followtwitter"
 msgstr "Volg ons op Twitter"
 
+msgid "base followlinkedin"
+msgstr "Volg ons op LinkedIn"
+
 msgid "base halloffame"
 msgstr "Hall of Fame"
 
@@ -1635,6 +1638,9 @@ msgstr "Je webserver biedt *geen* Referrer-Policy aan."
 
 msgid "detail web appsecpriv http-referrer-policy verdict good"
 msgstr "Je webserver biedt Referrer-Policy aan."
+
+msgid "detail web appsecpriv http-referrer-policy verdict info"
+msgstr "Je webserver biedt Referrer-Policy aan. DigID uitleg hier."
 
 msgid "detail web appsecpriv http-x-content-type exp"
 msgstr ""
