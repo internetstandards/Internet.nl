@@ -629,6 +629,8 @@ def save_results(model, results, addr, domain, category):
                     model.cipher_order = result.get("cipher_order")
                     model.cipher_order_score = result.get("cipher_order_score")
                     model.cipher_order_violation = result.get("cipher_order_violation")
+                    model.protocols_good = result.get("prots_good")
+                    model.protocols_sufficient = result.get("prots_sufficient")
                     model.protocols_bad = result.get("prots_bad")
                     model.protocols_phase_out = result.get("prots_phase_out")
                     model.protocols_score = result.get("prots_score")
@@ -738,6 +740,15 @@ def build_report(dttls, category):
             ["detail tech data insufficient"] * len(bad_items) + ["detail tech data phase-out"] * len(phaseout_items),
         ]
 
+    def annotate_and_combine_all(good_items, sufficient_items, bad_items, phaseout_items):
+        return [
+            good_items + sufficient_items + bad_items + phaseout_items,
+            ["detail tech data secure"] * len(good_items)
+            + ["detail tech data sufficient"] * len(sufficient_items)
+            + ["detail tech data insufficient"] * len(bad_items)
+            + ["detail tech data phase-out"] * len(phaseout_items),
+        ]
+
     if isinstance(category, categories.WebTls):
         if not dttls.server_reachable:
             category.subtests["https_exists"].result_unreachable()
@@ -810,7 +821,9 @@ def build_report(dttls, category):
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
-            protocols_all = annotate_and_combine(dttls.protocols_bad, dttls.protocols_phase_out)
+            protocols_all = annotate_and_combine_all(
+                dttls.protocols_good, dttls.protocols_sufficient, dttls.protocols_bad, dttls.protocols_phase_out
+            )
             if len(dttls.protocols_bad) > 0:
                 category.subtests["tls_version"].result_bad(protocols_all)
             elif len(dttls.protocols_phase_out) > 0:
@@ -1848,6 +1861,8 @@ def check_mail_tls(server, dane_cb_data, task):
             tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
             prots_bad=prots_result["bad"],
             prots_phase_out=prots_result["phase_out"],
+            prots_good=prots_result["good"],
+            prots_sufficient=prots_result["sufficient"],
             prots_score=prots_score,
             ciphers_bad=ciphers_result["bad"],
             ciphers_phase_out=ciphers_result["phase_out"],
@@ -1935,6 +1950,7 @@ class ConnectionChecker:
             self._score_tls_suites_ok = scoring.WEB_TLS_SUITES_OK
             self._score_tls_suites_bad = scoring.WEB_TLS_SUITES_BAD
             self._score_tls_protocols_good = scoring.WEB_TLS_PROTOCOLS_GOOD
+            self._score_tls_protocols_sufficient = scoring.WEB_TLS_PROTOCOLS_GOOD
             self._score_tls_protocols_bad = scoring.WEB_TLS_PROTOCOLS_BAD
             self._score_tls_fs_ok = scoring.WEB_TLS_FS_OK
             self._score_tls_fs_bad = scoring.WEB_TLS_FS_BAD
@@ -1959,6 +1975,7 @@ class ConnectionChecker:
             self._score_tls_suites_ok = scoring.MAIL_TLS_SUITES_OK
             self._score_tls_suites_bad = scoring.MAIL_TLS_SUITES_BAD
             self._score_tls_protocols_good = scoring.MAIL_TLS_PROTOCOLS_GOOD
+            self._score_tls_protocols_sufficent = scoring.MAIL_TLS_PROTOCOLS_GOOD
             self._score_tls_protocols_bad = scoring.MAIL_TLS_PROTOCOLS_BAD
             self._score_tls_fs_ok = scoring.MAIL_TLS_FS_OK
             self._score_tls_fs_bad = scoring.MAIL_TLS_FS_BAD
@@ -2254,11 +2271,15 @@ class ConnectionChecker:
     def check_protocol_versions(self):
         # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0
         # Test for SSL v2 and v3 as these are "insecure" per NCSC 2.0
+        prots_good = []
+        prots_sufficient = []
         prots_bad = []
         prots_phase_out = []
         prots_score = self._score_tls_protocols_good
 
         prot_test_configs = [
+            (TLSV1_3, "TLS 1.3", prots_good, self._score_tls_protocols_good),
+            (TLSV1_2, "TLS 1.2", prots_sufficient, self._score_tls_protocols_good),
             (TLSV1_1, "TLS 1.1", prots_phase_out, self._score_tls_protocols_good),
             (TLSV1, "TLS 1.0", prots_phase_out, self._score_tls_protocols_good),
             (SSLV3, "SSL 3.0", prots_bad, self._score_tls_protocols_bad),
@@ -2286,6 +2307,8 @@ class ConnectionChecker:
                 prots_score = score
 
         result_dict = {
+            "good": prots_good,
+            "sufficient": prots_sufficient,
             "bad": prots_bad,
             "phase_out": prots_phase_out,
         }
@@ -2870,6 +2893,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             tls_enabled=True,
             prots_bad=prots_result["bad"],
             prots_phase_out=prots_result["phase_out"],
+            prots_good=prots_result["good"],
+            prots_sufficient=prots_result["sufficient"],
             prots_score=prots_score,
             ciphers_bad=ciphers_result["bad"],
             ciphers_phase_out=ciphers_result["phase_out"],
