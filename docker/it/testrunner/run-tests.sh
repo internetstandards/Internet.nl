@@ -211,9 +211,10 @@ wait_for_http_connect $C_APP nl.internetnl.test.nlnetlabs.tk 8080 ${MAX_APP_STAR
 NUM_SIMULTANEOUS_TESTS=${NUM_BROWSER_NODES}
 PYTEST_XDIST_ARGS="-n ${NUM_SIMULTANEOUS_TESTS}"
 PYTEST_PROGRESS_ARGS="" #"--show-progress"
-PYTEST_SELENIUM_ARGS="--driver Remote --host selenium --port 4444 --capability browserName firefox"
+PYTEST_SELENIUM_ARGS="--driver Remote --selenium-host selenium --selenium-port 4444 --capability browserName firefox"
 PYTEST_HTML_ARGS="--html=/tmp/it-report/$(date +'%Y%m%d_%H%M%S').html"
 PYTEST_ARGS="-vv" # to get the full diff in case of failed assertions
+PYTEST_IGNORE_ARGS="--ignore=tests/unittests/"  # Don't try to run these in integration testing
 
 if [ "${TEST_SELECTOR}" != "" ]; then
     PYTEST_ARGS="${PYTEST_ARGS} -k ${TEST_SELECTOR}"
@@ -234,6 +235,7 @@ docker exec $C_APP sudo mkdir -p /tmp/it-report/coverage-data
 docker exec $C_APP sudo chmod -R a+w /tmp/it-report
 docker exec $C_APP pytest \
     ${PYTEST_ARGS} \
+    ${PYTEST_IGNORE_ARGS} \
     ${PYTEST_XDIST_ARGS} \
     ${PYTEST_PROGRESS_ARGS} \
     ${PYTEST_HTML_ARGS} \
