@@ -2,8 +2,9 @@
 
 ## Unreleased next version
 
-SSL_OP_PRIORITIZE_CHAHA, explicit check for NULL MX, DKIM not required
-for non email sending domains, and more.
+SSL_OP_PRIORITIZE_CHAHA support, support for more ciphers via the
+ModernConnection, explicit check for NULL MX, DKIM not required for non email
+sending domains, and more.
 
 New
 - docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
@@ -37,6 +38,7 @@ Bug Fixes
 - Can't test site with invalid IDN. [(#484)]
 - set_async(True) causes libunbound under celery to not honor config options
   set notable cache-max-ttl; remove for now.
+- ARIA and DSS algorithms not detected. [(#477)]
 
 Dependencies
 - Updated python-pip-requirements.txt:
@@ -63,6 +65,7 @@ Settings
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 [(#463)]: https://github.com/NLnetLabs/Internet.nl/issues/463
 [(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
+[(#477)]: https://github.com/NLnetLabs/Internet.nl/issues/477
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 [(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
 [(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503

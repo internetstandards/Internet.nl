@@ -132,42 +132,55 @@ KEX_GOOD_HASH_FUNCS = frozenset(
     set(KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER) |
     set(KEX_TLS13_SHA2_SIGNATURE_SCHEMES))
 
-BULK_ENC_CIPHERS_PHASEOUT = ['3DES']
-BULK_ENC_CIPHERS_OTHER_PHASEOUT = ['SEED', 'ARIA']
-BULK_ENC_CIPHERS_INSUFFICIENT = ['EXP', 'eNULL', 'RC4', 'DES', 'IDEA']
-KEX_CIPHERS_PHASEOUT = ['kRSA']
-KEX_CIPHERS_INSUFFICIENT = ['DH', 'ECDH', 'eNULL', 'aNULL', 'PSK', 'SRP', 'MD5']
-KEX_CIPHERS_INSUFFICIENT_AS_SET = frozenset(KEX_CIPHERS_INSUFFICIENT)
+# Need to be lists because we want them in specific order for testing when
+# combining with other security levels i.e., more secure > less secure. The
+# cipher order test relies on that order.
 
-PHASE_OUT_CIPHERS = (
-    BULK_ENC_CIPHERS_PHASEOUT
-    + BULK_ENC_CIPHERS_OTHER_PHASEOUT
-    + KEX_CIPHERS_PHASEOUT)
-INSUFFICIENT_CIPHERS = BULK_ENC_CIPHERS_INSUFFICIENT + KEX_CIPHERS_INSUFFICIENT
+# These ciphers are only available on SSL2 that we need to explicitly set.
+INSUFFICIENT_CIPHERS_SSLV2 = {x.name for x in filter(
+    lambda x: (DebugConnection in x.supported_conns and
+               x.sec_level == SecLevel.INSUFFICIENT and
+               x.tls_version == 'SSLv2'),
+    cipher_infos.values())}
+INSUFFICIENT_CIPHERS = {x.name for x in filter(
+    lambda x: (DebugConnection in x.supported_conns and
+               x.sec_level == SecLevel.INSUFFICIENT),
+    cipher_infos.values())} - INSUFFICIENT_CIPHERS_SSLV2
+INSUFFICIENT_CIPHERS_MODERN = list({x.name for x in filter(
+    lambda x: (ModernConnection in x.supported_conns and
+               x.sec_level == SecLevel.INSUFFICIENT),
+    cipher_infos.values())} - INSUFFICIENT_CIPHERS)
+INSUFFICIENT_CIPHERS = list(INSUFFICIENT_CIPHERS)
+INSUFFICIENT_CIPHERS_SSLV2 = list(INSUFFICIENT_CIPHERS_SSLV2)
 
-# Some ciphers are not supported by LegacySslClient, only by SslClient which is
-# based on more modern OpenSSL.
-BULK_ENC_CIPHERS_INSUFFICIENT_MODERN = ['AESCCM8']
-INSUFFICIENT_CIPHERS_MODERN = BULK_ENC_CIPHERS_INSUFFICIENT_MODERN
+PHASE_OUT_CIPHERS = {x.name for x in filter(
+    lambda x: (DebugConnection in x.supported_conns and
+               x.sec_level == SecLevel.PHASE_OUT),
+    cipher_infos.values())}
+PHASE_OUT_CIPHERS_MODERN = list({x.name for x in filter(
+    lambda x: (ModernConnection in x.supported_conns and
+               x.sec_level == SecLevel.PHASE_OUT),
+    cipher_infos.values())} - PHASE_OUT_CIPHERS)
+PHASE_OUT_CIPHERS = list(PHASE_OUT_CIPHERS)
 
-SUFFICIENT_DEBUG_CIPHERS = list(x.name for x in filter(
+SUFFICIENT_DEBUG_CIPHERS = {x.name for x in filter(
     lambda x: (DebugConnection in x.supported_conns and
                x.sec_level == SecLevel.SUFFICIENT),
-    cipher_infos.values()))
-SUFFICIENT_MODERN_CIPHERS = list(x.name for x in filter(
+    cipher_infos.values())}
+SUFFICIENT_MODERN_CIPHERS = {x.name for x in filter(
     lambda x: (ModernConnection in x.supported_conns and
                x.sec_level == SecLevel.SUFFICIENT),
-    cipher_infos.values()))
+    cipher_infos.values())}
 
 GOOD_SUFFICIENT_SEC_LEVELS = frozenset([SecLevel.GOOD, SecLevel.SUFFICIENT])
-GOOD_SUFFICIENT_DEBUG_CIPHERS = list(x.name for x in filter(
+GOOD_SUFFICIENT_DEBUG_CIPHERS = {x.name for x in filter(
     lambda x: (DebugConnection in x.supported_conns and
                x.sec_level in GOOD_SUFFICIENT_SEC_LEVELS),
-    cipher_infos.values()))
-GOOD_SUFFICIENT_MODERN_CIPHERS = list(x.name for x in filter(
+    cipher_infos.values())}
+GOOD_SUFFICIENT_MODERN_CIPHERS = {x.name for x in filter(
     lambda x: (ModernConnection in x.supported_conns and
                x.sec_level in GOOD_SUFFICIENT_SEC_LEVELS),
-    cipher_infos.values()))
+    cipher_infos.values())}
 
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
@@ -2486,7 +2499,8 @@ class ConnectionChecker:
             relevant_ciphers = self._seen_ciphers.get(tls_version, dict()).get(
                 conn_type, frozenset())
             reject_string = ':'.join([f'!{x}' for x in relevant_ciphers])
-            cipher_string = f"{reject_string}:{cipher_string}"
+            if reject_string:
+                cipher_string = f"{reject_string}:{cipher_string}"
 
             lowest_values = {
                 'score': None,
@@ -2582,8 +2596,8 @@ class ConnectionChecker:
 
         # Check specifically for SUFFICIENT cipher support.
         self._check_ciphers([
-            (DebugConnection,  SSLV23,  ':'.join(SUFFICIENT_DEBUG_CIPHERS)),
-            (ModernConnection, TLSV1_2, ':'.join(SUFFICIENT_MODERN_CIPHERS)),
+            (DebugConnection,  SSLV23, ':'.join(SUFFICIENT_DEBUG_CIPHERS)),
+            (ModernConnection, SSLV23, ':'.join(SUFFICIENT_MODERN_CIPHERS)),
         ], first_cipher_only=True)
         # If the server only supports GOOD ciphers we don't care
         # about the cipher order.
@@ -2653,8 +2667,8 @@ class ConnectionChecker:
             # Complete the prescribed order check by testing "good" ciphers.
             # and "sufficient" ciphers.
             self._check_ciphers([
-                (DebugConnection,  SSLV23,  GOOD_SUFFICIENT_DEBUG_CIPHERS),
-                (ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS),
+                (DebugConnection,  SSLV23, ':'.join(GOOD_SUFFICIENT_DEBUG_CIPHERS)),
+                (ModernConnection, SSLV23, ':'.join(GOOD_SUFFICIENT_MODERN_CIPHERS)),
             ])
 
         # The self._cipher_order_violation list will be populated if the
@@ -2704,7 +2718,8 @@ class ConnectionChecker:
 
         self._check_ciphers([
             (DebugConnection,  SSLV23,  ':'.join(PHASE_OUT_CIPHERS+INSUFFICIENT_CIPHERS)),
-            (ModernConnection, TLSV1_2, ':'.join(INSUFFICIENT_CIPHERS_MODERN)),
+            (DebugConnection,  SSLV2,   ':'.join(INSUFFICIENT_CIPHERS_SSLV2)),
+            (ModernConnection, SSLV23, ':'.join(PHASE_OUT_CIPHERS_MODERN+INSUFFICIENT_CIPHERS_MODERN)),
         ])
 
         if self._bad_ciphers:
