@@ -2,6 +2,9 @@
 
 ## Unreleased next version
 
+SSL_OP_PRIORITIZE_CHAHA, explicit check for NULL MX, DKIM not required
+for non email sending domains, and more.
+
 New
 - docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
   the IT related certificates.
@@ -69,10 +72,15 @@ Settings
 
 ## 1.2.1
 
+Hotfix release.
+
 Bug Fixes
 - Fix broken connection test from 1.2.0; wrong variable name.
 
 ## 1.2.0
+
+Update of the batch API to v2, removal of the X-XSS-Protection test, visual and
+content improvements for no-MX cases.
 
 New
 - Batch API updated to v2. [(#337)] [(#395)] [(#336)] [(#436)]
