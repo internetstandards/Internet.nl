@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased next version
+## 1.3.0
 
 SSL_OP_PRIORITIZE_CHAHA support, support for more ciphers via the
 ModernConnection, explicit check for NULL MX, DKIM not required for non email
@@ -46,6 +46,7 @@ Dependencies
   - celery bumped to 4.3.1 (vine dependency)
   - vine pinned to 1.3.0
   - beautifulsoup4 added [(#463)]
+  - idna added [(#507)]
 
 Migrations
 - New column in DB (mailtestauth_dmarc_record_org_domain). [(#249)]
