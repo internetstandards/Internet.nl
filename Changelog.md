@@ -1,5 +1,20 @@
 # Change Log
 
+## Next unreleased version
+
+
+New
+
+Changes
+
+Bug Fixes
+
+Dependencies
+
+Migrations
+
+Settings
+
 ## 1.3.0
 
 SSL_OP_PRIORITIZE_CHAHA support, support for more ciphers via the
