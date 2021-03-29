@@ -8,12 +8,15 @@ New
 Changes
 
 Bug Fixes
+- Pick the correct domain for checking nameservers. [(#526)]
 
 Dependencies
 
 Migrations
 
 Settings
+
+[(#526)]: https://github.com/NLnetLabs/Internet.nl/issues/526
 
 ## 1.3.0
 
