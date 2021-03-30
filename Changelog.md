@@ -1,22 +1,12 @@
 # Change Log
 
-## Next unreleased version
+## 1.3.1
 
 Hotfix release.
-
-New
-
-Changes
 
 Bug Fixes
 - Pick the correct domain for checking nameservers. [(#526)]
 - Typos.
-
-Dependencies
-
-Migrations
-
-Settings
 
 [(#526)]: https://github.com/NLnetLabs/Internet.nl/issues/526
 
