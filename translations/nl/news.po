@@ -823,7 +823,7 @@ msgstr ""
 "Vanaf vandaag kunt u gebruik maken van een nieuwe versie van Internet.nl met"
 " verbeterde testen voor TLS en voor Content Security Policy. Verder zijn er "
 "verschillende wijzigingen, zoals verbeterde ondersteuning voor niet-mail "
-"domeinnamen en de verlenging van de mimimale HSTS cache-geldigheidsduur. "
+"domeinnamen en de verlenging van de minimale HSTS cache-geldigheidsduur. "
 "Veel plezier met het nog beter testen op moderne internetstandaarden!"
 
 msgid "article new-release-with-improved-tests-for-TLS-and-CSP title"

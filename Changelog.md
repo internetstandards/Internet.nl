@@ -8,6 +8,7 @@ New
 Changes
 
 Bug Fixes
+- Typos.
 
 Dependencies
 
