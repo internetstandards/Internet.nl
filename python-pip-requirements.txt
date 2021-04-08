@@ -25,6 +25,7 @@ django-hosts
 django-markdown_deux
 eventlet
 gevent
+idna
 libsass
 markdown
 polib

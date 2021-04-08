@@ -79,6 +79,22 @@ class HeaderCheckerContentSecurityPolicy(object):
                 return True
             return False
 
+        def __str__(self):
+            """
+            Could be used together with tests/unittests/test_tasks_http_headers.py
+            for debugging.
+            """
+            return (
+                f"has_unsafe_inline: {self.has_unsafe_inline}\n"
+                f"has_unsafe_eval: {self.has_unsafe_eval}\n"
+                f"has_unsafe_hashes: {self.has_unsafe_hashes}\n"
+                f"has_http: {self.has_http}\n"
+                f"has_data: {self.has_data}\n"
+                f"has_default_src: {self.has_default_src}\n"
+                f"has_frame_src: {self.has_frame_src}\n"
+                f"has_frame_ancestors: {self.has_frame_ancestors}\n"
+                f"has_invalid_host: {self.has_invalid_host}\n")
+
     Directive = namedtuple('Directive', [
         'default', 'values', 'values_optional', 'values_regex_all'],
         defaults=[[], [], False, False])

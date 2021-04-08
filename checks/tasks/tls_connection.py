@@ -429,29 +429,41 @@ class SSLConnectionWrapper:
             self.host = conn.server_name
             self.conn = conn
         else:
-            try:
-                # First see if the server supports TLS 1.3
-                # Do not use ModernConnection for other protocol versions as it
-                # lacks support for verifying TLS compression, insecure
-                # renegotiation and client renegotiation.
-                self.conn = ModernConnection(version=TLSV1_3, **kwargs)
-            except ConnectionHandshakeException:
+            # First see if the server supports TLS 1.3
+            # Do not use ModernConnection for other protocol versions as it
+            # lacks support for verifying TLS compression, insecure
+            # renegotiation and client renegotiation.
+            # Note: TLS related tests may rely on the information if
+            # TLS 1.3 connection was explicitly possible or not.
+            #
+            # No TLS 1.3? Try the lesser versions. For SSLV2 we need to
+            # explicitly set it.
+            #
+            # Now, try ModernConnection again because, while it lacks
+            # some features, it
+            # also supports some ciphers that DebugConnection does not,
+            # better to verify what we can than fail to connect at all.
+            # Ciphers known to be unsupported by DebugConnection but
+            # supported by ModernConnection include:
+            #   - AES128-CCM
+            #   - DHE-RSA-CHACHA20-POLY1305
+            #   - ECDHE-RSA-CHACHA20-POLY1305
+            #   - ECDHE-ECDSA-CHACHA20-POLY1305
+            connection_attempts = [
+                (ModernConnection, TLSV1_3),
+                (DebugConnection, SSLV23),
+                (DebugConnection, SSLV2),
+                (ModernConnection, SSLV23),
+            ]
+            fails = 0
+            for current_conn, current_version in connection_attempts:
                 try:
-                    # No TLS 1.3? Try TLS 1.2, TLS 1.1, TLS 1.0 and SSL 3.0.
-                    # We don't have support for SSL 2.0.
-                    self.conn = DebugConnection(version=SSLV23, **kwargs)
+                    self.conn = current_conn(version=current_version, **kwargs)
+                    break
                 except ConnectionHandshakeException:
-                    # Now, try TLS 1.2 again but this time with
-                    # ModernConnection because while it lacks some features it
-                    # also supports some ciphers that DebugConnection does not,
-                    # better to verify what we can than fail to connect at all.
-                    # Ciphers known to be unsupported by DebugConnection but
-                    # supported by ModernConnection include:
-                    #   - AES128-CCM
-                    #   - DHE-RSA-CHACHA20-POLY1305
-                    #   - ECDHE-RSA-CHACHA20-POLY1305
-                    #   - ECDHE-ECDSA-CHACHA20-POLY1305
-                    self.conn = ModernConnection(version=TLSV1_2, **kwargs)
+                    fails += 1
+                    if fails >= len(connection_attempts):
+                        raise
 
             # For similarity/compatibility with http.client.HTTP(S)Connection:
             self.host = self.conn.server_name

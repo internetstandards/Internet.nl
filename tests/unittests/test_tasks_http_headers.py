@@ -3,6 +3,8 @@ from django.test import SimpleTestCase
 from checks import scoring
 from checks.tasks import http_headers
 
+DEBUG = False
+
 
 class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     @classmethod
@@ -16,15 +18,20 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self.results = self.checker.get_positive_values()
         self.domain = 'internet.nl'
 
-    def _is_good(self, headers):
+    def _checker_check(self, headers):
         self.checker.check(headers, self.results, self.domain)
+        if DEBUG:
+            print(self.checker.result)
+
+    def _is_good(self, headers):
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
         self.assertEqual(
             self.results[self.score],
             scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
 
     def _is_good_and_parsed(self, headers, directive):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
         self.assertEqual(
             self.results[self.score],
@@ -32,7 +39,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self.assertTrue(directive in self.checker.parsed)
 
     def _is_good_and_not_parsed(self, headers, directive):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
         self.assertEqual(
             self.results[self.score],
@@ -40,14 +47,14 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self.assertTrue(directive not in self.checker.parsed)
 
     def _is_bad(self, headers):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], False)
         self.assertEqual(
             self.results[self.score],
             scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD)
 
     def _is_bad_and_parsed(self, headers, directive):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], False)
         self.assertEqual(
             self.results[self.score],

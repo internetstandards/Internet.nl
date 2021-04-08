@@ -121,46 +121,31 @@ class PostfixTLS13Config(DomainConfig):
 # Tests specifically intended to show that Internet.NL tests for compliance
 # with the NCSC 2.0 guidelines.
 ncsc_20_tests = [
-    # The NaSSL LegacySslClient can connect to SSLv2 ONLY servers but only if
-    # the  SSLV2 protocol is explicitly requested. The initial connection made
-    # by Internet.NL doesn't request SSLV2 explicitly, instead it requests
-    # SSLV23 which should connect to SSLv2 servers but appears to
-    # fail to do so if the server _ONLY_ supports SSLv2. Currently the decision
-    # is to leave Internet.NL as it is rather than add yet another connection
-    # attempt with SSLv2 only, as the number of servers out there supporting
-    # just SSLv2 is likely very low and because the generated report is still
-    # red due to the failing "HTTPS available" test. So, we expect a "HTTPS
-    # available" test failure, not a "TLS version" test failure.
     DomainConfig('NCSC20-Table1:SSL20',
         'ssl2only.test.nlnetlabs.tk',
         expected_failures={
-            TESTS.HTTPS_HTTP_HTTPS_AVAILABLE,
-            TESTS.IPV6_WEB_SAME_WEBSITE,
+            TESTS.HTTPS_HTTP_HSTS,
+            TESTS.TLS_VERSION,
+            TESTS.TLS_CIPHER_SUITES,
+            TESTS.TLS_SECURE_RENEG,
+        },
+        expected_warnings={
+            TESTS.TLS_HASH_FUNC,
+            TESTS.SECURITY_HTTP_CSP,
+            TESTS.SECURITY_HTTP_REFERRER,
+            TESTS.SECURITY_HTTP_XCONTYPE,
+        },
+        expected_info={
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.DANE_EXISTS,
+            TESTS.SECURITY_HTTP_XFRAME,
         },
         expected_not_tested={
-            TESTS.DANE_EXISTS,
             TESTS.DANE_VALID,
             TESTS.HTTPS_CERT_DOMAIN,
             TESTS.HTTPS_CERT_PUBKEY,
             TESTS.HTTPS_CERT_SIG,
             TESTS.HTTPS_CERT_TRUST,
-            TESTS.HTTPS_HTTP_COMPRESSION,
-            TESTS.HTTPS_HTTP_HSTS,
-            TESTS.HTTPS_HTTP_REDIRECT,
-            TESTS.SECURITY_HTTP_CSP,
-            TESTS.SECURITY_HTTP_REFERRER,
-            TESTS.SECURITY_HTTP_XCONTYPE,
-            TESTS.SECURITY_HTTP_XFRAME,
-            TESTS.TLS_CIPHER_ORDER,
-            TESTS.TLS_CIPHER_SUITES,
-            TESTS.TLS_CLIENT_RENEG,
-            TESTS.TLS_COMPRESSION,
-            TESTS.TLS_HASH_FUNC,
-            TESTS.TLS_KEY_EXCHANGE,
-            TESTS.TLS_OCSP_STAPLING,
-            TESTS.TLS_SECURE_RENEG,
-            TESTS.TLS_VERSION,
-            TESTS.TLS_ZERO_RTT,
         }),
 
     # internet.nl cannot make SSLv3 connections so instead of failing because
@@ -171,13 +156,13 @@ ncsc_20_tests = [
         expected_failures={
             TESTS.TLS_CIPHER_ORDER,
             TESTS.TLS_CIPHER_SUITES,
-            TESTS.TLS_CLIENT_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
             TESTS.TLS_SECURE_RENEG,
             TESTS.TLS_VERSION,
         },
         expected_info={
-            TESTS.TLS_OCSP_STAPLING
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_CLIENT_RENEG,
         }),
 
     PreTLS12DomainConfig('NCSC20-Table1:TLS10',
@@ -213,12 +198,12 @@ ncsc_20_tests = [
         expected_failures={
             TESTS.TLS_CIPHER_SUITES,
             TESTS.TLS_CIPHER_ORDER,
-            TESTS.TLS_CLIENT_RENEG,
             TESTS.TLS_KEY_EXCHANGE,
             TESTS.TLS_SECURE_RENEG,
         },
         expected_info={
-            TESTS.TLS_OCSP_STAPLING
+            TESTS.TLS_OCSP_STAPLING,
+            TESTS.TLS_CLIENT_RENEG,
         }),
 
     PreTLS12DomainConfig('NCSC20-Table1:TLS11',
@@ -324,6 +309,8 @@ ncsc_20_tests = [
             TESTS.TLS_CIPHER_ORDER,
         }),
 
+    # Prescribed ordering is now disabled.
+    # This will be marked as skipped in test_ncsc_20().
     PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
         'tls12onlynotprescribedorder1.test.nlnetlabs.tk',
         expected_warnings={
@@ -335,6 +322,8 @@ ncsc_20_tests = [
             ]
         }),
 
+    # Prescribed ordering is now disabled.
+    # This will be marked as skipped in test_ncsc_20().
     PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
         'tls12onlynotprescribedorder4.test.nlnetlabs.tk',
         expected_warnings={
@@ -346,6 +335,8 @@ ncsc_20_tests = [
             ]
         }),
 
+    # With PRIORITIZE_CHACHA this now does not fail; CHACHA is ignored for
+    # order. This will be marked as skipped in test_ncsc_20().
     PreTLS13DomainConfig('NCSC20-GuidelineB2-5:TLS10',
         'tls12onlyphaseoutorder.test.nlnetlabs.tk',
         expected_warnings={
@@ -677,7 +668,7 @@ ncsc_20_sufficient_ciphers = [
 ncsc_20_phaseout_ciphers = [
     ('TLS12', 'TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA',         'ECDHE-ECDSA-DES-CBC3-SHA',  False),
     ('TLS12', 'TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA',           'ECDHE-RSA-DES-CBC3-SHA',    True),
-    ('TLS12', 'TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA',             'EDH-RSA-DES-CBC3-SHA',      True),
+    ('TLS12', 'TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA',             'DHE-RSA-DES-CBC3-SHA',      True),
     ('TLS12', 'TLS_RSA_WITH_AES_256_GCM_SHA384',               'AES256-GCM-SHA384',         None),
     ('TLS12', 'TLS_RSA_WITH_AES_128_GCM_SHA256',               'AES128-GCM-SHA256',         None),
     ('TLS12', 'TLS_RSA_WITH_AES_256_CBC_SHA256',               'AES256-SHA256',             None),
@@ -691,7 +682,7 @@ ncsc_20_phaseout_ciphers = [
 mail_tests = [
     PostfixTLS12Config(
         'mail test', 'tls12only.test.nlnetlabs.tk',
-        expected_warnings={
+        expected_info={
             TESTS.TLS_CLIENT_RENEG
         }),
 
@@ -921,7 +912,7 @@ def iana_cipher_to_target_server_fqdn(group, iana_cipher):
         # FQDN.
         domain = f'ec.{domain}'
 
-    return f'{ssl_version.lower()}only{group}{iana_cipher_name.replace("_", "")}.{domain}'
+    return f'{ssl_version}only{group}{iana_cipher_name.replace("_", "")}.{domain}'.lower()
 
 
 def iana_cipher_id_generator(val):
@@ -933,6 +924,13 @@ def iana_cipher_id_generator(val):
 @pytest.mark.parametrize(
     'domain_config', ncsc_20_tests, ids=domainconfig_id_generator)
 def test_ncsc_20(selenium, domain_config):
+    if domain_config.domain == 'tls12onlyphaseoutorder.test.nlnetlabs.tk':
+        pytest.skip("Test not vaid since PRIORITIZE_CHACHA support")
+    if domain_config.domain in [
+            'tls12onlynotprescribedorder4.test.nlnetlabs.tk',
+            'tls12onlynotprescribedorder1.test.nlnetlabs.tk',
+            ]:
+        pytest.skip("Prescribed order is now disabled")
     assess_website(selenium, domain_config)
 
 
@@ -976,15 +974,23 @@ def test_ncsc_sufficient_ciphers(selenium, iana_cipher):
 def test_ncsc_phaseout_ciphers(selenium, iana_cipher):
     openssl_cipher_name = iana_cipher[2]
     ssh2_hash_function_supported = iana_cipher[3]
+    if openssl_cipher_name == 'DHE-RSA-DES-CBC3-SHA':
+        # The webserver uses both DHE-RSA-DES-CBC3-SHA and EDH-RSA-DES-CBC3-SHA
+        # so the compaarison fails.
+        expected_warnings = {
+            TESTS.TLS_CIPHER_SUITES,
+        }
+    else:
+        expected_warnings = {
+            TESTS.TLS_CIPHER_SUITES: [
+                [openssl_cipher_name, PHASE_OUT_TEXT],  # IPv6/IPv4
+                [openssl_cipher_name, PHASE_OUT_TEXT],  # IPv6/IPv4
+            ]
+        }
 
     domain_config = PreTLS13DomainConfig('ncsc_phaseout_ciphers',
         iana_cipher_to_target_server_fqdn('PHASEOUT', iana_cipher),
-        expected_warnings={
-            TESTS.TLS_CIPHER_SUITES: [
-                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv6/IPv4
-                [openssl_cipher_name, PHASE_OUT_TEXT ],  # IPv6/IPv4
-            ]
-        })
+        expected_warnings=expected_warnings)
 
     if ssh2_hash_function_supported is False:
         domain_config.expected_warnings[TESTS.TLS_HASH_FUNC] = [

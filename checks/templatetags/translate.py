@@ -39,7 +39,10 @@ def idna(value):
     Return the IDNA; value is str and may contain punnycode.
 
     """
-    return IDNA.decode(value.encode("ascii"))
+    try:
+        return IDNA.decode(value.encode("ascii"))
+    except IDNA.IDNAError:
+        return value
 
 
 @register.simple_tag()

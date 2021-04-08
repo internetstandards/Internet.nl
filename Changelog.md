@@ -1,6 +1,36 @@
 # Change Log
 
-## Unreleased next version
+## Next unreleased version
+
+
+New
+
+Changes
+
+Bug Fixes
+- Typos.
+
+Dependencies
+
+Migrations
+
+Settings
+
+## 1.3.1
+
+Hotfix release.
+
+Bug Fixes
+- Pick the correct domain for checking nameservers. [(#526)]
+- Typos.
+
+[(#526)]: https://github.com/NLnetLabs/Internet.nl/issues/526
+
+## 1.3.0
+
+SSL_OP_PRIORITIZE_CHAHA support, support for more ciphers via the
+ModernConnection, explicit check for NULL MX, DKIM not required for non email
+sending domains, and more.
 
 New
 - docker/it/targetbase/recreate-certificates.sh allows for easy recreation of
@@ -34,6 +64,7 @@ Bug Fixes
 - Can't test site with invalid IDN. [(#484)]
 - set_async(True) causes libunbound under celery to not honor config options
   set notable cache-max-ttl; remove for now.
+- ARIA and DSS algorithms not detected. [(#477)]
 
 Dependencies
 - Updated python-pip-requirements.txt:
@@ -41,6 +72,7 @@ Dependencies
   - celery bumped to 4.3.1 (vine dependency)
   - vine pinned to 1.3.0
   - beautifulsoup4 added [(#463)]
+  - idna added [(#507)]
 
 Migrations
 - New column in DB (mailtestauth_dmarc_record_org_domain). [(#249)]
@@ -60,6 +92,7 @@ Settings
 [(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
 [(#463)]: https://github.com/NLnetLabs/Internet.nl/issues/463
 [(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
+[(#477)]: https://github.com/NLnetLabs/Internet.nl/issues/477
 [(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
 [(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
 [(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503
@@ -69,10 +102,15 @@ Settings
 
 ## 1.2.1
 
+Hotfix release.
+
 Bug Fixes
 - Fix broken connection test from 1.2.0; wrong variable name.
 
 ## 1.2.0
+
+Update of the batch API to v2, removal of the X-XSS-Protection test, visual and
+content improvements for no-MX cases.
 
 New
 - Batch API updated to v2. [(#337)] [(#395)] [(#336)] [(#436)]
