@@ -326,6 +326,10 @@ class HeaderCheckerContentSecurityPolicy(object):
                     if not domain.endswith(host[1]):
                         return False
                     matched_host += 1
+                else:
+                    if not host.endswith(domain):
+                    	return False
+                    matched_host +=1
         if not found_self:
             return False
         # Check that at least one host matched and that the hosts have the same
