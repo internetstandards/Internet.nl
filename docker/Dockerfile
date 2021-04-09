@@ -54,7 +54,7 @@ RUN pip install setuptools
 
 # Install forked pythonwhois
 WORKDIR /tmp/build/python-whois
-RUN curl -fsSLo- 'https://github.com/ralphdolmans/python-whois/tarball/ee546f4' | tar zx --strip-components 1
+RUN curl -fsSLo- 'https://github.com/internetstandards/python-whois/tarball/internetnl' | tar zx --strip-components 1
 RUN python setup.py install
 
 # Build nassl from sources for deprecated protocol support and "extra features" compared to the stock package
@@ -66,7 +66,7 @@ RUN mkdir -p bin/openssl-legacy/freebsd64 \
              bin/openssl-modern/freebsd64 \
              openssl-1.0.2e \
              openssl-master && \
-    curl -fsSLo- 'https://github.com/ximon18/nassl/tarball/758723b' | tar zx --strip-components 1 && \
+    curl -fsSLo- 'https://github.com/internetstandards/nassl.git/tarball/internetnl' | tar zx --strip-components 1 && \
     curl -fsSLo- 'https://zlib.net/zlib-1.2.11.tar.gz' | tar zx && \
     curl -fsSLo- 'https://github.com/PeterMosmans/openssl/tarball/1.0.2-chacha' | tar zx --strip-components 1 -C openssl-1.0.2e && \
     curl -fsSLo- 'https://github.com/openssl/openssl/archive/OpenSSL_1_1_1c.tar.gz' | tar zx --strip-components 1 -C openssl-master && \
@@ -74,11 +74,11 @@ RUN mkdir -p bin/openssl-legacy/freebsd64 \
     python setup.py install
 
 # Unbound
-# See: https://github.com/ralphdolmans/unbound/blob/internetnl/README.md
+# See: https://github.com/internetstandards/unbound/blob/internetnl/README.md
 # TODO: edit internetnl/internetnl.c to match our deployment of Internet.nl
 #    ln -s /usr/local/bin/python3.5 /usr/local/bin/python3.5.6 && \
 WORKDIR /tmp/build/unbound
-RUN curl -fsSLo- 'https://github.com/ralphdolmans/unbound/tarball/internetnl' | tar zx --strip-components 1 && \
+RUN curl -fsSLo- 'https://github.com/internetstandards/unbound/tarball/internetnl' | tar zx --strip-components 1 && \
     ln -s /usr/bin/swig3.0 /usr/bin/swig && \
     ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis && \
     make && \

@@ -22,11 +22,11 @@ Install all Python dependencies from pip at once:
 * `pip install -r python-pip-requirements.txt`
 
 Install Python dependencies not in pip:
-* pythonwhois (use fork at https://github.com/ralphdolmans/python-whois/tree/timeout)
+* pythonwhois (use fork at https://github.com/internetstandards/python-whois/tree/internetnl)
    ```
-   git clone https://github.com/ralphdolmans/python-whois.git
+   git clone https://github.com/internetstandards/python-whois.git
    cd python-whois
-   git checkout timeout
+   git checkout internetnl
    python setup.py install
    ```
 
@@ -38,11 +38,11 @@ in the various TLS related tests in the website and mail tests.
 
 A fork is used to facilitate installation on freeBSD systems.
 
-1. Clone nassl (use fork at https://github.com/ximon18/nassl/tree/free_bsd)
+1. Clone nassl (use fork at https://github.com/internetstandards/nassl/tree/internetnl)
    ```
-   git clone https://github.com/ximon18/nassl.git nassl_freebsd
+   git clone https://github.com/internetstandards/nassl.git nassl_freebsd
    cd nassl_freebsd
-   git checkout free_bsd
+   git checkout internetnl
    mkdir -p bin/openssl-legacy/freebsd64
    mkdir -p bin/openssl-modern/freebsd64
    ```
@@ -89,9 +89,9 @@ Rabbitmq is used as the broker for Celery
 Unbound (and pylibunbound) is used as a DNS resolver/nameserver for the various
 tests performed.
 
-Use the fork at https://github.com/ralphdolmans/unbound.
+Use the fork at https://github.com/internetstandards/unbound.git
 Make sure to use the `internetnl` branch and follow the
-[README.md](https://github.com/ralphdolmans/unbound/blob/internetnl/README.md)
+[README.md](https://github.com/internetstandards/unbound/blob/internetnl/README.md)
 instructions for installation.
 
 If you setup a python virtual environment you should enable it for unbound's

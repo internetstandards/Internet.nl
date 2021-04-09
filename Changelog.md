@@ -12,6 +12,10 @@ Bug Fixes
 - Typos.
 
 Dependencies
+- Updated fork targets:
+  - unbound: https://github.com/ralphdolmans/unbound -> https://github.com/internetstandards/unbound
+  - nassl: https://github.com/ximon18/nassl -> https://github.com/internetstandards/nassl
+  - python-whois: https://github.com/ralphdolmans/python-whois -> https://github.com/internetstandards/python-whois
 
 Migrations
 
