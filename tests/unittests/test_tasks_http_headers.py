@@ -3,6 +3,9 @@ from django.test import SimpleTestCase
 from checks import scoring
 from checks.tasks import http_headers
 
+# Set this to true for more information per test. Then you probably want to run
+# with a specific test only like:
+# ./manage.py test tests.unittests.test_tasks_http_headers..HeaderCheckerContentSecurityPolicyTestCase.test_no_default_src
 DEBUG = False
 
 
@@ -135,7 +138,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_default_src_11(self):
         headers = "default-src 'self' www.internet.nl; frame-ancestors 'self'"
-        self._is_bad(headers)
+        self._is_good(headers)
 
     def test_default_src_12(self):
         headers = "default-src 'self' *.internet.nl; frame-ancestors 'self'"

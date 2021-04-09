@@ -8,6 +8,7 @@ New
 Changes
 
 Bug Fixes
+- CSP: subdomains not processed properly within default-src directive [(#530)]
 - Typos.
 
 Dependencies
@@ -15,6 +16,8 @@ Dependencies
 Migrations
 
 Settings
+
+[(#530)]: https://github.com/NLnetLabs/Internet.nl/issues/530
 
 ## 1.3.1
 
