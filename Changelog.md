@@ -9,6 +9,7 @@ Changes
 
 Bug Fixes
 - CSP: subdomains not processed properly within default-src directive [(#530)]
+- Fix for Public Suffix List: do not ignore rules that include wildcards.
 - Typos.
 
 Dependencies

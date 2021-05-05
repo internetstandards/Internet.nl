@@ -765,6 +765,7 @@ def dmarc_fetch_public_suffix_list():
 
     lines = r.text.split("\n")
     for line in lines:
+        labels = []
         line = line.rstrip()
         if line and not line.startswith(("//", " ")):
             exception = False
@@ -774,8 +775,12 @@ def dmarc_fetch_public_suffix_list():
             # Convert to punnycode.
             # This is how we are going to compare domain names later.
             try:
-                line = idna.encode(line).decode("ascii")
-                public_suffix_list.append((line.split(".")[::-1], exception))
+                for label in line.split('.'):
+                    if label == '*':
+                        labels.append(label)
+                    else:
+                        labels.append(idna.encode(label).decode('ascii'))
+                public_suffix_list.append((labels[::-1], exception))
             except (UnicodeError, ValueError, idna.IDNAError):
                 pass
     return public_suffix_list
