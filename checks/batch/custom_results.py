@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from ..models import DomainTestReport, MailTestReport, ZeroRttStatus
 from ..models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
 from ..categories import MailTlsStarttlsExists
-from ..tasks.mail import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG
+from ..tasks.mail import DMARC_NON_SENDING_POLICY
 from ..tasks.mail import SPF_NON_SENDING_POLICY
 
 
@@ -121,10 +121,7 @@ is translated as:
         is_org = mtauth.dmarc_record_org_domain
         if (mtauth.dmarc_available
                 and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
-                and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
-                        mtauth.dmarc_record[0]))
-                     or (not is_org and DMARC_NON_SENDING_POLICY.match(
-                         mtauth.dmarc_record[0])))
+                and DMARC_NON_SENDING_POLICY.match( mtauth.dmarc_record[0])
                 and mtauth.spf_available
                 and mtauth.spf_policy_status == SpfPolicyStatus.valid
                 and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])):
