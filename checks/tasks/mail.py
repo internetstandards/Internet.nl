@@ -21,7 +21,7 @@ from .. import batch, batch_shared_task
 from ..models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
 
 DMARC_NON_SENDING_POLICY = re.compile(r'^v=DMARC1;\ *p=reject;?$')
-DMARC_NON_SENDING_POLICY_ORG = re.compile(r'v=DMARC1;(?:.*sp=reject|\ *p=reject(?!.*sp=))')
+
 SPF_NON_SENDING_POLICY = re.compile(r'^v=spf1\ +(?:exp=[^ ]+\ +)?-all;?(?:\ +exp=[^ ]+)?$')
 
 
@@ -119,10 +119,7 @@ def skip_dkim_for_non_sending_domain(mtauth):
     if (not mtauth.dkim_available
             and mtauth.dmarc_available
             and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
-            and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
-                    mtauth.dmarc_record[0]))
-                 or (not is_org and DMARC_NON_SENDING_POLICY.match(
-                     mtauth.dmarc_record[0])))
+        	and DMARC_NON_SENDING_POLICY.match(mtauth.dmarc_record[0])
             and mtauth.spf_available
             and mtauth.spf_policy_status == SpfPolicyStatus.valid
             and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])):
