@@ -25,7 +25,7 @@ class DmarcNonSendingPolicyRegexTestCase(SimpleTestCase):
         }
         for record, check in cases:
             with self.subTest(msg=record):
-                check(mail.DMARC_NON_SENDING_POLICY_ORG.match(record))
+                check(mail.DMARC_NON_SENDING_POLICY.match(record))
 
 
 class PublicSuffixListTestCase(SimpleTestCase):
