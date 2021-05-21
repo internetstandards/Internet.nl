@@ -10,6 +10,7 @@ Changes
 Bug Fixes
 - CSP: subdomains not processed properly within default-src directive [(#530)]
 - Fix for Public Suffix List: do not ignore rules that include wildcards.
+- Key exchange parameter divergence [(#538)]
 - Typos.
 
 Dependencies
@@ -23,6 +24,7 @@ Migrations
 Settings
 
 [(#530)]: https://github.com/NLnetLabs/Internet.nl/issues/530
+[(#538)]: https://github.com/NLnetLabs/Internet.nl/issues/538
 
 ## 1.3.1
 
