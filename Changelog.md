@@ -12,6 +12,7 @@ Bug Fixes
 - Fix for Public Suffix List: do not ignore rules that include wildcards.
 - Key exchange parameter divergence [(#538)]
 - Fix for 'non email sending domains and DKIM' does not work for bare domains [(#532)]
+- Fix broken github tarball url for internetstandards/nassl [(#549)]
 - Typos.
 
 Dependencies
@@ -27,6 +28,7 @@ Settings
 [(#530)]: https://github.com/NLnetLabs/Internet.nl/issues/530
 [(#532)]: https://github.com/NLnetLabs/Internet.nl/issues/532
 [(#538)]: https://github.com/NLnetLabs/Internet.nl/issues/538
+[(#549)]: https://github.com/NLnetLabs/Internet.nl/issues/549
 
 ## 1.3.1
 
