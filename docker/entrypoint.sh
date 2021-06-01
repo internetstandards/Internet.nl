@@ -45,8 +45,11 @@ sed \
 cd ${APP_PATH}/checks
 ../manage.py compilemessages
 
-# Prepare the database for use
 cd ${APP_PATH}
+# Check for database connectivity
+docker/postgres-ping.sh postgresql://${POSTGRES_USER}@${POSTGRES_HOST}/${POSTGRES_DB}
+
+# Prepare the database for use
 ./manage.py migrate checks
 
 # Start Celery
