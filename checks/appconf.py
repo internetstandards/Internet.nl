@@ -129,3 +129,4 @@ class ChecksAppConfig(AppConfig):
         _load_padded_macs_in_cache()
         _clear_cached_pages()
         _batch_startup_checks()
+        connection.inc_thread_sharing()
