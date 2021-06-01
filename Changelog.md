@@ -6,6 +6,7 @@
 New
 
 Changes
+- (Docker) Use pg_isready to check db availability on startup [(#551)]
 
 Bug Fixes
 - CSP: subdomains not processed properly within default-src directive [(#530)]
@@ -13,6 +14,7 @@ Bug Fixes
 - Key exchange parameter divergence [(#538)]
 - Fix for 'non email sending domains and DKIM' does not work for bare domains [(#532)]
 - Fix broken github tarball url for internetstandards/nassl [(#549)]
+- Work around Celery bug #5409 leaving stale pid files [(#550)]
 - Typos.
 
 Dependencies
@@ -29,6 +31,8 @@ Settings
 [(#532)]: https://github.com/NLnetLabs/Internet.nl/issues/532
 [(#538)]: https://github.com/NLnetLabs/Internet.nl/issues/538
 [(#549)]: https://github.com/NLnetLabs/Internet.nl/issues/549
+[(#550)]: https://github.com/NLnetLabs/Internet.nl/issues/550
+[(#551)]: https://github.com/NLnetLabs/Internet.nl/issues/551
 
 ## 1.3.1
 
