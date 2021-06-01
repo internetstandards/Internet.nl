@@ -32,6 +32,7 @@ RUN apt-get update && \
         libssl-dev=1.1.1b\* \
         libwww-perl \
         openssl=1.1.1b\* \
+        postgresql-client-11 \
         postgresql-server-dev-11 \
         python3-gdbm \
         python3.7 \
