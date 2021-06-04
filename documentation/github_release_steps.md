@@ -7,7 +7,7 @@ Even if the work was part of the master branch, it is advised to create a branch
 and a PR for the release for cleaner workflow. Indicative branch name:
 'release-v1.2.3'.
 
-0. Make a release branch if needed.
+0. Make a release branch if not already present (e.g., release-v1.2.3)
 1. Make sure that Changelog.md is finalized with the immediate release as the
    latest release documented there. (If creating a release branch as suggested
    above, this change shoud be there).
@@ -18,7 +18,7 @@ and a PR for the release for cleaner workflow. Indicative branch name:
    make update_root_key_file
    ```
 3. Push everything to upstream.
-4. If on a release branch, create the PR as suggested.
+4. Create the PR on GitHub.
 5. Merge the PR and delete the branch on GitHub.
 6. Make a release on GitHub:
    1. Use tag 'vx.x.x' e.g., v1.2.3 for the release

@@ -1,9 +1,8 @@
 # Change Log
 
-## Next unreleased version
+## 1.3.2
 
-
-New
+Hotfix release.
 
 Changes
 - (Docker) Use pg_isready to check db availability on startup [(#551)]
@@ -22,10 +21,6 @@ Dependencies
   - unbound: https://github.com/ralphdolmans/unbound -> https://github.com/internetstandards/unbound
   - nassl: https://github.com/ximon18/nassl -> https://github.com/internetstandards/nassl
   - python-whois: https://github.com/ralphdolmans/python-whois -> https://github.com/internetstandards/python-whois
-
-Migrations
-
-Settings
 
 [(#530)]: https://github.com/NLnetLabs/Internet.nl/issues/530
 [(#532)]: https://github.com/NLnetLabs/Internet.nl/issues/532
