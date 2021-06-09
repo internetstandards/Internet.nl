@@ -2870,7 +2870,8 @@ def forced_http_check(af_ip_pair, url, task):
         has_443 = True
         conn, res, headers, visited_hosts = http_fetch(
             url, af=af_ip_pair[0], path="", port=80, task=task,
-            ip_address=af_ip_pair[1])
+            ip_address=af_ip_pair[1],
+            depth=MAX_REDIRECT_DEPTH-1)
     except (socket.error, http.client.BadStatusLine, NoIpError,
             ConnectionHandshakeException, ConnectionSocketException):
         if has_443:

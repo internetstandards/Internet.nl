@@ -14,6 +14,7 @@ Bug Fixes
 - Fix for 'non email sending domains and DKIM' does not work for bare domains [(#532)]
 - Fix broken github tarball url for internetstandards/nassl [(#549)]
 - Work around Celery bug #5409 leaving stale pid files [(#550)]
+- Do not test redirects after test for first upgrade to HTTPS in "HTTPS redirect" subtest [(#555)]
 - Typos.
 
 Dependencies
@@ -28,6 +29,7 @@ Dependencies
 [(#549)]: https://github.com/NLnetLabs/Internet.nl/issues/549
 [(#550)]: https://github.com/NLnetLabs/Internet.nl/issues/550
 [(#551)]: https://github.com/NLnetLabs/Internet.nl/issues/551
+[(#555)]: https://github.com/NLnetLabs/Internet.nl/issues/555
 
 ## 1.3.1
 
