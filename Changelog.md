@@ -1,5 +1,21 @@
 # Change Log
 
+## Next unreleased version
+
+--- Brief description for next version ---
+
+New
+
+Changes
+
+Bug Fixes
+
+Dependencies
+
+Migrations
+
+Settings
+
 ## 1.3.2
 
 Hotfix release.
