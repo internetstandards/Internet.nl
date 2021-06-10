@@ -3,7 +3,7 @@
 wheel
 
 # The currently supported Django version
-Django==1.11.29
+Django==2.2.24
 django-redis==4.10
 
 # Newer versions of amqp do not work on all systems because of newer TCP settings.
