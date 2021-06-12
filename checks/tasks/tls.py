@@ -1469,8 +1469,15 @@ def starttls_sock_setup(conn):
     """
 
     def readline(fd, maximum_bytes=4096):
-        line = fd.readline(maximum_bytes).decode("ascii")
-        return line
+        """
+        Read and decode one line from `fd`.
+        Try again if the line is blank (including <4 chars) for #560.
+        """
+        for _ in range(2):
+            line = fd.readline(maximum_bytes).decode("ascii")
+            if len(line) >= 4:
+                return line
+        raise SMTPConnectionCouldNotTestException
 
     conn.sock = None
 
