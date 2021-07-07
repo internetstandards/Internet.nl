@@ -1863,6 +1863,13 @@ class ConnectionChecker:
         self._phase_out_ciphers = set()
         self._sufficient_ciphers = set()
         self._cipher_order_violation = []
+        self._test_order_on_sslv2 = False
+        self._test_order_on_sslv23 = False
+        self._test_order_on_sslv3 = False
+        self._test_order_on_tlsv1 = False
+        self._test_order_on_tlsv1_1 = False
+        self._test_order_on_tlsv1_2 = False
+        self._test_order_on_tlsv1_3 = False
 
         if self._checks_mode == ChecksMode.WEB:
             self._score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
@@ -2008,13 +2015,31 @@ class ConnectionChecker:
 
     def _note_cipher(self, cipher, conn=None):
         ci = cipher_infos.get(cipher, None)
+        ssl_version = conn.get_ssl_version()
         if ci:
-            if ci.sec_level == SecLevel.INSUFFICIENT:
+            if ci.sec_level == SecLevel.GOOD:
+                return
+            elif ci.sec_level == SecLevel.INSUFFICIENT:
                 self._bad_ciphers.add(ci.name)
             elif ci.sec_level == SecLevel.PHASE_OUT:
                 self._phase_out_ciphers.add(ci.name)
             elif ci.sec_level == SecLevel.SUFFICIENT:
                 self._sufficient_ciphers.add(ci.name)
+            #cipher is not good, so we will need to test if server enforces order on this connection
+            if ssl_version == SSLV23:
+                self._test_order_on_sslv23 = True
+            elif ssl_version == SSLV2:
+                self._test_order_on_sslv2 = True
+            elif ssl_version == SSLV3:
+                self._test_order_on_sslv3 = True
+            elif ssl_version == TLSV1:
+                self._test_order_on_tlsv1 = True
+            elif ssl_version == TLSV1_1:
+                self._test_order_on_tlsv1_1 = True
+            elif ssl_version == TLSV1_2:
+                self._test_order_on_tlsv1_2 = True
+            elif ssl_version == TLSV1_3:
+                self._test_order_on_tlsv1_3 = True
 
     def check_cert_trust(self):
         """
@@ -2561,6 +2586,86 @@ class ConnectionChecker:
         server.
 
         """
+
+
+        def _test_cipher_order(a_connection,cipher_order_score):
+            # For this test we need two ciphers, one selected by the server and
+            # another selected by the server when the former was disallowed by the
+            # client. We then reverse the order of these two ciphers in the list of
+            # ciphers that the client tells the server it supports, and see if the
+            # server still selects the same cipher. We hope that the server doesn't
+            # consider both ciphers to be of equal weight and thus happy to use
+            # either irrespective of order.
+            cipher_order_tested = CipherOrderStatus.good
+            # Which ciphers seen so far during checks are relevant for self._conn?
+            relevant_ciphers = self._get_seen_ciphers_for_conn(a_connection)
+            # Get the cipher name of at least one cipher that works with self._conn
+            first_cipher = relevant_ciphers[0]
+            ignore_ciphers = [first_cipher]
+            second_cipher = _get_nth_or_default(
+                relevant_ciphers, 1, _get_another_cipher(self, ignore_ciphers))
+
+            # Try to get a non CHACHA cipher to avoid the possible
+            # PRIORITIZE_CHACHA server option.
+            # https://github.com/NLnetLabs/Internet.nl/issues/461
+            while second_cipher:
+                ci = cipher_infos.get(second_cipher, None)
+                if ci and "CHACHA" not in ci.bulk_enc_alg:
+                    break
+                ignore_ciphers.append(second_cipher)
+                second_cipher = _get_another_cipher(self, ignore_ciphers)
+
+            if second_cipher and first_cipher != second_cipher:
+                try:
+                    # Now that we know of two ciphers that can be used to connect
+                    # to the server, one of which was chosen in preference to the
+                    # other, ask the server to use them in reverse order and
+                    # confirm that the server instead continues to impose its own
+                    # order preference on the cipher selection process:
+                    cipher_string = f'{second_cipher}:{first_cipher}'
+                    if self._conn__get_ssl_version < TLSV1_3:
+                        with a_connection.dup(ciphers=cipher_string) as new_conn:
+                            self._note_conn_details(new_conn)
+                            newly_selected_cipher = new_conn.get_current_cipher_name()
+                    else:
+                        with a_connection.dup(tls13ciphers=cipher_string) as new_conn:
+                            self._note_conn_details(new_conn)
+                            newly_selected_cipher = new_conn.get_current_cipher_name()
+
+                    if newly_selected_cipher == second_cipher:
+                        cipher_order_score = self._score_tls_cipher_order_bad
+                        cipher_order_tested = CipherOrderStatus.bad
+
+                except ConnectionHandshakeException:
+                    # Unable to connect with reversed cipher order.
+                    pass
+
+            # Did a previous call to self.check_cipher_sec_level() discover a
+            # prescribed order violation?
+            if not (cipher_order_tested == CipherOrderStatus.bad
+                    or self._cipher_order_violation):
+                # Complete the prescribed order check by testing "good" ciphers.
+                # and "sufficient" ciphers.
+                self._check_ciphers([
+                    (DebugConnection,  SSLV23,  GOOD_SUFFICIENT_DEBUG_CIPHERS),
+                    (ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS),
+                ])
+
+            # The self._cipher_order_violation list will be populated if the
+            # call to self._check_ciphers() finds a prescribed order violation.
+
+            if cipher_order_tested == CipherOrderStatus.bad:
+                # Server does not respect its own preference; ignore any order
+                # violation.
+                pass
+            elif self._cipher_order_violation:
+                if self._cipher_order_violation[2] == '':
+                    cipher_order_tested = CipherOrderStatus.not_seclevel
+                    cipher_order_score = self._score_tls_cipher_order_bad
+                else:
+                    cipher_order_tested = CipherOrderStatus.not_prescribed
+            return cipher_order_tested, cipher_order_score
+
         def _get_nth_or_default(collection, index, default):
             return collection[index] if index < len(collection) else default
 
@@ -2572,7 +2677,7 @@ class ConnectionChecker:
                             ciphers=':'.join(
                                 [f'!{cipher}' for cipher in ignore_ciphers])
                             ) as new_conn:
-                        self._note_conn_details(new_conn)
+                        self._note_conn_details(new_conn)                      
                         another_cipher = new_conn.get_current_cipher_name()
                 else:
                     # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
@@ -2608,82 +2713,29 @@ class ConnectionChecker:
                 cipher_order_score, CipherOrderStatus.na,
                 self._cipher_order_violation)
 
-        # For this test we need two ciphers, one selected by the server and
-        # another selected by the server when the former was disallowed by the
-        # client. We then reverse the order of these two ciphers in the list of
-        # ciphers that the client tells the server it supports, and see if the
-        # server still selects the same cipher. We hope that the server doesn't
-        # consider both ciphers to be of equal weight and thus happy to use
-        # either irrespective of order.
 
-        # Which ciphers seen so far during checks are relevant for self._conn?
-        relevant_ciphers = self._get_seen_ciphers_for_conn(self._conn)
+        #for each connection that has ciphers other than 'good' only, test if order is enforced
+        # test only if we haven't found a order violation yet
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_3):
+            cipher_order, cipher_order_score = _test_cipher_order(ModernConnection.from_conn(self._conn, version=TLSV1_3),cipher_order_score)
 
-        # Get the cipher name of at least one cipher that works with self._conn
-        first_cipher = relevant_ciphers[0]
-        ignore_ciphers = [first_cipher]
-        second_cipher = _get_nth_or_default(
-            relevant_ciphers, 1, _get_another_cipher(self, ignore_ciphers))
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_2):
+            cipher_order, cipher_order_score = _test_cipher_order(DebugConnection.from_conn(self._conn, version=TLSV1_2),cipher_order_score)
 
-        # Try to get a non CHACHA cipher to avoid the possible
-        # PRIORITIZE_CHACHA server option.
-        # https://github.com/NLnetLabs/Internet.nl/issues/461
-        while second_cipher:
-            ci = cipher_infos.get(second_cipher, None)
-            if ci and "CHACHA" not in ci.bulk_enc_alg:
-                break
-            ignore_ciphers.append(second_cipher)
-            second_cipher = _get_another_cipher(self, ignore_ciphers)
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_1):
+            cipher_order, cipher_order_score = _test_cipher_order(DebugConnection.from_conn(self._conn, version=TLSV1_1),cipher_order_score)
 
-        if second_cipher and first_cipher != second_cipher:
-            try:
-                # Now that we know of two ciphers that can be used to connect
-                # to the server, one of which was chosen in preference to the
-                # other, ask the server to use them in reverse order and
-                # confirm that the server instead continues to impose its own
-                # order preference on the cipher selection process:
-                cipher_string = f'{second_cipher}:{first_cipher}'
-                if self._conn__get_ssl_version < TLSV1_3:
-                    with self._conn.dup(ciphers=cipher_string) as new_conn:
-                        self._note_conn_details(new_conn)
-                        newly_selected_cipher = new_conn.get_current_cipher_name()
-                else:
-                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
-                        self._note_conn_details(new_conn)
-                        newly_selected_cipher = new_conn.get_current_cipher_name()
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1):
+            cipher_order, cipher_order_score = _test_cipher_order(DebugConnection.from_conn(self._conn, version=TLSV1),cipher_order_score)
 
-                if newly_selected_cipher == second_cipher:
-                    cipher_order_score = self._score_tls_cipher_order_bad
-                    cipher_order = CipherOrderStatus.bad
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_sslv3):
+            cipher_order, cipher_order_score = _test_cipher_order(DebugConnection.from_conn(self._conn, version=SSLV3),cipher_order_score)
 
-            except ConnectionHandshakeException:
-                # Unable to connect with reversed cipher order.
-                pass
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_sslv23):
+            cipher_order, cipher_order_score = _test_cipher_order(DebugConnection.from_conn(self._conn, version=SSLV23),cipher_order_score)
 
-        # Did a previous call to self.check_cipher_sec_level() discover a
-        # prescribed order violation?
-        if not (cipher_order == CipherOrderStatus.bad
-                or self._cipher_order_violation):
-            # Complete the prescribed order check by testing "good" ciphers.
-            # and "sufficient" ciphers.
-            self._check_ciphers([
-                (DebugConnection,  SSLV23, ':'.join(GOOD_SUFFICIENT_DEBUG_CIPHERS)),
-                (ModernConnection, SSLV23, ':'.join(GOOD_SUFFICIENT_MODERN_CIPHERS)),
-            ])
-
-        # The self._cipher_order_violation list will be populated if the
-        # call to self._check_ciphers() finds a prescribed order violation.
-
-        if cipher_order == CipherOrderStatus.bad:
-            # Server does not respect its own preference; ignore any order
-            # violation.
-            pass
-        elif self._cipher_order_violation:
-            if self._cipher_order_violation[2] == '':
-                cipher_order = CipherOrderStatus.not_seclevel
-                cipher_order_score = self._score_tls_cipher_order_bad
-            else:
-                cipher_order = CipherOrderStatus.not_prescribed
+        if (cipher_order == CipherOrderStatus.good and self._test_order_on_sslv2):
+            cipher_order, cipher_order_score = _test_cipher_order(DebugConnection.from_conn(self._conn, version=SSLV2),cipher_order_score)
 
         return cipher_order_score, cipher_order, self._cipher_order_violation
 
