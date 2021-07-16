@@ -1,6 +1,6 @@
 ## tl;dr
 
-> **Note: "host networking" support required (see issue [#435](https://github.com/NLnetLabs/Internet.nl/issues/435)).**
+> **Note: "host networking" support required (see issue [#435](https://github.com/internetstandards/Internet.nl/issues/435)).**
 >
 > According to [docs.docker.com](https://docs.docker.com/network/host/) _"The host networking driver only works on Linux hosts, and is not supported on Docker Desktop for Mac, Docker Desktop for Windows, or Docker EE for Windows Server"_.
 
@@ -58,7 +58,7 @@ $ docker-compose down (in another terminal)
 There are three ways to customize the deployment:
 1. Pass environment variables to docker directly (see the example above).
 2. Pass environment variables to Docker Compose by creating a `.env` file containing NAME=VALUE key pairs to override the any of the environment variables that are passed by the `docker-compose.yml` file. See the [Docker Compose documentation](https://docs.docker.com/compose/environment-variables/#pass-environment-variables-to-containers).
-3. Create your own Dockerfile using the nlnetlabs/internetnl image as a base, `export DJANGO_SETTINGS_MODULE=/path/to/your/settings.py` and base your `settings.py` file on [`settings.py-dist`](https://github.com/NLnetLabs/Internet.nl/blob/master/internetnl/settings.py-dist). You can also go even further and override the Docker entrypoint to take complete control.
+3. Create your own Dockerfile using the nlnetlabs/internetnl image as a base, `export DJANGO_SETTINGS_MODULE=/path/to/your/settings.py` and base your `settings.py` file on [`settings.py-dist`](https://github.com/internetstandards/Internet.nl/blob/master/internetnl/settings.py-dist). You can also go even further and override the Docker entrypoint to take complete control.
 
 For further customisation edit `Dockerfile` before running `docker-compose build`.
 
