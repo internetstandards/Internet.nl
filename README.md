@@ -18,8 +18,7 @@ Platform which is a collaboration of partners from the internet community and
 the Dutch government. The platform's mission is to jointly promote the use of
 modern internet standards keeping the internet reliable and accessible for
 everybody. [ECP](https://ecp.nl/) provides for the administrative home of the
-platform. [NLnet Labs](https://nlnetlabs.nl/) is responsible for the technical
-realisation and implementation of the test tool.
+platform. [NLnet Labs](https://nlnetlabs.nl/) laid the foundation for Internet.nl and the underlying tooling. From 1 April 2021 onwards, maintenance and further development will be carried out by the project team of the Internet Standards Platform.
 
 
 ## Scope
@@ -58,23 +57,23 @@ Although the first open source release of the project is aimed to provide
 transparency on the tool and the way the tests are run, there is (currently) no
 trivial way to install the software. Nonetheless, you could easily spin up a
 ready to use local dockerized environment for local development and testing
-purposes by following the [docker instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/docker/README.md).
+purposes by following the [docker instructions](https://github.com/internetstandards/Internet.nl/blob/master/docker/README.md).
 
 
 ### Slow start
 
 If you feel brave enough for a system install you can follow the
-[installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/Installation.md).
+[installation instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md).
 
-The [customize instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/Customize.md) describe how you could
+The [customize instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Customize.md) describe how you could
 customize your installation.
 
-The [deployment instructions](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/Deployment.md) provide information
+The [deployment instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Deployment.md) provide information
 relevant to the deployment of your installation and steps you need to run
 before starting/updating your installation.
 
 Example configuration files for the internet.nl ecosystem can be found
-[here](https://github.com/NLnetLabs/Internet.nl/blob/master/documentation/example_configuration).
+[here](https://github.com/internetstandards/Internet.nl/blob/master/documentation/example_configuration).
 
 
 ## Building blocks

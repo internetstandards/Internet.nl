@@ -8,9 +8,9 @@ PackageOriginator: Organization: NLnet Labs
 PackageLicenseConcluded: Apache-2.0
 PackageLicenseInfoFromFiles: LICENSE-Apache-2.0.txt
 PackageCopyrightText: <text>2019, NLnet Labs and the Internet.nl contributors</text>
-PackageDownloadLocation: git://github.com/NLnetLabs/Internet.nl
-PackageDownloadLocation: git+https://github.com/NLnetLabs/Internet.nl.git
-PackageDownloadLocation: git+ssh://github.com/NLnetLabs/Internet.nl.git
+PackageDownloadLocation: git://github.com/internetstandards/Internet.nl
+PackageDownloadLocation: git+https://github.com/internetstandards/Internet.nl.git
+PackageDownloadLocation: git+ssh://github.com/internetstandards/Internet.nl.git
 
 FileName: ./translations/en/main.po
 SPDXID: SPDXRef-FileEnMain
