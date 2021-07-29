@@ -749,7 +749,7 @@ def build_report(dttls, category):
             elif len(dttls.protocols_phase_out) > 0:
                 category.subtests['tls_version'].result_phase_out(protocols_all)
             else:
-                category.subtests['tls_version'].result_good()
+                category.subtests['tls_version'].result_good(protocols_all)
 
             if dttls.compression:
                 category.subtests['tls_compression'].result_bad()
@@ -2647,8 +2647,8 @@ class ConnectionChecker:
                 # Complete the prescribed order check by testing "good" ciphers.
                 # and "sufficient" ciphers.
                 self._check_ciphers([
-                    (DebugConnection,  SSLV23,  GOOD_SUFFICIENT_DEBUG_CIPHERS),
-                    (ModernConnection, TLSV1_2, GOOD_SUFFICIENT_MODERN_CIPHERS),
+                    (DebugConnection,  SSLV23, ':'.join(GOOD_SUFFICIENT_DEBUG_CIPHERS)),
+                    (ModernConnection, SSLV23, ':'.join(GOOD_SUFFICIENT_MODERN_CIPHERS)),
                 ])
 
             # The self._cipher_order_violation list will be populated if the
