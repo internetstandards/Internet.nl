@@ -52,9 +52,6 @@ docker/postgres-ping.sh postgresql://${POSTGRES_USER}@${POSTGRES_HOST}/${POSTGRE
 # Prepare the database for use
 ./manage.py migrate checks
 
-# remove stale Celery .pid files (fixed in Celery 4.4.0, see https://github.com/celery/celery/issues/5409)
-rm -f *.pid
-
 # Start Celery
 celery -A internetnl multi start \
     worker db_worker slow_db_worker \
