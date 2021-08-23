@@ -13,10 +13,6 @@ app.config_from_object('django.conf:settings')
 
 app.autodiscover_tasks()
 
-# https://github.com/celery/celery/issues/4105
-app.backend.result_consumer.start("")
-
-
 @app.task(bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
