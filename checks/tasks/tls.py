@@ -2603,8 +2603,10 @@ class ConnectionChecker:
             first_cipher = relevant_ciphers[0]
             ignore_ciphers = [first_cipher]
             second_cipher = _get_nth_or_default(
-                relevant_ciphers, 1, _get_another_cipher(self, ignore_ciphers))
-
+                relevant_ciphers, 1, first_cipher)
+            if (first_cipher == second_cipher):
+                # only one cipher supported, order is irrelevant
+                return cipher_order_tested, cipher_order_score
             # Try to get a non CHACHA cipher to avoid the possible
             # PRIORITIZE_CHACHA server option.
             # https://github.com/NLnetLabs/Internet.nl/issues/461
