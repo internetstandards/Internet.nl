@@ -21,7 +21,7 @@ if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
                 'task': 'tasks.run_batch',
-                'schedule': settings.BATCH_SCHEDULER_INTERVAL,
+                'schedule': app.conf.BATCH_SCHEDULER_INTERVAL,
         }
     }
 else:
