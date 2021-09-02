@@ -480,7 +480,10 @@ def simhash(url, task=None):
         for tag in soup.select(','.join([
                 f'{t}[nonce]' for t in ('script', 'style')])):
             del tag['nonce']
-        return str(soup)
+        try:
+            return soup.prettify("latin-1")
+        except RecursionError:
+            return html
 
     simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
     distance = settings.SIMHASH_MAX + 100
