@@ -29,7 +29,10 @@ idna
 libsass
 markdown
 polib
-psycopg2-binary
+# psycopg2 2.9 is incompatible with old django versions
+# see: https://github.com/psycopg/psycopg2/issues/1293#issuecomment-862835147
+# remove constraint after Django upgrade
+psycopg2-binary<2.9
 pyparsing
 pyrabbit
 pyyaml
