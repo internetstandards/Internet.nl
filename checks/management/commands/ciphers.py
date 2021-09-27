@@ -11,6 +11,10 @@ class Command(BaseCommand):
         parser.add_argument(
             'ciphers', nargs='*',
             help='Zero or more OpenSSL cipher names to show details for.')
+        parser.add_argument(
+            '--sec-level',
+            choices=['INSUFFICIENT', 'PHASE_OUT', 'SUFFICIENT', 'GOOD'],
+            help='Only show ciphers of a certain security level.')
 
     def handle(self, *args, **options):
         cipher_infos = load_cipher_info()
@@ -18,6 +22,9 @@ class Command(BaseCommand):
 
         for ci in cipher_infos.values():
             if options['ciphers'] and ci.name not in options['ciphers']:
+                continue
+            sec_level = CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci).name
+            if options['sec_level'] and sec_level != options['sec_level']:
                 continue
 
             cipher_string = f'{ci.name}'
@@ -35,7 +42,6 @@ class Command(BaseCommand):
                 cipher_string += f'\tConn={ci.conn_class.__name__}'
 
             if v_level > 2:
-                sec_level = CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci).name
                 formatted_score = CipherScoreAndSecLevel.format_score(
                     CipherScoreAndSecLevel.calc_cipher_score(ci))
                 cipher_string += f'\tSecLevel={sec_level}'

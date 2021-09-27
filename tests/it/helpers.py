@@ -94,7 +94,7 @@ class TESTS:
     IPV6_WEB_SAME_WEBSITE = 'Same website on IPv6 and IPv4'
     SECURITY_HTTP_XFRAME = 'X-Frame-Options'
     SECURITY_HTTP_XCONTYPE = 'X-Content-Type-Options'
-    SECURITY_HTTP_CSP = 'Content-Security-Policy existence'
+    SECURITY_HTTP_CSP = 'Content-Security-Policy'
     SECURITY_HTTP_REFERRER = 'Referrer-Policy existence'
 
 

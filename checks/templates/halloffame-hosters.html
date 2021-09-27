@@ -28,7 +28,7 @@
     <h2>{% include "string.html" with name=hof_subtitle %}</h2>
     <ul class="list-column column-3">
     {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
+      <li><a href="{{member.permalink}}">{{member.domain|truncatechars:36}}</a></li>
     {% endfor %}
     </ul>
   </div>

@@ -3,11 +3,11 @@
 import inspect
 import random
 import re
+from time import monotonic
 import json
 from collections import defaultdict
 from functools import wraps
 
-from celery.five import monotonic
 from contextlib import contextmanager
 from django.conf import settings
 from django.core.cache import cache

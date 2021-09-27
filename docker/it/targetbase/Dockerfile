@@ -25,7 +25,7 @@ RUN a2enmod rewrite
 WORKDIR /tmp/build/nassl
 RUN mkdir -p bin/openssl-legacy/freebsd64 \
              openssl-1.0.2e && \
-    curl -fsSLo- 'https://github.com/ximon18/nassl/tarball/994e156' | tar zx --strip-components 1 && \
+    curl -fsSLo- 'https://github.com/internetstandards/nassl.git/tarball/internetnl' | tar zx --strip-components 1 && \
     curl -fsSLo- 'https://zlib.net/zlib-1.2.11.tar.gz' | tar zx && \
     curl -fsSLo- 'https://github.com/PeterMosmans/openssl/tarball/1.0.2-chacha' | tar zx --strip-components 1 -C openssl-1.0.2e
 COPY custom-httpd/build_from_scratch.py .

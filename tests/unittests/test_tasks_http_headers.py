@@ -3,6 +3,11 @@ from django.test import SimpleTestCase
 from checks import scoring
 from checks.tasks import http_headers
 
+# Set this to true for more information per test. Then you probably want to run
+# with a specific test only like:
+# ./manage.py test tests.unittests.test_tasks_http_headers..HeaderCheckerContentSecurityPolicyTestCase.test_no_default_src
+DEBUG = False
+
 
 class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     @classmethod
@@ -16,15 +21,20 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self.results = self.checker.get_positive_values()
         self.domain = 'internet.nl'
 
-    def _is_good(self, headers):
+    def _checker_check(self, headers):
         self.checker.check(headers, self.results, self.domain)
+        if DEBUG:
+            print(self.checker.result)
+
+    def _is_good(self, headers):
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
         self.assertEqual(
             self.results[self.score],
             scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
 
     def _is_good_and_parsed(self, headers, directive):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
         self.assertEqual(
             self.results[self.score],
@@ -32,7 +42,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self.assertTrue(directive in self.checker.parsed)
 
     def _is_good_and_not_parsed(self, headers, directive):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
         self.assertEqual(
             self.results[self.score],
@@ -40,14 +50,14 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self.assertTrue(directive not in self.checker.parsed)
 
     def _is_bad(self, headers):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], False)
         self.assertEqual(
             self.results[self.score],
             scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD)
 
     def _is_bad_and_parsed(self, headers, directive):
-        self.checker.check(headers, self.results, self.domain)
+        self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], False)
         self.assertEqual(
             self.results[self.score],
@@ -92,7 +102,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_default_src_2(self):
         headers = "default-src 'self' https:; frame-ancestors 'self'"
-        self._is_bad(headers)
+        self._is_good(headers)
 
     def test_default_src_3(self):
         headers = "default-src 'self' 'report_sample'; frame-ancestors 'self'"
@@ -128,11 +138,19 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_default_src_11(self):
         headers = "default-src 'self' www.internet.nl; frame-ancestors 'self'"
-        self._is_bad(headers)
+        self._is_good(headers)
 
     def test_default_src_12(self):
         headers = "default-src 'self' *.internet.nl; frame-ancestors 'self'"
         self._is_good(headers)
+
+    def test_default_src_13(self):
+        headers = "default-src 'self' http:; frame-ancestors 'self'"
+        self._is_bad(headers)
+
+    def test_default_src_14(self):
+        headers = "default-src 'self' somethingelse; frame-ancestors 'self'"
+        self._is_bad(headers)
 
     def test_http_1(self):
         headers = "default-src 'self'; frame-ancestors 'self', style-src http://adfadf.com/asdfh"

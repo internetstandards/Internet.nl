@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nlnetlabs/internetnl:devel
+ARG BASE_IMAGE=internetnl/internetnl:devel
 FROM ${BASE_IMAGE}
 
 # Capture the name of the base image we are extending in an environment

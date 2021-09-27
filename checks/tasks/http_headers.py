@@ -79,6 +79,22 @@ class HeaderCheckerContentSecurityPolicy(object):
                 return True
             return False
 
+        def __str__(self):
+            """
+            Could be used together with tests/unittests/test_tasks_http_headers.py
+            for debugging.
+            """
+            return (
+                f"has_unsafe_inline: {self.has_unsafe_inline}\n"
+                f"has_unsafe_eval: {self.has_unsafe_eval}\n"
+                f"has_unsafe_hashes: {self.has_unsafe_hashes}\n"
+                f"has_http: {self.has_http}\n"
+                f"has_data: {self.has_data}\n"
+                f"has_default_src: {self.has_default_src}\n"
+                f"has_frame_src: {self.has_frame_src}\n"
+                f"has_frame_ancestors: {self.has_frame_ancestors}\n"
+                f"has_invalid_host: {self.has_invalid_host}\n")
+
     Directive = namedtuple('Directive', [
         'default', 'values', 'values_optional', 'values_regex_all'],
         defaults=[[], [], False, False])
@@ -282,7 +298,6 @@ class HeaderCheckerContentSecurityPolicy(object):
         directive = 'default-src'
         domain = domain.rstrip('.')
         expected_sources = 0
-        matched_host = 0
         found_self = False
         found_hosts = set()
         for match in self.parsed[directive]:
@@ -294,27 +309,19 @@ class HeaderCheckerContentSecurityPolicy(object):
                 found_self = True
             elif 'report_sample' in match.groupdict() and match.group('report_sample'):
                 expected_sources += 1
+            elif ('scheme' in match.groupdict() and match.group('scheme')
+                  and match.string == "https:"):
+                expected_sources += 1
             elif 'host' in match.groupdict() and match.group('host'):
                 expected_sources += 1
                 host = match.group('host').rstrip('.')
                 found_hosts.add(host)
-                if domain == host:
-                    matched_host += 1
-                elif host.startswith('*.'):
-                    host = host.split('*.', 1)
-                    if not host[1]:
-                        return False
-                    if not domain.endswith(host[1]):
-                        return False
-                    matched_host += 1
         if not found_self:
             return False
-        # Check that at least one host matched and that the hosts have the same
-        # base domain.
+        # Since we are here, at least one host matched (the visiting domain via
+        # 'self'). Check that all the found hosts share the same base domain.
         if found_hosts:
-            if not matched_host:
-                return False
-            base_domain = min(found_hosts, key=len)
+            base_domain = min(found_hosts | {domain}, key=len)
             for host in found_hosts:
                 if not host.endswith(base_domain):
                     return False
@@ -385,7 +392,7 @@ class HeaderCheckerContentSecurityPolicy(object):
                         if not values:
                             if (not self.directives[dir].values
                                     or self.directives[dir].values_optional):
-                                # No values allowed; keep.
+                                # No-values allowed; keep.
                                 self.parsed[dir]
                             continue
 

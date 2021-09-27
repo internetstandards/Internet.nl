@@ -412,8 +412,8 @@ def do_ns(self, url, *args, **kwargs):
         rrset = self.resolve(url, RR_TYPE_NS)
         next_label = url
         while not rrset and "." in next_label:
-            next_label = next_label[next_label.find(".")+1:]
             rrset = self.resolve(next_label, RR_TYPE_NS)
+            next_label = next_label[next_label.find(".")+1:]
 
         has_a = set()  # Name servers that have IPv4.
         has_aaaa = set()  # Name servers that have IPv6.

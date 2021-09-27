@@ -28,6 +28,10 @@ class Command(BaseCommand):
                 'TLSv1.3'],
             default='auto')
         parser.add_argument(
+            '--cipher-string', default='', help=(
+                'Cipher string to use for the connection. Default is all '
+                'available ciphers.'))
+        parser.add_argument(
             '--calc-score', action='store_true', help=(
                 'Calculate the prescribed ordering score.'))
 
@@ -64,6 +68,9 @@ class Command(BaseCommand):
 
         if conn_class not in (SSLConnectionWrapper, SMTPConnection):
             kwargs['version'] = tls_version
+
+        if options['cipher_string']:
+            kwargs['ciphers'] = options['cipher_string']
 
         with conn_class(**kwargs) as conn:
             # Output a partial version of the openssl s_client -connect output:
