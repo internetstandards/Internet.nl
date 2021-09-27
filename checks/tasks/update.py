@@ -1,7 +1,5 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from celery.task.schedules import crontab
-from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from django.db import transaction
 from django.conf import settings
@@ -10,6 +8,7 @@ from django.core.cache import cache
 from .. import redis_id
 from ..models import DomainTestReport, MailTestReport
 from ..batch import util
+from internetnl.celery import app
 
 logger = get_task_logger(__name__)
 
@@ -174,7 +173,7 @@ def _update_hof():
 
 # Disable HoF when on batch mode, too much DB activity.
 if not settings.ENABLE_BATCH:
-    @periodic_task(run_every=(crontab(hour="*", minute="*/10", day_of_week="*")))
+    @app.task(name='update_HoF_ranking')
     def ranking():
         lock_id = redis_id.hof_lock.id
         lock_ttl = redis_id.hof_lock.ttl
