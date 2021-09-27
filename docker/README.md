@@ -11,16 +11,16 @@ $ xdg-open http://localhost:8080/
 ```
 
 ## With your own Redis, RabbitMQ and Postgres servers
-If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly:
+If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly with these parameters:
 ```
-$ docker run --dns 127.0.0.1 --network host \
-    -e RABBITMQ_HOST=<IP address or domain name> \
-    -e REDIS_HOST=<IP address or domain name> \
-    -e POSTGRES_HOST=<IP address or domain name> \
-    -e POSTGRES_USER=<username> \
-    -e POSTGRES_DB=<db name> \
-    -e POSTGRES_PASS=<password> \
-    nlnetlabs/internetnl:latest
+--dns 127.0.0.1 --network host \
+-e RABBITMQ_HOST=<IP address or domain name> \
+-e REDIS_HOST=<IP address or domain name> \
+-e POSTGRES_HOST=<IP address or domain name> \
+-e POSTGRES_USER=<username> \
+-e POSTGRES_DB=<db name> \
+-e POSTGRES_PASS=<password> \
+
 ```
 
 ## Tested versions
@@ -34,7 +34,7 @@ docker-compose version 1.23.2, build 1110ad01
 ```
 
 ## Rebuilding the Docker image
-If you don't have the image locally (e.g. you didn't do `docker-compose pull`) then Docker Compose will build it from your current Internet.nl GitHub clone. However, this will take some time so normally it's best to do `docker-compose pull` first to fetch the already built image from Docker Hub.
+The docker image on Docker Hub is no longer maintained - you will need to use the docker files from this repo.
 
 If you've made changes to the files in your local clone of Internet.nl you can build an image containing those changes by forcing Docker Compose to build the image:
 ```
