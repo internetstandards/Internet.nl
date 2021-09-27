@@ -2607,7 +2607,7 @@ class ConnectionChecker:
 
             # Try to get a non CHACHA cipher to avoid the possible
             # PRIORITIZE_CHACHA server option.
-            # https://github.com/NLnetLabs/Internet.nl/issues/461
+            # https://github.com/internetnl/Internet.nl/issues/461
             while second_cipher:
                 ci = cipher_infos.get(second_cipher, None)
                 if ci and "CHACHA" not in ci.bulk_enc_alg:

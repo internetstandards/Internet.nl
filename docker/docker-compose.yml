@@ -2,7 +2,7 @@ version: '2.0'
 
 services:
   app:
-    image: nlnetlabs/internetnl
+    image: internetnl/internetnl
     build:
       context: ..
       dockerfile: docker/Dockerfile
