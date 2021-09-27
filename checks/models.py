@@ -8,8 +8,16 @@ from enumfields import Enum as LabelEnum
 from uuid import uuid4 as uuid
 
 from django.core.exceptions import SuspiciousFileOperation
-from django.db import models, transaction
+from django.db import models, transaction, connection
 from django.utils import timezone
+from logging.handlers import SysLogHandler
+import logging
+
+
+logger = logging.getLogger('internetnl')
+
+
+
 
 
 class DnssecStatus(Enum):
@@ -59,14 +67,6 @@ class CipherOrderStatus(Enum):
     na = 4  # Don't care about order; only GOOD ciphers.
 
 
-class MxStatus(LabelEnum):
-    has_mx = 0
-    no_mx = 1
-    no_null_mx = 2
-    invalid_null_mx = 3
-    null_mx = 4
-
-
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -95,7 +95,7 @@ class ListField(models.TextField):
     def __init__(self, *args, **kwargs):
         super(ListField, self).__init__(*args, **kwargs)
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection, context="Null"):
         if value is None:
             return value
         return ast.literal_eval(value)
@@ -161,27 +161,27 @@ class ConnectionTest(BaseTestModel):
     ipv4_addr = models.CharField(max_length=16, default="")
     ipv4_owner = models.CharField(max_length=255, default="")
     ipv4_origin_as = models.ForeignKey(
-        'ASRecord', null=True, related_name='ipv4_connection_tests')
+        'ASRecord', null=True, related_name='ipv4_connection_tests',on_delete=models.CASCADE)
     ipv4_reverse = models.CharField(max_length=255, default="")
 
     ipv6_addr = models.CharField(max_length=40, default="")
     ipv6_owner = models.CharField(max_length=255, default="")
     ipv6_origin_as = models.ForeignKey(
-        'ASRecord', null=True, related_name='ipv6_connection_tests')
+        'ASRecord', null=True, related_name='ipv6_connection_tests',on_delete=models.CASCADE)
     ipv6_reverse = models.CharField(max_length=255, default="")
-    aaaa_ipv6 = models.BooleanField(default=False)
-    addr_ipv6 = models.BooleanField(default=False)
+    aaaa_ipv6 = models.BooleanField(null=True,default=False)
+    addr_ipv6 = models.BooleanField(null=True,default=False)
 
-    resolv_ipv6 = models.BooleanField(default=False)
-    slaac_without_privext = models.BooleanField(default=False)
-    dnssec_val = models.BooleanField(default=False)
+    resolv_ipv6 = models.BooleanField(null=True,default=False)
+    slaac_without_privext = models.BooleanField(null=True,default=False)
+    dnssec_val = models.BooleanField(null=True,default=False)
 
     score_ipv6 = models.IntegerField(null=True)
     score_ipv6_max = models.IntegerField(null=True)
     score_dnssec = models.IntegerField(null=True)
     score_dnssec_max = models.IntegerField(null=True)
 
-    finished = models.BooleanField(default=False)
+    finished = models.BooleanField(null=True,default=False)
 
     def totalscore(self, probe):
         score = 0
@@ -237,11 +237,11 @@ class ConnectionTest(BaseTestModel):
 
 
 class Resolver(models.Model):
-    connectiontest = models.ForeignKey(ConnectionTest)
+    connectiontest = models.ForeignKey(ConnectionTest,on_delete=models.CASCADE)
     address = models.CharField(max_length=40)
     owner = models.CharField(max_length=255)
     origin_as = models.ForeignKey(
-        'ASRecord', null=True, related_name='resolvers')
+        'ASRecord', null=True, related_name='resolvers',on_delete=models.CASCADE)
     reverse = models.CharField(max_length=255)
 
     def __dir__(self):
@@ -299,7 +299,7 @@ class IPv6TestDomain(models.Model):
 
 class WebDomain(IPv6TestDomain):
     domaintestipv6 = models.ForeignKey(
-        DomainTestIpv6, null=True, related_name='webdomains')
+        DomainTestIpv6, null=True, related_name='webdomains',on_delete=models.CASCADE)
 
     def __dir__(self):
         return super(WebDomain, self).__dir__().extend([
@@ -345,7 +345,7 @@ class DomainServersModel(models.Model):
 
 
 class MailTestTls(DomainServersModel):
-    mx_status = EnumIntegerField(MxStatus, null=True)
+    has_null_mx = models.BooleanField(null=True,default=False)
 
     def totalscore(self, score_fields):
         tests_subset = self.testset.all()
@@ -356,11 +356,11 @@ class MailTestTls(DomainServersModel):
         return super(MailTestTls, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['mx_status'] + super(MailTestTls, self).__dir__()
+        return ['has_null_mx'] + super(MailTestTls, self).__dir__()
 
 
 class MailTestDnssec(DomainServersModel):
-    mx_status = EnumIntegerField(MxStatus, null=True)
+    has_null_mx = models.BooleanField(null=True,default=False)
 
     def totalscore(self, score_fields):
         return super(MailTestDnssec, self).totalscore(
@@ -370,7 +370,7 @@ class MailTestDnssec(DomainServersModel):
         return super(MailTestDnssec, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['mx_status'] + super(MailTestDnssec, self).__dir__()
+        return ['has_null_mx'] + super(MailTestDnssec, self).__dir__()
 
 
 # DNSSEC
@@ -383,7 +383,7 @@ class DomainTestDnssec(BaseTestModel):
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
     maildomain = models.ForeignKey(
-        MailTestDnssec, null=True, related_name="testset")
+        MailTestDnssec, null=True, related_name="testset",on_delete=models.CASCADE)
 
     def __dir__(self):
         return [
@@ -407,20 +407,20 @@ class DomainTestTls(BaseTestModel):
     report = ListField(default="")
     port = models.IntegerField(null=True)
     maildomain = models.ForeignKey(
-        MailTestTls, null=True, related_name="testset")
+        MailTestTls, null=True, related_name="testset",on_delete=models.CASCADE)
     webdomain = models.ForeignKey(
-        WebTestTls, null=True, related_name="webtestset")
-    server_reachable = models.NullBooleanField(default=True)
-    tls_enabled = models.NullBooleanField(default=False)
+        WebTestTls, null=True, related_name="webtestset",on_delete=models.CASCADE)
+    server_reachable = models.BooleanField(null=True,default=True)
+    tls_enabled = models.BooleanField(null=True,default=False)
     tls_enabled_score = models.IntegerField(null=True)
-    could_not_test_smtp_starttls = models.BooleanField(default=False)
+    could_not_test_smtp_starttls = models.BooleanField(null=True,default=False)
 
     # DANE
     dane_log = models.TextField(default="", null=True)
     dane_score = models.IntegerField(null=True)
     dane_status = EnumField(DaneStatus, default=DaneStatus.none)
     dane_records = ListField(default=[])
-    dane_rollover = models.BooleanField(default=False)
+    dane_rollover = models.BooleanField(null=True,default=False)
 
     # TLS connection
     dh_param = models.CharField(max_length=255, default="", null=True)
@@ -441,11 +441,11 @@ class DomainTestTls(BaseTestModel):
     protocols_phase_out = ListField(null=True)
     protocols_score = models.IntegerField(null=True)
 
-    compression = models.NullBooleanField(default=False)
+    compression = models.BooleanField(null=True,default=False)
     compression_score = models.IntegerField(null=True)
-    secure_reneg = models.NullBooleanField(default=False)
+    secure_reneg = models.BooleanField(null=True,default=False)
     secure_reneg_score = models.IntegerField(null=True)
-    client_reneg = models.NullBooleanField(default=False)
+    client_reneg = models.BooleanField(null=True,default=False)
     client_reneg_score = models.IntegerField(null=True)
 
     zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
@@ -461,10 +461,10 @@ class DomainTestTls(BaseTestModel):
     forced_https_score = models.IntegerField(null=True)
 
     # HTTP headers
-    http_compression_enabled = models.NullBooleanField(default=False)
+    http_compression_enabled = models.BooleanField(null=True,default=False)
     http_compression_score = models.IntegerField(null=True)
 
-    hsts_enabled = models.NullBooleanField(default=False)
+    hsts_enabled = models.BooleanField(null=True,default=False)
     hsts_policies = ListField(default=[])
     hsts_score = models.IntegerField(null=True)
 
@@ -580,27 +580,27 @@ class DomainTestAppsecpriv(BaseTestModel):
     domain = models.CharField(max_length=255, default="")
     report = ListField(default="")
     webdomain = models.ForeignKey(
-        WebTestAppsecpriv, null=True, related_name="webtestset")
-    server_reachable = models.BooleanField(default=True)
+        WebTestAppsecpriv, null=True, related_name="webtestset",on_delete=models.CASCADE)
+    server_reachable = models.BooleanField(null=True,default=True)
     score = models.IntegerField(null=True)
 
-    x_frame_options_enabled = models.NullBooleanField(default=False)
+    x_frame_options_enabled = models.BooleanField(null=True,default=False)
     x_frame_options_values = ListField(default=[])
     x_frame_options_score = models.IntegerField(null=True)
 
-    x_xss_protection_enabled = models.NullBooleanField(default=False)
+    x_xss_protection_enabled = models.BooleanField(null=True,default=False)
     x_xss_protection_values = ListField(default=[])
     x_xss_protection_score = models.IntegerField(null=True)
 
-    referrer_policy_enabled = models.NullBooleanField(default=False)
+    referrer_policy_enabled = models.BooleanField(null=True,default=False)
     referrer_policy_values = ListField(default=[])
     referrer_policy_score = models.IntegerField(null=True)
 
-    content_security_policy_enabled = models.NullBooleanField(default=False)
+    content_security_policy_enabled = models.BooleanField(null=True,default=False)
     content_security_policy_values = ListField(default=[])
     content_security_policy_score = models.IntegerField(null=True)
 
-    x_content_type_options_enabled = models.NullBooleanField(default=False)
+    x_content_type_options_enabled = models.BooleanField(null=True,default=False)
     x_content_type_options_values = ListField(default=[])
     x_content_type_options_score = models.IntegerField(null=True)
 
@@ -638,10 +638,10 @@ class DomainTestReport(models.Model):
     domain = models.CharField(max_length=255, default="")
     registrar = models.CharField(max_length=255, default="")
     score = models.IntegerField(null=True)
-    ipv6 = models.ForeignKey(DomainTestIpv6, null=True)
-    dnssec = models.ForeignKey(DomainTestDnssec, null=True)
-    tls = models.ForeignKey(WebTestTls, null=True)
-    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True)
+    ipv6 = models.ForeignKey(DomainTestIpv6, null=True,on_delete=models.CASCADE)
+    dnssec = models.ForeignKey(DomainTestDnssec, null=True,on_delete=models.CASCADE)
+    tls = models.ForeignKey(WebTestTls, null=True,on_delete=models.CASCADE)
+    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True,on_delete=models.CASCADE)
 
     def __dir__(self):
         return [
@@ -664,20 +664,20 @@ class MailTestIpv6(BaseTestModel):
     ns_score = models.IntegerField(null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
-    mx_status = EnumIntegerField(MxStatus, null=True)
+    has_null_mx = models.BooleanField(null=True,default=False)
 
     def __dir__(self):
         return [
             'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
-            'max_score', 'mx_status'
+            'max_score', 'has_null_mx'
         ]
 
 
 class NsDomain(IPv6TestDomain):
     domaintestipv6 = models.ForeignKey(
-        DomainTestIpv6, null=True, related_name='nsdomains')
+        DomainTestIpv6, null=True, related_name='nsdomains',on_delete=models.CASCADE)
     mailtestipv6 = models.ForeignKey(
-        MailTestIpv6, null=True, related_name='nsdomains')
+        MailTestIpv6, null=True, related_name='nsdomains',on_delete=models.CASCADE)
 
     def __dir__(self):
         return super(NsDomain, self).__dir__().extend([
@@ -688,7 +688,7 @@ class NsDomain(IPv6TestDomain):
 
 class MxDomain(IPv6TestDomain):
     mailtestipv6 = models.ForeignKey(
-        MailTestIpv6, null=True, related_name='mxdomains')
+        MailTestIpv6, null=True, related_name='mxdomains',on_delete=models.CASCADE)
 
     def __dir__(self):
         return super(MxDomain, self).__dir__().extend([
@@ -718,15 +718,15 @@ class MailTestAuth(BaseTestModel):
     domain = models.CharField(max_length=255)
     report = ListField(default="")
     dkim_score = models.IntegerField(null=True)
-    dkim_available = models.BooleanField(default=False)
+    dkim_available = models.BooleanField(null=True,default=False)
     dmarc_score = models.IntegerField(null=True)
-    dmarc_available = models.BooleanField(default=False)
+    dmarc_available = models.BooleanField(null=True,default=False)
     dmarc_record = ListField(default=[])
     dmarc_record_org_domain = models.CharField(max_length=255, null=True)
     dmarc_policy_status = EnumIntegerField(DmarcPolicyStatus, null=True)
     dmarc_policy_score = models.IntegerField(null=True)
     spf_score = models.IntegerField(null=True)
-    spf_available = models.BooleanField(default=False)
+    spf_available = models.BooleanField(null=True,default=False)
     spf_record = ListField(default=[])
     spf_policy_status = EnumIntegerField(SpfPolicyStatus, null=True)
     spf_policy_score = models.IntegerField(null=True)
@@ -750,10 +750,10 @@ class MailTestReport(models.Model):
     domain = models.CharField(max_length=255, default="")
     registrar = models.CharField(max_length=255, default="")
     score = models.IntegerField(null=True)
-    ipv6 = models.ForeignKey(MailTestIpv6, null=True)
-    dnssec = models.ForeignKey(MailTestDnssec, null=True)
-    auth = models.ForeignKey(MailTestAuth, null=True)
-    tls = models.ForeignKey(MailTestTls, null=True)
+    ipv6 = models.ForeignKey(MailTestIpv6, null=True,on_delete=models.CASCADE)
+    dnssec = models.ForeignKey(MailTestDnssec, null=True,on_delete=models.CASCADE)
+    auth = models.ForeignKey(MailTestAuth, null=True,on_delete=models.CASCADE)
+    tls = models.ForeignKey(MailTestTls, null=True,on_delete=models.CASCADE)
 
     def __dir__(self):
         return [
@@ -814,7 +814,7 @@ class BatchRequest(models.Model):
     The main table for batch requests.
 
     """
-    user = models.ForeignKey(BatchUser, related_name="batch_requests")
+    user = models.ForeignKey(BatchUser, related_name="batch_requests",on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     submit_date = models.DateTimeField(auto_now_add=True)
     finished_date = models.DateTimeField(null=True)
@@ -916,12 +916,12 @@ class BatchDomain(models.Model):
 
     """
     domain = models.CharField(max_length=255, default="")
-    batch_request = models.ForeignKey(BatchRequest, related_name="domains")
+    batch_request = models.ForeignKey(BatchRequest, related_name="domains",on_delete=models.CASCADE)
     status = EnumIntegerField(
         BatchDomainStatus, default=BatchDomainStatus.waiting, db_index=True)
     status_changed = models.DateTimeField(default=timezone.now)
-    webtest = models.ForeignKey('BatchWebTest', null=True)
-    mailtest = models.ForeignKey('BatchMailTest', null=True)
+    webtest = models.ForeignKey('BatchWebTest', null=True,on_delete=models.CASCADE)
+    mailtest = models.ForeignKey('BatchMailTest', null=True,on_delete=models.CASCADE)
 
     def get_batch_test(self):
         if self.webtest:
@@ -961,20 +961,20 @@ class BatchWebTest(models.Model):
     web tests.
 
     """
-    report = models.ForeignKey(DomainTestReport, null=True)
-    ipv6 = models.ForeignKey(DomainTestIpv6, null=True)
+    report = models.ForeignKey(DomainTestReport, null=True,on_delete=models.CASCADE)
+    ipv6 = models.ForeignKey(DomainTestIpv6, null=True,on_delete=models.CASCADE)
     ipv6_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     ipv6_errors = models.PositiveSmallIntegerField(default=0)
-    dnssec = models.ForeignKey(DomainTestDnssec, null=True)
+    dnssec = models.ForeignKey(DomainTestDnssec, null=True,on_delete=models.CASCADE)
     dnssec_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     dnssec_errors = models.PositiveSmallIntegerField(default=0)
-    tls = models.ForeignKey(WebTestTls, null=True)
+    tls = models.ForeignKey(WebTestTls, null=True,on_delete=models.CASCADE)
     tls_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     tls_errors = models.PositiveSmallIntegerField(default=0)
-    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True)
+    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True,on_delete=models.CASCADE)
     appsecpriv_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     appsecpriv_errors = models.PositiveSmallIntegerField(default=0)
@@ -994,20 +994,20 @@ class BatchMailTest(models.Model):
     mail tests.
 
     """
-    report = models.ForeignKey(MailTestReport, null=True)
-    ipv6 = models.ForeignKey(MailTestIpv6, null=True)
+    report = models.ForeignKey(MailTestReport, null=True,on_delete=models.CASCADE)
+    ipv6 = models.ForeignKey(MailTestIpv6, null=True,on_delete=models.CASCADE)
     ipv6_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     ipv6_errors = models.PositiveSmallIntegerField(default=0)
-    dnssec = models.ForeignKey(MailTestDnssec, null=True)
+    dnssec = models.ForeignKey(MailTestDnssec, null=True,on_delete=models.CASCADE)
     dnssec_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     dnssec_errors = models.PositiveSmallIntegerField(default=0)
-    auth = models.ForeignKey(MailTestAuth, null=True)
+    auth = models.ForeignKey(MailTestAuth, null=True,on_delete=models.CASCADE)
     auth_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     auth_errors = models.PositiveSmallIntegerField(default=0)
-    tls = models.ForeignKey(MailTestTls, null=True)
+    tls = models.ForeignKey(MailTestTls, null=True,on_delete=models.CASCADE)
     tls_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     tls_errors = models.PositiveSmallIntegerField(default=0)

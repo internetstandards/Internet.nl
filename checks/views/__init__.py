@@ -14,7 +14,7 @@ from checks.views.shared import get_hof_champions, get_hof_web, get_hof_mail
 from checks.views.shared import update_base_stats, get_hof_manual
 
 
-def page404(request):
+def page404(request,exception):
     return render(
         request, '404.html',
         dict(
