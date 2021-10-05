@@ -1,6 +1,6 @@
 ## tl;dr
 
-> **Note: "host networking" support required (see issue [#435](https://github.com/NLnetLabs/Internet.nl/issues/435)).**
+> **Note: "host networking" support required (see issue [#435](https://github.com/internetstandards/Internet.nl/issues/435)).**
 >
 > According to [docs.docker.com](https://docs.docker.com/network/host/) _"The host networking driver only works on Linux hosts, and is not supported on Docker Desktop for Mac, Docker Desktop for Windows, or Docker EE for Windows Server"_.
 
@@ -11,16 +11,16 @@ $ xdg-open http://localhost:8080/
 ```
 
 ## With your own Redis, RabbitMQ and Postgres servers
-If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly:
+If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly with these parameters:
 ```
-$ docker run --dns 127.0.0.1 --network host \
-    -e RABBITMQ_HOST=<IP address or domain name> \
-    -e REDIS_HOST=<IP address or domain name> \
-    -e POSTGRES_HOST=<IP address or domain name> \
-    -e POSTGRES_USER=<username> \
-    -e POSTGRES_DB=<db name> \
-    -e POSTGRES_PASS=<password> \
-    nlnetlabs/internetnl:latest
+--dns 127.0.0.1 --network host \
+-e RABBITMQ_HOST=<IP address or domain name> \
+-e REDIS_HOST=<IP address or domain name> \
+-e POSTGRES_HOST=<IP address or domain name> \
+-e POSTGRES_USER=<username> \
+-e POSTGRES_DB=<db name> \
+-e POSTGRES_PASS=<password> \
+
 ```
 
 ## Tested versions
@@ -34,7 +34,7 @@ docker-compose version 1.23.2, build 1110ad01
 ```
 
 ## Rebuilding the Docker image
-If you don't have the image locally (e.g. you didn't do `docker-compose pull`) then Docker Compose will build it from your current Internet.nl GitHub clone. However, this will take some time so normally it's best to do `docker-compose pull` first to fetch the already built image from Docker Hub.
+The docker image on Docker Hub is no longer maintained - you will need to use the docker files from this repo.
 
 If you've made changes to the files in your local clone of Internet.nl you can build an image containing those changes by forcing Docker Compose to build the image:
 ```
@@ -58,7 +58,7 @@ $ docker-compose down (in another terminal)
 There are three ways to customize the deployment:
 1. Pass environment variables to docker directly (see the example above).
 2. Pass environment variables to Docker Compose by creating a `.env` file containing NAME=VALUE key pairs to override the any of the environment variables that are passed by the `docker-compose.yml` file. See the [Docker Compose documentation](https://docs.docker.com/compose/environment-variables/#pass-environment-variables-to-containers).
-3. Create your own Dockerfile using the nlnetlabs/internetnl image as a base, `export DJANGO_SETTINGS_MODULE=/path/to/your/settings.py` and base your `settings.py` file on [`settings.py-dist`](https://github.com/NLnetLabs/Internet.nl/blob/master/internetnl/settings.py-dist). You can also go even further and override the Docker entrypoint to take complete control.
+3. Create your own Dockerfile using the nlnetlabs/internetnl image as a base, `export DJANGO_SETTINGS_MODULE=/path/to/your/settings.py` and base your `settings.py` file on [`settings.py-dist`](https://github.com/internetstandards/Internet.nl/blob/master/internetnl/settings.py-dist). You can also go even further and override the Docker entrypoint to take complete control.
 
 For further customisation edit `Dockerfile` before running `docker-compose build`.
 

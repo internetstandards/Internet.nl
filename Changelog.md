@@ -9,12 +9,16 @@ New
 Changes
 
 Bug Fixes
+- Typos.
 
 Dependencies
 
 Migrations
+- Transfer the repository to Platform Internetstandaarden [(#569)]
 
 Settings
+
+[(#569)]: https://github.com/internetstandards/Internet.nl/issues/569
 
 ## 1.3.2
 
@@ -39,13 +43,13 @@ Dependencies
   - nassl: https://github.com/ximon18/nassl -> https://github.com/internetstandards/nassl
   - python-whois: https://github.com/ralphdolmans/python-whois -> https://github.com/internetstandards/python-whois
 
-[(#530)]: https://github.com/NLnetLabs/Internet.nl/issues/530
-[(#532)]: https://github.com/NLnetLabs/Internet.nl/issues/532
-[(#538)]: https://github.com/NLnetLabs/Internet.nl/issues/538
-[(#549)]: https://github.com/NLnetLabs/Internet.nl/issues/549
-[(#550)]: https://github.com/NLnetLabs/Internet.nl/issues/550
-[(#551)]: https://github.com/NLnetLabs/Internet.nl/issues/551
-[(#555)]: https://github.com/NLnetLabs/Internet.nl/issues/555
+[(#530)]: https://github.com/internetstandards/Internet.nl/issues/530
+[(#532)]: https://github.com/internetstandards/Internet.nl/issues/532
+[(#538)]: https://github.com/internetstandards/Internet.nl/issues/538
+[(#549)]: https://github.com/internetstandards/Internet.nl/issues/549
+[(#550)]: https://github.com/internetstandards/Internet.nl/issues/550
+[(#551)]: https://github.com/internetstandards/Internet.nl/issues/551
+[(#555)]: https://github.com/internetstandards/Internet.nl/issues/555
 
 ## 1.3.1
 
@@ -55,7 +59,7 @@ Bug Fixes
 - Pick the correct domain for checking nameservers. [(#526)]
 - Typos.
 
-[(#526)]: https://github.com/NLnetLabs/Internet.nl/issues/526
+[(#526)]: https://github.com/internetstandards/Internet.nl/issues/526
 
 ## 1.3.0
 
@@ -113,23 +117,23 @@ Settings
 - New SMTP_EHLO_DOMAIN setting in settings.py. [(#483)]
 - New optional HAS_ACCESSIBILITY_PAGE setting in settings.py. [(#290)]
 
-[(#249)]: https://github.com/NLnetLabs/Internet.nl/issues/249
-[(#290)]: https://github.com/NLnetLabs/Internet.nl/issues/290
-[(#329)]: https://github.com/NLnetLabs/Internet.nl/issues/329
-[(#325)]: https://github.com/NLnetLabs/Internet.nl/issues/325
-[(#341)]: https://github.com/NLnetLabs/Internet.nl/issues/341
-[(#421)]: https://github.com/NLnetLabs/Internet.nl/issues/421
-[(#443)]: https://github.com/NLnetLabs/Internet.nl/issues/443
-[(#461)]: https://github.com/NLnetLabs/Internet.nl/issues/461
-[(#463)]: https://github.com/NLnetLabs/Internet.nl/issues/463
-[(#468)]: https://github.com/NLnetLabs/Internet.nl/issues/468
-[(#477)]: https://github.com/NLnetLabs/Internet.nl/issues/477
-[(#483)]: https://github.com/NLnetLabs/Internet.nl/issues/483
-[(#484)]: https://github.com/NLnetLabs/Internet.nl/issues/484
-[(#503)]: https://github.com/NLnetLabs/Internet.nl/issues/503
-[(#506)]: https://github.com/NLnetLabs/Internet.nl/issues/506
-[(#507)]: https://github.com/NLnetLabs/Internet.nl/issues/507
-[(#508)]: https://github.com/NLnetLabs/Internet.nl/issues/508
+[(#249)]: https://github.com/internetstandards/Internet.nl/issues/249
+[(#290)]: https://github.com/internetstandards/Internet.nl/issues/290
+[(#329)]: https://github.com/internetstandards/Internet.nl/issues/329
+[(#325)]: https://github.com/internetstandards/Internet.nl/issues/325
+[(#341)]: https://github.com/internetstandards/Internet.nl/issues/341
+[(#421)]: https://github.com/internetstandards/Internet.nl/issues/421
+[(#443)]: https://github.com/internetstandards/Internet.nl/issues/443
+[(#461)]: https://github.com/internetstandards/Internet.nl/issues/461
+[(#463)]: https://github.com/internetstandards/Internet.nl/issues/463
+[(#468)]: https://github.com/internetstandards/Internet.nl/issues/468
+[(#477)]: https://github.com/internetstandards/Internet.nl/issues/477
+[(#483)]: https://github.com/internetstandards/Internet.nl/issues/483
+[(#484)]: https://github.com/internetstandards/Internet.nl/issues/484
+[(#503)]: https://github.com/internetstandards/Internet.nl/issues/503
+[(#506)]: https://github.com/internetstandards/Internet.nl/issues/506
+[(#507)]: https://github.com/internetstandards/Internet.nl/issues/507
+[(#508)]: https://github.com/internetstandards/Internet.nl/issues/508
 
 ## 1.2.1
 
@@ -164,16 +168,16 @@ Bug Fixes
 - mail_starttls_tls_available icon when a server is not tested. [(#457)]
 - Typos.
 
-[(#336)]: https://github.com/NLnetLabs/Internet.nl/issues/336
-[(#337)]: https://github.com/NLnetLabs/Internet.nl/issues/337
-[(#395)]: https://github.com/NLnetLabs/Internet.nl/issues/395
-[(#411)]: https://github.com/NLnetLabs/Internet.nl/issues/411
-[(#417)]: https://github.com/NLnetLabs/Internet.nl/issues/417
-[(#437)]: https://github.com/NLnetLabs/Internet.nl/issues/437
-[(#436)]: https://github.com/NLnetLabs/Internet.nl/issues/436
-[(#455)]: https://github.com/NLnetLabs/Internet.nl/issues/455
-[(#456)]: https://github.com/NLnetLabs/Internet.nl/issues/456
-[(#457)]: https://github.com/NLnetLabs/Internet.nl/issues/457
+[(#336)]: https://github.com/internetstandards/Internet.nl/issues/336
+[(#337)]: https://github.com/internetstandards/Internet.nl/issues/337
+[(#395)]: https://github.com/internetstandards/Internet.nl/issues/395
+[(#411)]: https://github.com/internetstandards/Internet.nl/issues/411
+[(#417)]: https://github.com/internetstandards/Internet.nl/issues/417
+[(#437)]: https://github.com/internetstandards/Internet.nl/issues/437
+[(#436)]: https://github.com/internetstandards/Internet.nl/issues/436
+[(#455)]: https://github.com/internetstandards/Internet.nl/issues/455
+[(#456)]: https://github.com/internetstandards/Internet.nl/issues/456
+[(#457)]: https://github.com/internetstandards/Internet.nl/issues/457
 
 ## 1.1.2
 
@@ -210,10 +214,10 @@ New
 Dependencies
 - Python bumped to 3.7. Make sure to update your environment and reinstall
   everything Python related (including unbound). You can follow the
-  [Installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/v1.1.0/documentation/Installation.md).
+  [Installation instructions](https://github.com/internetstandards/Internet.nl/blob/v1.1.0/documentation/Installation.md).
 - The [nassl fork](https://github.com/ximon18/nassl/tree/free_bsd) was updated.
   Make sure to use the _new_ repository and follow the
-  [Installation instructions](https://github.com/NLnetLabs/Internet.nl/blob/v1.1.0/documentation/Installation.md).
+  [Installation instructions](https://github.com/internetstandards/Internet.nl/blob/v1.1.0/documentation/Installation.md).
 
 Bug Fixes
 - Long domain names break the design. [(#401)]
@@ -227,17 +231,17 @@ Bug Fixes
 - HTML-element is closed while not opened based on @julezrulez commit. [(#392)]
 - Try to detect browser DoNotTrack. [(#426)]
 
-[(#401)]: https://github.com/NLnetLabs/Internet.nl/issues/401
-[(#402)]: https://github.com/NLnetLabs/Internet.nl/issues/402
-[(#389)]: https://github.com/NLnetLabs/Internet.nl/issues/389
-[(#387)]: https://github.com/NLnetLabs/Internet.nl/issues/387
-[(#307)]: https://github.com/NLnetLabs/Internet.nl/issues/307
-[(#306)]: https://github.com/NLnetLabs/Internet.nl/issues/306
-[(#410)]: https://github.com/NLnetLabs/Internet.nl/issues/410
-[(#362)]: https://github.com/NLnetLabs/Internet.nl/issues/362
-[(#170)]: https://github.com/NLnetLabs/Internet.nl/issues/170
-[(#392)]: https://github.com/NLnetLabs/Internet.nl/issues/392
-[(#426)]: https://github.com/NLnetLabs/Internet.nl/issues/426
+[(#401)]: https://github.com/internetstandards/Internet.nl/issues/401
+[(#402)]: https://github.com/internetstandards/Internet.nl/issues/402
+[(#389)]: https://github.com/internetstandards/Internet.nl/issues/389
+[(#387)]: https://github.com/internetstandards/Internet.nl/issues/387
+[(#307)]: https://github.com/internetstandards/Internet.nl/issues/307
+[(#306)]: https://github.com/internetstandards/Internet.nl/issues/306
+[(#410)]: https://github.com/internetstandards/Internet.nl/issues/410
+[(#362)]: https://github.com/internetstandards/Internet.nl/issues/362
+[(#170)]: https://github.com/internetstandards/Internet.nl/issues/170
+[(#392)]: https://github.com/internetstandards/Internet.nl/issues/392
+[(#426)]: https://github.com/internetstandards/Internet.nl/issues/426
 
 ## 1.0.3
 
@@ -251,7 +255,7 @@ Bug Fixes
 - Uncaught exception from python-whois. [(#374)]
 - Typos.
 
-[(#374)]: https://github.com/NLnetLabs/Internet.nl/issues/374
+[(#374)]: https://github.com/internetstandards/Internet.nl/issues/374
 
 ## 1.0.2
 
@@ -260,7 +264,7 @@ Hotfix release.
 Bug Fixes
 - Report unusable TLSA records as non-valid. [(#372)]
 
-[(#372)]: https://github.com/NLnetLabs/Internet.nl/issues/372
+[(#372)]: https://github.com/internetstandards/Internet.nl/issues/372
 
 ## 1.0.1
 
@@ -270,8 +274,8 @@ Bug Fixes
 - Don't check the root certificate's hash function. [(#368)]
 - Missing space between test explanation and technical details. [(#369)]
 
-[(#368)]: https://github.com/NLnetLabs/Internet.nl/issues/368
-[(#369)]: https://github.com/NLnetLabs/Internet.nl/issues/369
+[(#368)]: https://github.com/internetstandards/Internet.nl/issues/368
+[(#369)]: https://github.com/internetstandards/Internet.nl/issues/369
 
 ## 1.0.0
 

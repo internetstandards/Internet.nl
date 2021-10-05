@@ -4,7 +4,7 @@ from datetime import timedelta
 import random
 from timeit import default_timer as timer
 
-from celery.decorators import periodic_task
+from internetnl.celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
@@ -583,8 +583,7 @@ def _run_scheduler():
 
 
 if settings.ENABLE_BATCH:
-    @periodic_task(run_every=timedelta(
-        seconds=settings.BATCH_SCHEDULER_INTERVAL))
+    @app.task(name='run_batch')
     def run():
         """
         Run the scheduler every interval only if it is not running already.

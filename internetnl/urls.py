@@ -9,8 +9,7 @@ urlpatterns = [
 ]
 handler404 = 'checks.views.page404'
 
-
 if settings.DEBUG is True:
     urlpatterns += [
-        url(r'^admin/', include(admin.site.urls)),
+        url(r'^admin/', admin.site.urls),
     ]

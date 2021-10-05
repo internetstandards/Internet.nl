@@ -384,6 +384,8 @@ class HeaderCheckerContentSecurityPolicy(object):
             for header in values:
                 dirs = filter(None, header.split(';'))
                 for content in dirs:
+                    if len(content.strip()) == 0:
+                        continue    
                     content = content.strip().split()
                     dir = content[0]
                     values = content[1:]
