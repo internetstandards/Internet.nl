@@ -50,7 +50,7 @@ cd ${APP_PATH}
 docker/postgres-ping.sh postgresql://${POSTGRES_USER}@${POSTGRES_HOST}/${POSTGRES_DB}
 
 # Prepare the database for use
-./manage.py migrate checks
+./manage.py migrate
 
 # Start Celery
 celery -A internetnl multi start \
