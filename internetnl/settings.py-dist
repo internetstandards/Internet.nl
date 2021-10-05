@@ -97,6 +97,8 @@ if ENABLE_BATCH:
         "Tls13Support": True,
     }
 
+# issue 599 https://github.com/internetstandards/Internet.nl/issues/599
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # --- Application definition
 #
