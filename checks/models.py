@@ -10,14 +10,6 @@ from uuid import uuid4 as uuid
 from django.core.exceptions import SuspiciousFileOperation
 from django.db import models, transaction, connection
 from django.utils import timezone
-from logging.handlers import SysLogHandler
-import logging
-
-
-logger = logging.getLogger('internetnl')
-
-
-
 
 
 class DnssecStatus(Enum):
@@ -65,6 +57,14 @@ class CipherOrderStatus(Enum):
     not_prescribed = 2
     not_seclevel = 3
     na = 4  # Don't care about order; only GOOD ciphers.
+
+
+class MxStatus(LabelEnum):
+    has_mx = 0
+    no_mx = 1
+    no_null_mx = 2
+    invalid_null_mx = 3
+    null_mx = 4
 
 
 def conn_test_id():
