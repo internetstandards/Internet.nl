@@ -442,6 +442,14 @@ def spf_check_policy(
                 redirect_terms.append(term)
             elif 'include:' in term:
                 terms.append(term)
+            elif 'mx' in term:
+                left_lookups -= 1
+            elif 'ptr' in term:
+                left_lookups -= 1
+            elif 'exists' in term:
+                left_lookups -= 1
+            elif 'a' == term:
+                left_lookups -= 1
             elif term.endswith('all') and len(term) < 5:
                 all_found = True
 

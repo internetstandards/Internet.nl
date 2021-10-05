@@ -298,6 +298,7 @@ class HeaderCheckerContentSecurityPolicy(object):
         directive = 'default-src'
         domain = domain.rstrip('.')
         expected_sources = 0
+        matched_host = 0
         found_self = False
         found_hosts = set()
         for match in self.parsed[directive]:
@@ -316,12 +317,27 @@ class HeaderCheckerContentSecurityPolicy(object):
                 expected_sources += 1
                 host = match.group('host').rstrip('.')
                 found_hosts.add(host)
+                if domain == host:
+                    matched_host += 1
+                elif host.startswith('*.'):
+                    host = host.split('*.', 1)
+                    if not host[1]:
+                        return False
+                    if not domain.endswith(host[1]):
+                        return False
+                    matched_host += 1
+                else:
+                    if not host.endswith(domain):
+                        return False
+                    matched_host += 1
         if not found_self:
             return False
         # Since we are here, at least one host matched (the visiting domain via
         # 'self'). Check that all the found hosts share the same base domain.
         if found_hosts:
-            base_domain = min(found_hosts | {domain}, key=len)
+            if not matched_host:
+                return False
+            base_domain = min(found_hosts, key=len)
             for host in found_hosts:
                 if not host.endswith(base_domain):
                     return False

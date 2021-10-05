@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
+import idna as IDNA
 
 from django import template
 from django.conf import settings
@@ -38,7 +39,10 @@ def idna(value):
     Return the IDNA; value is str and may contain punnycode.
 
     """
-    return value.encode("ascii").decode("idna")
+    try:
+        return IDNA.decode(value.encode("ascii"))
+    except IDNA.IDNAError:
+        return value
 
 
 @register.simple_tag()
@@ -105,7 +109,9 @@ def render_details_table(headers, arguments):
                             'detail tech data not-testable',
                             'detail tech data not-reachable',
                             'detail tech data phase-out',
-                            'detail tech data insufficient']:
+                            'detail tech data sufficient',
+                            'detail tech data insufficient'
+                            ]:
                         value = _(value)
                     row.append(value)
                 else:
