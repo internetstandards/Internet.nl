@@ -345,7 +345,7 @@ class DomainServersModel(models.Model):
 
 
 class MailTestTls(DomainServersModel):
-    has_null_mx = models.BooleanField(null=True,default=False)
+    mx_status = EnumIntegerField(MxStatus, null=True,default=False)
 
     def totalscore(self, score_fields):
         tests_subset = self.testset.all()
@@ -356,11 +356,11 @@ class MailTestTls(DomainServersModel):
         return super(MailTestTls, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['has_null_mx'] + super(MailTestTls, self).__dir__()
+        return ['mx_status'] + super(MailTestTls, self).__dir__()
 
 
 class MailTestDnssec(DomainServersModel):
-    has_null_mx = models.BooleanField(null=True,default=False)
+    mx_status = EnumIntegerField(MxStatus, null=True,default=False)
 
     def totalscore(self, score_fields):
         return super(MailTestDnssec, self).totalscore(
@@ -370,7 +370,7 @@ class MailTestDnssec(DomainServersModel):
         return super(MailTestDnssec, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['has_null_mx'] + super(MailTestDnssec, self).__dir__()
+        return ['mx_status'] + super(MailTestDnssec, self).__dir__()
 
 
 # DNSSEC
@@ -438,6 +438,7 @@ class DomainTestTls(BaseTestModel):
     cipher_order_score = models.IntegerField(null=True)
 
     protocols_bad = ListField(null=True)
+    protocols_good = ListField(null=True)
     protocols_phase_out = ListField(null=True)
     protocols_score = models.IntegerField(null=True)
 
@@ -504,7 +505,7 @@ class DomainTestTls(BaseTestModel):
             'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
             'cert_pubkey_bad', 'cert_pubkey_phase_out', 'cert_pubkey_score',
             'cert_signature_bad', 'cert_signature_score', 'cert_hostmatch_bad',
-            'cert_hostmatch_score', 'score',
+            'cert_hostmatch_score', 'score', 'protocols_good',
         ]
 
     def get_web_api_details(self):
@@ -664,12 +665,12 @@ class MailTestIpv6(BaseTestModel):
     ns_score = models.IntegerField(null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
-    has_null_mx = models.BooleanField(null=True,default=False)
+    mx_status = EnumIntegerField(MxStatus, null=True,default=False)
 
     def __dir__(self):
         return [
             'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
-            'max_score', 'has_null_mx'
+            'max_score', 'mx_status'
         ]
 
 
