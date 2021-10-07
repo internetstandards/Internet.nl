@@ -11,6 +11,7 @@ POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
 POSTGRES_DB=${POSTGRES_DB:-internetnl_db1}
 RABBITMQ_HOST=${RABBITMQ_HOST:-localhost}
 REDIS_HOST=${REDIS_HOST:-localhost}
+ROUTINATOR_HOST=${ROUTINATOR_URL:-localhost:9556}
 RUN_SERVER_CMD=${RUN_SERVER_CMD:-runserver}
 LDNS_DANE_VALIDATION_DOMAIN=${LDNS_DANE_VALIDATION_DOMAIN:-internet.nl}
 
@@ -41,6 +42,7 @@ sed \
     -e "s|'USER': '<db_user>'|'USER': '${POSTGRES_USER}'|g" \
     -e "s|'PASSWORD': 'password'|'PASSWORD': '${POSTGRES_PASSWORD}'|g" \
     -e "s|CACHE_TTL = .*|CACHE_TTL = ${CACHE_TTL}|g" \
+    -e "s|ROUTINATOR_URL = 'http://localhost:9556/api/v1/validity'|ROUTINATOR_URL = 'http://${ROUTINATOR_HOST}/api/v1/validity'|g" \
     ${APP_PATH}/internetnl/settings.py-dist > ${APP_PATH}/internetnl/settings.py
 
 # configure Django logging

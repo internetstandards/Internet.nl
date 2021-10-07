@@ -3,10 +3,10 @@
 from django.utils.translation import ugettext as _
 
 from . import categories
-from .tasks import ipv6, dnssec, mail, tls, dispatcher, appsecpriv
+from .tasks import ipv6, dnssec, mail, tls, dispatcher, appsecpriv, rpki
 from .models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
 from .models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
-from .models import MailTestTls, WebTestAppsecpriv
+from .models import MailTestRpki, MailTestTls, WebTestAppsecpriv, WebTestRpki
 from .categories import WebTlsHttpsExists, MailTlsStarttlsExists
 from .scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
 from .scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
@@ -375,6 +375,11 @@ web_probe_appsecpriv = Probe(
     "appsecpriv", "site", model=WebTestAppsecpriv,
     category=categories.WebAppsecpriv,
     taskset=appsecpriv.web_registered)
+web_probe_rpki = Probe(
+    "rpki", "site", model=WebTestRpki,
+    category=categories.WebTestRpki,
+    taskset=rpki.web_registered)
+
 
 batch_web_probe_ipv6 = Probe(
     "ipv6", "site", model=DomainTestIpv6,
@@ -398,6 +403,7 @@ webprobes.add(web_probe_ipv6, 0)
 webprobes.add(web_probe_dnssec, 1)
 webprobes.add(web_probe_tls, 2)
 webprobes.add(web_probe_appsecpriv, 3)
+webprobes.add(web_probe_rpki, 4)
 
 batch_webprobes = ProbeSet()
 batch_webprobes.add(batch_web_probe_ipv6, 0)
@@ -421,6 +427,10 @@ mail_probe_tls = Probe(
     "tls", "mail", model=MailTestTls,
     category=categories.MailTls,
     taskset=tls.mail_registered)
+mail_probe_rpki = Probe(
+    "rpki", "mail", model=MailTestRpki,
+    category=categories.MailTestRpki,
+    taskset=rpki.mail_registered)
 
 batch_mail_probe_ipv6 = Probe(
     "ipv6", "mail", model=MailTestIpv6,
@@ -444,6 +454,7 @@ mailprobes.add(mail_probe_ipv6, 0)
 mailprobes.add(mail_probe_dnssec, 1)
 mailprobes.add(mail_probe_auth, 2)
 mailprobes.add(mail_probe_tls, 3)
+mailprobes.add(mail_probe_rpki, 4)
 
 batch_mailprobes = ProbeSet()
 batch_mailprobes.add(batch_mail_probe_ipv6, 0)

@@ -30,6 +30,7 @@ psycopg2-binary==2.9.1
 pyparsing
 pyrabbit2
 pyyaml
+requests
 rjsmin
 pythonwhois
 argparse

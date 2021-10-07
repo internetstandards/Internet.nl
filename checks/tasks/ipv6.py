@@ -404,7 +404,8 @@ def do_mx(self, url, *args, **kwargs):
         score=int(score),
         mx_status=mx_status))
 
-
+# TODO: consider refactoring using shared.resolve_ns as a pre_test
+# see rpki.py
 def do_ns(self, url, *args, **kwargs):
     try:
         domains = []

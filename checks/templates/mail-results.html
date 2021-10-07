@@ -81,6 +81,18 @@
     {% include "details-test-item.html" with testitem=details.dane_exists %}
     {% include "details-test-item.html" with testitem=details.dane_valid %}
     {% include "details-test-item.html" with testitem=details.dane_rollover %}
+
+  {% elif probe.name == 'mailrpki' %}
+    <div class="test-subsection">
+     {% include "string.html" with name="results domain-mail rpki mail-server label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.rpki_exists %}
+    {% include "details-test-item.html" with testitem=details.rpki_valid %}
+    <div class="test-subsection">
+     {% include "string.html" with name="results domain-mail rpki name-servers label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.rpki_ns_exists %}
+    {% include "details-test-item.html" with testitem=details.rpki_ns_valid %}
   {% endif %}
 {% endblock %}
 

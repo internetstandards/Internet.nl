@@ -6,21 +6,24 @@
 
 ```
 $ docker-compose pull
+# initialize routinator volume
+$ docker run --rm -v ${COMPOSE_PROJECT_NAME:-docker}_routinator-tals:/home/routinator/.rpki-cache/tals \
+    nlnetlabs/routinator init -f --accept-arin-rpa
 $ docker-compose up
 $ xdg-open http://localhost:8080/
 ```
 
-## With your own Redis, RabbitMQ and Postgres servers
-If using your own Redis, RabbitMQ and Postgres servers you don't need Docker Compose, you can use Docker directly with these parameters:
+## With your own Redis, RabbitMQ, Routinator and Postgres servers
+If using your own Redis, RabbitMQ, Routinator and Postgres servers you don't need Docker Compose, you can use Docker directly with these parameters:
 ```
 --dns 127.0.0.1 --network host \
--e RABBITMQ_HOST=<IP address or domain name> \
--e REDIS_HOST=<IP address or domain name> \
--e POSTGRES_HOST=<IP address or domain name> \
--e POSTGRES_USER=<username> \
--e POSTGRES_DB=<db name> \
--e POSTGRES_PASS=<password> \
-
+    -e RABBITMQ_HOST=<IP address or domain name> \
+    -e REDIS_HOST=<IP address or domain name> \
+    -e ROUTINATOR_HOST=<IP address or domain name:portnumber> \
+    -e POSTGRES_HOST=<IP address or domain name> \
+    -e POSTGRES_USER=<username> \
+    -e POSTGRES_DB=<db name> \
+    -e POSTGRES_PASS=<password> \
 ```
 
 ## Tested versions

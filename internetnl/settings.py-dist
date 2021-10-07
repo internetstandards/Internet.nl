@@ -384,3 +384,7 @@ HOF_UPDATE_INTERVAL = 600 # seconds
 # internet.nl to be approached by hosters in order (after manual testing and
 # agreement) to be included in a hosters HoF.
 MANUAL_HOF = {}
+
+# --- Routinator settings
+#
+ROUTINATOR_URL = 'http://localhost:9556/api/v1/validity'

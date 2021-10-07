@@ -1,7 +1,9 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import os
+import requests
 import socket
+import threading
 import time
 
 from celery import Task
@@ -102,3 +104,15 @@ class SetupUnboundContext(Task):
                 data["data"] = result.data
                 data["rcode"] = result.rcode
         data["done"] = True
+
+    def get(self, *args, **kwargs):
+        """
+        Perform a HTTP GET request using the stored session
+        """
+        if not hasattr(self, "_tls"):
+            self._tls = threading.local()
+
+        if not hasattr(self._tls, 'session'):
+            self._tls.session = requests.Session()
+
+        return self._tls.session.get(*args, **kwargs)

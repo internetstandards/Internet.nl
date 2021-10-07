@@ -3890,6 +3890,18 @@ msgstr ""
 msgid "test siteappsecpriv label"
 msgstr "Security options"
 
+msgid "detail web-mail rpki exists tech table"
+msgstr "Server|IP address|ROA exists"
+
+msgid "detail web-mail rpki ns exists tech table"
+msgstr "Nameserver|IP address|ROA exists"
+
+msgid "detail web-mail rpki valid tech table"
+msgstr "Server|Route|Origin|Validation state"
+
+msgid "detail web-mail rpki ns valid tech table"
+msgstr "Nameserver|Route|Origin|Validation state"
+
 msgid "test siteappsecpriv passed description"
 msgstr ""
 "Well done! All application security options are set for your website "

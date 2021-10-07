@@ -233,6 +233,142 @@ class MailTls(Category):
 
 # --- Subtests
 #
+# ---rpki
+class rpkiExists(Subtest):
+    def __init__(self):
+        super(rpkiExists, self).__init__(
+            name="rpki_exists",
+            label="detail web-mail rpki exists label",
+            explanation="detail web-mail rpki exists exp",
+            tech_string="detail web-mail rpki exists tech table",
+            init_tech_type="table_multi_col",
+            worst_status=scoring.RPKI_EXISTENCE_WORST_STATUS)
+
+    def result_bad(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web-mail rpki exists verdict bad"
+
+    def result_good(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki exists verdict good"
+
+    def result_info(self, tech_data):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki exists verdict info"
+        self.tech_data = tech_data
+
+
+class rpkiValid(Subtest):
+    def __init__(self):
+        super(rpkiValid, self).__init__(
+            name="rpki_valid",
+            label="detail web-mail rpki valid label",
+            explanation="detail web-mail rpki valid exp",
+            tech_string="detail web-mail rpki valid tech table",
+            init_tech_type="table",
+            worst_status=scoring.RPKI_VALIDITY_WORST_STATUS)
+
+    def result_bad(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web-mail rpki valid verdict bad"
+
+    def result_good(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki valid verdict good"
+
+    def result_info(self, tech_data):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki valid verdict info"
+
+    def result_nonexistent(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web-mail rpki valid verdict nonexistent"
+        self.tech_type = ""
+
+
+class rpkiNsExists(Subtest):
+    def __init__(self):
+        super(rpkiNsExists, self).__init__(
+            name="rpki_ns_exists",
+            label="detail web-mail rpki ns exists label",
+            explanation="detail web-mail rpki ns exists exp",
+            tech_string="detail web-mail rpki ns exists tech table",
+            init_tech_type="table",
+            worst_status=scoring.RPKI_EXISTENCE_WORST_STATUS)
+
+    def result_bad(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web-mail rpki ns exists verdict bad"
+
+    def result_good(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki ns exists verdict good"
+
+    def result_info(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki ns exists verdict info"
+
+
+class rpkiNsValid(Subtest):
+    def __init__(self):
+        super(rpkiNsValid, self).__init__(
+            name="rpki_ns_valid",
+            label="detail web-mail rpki ns valid label",
+            explanation="detail web-mail rpki ns valid exp",
+            tech_string="detail web-mail rpki ns valid tech table",
+            init_tech_type="table",
+            worst_status=scoring.RPKI_VALIDITY_WORST_STATUS)
+
+    def result_bad(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web-mail rpki ns valid verdict bad"
+
+    def result_good(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki ns valid verdict good"
+
+    def result_info(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki ns valid verdict info"
+
+    def result_nonexistent(self):
+        self.tech_type = ""
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web-mail rpki valid verdict nonexistent"
+
+
+class WebTestRpki(Category):
+    def __init__(self, name="web-rpkiweb"):
+        subtests = [
+            rpkiExists,
+            rpkiValid,
+            rpkiNsExists,
+            rpkiNsValid
+        ]
+        super().__init__(name, subtests)
+
+
+class MailTestRpki(Category):
+    def __init__(self, name="mail-rpki"):
+        subtests = [
+            rpkiExists,
+            rpkiValid,
+            rpkiNsExists,
+            rpkiNsValid
+        ]
+        super().__init__(name, subtests)
+
+
 # --- IPV6
 class Ipv6NsAaaa(Subtest):
     def __init__(self):

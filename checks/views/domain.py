@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
 from checks import simple_cache_page, redis_id
-from checks.models import DomainTestIpv6, DomainTestDnssec
+from checks.models import DomainTestIpv6, DomainTestDnssec, WebTestRpki
 from checks.models import WebTestTls, DomainTestReport, WebTestAppsecpriv
 from checks.models import AutoConfOption
 from checks.probes import webprobes
@@ -48,13 +48,14 @@ def siteprocess(request, dname):
         "test-in-progress", "domain pagetitle")
 
 
-def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None):
+def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
     report = DomainTestReport(
         domain=domain,
         ipv6=ipv6,
         dnssec=dnssec,
         tls=tls,
-        appsecpriv=appsecpriv
+        appsecpriv=appsecpriv,
+        rpki=rpki
     )
     report.save()
     return report
@@ -127,6 +128,8 @@ def resultscurrent(request, dname):
         tls = WebTestTls.objects.filter(domain=addr).order_by('-id')[0]
         appsecpriv = (
             WebTestAppsecpriv.objects.filter(domain=addr).order_by('-id')[0])
+        rpki = (
+            WebTestRpki.objects.filter(domain=addr).order_by('-id')[0])
     except IndexError:
         # Domain not tested, go back to start test
         return HttpResponseRedirect("/site/{}/".format(addr))
@@ -137,12 +140,13 @@ def resultscurrent(request, dname):
         report = ipv6.domaintestreport_set.order_by('-id')[0]
         if (not report.id == dnssec.domaintestreport_set.order_by('-id')[0].id
                 == tls.domaintestreport_set.order_by('-id')[0].id
-                == appsecpriv.domaintestreport_set.order_by('-id')[0].id):
-            report = create_report(addr, ipv6, dnssec, tls, appsecpriv)
+                == appsecpriv.domaintestreport_set.order_by('-id')[0].id
+                == rpki.domaintestreport_set.order_by('-id')[0].id):
+            report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
     except IndexError:
         # one of the test results is not yet related to a report,
         # create one
-        report = create_report(addr, ipv6, dnssec, tls, appsecpriv)
+        report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
     return HttpResponseRedirect("/site/{}/{}/".format(addr, report.id))
 
 
