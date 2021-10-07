@@ -111,6 +111,9 @@ msgstr "Knowledge base"
 msgid "base followtwitter"
 msgstr "Follow us on Twitter"
 
+msgid "base followlinkedin"
+msgstr "Follow us on LinkedIn"
+
 msgid "base halloffame"
 msgstr "Hall of Fame"
 
