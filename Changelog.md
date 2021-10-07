@@ -22,18 +22,18 @@ Settings
 
 ## 1.4
 
-- Issue 496 Mention LinkedIn next to Twitter in footer.
-- Issue 493 Add security.txt based on https://securitytxt.org/
-- Issue 486 Update Django version to latest LTS version, together with dependencies
-- Issue 586 update version of Celery to the latest LTS version, together with dependencies
-- Issue 540 Improve description of the ipv4-ipv6 comparison results and what may be a reason for the differences
-- Issue 562 Add accessibility statement
-- Issue 575, Issue 574 Fix some minor typos and a broken
-- Issue 578 add a missing ' in the frame-ancestors explanation
-- Issue 583 an empty part of Content Security Policy gives an error
-- Issue 589 Refer to https://dutchcloudcommunity.nl/ on https://internet.nl/about/
-- Issue 565 updated jquery (also stops support for very old browsers)
-- Issue 599 add DEFAULT_AUTO_FIELD to default config file
+- Mention LinkedIn next to Twitter in footer. [(#496)]
+- Add security.txt based on https://securitytxt.org/ [(#493)]
+- Update Django version to latest LTS version, together with dependencies [(#486)]
+- update version of Celery to the latest LTS version, together with dependencies [(#586)]
+- Improve description of the ipv4-ipv6 comparison results and what may be a reason for the differences [(#540)]
+- Add accessibility statement [(#562)]
+- Fix some minor typos and a broken [(#574)] [(#575)]
+- add a missing ' in the frame-ancestors explanation [(#578)]
+- an empty part of Content Security Policy gives an error [(#583)]
+- Refer to https://dutchcloudcommunity.nl/ on https://internet.nl/about/ [(#589)]
+- updated jquery (also stops support for very old browsers) [(#565)]
+- add DEFAULT_AUTO_FIELD to default config file [(#599)]
 - Added information/guidance for developers about the batch logic/code.
 
 
