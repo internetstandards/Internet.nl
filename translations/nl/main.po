@@ -3497,12 +3497,6 @@ msgstr "Oude resultaatpresentatie. Doe de test opnieuw."
 msgid "results domain appsecpriv http-headers label"
 msgstr "HTTP security headers"
 
-msgid "detail tech rpki data good"
-msgstr "Ondertekend"
-
-msgid "detail tech rpki data bad"
-msgstr "Niet ondertekend"
-
 msgid "detail web-mail rpki exists tech table"
 msgstr "Server|IP-adres|ROA gepubliceerd"
 
