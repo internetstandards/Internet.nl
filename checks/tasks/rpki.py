@@ -234,7 +234,7 @@ def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
 
 def report_exists(subtestname, category, domainset) -> None:
     """Generate a test report for the existence of ROAs."""
-    def gen_tech_data(subtestname, domain, ip, validity) -> List[List[str]]:
+    def gen_tech_data(domain, ip, validity) -> List[List[str]]:
         # Provide tech_data to generate a table of the following form
         # 
         # Server     | IP address  | ROA exists
@@ -244,7 +244,6 @@ def report_exists(subtestname, category, domainset) -> None:
 
         if any(route['vrps'] for route in validity.values()):
             row = [domain, ip, "detail tech data yes"]
-
         else:
             row = [domain, ip, "detail tech data no"]
 
@@ -262,8 +261,7 @@ def report_exists(subtestname, category, domainset) -> None:
                 return
 
             tech_data.append(
-                gen_tech_data(subtestname,
-                              domain.domain if domain.domain != prev_domain else '...',
+                gen_tech_data(domain.domain if domain.domain != prev_domain else '...',
                               ip['ip'],
                               ip['validity']))
 
@@ -284,7 +282,7 @@ def report_valid(subtestname, category, domainset) -> None:
 
     This compares routing data from BGP with published ROAs.
     """
-    def gen_tech_data(subtestname, domain, asn, prefix, validity) -> List[str]:
+    def gen_tech_data(domain, asn, prefix, validity) -> List[str]:
         # Provide tech_data to generate a table of the following form
         # 
         # Server     | Route          | Origin  | Validation state
@@ -315,8 +313,7 @@ def report_valid(subtestname, category, domainset) -> None:
             for route, validity in ip['validity'].items():
                 asn, prefix = route
                 tech_data.append(
-                    gen_tech_data(subtestname,
-                                  domain.domain if domain.domain != prev_domain else '...',
+                    gen_tech_data(domain.domain if domain.domain != prev_domain else '...',
                                   asn, prefix, validity))
 
                 if validity['state'] != 'valid':
