@@ -256,6 +256,11 @@ def report_exists(subtestname, category, domainset) -> None:
     prev_domain = None
     for domain in domainset:
         for ip in domain.routing:
+            # failure to validate, team cymru or routinator was unavailable
+            if not ip['routes'] or not all(ip['validity'].values()):
+                category.subtests[subtestname].result_not_tested()
+                return
+
             tech_data.append(
                 gen_tech_data(subtestname,
                               domain.domain if domain.domain != prev_domain else '...',
@@ -302,6 +307,11 @@ def report_valid(subtestname, category, domainset) -> None:
     prev_domain = None
     for domain in domainset:
         for ip in domain.routing:
+            # failure to validate, team cymru or routinator was unavailable
+            if not ip['routes'] or not all(ip['validity'].values()):
+                category.subtests[subtestname].result_not_tested()
+                return
+
             for route, validity in ip['validity'].items():
                 asn, prefix = route
                 tech_data.append(

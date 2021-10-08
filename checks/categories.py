@@ -259,6 +259,10 @@ class rpkiExists(Subtest):
         self.verdict = "detail web-mail rpki exists verdict info"
         self.tech_data = tech_data
 
+    def result_not_tested(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
+
 
 class rpkiValid(Subtest):
     def __init__(self):
@@ -289,6 +293,10 @@ class rpkiValid(Subtest):
         self.verdict = "detail web-mail rpki valid verdict nonexistent"
         self.tech_type = ""
 
+    def result_not_tested(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
+
 
 class rpkiNsExists(Subtest):
     def __init__(self):
@@ -314,6 +322,10 @@ class rpkiNsExists(Subtest):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns exists verdict info"
+
+    def result_not_tested(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
 
 
 class rpkiNsValid(Subtest):
@@ -345,6 +357,10 @@ class rpkiNsValid(Subtest):
         self.tech_type = ""
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web-mail rpki valid verdict nonexistent"
+
+    def result_not_tested(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
 
 
 class WebTestRpki(Category):
