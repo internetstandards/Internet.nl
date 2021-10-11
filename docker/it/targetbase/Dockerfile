@@ -76,7 +76,7 @@ RUN curl -fsSLo- 'https://archive.apache.org/dist/httpd/httpd-2.4.39.tar.bz2' | 
 # OpenSSL is configured. See:
 # https://github.com/apache/httpd/commit/06f68fdc54c72573d4b520219b87a05abb098380
 WORKDIR /tmp/build/openssl-ancient
-RUN curl -fsSLo- 'https://www.openssl.org/source/openssl-0.9.8k.tar.gz' | tar zx --strip-components 1 && \
+RUN curl -fsSLo- 'https://www.openssl.org/source/old/0.9.x/openssl-0.9.8k.tar.gz' | tar zx --strip-components 1 && \
     CFLAGS=-fPIC ./config --prefix=/opt/openssl-ancient shared no-asm && \
     make && make install_sw
 # Then build Apache using our new OpenSSL
@@ -93,7 +93,7 @@ RUN make && make install
 # Build the Postfix SMTP server using legacy OpenSSL
 RUN useradd postfix && groupadd postdrop
 WORKDIR /tmp/build/postfix
-RUN curl -fsSLo- 'ftp://ftp.cs.uu.nl/mirror/postfix/postfix-release/official/postfix-3.4.5.tar.gz' | tar zx --strip-components 1
+RUN curl -fsSLo- 'https://ftp.cs.uu.nl/mirror/postfix/postfix-release/official/postfix-3.4.5.tar.gz' | tar zx --strip-components 1
 ENV POSTFIX_PREFIX_OPENSSL_LEGACY /opt/postfix-old
 RUN make clean && \
     make makefiles \
