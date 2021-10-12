@@ -125,11 +125,11 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_bad(headers)
 
     def test_default_src_8(self):
-        headers = "default-src 'self' nl *.nl www.internet.nl; frame-ancestors 'self'"
+        headers = "default-src 'self' www.internet.nl; frame-ancestors 'self'"
         self._is_good(headers)
 
     def test_default_src_9(self):
-        headers = "default-src 'self' nl *.nl www.internet.nl theinternet.nl; frame-ancestors 'self'"
+        headers = "default-src 'self' www.internet.nl; frame-ancestors 'self'"
         self._is_good(headers)
 
     def test_default_src_10(self):
