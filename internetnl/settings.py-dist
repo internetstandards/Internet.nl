@@ -104,7 +104,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 #
 IPV6_TEST_ADDR = "::1"
 ALLOWED_HOSTS = [".internet.nl", "internet.nl", IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
-ADMINS = (('Administrator', 'django@internet.nl'))
+ADMINS = (('Administrator', 'django@internet.nl'),)
 SERVER_EMAIL = 'django@internet.nl'
 INTERNAL_IPS = [ "localhost", "127.0.0.1" ]
 CONN_TEST_DOMAIN = "internet.nl"
@@ -148,6 +148,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django_hosts.middleware.HostsResponseMiddleware',
     'internetnl.custom_middlewares.ActivateTranslationMiddleware',
