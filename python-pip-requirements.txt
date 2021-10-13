@@ -12,6 +12,7 @@ celery==5.1.2
 kombu==5.1.0
 vine==5.0.0
 
+setuptools-rust
 beautifulsoup4
 cryptography
 django-bleach
