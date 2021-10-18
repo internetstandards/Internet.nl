@@ -55,7 +55,7 @@ if ENABLE_BATCH:
 
     # Note that all the following queues need to be defined in the celery
     # service configuration.
-    CELERY_ROUTES = {
+    CELERY_TASK_ROUTES = {
         'checks.tasks.dnssec.batch_mail_callback': {'queue': 'batch_callback'},
         'checks.tasks.dnssec.batch_mail_is_secure': {'queue': 'batch_main'},
         'checks.tasks.dnssec.batch_web_callback': {'queue': 'batch_callback'},
@@ -226,10 +226,10 @@ STATICFILES_DIRS = [
 
 # --- Celery configuration
 #
-BROKER_URL = 'amqp://guest@localhost//'
+CELERY_BROKER_URL = 'amqp://guest@localhost//'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TASK_RESULT_EXPIRES = 7200
-BROKER_HEARTBEAT = 0  # Workaround for https://github.com/celery/celery/issues/4817
+CELERY_RESULT_EXPIRES = 7200
+CELERY_BROKER_HEARTBEAT = 0  # Workaround for https://github.com/celery/celery/issues/4817
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
@@ -246,7 +246,7 @@ CELERY_ACCEPT_CONTENT = ['pickle']
 
 # Note that all the following queues need to be defined in the celery
 # service configuration.
-CELERY_ROUTES = {
+CELERY_TASK_ROUTES = {
         'checks.tasks.dnssec.mail_callback': {'queue': 'db_worker'},
         'checks.tasks.dnssec.web_callback': {'queue': 'db_worker'},
 
