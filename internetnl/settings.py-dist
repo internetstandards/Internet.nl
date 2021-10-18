@@ -55,7 +55,7 @@ if ENABLE_BATCH:
 
     # Note that all the following queues need to be defined in the celery
     # service configuration.
-    CELERY_TASK_ROUTES = {
+    CELERY_BATCH_TASK_ROUTES = {
         'checks.tasks.dnssec.batch_mail_callback': {'queue': 'batch_callback'},
         'checks.tasks.dnssec.batch_mail_is_secure': {'queue': 'batch_main'},
         'checks.tasks.dnssec.batch_web_callback': {'queue': 'batch_callback'},
@@ -266,6 +266,9 @@ CELERY_TASK_ROUTES = {
         'checks.views.shared.update_running_status': {'queue': 'slow_db_worker'},
         'checks.tasks.update.update_hof': {'queue': 'slow_db_worker'},
 }
+
+if ENABLE_BATCH:
+    CELERY_TASK_ROUTES.update(CELERY_BATCH_TASK_ROUTES)
 
 # Shared task timings
 SHARED_TASK_SOFT_TIME_LIMIT_HIGH = 90
