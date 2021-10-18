@@ -582,17 +582,16 @@ def _run_scheduler():
     logger.info("Found {} domains".format(found_domains))
 
 
-if settings.ENABLE_BATCH:
-    @app.task(name='run_batch')
-    def run():
-        """
-        Run the scheduler every interval only if it is not running already.
+@batch_shared_task
+def run():
+    """
+    Run the scheduler every interval only if it is not running already.
 
-        """
-        lock_id = redis_id.batch_scheduler_lock.id
-        lock_ttl = redis_id.batch_scheduler_lock.ttl
-        with util.memcache_lock(lock_id, lock_ttl) as acquired:
-            if acquired:
-                _run_scheduler()
-                return
-        logger.info("Already running...")
+    """
+    lock_id = redis_id.batch_scheduler_lock.id
+    lock_ttl = redis_id.batch_scheduler_lock.ttl
+    with util.memcache_lock(lock_id, lock_ttl) as acquired:
+        if acquired:
+            _run_scheduler()
+            return
+    logger.info("Already running...")

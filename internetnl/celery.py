@@ -20,15 +20,15 @@ def debug_task(self):
 if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
-                'task': 'tasks.run_batch',
-                'schedule': app.conf.BATCH_SCHEDULER_INTERVAL,
+                'task': 'checks.batch.scheduler.run',
+                'schedule': app.conf.BATCH_SCHEDULER_INTERVAL
         }
     }
 else:
     # Disable HoF when on batch mode, too much DB activity.
     app.conf.beat_schedule = {
         'generate_HoF': {
-                'task': 'update_HoF_ranking',
-                'schedule': crontab(hour='*', minute='*/10', day_of_week='*'),
+                'task': 'checks.tasks.update.update_hof',
+                'schedule': app.conf.HOF_UPDATE_INTERVAL
         }
     }
