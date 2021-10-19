@@ -526,6 +526,28 @@ def addr_ipv6(request, request_id):
     return network_ipv6(request, request_id)
 
 
+def get_slaac_mac_vendor(ip):
+    """
+    Try to get the mac vendor out of a potential IPv6 SLAAC address with no
+    privacy extensions enabled.
+
+    """
+    # Get padded mac oui of SLAAC address
+    s = socket.inet_pton(socket.AF_INET6, ip)
+    mac_oui = bytearray(s[8:13])
+    # flip 7th bit of 1st byte
+    mac_oui[0] = mac_oui[0] ^ 2
+    mac_oui = mac_oui.hex().upper()
+
+    red = get_redis_connection("default")
+    mac_vendor = red.hget(redis_id.padded_macs.id, mac_oui)
+    if mac_vendor is None:
+        mac_vendor = 'false'
+    else:
+        mac_vendor = mac_vendor.decode(errors='replace')
+    return mac_vendor
+
+
 def network_ipv6(request, test_id):
     cache_id = redis_id.conn_test_v6.id.format(test_id)
     cache_ttl = redis_id.conn_test_v6.ttl
@@ -540,17 +562,7 @@ def network_ipv6(request, test_id):
     ptr_list = unbound_ptr(reverse_pointer)
     reverse = ", ".join(ptr_list)
 
-    # Get padded mac oui of SLAAC address
-    s = socket.inet_pton(socket.AF_INET6, ip)
-    mac_oui = bytearray(s[8:13])
-    # flip 7th bit of 1st byte
-    mac_oui[0] = mac_oui[0] ^ 2
-    mac_oui = mac_oui.hex().upper()
-
-    red = get_redis_connection("default")
-    mac_vendor = red.hget(redis_id.padded_macs.id, mac_oui)
-    if not mac_vendor:
-        mac_vendor = 'false'
+    mac_vendor = get_slaac_mac_vendor(ip)
 
     resolv = resolv_list(request.get_host(), test_id)
 
