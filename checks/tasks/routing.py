@@ -248,8 +248,13 @@ class Routinator(RelyingPartySoftware):
     def query(task: T, asn: Asn, prefix: Prefix) -> Dict:
         """Query Routinator's /api/v1/validate endpoint and return json response.
 
-        :throws: requests.RequestException, json.JSONDecodeError
+        :throws: requests.RequestException, requests.HTTPError, json.JSONDecodeError
         """
         request = f"{settings.ROUTINATOR_URL}/{asn}/{prefix}"
         response = requests.get(request)
+
+        # API unavailable during Routinator's initial validation
+        if response.status_code == 503:
+            raise requests.HTTPError
+
         return response.json()
