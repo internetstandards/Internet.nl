@@ -38,4 +38,7 @@ pathlib2
 py
 pytest
 selenium
+urllib3
+chardet
+requests
 
