@@ -114,8 +114,7 @@ class Command(BaseCommand):
         cmd = self
         subparsers = parser.add_subparsers(
             title='sub-commands', description='Available sub-commands',
-            dest='sub-command', required=True,
-            parser_class=lambda **kw: CommandParser(cmd, **kw))
+            dest='sub-command', required=True)
 
         list_parser = subparsers.add_parser(
             'list', help='List the registered API users')
