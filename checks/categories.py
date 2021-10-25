@@ -302,26 +302,26 @@ class rpkiNsExists(Subtest):
     def __init__(self):
         super(rpkiNsExists, self).__init__(
             name="rpki_ns_exists",
-            label="detail web-mail rpki ns exists label",
-            explanation="detail web-mail rpki ns exists exp",
-            tech_string="detail web-mail rpki ns exists tech table",
+            label="detail web-mail rpki ns_exists label",
+            explanation="detail web-mail rpki ns_exists exp",
+            tech_string="detail web-mail rpki ns_exists tech table",
             init_tech_type="table",
             worst_status=scoring.RPKI_EXISTENCE_WORST_STATUS)
 
     def result_bad(self, tech_data):
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
-        self.verdict = "detail web-mail rpki ns exists verdict bad"
+        self.verdict = "detail web-mail rpki ns_exists verdict bad"
 
     def result_good(self, tech_data):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns exists verdict good"
+        self.verdict = "detail web-mail rpki ns_exists verdict good"
 
     def result_info(self, tech_data):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns exists verdict info"
+        self.verdict = "detail web-mail rpki ns_exists verdict info"
 
     def result_not_tested(self):
         self.tech_type = ""
@@ -332,31 +332,31 @@ class rpkiNsValid(Subtest):
     def __init__(self):
         super(rpkiNsValid, self).__init__(
             name="rpki_ns_valid",
-            label="detail web-mail rpki ns valid label",
-            explanation="detail web-mail rpki ns valid exp",
-            tech_string="detail web-mail rpki ns valid tech table",
+            label="detail web-mail rpki ns_valid label",
+            explanation="detail web-mail rpki ns_valid exp",
+            tech_string="detail web-mail rpki ns_valid tech table",
             init_tech_type="table",
             worst_status=scoring.RPKI_VALIDITY_WORST_STATUS)
 
     def result_bad(self, tech_data):
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
-        self.verdict = "detail web-mail rpki ns valid verdict bad"
+        self.verdict = "detail web-mail rpki ns_valid verdict bad"
 
     def result_good(self, tech_data):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns valid verdict good"
+        self.verdict = "detail web-mail rpki ns_valid verdict good"
 
     def result_info(self, tech_data):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns valid verdict info"
+        self.verdict = "detail web-mail rpki ns_valid verdict info"
 
     def result_nonexistent(self):
         self.tech_type = ""
         self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web-mail rpki valid verdict nonexistent"
+        self.verdict = "detail web-mail rpki ns_valid verdict nonexistent"
 
     def result_not_tested(self):
         self.tech_type = ""
