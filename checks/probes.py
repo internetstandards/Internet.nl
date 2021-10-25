@@ -377,7 +377,7 @@ web_probe_appsecpriv = Probe(
     taskset=appsecpriv.web_registered)
 web_probe_rpki = Probe(
     "rpki", "site", model=WebTestRpki,
-    category=categories.WebTestRpki,
+    category=categories.WebRpki,
     taskset=rpki.web_registered)
 
 
@@ -429,7 +429,7 @@ mail_probe_tls = Probe(
     taskset=tls.mail_registered)
 mail_probe_rpki = Probe(
     "rpki", "mail", model=MailTestRpki,
-    category=categories.MailTestRpki,
+    category=categories.MailRpki,
     taskset=rpki.mail_registered)
 
 batch_mail_probe_ipv6 = Probe(

@@ -363,8 +363,8 @@ class rpkiNsValid(Subtest):
         self._status(STATUS_ERROR, override=True)
 
 
-class WebTestRpki(Category):
-    def __init__(self, name="web-rpkiweb"):
+class WebRpki(Category):
+    def __init__(self, name="web-rpki"):
         subtests = [
             rpkiExists,
             rpkiValid,
@@ -374,7 +374,7 @@ class WebTestRpki(Category):
         super().__init__(name, subtests)
 
 
-class MailTestRpki(Category):
+class MailRpki(Category):
     def __init__(self, name="mail-rpki"):
         subtests = [
             rpkiExists,

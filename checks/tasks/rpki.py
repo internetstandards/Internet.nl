@@ -32,7 +32,7 @@ model_map = dict(
 @shared_task(bind=True)
 def mail_callback(self, results, domain, req_limit_id):
     """Save results in the DB."""
-    category = categories.MailTestRpki()
+    category = categories.MailRpki()
     maildomain, results = callback(results, domain, MailTestRpki(),
                                    "mailtestrpki", category)
     # Always calculate scores on saving.
@@ -45,7 +45,7 @@ def mail_callback(self, results, domain, req_limit_id):
 @shared_task(bind=True)
 def batch_mail_callback(self, results, domain, req_limit_id):
     """Save results in the DB."""
-    category = categories.MailTestRpki()
+    category = categories.MailRpki()
     maildomain, results = callback(results, domain, MailTestRpki(),
                                    "mailtestrpki", category)
     # Always calculate scores on saving.
@@ -57,7 +57,7 @@ def batch_mail_callback(self, results, domain, req_limit_id):
 @shared_task(bind=True)
 def web_callback(self, results, domain, req_limit_id):
     """Save results in the DB."""
-    category = categories.WebTestRpki()
+    category = categories.WebRpki()
     webdomain, results = callback(results, domain, WebTestRpki(),
                                   "webtestrpki", category)
     # Always calculate scores on saving.
