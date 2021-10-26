@@ -19,7 +19,7 @@ push the changes to the server:
    make update_root_key_file
    ```
    This is already done with each release, but in case you are not using the
-   latest release.
+   latest release. For the update_cert_fingerprints, please read [(#614)]
    
 On the server you need to:
 
