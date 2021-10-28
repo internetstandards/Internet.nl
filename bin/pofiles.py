@@ -186,7 +186,10 @@ def build_tar(args=None):
 
     """
     print("Removing previous directory structure...")
-    shutil.rmtree(TAR_UNPACK_DIR)
+    try:
+        shutil.rmtree(TAR_UNPACK_DIR)
+    except FileNotFoundError:
+        pass
     pathlib.Path(TAR_UNPACK_DIR).mkdir(parents=True, exist_ok=True)
 
     print("Building tar from translations...")
