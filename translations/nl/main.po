@@ -809,6 +809,45 @@ msgid "detail mail ipv6 mx-reach verdict good"
 msgstr ""
 "Al je ontvangende mailservers met een IPv6-adres zijn bereikbaar via IPv6."
 
+msgid "detail mail rpki exists exp"
+msgstr ""
+
+msgid "detail mail rpki exists label"
+msgstr ""
+
+msgid "detail mail rpki exists tech table"
+msgstr "Mailserver|IP-adres|ROA gepubliceerd"
+
+msgid "detail mail rpki exists verdict bad"
+msgstr ""
+
+msgid "detail mail rpki exists verdict good"
+msgstr ""
+
+msgid "detail mail rpki exists verdict info"
+msgstr ""
+
+msgid "detail mail rpki valid exp"
+msgstr ""
+
+msgid "detail mail rpki valid label"
+msgstr ""
+
+msgid "detail mail rpki valid tech table"
+msgstr "Mailserver|Route|Origin|Uitkomst validatie"
+
+msgid "detail mail rpki valid verdict bad"
+msgstr ""
+
+msgid "detail mail rpki valid verdict good"
+msgstr ""
+
+msgid "detail mail rpki valid verdict info"
+msgstr ""
+
+msgid "detail mail rpki valid verdict nonexistent"
+msgstr ""
+
 msgid "detail mail tls cert-hostmatch exp"
 msgstr ""
 "We testen of de domeinnaam van ieder van je ontvangende mailservers (MX) overeenkomt met de domeinnaam op het gepresenteerde certificaat. \n"
@@ -1857,6 +1896,45 @@ msgstr ""
 msgid "detail web ipv6 web-reach verdict good"
 msgstr "Al je webservers met een IPv6-adres zijn bereikbaar via IPv6."
 
+msgid "detail web rpki exists exp"
+msgstr ""
+
+msgid "detail web rpki exists label"
+msgstr ""
+
+msgid "detail web rpki exists tech table"
+msgstr "Webserver|IP-adres|ROA gepubliceerd"
+
+msgid "detail web rpki exists verdict bad"
+msgstr ""
+
+msgid "detail web rpki exists verdict good"
+msgstr ""
+
+msgid "detail web rpki exists verdict info"
+msgstr ""
+
+msgid "detail web rpki valid exp"
+msgstr ""
+
+msgid "detail web rpki valid label"
+msgstr ""
+
+msgid "detail web rpki valid tech table"
+msgstr "Webserver|Route|Origin|Uitkomst validatie"
+
+msgid "detail web rpki valid verdict bad"
+msgstr ""
+
+msgid "detail web rpki valid verdict good"
+msgstr ""
+
+msgid "detail web rpki valid verdict info"
+msgstr ""
+
+msgid "detail web rpki valid verdict nonexistent"
+msgstr ""
+
 msgid "detail web tls cert-hostmatch exp"
 msgstr ""
 "We testen of de domeinnaam van je website overeenkomt met de domeinnaam op het certificaat. \n"
@@ -2649,6 +2727,12 @@ msgstr ""
 
 msgid "detail web-mail ipv6 ns-reach verdict good"
 msgstr "Alle nameservers die een IPv6-adres hebben zijn bereikbaar via IPv6."
+
+msgid "detail web-mail rpki ns_exists tech table"
+msgstr "Nameserver|IP-adres|ROA gepubliceerd"
+
+msgid "detail web-mail rpki ns_valid tech table"
+msgstr "Nameserver|Route|Origin|Uitkomst validatie"
 
 msgid "disclosure content"
 msgstr ""
@@ -3497,20 +3581,14 @@ msgstr "Oude resultaatpresentatie. Doe de test opnieuw."
 msgid "results domain appsecpriv http-headers label"
 msgstr "HTTP security headers"
 
-msgid "detail web-mail rpki exists tech table"
-msgstr "Server|IP-adres|ROA gepubliceerd"
-
-msgid "detail web-mail rpki ns exists tech table"
-msgstr "Nameserver|IP-adres|ROA gepubliceerd"
-
-msgid "detail web-mail rpki valid tech table"
-msgstr "Server|Route|Origin|Uitkomst validatie"
-
-msgid "detail web-mail rpki ns valid tech table"
-msgstr "Nameserver|Route|Origin|Uitkomst validatie"
-
 msgid "results domain ipv6 web-server label"
 msgstr "Webserver"
+
+msgid "results domain rpki name-servers label"
+msgstr ""
+
+msgid "results domain rpki web-server label"
+msgstr ""
 
 msgid "results domain tls http-headers label"
 msgstr "HTTP headers"
@@ -4203,6 +4281,36 @@ msgstr ""
 msgid "test siteipv6 warning summary"
 msgstr ""
 "*Niet* bereikbaar via modern internetadres, of verbetering mogelijk (IPv6)"
+
+msgid "test siterpki failed description"
+msgstr ""
+
+msgid "test siterpki failed summary"
+msgstr ""
+
+msgid "test siterpki info description"
+msgstr ""
+
+msgid "test siterpki info summary"
+msgstr ""
+
+msgid "test siterpki label"
+msgstr ""
+
+msgid "test siterpki passed description"
+msgstr ""
+
+msgid "test siterpki passed summary"
+msgstr ""
+
+msgid "test siterpki title"
+msgstr ""
+
+msgid "test siterpki warning description"
+msgstr ""
+
+msgid "test siterpki warning summary"
+msgstr ""
 
 msgid "test sitetls failed description"
 msgstr ""

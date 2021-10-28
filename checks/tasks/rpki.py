@@ -333,19 +333,19 @@ def build_summary_report(parent, parent_name, category) -> None:
         webset = parent.webdomains.all().order_by('domain')
         nsset = parent.nsdomains.all().order_by('domain')
 
-        report_exists('rpki_exists', category, webset)
-        report_valid('rpki_valid', category, webset)
-        report_exists('rpki_ns_exists', category, nsset)
-        report_valid('rpki_ns_valid', category, nsset)
+        report_exists('web_rpki_exists', category, webset)
+        report_valid('web_rpki_valid', category, webset)
+        report_exists('ns_rpki_exists', category, nsset)
+        report_valid('ns_rpki_valid', category, nsset)
 
     elif parent_name == 'mailtestrpki':
         mxset = parent.mxdomains.all().order_by('domain')
         nsset = parent.nsdomains.all().order_by('domain')
 
-        report_exists('rpki_exists', category, mxset)
-        report_valid('rpki_valid', category, mxset)
-        report_exists('rpki_ns_exists', category, nsset)
-        report_valid('rpki_ns_valid', category, nsset)
+        report_exists('mail_rpki_exists', category, mxset)
+        report_valid('mail_rpki_valid', category, mxset)
+        report_exists('ns_rpki_exists', category, nsset)
+        report_valid('ns_rpki_valid', category, nsset)
 
     parent.report = category.gen_report()
     parent.save()
