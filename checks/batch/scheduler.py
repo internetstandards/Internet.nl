@@ -24,13 +24,15 @@ from ..tasks.mail import batch_mail_registered as auth_mail_taskset
 from ..tasks.tls import batch_web_registered as tls_web_taskset
 from ..tasks.tls import batch_mail_registered as tls_mail_taskset
 from ..tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
+from ..tasks.rpki import batch_web_registered as rpki_web_taskset
+from ..tasks.rpki import batch_mail_registered as rpki_mail_taskset
 from ..tasks import dispatcher
 from ..models import BatchRequest, BatchRequestStatus, BatchDomain
 from ..models import BatchDomainStatus, BatchTestStatus
 from ..models import BatchWebTest
-from ..models import WebTestTls, WebTestAppsecpriv
+from ..models import WebTestTls, WebTestAppsecpriv, WebTestRpki
 from ..models import DomainTestReport, MailTestReport, MailTestTls
-from ..models import MailTestDnssec, DomainTestDnssec
+from ..models import MailTestDnssec, DomainTestDnssec, MailTestRpki
 
 logger = get_task_logger(__name__)
 
@@ -40,6 +42,7 @@ BATCH_WEBTEST = {
         'dnssec': dnssec_web_taskset,
         'tls': tls_web_taskset,
         'appsecpriv': appsecpriv_web_taskset,
+        'rpki': rpki_web_taskset,
     },
     'report': {
         'name': 'domaintestreport'
@@ -51,6 +54,7 @@ BATCH_MAILTEST = {
         'dnssec': dnssec_mail_taskset,
         'auth': auth_mail_taskset,
         'tls': tls_mail_taskset,
+        'rpki': rpki_mail_taskset,
     },
     'report': {
         'name': 'mailtestreport'
@@ -192,6 +196,14 @@ def find_result(batch_domain, model):
             result = model.objects.filter(
                 domain=batch_domain.domain,
                 webtestset__timestamp__gte=submit_date).latest('id')
+        elif model is WebTestRpki:
+            result = model.objects.filter(
+                domain=batch_domain.domain,
+                timestamp__gte=submit_date).latest('id')
+        elif model is MailTestRpki:
+            result = model.objects.filter(
+                domain=batch_domain.domain,
+                timestamp__gte=submit_date).latest('id')
         elif model is DomainTestDnssec:
             result = model.objects.filter(
                 domain=batch_domain.domain,
@@ -329,7 +341,9 @@ def create_report(batch_domain):
             ipv6=batch_test.ipv6,
             dnssec=batch_test.dnssec,
             tls=batch_test.tls,
-            appsecpriv=batch_test.appsecpriv)
+            appsecpriv=batch_test.appsecpriv,
+            rpki=batch_test.rpki
+            )
         probe_reports = batch_webprobes.get_probe_reports(report)
         score = batch_webprobes.count_probe_reports_score(probe_reports)
     else:
@@ -339,7 +353,8 @@ def create_report(batch_domain):
             ipv6=batch_test.ipv6,
             dnssec=batch_test.dnssec,
             auth=batch_test.auth,
-            tls=batch_test.tls)
+            tls=batch_test.tls,
+            rpki=batch_test.rpki)
         probe_reports = batch_mailprobes.get_probe_reports(report)
         score = batch_mailprobes.count_probe_reports_score(probe_reports)
 

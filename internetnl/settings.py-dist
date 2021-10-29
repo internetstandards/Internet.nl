@@ -85,6 +85,13 @@ if ENABLE_BATCH:
         'checks.tasks.appsecpriv.batch_web_appsecpriv': {'queue': 'batch_main'},
         'checks.tasks.appsecpriv.batch_web_callback': {'queue': 'batch_callback'},
 
+        'checks.tasks.rpki.batch_mail_callback': {'queue': 'batch_callback'},
+        'checks.tasks.rpki.batch_mail_ns_ns_rpki': {'queue': 'batch_main'},
+        'checks.tasks.rpki.batch_mail_rpki': {'queue': 'batch_main'},
+        'checks.tasks.rpki.batch_ns_rpki': {'queue': 'batch_main'},
+        'checks.tasks.rpki.batch_web_callback': {'queue': 'batch_callback'},
+        'checks.tasks.rpki.batch_web_rpki': {'queue': 'batch_main'},
+
         'checks.batch.util.batch_async_generate_results': {'queue': 'batch_slow'},
         'checks.batch.util.batch_async_register': {'queue': 'batch_slow'},
 

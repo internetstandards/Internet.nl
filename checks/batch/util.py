@@ -394,6 +394,9 @@ def get_batch_request_info(batch_request, prefetch_related, custom_instances):
                     prefetch_fields.add(f'{inter_table_relation}__webdomains')
                 elif probe.name == 'appsecpriv':
                     prefetch_fields.add(f'{inter_table_relation}__webtestset')
+                elif probe.name == 'rpki':
+                    prefetch_fields.add(f'{inter_table_relation}__webdomains')
+                    prefetch_fields.add(f'{inter_table_relation}__nsdomains')
             else:
                 if probe.name == 'tls':
                     prefetch_fields.add(f'{inter_table_relation}__testset')
@@ -402,6 +405,9 @@ def get_batch_request_info(batch_request, prefetch_related, custom_instances):
                     prefetch_fields.add(f'{inter_table_relation}__mxdomains')
                 elif probe.name == 'dnssec':
                     prefetch_fields.add(f'{inter_table_relation}__testset')
+                elif probe.name == 'rpki':
+                    prefetch_fields.add(f'{inter_table_relation}__mxdomains')
+                    prefetch_fields.add(f'{inter_table_relation}__nsdomains')
 
     for custom_instance in custom_instances:
         custom_prefetch = custom_instance.related_db_tables(batch_request.type)
@@ -433,6 +439,56 @@ class DomainTechnicalResults:
         for addr in domain_table.v6_bad:
             addr6.append({'address': addr, 'reachable': False})
         return res
+
+    @classmethod
+    def _add_routing_info(cls, domain_table, addresses_info):
+        if addresses_info is None:
+            addresses_info = {'ipv4': {'addresses': []}, 'ipv6': {'addresses': []}}
+
+        routing_info = cls._get_routing_info(domain_table)
+
+        addr = {}
+        addr[4] = addresses_info['ipv4']['addresses']
+        addr[6] = addresses_info['ipv6']['addresses']
+
+        for addr_list in addr.values():
+           for entry in addr_list:
+               ip = entry['address']
+               if ip in routing_info:
+                   entry['routing'] = routing_info[ip]
+                   del routing_info[ip]
+
+        # ip addresses not yet present in address_info
+        for ip, routes in routing_info.items():
+            version = ip_address(ip).version
+
+            addr[version].append({'address': ip, 'routing': routes})
+
+        return addresses_info
+
+
+    @classmethod
+    def _get_routing_info(cls, domain_table):
+        def pp_validity(v):
+            state = v['state']
+            reason = v['reason']
+
+            return f"{state} ({reason})" if state == 'invalid' else state
+
+        addr = defaultdict(list)
+
+        for r in domain_table.routing:
+            ip = r['ip']
+            routes = []
+            for route, validity in r['validity'].items():
+                origin, prefix = route
+                routes.append({'origin': f"AS{origin}",
+                               'route': prefix,
+                               'rov_state': pp_validity(validity)})
+
+            addr[ip].append(routes)
+
+        return addr
 
     @classmethod
     def _get_web_tls_info(cls, dttls, report_table):
@@ -504,6 +560,10 @@ class DomainTechnicalResults:
         nsdomains = report_table.ipv6.nsdomains.all()
         for nsdomain in nsdomains:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
+
+        for nsdomain in report_table.rpki.nsdomains.all():
+            nameservers[nsdomain.domain] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.domain, None))
+
         return nameservers
 
     @classmethod
@@ -512,6 +572,12 @@ class DomainTechnicalResults:
         nsdomains = report_table.ipv6.nsdomains.all()
         for nsdomain in nsdomains:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
+
+        # CAUTION: the rpki tests tests nameservers for mx records, which the ipv6 test does not include
+        # this may suprise API callers, because they might expect a 'reachable' key for each dict.
+        for nsdomain in report_table.rpki.nsdomains.all():
+            nameservers[nsdomain.domain] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.domain, None))
+
         return nameservers
 
     @classmethod
@@ -523,8 +589,13 @@ class DomainTechnicalResults:
             ip_similarity = distance <= settings.SIMHASH_MAX
             webservers['ip_similarity'] = ip_similarity
 
-        webdomain = report_table.ipv6.webdomains.all()[0]
-        webservers.update(cls._get_addresses_info(webdomain))
+        # always loops once, guaranteed to exist
+        for webdomain in report_table.ipv6.webdomains.all():
+            webservers.update(cls._get_addresses_info(webdomain))
+
+        # only loops when there's actual A/AAAA records (and routing info)
+        for webdomain in report_table.rpki.webdomains.all():
+            webservers = cls._add_routing_info(webdomain, webservers)
 
         for dttls in report_table.tls.webtestset.all():
             info = cls._get_web_tls_info(dttls, report_table)
@@ -544,6 +615,10 @@ class DomainTechnicalResults:
             mailserver = {}
             mailservers[mxdomain.domain] = mailserver
             mailserver['addresses'] = cls._get_addresses_info(mxdomain)
+
+        for mxdomain in report_table.rpki.mxdomains.all():
+            addr = mailservers.get(mxdomain.domain, {}).get('addresses')
+            mailservers[mxdomain.domain] = cls._add_routing_info(mxdomain, addr)
 
         for dtdnssec in report_table.dnssec.testset.all():
             # Cheap way to see if the result is for the domain

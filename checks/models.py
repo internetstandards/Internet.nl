@@ -1061,6 +1061,10 @@ class BatchWebTest(models.Model):
     appsecpriv_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     appsecpriv_errors = models.PositiveSmallIntegerField(default=0)
+    rpki = models.ForeignKey(WebTestRpki, null=True,on_delete=models.CASCADE)
+    rpki_status = EnumIntegerField(
+        BatchTestStatus, default=BatchTestStatus.waiting)
+    rpki_errors = models.PositiveSmallIntegerField(default=0)
 
     def __dir__(self):
         return [
@@ -1068,6 +1072,7 @@ class BatchWebTest(models.Model):
             'dnssec_status', 'dnssec_errors', 'tls', 'tls_status',
             'tls_errors', 'appsecpriv', 'appsecpriv_status',
             'appsecpriv_errors',
+            'rpki','rpki_status','rpki_errors'
         ]
 
 
@@ -1094,12 +1099,17 @@ class BatchMailTest(models.Model):
     tls_status = EnumIntegerField(
         BatchTestStatus, default=BatchTestStatus.waiting)
     tls_errors = models.PositiveSmallIntegerField(default=0)
+    rpki = models.ForeignKey(MailTestRpki, null=True,on_delete=models.CASCADE)
+    rpki_status = EnumIntegerField(
+        BatchTestStatus, default=BatchTestStatus.waiting)
+    rpki_errors = models.PositiveSmallIntegerField(default=0)
 
     def __dir__(self):
         return [
             'report', 'ipv6', 'ipv6_status', 'ipv6_errors', 'dnssec',
             'dnssec_status', 'dnssec_errors', 'auth', 'auth_status',
-            'auth_errors', 'tls', 'tls_status', 'tls_errors'
+            'auth_errors', 'tls', 'tls_status', 'tls_errors',
+            'rpki','rpki_status','rpki_errors'
         ]
 
 

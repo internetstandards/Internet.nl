@@ -397,6 +397,11 @@ batch_web_probe_appsecpriv = Probe(
     "appsecpriv", "site", model=WebTestAppsecpriv,
     category=categories.WebAppsecpriv,
     taskset=appsecpriv.batch_web_registered)
+batch_web_probe_rpki = Probe(
+    "rpki", "site", model=WebTestRpki,
+    category=categories.WebRpki,
+    taskset=rpki.batch_web_registered)
+
 
 webprobes = ProbeSet()
 webprobes.add(web_probe_ipv6, 0)
@@ -410,6 +415,7 @@ batch_webprobes.add(batch_web_probe_ipv6, 0)
 batch_webprobes.add(batch_web_probe_dnssec, 1)
 batch_webprobes.add(batch_web_probe_tls, 2)
 batch_webprobes.add(batch_web_probe_appsecpriv, 3)
+batch_webprobes.add(batch_web_probe_rpki, 4)
 
 mail_probe_ipv6 = Probe(
     "ipv6", "mail", model=MailTestIpv6,
@@ -448,6 +454,10 @@ batch_mail_probe_tls = Probe(
     "tls", "mail", model=MailTestTls,
     category=categories.MailTls,
     taskset=tls.batch_mail_registered)
+batch_mail_probe_rpki = Probe(
+    "rpki", "mail", model=MailTestRpki,
+    category=categories.MailRpki,
+    taskset=rpki.batch_mail_registered)
 
 mailprobes = ProbeSet()
 mailprobes.add(mail_probe_ipv6, 0)
@@ -461,3 +471,4 @@ batch_mailprobes.add(batch_mail_probe_ipv6, 0)
 batch_mailprobes.add(batch_mail_probe_dnssec, 1)
 batch_mailprobes.add(batch_mail_probe_auth, 2)
 batch_mailprobes.add(batch_mail_probe_tls, 3)
+batch_mailprobes.add(batch_mail_probe_rpki, 4)

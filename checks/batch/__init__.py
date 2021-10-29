@@ -1,8 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 BATCH_API_MAJOR_VERSION = '2'
-BATCH_API_MINOR_VERSION = '0'
-BATCH_API_PATCH_VERSION = '1'
+BATCH_API_MINOR_VERSION = '1'
+BATCH_API_PATCH_VERSION = '0'
 BATCH_API_FULL_VERSION = (
     f"{BATCH_API_MAJOR_VERSION}"
     f".{BATCH_API_MINOR_VERSION}"
@@ -25,22 +25,26 @@ BATCH_PROBE_NAME_TO_API_CATEGORY = {
     "sitednssec": "web_dnssec",
     "sitetls": "web_https",
     "siteappsecpriv": "web_appsecpriv",
+    "siterpki": "web_rpki",
 
     "mailipv6": "mail_ipv6",
     "maildnssec": "mail_dnssec",
     "mailauth": "mail_auth",
     "mailtls": "mail_starttls",
+    "mailrpki": "mail_rpki",
 }
 BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "web_ipv6": "ipv6",
     "web_dnssec": "dnssec",
     "web_https": "tls",
     "web_appsecpriv": "appsecpriv",
+    "web_rpki": "rpki",
 
     "mail_ipv6": "ipv6",
     "mail_dnssec": "dnssec",
     "mail_auth": "auth",
-    "mail_starttls": "tls"
+    "mail_starttls": "tls",
+    "mail_rpki": "rpki",
 }
 
 REPORT_METADATA_WEB_MAP = [
@@ -313,7 +317,38 @@ REPORT_METADATA_WEB_MAP = [
                 ]
             }
         ]
-    }
+    },
+    {
+        'name': 'web_rpki',
+        'type': 'category',
+        'translation_key': 'siterpki',
+        'children': [
+            {
+                'name': 'web_rpki_exists',
+                'name_on_report': 'web_rpki_exists',
+                'type': 'test',
+                'translation_key': 'web rpki exists',
+            },
+            {
+                'name': 'web_rpki_valid',
+                'name_on_report': 'web_rpki_valid',
+                'type': 'test',
+                'translation_key': 'web rpki valid',
+            },
+            {
+                'name': 'ns_rpki_exists',
+                'name_on_report': 'ns_rpki_exists',
+                'type': 'test',
+                'translation_key': 'web ns rpki exists',
+            },
+            {
+                'name': 'ns_rpki_valid',
+                'name_on_report': 'ns_rpki_valid',
+                'type': 'test',
+                'translation_key': 'web ns rpki valid',
+            },
+        ]
+    },
 ]
 
 REPORT_METADATA_MAIL_MAP = [
@@ -593,6 +628,37 @@ REPORT_METADATA_MAIL_MAP = [
                     },
                 ]
             }
+        ]
+    },
+    {
+        'name': 'mail_rpki',
+        'type': 'category',
+        'translation_key': 'siterpki',
+        'children': [
+            {
+                'name': 'mail_rpki_exists',
+                'name_on_report': 'mail_rpki_exists',
+                'type': 'test',
+                'translation_key': 'mail rpki exists',
+            },
+            {
+                'name': 'mail_rpki_valid',
+                'name_on_report': 'mail_rpki_valid',
+                'type': 'test',
+                'translation_key': 'mail rpki valid',
+            },
+            {
+                'name': 'ns_rpki_exists',
+                'name_on_report': 'ns_rpki_exists',
+                'type': 'test',
+                'translation_key': 'web-mail rpki ns_exists',
+            },
+            {
+                'name': 'ns_rpki_valid',
+                'name_on_report': 'ns_rpki_valid',
+                'type': 'test',
+                'translation_key': 'web-mail rpki ns_valid',
+            },
         ]
     },
 ]

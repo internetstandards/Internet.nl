@@ -443,7 +443,7 @@ components:
       type: object
       required:
         - address
-        - reachable
+        - routing
       properties:
         address:
           type: string
@@ -453,12 +453,14 @@ components:
           type: boolean
           description: >
             If connectivity to this address was possible.
+        routing:
+          $ref: '#/components/schemas/TechnicalRouting'
 
     TechnicalIpv6:
       type: object
       required:
         - address
-        - reachable
+        - routing
       properties:
         address:
           type: string
@@ -468,6 +470,8 @@ components:
           type: boolean
           description: >
             If connectivity to this address was possible.
+        routing:
+          $ref: '#/components/schemas/TechnicalRouting'
 
     TechnicalNameServer:
       type: object
@@ -521,6 +525,27 @@ components:
               record is not supported by the resolver, this is treated
               the same as insecure.
             * `error` - Resolver error.
+
+    TechnicalRouting:
+      type: object
+      required:
+        - origin
+        - route
+        - rov_state
+      properties:
+        origin:
+          type: string
+          description: The origin AS number as seen in a route announcement in BGP.
+        route:
+          type: string
+          description: The announced prefix as seen in a route announcement in BGP.
+        rov_state:
+          type: string
+          enum:
+            - "valid"
+            - "invalid"
+            - "not-found"
+          description: The outcome of Route Origin Validation for this route announcement.
 
     TechnicalSharedDetails:
       type: object
@@ -1130,6 +1155,7 @@ components:
         - web_dnssec
         - web_https
         - web_appsecpriv
+        - web_rpki
       properties:
         web_ipv6:
           $ref: '#/components/schemas/Category'
@@ -1138,6 +1164,8 @@ components:
         web_https:
           $ref: '#/components/schemas/Category'
         web_appsecpriv:
+          $ref: '#/components/schemas/Category'
+        web_rpki:
           $ref: '#/components/schemas/Category'
 
     MailCategories:
@@ -1148,6 +1176,7 @@ components:
         - mail_dnssec
         - mail_auth
         - mail_starttls
+        - mail_rpki
       properties:
         mail_ipv6:
           $ref: '#/components/schemas/Category'
@@ -1156,6 +1185,8 @@ components:
         mail_auth:
           $ref: '#/components/schemas/Category'
         mail_starttls:
+          $ref: '#/components/schemas/Category'
+        mail_rpki:
           $ref: '#/components/schemas/Category'
 
     Categories:
