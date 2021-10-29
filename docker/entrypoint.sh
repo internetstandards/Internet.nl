@@ -43,6 +43,29 @@ sed \
     -e "s|CACHE_TTL = .*|CACHE_TTL = ${CACHE_TTL}|g" \
     ${APP_PATH}/internetnl/settings.py-dist > ${APP_PATH}/internetnl/settings.py
 
+# configure Django logging
+cat << EOF >> ${APP_PATH}/internetnl/settings.py
+if DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': 'django.log',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }
+EOF
+
 # Prepare translations for use
 cd ${APP_PATH}/checks
 ../manage.py compilemessages
