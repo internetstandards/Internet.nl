@@ -20,3 +20,10 @@ __pycache__
 *.log
 *.pid
 /tests/.pytest_cache/
+
+# Pycharm defaults
+.idea
+.venv
+
+# When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
+unbound

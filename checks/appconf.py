@@ -7,7 +7,7 @@ from django.apps import AppConfig
 from django_redis import get_redis_connection
 from django.conf import settings
 from django.core.cache import cache
-from django.db import connection, utils
+from django.db import connection, utils, OperationalError
 
 from checks import redis_id
 
@@ -31,7 +31,7 @@ def _load_autoconf_in_cache():
             if value:
                 value = int(value)
             cache.set(cache_id, value, cache_ttl)
-    except utils.ProgrammingError:
+    except (utils.ProgrammingError, OperationalError):
         # Avoid the chicken-egg problem when trying to migrate(start the app)
         # when the table is not there yet.
         pass
