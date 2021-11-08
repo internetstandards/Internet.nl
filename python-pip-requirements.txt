@@ -28,7 +28,6 @@ markdown
 polib
 psycopg2-binary==2.9.1
 pyparsing
-pyrabbit
 pyrabbit2
 pyyaml
 rjsmin
