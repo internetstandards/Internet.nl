@@ -113,3 +113,17 @@ file for details.
 Both the name Internet.nl and the Internet.nl logo are explicitly excluded from
 the above licensing. Thus we do not grant permission to use these when our
 content or software code is reused.
+
+
+## Installation on a new debian 64 machine:
+
+Use the shipped python3 installation of debian. Even though it's not 3.8 yet.
+
+#  Then: 
+apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server
+
+# Then: 
+# https://github.com/internetstandards/unbound
+
+# Then:
+# https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md
