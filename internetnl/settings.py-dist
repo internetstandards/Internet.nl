@@ -17,7 +17,7 @@ MEDIA_ROOT = BASE_DIR
 SECRET_KEY = 'secret'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = bool(os.environ.get("DEBUG", False))
 
 # If Django is proxied (eg. webserver proxying to django/gunicorn) enable this setting.
 # Make sure that the `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers;
@@ -119,6 +119,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_bleach',
     'markdown_deux',
+    'frontend',
     'checks',
     'django_hosts',
 ]
@@ -126,7 +127,7 @@ INSTALLED_APPS = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['', 'interface', 'interface/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,6 +140,9 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
             ],
+            'libraries': {
+                'translate': 'interface.templatetags.translate'
+            }
         },
     },
 ]
@@ -167,15 +171,22 @@ WSGI_APPLICATION = 'internetnl.wsgi.application'
 # --- Database configuration
 #     https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
+DATABASES_SETTINGS = {
+    "dev": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.environ.get("DB_NAME", "db.sqlite3"),
+    },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '<db_name>',
-        'USER': '<db_user>',
-        'PASSWORD': 'password',
+        'NAME': 'internetnl',
+        'USER': 'internetnl',
+        'PASSWORD': 'internetnl',
         'HOST': '127.0.0.1'
     }
 }
+
+DATABASE = os.environ.get("DJANGO_DATABASE", "default")
+DATABASES = {"default": DATABASES_SETTINGS[DATABASE]}
 
 
 # --- Cache configuration
@@ -377,3 +388,21 @@ MATOMO_SUBDOMAIN_TRACKING = ""
 # internet.nl to be approached by hosters in order (after manual testing and
 # agreement) to be included in a hosters HoF.
 MANUAL_HOF = {}
+
+"""
+Feature flags:
+
+The following flags enable and disable various parts of the checks in the internet.nl repository.
+This allows you to check only DNSSEC and omit any other result (and also painful dependencies). Which helps if
+you only want to run internet.nl for a specific test.
+
+This prevents loading the nassl library, which is not supported on arm64 platforms. It also loading
+other dependencies for more advanced tests if they are not needed.
+
+By default everything is set to False and you need to enable everything.
+"""
+INTERNET_NL_CHECK_SUPPORT_IPV6 = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_IPV6", True))
+INTERNET_NL_CHECK_SUPPORT_DNSSEC = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_DNSSEC", True))
+INTERNET_NL_CHECK_SUPPORT_MAIL = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", True))
+INTERNET_NL_CHECK_SUPPORT_TLS = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True))
+INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True))

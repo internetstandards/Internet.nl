@@ -8,12 +8,11 @@ from django.conf import settings
 from django.template import Template
 from django.utils.translation import ugettext as _
 
-from ..scoring import STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED
-from ..scoring import STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL
-from ..scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
+from checks.scoring import STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED
+from checks.scoring import STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL
+from checks.scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
 
 register = template.Library()
-
 
 @register.simple_tag(takes_context=True)
 def translate(context, longname):
