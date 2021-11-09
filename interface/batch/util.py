@@ -29,7 +29,7 @@ from ..models import BatchUser, BatchRequestType, BatchDomainStatus
 from ..models import BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..models import DomainTestReport
-from ..scoring import STATUSES_API_TEXT_MAP
+from checks.scoring import STATUSES_API_TEXT_MAP
 from ..views.shared import pretty_domain_name, validate_dname
 
 

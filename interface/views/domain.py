@@ -12,7 +12,7 @@ from interface import simple_cache_page, redis_id
 from interface.models import DomainTestIpv6, DomainTestDnssec
 from interface.models import WebTestTls, DomainTestReport, WebTestAppsecpriv
 from interface.models import AutoConfOption
-from interface.probes import webprobes
+from checks.probes import webprobes
 from interface.views.shared import redirect_invalid_domain
 from interface.views.shared import proberesults, add_registrar_to_report
 from interface.views.shared import add_score_to_report, process, probestatuses

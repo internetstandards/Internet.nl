@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 from interface import redis_id
 from interface.models import MailTestIpv6, MailTestDnssec, MailTestAuth
 from interface.models import MailTestTls, MailTestReport, AutoConfOption
-from interface.probes import mailprobes
+from checks.probes import mailprobes
 from interface.views.shared import proberesults, process, pretty_domain_name
 from interface.views.shared import redirect_invalid_domain, add_score_to_report
 from interface.views.shared import get_valid_domain_mail, add_registrar_to_report

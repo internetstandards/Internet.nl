@@ -1,16 +1,32 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from django.utils.translation import ugettext as _
+from django.conf import settings
 
-from . import categories
-from .tasks import ipv6, dnssec, mail, tls, dispatcher, appsecpriv
-from .models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
-from .models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
-from .models import MailTestTls, WebTestAppsecpriv
-from .categories import WebTlsHttpsExists, MailTlsStarttlsExists
-from .scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
-from .scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
-from .scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
+from checks import categories
+from checks.tasks import dispatcher
+from interface.models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
+from interface.models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
+from interface.models import MailTestTls, WebTestAppsecpriv
+from checks.categories import WebTlsHttpsExists, MailTlsStarttlsExists
+from checks.scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
+from checks.scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
+from checks.scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
+
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    from .tasks import ipv6
+
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    from .tasks import dnssec
+
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+    from .tasks import mail
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    from .tasks import tls
+
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    from .tasks import appsecpriv
 
 
 class ProbeSet(object):
@@ -75,7 +91,7 @@ class ProbeSet(object):
                 continue
             scores.append(total_score)
 
-        return max(min(int(sum(scores)/len(scores)), 100), 0)
+        return max(min(int(sum(scores) / len(scores)), 100), 0)
 
 
 class Probe(object):
@@ -359,94 +375,138 @@ class Probe(object):
         return max_score
 
 
-web_probe_ipv6 = Probe(
-    "ipv6", "site", model=DomainTestIpv6,
-    category=categories.WebIpv6,
-    taskset=ipv6.web_registered)
-web_probe_dnssec = Probe(
-    "dnssec", "site", model=DomainTestDnssec,
-    category=categories.WebDnssec,
-    taskset=dnssec.web_registered)
-web_probe_tls = Probe(
-    "tls", "site", model=WebTestTls,
-    category=categories.WebTls,
-    taskset=tls.web_registered)
-web_probe_appsecpriv = Probe(
-    "appsecpriv", "site", model=WebTestAppsecpriv,
-    category=categories.WebAppsecpriv,
-    taskset=appsecpriv.web_registered)
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    web_probe_ipv6 = Probe(
+        "ipv6", "site", model=DomainTestIpv6,
+        category=categories.WebIpv6,
+        taskset=ipv6.web_registered)
 
-batch_web_probe_ipv6 = Probe(
-    "ipv6", "site", model=DomainTestIpv6,
-    category=categories.WebIpv6,
-    taskset=ipv6.batch_web_registered)
-batch_web_probe_dnssec = Probe(
-    "dnssec", "site", model=DomainTestDnssec,
-    category=categories.WebDnssec,
-    taskset=dnssec.batch_web_registered)
-batch_web_probe_tls = Probe(
-    "tls", "site", model=WebTestTls,
-    category=categories.WebTls,
-    taskset=tls.batch_web_registered)
-batch_web_probe_appsecpriv = Probe(
-    "appsecpriv", "site", model=WebTestAppsecpriv,
-    category=categories.WebAppsecpriv,
-    taskset=appsecpriv.batch_web_registered)
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    web_probe_dnssec = Probe(
+        "dnssec", "site", model=DomainTestDnssec,
+        category=categories.WebDnssec,
+        taskset=dnssec.web_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    web_probe_tls = Probe(
+        "tls", "site", model=WebTestTls,
+        category=categories.WebTls,
+        taskset=tls.web_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    web_probe_appsecpriv = Probe(
+        "appsecpriv", "site", model=WebTestAppsecpriv,
+        category=categories.WebAppsecpriv,
+        taskset=appsecpriv.web_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    batch_web_probe_ipv6 = Probe(
+        "ipv6", "site", model=DomainTestIpv6,
+        category=categories.WebIpv6,
+        taskset=ipv6.batch_web_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    batch_web_probe_dnssec = Probe(
+        "dnssec", "site", model=DomainTestDnssec,
+        category=categories.WebDnssec,
+        taskset=dnssec.batch_web_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    batch_web_probe_tls = Probe(
+        "tls", "site", model=WebTestTls,
+        category=categories.WebTls,
+        taskset=tls.batch_web_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    batch_web_probe_appsecpriv = Probe(
+        "appsecpriv", "site", model=WebTestAppsecpriv,
+        category=categories.WebAppsecpriv,
+        taskset=appsecpriv.batch_web_registered)
 
 webprobes = ProbeSet()
-webprobes.add(web_probe_ipv6, 0)
-webprobes.add(web_probe_dnssec, 1)
-webprobes.add(web_probe_tls, 2)
-webprobes.add(web_probe_appsecpriv, 3)
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    webprobes.add(web_probe_ipv6, 0)
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    webprobes.add(web_probe_dnssec, 1)
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    webprobes.add(web_probe_tls, 2)
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    webprobes.add(web_probe_appsecpriv, 3)
 
 batch_webprobes = ProbeSet()
-batch_webprobes.add(batch_web_probe_ipv6, 0)
-batch_webprobes.add(batch_web_probe_dnssec, 1)
-batch_webprobes.add(batch_web_probe_tls, 2)
-batch_webprobes.add(batch_web_probe_appsecpriv, 3)
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    batch_webprobes.add(batch_web_probe_ipv6, 0)
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    batch_webprobes.add(batch_web_probe_dnssec, 1)
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    batch_webprobes.add(batch_web_probe_tls, 2)
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    batch_webprobes.add(batch_web_probe_appsecpriv, 3)
 
-mail_probe_ipv6 = Probe(
-    "ipv6", "mail", model=MailTestIpv6,
-    category=categories.MailIpv6,
-    taskset=ipv6.mail_registered)
-mail_probe_dnssec = Probe(
-    "dnssec", "mail", model=MailTestDnssec,
-    category=categories.MailDnssec,
-    taskset=dnssec.mail_registered)
-mail_probe_auth = Probe(
-    "auth", "mail", model=MailTestAuth,
-    category=categories.MailAuth,
-    taskset=mail.mail_registered)
-mail_probe_tls = Probe(
-    "tls", "mail", model=MailTestTls,
-    category=categories.MailTls,
-    taskset=tls.mail_registered)
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    mail_probe_ipv6 = Probe(
+        "ipv6", "mail", model=MailTestIpv6,
+        category=categories.MailIpv6,
+        taskset=ipv6.mail_registered)
 
-batch_mail_probe_ipv6 = Probe(
-    "ipv6", "mail", model=MailTestIpv6,
-    category=categories.MailIpv6,
-    taskset=ipv6.batch_mail_registered)
-batch_mail_probe_dnssec = Probe(
-    "dnssec", "mail", model=MailTestDnssec,
-    category=categories.MailDnssec,
-    taskset=dnssec.batch_mail_registered)
-batch_mail_probe_auth = Probe(
-    "auth", "mail", model=MailTestAuth,
-    category=categories.MailAuth,
-    taskset=mail.batch_mail_registered)
-batch_mail_probe_tls = Probe(
-    "tls", "mail", model=MailTestTls,
-    category=categories.MailTls,
-    taskset=tls.batch_mail_registered)
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    mail_probe_dnssec = Probe(
+        "dnssec", "mail", model=MailTestDnssec,
+        category=categories.MailDnssec,
+        taskset=dnssec.mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+    mail_probe_auth = Probe(
+        "auth", "mail", model=MailTestAuth,
+        category=categories.MailAuth,
+        taskset=mail.mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    mail_probe_tls = Probe(
+        "tls", "mail", model=MailTestTls,
+        category=categories.MailTls,
+        taskset=tls.mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    batch_mail_probe_ipv6 = Probe(
+        "ipv6", "mail", model=MailTestIpv6,
+        category=categories.MailIpv6,
+        taskset=ipv6.batch_mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    batch_mail_probe_dnssec = Probe(
+        "dnssec", "mail", model=MailTestDnssec,
+        category=categories.MailDnssec,
+        taskset=dnssec.batch_mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+    batch_mail_probe_auth = Probe(
+        "auth", "mail", model=MailTestAuth,
+        category=categories.MailAuth,
+        taskset=mail.batch_mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    batch_mail_probe_tls = Probe(
+        "tls", "mail", model=MailTestTls,
+        category=categories.MailTls,
+        taskset=tls.batch_mail_registered)
 
 mailprobes = ProbeSet()
-mailprobes.add(mail_probe_ipv6, 0)
-mailprobes.add(mail_probe_dnssec, 1)
-mailprobes.add(mail_probe_auth, 2)
-mailprobes.add(mail_probe_tls, 3)
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    mailprobes.add(mail_probe_ipv6, 0)
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    mailprobes.add(mail_probe_dnssec, 1)
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+    mailprobes.add(mail_probe_auth, 2)
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    mailprobes.add(mail_probe_tls, 3)
 
 batch_mailprobes = ProbeSet()
-batch_mailprobes.add(batch_mail_probe_ipv6, 0)
-batch_mailprobes.add(batch_mail_probe_dnssec, 1)
-batch_mailprobes.add(batch_mail_probe_auth, 2)
-batch_mailprobes.add(batch_mail_probe_tls, 3)
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    batch_mailprobes.add(batch_mail_probe_ipv6, 0)
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    batch_mailprobes.add(batch_mail_probe_dnssec, 1)
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+    batch_mailprobes.add(batch_mail_probe_auth, 2)
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    batch_mailprobes.add(batch_mail_probe_tls, 3)
