@@ -4,9 +4,8 @@ from abc import ABC, abstractmethod
 
 from interface.models import DomainTestReport, MailTestReport, ZeroRttStatus
 from interface.models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
-from interface.categories import MailTlsStarttlsExists
-from checks.tasks.mail import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG
-from checks.tasks.mail import SPF_NON_SENDING_POLICY
+from checks.categories import MailTlsStarttlsExists
+from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY
 
 
 def _create_custom_results_map(instances):

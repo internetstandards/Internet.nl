@@ -15,8 +15,8 @@ from .http_headers import HeaderCheckerContentSecurityPolicy
 from .http_headers import http_headers_check
 from .shared import results_per_domain, aggregate_subreports
 from .. import categories
-from .. import batch, batch_shared_task
-from ..models import WebTestAppsecpriv, DomainTestAppsecpriv
+from interface import batch, batch_shared_task
+from interface.models import WebTestAppsecpriv, DomainTestAppsecpriv
 
 
 @shared_task(bind=True)

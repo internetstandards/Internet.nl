@@ -5,9 +5,9 @@ from django.db import transaction
 from django.conf import settings
 from django.core.cache import cache
 
-from .. import redis_id
-from ..models import DomainTestReport, MailTestReport
-from ..batch import util
+from interface import redis_id
+from interface.models import DomainTestReport, MailTestReport
+from interface.batch import util
 from internetnl.celery import app
 
 logger = get_task_logger(__name__)

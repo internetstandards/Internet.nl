@@ -18,12 +18,12 @@ from interface import redis_id
 from interface.models import ConnectionTest
 from interface.models import Resolver
 from interface.models import ASRecord
-from interface.scoring import STATUS_FAIL
-from interface.scoring import STATUS_NOTICE
-from interface.scoring import STATUS_INFO
-from interface.scoring import STATUS_NOT_TESTED
-from interface.scoring import STATUS_SUCCESS
-from interface.probes import ProbeSet, Probe
+from checks.scoring import STATUS_FAIL
+from checks.scoring import STATUS_NOTICE
+from checks.scoring import STATUS_INFO
+from checks.scoring import STATUS_NOT_TESTED
+from checks.scoring import STATUS_SUCCESS
+from checks.probes import ProbeSet, Probe
 from interface.views.shared import get_javascript_retries
 from interface.views.shared import ub_ctx, get_client_ip
 

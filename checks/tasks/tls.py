@@ -46,9 +46,9 @@ from .tls_connection import http_fetch
 from .cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
-from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
-from ..models import KexHashFuncStatus, CipherOrderStatus, MxStatus
+from interface.models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
+from interface.models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
+from interface.models import KexHashFuncStatus, CipherOrderStatus, MxStatus
 
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet

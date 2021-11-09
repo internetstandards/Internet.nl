@@ -22,9 +22,9 @@ from .tls_connection import ConnectionSocketException
 from .dispatcher import check_registry
 from .. import scoring, categories, redis_id
 from .. import batch, batch_shared_task
-from ..models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
-from ..models import WebDomain, MxStatus
-from ..views.shared import pretty_domain_name
+from interface.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
+from interface.models import WebDomain, MxStatus
+from interface.views.shared import pretty_domain_name
 
 
 # mapping tasks to models

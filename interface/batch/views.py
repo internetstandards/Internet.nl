@@ -5,12 +5,12 @@ import json
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 
-from .util import check_valid_user, batch_async_generate_results
-from .util import get_site_url, APIMetadata, list_requests
-from .util import register_request, get_request, patch_request
-from .responses import api_response, unknown_request_response
-from .responses import invalid_url_response, bad_client_request_response
-from .responses import general_server_error_response
+from interface.batch.util import check_valid_user, batch_async_generate_results
+from interface.batch.util import get_site_url, APIMetadata, list_requests
+from interface.batch.util import register_request, get_request, patch_request
+from interface.batch.responses import api_response, unknown_request_response
+from interface.batch.responses import invalid_url_response, bad_client_request_response
+from interface.batch.responses import general_server_error_response
 from .. import simple_cache_page
 from ..models import BatchRequest
 from ..models import BatchRequestStatus
