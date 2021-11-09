@@ -27,3 +27,8 @@ __pycache__
 
 # When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
 unbound
+python-whois
+
+# Mac os via ubuntu
+._.DS_Store
+.DS_Store
