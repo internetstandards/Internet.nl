@@ -124,6 +124,15 @@ apt install git python3 python3-pip build-essential libssl-dev libffi-dev python
 
 # Then: 
 # https://github.com/internetstandards/unbound
+# But do:
+./configure --prefix=$HOME/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8
 
 # Then:
 # https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md
+
+# But do:
+apt upgrade gcc
+ otherwise youll get an unsupported -m64 error...
+
+# Then for nassl:
+that's not supported on arm64, so you're out of luck. Refactor the code to only use nassl when strictly needed.
