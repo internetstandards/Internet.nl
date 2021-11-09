@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from checks.models import DomainTestReport, MailTestReport
+from interface.models import DomainTestReport, MailTestReport
 
 
 class Command(BaseCommand):

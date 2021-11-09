@@ -5,9 +5,9 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^', include('checks.urls')),
+    url(r'^', include('interface.urls')),
 ]
-handler404 = 'checks.views.page404'
+handler404 = 'interface.views.page404'
 
 if settings.DEBUG is True:
     urlpatterns += [

@@ -10,8 +10,8 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from internetnl import batch_api_doc_conf as batch_settings
-from checks.batch.custom_results import CUSTOM_RESULTS_MAP
-from checks import models
+from interface.batch.custom_results import CUSTOM_RESULTS_MAP
+from interface import models
 
 OPENAPIFILE = "checks/batch/openapi.yaml"
 DOC_DESTINATION = os.path.join(settings.STATIC_ROOT, "openapi.yaml")

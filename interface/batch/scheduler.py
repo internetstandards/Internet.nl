@@ -16,21 +16,21 @@ from pyrabbit.api import APIError, PermissionError
 from . import util
 from .. import batch_shared_task, redis_id
 from ..probes import batch_webprobes, batch_mailprobes
-from ..tasks.dnssec import batch_web_registered as dnssec_web_taskset
-from ..tasks.dnssec import batch_mail_registered as dnssec_mail_taskset
-from ..tasks.ipv6 import batch_web_registered as ipv6_web_taskset
-from ..tasks.ipv6 import batch_mail_registered as ipv6_mail_taskset
-from ..tasks.mail import batch_mail_registered as auth_mail_taskset
-from ..tasks.tls import batch_web_registered as tls_web_taskset
-from ..tasks.tls import batch_mail_registered as tls_mail_taskset
-from ..tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
-from ..tasks import dispatcher
-from ..models import BatchRequest, BatchRequestStatus, BatchDomain
-from ..models import BatchDomainStatus, BatchTestStatus
-from ..models import BatchWebTest
-from ..models import WebTestTls, WebTestAppsecpriv
-from ..models import DomainTestReport, MailTestReport, MailTestTls
-from ..models import MailTestDnssec, DomainTestDnssec
+from checks.tasks.dnssec import batch_web_registered as dnssec_web_taskset
+from checks.tasks.dnssec import batch_mail_registered as dnssec_mail_taskset
+from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
+from checks.tasks.ipv6 import batch_mail_registered as ipv6_mail_taskset
+from checks.tasks.mail import batch_mail_registered as auth_mail_taskset
+from checks.tasks.tls import batch_web_registered as tls_web_taskset
+from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
+from checks.tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
+from checks.tasks import dispatcher
+from interface.models import BatchRequest, BatchRequestStatus, BatchDomain
+from interface.models import BatchDomainStatus, BatchTestStatus
+from interface.models import BatchWebTest
+from interface.models import WebTestTls, WebTestAppsecpriv
+from interface.models import DomainTestReport, MailTestReport, MailTestTls
+from interface.models import MailTestDnssec, DomainTestDnssec
 
 logger = get_task_logger(__name__)
 

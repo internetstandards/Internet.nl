@@ -8,15 +8,15 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.translation import ugettext as _
 
-from checks import redis_id
-from checks.models import MailTestIpv6, MailTestDnssec, MailTestAuth
-from checks.models import MailTestTls, MailTestReport, AutoConfOption
-from checks.probes import mailprobes
-from checks.views.shared import proberesults, process, pretty_domain_name
-from checks.views.shared import redirect_invalid_domain, add_score_to_report
-from checks.views.shared import get_valid_domain_mail, add_registrar_to_report
-from checks.views.shared import get_valid_domain_web, get_retest_time
-from checks.views.shared import probestatuses
+from interface import redis_id
+from interface.models import MailTestIpv6, MailTestDnssec, MailTestAuth
+from interface.models import MailTestTls, MailTestReport, AutoConfOption
+from interface.probes import mailprobes
+from interface.views.shared import proberesults, process, pretty_domain_name
+from interface.views.shared import redirect_invalid_domain, add_score_to_report
+from interface.views.shared import get_valid_domain_mail, add_registrar_to_report
+from interface.views.shared import get_valid_domain_web, get_retest_time
+from interface.views.shared import probestatuses
 
 regex_mailaddr = (
     r'([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+'

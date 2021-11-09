@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from checks import scoring
+from interface import scoring
 from checks.tasks import http_headers
 
 # Set this to true for more information per test. Then you probably want to run

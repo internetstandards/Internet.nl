@@ -4,13 +4,13 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from django.conf import settings
 
-from checks import views
-from checks.batch import BATCH_API_MAJOR_VERSION
-from checks.batch import views as batch
-from checks.views import connection
-from checks.views import domain
-from checks.views import mail
-from checks.views import stats
+from interface import views
+from interface.batch import BATCH_API_MAJOR_VERSION
+from interface.batch import views as batch
+from interface.views import connection
+from interface.views import domain
+from interface.views import mail
+from interface.views import stats
 
 
 regex_tld = r'(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)'

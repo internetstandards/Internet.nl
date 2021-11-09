@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
 
-from checks.batch import BATCH_INDEXES
+from interface.batch import BATCH_INDEXES
 
 
 class Command(BaseCommand):

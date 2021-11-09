@@ -19,7 +19,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 import unbound
 
-from checks import redis_id
+from interface import redis_id
 
 
 ub_ctx = unbound.ub_ctx()

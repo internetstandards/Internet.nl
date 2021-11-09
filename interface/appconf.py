@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import connection, utils, OperationalError
 
-from checks import redis_id
+from interface import redis_id
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def _load_autoconf_in_cache():
     Loads any autoconf option in cache to avoid repeated DB access.
 
     """
-    from checks.models import AutoConf, AutoConfOption
+    from interface.models import AutoConf, AutoConfOption
     try:
         for option in (
                 AutoConfOption.DATED_REPORT_ID_THRESHOLD_WEB,
@@ -58,9 +58,9 @@ def _clear_cached_pages():
 
 def _batch_startup_checks():
     if settings.ENABLE_BATCH:
-        from checks.batch import BATCH_INDEXES
-        from checks.batch.util import APIMetadata
-        from checks.batch.custom_results import CUSTOM_RESULTS_MAP
+        from interface.batch import BATCH_INDEXES
+        from interface.batch.util import APIMetadata
+        from interface.batch.custom_results import CUSTOM_RESULTS_MAP
 
         def cache_report_metadata():
             """

@@ -5,8 +5,8 @@ from django.core.management.base import BaseCommand, CommandParser
 from django.core.management.base import CommandError
 from django.db import transaction
 
-from checks.batch.util import create_batch_user
-from checks.models import BatchUser
+from interface.batch.util import create_batch_user
+from interface.models import BatchUser
 
 
 class FormatType(Enum):

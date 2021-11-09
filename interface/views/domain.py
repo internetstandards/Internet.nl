@@ -8,16 +8,16 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from checks import simple_cache_page, redis_id
-from checks.models import DomainTestIpv6, DomainTestDnssec
-from checks.models import WebTestTls, DomainTestReport, WebTestAppsecpriv
-from checks.models import AutoConfOption
-from checks.probes import webprobes
-from checks.views.shared import redirect_invalid_domain
-from checks.views.shared import proberesults, add_registrar_to_report
-from checks.views.shared import add_score_to_report, process, probestatuses
-from checks.views.shared import get_valid_domain_web, get_valid_domain_mail
-from checks.views.shared import get_retest_time, pretty_domain_name
+from interface import simple_cache_page, redis_id
+from interface.models import DomainTestIpv6, DomainTestDnssec
+from interface.models import WebTestTls, DomainTestReport, WebTestAppsecpriv
+from interface.models import AutoConfOption
+from interface.probes import webprobes
+from interface.views.shared import redirect_invalid_domain
+from interface.views.shared import proberesults, add_registrar_to_report
+from interface.views.shared import add_score_to_report, process, probestatuses
+from interface.views.shared import get_valid_domain_web, get_valid_domain_mail
+from interface.views.shared import get_retest_time, pretty_domain_name
 
 
 # Entrance after form submission.

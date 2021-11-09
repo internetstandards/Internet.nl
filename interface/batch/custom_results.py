@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC, abstractmethod
 
-from ..models import DomainTestReport, MailTestReport, ZeroRttStatus
-from ..models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
-from ..categories import MailTlsStarttlsExists
-from ..tasks.mail import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG
-from ..tasks.mail import SPF_NON_SENDING_POLICY
+from interface.models import DomainTestReport, MailTestReport, ZeroRttStatus
+from interface.models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
+from interface.categories import MailTlsStarttlsExists
+from checks.tasks.mail import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG
+from checks.tasks.mail import SPF_NON_SENDING_POLICY
 
 
 def _create_custom_results_map(instances):

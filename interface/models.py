@@ -147,6 +147,9 @@ class BaseTestModel(models.Model):
     def details_set(self, probe):
         return [("", "", self.details(probe))]
 
+    class Meta:
+        app_label = 'checks'
+
 
 ###
 # Domain test
@@ -235,6 +238,9 @@ class ConnectionTest(BaseTestModel):
             'score_dnssec_max', 'finished'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class Resolver(models.Model):
     connectiontest = models.ForeignKey(ConnectionTest,on_delete=models.CASCADE)
@@ -247,6 +253,9 @@ class Resolver(models.Model):
     def __dir__(self):
         return ['connectiontest', 'address', 'owner', 'origin_as', 'reverse']
 
+    class Meta:
+        app_label = 'checks'
+
 
 class ASRecord(models.Model):
     number = models.PositiveIntegerField(unique=True)
@@ -254,6 +263,9 @@ class ASRecord(models.Model):
 
     def __dir__(self):
         return ['number', 'description']
+
+    class Meta:
+        app_label = 'checks'
 
 
 ###
@@ -281,6 +293,9 @@ class DomainTestIpv6(BaseTestModel):
             'max_score'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class IPv6TestDomain(models.Model):
     domain = models.CharField(max_length=255)
@@ -305,6 +320,9 @@ class WebDomain(IPv6TestDomain):
         return super(WebDomain, self).__dir__().extend([
             'domaintestipv6',
         ])
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DomainServersModel(models.Model):
@@ -343,6 +361,9 @@ class DomainServersModel(models.Model):
     def __dir__(self):
         return ['domain', 'report', 'score', 'max_score']
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MailTestTls(DomainServersModel):
     mx_status = EnumIntegerField(MxStatus, null=True,default=False)
@@ -358,6 +379,9 @@ class MailTestTls(DomainServersModel):
     def __dir__(self):
         return ['mx_status'] + super(MailTestTls, self).__dir__()
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MailTestDnssec(DomainServersModel):
     mx_status = EnumIntegerField(MxStatus, null=True,default=False)
@@ -371,6 +395,9 @@ class MailTestDnssec(DomainServersModel):
 
     def __dir__(self):
         return ['mx_status'] + super(MailTestDnssec, self).__dir__()
+
+    class Meta:
+        app_label = 'checks'
 
 
 # DNSSEC
@@ -391,6 +418,9 @@ class DomainTestDnssec(BaseTestModel):
             'max_score', 'maildomain'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class WebTestTls(DomainServersModel):
     def totalscore(self, score_fields):
@@ -399,6 +429,9 @@ class WebTestTls(DomainServersModel):
 
     def details_set(self, probe):
         return super(WebTestTls, self).details_set(probe, self.webtestset)
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DomainTestTls(BaseTestModel):
@@ -564,6 +597,9 @@ class DomainTestTls(BaseTestModel):
             'cert_hostmatch_bad': self.cert_hostmatch_bad,
         }
 
+    class Meta:
+        app_label = 'checks'
+
 
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
@@ -574,6 +610,9 @@ class WebTestAppsecpriv(DomainServersModel):
     def details_set(self, probe):
         return super(WebTestAppsecpriv, self).details_set(
             probe, self.webtestset)
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DomainTestAppsecpriv(BaseTestModel):
@@ -633,6 +672,9 @@ class DomainTestAppsecpriv(BaseTestModel):
             #'x_xss_protection_values': self.x_xss_protection_values,
         }
 
+    class Meta:
+        app_label = 'checks'
+
 
 class DomainTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -650,6 +692,8 @@ class DomainTestReport(models.Model):
             'tls', 'appsecpriv',
         ]
 
+    class Meta:
+        app_label = 'checks'
 
 ###
 # Mail test
@@ -672,6 +716,8 @@ class MailTestIpv6(BaseTestModel):
             'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
             'max_score', 'mx_status'
         ]
+    class Meta:
+        app_label = 'checks'
 
 
 class NsDomain(IPv6TestDomain):
@@ -686,6 +732,9 @@ class NsDomain(IPv6TestDomain):
             'mailtestipv6',
         ])
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MxDomain(IPv6TestDomain):
     mailtestipv6 = models.ForeignKey(
@@ -695,6 +744,9 @@ class MxDomain(IPv6TestDomain):
         return super(MxDomain, self).__dir__().extend([
             'mailtestipv6',
         ])
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DmarcPolicyStatus(LabelEnum):
@@ -745,6 +797,9 @@ class MailTestAuth(BaseTestModel):
             'score', 'max_score'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MailTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -761,6 +816,9 @@ class MailTestReport(models.Model):
             'timestamp', 'domain', 'registrar', 'score', 'ipv6', 'dnssec',
             'auth', 'tls'
         ]
+
+    class Meta:
+        app_label = 'checks'
 
 
 class BatchUser(models.Model):
@@ -787,6 +845,9 @@ class BatchUser(models.Model):
 
         if delete_self:
             self.delete()
+
+    class Meta:
+        app_label = 'checks'
 
 
 class BatchRequestType(LabelEnum):
@@ -895,6 +956,9 @@ class BatchRequest(models.Model):
         if delete_self:
             self.delete()
 
+    class Meta:
+        app_label = 'checks'
+
 
 class BatchDomainStatus(LabelEnum):
     # Inital statuses (0-9)
@@ -934,6 +998,9 @@ class BatchDomain(models.Model):
             'domain', 'batch_result', 'status', 'status_changed', 'webtest',
             'mailtest'
         ]
+
+    class Meta:
+        app_label = 'checks'
 
 
 class BatchTestStatus(LabelEnum):
@@ -988,6 +1055,9 @@ class BatchWebTest(models.Model):
             'appsecpriv_errors',
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class BatchMailTest(models.Model):
     """
@@ -1019,6 +1089,9 @@ class BatchMailTest(models.Model):
             'dnssec_status', 'dnssec_errors', 'auth', 'auth_status',
             'auth_errors', 'tls', 'tls_status', 'tls_errors'
         ]
+
+    class Meta:
+        app_label = 'checks'
 
 
 class AutoConfOption(Enum):
@@ -1055,3 +1128,6 @@ class AutoConf(models.Model):
 
     def __dir__(self):
         return ['name', 'value']
+
+    class Meta:
+        app_label = 'checks'

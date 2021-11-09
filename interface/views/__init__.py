@@ -9,9 +9,9 @@ from django.shortcuts import render, redirect
 from django.utils import translation
 from django.utils.translation import ugettext as _
 
-from checks import redis_id, simple_cache_page
-from checks.views.shared import get_hof_champions, get_hof_web, get_hof_mail
-from checks.views.shared import update_base_stats, get_hof_manual
+from interface import redis_id, simple_cache_page
+from interface.views.shared import get_hof_champions, get_hof_web, get_hof_mail
+from interface.views.shared import update_base_stats, get_hof_manual
 
 
 def page404(request,exception):
