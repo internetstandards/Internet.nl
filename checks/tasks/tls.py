@@ -35,10 +35,9 @@ from .shared import resolve_dane, get_mail_servers_mxstatus
 from .shared import results_per_domain, aggregate_subreports
 from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
 from .shared import mail_get_servers, batch_mail_get_servers
-from .tls_connection import MAX_REDIRECT_DEPTH, NoIpError
+from .tls_connection import MAX_REDIRECT_DEPTH
 from .tls_connection import DebugConnection, ModernConnection
-from .tls_connection import ConnectionHandshakeException
-from .tls_connection import ConnectionSocketException
+from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from .tls_connection import SSLConnectionWrapper
 from .tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
 from .tls_connection import HTTPSConnection, CipherListAction, TLSV1_3

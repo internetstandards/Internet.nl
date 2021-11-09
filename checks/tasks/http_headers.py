@@ -5,9 +5,8 @@ import http.client
 import re
 import socket
 
-from .tls_connection import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
-from .tls_connection import ConnectionSocketException
-from .tls_connection import ConnectionHandshakeException
+from .tls_connection import http_fetch, MAX_REDIRECT_DEPTH
+from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from .. import scoring
 
 

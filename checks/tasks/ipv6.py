@@ -17,14 +17,53 @@ from django.db import transaction
 from . import dispatcher
 from . import SetupUnboundContext
 from . import shared
-from .tls_connection import http_fetch, NoIpError, ConnectionHandshakeException
-from .tls_connection import ConnectionSocketException
+from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from .dispatcher import check_registry
-from .. import scoring, categories, redis_id
-from .. import batch, batch_shared_task
+from .. import scoring, categories
+from interface import redis_id
+from interface import batch, batch_shared_task
 from interface.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
 from interface.models import WebDomain, MxStatus
 from interface.views.shared import pretty_domain_name
+
+
+if settings.USE_NASSL_FOR_IPV6:
+    # Nassl does not work on arm64, so this module provides an alternative tailored for IPv6.
+    # It uses the python requests library.
+    from .tls_connection import http_fetch
+else:
+    # call: url, socket.AF_INET, port=port, task=task, keep_conn_open=True
+    # task seems unused? what?
+    # from . import requests_wrapper as requests
+
+    class FakeResult():
+
+        data: ""
+
+        def __init__(self, data):
+            this.data = data
+
+        def close(self):
+            ...
+
+        def read(self, length):
+            return self.data[0:length]
+
+    def http_fetch(host, af=socket.AF_INET, path="/", port=80, **kwargs):
+        # todo: max length read.
+
+        try:
+            response = requests.get(
+                host, family=af, port=port,
+                allow_redirects=False,
+                verify=False,
+                headers={"User-Agent": "internetnl/1.0"},
+            )
+        except requests.requestException:
+            return False, FakeResult(), None, None
+
+        # needed are: connection.close, response (to read)
+        return FakeResult(), FakeResult(response.content), None, None
 
 
 # mapping tasks to models

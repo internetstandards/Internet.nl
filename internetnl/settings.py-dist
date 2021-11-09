@@ -231,7 +231,7 @@ LANGUAGES = sorted([
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'checks/assets'),
+    os.path.join(BASE_DIR, 'interface/assets'),
 ]
 
 
@@ -406,3 +406,5 @@ INTERNET_NL_CHECK_SUPPORT_DNSSEC = bool(os.environ.get("INTERNET_NL_CHECK_SUPPOR
 INTERNET_NL_CHECK_SUPPORT_MAIL = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", True))
 INTERNET_NL_CHECK_SUPPORT_TLS = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True))
 INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True))
+
+USE_NASSL_FOR_IPV6 = bool(os.environ.get("USE_NASSL_FOR_IPV6", True))
