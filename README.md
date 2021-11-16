@@ -139,3 +139,6 @@ celery -A internetnl multi start \
      worker db_worker slow_db_worker \
      -c:1 5 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
      -l info --without-gossip --time-limit=300  -P gevent
+
+
+celery -A internetnl worker -ldebug -Q db_worker,slow_db_worker --without-gossip --time-limit=300  -P gevent

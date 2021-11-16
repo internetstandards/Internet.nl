@@ -106,7 +106,7 @@ unbound: venv .unbound
 	cd unbound && ./configure --prefix=/home/parallels/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=/home/parallels/Internet.nl/.venv/lib/python3.8/site-packages &&  make install
 	touch .unbound
 
-python-whois: venv .python-whois
+pythonwhois: venv .python-whois
 .python-whois:
 	rm -rf python-whois
 	git clone https://github.com/internetstandards/python-whois.git

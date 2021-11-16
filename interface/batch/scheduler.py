@@ -16,14 +16,7 @@ from pyrabbit.api import APIError, PermissionError
 from . import util
 from .. import batch_shared_task, redis_id
 from checks.probes import batch_webprobes, batch_mailprobes
-from checks.tasks.dnssec import batch_web_registered as dnssec_web_taskset
-from checks.tasks.dnssec import batch_mail_registered as dnssec_mail_taskset
-from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
-from checks.tasks.ipv6 import batch_mail_registered as ipv6_mail_taskset
-from checks.tasks.mail import batch_mail_registered as auth_mail_taskset
-from checks.tasks.tls import batch_web_registered as tls_web_taskset
-from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
-from checks.tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
+
 from checks.tasks import dispatcher
 from checks.models import BatchRequest, BatchRequestStatus, BatchDomain
 from checks.models import BatchDomainStatus, BatchTestStatus
@@ -35,27 +28,44 @@ from checks.models import MailTestDnssec, DomainTestDnssec
 logger = get_task_logger(__name__)
 
 BATCH_WEBTEST = {
-    'subtests': {
-        'ipv6': ipv6_web_taskset,
-        'dnssec': dnssec_web_taskset,
-        'tls': tls_web_taskset,
-        'appsecpriv': appsecpriv_web_taskset,
-    },
+    'subtests': {},
     'report': {
         'name': 'domaintestreport'
     }
 }
+
 BATCH_MAILTEST = {
-    'subtests': {
-        'ipv6': ipv6_mail_taskset,
-        'dnssec': dnssec_mail_taskset,
-        'auth': auth_mail_taskset,
-        'tls': tls_mail_taskset,
-    },
+    'subtests': {},
     'report': {
         'name': 'mailtestreport'
     }
 }
+
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
+    BATCH_WEBTEST['subtests']['ipv6'] = ipv6_web_taskset
+    from checks.tasks.ipv6 import batch_mail_registered as ipv6_mail_taskset
+    BATCH_MAILTEST['subtests']['ipv6'] = ipv6_mail_taskset
+
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    from checks.tasks.dnssec import batch_web_registered as dnssec_web_taskset
+    BATCH_WEBTEST['subtests']['dnssec'] = dnssec_web_taskset
+    from checks.tasks.dnssec import batch_mail_registered as dnssec_mail_taskset
+    BATCH_MAILTEST['subtests']['dnssec'] = dnssec_mail_taskset
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    from checks.tasks.tls import batch_web_registered as tls_web_taskset
+    BATCH_WEBTEST['subtests']['tls'] = tls_web_taskset
+    from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
+    BATCH_MAILTEST['subtests']['tls'] = tls_mail_taskset
+
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    from checks.tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
+    BATCH_WEBTEST['subtests']['appsecpriv'] = appsecpriv_web_taskset
+
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+    from checks.tasks.mail import batch_mail_registered as auth_mail_taskset
+    BATCH_MAILTEST['subtests']['auth'] = auth_mail_taskset
 
 
 class Rabbit():
