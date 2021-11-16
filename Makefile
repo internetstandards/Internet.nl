@@ -17,6 +17,9 @@ else
 	POFILES_TAR_ARGS+=$(TAR)
 endif
 
+bin = .venv/bin
+env = env PATH="${bin}:$$PATH"
+
 .PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file
 
 help:
@@ -66,3 +69,13 @@ clean: clean_venv
 clean_venv:  # Remove venv
 	@echo "Cleaning venv"
 	@rm -rf .venv
+
+
+pip-compile: ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
+
+pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
+
+pip-sync: ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
