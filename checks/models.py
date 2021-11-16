@@ -130,9 +130,6 @@ class BaseTestModel(models.Model):
 
     """
 
-    class Meta:
-        abstract = True
-
     def totalscore(self, score_fields):
         if self.score is not None:
             return self.score
@@ -154,6 +151,7 @@ class BaseTestModel(models.Model):
 
     class Meta:
         app_label = 'checks'
+        abstract = True
 
 
 ###

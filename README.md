@@ -131,3 +131,11 @@ Currently ships with Python3.8. This is made for python 3.8
 
 # Then for nassl:
 That's not supported on arm64, so you're out of luck. Refactor the code to only use nassl when strictly needed.
+
+
+# Celery workers
+todo: add batch worker. Make workers follow-able: tail -f /var/log/celery*
+celery -A internetnl multi start \
+     worker db_worker slow_db_worker \
+     -c:1 5 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
+     -l info --without-gossip --time-limit=300  -P gevent

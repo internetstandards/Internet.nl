@@ -15,7 +15,7 @@ from pyrabbit.api import APIError, PermissionError
 
 from . import util
 from .. import batch_shared_task, redis_id
-from ..probes import batch_webprobes, batch_mailprobes
+from checks.probes import batch_webprobes, batch_mailprobes
 from checks.tasks.dnssec import batch_web_registered as dnssec_web_taskset
 from checks.tasks.dnssec import batch_mail_registered as dnssec_mail_taskset
 from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
