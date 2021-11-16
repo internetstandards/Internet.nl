@@ -15,9 +15,9 @@ from django.shortcuts import render
 from django_redis import get_redis_connection
 
 from interface import redis_id
-from interface.models import ConnectionTest
-from interface.models import Resolver
-from interface.models import ASRecord
+from checks.models import ConnectionTest
+from checks.models import Resolver
+from checks.models import ASRecord
 from checks.scoring import STATUS_FAIL
 from checks.scoring import STATUS_NOTICE
 from checks.scoring import STATUS_INFO

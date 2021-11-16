@@ -12,8 +12,8 @@ from interface.batch.responses import api_response, unknown_request_response
 from interface.batch.responses import invalid_url_response, bad_client_request_response
 from interface.batch.responses import general_server_error_response
 from .. import simple_cache_page
-from ..models import BatchRequest
-from ..models import BatchRequestStatus
+from checks.models import BatchRequest
+from checks.models import BatchRequestStatus
 
 
 @require_http_methods(['GET', 'POST'])

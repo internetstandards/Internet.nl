@@ -20,7 +20,7 @@ def _load_autoconf_in_cache():
     Loads any autoconf option in cache to avoid repeated DB access.
 
     """
-    from interface.models import AutoConf, AutoConfOption
+    from checks.models import AutoConf, AutoConfOption
     try:
         for option in (
                 AutoConfOption.DATED_REPORT_ID_THRESHOLD_WEB,
@@ -121,8 +121,8 @@ SELECT
         check_indexes_in_place()
 
 
-class ChecksAppConfig(AppConfig):
-    name = 'checks'
+class InterfaceAppConfig(AppConfig):
+    name = 'interface'
 
     def ready(self):
         _load_autoconf_in_cache()

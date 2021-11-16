@@ -6,7 +6,7 @@ from django.core.management.base import CommandError
 from django.db import transaction
 
 from interface.batch.util import create_batch_user
-from interface.models import BatchUser
+from checks.models import BatchUser
 
 
 class FormatType(Enum):

@@ -9,8 +9,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.translation import ugettext as _
 
 from interface import redis_id
-from interface.models import MailTestIpv6, MailTestDnssec, MailTestAuth
-from interface.models import MailTestTls, MailTestReport, AutoConfOption
+from checks.models import MailTestIpv6, MailTestDnssec, MailTestAuth
+from checks.models import MailTestTls, MailTestReport, AutoConfOption
 from checks.probes import mailprobes
 from interface.views.shared import proberesults, process, pretty_domain_name
 from interface.views.shared import redirect_invalid_domain, add_score_to_report

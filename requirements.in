@@ -40,4 +40,4 @@ pytest
 selenium
 chardet
 requests
-
+hiredis

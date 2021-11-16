@@ -19,8 +19,8 @@ from . import shared
 from .dispatcher import check_registry, post_callback_hook
 from interface import batch, batch_shared_task
 from .. import scoring, categories, redis_id
-from interface.models import DomainTestDnssec, DnssecStatus, MailTestDnssec
-from interface.models import MxStatus
+from checks.models import DomainTestDnssec, DnssecStatus, MailTestDnssec
+from checks.models import MxStatus
 
 
 UNBOUND_PATCHED_DS_LOG = "internetnl - DS unsupported"

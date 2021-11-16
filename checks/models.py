@@ -12,6 +12,47 @@ from django.db import models, transaction, connection
 from django.utils import timezone
 
 
+class ListField(models.TextField):
+    def __init__(self, *args, **kwargs):
+        super(ListField, self).__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection, context="Null"):
+        if value is None:
+            return value
+        return ast.literal_eval(value)
+
+    def to_python(self, value):
+        if not value:
+            value = []
+        if isinstance(value, list):
+            return value
+        if isinstance(value, dict):
+            return value
+        return ast.literal_eval(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+        return str(value)
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self.get_db_prep_value(value)
+
+
+class AutoConfOption(Enum):
+    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
+    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
+
+
+class MxStatus(LabelEnum):
+    has_mx = 0
+    no_mx = 1
+    no_null_mx = 2
+    invalid_null_mx = 3
+    null_mx = 4
+
+
 class DnssecStatus(Enum):
     insecure = 0
     secure = 1
@@ -59,14 +100,6 @@ class CipherOrderStatus(Enum):
     na = 4  # Don't care about order; only GOOD ciphers.
 
 
-class MxStatus(LabelEnum):
-    has_mx = 0
-    no_mx = 1
-    no_null_mx = 2
-    invalid_null_mx = 3
-    null_mx = 4
-
-
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -89,34 +122,6 @@ def batch_request_id():
             return new_uuid
         num_tries += 1
     raise Exception("Not able to get random id")
-
-
-class ListField(models.TextField):
-    def __init__(self, *args, **kwargs):
-        super(ListField, self).__init__(*args, **kwargs)
-
-    def from_db_value(self, value, expression, connection, context="Null"):
-        if value is None:
-            return value
-        return ast.literal_eval(value)
-
-    def to_python(self, value):
-        if not value:
-            value = []
-        if isinstance(value, list):
-            return value
-        if isinstance(value, dict):
-            return value
-        return ast.literal_eval(value)
-
-    def get_prep_value(self, value):
-        if value is None:
-            return value
-        return str(value)
-
-    def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
-        return self.get_db_prep_value(value)
 
 
 class BaseTestModel(models.Model):
@@ -1092,11 +1097,6 @@ class BatchMailTest(models.Model):
 
     class Meta:
         app_label = 'checks'
-
-
-class AutoConfOption(Enum):
-    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
-    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
 
 
 class AutoConf(models.Model):

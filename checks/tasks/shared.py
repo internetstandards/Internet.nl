@@ -11,7 +11,7 @@ import unbound
 from . import SetupUnboundContext
 from interface import batch_shared_task
 from checks.scoring import STATUS_MAX, ORDERED_STATUSES
-from interface.models import MxStatus
+from checks.models import MxStatus
 
 
 MAX_MAILSERVERS = 10

@@ -18,7 +18,7 @@ from .spf_parser import parse as spf_parse
 from .. import scoring, categories, redis_id, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
     SPF_NON_SENDING_POLICY
 from .. import batch, batch_shared_task
-from ..models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
+from checks.models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
 
 
 @shared_task(bind=True)

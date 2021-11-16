@@ -5,9 +5,9 @@ from django.conf import settings
 
 from checks import categories
 from checks.tasks import dispatcher
-from interface.models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
-from interface.models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
-from interface.models import MailTestTls, WebTestAppsecpriv
+from checks.models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
+from checks.models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
+from checks.models import MailTestTls, WebTestAppsecpriv
 from checks.categories import WebTlsHttpsExists, MailTlsStarttlsExists
 from checks.scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
 from checks.scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED

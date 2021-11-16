@@ -83,7 +83,7 @@ pip-sync: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
 
 run: venv
-	. .venv/bin/activate && ${env} python3 manage.py runserver --settings=internetnl.settings
+	. .venv/bin/activate && ${env} python3 manage.py runserver
 
 %:
     @:
@@ -92,7 +92,7 @@ args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 
 manage: venv
 	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
-	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring) --settings=internetnl.settings
+	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring)
 
 
 test:

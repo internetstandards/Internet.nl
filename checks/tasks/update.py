@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 from interface import redis_id
-from interface.models import DomainTestReport, MailTestReport
+from checks.models import DomainTestReport, MailTestReport
 from interface.batch import util
 from internetnl.celery import app
 

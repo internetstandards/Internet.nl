@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC, abstractmethod
 
-from interface.models import DomainTestReport, MailTestReport, ZeroRttStatus
-from interface.models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
+from checks.models import DomainTestReport, MailTestReport, ZeroRttStatus
+from checks.models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
 from checks.categories import MailTlsStarttlsExists
 from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY
 

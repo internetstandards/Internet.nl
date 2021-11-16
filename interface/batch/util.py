@@ -25,10 +25,10 @@ from .responses import general_server_error_response
 from .custom_results import CUSTOM_RESULTS_MAP
 from .. import batch_shared_task, redis_id
 from checks.probes import batch_webprobes, batch_mailprobes
-from ..models import BatchUser, BatchRequestType, BatchDomainStatus
-from ..models import BatchWebTest, BatchMailTest
-from ..models import BatchDomain, BatchRequestStatus, BatchRequest
-from ..models import DomainTestReport
+from checks.models import BatchUser, BatchRequestType, BatchDomainStatus
+from checks.models import BatchWebTest, BatchMailTest
+from checks.models import BatchDomain, BatchRequestStatus, BatchRequest
+from checks.models import DomainTestReport
 from checks.scoring import STATUSES_API_TEXT_MAP
 from ..views.shared import pretty_domain_name, validate_dname
 

@@ -25,12 +25,12 @@ from checks.tasks.tls import batch_web_registered as tls_web_taskset
 from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
 from checks.tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
 from checks.tasks import dispatcher
-from interface.models import BatchRequest, BatchRequestStatus, BatchDomain
-from interface.models import BatchDomainStatus, BatchTestStatus
-from interface.models import BatchWebTest
-from interface.models import WebTestTls, WebTestAppsecpriv
-from interface.models import DomainTestReport, MailTestReport, MailTestTls
-from interface.models import MailTestDnssec, DomainTestDnssec
+from checks.models import BatchRequest, BatchRequestStatus, BatchDomain
+from checks.models import BatchDomainStatus, BatchTestStatus
+from checks.models import BatchWebTest
+from checks.models import WebTestTls, WebTestAppsecpriv
+from checks.models import DomainTestReport, MailTestReport, MailTestTls
+from checks.models import MailTestDnssec, DomainTestDnssec
 
 logger = get_task_logger(__name__)
 

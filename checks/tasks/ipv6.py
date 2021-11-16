@@ -22,8 +22,8 @@ from .dispatcher import check_registry
 from .. import scoring, categories
 from interface import redis_id
 from interface import batch, batch_shared_task
-from interface.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
-from interface.models import WebDomain, MxStatus
+from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
+from checks.models import WebDomain, MxStatus
 from interface.views.shared import pretty_domain_name
 
 
