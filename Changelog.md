@@ -119,7 +119,7 @@ Bug Fixes
 - ARIA and DSS algorithms not detected. [(#477)]
 
 Dependencies
-- Updated python-pip-requirements.txt:
+- Updated requirements.txt:
   - django-redis pinned to 4.10
   - celery bumped to 4.3.1 (vine dependency)
   - vine pinned to 1.3.0

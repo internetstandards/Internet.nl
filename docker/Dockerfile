@@ -106,9 +106,9 @@ RUN rm -rf /tmp/build
 WORKDIR ${APP_PATH}
 
 # Install Internet.nl web application Python dependencies
-COPY python-pip-requirements.txt .
+COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install --trusted-host pypi.python.org -r ./python-pip-requirements.txt
+    pip install --trusted-host pypi.python.org -r ./requirements.txt
 
 # Copy our files into the image. Doing this after and separately to installing
 # dependencies avoids re-installing dependencies when the set of dependencies

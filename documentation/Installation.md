@@ -19,7 +19,7 @@ and make sure that the environment is always activated when interacting with
 internet.nl's installation.
 
 Install all Python dependencies from pip at once:
-* `pip install -r python-pip-requirements.txt`
+* `pip install -r requirements.txt`
 
 Install Python dependencies not in pip:
 * pythonwhois (use fork at https://github.com/internetstandards/python-whois/tree/internetnl)

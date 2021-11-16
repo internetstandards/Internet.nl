@@ -50,3 +50,19 @@ update_cert_fingerprints:
 
 update_root_key_file:
 	unbound-anchor -a $(DNSDIR)/root.key
+
+venv: .venv/make_venv_complete ## Create virtual environment
+.venv/make_venv_complete:
+	${MAKE} clean
+	python3 -m venv .venv
+	. .venv/bin/activate && ${env} pip install -U pip pip-tools
+	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
+	# . .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
+	touch .venv/make_venv_complete
+
+clean: ## Cleanup
+clean: clean_venv
+
+clean_venv:  # Remove venv
+	@echo "Cleaning venv"
+	@rm -rf .venv
