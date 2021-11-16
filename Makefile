@@ -79,3 +79,6 @@ pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
 
 pip-sync: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
+
+run: venv
+	. .venv/bin/activate && ${env} python3 manage.py runserver
