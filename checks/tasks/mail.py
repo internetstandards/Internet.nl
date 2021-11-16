@@ -1,7 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import idna
-import re
 import time
 
 from celery import shared_task
@@ -16,13 +15,10 @@ from .tls_connection import http_get
 from .dispatcher import post_callback_hook, check_registry
 from .dmarc_parser import parse as dmarc_parse
 from .spf_parser import parse as spf_parse
-from .. import scoring, categories, redis_id
+from .. import scoring, categories, redis_id, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
+    SPF_NON_SENDING_POLICY
 from .. import batch, batch_shared_task
 from ..models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
-
-DMARC_NON_SENDING_POLICY = re.compile(r'^v=DMARC1;\ *p=reject;?')
-DMARC_NON_SENDING_POLICY_ORG = re.compile(r'v=DMARC1;(?:.*sp=reject|\ *p=reject(?!.*sp=))')
-SPF_NON_SENDING_POLICY = re.compile(r'^v=spf1\ +(?:exp=[^ ]+\ +)?-all;?(?:\ +exp=[^ ]+)?$')
 
 
 @shared_task(bind=True)

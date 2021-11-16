@@ -9,9 +9,9 @@ from django.conf import settings
 import unbound
 
 from . import SetupUnboundContext
-from .. import batch_shared_task
-from ..scoring import STATUS_MAX, ORDERED_STATUSES
-from ..models import MxStatus
+from interface import batch_shared_task
+from checks.scoring import STATUS_MAX, ORDERED_STATUSES
+from interface.models import MxStatus
 
 
 MAX_MAILSERVERS = 10

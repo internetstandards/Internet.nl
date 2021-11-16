@@ -5,7 +5,7 @@ from celery.result import AsyncResult
 from django.core.cache import cache
 from django_redis import get_redis_connection
 
-from .. import redis_id
+from interface import redis_id
 
 
 def user_limit_exceeded(req_limit_id):

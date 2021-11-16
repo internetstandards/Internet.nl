@@ -35,10 +35,9 @@ from .shared import resolve_dane, get_mail_servers_mxstatus
 from .shared import results_per_domain, aggregate_subreports
 from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
 from .shared import mail_get_servers, batch_mail_get_servers
-from .tls_connection import MAX_REDIRECT_DEPTH, NoIpError
+from .tls_connection import MAX_REDIRECT_DEPTH
 from .tls_connection import DebugConnection, ModernConnection
-from .tls_connection import ConnectionHandshakeException
-from .tls_connection import ConnectionSocketException
+from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from .tls_connection import SSLConnectionWrapper
 from .tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
 from .tls_connection import HTTPSConnection, CipherListAction, TLSV1_3
@@ -46,9 +45,9 @@ from .tls_connection import http_fetch
 from .cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
 from .. import scoring, categories
 from .. import batch, batch_shared_task, redis_id
-from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
-from ..models import KexHashFuncStatus, CipherOrderStatus, MxStatus
+from interface.models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
+from interface.models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
+from interface.models import KexHashFuncStatus, CipherOrderStatus, MxStatus
 
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet

@@ -23,6 +23,7 @@ from nassl.ssl_client import ClientCertificateRequested
 from django.conf import settings
 from internetnl import celery_app
 from . import unbound
+from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from ..views.shared import ub_resolve_with_timeout
 
 
@@ -53,10 +54,6 @@ http.client._MAXHEADERS = 200
 MAX_TRIES = 2
 MAX_REDIRECT_DEPTH = 8
 DEFAULT_TIMEOUT = 10
-
-
-class NoIpError(Exception):
-    pass
 
 
 def sock_connect(
@@ -117,12 +114,6 @@ def sock_connect(
 
 # TODO: factor out TLS test specific functionality (used in tls.py) from basic
 # connectivity (used here by http_fetch and also by tls.py).
-class ConnectionHandshakeException(Exception):
-    pass
-
-
-class ConnectionSocketException(Exception):
-    pass
 
 
 # Almost identical to HTTPConnection::_create_conn()

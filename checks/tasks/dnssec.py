@@ -17,10 +17,10 @@ from django.db import transaction
 from . import SetupUnboundContext
 from . import shared
 from .dispatcher import check_registry, post_callback_hook
-from .. import batch, batch_shared_task
+from interface import batch, batch_shared_task
 from .. import scoring, categories, redis_id
-from ..models import DomainTestDnssec, DnssecStatus, MailTestDnssec
-from ..models import MxStatus
+from interface.models import DomainTestDnssec, DnssecStatus, MailTestDnssec
+from interface.models import MxStatus
 
 
 UNBOUND_PATCHED_DS_LOG = "internetnl - DS unsupported"
