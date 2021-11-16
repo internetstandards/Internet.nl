@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 PY?=python
 TAR?=0
 
@@ -81,4 +83,33 @@ pip-sync: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
 
 run: venv
-	. .venv/bin/activate && ${env} python3 manage.py runserver
+	. .venv/bin/activate && ${env} python3 manage.py runserver --settings=internetnl.settings
+
+%:
+    @:
+
+args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
+
+manage: venv
+	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
+	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring) --settings=internetnl.settings
+
+
+test:
+	@echo $(call args,defaultstring)
+
+unbound: venv .unbound
+.unbound:
+	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && ./configure --prefix=/home/parallels/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=/home/parallels/Internet.nl/.venv/lib/python3.8/site-packages &&  make install
+	touch .unbound
+
+python-whois: venv .python-whois
+.python-whois:
+	rm -rf python-whois
+	git clone https://github.com/internetstandards/python-whois.git
+	cd python-whois && git checkout internetnl
+	. .venv/bin/activate && cd python-whois && ${env} python3 setup.py install
+	touch .python-whois

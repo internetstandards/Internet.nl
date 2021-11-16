@@ -115,24 +115,19 @@ the above licensing. Thus we do not grant permission to use these when our
 content or software code is reused.
 
 
-## Installation on a new debian 64 machine:
+## Installation on a new ubuntu 64 machine:
 
-Use the shipped python3 installation of debian. Even though it's not 3.8 yet.
+Currently ships with Python3.8. This is made for python 3.8
 
 #  Then: 
-apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server
+`apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison`
 
 # Then: 
-# https://github.com/internetstandards/unbound
-# But do:
-./configure --prefix=$HOME/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8
+`make venv`
+`make unbound`
 
 # Then:
 # https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md
 
-# But do:
-apt upgrade gcc
- otherwise youll get an unsupported -m64 error...
-
 # Then for nassl:
-that's not supported on arm64, so you're out of luck. Refactor the code to only use nassl when strictly needed.
+That's not supported on arm64, so you're out of luck. Refactor the code to only use nassl when strictly needed.
