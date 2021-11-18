@@ -40,3 +40,5 @@ selenium
 chardet
 requests
 hiredis
+
+colorlog

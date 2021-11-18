@@ -20,7 +20,7 @@ from django.utils.translation import ugettext as _
 import unbound
 
 from interface import redis_id
-
+from internetnl import log
 
 ub_ctx = unbound.ub_ctx()
 if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')

@@ -1,5 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from django.conf import settings
+
 BATCH_API_MAJOR_VERSION = '2'
 BATCH_API_MINOR_VERSION = '0'
 BATCH_API_PATCH_VERSION = '0'
@@ -43,8 +45,11 @@ BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "mail_starttls": "tls"
 }
 
-REPORT_METADATA_WEB_MAP = [
-    {
+REPORT_METADATA_WEB_MAP = []
+
+
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    REPORT_METADATA_WEB_MAP.append({
         'name': 'web_ipv6',
         'type': 'category',
         'translation_key': 'siteipv6',
@@ -94,8 +99,10 @@ REPORT_METADATA_WEB_MAP = [
                 ]
             },
         ]
-    },
-    {
+    })
+
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    REPORT_METADATA_WEB_MAP.append({
         'name': 'web_dnssec',
         'type': 'category',
         'translation_key': 'sitednssec',
@@ -113,8 +120,10 @@ REPORT_METADATA_WEB_MAP = [
                 'translation_key': 'web dnnsec valid',
             },
         ]
-    },
-    {
+    })
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    REPORT_METADATA_WEB_MAP.append({
         'name': 'web_https',
         'type': 'category',
         'translation_key': 'sitetls',
@@ -268,8 +277,11 @@ REPORT_METADATA_WEB_MAP = [
                 ]
             },
         ],
-    },
-    {
+    }
+    )
+
+if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+    REPORT_METADATA_WEB_MAP.append({
         'name': 'web_appsecpriv',
         'type': 'category',
         'translation_key': 'siteappsecpriv',
@@ -313,11 +325,13 @@ REPORT_METADATA_WEB_MAP = [
                 ]
             }
         ]
-    }
-]
+    })
 
-REPORT_METADATA_MAIL_MAP = [
-    {
+
+REPORT_METADATA_MAIL_MAP = []
+
+if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+    REPORT_METADATA_MAIL_MAP.append({
         'name': 'mail_ipv6',
         'type': 'category',
         'translation_key': 'mailipv6',
@@ -361,8 +375,10 @@ REPORT_METADATA_MAIL_MAP = [
                 ]
             }
         ]
-    },
-    {
+    })
+
+if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+    REPORT_METADATA_MAIL_MAP.append({
         'name': 'mail_dnssec',
         'type': 'category',
         'translation_key': 'maildnssec',
@@ -406,8 +422,11 @@ REPORT_METADATA_MAIL_MAP = [
                 ]
             },
         ]
-    },
-    {
+    })
+
+if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
+
+    REPORT_METADATA_MAIL_MAP.append({
         'name': 'mail_auth',
         'type': 'category',
         'translation_key': 'mailauth',
@@ -464,8 +483,10 @@ REPORT_METADATA_MAIL_MAP = [
                 ]
             },
         ]
-    },
-    {
+    })
+
+if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+    REPORT_METADATA_MAIL_MAP.append({
         'name': 'mail_starttls',
         'type': 'category',
         'translation_key': 'mailtls',
@@ -594,5 +615,4 @@ REPORT_METADATA_MAIL_MAP = [
                 ]
             }
         ]
-    },
-]
+    })

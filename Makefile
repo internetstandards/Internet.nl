@@ -83,7 +83,11 @@ pip-sync: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
 
 run: venv
-	. .venv/bin/activate && ${env} python3 manage.py runserver
+	. .venv/bin/activate && ${env} python3 manage.py runserver 0.0.0.0:8000
+
+run-worker: venv
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -ldebug -Q db_worker,slow_db_worker --without-gossip --time-limit=300  -P gevent
+
 
 %:
     @:
@@ -103,7 +107,7 @@ unbound: venv .unbound
 	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ./configure --prefix=/home/parallels/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=/home/parallels/Internet.nl/.venv/lib/python3.8/site-packages &&  make install
+	cd unbound && ./configure --prefix=/home/parallels/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=/samba/stitch/Internet.nl/.venv/lib/python3.8/site-packages &&  make install
 	touch .unbound
 
 pythonwhois: venv .python-whois

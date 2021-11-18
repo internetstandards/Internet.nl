@@ -22,6 +22,9 @@ from interface.views.shared import get_retest_time, pretty_domain_name
 
 # Entrance after form submission.
 # URL: /(site|domain)/
+from internetnl import log
+
+
 def index(request, *args):
     try:
         url = request.POST.get('url', '').strip()
@@ -181,4 +184,5 @@ def siteprobeview(request, probename, dname):
 def siteprobesstatus(request, dname):
     dname = dname.lower()
     statuses = probestatuses(request, dname, webprobes)
+    log.debug("Probe status: %s", statuses)
     return HttpResponse(json.dumps(statuses))

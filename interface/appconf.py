@@ -10,7 +10,7 @@ from django.core.cache import cache
 from django.db import connection, utils, OperationalError
 
 from interface import redis_id
-
+from internetnl import log
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +93,15 @@ def _batch_startup_checks():
             prompts the user.
 
             """
+
+            # Only perform this check when running on oracle (as intended)
+            # Do not run these checks on sqlite while developing
+            if "lite" in settings.DATABASES["default"]["ENGINE"]:
+                log.warning("You are running the batch service on a sqlite database without proper indexes."
+                            "Only do this during development. Otherwise run Oracle and apply the indexes if "
+                            "a startup warning shows.")
+                return True
+
             for table, index_field, index_name in BATCH_INDEXES:
                 with connection.cursor() as cursor:
                     cursor.execute(
