@@ -288,6 +288,7 @@ def test_ns_connectivity(ip, port, domain):
     # XXX: Remove for now; inconsistency with applying settings on celery.
     # ctx.set_async(True)
     ctx.set_fwd(ip)
+    ctx.set_option("rrset-roundrobin:", "no")
     cb_data = dict(done=False)
     try:
         retval, async_id = ctx.resolve_async(

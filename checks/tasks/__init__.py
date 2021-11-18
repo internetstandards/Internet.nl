@@ -34,6 +34,7 @@ class SetupUnboundContext(Task):
                     os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
             self._ub_ctx.set_option(
                 "cache-max-ttl:", str(settings.CACHE_TTL*0.9))
+            self._ub_ctx.set_option("rrset-roundrobin:", "no")
             # XXX: Remove for now; inconsistency with applying settings on celery.
             # self._ub_ctx.set_async(True)
             if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
