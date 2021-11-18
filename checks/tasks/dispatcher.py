@@ -6,6 +6,7 @@ from django.core.cache import cache
 from django_redis import get_redis_connection
 
 from interface import redis_id
+from internetnl import log
 
 
 def user_limit_exceeded(req_limit_id):
@@ -33,6 +34,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
 
     task_id = cache.get(cache_id)
     while not task_id:
+        log.debug("No task found for task in cache. Creating a new redis task.")
         # Task is not yet available (not running AND not in cache)
         # Limit concurrent task launches per IP
         req_limit_id = redis_id.req_limit.id.format(remote_addr)
@@ -44,6 +46,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
         # Try to aquire lock and start tasks
         elif cache.add(cache_id, False, cache_ttl):
             # Submit test
+            log.debug("Submitting a new task set.")
             task_set = submit_task_set(url, checks_registry, req_limit_id)
             # Cache task_set
             task_id = task_set.id
@@ -53,6 +56,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             red.sadd(req_limit_id, task_id)
             red.expire(req_limit_id, req_limit_ttl)
 
+    log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
     callback = AsyncResult(task_id)
     if callback.task_id and callback.ready():
         results = {}
@@ -61,6 +65,8 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             for res in gets:
                 results[res[0]] = res[1]
         return True, results
+    else:
+        log.debug("Task is not yet ready.")
     return False, {}
 
 

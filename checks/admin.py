@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from django.contrib import admin
 
-# Register your models here.
-from checks.models import ConnectionTest, DomainTestIpv6, IPv6TestDomain, WebDomain, MailTestTls, ASRecord, Resolver, \
+from checks.models import ConnectionTest, DomainTestIpv6, WebDomain, MailTestTls, ASRecord, Resolver, \
     MailTestDnssec, DomainTestDnssec, DomainTestTls, WebTestAppsecpriv, DomainTestAppsecpriv, DomainTestReport, \
     MailTestIpv6, NsDomain, MxDomain, MailTestAuth, MailTestReport, BatchUser, BatchRequest, BatchDomain, BatchWebTest, \
     BatchMailTest, AutoConf

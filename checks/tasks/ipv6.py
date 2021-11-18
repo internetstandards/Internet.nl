@@ -5,6 +5,7 @@ import http.client
 import socket
 import time
 
+from internetnl import log
 from unbound import ub_ctx, RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS, RR_CLASS_IN
 
 from bs4 import BeautifulSoup
@@ -32,16 +33,17 @@ if settings.USE_NASSL_FOR_IPV6:
     # It uses the python requests library.
     from .tls_connection import http_fetch
 else:
+    # The goal here is to emulate the NASSL feature. Does not have to be exact.
     # call: url, socket.AF_INET, port=port, task=task, keep_conn_open=True
     # task seems unused? what?
-    # from . import requests_wrapper as requests
+    from checks import requests_wrapper as requests
 
-    class FakeResult():
+    class FakeResult:
 
         data: ""
 
         def __init__(self, data):
-            this.data = data
+            self.data = data
 
         def close(self):
             ...
@@ -59,11 +61,13 @@ else:
                 verify=False,
                 headers={"User-Agent": "internetnl/1.0"},
             )
-        except requests.requestException:
-            return False, FakeResult(), None, None
+        except Exception as e:
+            # Don't know how to deal with this yet. Given it's not a production env, this is fine for now.
+            log.exception(e)
+            return False, FakeResult(""), None, None
 
         # needed are: connection.close, response (to read)
-        return FakeResult(), FakeResult(response.content), None, None
+        return FakeResult(""), FakeResult(response.content), None, None
 
 
 # mapping tasks to models

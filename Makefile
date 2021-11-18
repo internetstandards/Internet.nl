@@ -86,7 +86,9 @@ run: venv
 	. .venv/bin/activate && ${env} python3 manage.py runserver 0.0.0.0:8000
 
 run-worker: venv
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -ldebug -Q db_worker,slow_db_worker --without-gossip --time-limit=300  -P gevent
+	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
+	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,celery,default --time-limit=300 -P eventlet
 
 
 %:
