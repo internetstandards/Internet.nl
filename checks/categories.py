@@ -295,7 +295,7 @@ class MailRpkiExists(Subtest):
     
     def result_nonexistent(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web rpki exists verdict nonexistent"
+        self.verdict = "detail mail rpki exists verdict nonexistent"
 
     def result_not_tested(self):
         self.tech_type = ""
