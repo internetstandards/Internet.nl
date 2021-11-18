@@ -409,9 +409,6 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
         results = defaultdict(list)
         for fqdn, af_ip_pairs in fqdn_ips_pairs:
             for af_ip_pair in af_ip_pairs:
-                # TODO: should we use concurrent.futures' map to do all this
-                # concurrently? Without concurrency we're sequentially waiting
-                # for both DNS resolution and http request completion.
                 ip = af_ip_pair[1]
                 result = {'ip': ip, 'routes': [], 'validity': {}}
 

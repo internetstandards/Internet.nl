@@ -133,8 +133,6 @@ class TeamCymruIPtoASN(RouteView):
         except ValueError:
             raise
 
-        # TODO: would caching at this level make sense? See:
-        # https://redislabs.com/redis-best-practices/indexing-patterns/ip-range-indexing/
         result = task.resolve(ip2asn_query, unbound.RR_TYPE_TXT)
         if not result:
             return []
