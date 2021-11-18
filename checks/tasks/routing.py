@@ -244,7 +244,7 @@ class Routinator(RelyingPartySoftware):
 
     @staticmethod
     def query(task: T, asn: Asn, prefix: Prefix) -> Dict:
-        """Query Routinator's /api/v1/validate endpoint and return json response.
+        """Query Routinator's /api/v1/validity endpoint and return json response.
 
         :throws: requests.RequestException, requests.HTTPError, json.JSONDecodeError
         """
