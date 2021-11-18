@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.db import transaction
 from django.utils import timezone
 
+from internetnl import log
 from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
 from . import REPORT_METADATA_MAIL_MAP, BATCH_API_CATEGORY_TO_PROBE_NAME
 from . import BATCH_PROBE_NAME_TO_API_CATEGORY
@@ -731,7 +732,8 @@ def register_request(request, *args, **kwargs):
             return bad_client_request_response(
                 "'domains' is missing from the request.")
         name = json_req.get('name', 'no-name')
-    except Exception:
+    except Exception as e:
+        log.exception(e)
         return general_server_error_response("Problem parsing domains.")
 
     if request_type.lower() == "web":

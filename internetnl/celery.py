@@ -20,7 +20,7 @@ def debug_task(self):
 if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
-                'task': 'tasks.run_batch',
+                'task': 'run_batch',
                 'schedule': app.conf.BATCH_SCHEDULER_INTERVAL,
         }
     }

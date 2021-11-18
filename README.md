@@ -115,7 +115,7 @@ the above licensing. Thus we do not grant permission to use these when our
 content or software code is reused.
 
 
-## Installation on a new ubuntu 64 machine:
+## Installation on a new ubuntu arm 64 machine:
 
 Currently ships with Python3.8. This is made for python 3.8
 
@@ -125,20 +125,12 @@ Currently ships with Python3.8. This is made for python 3.8
 # Then: 
 `make venv`
 `make unbound`
+`make run-worker`
+`make run-scheduler`
+`make run`
 
 # Then:
 # https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md
 
 # Then for nassl:
 That's not supported on arm64, so you're out of luck. Refactor the code to only use nassl when strictly needed.
-
-
-# Celery workers
-todo: add batch worker. Make workers follow-able: tail -f /var/log/celery*
-celery -A internetnl multi start \
-     worker db_worker slow_db_worker \
-     -c:1 5 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker \
-     -l info --without-gossip --time-limit=300  -P gevent
-
-
-celery -A internetnl worker -ldebug -Q db_worker,slow_db_worker --without-gossip --time-limit=300  -P gevent
