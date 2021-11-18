@@ -3,12 +3,31 @@
 from django.contrib import admin
 
 # Register your models here.
-from checks.models import ConnectionTest
+from checks.models import ConnectionTest, DomainTestIpv6, IPv6TestDomain, WebDomain, MailTestTls, ASRecord, Resolver, \
+    MailTestDnssec, DomainTestDnssec, DomainTestTls, WebTestAppsecpriv, DomainTestAppsecpriv, DomainTestReport, \
+    MailTestIpv6, NsDomain, MxDomain, MailTestAuth, MailTestReport, BatchUser, BatchRequest, BatchDomain, BatchWebTest, \
+    BatchMailTest, AutoConf
 
-
-@admin.register(ConnectionTest)
-class ConnectionTestAdmin(admin.ModelAdmin):
-
-    list_display = ('id', 'ipv4_addr', 'ipv6_addr', 'ipv6_owner', 'ipv6_reverse',
-                    'aaaa_ipv6', 'addr_ipv6', 'resolv_ipv6', 'score_ipv6', 'score_ipv6_max')
-
+admin.site.register(ConnectionTest)
+admin.site.register(Resolver)
+admin.site.register(ASRecord)
+admin.site.register(DomainTestIpv6)
+admin.site.register(WebDomain)
+admin.site.register(MailTestTls)
+admin.site.register(MailTestDnssec)
+admin.site.register(DomainTestDnssec)
+admin.site.register(DomainTestTls)
+admin.site.register(WebTestAppsecpriv)
+admin.site.register(DomainTestAppsecpriv)
+admin.site.register(DomainTestReport)
+admin.site.register(MailTestIpv6)
+admin.site.register(NsDomain)
+admin.site.register(MxDomain)
+admin.site.register(MailTestAuth)
+admin.site.register(MailTestReport)
+admin.site.register(BatchUser)
+admin.site.register(BatchRequest)
+admin.site.register(BatchDomain)
+admin.site.register(BatchWebTest)
+admin.site.register(BatchMailTest)
+admin.site.register(AutoConf)

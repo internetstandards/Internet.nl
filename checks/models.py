@@ -150,7 +150,6 @@ class BaseTestModel(models.Model):
         return [("", "", self.details(probe))]
 
     class Meta:
-        app_label = 'checks'
         abstract = True
 
 
@@ -334,9 +333,6 @@ class DomainServersModel(models.Model):
     Use this class to map server results to domain.
 
     """
-    class Meta:
-        abstract = True
-
     domain = models.CharField(max_length=255, default="")
     report = ListField(default="")
     score = models.IntegerField(null=True)
@@ -365,7 +361,7 @@ class DomainServersModel(models.Model):
         return ['domain', 'report', 'score', 'max_score']
 
     class Meta:
-        app_label = 'checks'
+        abstract = True
 
 
 class MailTestTls(DomainServersModel):
