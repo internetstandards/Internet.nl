@@ -1,4 +1,4 @@
-version: '2.0'
+version: '2.1'
 
 services:
   app:
@@ -14,6 +14,8 @@ services:
       - redis
       - rabbitmq
       - postgres
+    environment:
+      - ENABLE_BATCH=${ENABLE_BATCH:-False}
 
   redis:
     network_mode: host
@@ -21,7 +23,7 @@ services:
 
   rabbitmq:
     network_mode: host
-    image: rabbitmq:alpine
+    image: rabbitmq:management-alpine
 
   postgres:
     network_mode: host
