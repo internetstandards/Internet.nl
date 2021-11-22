@@ -83,7 +83,7 @@ Redis is used for Django caching and Celery result backend
 Rabbitmq is used as the broker for Celery
 `apt install rabbitmq-server`
 
-Install the management plugin for rabbit:
+For Batch support: Install the management plugin for rabbit:
 `rabbitmq-plugins enable rabbitmq_management`
 
 See: https://www.rabbitmq.com/management.html

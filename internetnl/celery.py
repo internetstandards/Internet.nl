@@ -13,22 +13,24 @@ app.config_from_object('django.conf:settings')
 
 app.autodiscover_tasks()
 
+
 @app.task(bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print('Debug Task. Request: {0!r}'.format(self.request))
+
 
 if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
-                'task': 'run_batch',
-                'schedule': app.conf.BATCH_SCHEDULER_INTERVAL,
+            'task': 'run_batch',
+            'schedule': app.conf.BATCH_SCHEDULER_INTERVAL,
         }
     }
 else:
     # Disable HoF when on batch mode, too much DB activity.
     app.conf.beat_schedule = {
         'generate_HoF': {
-                'task': 'update_HoF_ranking',
-                'schedule': crontab(hour='*', minute='*/10', day_of_week='*'),
+            'task': 'update_HoF_ranking',
+            'schedule': crontab(hour='*', minute='*/10', day_of_week='*'),
         }
     }

@@ -64,6 +64,8 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
 	# . .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	touch .venv/make_venv_complete
+	${MAKE} unbound
+	${MAKE} pythonwhois
 
 clean: ## Cleanup
 clean: clean_venv
@@ -71,15 +73,17 @@ clean: clean_venv
 clean_venv:  # Remove venv
 	@echo "Cleaning venv"
 	@rm -rf .venv
+	@rm -f .unbound
+	@rm -f .python-whois
 
 
-pip-compile: ## synchronizes the .venv with the state of requirements.txt
+pip-compile:  venv ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
 
-pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
+pip-upgrade: venv ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
 
-pip-sync: ## synchronizes the .venv with the state of requirements.txt
+pip-sync: venv ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
 
 run: venv
@@ -88,7 +92,8 @@ run: venv
 run-worker: venv
 	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
 	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default --time-limit=300 -P eventlet
+	# Todo: Eventlet results in a database deadlock, gevent does not.
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default --time-limit=300 -P gevent
 
 run-scheduler: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl beat

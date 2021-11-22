@@ -1,9 +1,11 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import logging
 from datetime import timedelta
 import random
 from timeit import default_timer as timer
 
+from internetnl import log
 from internetnl.celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -168,8 +170,17 @@ def check_for_result_or_start_test(batch_domain, batch_test, subtest, taskset):
 
     """
     started_test = False
-    subtest_model = batch_test._meta.get_field(subtest).rel.to
-    result = find_result(batch_domain, subtest_model)
+
+    # Todo: using _meta for anything is not django-version safe: replace with safe construct
+    # -> AttributeError: 'ForeignKey' object has no attribute 'rel'
+    result = False
+    try:
+        subtest_model = batch_test._meta.get_field(subtest).rel.to
+        result = find_result(batch_domain, subtest_model)
+    except AttributeError as e:
+        log.error("Cannot find a relation to a running test. Using _meta.")
+        log.exception(e)
+
     if result:
         save_result(batch_test, subtest, result)
     else:
