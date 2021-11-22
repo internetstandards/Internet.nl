@@ -465,6 +465,10 @@ class DomainTechnicalResults:
     @classmethod
     def _get_web_domain(cls, report_table):
         dtdnssec = report_table.dnssec
+        # In case the test did not run, as it was not flagged to run:
+        if not dtdnssec:
+            return {'dnssec': {'status': 'not tested'}}
+
         return {'dnssec': {'status': dtdnssec.status.name}}
 
     @classmethod
@@ -526,6 +530,10 @@ class DomainTechnicalResults:
 
         webdomain = report_table.ipv6.webdomains.all()[0]
         webservers.update(cls._get_addresses_info(webdomain))
+
+        # tls might not have run as it is feature flagged:
+        if not report_table.tls:
+            return webservers
 
         for dttls in report_table.tls.webtestset.all():
             info = cls._get_web_tls_info(dttls, report_table)

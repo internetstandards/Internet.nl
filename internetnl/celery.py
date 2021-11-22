@@ -22,7 +22,7 @@ def debug_task(self):
 if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
-                'task': 'checks.batch.scheduler.run',
+                'task': 'interface.batch.scheduler.run',
                 'schedule': app.conf.BATCH_SCHEDULER_INTERVAL
         }
     }

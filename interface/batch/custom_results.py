@@ -117,7 +117,11 @@ is translated as:
             return None
 
         mtauth = report_table.auth
+        if not mtauth:
+            # No guarantee that auth has been tested in this batch test, might be disabled in a feature flag
+            return False
         is_org = mtauth.dmarc_record_org_domain
+
         if (mtauth.dmarc_available
                 and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
                 and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
@@ -234,7 +238,12 @@ given the opportunity to do so.
         testset = 'testset'
         if isinstance(report_table, DomainTestReport):
             testset = 'webtestset'
-        servers = getattr(report_table.tls, testset).all()
+        try:
+            servers = getattr(report_table.tls, testset).all()
+        except AttributeError:
+            # if tls tests are not run, there is no webtestset inside of reporttable.tls as .tls is None:
+            return 'no'
+
         if not servers:
             status = 'no'
         for dttls in servers:
