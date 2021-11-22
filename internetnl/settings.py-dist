@@ -28,7 +28,7 @@ if DJANGO_IS_PROXIED:
 
 # --- Batch configuration
 #
-ENABLE_BATCH = False
+ENABLE_BATCH = bool(os.environ.get("ENABLE_BATCH", False))
 if ENABLE_BATCH:
     # RABBITMQ values
     RABBIT = 'localhost:15672'  # Note: Management port
