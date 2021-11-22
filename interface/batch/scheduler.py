@@ -170,17 +170,8 @@ def check_for_result_or_start_test(batch_domain, batch_test, subtest, taskset):
 
     """
     started_test = False
-
-    # Todo: using _meta for anything is not django-version safe: replace with safe construct
-    # -> AttributeError: 'ForeignKey' object has no attribute 'rel'
-    result = False
-    try:
-        subtest_model = batch_test._meta.get_field(subtest).rel.to
-        result = find_result(batch_domain, subtest_model)
-    except AttributeError as e:
-        log.error("Cannot find a relation to a running test. Using _meta.")
-        log.exception(e)
-
+    subtest_model = batch_test._meta.get_field(subtest).remote_field.model
+    result = find_result(batch_domain, subtest_model)
     if result:
         save_result(batch_test, subtest, result)
     else:
@@ -328,7 +319,7 @@ def get_common_report(batch_domain):
 
     if common_report_ids:
         common_report_id = max(common_report_ids)
-        report_model = batch_test._meta.get_field('report').rel.to
+        report_model = batch_test._meta.get_field('report').remote_field.model
         try:
             return report_model.objects.get(id=common_report_id)
         except report_model.DoesNotExist:
@@ -603,17 +594,16 @@ def _run_scheduler():
     logger.info("Found {} domains".format(found_domains))
 
 
-if settings.ENABLE_BATCH:
-    @app.task(name='run_batch')
-    def run():
-        """
-        Run the scheduler every interval only if it is not running already.
+@batch_shared_task
+def run():
+    """
+    Run the scheduler every interval only if it is not running already.
 
-        """
-        lock_id = redis_id.batch_scheduler_lock.id
-        lock_ttl = redis_id.batch_scheduler_lock.ttl
-        with util.memcache_lock(lock_id, lock_ttl) as acquired:
-            if acquired:
-                _run_scheduler()
-                return
-        logger.info("Already running...")
+    """
+    lock_id = redis_id.batch_scheduler_lock.id
+    lock_ttl = redis_id.batch_scheduler_lock.ttl
+    with util.memcache_lock(lock_id, lock_ttl) as acquired:
+        if acquired:
+            _run_scheduler()
+            return
+    logger.info("Already running...")

@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'internetnl.settings')
 
 app = Celery('internetnl')
 
-app.config_from_object('django.conf:settings')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks()
 
@@ -22,8 +22,8 @@ def debug_task(self):
 if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
-            'task': 'run_batch',
-            'schedule': app.conf.BATCH_SCHEDULER_INTERVAL,
+                'task': 'checks.batch.scheduler.run',
+                'schedule': app.conf.BATCH_SCHEDULER_INTERVAL
         }
     }
 else:

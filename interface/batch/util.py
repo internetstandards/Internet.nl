@@ -1,6 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import inspect
+from ipaddress import ip_address
+from json.decoder import JSONDecodeError
 import random
 import re
 from time import monotonic
@@ -732,7 +734,10 @@ def register_request(request, *args, **kwargs):
             return bad_client_request_response(
                 "'domains' is missing from the request.")
         name = json_req.get('name', 'no-name')
-    except Exception as e:
+    except JSONDecodeError:
+        return bad_client_request_response(
+            "Problem parsing json. Did you supply a 'type' and 'domains'?")
+    except Exception:
         log.exception(e)
         return general_server_error_response("Problem parsing domains.")
 
@@ -813,7 +818,9 @@ def patch_request(request, batch_request):
         BatchDomain.objects.filter(batch_request=batch_request).update(
             status=BatchDomainStatus.cancelled)
         return api_response({"request": batch_request.to_api_dict()})
-
+    except JSONDecodeError:
+        return bad_client_request_response(
+            "Problem parsing json. Did you supply a 'status'?")
     except Exception:
         return general_server_error_response(
             "Problem cancelling the batch request.")

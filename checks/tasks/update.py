@@ -9,6 +9,8 @@ from interface import redis_id
 from checks.models import DomainTestReport, MailTestReport
 from interface.batch import util
 from internetnl.celery import app
+from celery import shared_task
+
 
 logger = get_task_logger(__name__)
 
@@ -171,12 +173,10 @@ def _update_hof():
             cache.set(cache_id, cached_data, cache_ttl)
 
 
-# Disable HoF when on batch mode, too much DB activity.
-if not settings.ENABLE_BATCH:
-    @app.task(name='update_HoF_ranking')
-    def ranking():
-        lock_id = redis_id.hof_lock.id
-        lock_ttl = redis_id.hof_lock.ttl
-        with util.memcache_lock(lock_id, lock_ttl) as acquired:
-            if acquired:
-                _update_hof()
+@shared_task
+def update_hof():
+    lock_id = redis_id.hof_lock.id
+    lock_ttl = redis_id.hof_lock.ttl
+    with util.memcache_lock(lock_id, lock_ttl) as acquired:
+        if acquired:
+            _update_hof()
