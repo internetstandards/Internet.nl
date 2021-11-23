@@ -116,6 +116,7 @@ manage: venv
 
 unbound: venv .unbound
 .unbound:
+	# todo: also be able to use PYTHON_VERION from the environment
 	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
