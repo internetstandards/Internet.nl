@@ -114,15 +114,6 @@ manage: venv
 	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring)
 
 
-test:
-	@echo $(call args,defaultstring)
-
-
-tryout:
-	@echo "YOLO"
-	@echo $(USER)
-	@echo $(ROOT_DIR)
-
 unbound: venv .unbound
 .unbound:
 	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
