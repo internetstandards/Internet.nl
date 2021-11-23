@@ -12,6 +12,11 @@ MACSDIR=$(REMOTEDATADIR)/macs
 CERTSSDIR=$(REMOTEDATADIR)/certs
 DNSDIR=$(REMOTEDATADIR)/dns
 
+# https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 ifeq ($(TAR), 0)
 	POFILES_TAR_ARGS=to_tar
 else
@@ -103,6 +108,7 @@ run-scheduler: venv
 
 args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 
+# usage: make manage <command in manage.py>
 manage: venv
 	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
 	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring)
@@ -111,12 +117,18 @@ manage: venv
 test:
 	@echo $(call args,defaultstring)
 
+
+tryout:
+	@echo "YOLO"
+	@echo $(USER)
+	@echo $(ROOT_DIR)
+
 unbound: venv .unbound
 .unbound:
 	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ./configure --prefix=/home/parallels/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=/samba/stitch/Internet.nl/.venv/lib/python3.8/site-packages &&  make install
+	cd unbound && ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.8/site-packages &&  make install
 	touch .unbound
 
 pythonwhois: venv .python-whois
