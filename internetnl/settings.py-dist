@@ -172,7 +172,14 @@ WSGI_APPLICATION = 'internetnl.wsgi.application'
 
 # --- Database configuration
 #     https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
+"""
+PSQL settings for development purposes (no db restrictions for this user):
+create database internetnl;
+create role internetnluser with password 'internetnluser';
+grant connect on database internetnl to internetnluser;
+grant all on database internetnl to internetnluser;
+alter role internetnluser login;
+"""
 DATABASES_SETTINGS = {
     "dev": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -180,13 +187,14 @@ DATABASES_SETTINGS = {
     },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'internetnl',
-        'USER': 'internetnl',
-        'PASSWORD': 'internetnl',
-        'HOST': '127.0.0.1'
+        'NAME': os.environ.get("DB_NAME", "internetnl"),
+        'USER': os.environ.get("DB_USER", "internetnluser"),
+        'PASSWORD': os.environ.get("DB_PASSWORD", "internetnluser"),
+        'HOST': os.environ.get("DB_HOST", '127.0.0.1')
     }
 }
 
+# For development, use dev in your own settings.py:
 DATABASE = os.environ.get("DJANGO_DATABASE", "default")
 DATABASES = {"default": DATABASES_SETTINGS[DATABASE]}
 
