@@ -424,24 +424,34 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
         taskset=appsecpriv.batch_web_registered)
 
 webprobes = ProbeSet()
+counter = -1
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-    webprobes.add(web_probe_ipv6, 0)
+    counter += 1
+    webprobes.add(web_probe_ipv6, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-    webprobes.add(web_probe_dnssec, 1)
+    counter += 1
+    webprobes.add(web_probe_dnssec, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    webprobes.add(web_probe_tls, 2)
+    counter += 1
+    webprobes.add(web_probe_tls, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
-    webprobes.add(web_probe_appsecpriv, 3)
+    counter += 1
+    webprobes.add(web_probe_appsecpriv, counter)
 
+counter = -1
 batch_webprobes = ProbeSet()
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-    batch_webprobes.add(batch_web_probe_ipv6, 0)
+    counter += 1
+    batch_webprobes.add(batch_web_probe_ipv6, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-    batch_webprobes.add(batch_web_probe_dnssec, 1)
+    counter += 1
+    batch_webprobes.add(batch_web_probe_dnssec, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    batch_webprobes.add(batch_web_probe_tls, 2)
+    counter += 1
+    batch_webprobes.add(batch_web_probe_tls, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
-    batch_webprobes.add(batch_web_probe_appsecpriv, 3)
+    counter += 1
+    batch_webprobes.add(batch_web_probe_appsecpriv, counter)
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     mail_probe_ipv6 = Probe(
@@ -491,22 +501,33 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
         category=categories.MailTls,
         taskset=tls.batch_mail_registered)
 
+
 mailprobes = ProbeSet()
+counter = -1
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-    mailprobes.add(mail_probe_ipv6, 0)
+    counter += 1
+    mailprobes.add(mail_probe_ipv6, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-    mailprobes.add(mail_probe_dnssec, 1)
+    counter += 1
+    mailprobes.add(mail_probe_dnssec, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
-    mailprobes.add(mail_probe_auth, 2)
+    counter += 1
+    mailprobes.add(mail_probe_auth, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    mailprobes.add(mail_probe_tls, 3)
+    counter += 1
+    mailprobes.add(mail_probe_tls, counter)
 
 batch_mailprobes = ProbeSet()
+counter = -1
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-    batch_mailprobes.add(batch_mail_probe_ipv6, 0)
+    counter += 1
+    batch_mailprobes.add(batch_mail_probe_ipv6, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-    batch_mailprobes.add(batch_mail_probe_dnssec, 1)
+    counter += 1
+    batch_mailprobes.add(batch_mail_probe_dnssec, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
-    batch_mailprobes.add(batch_mail_probe_auth, 2)
+    counter += 1
+    batch_mailprobes.add(batch_mail_probe_auth, counter)
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    batch_mailprobes.add(batch_mail_probe_tls, 3)
+    counter += 1
+    batch_mailprobes.add(batch_mail_probe_tls, counter)
