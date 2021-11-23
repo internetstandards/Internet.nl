@@ -425,3 +425,53 @@ INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = bool(os.environ.get("INTERNET_NL_CHECK_SU
 # NASSL has no support for arm64, as a surrogate, use the requests library and a wrapper to perform some ipv6 requests
 # that sort-of-mimic the behavior of NASSL. If you're working on an x64 machine, ou don't need this.
 USE_NASSL_FOR_IPV6 = bool(os.environ.get("USE_NASSL_FOR_IPV6", True))
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",  # sys.stdout
+            "formatter": "color",
+        },
+    },
+    "formatters": {
+        "debug": {
+            "format": "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - " "%(funcName)20s() - %(message)s",
+        },
+        "color": {
+            "()": "colorlog.ColoredFormatter",
+            # to get the name of the logger a message came from, add %(name)s.
+            "format": "%(log_color)s%(asctime)s\t%(levelname)-8s - " "%(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+            "log_colors": {
+                "DEBUG": "green",
+                "INFO": "white",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "bold_red",
+            },
+        },
+    },
+    "loggers": {
+        # Default Django logging, we expect django to work, and therefore only show INFO messages.
+        # https://docs.djangoproject.com/en/2.1/topics/logging/#django-s-logging-extensions
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+        },
+        "internetnl": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
+        },
+        # disable verbose task logging (ie: "received task...", "...succeeded in...")
+        "celery.app.trace": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG") if DEBUG else "ERROR",
+        },
+        "celery.worker.strategy": {
+            "level": "INFO" if DEBUG else "ERROR",
+        },
+    },
+}
