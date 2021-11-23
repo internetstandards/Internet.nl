@@ -42,15 +42,15 @@ help:
 	@echo '   make update_root_key_file                  update DNS root key file'
 
 translations:
-	@$(PY) $(POFILESEXEC) to_django
+	. .venv/bin/activate && ${env} python3 $(POFILESEXEC) to_django
 	@echo "Make sure to run 'compilemessages' on the server to update the actual content"
 
 translations_tar:
-	@$(PY) $(POFILESEXEC) $(POFILES_TAR_ARGS)
+	. .venv/bin/activate && ${env} python3 $(POFILESEXEC) $(POFILES_TAR_ARGS)
 
 frontend:
-	@$(PY) $(FRONTENDEXEC) js
-	@$(PY) $(FRONTENDEXEC) css
+	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) js
+	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) css
 
 update_padded_macs:
 	cd $(MACSDIR); ./update-macs.sh
