@@ -120,7 +120,7 @@ content or software code is reused.
 Currently ships with Python3.8. This is made for python 3.8
 
 #  Then: 
-`apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison`
+`apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison python3-venv`
 
 # Then: 
 `make venv`

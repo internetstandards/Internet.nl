@@ -136,15 +136,14 @@ nassl: venv .nassl
 .nassl:
 	rm -rf nassl_freebsd
 	git clone https://github.com/internetstandards/nassl.git nassl_freebsd
-	cd nassl_freebsd
-	git checkout internetnl
-	mkdir -p bin/openssl-legacy/freebsd64
-	mkdir -p bin/openssl-modern/freebsd64
-	wget http://zlib.net/zlib-1.2.11.tar.gz
-	tar xvfz  zlib-1.2.11.tar.gz
-	git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
-	cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..
-	git clone https://github.com/openssl/openssl.git openssl-master
-	cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
-	. ./../venv/bin/activate && ${env} python3 build_from_scratch.py
-	. ./../venv/bin/activate && ${env} python3 setup.py install
+	cd nassl_freebsd && git checkout internetnl
+	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
+	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
+	cd nassl_freebsd && wget http://zlib.net/zlib-1.2.11.tar.gz
+	cd nassl_freebsd && tar xvfz  zlib-1.2.11.tar.gz
+	cd nassl_freebsd && git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
+	cd nassl_freebsd && cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..
+	cd nassl_freebsd && git clone https://github.com/openssl/openssl.git openssl-master
+	cd nassl_freebsd && cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
+	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
+	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 setup.py install
