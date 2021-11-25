@@ -23,8 +23,8 @@ from nassl.ssl_client import ClientCertificateRequested
 from django.conf import settings
 from internetnl import celery_app
 from . import unbound
-from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
-from ..views.shared import ub_resolve_with_timeout
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from interface.views.shared import ub_resolve_with_timeout
 
 
 # Use a dedicated logger as this logging can be very verbose
