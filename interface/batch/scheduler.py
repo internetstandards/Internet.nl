@@ -11,9 +11,9 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
-from pyrabbit import Client
-from pyrabbit.http import HTTPError, NetworkError
-from pyrabbit.api import APIError, PermissionError
+from pyrabbit2 import Client
+from pyrabbit2.http import HTTPError, NetworkError
+from pyrabbit2.api import APIError, PermissionError
 
 from interface.batch import util
 from interface import batch_shared_task, redis_id

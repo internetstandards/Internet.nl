@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     'django_bleach',
     'markdown_deux',
     'frontend',
+    'interface',
     'checks',
     'django_hosts',
 ]
