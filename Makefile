@@ -98,7 +98,19 @@ run-worker: venv
 	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
 	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
 	# Todo: Eventlet results in a database deadlock, gevent does not.
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 -P gevent
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300
+
+run-worker-batch-main: venv
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300
+
+run-worker-batch-scheduler: venv
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_scheduler --time-limit=300
+
+run-worker-batch-callback: venv
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_callback --time-limit=300
+
+run-worker-batch-slow: venv
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_slow --time-limit=300
 
 run-scheduler: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl beat
