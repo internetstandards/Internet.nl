@@ -98,7 +98,7 @@ run-worker: venv
 	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
 	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
 	# Todo: Eventlet results in a database deadlock, gevent does not.
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default --time-limit=300 -P gevent
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 -P gevent
 
 run-scheduler: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl beat
@@ -130,3 +130,21 @@ pythonwhois: venv .python-whois
 	cd python-whois && git checkout internetnl
 	. .venv/bin/activate && cd python-whois && ${env} python3 setup.py install
 	touch .python-whois
+
+
+nassl: venv .nassl
+.nassl:
+	rm -rf nassl_freebsd
+	git clone https://github.com/internetstandards/nassl.git nassl_freebsd
+	cd nassl_freebsd
+	git checkout internetnl
+	mkdir -p bin/openssl-legacy/freebsd64
+	mkdir -p bin/openssl-modern/freebsd64
+	wget http://zlib.net/zlib-1.2.11.tar.gz
+	tar xvfz  zlib-1.2.11.tar.gz
+	git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
+	cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..
+	git clone https://github.com/openssl/openssl.git openssl-master
+	cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
+	. ./../venv/bin/activate && ${env} python3 build_from_scratch.py
+	. ./../venv/bin/activate && ${env} python3 setup.py install
