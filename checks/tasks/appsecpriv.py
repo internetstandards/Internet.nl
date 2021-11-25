@@ -28,7 +28,7 @@ def web_callback(self, results, domain, req_limit_id):
     category = categories.WebAppsecpriv()
     webdomain, results = callback(results, domain, category)
     # Always calculate scores on saving.
-    from checks.tasks.probes import web_probe_appsecpriv
+    from checks.probes import web_probe_appsecpriv
     web_probe_appsecpriv.rated_results_by_model(webdomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -43,7 +43,7 @@ def batch_web_callback(self, results, domain):
     category = categories.WebAppsecpriv()
     webdomain, results = callback(results, domain, category)
     # Always calculate scores on saving.
-    from checks.tasks.probes import batch_web_probe_appsecpriv
+    from checks.probes import batch_web_probe_appsecpriv
     batch_web_probe_appsecpriv.rated_results_by_model(webdomain)
     batch.scheduler.batch_callback_hook(webdomain, self.request.id)
 
