@@ -27,7 +27,7 @@ def mail_callback(self, results, addr, req_limit_id):
     category = categories.MailAuth()
     mtauth = callback(results, addr, category)
     # Always calculate scores on saving.
-    from ..probes import mail_probe_auth
+    from checks.tasks.probes import mail_probe_auth
     mail_probe_auth.rated_results_by_model(mtauth)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -38,7 +38,7 @@ def batch_mail_callback(self, results, addr):
     category = categories.MailAuth()
     mtauth = callback(results, addr, category)
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_auth
+    from checks.tasks.probes import batch_mail_probe_auth
     batch_mail_probe_auth.rated_results_by_model(mtauth)
     batch.scheduler.batch_callback_hook(mtauth, self.request.id)
 

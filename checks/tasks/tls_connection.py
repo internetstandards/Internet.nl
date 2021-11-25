@@ -349,7 +349,7 @@ class ModernConnection(ConnectionCommon, SslClient):
 
         """
         if not cls.ALL_TLS13_CIPHERS:
-            from .cipher_info import cipher_infos
+            from checks.tasks.cipher_info import cipher_infos
             # There is no 'ALL' or other meta cipher suite names when building
             # a TLS 1.3 cipher suite list for OpenSSL, instead one must
             # construct it using only the colon ':' character to separate TLS

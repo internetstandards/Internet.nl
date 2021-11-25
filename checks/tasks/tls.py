@@ -365,7 +365,7 @@ def web_callback(self, results, domain, req_limit_id):
     """
     webdomain, results = callback(results, domain, 'web')
     # Always calculate scores on saving.
-    from ..probes import web_probe_tls
+    from checks.tasks.probes import web_probe_tls
     web_probe_tls.rated_results_by_model(webdomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -375,7 +375,7 @@ def web_callback(self, results, domain, req_limit_id):
 def batch_web_callback(self, results, domain):
     webdomain, results = callback(results, domain, 'web')
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_tls
+    from checks.tasks.probes import batch_web_probe_tls
     batch_web_probe_tls.rated_results_by_model(webdomain)
     batch.scheduler.batch_callback_hook(webdomain, self.request.id)
 
@@ -384,7 +384,7 @@ def batch_web_callback(self, results, domain):
 def mail_callback(self, results, domain, req_limit_id):
     maildomain, results = callback(results, domain, 'mail')
     # Always calculate scores on saving.
-    from ..probes import mail_probe_tls
+    from checks.tasks.probes import mail_probe_tls
     mail_probe_tls.rated_results_by_model(maildomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -394,7 +394,7 @@ def mail_callback(self, results, domain, req_limit_id):
 def batch_mail_callback(self, results, domain):
     maildomain, results = callback(results, domain, 'mail')
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_tls
+    from checks.tasks.probes import batch_mail_probe_tls
     batch_mail_probe_tls.rated_results_by_model(maildomain)
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 

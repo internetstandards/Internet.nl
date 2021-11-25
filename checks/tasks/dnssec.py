@@ -32,7 +32,7 @@ def web_callback(self, results, addr, req_limit_id):
     category = categories.WebDnssec()
     dtdnssec = save_results_web(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import web_probe_dnssec
+    from checks.tasks.probes import web_probe_dnssec
     web_probe_dnssec.rated_results_by_model(dtdnssec)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -43,7 +43,7 @@ def batch_web_callback(self, results, addr):
     category = categories.WebDnssec()
     dtdnssec = save_results_web(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_dnssec
+    from checks.tasks.probes import batch_web_probe_dnssec
     batch_web_probe_dnssec.rated_results_by_model(dtdnssec)
     batch.scheduler.batch_callback_hook(dtdnssec, self.request.id)
 
@@ -53,7 +53,7 @@ def mail_callback(self, results, addr, req_limit_id):
     category = categories.MailDnssec()
     maildomain = save_results_mail(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import mail_probe_dnssec
+    from checks.tasks.probes import mail_probe_dnssec
     mail_probe_dnssec.rated_results_by_model(maildomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -64,7 +64,7 @@ def batch_mail_callback(self, results, addr):
     category = categories.MailDnssec()
     maildomain = save_results_mail(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_dnssec
+    from checks.tasks.probes import batch_mail_probe_dnssec
     batch_mail_probe_dnssec.rated_results_by_model(maildomain)
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 

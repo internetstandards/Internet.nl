@@ -15,8 +15,8 @@ from pyrabbit import Client
 from pyrabbit.http import HTTPError, NetworkError
 from pyrabbit.api import APIError, PermissionError
 
-from . import util
-from .. import batch_shared_task, redis_id
+from interface.batch import util
+from interface import batch_shared_task, redis_id
 from checks.probes import batch_webprobes, batch_mailprobes
 
 from checks.tasks import dispatcher

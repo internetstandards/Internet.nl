@@ -31,7 +31,7 @@ from interface.views.shared import pretty_domain_name
 if settings.USE_NASSL_FOR_IPV6:
     # Nassl does not work on arm64, so this module provides an alternative tailored for IPv6.
     # It uses the python requests library.
-    from .tls_connection import http_fetch
+    from checks.tasks.tls_connection import http_fetch
 else:
     # The goal here is to emulate the NASSL feature. Does not have to be exact.
     # call: url, socket.AF_INET, port=port, task=task, keep_conn_open=True
@@ -83,7 +83,7 @@ def web_callback(self, results, addr, req_limit_id):
     domainipv6 = callback(
         results, addr, DomainTestIpv6(), "domaintestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import web_probe_ipv6
+    from checks.tasks.probes import web_probe_ipv6
     web_probe_ipv6.rated_results_by_model(domainipv6)
     dispatcher.post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -95,7 +95,7 @@ def batch_web_callback(self, results, addr):
     domainipv6 = callback(
         results, addr, DomainTestIpv6(), "domaintestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_ipv6
+    from checks.tasks.probes import batch_web_probe_ipv6
     batch_web_probe_ipv6.rated_results_by_model(domainipv6)
     batch.scheduler.batch_callback_hook(domainipv6, self.request.id)
 
@@ -106,7 +106,7 @@ def mail_callback(self, results, addr, req_limit_id):
     mailipv6 = callback(
         results, addr, MailTestIpv6(), "mailtestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import mail_probe_ipv6
+    from checks.tasks.probes import mail_probe_ipv6
     mail_probe_ipv6.rated_results_by_model(mailipv6)
     dispatcher.post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -118,7 +118,7 @@ def batch_mail_callback(self, results, addr):
     mailipv6 = callback(
         results, addr, MailTestIpv6(), "mailtestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_ipv6
+    from checks.tasks.probes import batch_mail_probe_ipv6
     batch_mail_probe_ipv6.rated_results_by_model(mailipv6)
     batch.scheduler.batch_callback_hook(mailipv6, self.request.id)
 
