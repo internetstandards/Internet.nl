@@ -15,8 +15,9 @@ from checks.tasks.tls_connection import http_get
 from checks.tasks.dispatcher import post_callback_hook, check_registry
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
-from checks import scoring, categories, redis_id, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
+from checks import scoring, categories, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
     SPF_NON_SENDING_POLICY
+from interface import redis_id
 from interface import batch, batch_shared_task
 from checks.models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
 
