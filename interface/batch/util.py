@@ -19,21 +19,21 @@ from django.db import transaction
 from django.utils import timezone
 
 from internetnl import log
-from . import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
-from . import REPORT_METADATA_MAIL_MAP, BATCH_API_CATEGORY_TO_PROBE_NAME
-from . import BATCH_PROBE_NAME_TO_API_CATEGORY
-from .responses import api_response, unauthorised_response
-from .responses import bad_client_request_response
-from .responses import general_server_error_response
-from .custom_results import CUSTOM_RESULTS_MAP
-from .. import batch_shared_task, redis_id
+from interface.batch import BATCH_API_FULL_VERSION, REPORT_METADATA_WEB_MAP
+from interface.batch import REPORT_METADATA_MAIL_MAP, BATCH_API_CATEGORY_TO_PROBE_NAME
+from interface.batch import BATCH_PROBE_NAME_TO_API_CATEGORY
+from interface.batch.responses import api_response, unauthorised_response
+from interface.batch.responses import bad_client_request_response
+from interface.batch.responses import general_server_error_response
+from interface.batch.custom_results import CUSTOM_RESULTS_MAP
+from interface import batch_shared_task, redis_id
 from checks.probes import batch_webprobes, batch_mailprobes
 from checks.models import BatchUser, BatchRequestType, BatchDomainStatus
 from checks.models import BatchWebTest, BatchMailTest
 from checks.models import BatchDomain, BatchRequestStatus, BatchRequest
 from checks.models import DomainTestReport
 from checks.scoring import STATUSES_API_TEXT_MAP
-from ..views.shared import pretty_domain_name, validate_dname
+from interface.views.shared import pretty_domain_name, validate_dname
 
 
 verdict_regex = re.compile(

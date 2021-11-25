@@ -15,12 +15,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from . import dispatcher
-from . import SetupUnboundContext
-from . import shared
-from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
-from .dispatcher import check_registry
-from .. import scoring, categories
+from checks.tasks import dispatcher
+from checks.tasks import SetupUnboundContext
+from checks.tasks import shared
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks.tasks.dispatcher import check_registry
+from checks import scoring, categories
 from interface import redis_id
 from interface import batch, batch_shared_task
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain

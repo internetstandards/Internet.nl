@@ -10,14 +10,14 @@ from django.core.cache import cache
 from urllib.parse import urlparse
 import unbound
 
-from . import SetupUnboundContext
-from .tls_connection import http_get
-from .dispatcher import post_callback_hook, check_registry
-from .dmarc_parser import parse as dmarc_parse
-from .spf_parser import parse as spf_parse
-from .. import scoring, categories, redis_id, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
+from checks.tasks import SetupUnboundContext
+from checks.tasks.tls_connection import http_get
+from checks.tasks.dispatcher import post_callback_hook, check_registry
+from checks.tasks.dmarc_parser import parse as dmarc_parse
+from checks.tasks.spf_parser import parse as spf_parse
+from checks import scoring, categories, redis_id, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
     SPF_NON_SENDING_POLICY
-from .. import batch, batch_shared_task
+from interface import batch, batch_shared_task
 from checks.models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
 
 

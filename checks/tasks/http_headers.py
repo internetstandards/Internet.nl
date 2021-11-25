@@ -5,9 +5,9 @@ import http.client
 import re
 import socket
 
-from .tls_connection import http_fetch, MAX_REDIRECT_DEPTH
-from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
-from .. import scoring
+from checks.tasks.tls_connection import http_fetch, MAX_REDIRECT_DEPTH
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks import scoring
 
 
 def get_multiple_values_from_header(header):

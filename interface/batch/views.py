@@ -11,7 +11,7 @@ from interface.batch.util import register_request, get_request, patch_request
 from interface.batch.responses import api_response, unknown_request_response
 from interface.batch.responses import invalid_url_response, bad_client_request_response
 from interface.batch.responses import general_server_error_response
-from .. import simple_cache_page
+from interface import simple_cache_page
 from checks.models import BatchRequest
 from checks.models import BatchRequestStatus
 

@@ -14,19 +14,19 @@ from checks.scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
 from checks.scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-    from .tasks import ipv6
+    from checks.tasks import ipv6
 
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-    from .tasks import dnssec
+    from checks.tasks import dnssec
 
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
-    from .tasks import mail
+    from checks.tasks import mail
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    from .tasks import tls
+    from checks.tasks import tls
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
-    from .tasks import appsecpriv
+    from checks.tasks import appsecpriv
 
 
 class ProbeSet(object):

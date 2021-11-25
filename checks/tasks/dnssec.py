@@ -14,11 +14,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from . import SetupUnboundContext
-from . import shared
-from .dispatcher import check_registry, post_callback_hook
+from checks.tasks import SetupUnboundContext
+from checks.tasks import shared
+from checks.tasks.dispatcher import check_registry, post_callback_hook
 from interface import batch, batch_shared_task
-from .. import scoring, categories, redis_id
+from checks import scoring, categories
+from interface import redis_id
 from checks.models import DomainTestDnssec, DnssecStatus, MailTestDnssec
 from checks.models import MxStatus
 

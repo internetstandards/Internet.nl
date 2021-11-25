@@ -22,7 +22,7 @@ from nassl.ssl_client import ClientCertificateRequested
 
 from django.conf import settings
 from internetnl import celery_app
-from . import unbound
+from checks.tasks import unbound
 from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from interface.views.shared import ub_resolve_with_timeout
 

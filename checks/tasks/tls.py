@@ -27,24 +27,24 @@ from itertools import product
 from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
-from . import SetupUnboundContext
-from .dispatcher import check_registry, post_callback_hook
-from .http_headers import HeaderCheckerContentEncoding, http_headers_check
-from .http_headers import HeaderCheckerStrictTransportSecurity
-from .shared import resolve_dane, get_mail_servers_mxstatus
-from .shared import results_per_domain, aggregate_subreports
-from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
-from .shared import mail_get_servers, batch_mail_get_servers
-from .tls_connection import MAX_REDIRECT_DEPTH
-from .tls_connection import DebugConnection, ModernConnection
-from .tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
-from .tls_connection import SSLConnectionWrapper
-from .tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
-from .tls_connection import HTTPSConnection, CipherListAction, TLSV1_3
-from .tls_connection import http_fetch
-from .cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
-from .. import scoring, categories
-from .. import batch, batch_shared_task, redis_id
+from checks.tasks import SetupUnboundContext
+from checks.tasks.dispatcher import check_registry, post_callback_hook
+from checks.tasks.http_headers import HeaderCheckerContentEncoding, http_headers_check
+from checks.tasks.http_headers import HeaderCheckerStrictTransportSecurity
+from checks.tasks.shared import resolve_dane, get_mail_servers_mxstatus
+from checks.tasks.shared import results_per_domain, aggregate_subreports
+from checks.tasks.shared import resolve_a_aaaa, batch_resolve_a_aaaa
+from checks.tasks.shared import mail_get_servers, batch_mail_get_servers
+from checks.tasks.tls_connection import MAX_REDIRECT_DEPTH
+from checks.tasks.tls_connection import DebugConnection, ModernConnection
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks.tasks.tls_connection import SSLConnectionWrapper
+from checks.tasks.tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
+from checks.tasks.tls_connection import HTTPSConnection, CipherListAction, TLSV1_3
+from checks.tasks.tls_connection import http_fetch
+from checks.tasks.cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
+from checks import scoring, categories
+from interface import batch, batch_shared_task, redis_id
 from checks.models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
 from checks.models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
 from checks.models import KexHashFuncStatus, CipherOrderStatus, MxStatus

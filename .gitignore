@@ -36,4 +36,5 @@ pythonwhois.egg-info
 
 # make targets
 .unbound
+.nassl_freebsd
 .python-whois

@@ -7,7 +7,7 @@ from celery import shared_task
 from django.conf import settings
 from django.core.cache import cache
 
-from . import redis_id
+from interface import redis_id
 
 default_app_config = 'interface.appconf.InterfaceAppConfig'
 mimetypes.add_type("text/x-component", ".htc")

@@ -1,9 +1,9 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from . import scoring
-from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
-from .scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
-from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
+from checks import scoring
+from checks.scoring import STATUS_FAIL, STATUS_NOT_TESTED
+from checks.scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
+from checks.scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
 
 # --- Base classes

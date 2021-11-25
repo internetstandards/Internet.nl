@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponse
 
-from . import BATCH_API_FULL_VERSION, BATCH_API_MAJOR_VERSION
+from interface.batch import BATCH_API_FULL_VERSION, BATCH_API_MAJOR_VERSION
 
 
 def api_response(data, status_code=200):
