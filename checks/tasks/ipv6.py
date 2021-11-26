@@ -346,7 +346,7 @@ def test_ns_connectivity(ip, port, domain):
 
 
 def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
-    log("Testing connectivity on %s, on port %s, is_ns: %s, test_domain: %s" % (ips, ports, is_ns, test_domain))
+    log.debug("Testing connectivity on %s, on port %s, is_ns: %s, test_domain: %s" % (ips, ports, is_ns, test_domain))
     good = set()
     bad = set()
     reachable_ports = set()
