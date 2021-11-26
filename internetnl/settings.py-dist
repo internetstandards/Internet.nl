@@ -51,6 +51,7 @@ if ENABLE_BATCH:
     # Central unbound where all the pyunbounds forward to. Used for better
     # cache performance while batch testing. Format is "ip@port".
     # Leave empty ("") for disabling the feature; NOT recommended.
+    # By default unbound runs on port 53 (...), so there is a different unbound setup recommended, but not documented
     CENTRAL_UNBOUND = "127.0.0.1@4321"
 
     # Note that all the following queues need to be defined in the celery
