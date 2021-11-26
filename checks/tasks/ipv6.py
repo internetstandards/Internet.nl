@@ -346,6 +346,7 @@ def test_ns_connectivity(ip, port, domain):
 
 
 def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
+    log("Testing connectivity on %s, on port %s, is_ns: %s, test_domain: %s" % (ips, ports, is_ns, test_domain))
     good = set()
     bad = set()
     reachable_ports = set()
@@ -370,6 +371,7 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
                 reachable_ports.add(port)
 
     bad = set(ips) - set(good)
+    log.debug("Conclusion on %s:%s: good: %s, bad: %s, ports: %s" % (ips, ports, good, bad, reachable_ports))
     return list(good), list(bad), reachable_ports
 
 
@@ -381,9 +383,11 @@ def get_domain_results(
 
     """
     v6 = task.resolve(domain, RR_TYPE_AAAA)
+    log.debug("V6 resolve: %s" % v6)
     v6_good, v6_bad, v6_ports = test_connectivity(
         v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
     v4 = task.resolve(domain, RR_TYPE_A)
+    log.debug("V4 resolve: %s" % v4)
     v4_good, v4_bad, v4_ports = test_connectivity(
         v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
     v6_conn_diff = v4_ports - v6_ports
@@ -585,6 +589,7 @@ def simhash(url, task=None):
 
 def do_web(self, url, *args, **kwargs):
     try:
+        log.debug("Performing IPv6 check")
         domain = []
         simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
         simhash_distance = settings.SIMHASH_MAX + 100
@@ -610,6 +615,7 @@ def do_web(self, url, *args, **kwargs):
             simhash_score, simhash_distance = simhash(url, task=self)
 
     except SoftTimeLimitExceeded:
+        log.debug("Error: SoftTimeLimitExceeded")
         if not domain:
             domain = dict(
                 domain=url,
