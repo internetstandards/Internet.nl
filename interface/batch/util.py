@@ -475,6 +475,9 @@ class DomainTechnicalResults:
     def _get_mail_domain(cls, report_table):
         res = {}
 
+        if not report_table.dnssec:
+            return {}
+
         # dnssec
         for dtdnssec in report_table.dnssec.testset.all():
             # Cheap way to see if the result is for the domain
