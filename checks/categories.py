@@ -425,6 +425,65 @@ class NsRpkiValid(Subtest):
         self._status(STATUS_ERROR, override=True)
 
 
+class MailMxNsRpkiExists(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="mail_mx_ns_rpki_exists",
+            label="detail mail rpki mx_ns_exists label",
+            explanation="detail mail rpki mx_ns_exists exp",
+            tech_string="detail mail rpki mx_ns_exists tech table",
+            init_tech_type="table",
+            worst_status=scoring.RPKI_EXISTENCE_WORST_STATUS)
+
+    def result_bad(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail rpki mx_ns_exists verdict bad"
+
+    def result_good(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail rpki mx_ns_exists verdict good"
+
+    def result_nonexistent(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail rpki mx_ns_exists verdict nonexistent"
+
+    def result_not_tested(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
+
+
+class MailMxNsRpkiValid(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="mail_mx_ns_rpki_valid",
+            label="detail mail rpki mx_ns_valid label",
+            explanation="detail mail rpki mx_ns_valid exp",
+            tech_string="detail mail rpki mx_ns_valid tech table",
+            init_tech_type="table",
+            worst_status=scoring.RPKI_VALIDITY_WORST_STATUS)
+
+    def result_bad(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail rpki mx_ns_valid verdict bad"
+
+    def result_good(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail rpki mx_ns_valid verdict good"
+
+    def result_nonexistent(self):
+        self.tech_type = ""
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail rpki mx_ns_valid verdict nonexistent"
+
+    def result_not_tested(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
+
+
 class WebRpki(Category):
     def __init__(self, name="web-rpki"):
         subtests = [
@@ -442,7 +501,9 @@ class MailRpki(Category):
             MailRpkiExists,
             MailRpkiValid,
             NsRpkiExists,
-            NsRpkiValid
+            NsRpkiValid,
+            MailMxNsRpkiExists,
+            MailMxNsRpkiValid
         ]
         super().__init__(name, subtests)
 

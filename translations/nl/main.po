@@ -827,6 +827,42 @@ msgstr ""
 msgid "detail mail rpki exists verdict info"
 msgstr ""
 
+msgid "detail mail rpki mx-ns-exists label"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-exists exp"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-exists tech table"
+msgstr "Nameserver|IP address|ROA exists"
+
+msgid "detail mail rpki mx-ns-exists verdict bad"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-exists verdict good"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-exists verdict nonexistent"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-valid label"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-valid exp"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-valid tech table"
+msgstr "Nameserver|Route|Origin|Validation state"
+
+msgid "detail mail rpki mx-ns-valid verdict bad"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-valid verdict good"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-valid verdict nonexistent"
+msgstr ""
+
 msgid "detail mail rpki valid exp"
 msgstr ""
 
@@ -3601,6 +3637,9 @@ msgstr "TLS"
 
 msgid "results domain-mail ipv6 name-servers label"
 msgstr "Nameservers"
+
+msgid "results domain-mail rpki mx-name-servers label"
+msgstr ""
 
 msgid "results domain-mail tls certificate label"
 msgstr "Certificaat"

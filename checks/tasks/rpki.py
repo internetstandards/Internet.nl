@@ -14,7 +14,7 @@ from .dispatcher import check_registry, post_callback_hook
 from .routing import Routinator, TeamCymruIPtoASN
 from .. import categories
 from .. import batch, batch_shared_task
-from ..models import MailTestRpki, WebTestRpki, RpkiMxDomain, RpkiNsDomain
+from ..models import MailTestRpki, WebTestRpki, RpkiMxDomain, RpkiMxNsDomain, RpkiNsDomain
 from ..models import RpkiWebDomain
 
 from typing import Dict, List, Mapping, NewType, Tuple, Union
@@ -25,7 +25,7 @@ TestResult = Dict[TestName, List[Dict[str, Union[Dict, List, str]]]]
 model_map = dict(
     rpki_mail=RpkiMxDomain,
     rpki_ns=RpkiNsDomain,
-    rpki_mx_ns=RpkiNsDomain,
+    rpki_mx_ns=RpkiMxNsDomain,
     rpki_web=RpkiWebDomain)
 
 
@@ -340,11 +340,14 @@ def build_summary_report(parent, parent_name, category) -> None:
     elif parent_name == 'mailtestrpki':
         mxset = parent.mxdomains.all().order_by('domain')
         nsset = parent.nsdomains.all().order_by('domain')
+        mxnsset = parent.mxnsdomains.all().order_by('domain')
 
         report_exists('mail_rpki_exists', category, mxset)
         report_valid('mail_rpki_valid', category, mxset)
         report_exists('ns_rpki_exists', category, nsset)
         report_valid('ns_rpki_valid', category, nsset)
+        report_exists('mail_mx_ns_rpki_exists', category, mxnsset)
+        report_valid('mail_mx_ns_rpki_valid', category, mxnsset)
 
     parent.report = category.gen_report()
     parent.save()

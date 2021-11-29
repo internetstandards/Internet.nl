@@ -704,6 +704,16 @@ class RpkiNsDomain(RpkiTestDomain):
         ])
 
 
+class RpkiMxNsDomain(RpkiTestDomain):
+    mailtestrpki = models.ForeignKey(
+        MailTestRpki, null=True, related_name='mxnsdomains', on_delete=models.CASCADE)
+
+    def __dir__(self):
+        return super().__dir__().extend([
+            'mailtestrpki',
+        ])
+
+
 class RpkiWebDomain(RpkiTestDomain):
     webtestrpki = models.ForeignKey(
         WebTestRpki, null=True, related_name='webdomains', on_delete=models.CASCADE)
