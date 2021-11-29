@@ -1,0 +1,39 @@
+# Manual: https://docs.celeryproject.org/en/latest/userguide/daemonizing.html
+# Place this file in /etc/default/celeryd or /opt/internetnl/etc/celery
+
+# Names of nodes to start
+#   most will only start one node:
+#CELERYD_NODES="worker db_worker slow_db_worker nassl_worker"
+#CELERYD_NODES="worker worker_slow batch_main batch_callback batch_slow"
+CELERYD_NODES="worker worker_slow batch_main batch_callback batch_slow nassl_worker db_worker slow_db_worker celery default"
+
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/opt/internetnl/bin/celery"
+
+# App instance to use
+# comment out this line if you don't use an app
+CELERY_APP="internetnl"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
+
+# Extra command-line arguments to the worker
+#CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
+CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker -c:5 -Q:5 worker_slow -c:6 -Q:6 batch_main -c:7 -Q:7 batch_callback -c:8 -Q:8  batch_slow -c9 -Q:9  nassl_worked"
+
+# %N will be replaced with the first part of the nodename.
+CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
+CELERYD_PID_FILE="/opt/internetnl/run/celery-%N.pid"
+
+CELERYD_LOG_LEVEL="INFO"
+
+# Workers should run as an unprivileged user.
+#   You need to create this user manually (or you can choose
+#   a user/group combination that already exists, e.g. nobody).
+#   could be internetnl if you add that user to the system (see useradd)
+CELERYD_USER="nobody"
+CELERYD_GROUP="nobody"
+
+# If enabled pid and log directories will be created if missing,
+# and owned by the userid/group configured.
+CELERY_CREATE_DIRS=1
