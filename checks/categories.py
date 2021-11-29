@@ -254,11 +254,6 @@ class WebRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki exists verdict good"
 
-    def result_info(self, tech_data):
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web rpki exists verdict info"
-        self.tech_data = tech_data
-    
     def result_nonexistent(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki exists verdict nonexistent"
@@ -288,11 +283,6 @@ class MailRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki exists verdict good"
 
-    def result_info(self, tech_data):
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki exists verdict info"
-        self.tech_data = tech_data
-    
     def result_nonexistent(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki exists verdict nonexistent"
@@ -322,10 +312,6 @@ class WebRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki valid verdict good"
 
-    def result_info(self, tech_data):
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web rpki valid verdict info"
-
     def result_not_tested(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
@@ -350,10 +336,6 @@ class MailRpkiValid(Subtest):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki valid verdict good"
-
-    def result_info(self, tech_data):
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki valid verdict info"
 
     def result_not_tested(self):
         self.tech_type = ""
@@ -380,11 +362,6 @@ class NsRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-exists verdict good"
 
-    def result_info(self, tech_data):
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns_exists verdict info"
-
     def result_not_tested(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
@@ -409,11 +386,6 @@ class NsRpkiValid(Subtest):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-valid verdict good"
-
-    def result_info(self, tech_data):
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns_valid verdict info"
 
     def result_nonexistent(self):
         self.tech_type = ""

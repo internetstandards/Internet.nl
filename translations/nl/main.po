@@ -824,9 +824,6 @@ msgstr ""
 msgid "detail mail rpki exists verdict good"
 msgstr ""
 
-msgid "detail mail rpki exists verdict info"
-msgstr ""
-
 msgid "detail mail rpki mx-ns-exists label"
 msgstr ""
 
@@ -876,9 +873,6 @@ msgid "detail mail rpki valid verdict bad"
 msgstr ""
 
 msgid "detail mail rpki valid verdict good"
-msgstr ""
-
-msgid "detail mail rpki valid verdict info"
 msgstr ""
 
 msgid "detail mail rpki valid verdict nonexistent"
@@ -1947,9 +1941,6 @@ msgstr ""
 msgid "detail web rpki exists verdict good"
 msgstr ""
 
-msgid "detail web rpki exists verdict info"
-msgstr ""
-
 msgid "detail web rpki valid exp"
 msgstr ""
 
@@ -1963,9 +1954,6 @@ msgid "detail web rpki valid verdict bad"
 msgstr ""
 
 msgid "detail web rpki valid verdict good"
-msgstr ""
-
-msgid "detail web rpki valid verdict info"
 msgstr ""
 
 msgid "detail web rpki valid verdict nonexistent"
