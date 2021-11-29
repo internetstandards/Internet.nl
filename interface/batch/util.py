@@ -552,32 +552,36 @@ class DomainTechnicalResults:
     @classmethod
     def _get_mail_mailservers(cls, report_table):
         mailservers = {}
-        for mxdomain in report_table.ipv6.mxdomains.all():
-            mailserver = {}
-            mailservers[mxdomain.domain] = mailserver
-            mailserver['addresses'] = cls._get_addresses_info(mxdomain)
 
-        for dtdnssec in report_table.dnssec.testset.all():
-            # Cheap way to see if the result is for the domain
-            # or one of the mailservers.
-            if not dtdnssec.domain.endswith("."):
-                continue
+        if report_table.ipv6:
+            for mxdomain in report_table.ipv6.mxdomains.all():
+                mailserver = {}
+                mailservers[mxdomain.domain] = mailserver
+                mailserver['addresses'] = cls._get_addresses_info(mxdomain)
 
-            # Old results where not sharing the same MXs on all tests.
-            # This will result in partial details between the tests here.
-            if dtdnssec.domain not in mailservers:
-                mailservers[dtdnssec.domain] = {}
-            mailservers[dtdnssec.domain]['dnssec'] = {
-                'status': dtdnssec.status.name}
+        if report_table.dnssec:
+            for dtdnssec in report_table.dnssec.testset.all():
+                # Cheap way to see if the result is for the domain
+                # or one of the mailservers.
+                if not dtdnssec.domain.endswith("."):
+                    continue
 
-        for dttls in report_table.tls.testset.all():
-            # Old results where not sharing the same MXs on all tests.
-            # This will result in partial details between the tests here.
-            if dttls.domain not in mailservers:
-                mailservers[dttls.domain] = {}
+                # Old results where not sharing the same MXs on all tests.
+                # This will result in partial details between the tests here.
+                if dtdnssec.domain not in mailservers:
+                    mailservers[dtdnssec.domain] = {}
+                mailservers[dtdnssec.domain]['dnssec'] = {
+                    'status': dtdnssec.status.name}
 
-            info = cls._get_mail_tls_info(dttls)
-            mailservers[dttls.domain].update(info)
+        if report_table.tls:
+            for dttls in report_table.tls.testset.all():
+                # Old results where not sharing the same MXs on all tests.
+                # This will result in partial details between the tests here.
+                if dttls.domain not in mailservers:
+                    mailservers[dttls.domain] = {}
+
+                info = cls._get_mail_tls_info(dttls)
+                mailservers[dttls.domain].update(info)
 
         return mailservers
 
