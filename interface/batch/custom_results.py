@@ -180,7 +180,7 @@ This result gives a clearer insight on the STARTTLS testability status:
             return None
 
         # In case the TLS scan did not run
-        if report_table.tls is None:
+        if not report_table.tls:
             return None
 
         report = report_table.tls.report
