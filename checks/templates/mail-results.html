@@ -84,7 +84,7 @@
 
   {% elif probe.name == 'mailrpki' %}
     <div class="test-subsection">
-     {% include "string.html" with name="results domain-mail rpki mail-server label" %}
+     {% include "string.html" with name="results mail rpki mail-servers label" %}
     </div>
     {% include "details-test-item.html" with testitem=details.mail_rpki_exists %}
     {% include "details-test-item.html" with testitem=details.mail_rpki_valid %}

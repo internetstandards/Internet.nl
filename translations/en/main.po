@@ -2769,40 +2769,34 @@ msgstr ""
 msgid "detail web-mail ipv6 ns-reach verdict good"
 msgstr "All name servers that have an IPv6 address are reachable over IPv6."
 
-msgid "detail web-mail rpki ns_exists exp"
+msgid "detail web-mail rpki ns-exists exp"
 msgstr ""
 
-msgid "detail web-mail rpki ns_exists label"
+msgid "detail web-mail rpki ns-exists label"
 msgstr ""
 
-msgid "detail web-mail rpki ns_exists tech table"
+msgid "detail web-mail rpki ns-exists tech table"
 msgstr "Nameserver|IP address|ROA exists"
 
-msgid "detail web-mail rpki ns_exists verdict bad"
+msgid "detail web-mail rpki ns-exists verdict bad"
 msgstr ""
 
-msgid "detail web-mail rpki ns_exists verdict good"
+msgid "detail web-mail rpki ns-exists verdict good"
 msgstr ""
 
-msgid "detail web-mail rpki ns_exists verdict info"
+msgid "detail web-mail rpki ns-valid exp"
 msgstr ""
 
-msgid "detail web-mail rpki ns_valid exp"
+msgid "detail web-mail rpki ns-valid label"
 msgstr ""
 
-msgid "detail web-mail rpki ns_valid label"
-msgstr ""
-
-msgid "detail web-mail rpki ns_valid tech table"
+msgid "detail web-mail rpki ns-valid tech table"
 msgstr "Nameserver|Route|Origin|Validation state"
 
-msgid "detail web-mail rpki ns_valid verdict bad"
+msgid "detail web-mail rpki ns-valid verdict bad"
 msgstr ""
 
-msgid "detail web-mail rpki ns_valid verdict good"
-msgstr ""
-
-msgid "detail web-mail rpki ns_valid verdict info"
+msgid "detail web-mail rpki ns-valid verdict good"
 msgstr ""
 
 msgid "disclosure content"
@@ -3495,11 +3489,8 @@ msgstr "HTTP security headers"
 msgid "results domain ipv6 web-server label"
 msgstr "Web server"
 
-msgid "results domain rpki name-servers label"
-msgstr ":
-
 msgid "results domain rpki web-server label"
-msgstr ":
+msgstr ""
 
 msgid "results domain tls http-headers label"
 msgstr "HTTP headers"
@@ -3512,6 +3503,9 @@ msgstr "TLS"
 
 msgid "results domain-mail ipv6 name-servers label"
 msgstr "Name servers"
+
+msgid "results domain-mail rpki name-servers label"
+msgstr ""
 
 msgid "results domain-mail rpki mx-name-servers label"
 msgstr ""
@@ -3595,6 +3589,9 @@ msgstr "Mail server domain(s)"
 
 msgid "results mail ipv6 mail-servers label"
 msgstr "Mail server(s)"
+
+msgid "results mail rpki mail-servers label"
+msgstr ""
 
 msgid "results mail tls starttls label"
 msgstr "TLS"
