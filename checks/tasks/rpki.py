@@ -232,7 +232,7 @@ def report_exists(subtestname, category, domainset) -> None:
     """Generate a test report for the existence of ROAs."""
     def gen_tech_data(domain, ip, validity) -> List[List[str]]:
         # Provide tech_data to generate a table of the following form
-        # 
+        #
         # Server     | IP address  | ROA exists
         # -------------------------------------
         # example.nl | 192.168.0.1 | yes
@@ -283,7 +283,7 @@ def report_valid(subtestname, category, domainset) -> None:
     """
     def gen_tech_data(domain, asn, prefix, validity) -> List[str]:
         # Provide tech_data to generate a table of the following form
-        # 
+        #
         # Server     | Route          | Origin  | Validation state
         # --------------------------------------------------------
         # example.nl | 192.168.0.0/16 | AS64496 | valid
