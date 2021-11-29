@@ -132,7 +132,7 @@ unbound: venv .unbound
 	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.8/site-packages &&  make install
+	cd unbound && ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
 	touch .unbound
 
 pythonwhois: venv .python-whois
