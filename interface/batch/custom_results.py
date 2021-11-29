@@ -179,6 +179,10 @@ This result gives a clearer insight on the STARTTLS testability status:
         if not isinstance(report_table, MailTestReport):
             return None
 
+        # In case the TLS scan did not run
+        if report_table.tls is None:
+            return None
+
         report = report_table.tls.report
         test_instance = MailTlsStarttlsExists()
         test_instance.result_no_mailservers()
