@@ -38,3 +38,8 @@ pythonwhois.egg-info
 .unbound
 .nassl_freebsd
 .python-whois
+
+
+# testing
+# Test coverage database is not relevant
+.coverage

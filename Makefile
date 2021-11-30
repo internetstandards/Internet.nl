@@ -67,6 +67,7 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	python3 -m venv .venv
 	. .venv/bin/activate && ${env} pip install -U pip pip-tools
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
+	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	# . .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	touch .venv/make_venv_complete
 	${MAKE} unbound
@@ -82,14 +83,16 @@ clean_venv:  # Remove venv
 	@rm -f .python-whois
 
 
-pip-compile:  venv ## synchronizes the .venv with the state of requirements.txt
+pip-compile:  ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
+	. .venv/bin/activate && ${env} python3 -m piptools compile requirements-dev.in
 
-pip-upgrade: venv ## synchronizes the .venv with the state of requirements.txt
+pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
+	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements-dev.in
 
-pip-sync: venv ## synchronizes the .venv with the state of requirements.txt
-	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
+pip-sync:  ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt requirements-dev.txt
 
 run: venv
 	. .venv/bin/activate && ${env} python3 manage.py runserver 0.0.0.0:8000
@@ -158,4 +161,24 @@ nassl: venv .nassl
 	cd nassl_freebsd && git clone https://github.com/openssl/openssl.git openssl-master
 	cd nassl_freebsd && cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
 	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
-	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 setup.py install
+	. .venv/bin/activate setup.cfgebsd && ${env} python3 setup.py install
+
+
+
+test: .make.test	## run test suite
+.make.test:
+	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
+		-m pytest -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	# generate coverage
+	${env} coverage report
+	# and pretty html
+	${env} coverage html
+	# ensure no model updates are commited without migrations
+	${env} ${app} makemigrations --check
+	@touch $@  # update timestamp
+
+
+testcase: ${app}
+	# run specific testcase
+	# example: make testcase case=test_openstreetmaps
+	DJANGO_SETTINGS_MODULE=internetnl.settings DB_NAME=test.sqlite3 ${env} pytest -vvv --log-cli-level=10 -k ${case}

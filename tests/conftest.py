@@ -27,15 +27,16 @@ def make_result_square(subtest_name, result):
 
 
 # pytest-html hook to manipulate the HTML report table header
-def pytest_html_results_table_header(session, cells):
-    if session.config.getoption("--batch-input-file", None):
-        (reference, demo) = session.config.getoption("--batch-base-names").split(',')
-        cells[0] = html.th('Result', class_='sortable result initial-sort asc active', title=f'Passed if the test results for this domain in both the {reference} and {demo} instances is 100%, Failed otherwise.')
-        cells[1] = html.th('Domain', class_='sortable')
-        cells.insert(2, html.th('Delta Score (%)', class_='sortable numeric', title=f'The difference between the {reference} score and the {demo} score for this domain'))
-        cells.insert(3, html.th('Subtest Results (hover for details)'))
-        cells.insert(4, html.th('New Failures', class_='sortable'))
-        cells.insert(5, html.th('New Warnings', class_='sortable'))
+# todo: legacy: pytest-html spec does not have "session" in the hook. see: https://github.com/pytest-dev/pytest-html/blob/master/src/pytest_html/hooks.py
+# def pytest_html_results_table_header(session, cells):
+#     if session.config.getoption("--batch-input-file", None):
+#         (reference, demo) = session.config.getoption("--batch-base-names").split(',')
+#         cells[0] = html.th('Result', class_='sortable result initial-sort asc active', title=f'Passed if the test results for this domain in both the {reference} and {demo} instances is 100%, Failed otherwise.')
+#         cells[1] = html.th('Domain', class_='sortable')
+#         cells.insert(2, html.th('Delta Score (%)', class_='sortable numeric', title=f'The difference between the {reference} score and the {demo} score for this domain'))
+#         cells.insert(3, html.th('Subtest Results (hover for details)'))
+#         cells.insert(4, html.th('New Failures', class_='sortable'))
+#         cells.insert(5, html.th('New Warnings', class_='sortable'))
 
 
 def br_join(iterable):
