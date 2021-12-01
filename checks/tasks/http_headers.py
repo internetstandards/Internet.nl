@@ -80,7 +80,7 @@ class HeaderCheckerContentSecurityPolicy(object):
 
         def __str__(self):
             """
-            Could be used together with tests/unittests/test_tasks_http_headers.py
+            Could be used together with tests/unittests/disabled_test_tasks_http_headers.py
             for debugging.
             """
             return (

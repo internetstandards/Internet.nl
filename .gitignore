@@ -29,6 +29,7 @@ __pycache__
 unbound
 python-whois
 pythonwhois.egg-info
+nassl_freebsd
 
 # Mac os via ubuntu
 ._.DS_Store

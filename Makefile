@@ -205,7 +205,7 @@ test: .make.test	## run test suite
 	# and pretty html
 	${env} coverage html
 	# ensure no model updates are commited without migrations
-	${env} ${app} makemigrations --check
+	${env} python3 manage.py makemigrations --check
 	@touch $@  # update timestamp
 
 
