@@ -12,6 +12,12 @@ MACSDIR=$(REMOTEDATADIR)/macs
 CERTSSDIR=$(REMOTEDATADIR)/certs
 DNSDIR=$(REMOTEDATADIR)/dns
 
+ifeq ($(shell uname -m),arm64)
+env = env PATH="${bin}:$$PATH /usr/bin/arch -x86_64"
+else
+env = env PATH="${bin}:$$PATH"
+endif
+
 # https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
@@ -129,14 +135,39 @@ manage: venv
 	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring)
 
 
+# compiling unbound for an x86_64 system:
+ifeq ($(shell uname -m),arm64)
+# arm64: -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/ -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9
+PYTHON_LDFLAGS="-L -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9"
+
+# arm64: -I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9
+PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9"
+endif
+
 unbound: venv .unbound
 .unbound:
-	# todo: also be able to use PYTHON_VERION from the environment
-	# todo: this assumes that there is a parallels user and the code is at the /home/parallels/Internet.nl -> todo: make dynamic
+	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
+	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
+	# -L/usr/lib -L/usr/lib/python3.9 -lpython3.9 -> contains tons of .py files, for example chunk.py and tstats.py
+
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
+	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
 	touch .unbound
+
+unbound-x86: .unbound-x86
+.unbound-x86:
+	# todo: this does not work yet, see: https://github.com/NLnetLabs/unbound/issues/564
+	# For m1 users:
+	# arch -x86_64 /bin/bash
+	# /usr/local/Homebrew/bin/brew install python@3.9
+	# brew unlink python@3.9 && brew link python@3.9
+	# ofc you need to also execute the file with a x86 python after compiling it... But it finds the python
+
+	# rm -rf unbound
+	# git clone https://github.com/internetstandards/unbound
+	cd unbound && /usr/bin/arch -x86_64 ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.9/3.9.9/bin/python3.9" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9 -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9/config-3.9-darwin -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib" PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9" && make install
+	touch .unbound-x86
 
 pythonwhois: venv .python-whois
 .python-whois:
@@ -167,7 +198,7 @@ nassl: venv .nassl
 
 test: .make.test	## run test suite
 .make.test:
-	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
+	DJANGO_SETTINGS_MODULE=internetnl.settings DJANGO_DATABASE=test ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
 		-m pytest -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 	# generate coverage
 	${env} coverage report
@@ -181,4 +212,4 @@ test: .make.test	## run test suite
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	DJANGO_SETTINGS_MODULE=internetnl.settings DB_NAME=test.sqlite3 ${env} pytest -vvv --log-cli-level=10 -k ${case}
+	DJANGO_SETTINGS_MODULE=internetnl.settings DJANGO_DATABASE=test ${env} pytest -vvv --log-cli-level=10 -k ${case}

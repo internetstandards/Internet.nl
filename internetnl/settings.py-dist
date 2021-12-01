@@ -187,6 +187,10 @@ DATABASES_SETTINGS = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.environ.get("DB_NAME", "db.sqlite3"),
     },
+    "test": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.environ.get("DB_NAME", "test.sqlite3"),
+    },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.environ.get("DB_NAME", "internetnl"),
