@@ -1,7 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import inspect
-from ipaddress import ip_address
 from json.decoder import JSONDecodeError
 import random
 import re
@@ -11,9 +10,12 @@ from collections import defaultdict
 from functools import wraps
 
 from contextlib import contextmanager
+from typing import Dict, Tuple, Optional, List
+
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.base import ContentFile
+from django.http import JsonResponse
 from django.urls import reverse
 from django.db import transaction
 from django.utils import timezone
@@ -736,39 +738,55 @@ def create_batch_user(username, name, organization, email):
         return user
 
 
-def register_request(request, *args, **kwargs):
+def get_json_data_from_request(request) -> Tuple[Optional[Exception], Dict]:
+    data = {}
     try:
-        json_req = json.loads(request.body.decode('utf-8'))
-        request_type = json_req.get('type')
-        if not request_type:
-            return bad_client_request_response(
-                "'type' is missing from the request.")
-
-        domains = json_req.get('domains')
-        if not domains or type(domains) is not list:
-            return bad_client_request_response(
-                "'domains' is missing from the request.")
-        name = json_req.get('name', 'no-name')
-    except JSONDecodeError:
-        return bad_client_request_response(
-            "Problem parsing json. Did you supply a 'type' and 'domains'?")
+        data = json.loads(request.body.decode('utf-8'))
+        return None, data
+    except JSONDecodeError as exception_data:
+        return exception_data, data
     except Exception as exception_data:
         log.exception(exception_data)
-        return general_server_error_response("Problem parsing domains.")
+        return exception_data, data
 
-    if request_type.lower() == "web":
-        return register_batch_request(
-            request, kwargs['batch_user'], BatchRequestType.web, name,
-            domains)
 
-    elif request_type.lower() == "mail":
-        return register_batch_request(
-            request, kwargs['batch_user'], BatchRequestType.mail, name,
-            domains)
+def fields_missing_in_dict(fields: List[str], data: Dict) -> List[str]:
+    # one dimensional check if the fields are at the root of the dict.
+    # builds a list of fields to return and will return those in a bad client response.
+    # in case of no missing fields a False is issued.
+    missing_fields = []
+    for field in fields:
+        if field not in data:
+            missing_fields.append(field)
 
-    else:
-        return bad_client_request_response(
-            "'type' is not one of the expected values.")
+    return missing_fields
+
+
+def missing_fields_error(fields: List[str]) -> JsonResponse:
+    messages = [f"'{field}' is missing from the request." for field in fields]
+    return bad_client_request_response(",".join(messages))
+
+
+def register_request(data: Dict, *args, **kwargs) -> JsonResponse:
+    # todo: this should not return a webserver answer but json. The webserver stuff is just a wrapper.
+    missing_fields = fields_missing_in_dict(["type", "domains"], data)
+    if missing_fields:
+        return missing_fields_error(missing_fields)
+
+    request_type: str = data.get('type')
+    request_type = request_type.lower()
+    if request_type not in ['web', 'mail']:
+        return bad_client_request_response("'type' is not one of the expected values.")
+
+    domains: str = data.get('domains')
+    if not domains:
+        return bad_client_request_response("Domains are empty.")
+
+    # todo: this is model validation, this should be done in a generic approach, not this patchwork
+    name = data.get('name', 'no-name')
+
+    # todo: apparently there is always a batch user?
+    return register_batch_request(None, kwargs['batch_user'], BatchRequestType[request_type], name, domains)
 
 
 def register_batch_request(request, user, test_type, name, domains):

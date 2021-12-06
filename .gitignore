@@ -37,6 +37,9 @@ nassl_freebsd
 
 # make targets
 .unbound
+.unbound-x86
+.unbound-x86-3.8
+.unbound-x86-3.9
 .nassl_freebsd
 .python-whois
 

@@ -1,19 +1,20 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import json
+from json import JSONDecodeError
 
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 
-from interface.batch.util import check_valid_user, batch_async_generate_results
+from interface.batch.util import check_valid_user, batch_async_generate_results, get_json_data_from_request
 from interface.batch.util import get_site_url, APIMetadata, list_requests
 from interface.batch.util import register_request, get_request, patch_request
 from interface.batch.responses import api_response, unknown_request_response
 from interface.batch.responses import invalid_url_response, bad_client_request_response
 from interface.batch.responses import general_server_error_response
-from interface import simple_cache_page
 from checks.models import BatchRequest
 from checks.models import BatchRequestStatus
+from internetnl import log
 
 
 @require_http_methods(['GET', 'POST'])
@@ -22,7 +23,14 @@ def endpoint_requests(request, *args, **kwargs):
     if request.method == "GET":
         return list_requests(request, *args, **kwargs)
     else:
-        return register_request(request, *args, **kwargs)
+        exception_data, data = get_json_data_from_request(request)
+        if isinstance(exception_data, JSONDecodeError):
+            # todo: provide better feedback than just missing fields, this is mixing up messages:
+            return bad_client_request_response("Problem parsing json. Did you supply a 'type' and 'domains'?")
+        if exception_data:
+            log.exception(exception_data)
+            return general_server_error_response("Problem parsing domains.")
+        return register_request(data, *args, **kwargs)
 
 
 @require_http_methods(['GET', 'PATCH'])

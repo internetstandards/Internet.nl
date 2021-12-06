@@ -70,14 +70,15 @@ update_root_key_file:
 venv: .venv/make_venv_complete ## Create virtual environment
 .venv/make_venv_complete:
 	${MAKE} clean
-	python3 -m venv .venv
+	# todo: how to set python3 correctly on m1 macs??
+	/usr/local/Cellar/python@3.8/3.8.12_1/bin/python3.8 -m venv .venv
 	. .venv/bin/activate && ${env} pip install -U pip pip-tools
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	# . .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	touch .venv/make_venv_complete
-	${MAKE} unbound
-	${MAKE} pythonwhois
+	# ${MAKE} unbound
+	# ${MAKE} pythonwhois
 
 clean: ## Cleanup
 clean: clean_venv
@@ -109,6 +110,11 @@ run-worker: venv
 	# Todo: Eventlet results in a database deadlock, gevent does not.
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 --concurrency=20 -n generic_worker
 
+run-test-worker: venv
+	# Know that the worker will complain that the database is plainly been dropped, this is exactly what happens during
+	# tests. It will keep on running, and the tests will run well.
+	. .venv/bin/activate && DJANGO_DATABASE=testworker ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 --concurrency=20 -n generic_worker
+
 run-worker-batch-main: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300 --concurrency=20 -n batch_main
 
@@ -123,6 +129,13 @@ run-worker-batch-slow: venv
 
 run-scheduler: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl beat
+
+run-broker:
+	docker run --rm --name=redis -p 6379:6379 redis
+
+run-rabbit:
+	docker run --rm --name=redis -p 6379:6379 redis
+
 
 %:
     @:
@@ -155,19 +168,34 @@ unbound: venv .unbound
 	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
 	touch .unbound
 
-unbound-x86: .unbound-x86
-.unbound-x86:
-	# todo: this does not work yet, see: https://github.com/NLnetLabs/unbound/issues/564
+unbound-x86-3.9: .unbound-x86-3.9
+.unbound-x86-3.9:
 	# For m1 users:
 	# arch -x86_64 /bin/bash
 	# /usr/local/Homebrew/bin/brew install python@3.9
 	# brew unlink python@3.9 && brew link python@3.9
-	# ofc you need to also execute the file with a x86 python after compiling it... But it finds the python
+	# /usr/local/Homebrew/bin/brew install libevent
+	# /usr/local/Homebrew/bin/brew install hiredis
 
-	# rm -rf unbound
-	# git clone https://github.com/internetstandards/unbound
-	cd unbound && /usr/bin/arch -x86_64 ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.9/3.9.9/bin/python3.9" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9 -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9/config-3.9-darwin -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib" PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9" && make install
-	touch .unbound-x86
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && /usr/bin/arch -x86_64 ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.9/3.9.9/bin/python3.9" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9 -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9/config-3.9-darwin -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib -lpython3.9" PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9" PYTHON_LIBDIR="/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib" && make install
+	touch .unbound-x86-3.9
+
+unbound-x86-3.8: .unbound-x86-3.8
+.unbound-x86-3.8:
+	# For m1 users:
+	# arch -x86_64 /bin/bash
+	# /usr/local/Homebrew/bin/brew install python@3.8
+	# /usr/local/Homebrew/bin/brew unlink python@3.8 && /usr/local/Homebrew/bin/brew link --overwrite python@3.8
+	# /usr/local/Homebrew/bin/brew install libevent
+	# /usr/local/Homebrew/bin/brew install hiredis
+
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && /usr/bin/arch -x86_64 ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.8/3.8.12_1/bin/python3.8" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.8/site-packages PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8 -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8/config-3.8-darwin -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib -lpython3.8" PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/include/python3.8" PYTHON_LIBDIR="/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib" && make install
+	touch .unbound-x86-3.8
+
 
 pythonwhois: venv .python-whois
 .python-whois:
