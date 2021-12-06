@@ -1,2 +1,3 @@
-def test_create_batch_scan():
-    ...
+def test_register_request(db):
+
+    request_data = {}

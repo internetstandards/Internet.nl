@@ -752,8 +752,8 @@ def register_request(request, *args, **kwargs):
     except JSONDecodeError:
         return bad_client_request_response(
             "Problem parsing json. Did you supply a 'type' and 'domains'?")
-    except Exception:
-        log.exception(e)
+    except Exception as exception_data:
+        log.exception(exception_data)
         return general_server_error_response("Problem parsing domains.")
 
     if request_type.lower() == "web":
