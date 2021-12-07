@@ -75,10 +75,7 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	. .venv/bin/activate && ${env} pip install -U pip pip-tools
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
-	# . .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	touch .venv/make_venv_complete
-	# ${MAKE} unbound
-	# ${MAKE} pythonwhois
 
 clean: ## Cleanup
 clean: clean_venv
@@ -157,7 +154,7 @@ PYTHON_LDFLAGS="-L -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framew
 PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9"
 endif
 
-unbound: venv .unbound
+unbound-39: venv .unbound
 .unbound:
 	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
 	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
@@ -166,6 +163,17 @@ unbound: venv .unbound
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
 	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
+	touch .unbound
+
+unbound-37: venv .unbound
+.unbound:
+	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
+	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
+	# -L/usr/lib -L/usr/lib/python3.9 -lpython3.9 -> contains tons of .py files, for example chunk.py and tstats.py
+
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound
 
 unbound-x86-3.9: .unbound-x86-3.9
