@@ -76,6 +76,12 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	. .venv/bin/activate && ${env} pip install -U pip pip-tools
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
+	# After this you also need to make an unbound, see below for a list of commands and flavors.
+	# Example: make unbound
+	# You also need to make pythonwhois
+	# example: make pythonwhois
+	# And of course nassl
+	# example: make nassl
 	touch .venv/make_venv_complete
 
 clean: ## Cleanup
@@ -174,7 +180,7 @@ unbound-37: venv .unbound
 
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	cd unbound && ${env} ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound
 
 unbound-x86-3.9: .unbound-x86-3.9
