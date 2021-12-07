@@ -67,11 +67,12 @@ update_cert_fingerprints:
 update_root_key_file:
 	unbound-anchor -a $(DNSDIR)/root.key
 
+# Internetnl only supports python 3.7!
 venv: .venv/make_venv_complete ## Create virtual environment
 .venv/make_venv_complete:
 	${MAKE} clean
 	# todo: how to set python3 correctly on m1 macs??
-	/usr/local/Cellar/python@3.8/3.8.12_1/bin/python3.8 -m venv .venv
+	python3.7 -m venv .venv
 	. .venv/bin/activate && ${env} pip install -U pip pip-tools
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
