@@ -235,7 +235,7 @@ nassl: venv .nassl
 	cd nassl_freebsd && git clone https://github.com/openssl/openssl.git openssl-master
 	cd nassl_freebsd && cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
 	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
-	. .venv/bin/activate setup.cfgebsd && ${env} python3 setup.py install
+	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 setup.py install
 
 
 
