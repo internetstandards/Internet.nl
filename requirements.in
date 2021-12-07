@@ -42,3 +42,5 @@ requests
 hiredis
 
 colorlog
+
+gunicorn
