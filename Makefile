@@ -177,6 +177,8 @@ unbound-37: venv .unbound
 	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
 	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
 	# -L/usr/lib -L/usr/lib/python3.9 -lpython3.9 -> contains tons of .py files, for example chunk.py and tstats.py
+	# The --prefix will be the location where unbound code is dumped, the content of that directory are the following dirs:
+	#  etc  include  lib  sbin  share
 
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound

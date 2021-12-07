@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn for internet.nl
+After=network.target postgresql.service pgbouncer.service redis-server.service rabbitmq-server.service
+
+[Service]
+User=internetnl
+Group=internetnl
+WorkingDirectory=/opt/internetnl/Internet.nl
+ExecStartPre=/bin/sleep 5
+ExecStart=/opt/internetnl/bin/python /opt/internetnl/bin/gunicorn -b localhost:8000 -w 3 -k gevent internetnl.wsgi:application --access-logfile /opt/internetnl/log/gunicorn-access.log --error-logfile /opt/internetnl/log/gunicorn-error.log
+
+[Install]
+WantedBy=multi-user.target

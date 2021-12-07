@@ -186,6 +186,18 @@ Make sure the following services are installed and running on your system:
 - Celery and celery beat
   These services need to be setup manually. You can follow [these](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html)
   instructions and consult the [example configuration files](example_configuration/).
+  
+The basics of the celery and celery beat services:
+
+* List all services: systemctl list-units --type=service
+* service internetnl-celery restart
+* service internetnl-celery-beat restart
+* service internetnl-gunicorn restart
+* service internetnl-unbound restart
+ 
+Restart all services:
+* `for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl restart `basename $i`; done`
+
 
 
 ## DNS records
