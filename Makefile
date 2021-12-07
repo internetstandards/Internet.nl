@@ -180,7 +180,7 @@ unbound-37: venv .unbound
 
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound
 
 unbound-x86-3.9: .unbound-x86-3.9
