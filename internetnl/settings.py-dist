@@ -287,8 +287,8 @@ CELERY_TASK_ROUTES = {
 
         'checks.tasks.appsecpriv.web_callback': {'queue': 'db_worker'},
 
-        'checks.views.shared.run_stats_queries': {'queue': 'slow_db_worker'},
-        'checks.views.shared.update_running_status': {'queue': 'slow_db_worker'},
+        'interface.views.shared.run_stats_queries': {'queue': 'slow_db_worker'},
+        'interface.views.shared.update_running_status': {'queue': 'slow_db_worker'},
         'checks.tasks.update.update_hof': {'queue': 'slow_db_worker'},
 }
 
