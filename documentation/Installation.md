@@ -3,73 +3,90 @@
 Internet.nl is a [Django](https://www.djangoproject.com/)
 based application and therefore inherits its requirements.
 
-Current install base is Django 1.11 with Python 3.7+.
+Current install base is Django 3.2 LTS with Python 3.7.
 
-The following instructions should work on most Debian-based systems.
+The following instructions should work on most Debian-based systems. Tested on Ubuntu 18.04
 
+## System requirements
+
+Install the following system requirements:
+
+`apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison python3-venv`
 
 ## Software
 
 ### Python 3
 
-_Setting up a Python virtual environment is **highly recommended**._
-Follow the instructions at the
-[official Python documentation](https://docs.python.org/3/tutorial/venv.html)
-and make sure that the environment is always activated when interacting with
-internet.nl's installation.
+Create a virtual environment with: 
+`make venv`
 
-Install all Python dependencies from pip at once:
-* `pip install -r requirements.txt`
+Add the custom python-whois with:
+`make pythonwhois`
 
-Install Python dependencies not in pip:
-* pythonwhois (use fork at https://github.com/internetstandards/python-whois/tree/internetnl)
-   ```
-   git clone https://github.com/internetstandards/python-whois.git
-   cd python-whois
-   git checkout internetnl
-   python setup.py install
-   ```
+
+[//]: # (Old / outdated instructions:)
+[//]: # (_Setting up a Python virtual environment is **highly recommended**._)
+[//]: # (Follow the instructions at the)
+[//]: # (official Python documentation](https://docs.python.org/3/tutorial/venv.html)
+[//]: # (and make sure that the environment is always activated when interacting with)
+[//]: # (internet.nl's installation.)
+[//]: # ()
+[//]: # (Install all Python dependencies from pip at once:)
+[//]: # (* `pip install -r requirements.txt`)
+[//]: # ()
+[//]: # (Install Python dependencies not in pip:)
+[//]: # (* pythonwhois (use fork at https://github.com/internetstandards/python-whois/tree/internetnl)
+[//]: # (   ```)
+[//]: # (   git clone https://github.com/internetstandards/python-whois.git)
+[//]: # (   cd python-whois)
+[//]: # (   git checkout internetnl)
+[//]: # (   python setup.py install)
+[//]: # (   ```)
 
 
 ### nassl
 
-[nassl](https://github.com/nabla-c0d3/nassl) is an OpenSSL wrapper and is used
-in the various TLS related tests in the website and mail tests.
+Install with:
+`make nassl`
 
-A fork is used to facilitate installation on freeBSD systems.
-
-1. Clone nassl (use fork at https://github.com/internetstandards/nassl/tree/internetnl)
-   ```
-   git clone https://github.com/internetstandards/nassl.git nassl_freebsd
-   cd nassl_freebsd
-   git checkout internetnl
-   mkdir -p bin/openssl-legacy/freebsd64
-   mkdir -p bin/openssl-modern/freebsd64
-   ```
-
-2. Download zlib (needed for building legacy openssl)
-   ```
-   wget http://zlib.net/zlib-1.2.11.tar.gz
-   tar xvfz  zlib-1.2.11.tar.gz
-   ```
-
-3. Clone PeterMosmans openssl fork inside nassl's directory
-   ```
-   git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
-   cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..
-   ```
-
-4.  Clone openssl inside nassl's directory
-   ```
-   git clone https://github.com/openssl/openssl.git openssl-master
-   cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
-   ```
-
-5. Build nassl
-   `python build_from_scratch.py`
-
-6. Install nassl
-   `python setup.py install`
+[//]: # (Old / outdated instructions:)
+[//]: # (nassl](https://github.com/nabla-c0d3/nassl is an OpenSSL wrapper and is used)
+[//]: # (in the various TLS related tests in the website and mail tests.)
+[//]: # ()
+[//]: # (A fork is used to facilitate installation on freeBSD systems.)
+[//]: # ()
+[//]: # (1. Clone nassl use fork at https://github.com/internetstandards/nassl/tree/internetnl)
+[//]: # (   ```)
+[//]: # (   git clone https://github.com/internetstandards/nassl.git nassl_freebsd)
+[//]: # (   cd nassl_freebsd)
+[//]: # (   git checkout internetnl)
+[//]: # (   mkdir -p bin/openssl-legacy/freebsd64)
+[//]: # (   mkdir -p bin/openssl-modern/freebsd64)
+[//]: # (   ```)
+[//]: # ()
+[//]: # (2. Download zlib needed for building legacy openssl)
+[//]: # (   ```)
+[//]: # (   wget http://zlib.net/zlib-1.2.11.tar.gz)
+[//]: # (   tar xvfz  zlib-1.2.11.tar.gz)
+[//]: # (   ```)
+[//]: # ()
+[//]: # (3. Clone PeterMosmans openssl fork inside nassl's directory)
+[//]: # (   ```)
+[//]: # (   git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e)
+[//]: # (   cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..)
+[//]: # (   ```)
+[//]: # ()
+[//]: # (4.  Clone openssl inside nassl's directory)
+[//]: # (   ```)
+[//]: # (   git clone https://github.com/openssl/openssl.git openssl-master)
+[//]: # (   cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..)
+[//]: # (   ```)
+[//]: # ()
+[//]: # (5. Build nassl)
+[//]: # (   `python build_from_scratch.py`)
+[//]: # ()
+[//]: # (6. Install nassl)
+[//]: # (   `python setup.py install`)
 
 
 ### Redis
@@ -90,6 +107,9 @@ See: https://www.rabbitmq.com/management.html
 
 
 ### Unbound
+
+Install for python 3.7 with:
+`make unbound-37`
 
 Unbound (and pylibunbound) is used as a DNS resolver/nameserver for the various
 tests performed.
@@ -186,7 +206,9 @@ Make sure the following services are installed and running on your system:
 - Celery and celery beat
   These services need to be setup manually. You can follow [these](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html)
   instructions and consult the [example configuration files](example_configuration/).
+  The example configuration files are included for systemd and should be placed in the correct directories.
   
+
 The basics of the celery and celery beat services:
 
 * List all services: systemctl list-units --type=service
@@ -195,7 +217,7 @@ The basics of the celery and celery beat services:
 * service internetnl-gunicorn restart
 * service internetnl-unbound restart
  
-Restart all services:
+Restart all internetnl services:
 * `for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl restart `basename $i`; done`
 
 

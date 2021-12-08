@@ -115,22 +115,16 @@ the above licensing. Thus we do not grant permission to use these when our
 content or software code is reused.
 
 
-## Installation on a new ubuntu arm 64 machine:
+## Development quickstart (debian/ubuntu)
 
-Currently ships with Python3.8. This is made for python 3.8
+Expects python3.7 but you might get it to work with other versions.
 
-#  Then: 
-`apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison python3-venv`
+* Install the system requirements from the installation page
+* Run `make venv`
+* Install nassl, python-whois and an unbound version. See the makefile for the unbound versions.
 
-# Then: 
-`make venv`
-`make unbound`
-`make run-worker`
-`make run-scheduler`
-`make run`
+After everything is installed run a webserver with `make run`.
 
-# Then:
-# https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md
+Start a worker that supports all queues with: `make-run-worker`
 
-# Then for nassl:
-That's not supported on arm64, so you're out of luck. Refactor the code to only use nassl when strictly needed.
+Note that NASSL is not yet supported on AMD64 platforms, see: https://github.com/nabla-c0d3/nassl/issues/86

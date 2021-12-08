@@ -168,11 +168,11 @@ endif
 
 reinstall-production-dependencies:
 	# You need to do this after pip-sync, since pip-sync does not recognize these dependencies.
-	rm .unbound
+	rm -rf .unbound
 	${MAKE} unbound-37
-	rm .python-whois
+	rm -rf .python-whois
 	${MAKE} pythonwhois
-	rm .nassl
+	rm -rf .nassl
 	${MAKE} nassl
 
 unbound-39: venv .unbound
