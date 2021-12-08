@@ -44,4 +44,8 @@ hiredis
 
 colorlog
 
+# Webserver used for batch
 gunicorn
+
+# Needed in celery/kombu, but not installed automatically?
+cached-property
