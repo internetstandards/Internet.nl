@@ -217,6 +217,12 @@ The basics of the celery and celery beat services:
 * service internetnl-gunicorn restart
 * service internetnl-unbound restart
  
+If things don't happen, you can inspect the current queues with:
+`rabbitmqctl list_queues`
+
+And you can see what workers are running in memory with:
+`ps aux | grep python`
+
 Restart all internetnl services:
 * `for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl restart `basename $i`; done`
 
