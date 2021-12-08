@@ -2,7 +2,7 @@
 # Manual: https://docs.celeryproject.org/en/latest/userguide/daemonizing.html
 
 # Names of nodes to start, with celery and default added for non-addressed tasks (should not happen)
-CELERYD_NODES="db_worker slow_db_worker worker_slow batch_slow batch_main batch_callback batch_scheduler celery default"
+CELERYD_NODES="db_worker slow_db_worker worker_slow batch_slow batch_main batch_callback celery default"
 
 # Absolute or relative path to the 'celery' command:
 CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
@@ -31,7 +31,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # Let's start by telling all workers are on concurrency 2
 # -c is used for --concurrency, -Q is used for Queues (the longhand is not allowed)
 # All queues: db_worker, slow_db_worker, batch_callback, batch_main, worker_slow, batch_slow
-CELERYD_OPTS="--without-gossip --events --time-limit=300 12 -c 1 -c:1-7 1 -c:8-20 4 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -Q:7 batch_scheduler -Q:8 batch_main -Q:9 batch_callback -Q:10 batch_callback batch_callback"
+CELERYD_OPTS="--without-gossip --events --time-limit=300 8 -c 1 -c:1-6 1 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -c:7 50 -Q:7 batch_main -c:8 2 -Q:8 batch_callback"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"

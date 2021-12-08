@@ -213,6 +213,7 @@ The basics of the celery and celery beat services:
 
 * List all services: systemctl list-units --type=service
 * service internetnl-celery restart
+* service internetnl-celery-scheduler restart
 * service internetnl-celery-beat restart
 * service internetnl-gunicorn restart
 * service internetnl-unbound restart
