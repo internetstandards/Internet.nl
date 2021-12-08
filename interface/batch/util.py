@@ -362,6 +362,7 @@ def gather_batch_results(user, batch_request, site_url):
 
 def get_batch_request_info(batch_request, prefetch_related, custom_instances):
     if batch_request.type is BatchRequestType.web:
+        # This expects 'batch:name_map_metadata' to be set in redis. But where is that set?
         webtest = True
         probes = batch_webprobes.getset()
         url_name = 'webtest_results'

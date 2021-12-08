@@ -20,6 +20,7 @@ def _load_autoconf_in_cache():
     Loads any autoconf option in cache to avoid repeated DB access.
 
     """
+    log.debug("Loading autoconf into redis cache.")
     from checks.models import AutoConf, AutoConfOption
     try:
         for option in (
@@ -58,6 +59,7 @@ def _clear_cached_pages():
 
 def _batch_startup_checks():
     if settings.ENABLE_BATCH:
+        log.debug("Performing batch startup checks.")
         from interface.batch import BATCH_INDEXES
         from interface.batch.util import APIMetadata
         from interface.batch.custom_results import CUSTOM_RESULTS_MAP
@@ -134,6 +136,7 @@ class InterfaceAppConfig(AppConfig):
     name = 'interface'
 
     def ready(self):
+        log.debug("Running interface startup checks.")
         _load_autoconf_in_cache()
         _load_padded_macs_in_cache()
         _clear_cached_pages()
