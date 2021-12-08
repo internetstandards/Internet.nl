@@ -102,6 +102,10 @@ pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements-dev.in
 
+pip-upgrade-package: ## Upgrades a package in the requirements.txt
+	# example: make pip-upgrade-package package=django
+	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade-package ${package}
+
 pip-sync:  ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt requirements-dev.txt
 
@@ -160,6 +164,16 @@ PYTHON_LDFLAGS="-L -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framew
 # arm64: -I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9
 PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9"
 endif
+
+
+reinstall-production-dependencies:
+	# You need to do this after pip-sync, since pip-sync does not recognize these dependencies.
+	rm .unbound
+	${MAKE} unbound-37
+	rm .python-whois
+	${MAKE} pythonwhois
+	rm .nassl
+	${MAKE} nassl
 
 unbound-39: venv .unbound
 .unbound:
@@ -238,6 +252,7 @@ nassl: venv .nassl
 	cd nassl_freebsd && cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
 	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
 	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 setup.py install
+	touch .nassl
 
 
 

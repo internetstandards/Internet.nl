@@ -2,8 +2,9 @@
 # virtual environments
 wheel
 
-# The currently supported Django version
-Django==3.2.5
+# The current LTS of django is 3.2, see: https://www.djangoproject.com/download/#supported-versions
+# We'll probably wait until 4.2 LTS to be available for the next upgrade.
+Django<4
 django-redis==4.12.1
 
 
