@@ -367,7 +367,12 @@ def get_batch_request_info(batch_request, prefetch_related, custom_instances):
         url_name = 'webtest_results'
         url_arg = ['site']
         related_testset = 'webtest'
-        name_map = cache.get(redis_id.batch_metadata.id)['web']
+        log.debug("Getting redis metadata from cache with id: %s", redis_id.batch_metadata.id)
+        log.debug("Metadata information: %s", redis_id.batch_metadata)
+        cached_data = cache.get(redis_id.batch_metadata.id)
+        log.debug("Cached data retrieved: %s", cached_data)
+        # This can be none... has it not been registered correctly?
+        name_map = cached_data['web']
     else:
         webtest = False
         probes = batch_mailprobes.getset()
