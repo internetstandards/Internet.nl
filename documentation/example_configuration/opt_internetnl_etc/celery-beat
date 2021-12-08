@@ -13,3 +13,4 @@ CELERYBEAT_LOG_FILE="/opt/internetnl/log/celery-beat.log"
 
 CELERYD_LOG_LEVEL="INFO"
 CELERY_CREATE_DIRS=1
+

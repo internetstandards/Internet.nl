@@ -1,14 +1,11 @@
+# This is used for the batch server
 # Manual: https://docs.celeryproject.org/en/latest/userguide/daemonizing.html
-# Place this file in /etc/default/celeryd or /opt/internetnl/etc/celery
 
-# Names of nodes to start
-#   most will only start one node:
-#CELERYD_NODES="worker db_worker slow_db_worker"
-#CELERYD_NODES="worker worker_slow batch_main batch_callback batch_slow"
-CELERYD_NODES="worker worker_slow batch_main batch_callback batch_slow db_worker slow_db_worker celery default"
+# Names of nodes to start, with celery and default added for non-addressed tasks (should not happen)
+CELERYD_NODES="db_worker slow_db_worker worker_slow batch_slow batch_main batch_callback batch_scheduler celery default"
 
 # Absolute or relative path to the 'celery' command:
-CELERY_BIN="/opt/internetnl/bin/celery"
+CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
 
 # App instance to use
 # comment out this line if you don't use an app
@@ -18,7 +15,8 @@ CELERY_APP="internetnl"
 CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 
 # Extra command-line arguments to the worker
-#CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50"
+# Old commands used before:
+# CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50"
 # CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -c:5 -Q:5 worker_slow -c:6 -Q:6 batch_main -c:7 -Q:7 batch_callback -c:8 -Q:8  batch_slow -c9"
 # Using the most horrid and convoluted syntax invented, this is the meaning of belows atrocity:
 # worker 20
@@ -29,10 +27,11 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 #   -> tells workers 5-to to have a concurrency of 1
 # --queues:1 db_worker
 #   -> tells worker one to listen to the db_worker queue only
+# The last worker mentioned is for 'the rest'
 # Let's start by telling all workers are on concurrency 2
 # -c is used for --concurrency, -Q is used for Queues (the longhand is not allowed)
-# All queues: db_worker, slow_db_worker, batch_callback, batch_main, worker_slow, batch_slow, batch_scheduler
-CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent 12 -c 1 -c:1-5 1 -c:6-20 4 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 batch_scheduler -Q:6-8 batch_main -Q:9-12 batch_callback batch_callback"
+# All queues: db_worker, slow_db_worker, batch_callback, batch_main, worker_slow, batch_slow
+CELERYD_OPTS="--without-gossip --events --time-limit=300 12 -c 1 -c:1-7 1 -c:8-20 4 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -Q:7 batch_scheduler -Q:8 batch_main -Q:9 batch_callback -Q:10 batch_callback batch_callback"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
