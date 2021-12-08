@@ -9,7 +9,6 @@ from django.core.cache import cache
 
 from interface import redis_id
 
-# default_app_config = 'interface.appconf.InterfaceAppConfig'
 mimetypes.add_type("text/x-component", ".htc")
 
 

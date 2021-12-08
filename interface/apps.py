@@ -132,7 +132,7 @@ SELECT
         check_indexes_in_place()
 
 
-class InterfaceAppConfig(AppConfig):
+class InterfaceConfig(AppConfig):
     name = 'interface'
 
     def ready(self):
