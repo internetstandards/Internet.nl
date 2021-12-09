@@ -191,6 +191,18 @@ CELERY_BATCH_TASK_ROUTES = {
 ```
 
 
+And celery imports have changed:
+
+```python
+CELERY_IMPORTS = (
+    'checks.tasks.update',
+    'interface.batch.scheduler',
+    'interface.batch.util',
+)
+```
+
+
+
 Some more options can be controlled using environment variables:
 ```python
 DEBUG = bool(os.environ.get("DEBUG", False))
