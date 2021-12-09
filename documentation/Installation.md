@@ -11,7 +11,7 @@ The following instructions should work on most Debian-based systems. Tested on U
 
 Install the following system requirements:
 
-`apt install git python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison python3-venv`
+`apt install git git-lfs python3 python3-pip build-essential libssl-dev libffi-dev python-dev postgresql postgresql-server-dev-all swig libevent-dev libhiredis-dev redis-server rabbitmq-server bison python3-venv`
 
 ## Software
 

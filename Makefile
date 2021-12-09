@@ -175,8 +175,8 @@ reinstall-production-dependencies:
 	rm -rf .nassl
 	${MAKE} nassl
 
-unbound-39: venv .unbound
-.unbound:
+unbound-39: venv .unbound-39
+.unbound-39:
 	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
 	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
 	# -L/usr/lib -L/usr/lib/python3.9 -lpython3.9 -> contains tons of .py files, for example chunk.py and tstats.py
@@ -184,10 +184,10 @@ unbound-39: venv .unbound
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
 	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
-	touch .unbound
+	touch .unbound-39
 
-unbound-37: venv .unbound
-.unbound:
+unbound-37: venv .unbound-37
+.unbound-37:
 	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
 	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
 	# -L/usr/lib -L/usr/lib/python3.9 -lpython3.9 -> contains tons of .py files, for example chunk.py and tstats.py
@@ -197,7 +197,7 @@ unbound-37: venv .unbound
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
 	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
-	touch .unbound
+	touch .unbound-37
 
 unbound-x86-3.9: .unbound-x86-3.9
 .unbound-x86-3.9:
@@ -240,8 +240,8 @@ python-whois: venv .python-whois
 nassl: venv .nassl
 .nassl:
 	rm -rf nassl_freebsd
-	git clone https://github.com/internetstandards/nassl.git nassl_freebsd
-	cd nassl_freebsd && git checkout internetnl
+	git clone https://github.com/internetstandards/nassl.git nassl_freebsd --branch internetnl
+	# cd nassl_freebsd && git checkout internetnl
 	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
 	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
 	cd nassl_freebsd && wget http://zlib.net/zlib-1.2.11.tar.gz
