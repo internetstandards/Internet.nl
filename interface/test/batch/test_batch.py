@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from checks.models import BatchRequestType, BatchUser
 from interface.batch.util import register_request
@@ -21,10 +22,12 @@ def test_register_batch_request(db):
 
     test_user = BatchUser.objects.create(name="test_user")
 
+    random_name = str(uuid.uuid4())
+
     request_data = {
         'type': 'mail',
         'domains': ['internet.nl', 'example.nl'],
-        'name': 'sample-test'
+        'name': random_name
     }
 
     request_user = {
@@ -34,7 +37,7 @@ def test_register_batch_request(db):
     created = register_request(request_data, **request_user)
 
     response_data = json.loads(created.content)
-    assert response_data['request']['name'] == "sample-test"
+    assert response_data['request']['name'] == random_name
     assert response_data['request']['request_type'] == "mail"
     assert response_data['request']['status'] == "registering"
 
