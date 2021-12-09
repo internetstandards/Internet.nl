@@ -1,3 +1,7 @@
+# Disabled because:
+# 1: points to an external environment that is (for me) not known, should be reproducable
+# 2: does not instantly run using make test, as it needs a driver and a slew of options.
+
 import pytest
 import re
 import time
