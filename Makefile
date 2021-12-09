@@ -258,17 +258,18 @@ nassl: venv .nassl
 
 test: .make.test	## run test suite
 .make.test:
-	DJANGO_SETTINGS_MODULE=internetnl.settings DJANGO_DATABASE=test ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
+	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
 		-m pytest -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 	# generate coverage
 	${env} coverage report
 	# and pretty html
 	${env} coverage html
 	# ensure no model updates are commited without migrations
-	${env} python3 manage.py makemigrations --check
+	# Todo: disabled because the app now requires celery to run. This should be added to the CI first.
+	# ${env} python3 manage.py makemigrations --check
 
 
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	DJANGO_SETTINGS_MODULE=internetnl.settings DJANGO_DATABASE=test ${env} pytest -vvv --log-cli-level=10 -k ${case}
+	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} pytest -vvv --log-cli-level=10 -k ${case}

@@ -17,6 +17,7 @@ app.autodiscover_tasks()
 @app.task(bind=True)
 def debug_task(self):
     print('Debug Task. Request: {0!r}'.format(self.request))
+    return True
 
 
 if app.conf.ENABLE_BATCH:

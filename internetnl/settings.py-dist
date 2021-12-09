@@ -176,20 +176,27 @@ WSGI_APPLICATION = 'internetnl.wsgi.application'
 #     https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 """
 PSQL settings for development purposes (no db restrictions for this user):
+This creates the standard development database ('internetnl') and one for test: test_internetnl
+
 create database internetnl;
 create role internetnluser with password 'internetnluser';
 grant connect on database internetnl to internetnluser;
 grant all on database internetnl to internetnluser;
 alter role internetnluser login;
+
+create database test_internetnl;
+grant connect on database test_internetnl to internetnluser;
+grant all on database test_internetnl to internetnluser;
+
+GRANT ALL ON ALL TABLES IN SCHEMA public to internetnluser;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public to internetnluser;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public to internetnluser;
+ALTER USER internetnluser CREATEDB;
 """
 DATABASES_SETTINGS = {
     "dev": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.environ.get("DB_NAME", "db.sqlite3"),
-    },
-    "test": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("DB_NAME", "test.sqlite3"),
     },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
