@@ -40,10 +40,10 @@ nassl_freebsd
 .unbound-x86
 .unbound-x86-3.8
 .unbound-x86-3.9
-.nassl_freebsd
 .python-whois
-
+.nassl
 
 # testing
 # Test coverage database is not relevant
 .coverage
+.make.test

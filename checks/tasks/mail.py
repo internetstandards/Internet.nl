@@ -11,23 +11,8 @@ from urllib.parse import urlparse
 import unbound
 
 from checks.tasks import SetupUnboundContext
-from internetnl import log
+from checks.tasks.tls_connection import http_get
 
-if settings.USE_NASSL_FOR_IPV6:
-    # Nassl does not work on arm64, so this module provides an alternative tailored for IPv6.
-    # It uses the python requests library.
-    from checks.tasks.tls_connection import http_get
-else:
-    from checks import requests_wrapper as requests
-
-    def http_get(url):
-        try:
-            response = requests.get(url,allow_redirects=True, verify=False, headers={"User-Agent": "internetnl/1.0"})
-            return response
-        except Exception as e:
-            # Don't know how to deal with this yet. Given it's not a production env, this is fine for now.
-            log.exception(e)
-            return None
 
 from checks.tasks.dispatcher import post_callback_hook, check_registry
 from checks.tasks.dmarc_parser import parse as dmarc_parse

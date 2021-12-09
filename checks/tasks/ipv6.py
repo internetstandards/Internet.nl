@@ -27,47 +27,7 @@ from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
 from checks.models import WebDomain, MxStatus
 from interface.views.shared import pretty_domain_name
 
-
-if settings.USE_NASSL_FOR_IPV6:
-    # Nassl does not work on arm64, so this module provides an alternative tailored for IPv6.
-    # It uses the python requests library.
-    from checks.tasks.tls_connection import http_fetch
-else:
-    # The goal here is to emulate the NASSL feature. Does not have to be exact.
-    # call: url, socket.AF_INET, port=port, task=task, keep_conn_open=True
-    # task seems unused? what?
-    from checks import requests_wrapper as requests
-
-    class FakeResult:
-
-        data: ""
-
-        def __init__(self, data):
-            self.data = data
-
-        def close(self):
-            ...
-
-        def read(self, length):
-            return self.data[0:length]
-
-    def http_fetch(host, af=socket.AF_INET, path="/", port=80, **kwargs):
-        # todo: max length read.
-
-        try:
-            response = requests.get(
-                host, family=af, port=port,
-                allow_redirects=False,
-                verify=False,
-                headers={"User-Agent": "internetnl/1.0"},
-            )
-        except Exception as e:
-            # Don't know how to deal with this yet. Given it's not a production env, this is fine for now.
-            log.exception(e)
-            return False, FakeResult(""), None, None
-
-        # needed are: connection.close, response (to read)
-        return FakeResult(""), FakeResult(response.content), None, None
+from checks.tasks.tls_connection import http_fetch
 
 
 # mapping tasks to models

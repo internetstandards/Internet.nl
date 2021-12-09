@@ -428,10 +428,6 @@ INTERNET_NL_CHECK_SUPPORT_MAIL = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_
 INTERNET_NL_CHECK_SUPPORT_TLS = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True))
 INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True))
 
-# NASSL has no support for arm64, as a surrogate, use the requests library and a wrapper to perform some ipv6 requests
-# that sort-of-mimic the behavior of NASSL. If you're working on an x64 machine, ou don't need this.
-USE_NASSL_FOR_IPV6 = bool(os.environ.get("USE_NASSL_FOR_IPV6", True))
-
 
 LOGGING = {
     "version": 1,
