@@ -212,9 +212,9 @@ Make sure the following services are installed and running on your system:
 The basics of the celery and celery beat services:
 
 * List all services: systemctl list-units --type=service
-* service internetnl-celery restart
-* service internetnl-celery-scheduler restart
-* service internetnl-celery-beat restart
+* service internetnl-batch-celery-workers restart
+* service internetnl-batch-celery-scheduler restart
+* service internetnl-batch-celery-heartbeat restart
 * service internetnl-gunicorn restart
 * service internetnl-unbound restart
  
@@ -227,6 +227,8 @@ And you can see what workers are running in memory with:
 Restart all internetnl services:
 * `for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl restart `basename $i`; done`
 
+Restart all batch workers:
+* `for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done`
 
 
 ## DNS records

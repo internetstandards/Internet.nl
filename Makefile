@@ -78,8 +78,8 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	# After this you also need to make an unbound, see below for a list of commands and flavors.
 	# Example: make unbound
-	# You also need to make pythonwhois
-	# example: make pythonwhois
+	# You also need to make python-whois
+	# example: make python-whois
 	# And of course nassl
 	# example: make nassl
 	touch .venv/make_venv_complete
@@ -135,7 +135,7 @@ run-worker-batch-callback: venv
 run-worker-batch-slow: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_slow --time-limit=300 --concurrency=2 -n batch_slow
 
-run-scheduler: venv
+run-heartbeat: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl beat
 
 run-broker:
@@ -171,7 +171,7 @@ reinstall-production-dependencies:
 	rm -rf .unbound
 	${MAKE} unbound-37
 	rm -rf .python-whois
-	${MAKE} pythonwhois
+	${MAKE} python-whois
 	rm -rf .nassl
 	${MAKE} nassl
 
@@ -228,7 +228,7 @@ unbound-x86-3.8: .unbound-x86-3.8
 	touch .unbound-x86-3.8
 
 
-pythonwhois: venv .python-whois
+python-whois: venv .python-whois
 .python-whois:
 	rm -rf python-whois
 	git clone https://github.com/internetstandards/python-whois.git

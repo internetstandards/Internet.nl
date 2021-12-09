@@ -1,7 +1,7 @@
 # This is used for the batch server
 # Manual: https://docs.celeryproject.org/en/latest/userguide/daemonizing.html
 # The scheduler uses greenlet tasks, which cannot be handled with gevent tasks. Therefore this is
-# separated from the normal generic worker.
+# separated from the normal generic workers.
 
 # Names of nodes to start, with celery and default added for non-addressed tasks (should not happen)
 CELERYD_NODES="batch_scheduler"
