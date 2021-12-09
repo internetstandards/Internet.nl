@@ -8,7 +8,7 @@ hosters.
 
 ### Python installation management
 The makefile is 'the way to go' for running and installing the application. Inside the makefile there are a bunch
-of automated procedures that superseed the manual sets from the [Installation.md](Installation.md) file. 
+of automated procedures that supersede the manual sets from the [Installation.md](Installation.md) file. 
 
 To setup a complete virtual environment with all needed dependencies run the following:
 ```bash
@@ -32,7 +32,7 @@ If your environment was destroyed or something weird is happening, just `make cl
 Python dependencies are now managed with [pip-tools](https://github.com/jazzband/pip-tools/).
 
 Dive into pip-tools and the pip-tools commands in the makefile to figure out how to upgrade dependencies. Note that, 
-the manual dependecies above (unbound etc) need to be re-installed after running pip-sync. This has not yet been 
+the manual dependencies above (unbound ...) need to be re-installed after running pip-sync. This has not yet been 
 automated away due to time constraints.
 
 The requirements.txt is now a product of pip-tools, and the high-level requirements are maintained in requirements.in.
@@ -46,7 +46,7 @@ internet.nl website, while the batch services are only needed to run the batch/a
 
 The folder structure used is explained in the [example configuration readme](example_configuration/readme.md).
 
-Services point to the virtual environment created in the step "Python dependency maangement".
+Services point to the virtual environment created in the step "Python dependency management".
 
 A new service has been added which handles the scheduler tasks (which are incompatible with gevent). Services and
 their instructions are now documented in [Installation.md](Installation.md).
