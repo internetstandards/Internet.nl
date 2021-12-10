@@ -478,7 +478,8 @@ components:
         ipv4:
           type: object
           description: Details for the IPv4 side.
-          required: addresses
+          required:
+            - addresses
           properties:
             addresses:
               type: array
@@ -488,7 +489,8 @@ components:
         ipv6:
           type: object
           description: Details for the IPv6 side.
-          required: addresses
+          required:
+            - addresses
           properties:
             addresses:
               type: array
@@ -775,7 +777,6 @@ components:
     TechnicalWebServer:
       type: object
       description: Results for the webserver.
-      required:
       properties:
         tested_address:
           type: string
@@ -802,7 +803,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/TechnicalWebServer'
         - type: object
-          required: addresses
+          required:
+            - addresses
           properties:
             addresses:
               type: array
@@ -814,7 +816,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/TechnicalWebServer'
         - type: object
-          required: addresses
+          required:
+            - addresses
           properties:
             addresses:
               type: array
@@ -851,7 +854,7 @@ components:
             - ipv6
           properties:
             ip_similarity:
-              type: booelan
+              type: boolean
               description: >
                 If the webserver returns similar pages on IPv4 and IPv6. Only
                 available when both IPv4 and IPv6 are configured and reachable
