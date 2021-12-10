@@ -466,7 +466,6 @@ class DomainTechnicalResults:
 
         return addresses_info
 
-
     @classmethod
     def _get_routing_info(cls, domain_table):
         def pp_validity(v):
@@ -573,10 +572,16 @@ class DomainTechnicalResults:
         for nsdomain in nsdomains:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
-        # CAUTION: the rpki tests tests nameservers for mx records, which the ipv6 test does not include
-        # this may suprise API callers, because they might expect a 'reachable' key for each dict.
         for nsdomain in report_table.rpki.nsdomains.all():
             nameservers[nsdomain.domain] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.domain, None))
+
+        return nameservers
+
+    @classmethod
+    def _get_mail_mx_nameservers(cls, report_table):
+        nameservers = {}
+        for mxnsdomain in report_table.rpki.mxnsdomains.all():
+            nameservers[mxnsdomain.domain] = cls._get_routing_info(mxnsdomain)
 
         return nameservers
 
@@ -657,6 +662,7 @@ class DomainTechnicalResults:
         details = {}
         details['domain'] = cls._get_mail_domain(report_table)
         details['nameservers'] = cls._get_mail_nameservers(report_table)
+        details['mx_nameservers'] = cls._get_mail_mx_nameservers(report_table)
         details['receiving_mailservers'] = cls._get_mail_mailservers(report_table)
         return details
 

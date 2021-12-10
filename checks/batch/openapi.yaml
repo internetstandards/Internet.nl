@@ -439,10 +439,11 @@ components:
         results:
           $ref: '#/components/schemas/DomainResults'
 
-    TechnicalIpv4:
+    TechnicalIpv4Base:
       type: object
       required:
         - address
+        - reachable
         - routing
       properties:
         address:
@@ -456,10 +457,21 @@ components:
         routing:
           $ref: '#/components/schemas/TechnicalRouting'
 
-    TechnicalIpv6:
+    TechnicalIpv4:
+     allOf:
+      - $ref: '#/components/schemas/TechnicalIpv4Base'
+      - required:
+        - reachable
+
+    TechnicalIpv4WithoutReachability:
+      allOf:
+      - $ref: '#/components/schemas/TechnicalIpv4'
+
+    TechnicalIpv6Base:
       type: object
       required:
         - address
+        - reachable
         - routing
       properties:
         address:
@@ -472,6 +484,16 @@ components:
             If connectivity to this address was possible.
         routing:
           $ref: '#/components/schemas/TechnicalRouting'
+
+    TechnicalIpv6:
+     allOf:
+      - $ref: '#/components/schemas/TechnicalIpv6Base'
+      - required:
+        - reachable
+
+    TechnicalIpv6WithoutReachability:
+      allOf:
+      - $ref: '#/components/schemas/TechnicalIpv6'
 
     TechnicalNameServer:
       type: object
@@ -501,6 +523,35 @@ components:
               description: The available IPv6 addresses.
               items:
                 $ref: '#/components/schemas/TechnicalIpv6'
+
+    TechnicalNameServerWithoutReachability:
+      type: object
+      required:
+        - ipv4
+        - ipv6
+      properties:
+        ipv4:
+          type: object
+          description: Details for the IPv4 side.
+          required:
+            - addresses
+          properties:
+            addresses:
+              type: array
+              description: The available IPv4 addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv4WithoutReachability'
+        ipv6:
+          type: object
+          description: Details for the IPv6 side.
+          required:
+            - addresses
+          properties:
+            addresses:
+              type: array
+              description: The available IPv6 addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv6WithoutReachability'
 
     TechnicalDnssec:
       description: DNSSEC results for the tested domain.
@@ -998,6 +1049,14 @@ components:
           additionalProperties:
             x-additionalPropertiesName: <nameserver.name>
             $ref: '#/components/schemas/TechnicalNameServer'
+        mx_nameservers:
+          type: object
+          description: >
+            Results per nameserver authoritative for the zone
+            referred to in the MX records.
+          additionalProperties:
+            x-additionalPropertiesName: <mx_nameserver.name>
+            $ref: '#/components/schemas/TechnicalNameServerWithoutReachability'
         receiving_mailservers:
           description: Results per receiving mailserver.
           type: object
@@ -1481,7 +1540,8 @@ components:
       $ref: '#/components/schemas/ResultsReply'
 
     ResultsTechnicalResponse:
-      $ref: '#/components/schemas/ResultsTechnicalReply'
+      allOf:
+        - $ref: '#/components/schemas/ResultsTechnicalReply'
 
     ResultsCategoriesResponse:
       oneOf:
