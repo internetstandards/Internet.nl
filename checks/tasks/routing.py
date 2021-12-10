@@ -138,21 +138,24 @@ class TeamCymruIPtoASN(RouteView):
             return []
 
         # The values in the TXT record are separated by '|' and the ASN is the
-        # first value.
+        # first value. There may be more than one ASN, separated by a space.
+        # The second value contains the prefix.
         asn_prefix_pairs = []
         for txt in result:
             try:
-                asn = txt[0].split("|")[0].strip()
+                ASNs = txt[0].split("|")[0].strip().split(' ')
                 prefix = txt[0].split("|")[1].strip()
 
                 # Check that we didn't get any gibberish back.
-                if int(asn) >= 2**32:
-                    raise ValueError
                 ipaddress.ip_network(prefix)
+                for asn in ASNs:
+                    if int(asn) >= 2**32:
+                        raise ValueError
             except ValueError:
                 continue
 
-            asn_prefix_pairs.append((asn, prefix))
+            for asn in ASNs:
+                asn_prefix_pairs.append((asn, prefix))
 
         return asn_prefix_pairs
 
