@@ -14,7 +14,7 @@ DISCLAIMER: |
 openapi: "3.0.3"
 
 info:
-  version: 2.0.0
+  version: OVERRIDE THIS VALUE in checks/batch/__init.py
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html

@@ -21,6 +21,7 @@ VALUES_MAP = {
     "CONTACT": ['info', 'contact'],
     "LOGO": ['info', 'x-logo'],
     "SERVERS": ['servers'],
+    "BATCH_API_FULL_VERSION": ['info', 'version']
 }
 REPLACE_MAP = {
     "DESC_INTRO_EXTRA": ['info', 'description'],

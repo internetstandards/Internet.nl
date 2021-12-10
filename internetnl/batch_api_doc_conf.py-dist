@@ -27,6 +27,8 @@ SERVERS = [
     },
 
 ]
+# Get API version from the batch code to update section in the documentation
+from checks.batch import BATCH_API_FULL_VERSION
 
 #
 # These values will replace text in the documentation.
