@@ -387,11 +387,6 @@ class NsRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-valid verdict good"
 
-    def result_nonexistent(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web-mail rpki ns-valid verdict nonexistent"
-
     def result_not_tested(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
@@ -445,11 +440,6 @@ class MailMxNsRpkiValid(Subtest):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-valid verdict good"
-
-    def result_nonexistent(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail mail rpki mx-ns-valid verdict nonexistent"
 
     def result_not_tested(self):
         self.tech_type = ""
