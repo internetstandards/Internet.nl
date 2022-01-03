@@ -71,7 +71,7 @@ def clear(request, dname):
     if url in settings.CACHE_RESET_WHITELIST:
         for test in [
                 "mail_auth", "dnssec", "web_ipv6", "mail_ipv6",
-                "web_tls", "web_appsecpriv","web_rpkiweb"]:
+                "web_tls", "web_appsecpriv", "web_rpki", "mail_rpki"]:
             cache.delete(redis_id.dom_task.id.format(url, test))
         return HttpResponse("ok")
     return HttpResponse("nope")
