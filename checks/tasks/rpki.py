@@ -375,17 +375,11 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task,
     """Check nameservers for the mx record of a domain.
 
     These may or may not be the same as the nameservers for the domain itself.
-    Only check additions.
     """
     mx_ns_ips_pairs = set()
     for mx, _ in mx_ips_pairs:
         for ns, ips in shared.do_resolve_ns(task, mx):
             mx_ns_ips_pairs.add((ns, tuple(ips)))
-
-    # only look at distinct ns for mx
-    ns_ips_pairs = ((ns, tuple(ips))
-                    for ns, ips in shared.do_resolve_ns(task, url))
-    mx_ns_ips_pairs -= set(ns_ips_pairs)
 
     mxns = do_rpki(task, mx_ns_ips_pairs, *args, **kwargs)
 
