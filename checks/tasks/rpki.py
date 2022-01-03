@@ -269,7 +269,7 @@ def report_exists(subtestname, category, domainset) -> None:
         prev_domain = domain.domain
     if not domainset:
         # no A/AAAA records exist
-        category.subtests[subtestname].result_nonexistent()
+        category.subtests[subtestname].result_no_addresses()
     elif not failure_count:
         category.subtests[subtestname].result_good(tech_data)
     else:

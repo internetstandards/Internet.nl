@@ -813,6 +813,9 @@ msgstr ""
 msgid "detail mail rpki exists verdict good"
 msgstr ""
 
+msgid "detail mail rpki exists verdict no-addresses"
+msgstr ""
+
 msgid "detail mail rpki mx-ns-exists label"
 msgstr ""
 
@@ -828,7 +831,7 @@ msgstr ""
 msgid "detail mail rpki mx-ns-exists verdict good"
 msgstr ""
 
-msgid "detail mail rpki mx-ns-exists verdict nonexistent"
+msgid "detail mail rpki mx-ns-exists verdict no-addresses"
 msgstr ""
 
 msgid "detail mail rpki mx-ns-valid label"
@@ -846,9 +849,6 @@ msgstr ""
 msgid "detail mail rpki mx-ns-valid verdict good"
 msgstr ""
 
-msgid "detail mail rpki mx-ns-valid verdict nonexistent"
-msgstr ""
-
 msgid "detail mail rpki valid exp"
 msgstr ""
 
@@ -862,9 +862,6 @@ msgid "detail mail rpki valid verdict bad"
 msgstr ""
 
 msgid "detail mail rpki valid verdict good"
-msgstr ""
-
-msgid "detail mail rpki valid verdict nonexistent"
 msgstr ""
 
 msgid "detail mail tls cert-hostmatch exp"
@@ -1936,6 +1933,9 @@ msgstr ""
 msgid "detail web rpki exists verdict good"
 msgstr ""
 
+msgid "detail web rpki exists verdict no-addresses"
+msgstr ""
+
 msgid "detail web rpki valid exp"
 msgstr ""
 
@@ -1949,9 +1949,6 @@ msgid "detail web rpki valid verdict bad"
 msgstr ""
 
 msgid "detail web rpki valid verdict good"
-msgstr ""
-
-msgid "detail web rpki valid verdict nonexistent"
 msgstr ""
 
 msgid "detail web tls cert-hostmatch exp"

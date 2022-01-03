@@ -254,9 +254,9 @@ class WebRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki exists verdict good"
 
-    def result_nonexistent(self):
+    def result_no_addresses(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web rpki exists verdict nonexistent"
+        self.verdict = "detail web rpki exists verdict no-addresses"
 
     def result_not_tested(self):
         self.tech_type = ""
@@ -283,9 +283,9 @@ class MailRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki exists verdict good"
 
-    def result_nonexistent(self):
+    def result_no_addresses(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki exists verdict nonexistent"
+        self.verdict = "detail mail rpki exists verdict no-addresses"
 
     def result_not_tested(self):
         self.tech_type = ""
@@ -412,9 +412,9 @@ class MailMxNsRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-exists verdict good"
 
-    def result_nonexistent(self):
+    def result_no_addresses(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki mx-ns-exists verdict nonexistent"
+        self.verdict = "detail mail rpki mx-ns-exists verdict no-addresses"
 
     def result_not_tested(self):
         self.tech_type = ""
