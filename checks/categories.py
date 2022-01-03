@@ -258,7 +258,7 @@ class WebRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki exists verdict no-addresses"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -287,7 +287,7 @@ class MailRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki exists verdict no-addresses"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -312,7 +312,7 @@ class WebRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki valid verdict good"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -337,7 +337,7 @@ class MailRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki valid verdict good"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -362,7 +362,7 @@ class NsRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-exists verdict good"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -387,7 +387,7 @@ class NsRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-valid verdict good"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -416,7 +416,7 @@ class MailMxNsRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-exists verdict no-addresses"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
@@ -441,7 +441,7 @@ class MailMxNsRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-valid verdict good"
 
-    def result_not_tested(self):
+    def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
