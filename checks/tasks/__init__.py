@@ -110,10 +110,7 @@ class SetupUnboundContext(Task):
         """
         Perform a HTTP GET request using the stored session
         """
-        if not hasattr(self, "_tls"):
-            self._tls = threading.local()
+        if not hasattr(self, "_requests_session"):
+            self._requests_session = requests.session()
 
-        if not hasattr(self._tls, 'session'):
-            self._tls.session = requests.Session()
-
-        return self._tls.session.get(*args, **kwargs)
+        return self._requests_session.get(*args, **kwargs)

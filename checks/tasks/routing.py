@@ -252,7 +252,7 @@ class Routinator(RelyingPartySoftware):
         :throws: requests.RequestException, requests.HTTPError, json.JSONDecodeError
         """
         request = f"{settings.ROUTINATOR_URL}/{asn}/{prefix}"
-        response = requests.get(request)
+        response = task.get(request)
 
         # API unavailable during Routinator's initial validation
         if response.status_code == 503:
