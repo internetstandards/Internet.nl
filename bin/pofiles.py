@@ -28,8 +28,8 @@ KNOWN_PO_FILES = [
 PO_FILES_DIR = "translations"
 PO_FILES_LOCALES = PO_FILES_DIR + "/{}"
 
-DJANGO_PO_FILE = "checks/locale/{}/LC_MESSAGES/django.po"
-DJANGO_ASSETS_DIR = "checks/assets"
+DJANGO_PO_FILE = "interface/locale/{}/LC_MESSAGES/django.po"
+DJANGO_ASSETS_DIR = "interface/assets"
 
 TAR_UNPACK_DIR = "locale_files"
 TAR_NAME = TAR_UNPACK_DIR + ".tar.gz"

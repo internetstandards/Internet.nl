@@ -5,10 +5,9 @@ import http.client
 import re
 import socket
 
-from .tls_connection import NoIpError, http_fetch, MAX_REDIRECT_DEPTH
-from .tls_connection import ConnectionSocketException
-from .tls_connection import ConnectionHandshakeException
-from .. import scoring
+from checks.tasks.tls_connection import http_fetch, MAX_REDIRECT_DEPTH
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks import scoring
 
 
 def get_multiple_values_from_header(header):
@@ -81,7 +80,7 @@ class HeaderCheckerContentSecurityPolicy(object):
 
         def __str__(self):
             """
-            Could be used together with tests/unittests/test_tasks_http_headers.py
+            Could be used together with tests/unittests/disabled_test_tasks_http_headers.py
             for debugging.
             """
             return (

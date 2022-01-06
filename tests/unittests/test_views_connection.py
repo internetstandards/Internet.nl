@@ -1,8 +1,8 @@
 from django.test import SimpleTestCase
 from django_redis import get_redis_connection
 
-from checks import redis_id
-from checks.views import connection
+from interface import redis_id
+from interface.views import connection
 
 
 class SlaacPrivacyExtensionTestCase(SimpleTestCase):

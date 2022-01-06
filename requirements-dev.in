@@ -1,0 +1,17 @@
+# make sure there are no version conflicts with requirements.txt
+-c requirements.txt
+
+pytest
+pytest-cov
+pytest-django
+pylama
+coverage
+pytest-responses
+# output logging when test fails
+pytest-logging
+django-coverage
+pytest-mock
+requests_mock
+freezegun
+pytest-html
+pytest-selenium

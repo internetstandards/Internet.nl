@@ -27,28 +27,27 @@ from itertools import product
 from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
-from . import SetupUnboundContext
-from .dispatcher import check_registry, post_callback_hook
-from .http_headers import HeaderCheckerContentEncoding, http_headers_check
-from .http_headers import HeaderCheckerStrictTransportSecurity
-from .shared import resolve_dane, get_mail_servers_mxstatus
-from .shared import results_per_domain, aggregate_subreports
-from .shared import resolve_a_aaaa, batch_resolve_a_aaaa
-from .shared import mail_get_servers, batch_mail_get_servers
-from .tls_connection import MAX_REDIRECT_DEPTH, NoIpError
-from .tls_connection import DebugConnection, ModernConnection
-from .tls_connection import ConnectionHandshakeException
-from .tls_connection import ConnectionSocketException
-from .tls_connection import SSLConnectionWrapper
-from .tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
-from .tls_connection import HTTPSConnection, CipherListAction, TLSV1_3
-from .tls_connection import http_fetch
-from .cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
-from .. import scoring, categories
-from .. import batch, batch_shared_task, redis_id
-from ..models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
-from ..models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
-from ..models import KexHashFuncStatus, CipherOrderStatus, MxStatus
+from checks.tasks import SetupUnboundContext
+from checks.tasks.dispatcher import check_registry, post_callback_hook
+from checks.tasks.http_headers import HeaderCheckerContentEncoding, http_headers_check
+from checks.tasks.http_headers import HeaderCheckerStrictTransportSecurity
+from checks.tasks.shared import resolve_dane, get_mail_servers_mxstatus
+from checks.tasks.shared import results_per_domain, aggregate_subreports
+from checks.tasks.shared import resolve_a_aaaa, batch_resolve_a_aaaa
+from checks.tasks.shared import mail_get_servers, batch_mail_get_servers
+from checks.tasks.tls_connection import MAX_REDIRECT_DEPTH
+from checks.tasks.tls_connection import DebugConnection, ModernConnection
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks.tasks.tls_connection import SSLConnectionWrapper
+from checks.tasks.tls_connection import SSLV23, SSLV2, SSLV3, TLSV1, TLSV1_1, TLSV1_2
+from checks.tasks.tls_connection import HTTPSConnection, CipherListAction, TLSV1_3
+from checks.tasks.tls_connection import http_fetch
+from checks.tasks.cipher_info import cipher_infos, SecLevel, CipherScoreAndSecLevel
+from checks import scoring, categories
+from interface import batch, batch_shared_task, redis_id
+from checks.models import DaneStatus, DomainTestTls, MailTestTls, WebTestTls
+from checks.models import ForcedHttpsStatus, OcspStatus, ZeroRttStatus
+from checks.models import KexHashFuncStatus, CipherOrderStatus, MxStatus
 
 
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
@@ -366,7 +365,7 @@ def web_callback(self, results, domain, req_limit_id):
     """
     webdomain, results = callback(results, domain, 'web')
     # Always calculate scores on saving.
-    from ..probes import web_probe_tls
+    from checks.probes import web_probe_tls
     web_probe_tls.rated_results_by_model(webdomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -376,7 +375,7 @@ def web_callback(self, results, domain, req_limit_id):
 def batch_web_callback(self, results, domain):
     webdomain, results = callback(results, domain, 'web')
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_tls
+    from checks.probes import batch_web_probe_tls
     batch_web_probe_tls.rated_results_by_model(webdomain)
     batch.scheduler.batch_callback_hook(webdomain, self.request.id)
 
@@ -385,7 +384,7 @@ def batch_web_callback(self, results, domain):
 def mail_callback(self, results, domain, req_limit_id):
     maildomain, results = callback(results, domain, 'mail')
     # Always calculate scores on saving.
-    from ..probes import mail_probe_tls
+    from checks.probes import mail_probe_tls
     mail_probe_tls.rated_results_by_model(maildomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -395,7 +394,7 @@ def mail_callback(self, results, domain, req_limit_id):
 def batch_mail_callback(self, results, domain):
     maildomain, results = callback(results, domain, 'mail')
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_tls
+    from checks.probes import batch_mail_probe_tls
     batch_mail_probe_tls.rated_results_by_model(maildomain)
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 

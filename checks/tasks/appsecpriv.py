@@ -5,18 +5,18 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
 
-from . import SetupUnboundContext, shared
-from .dispatcher import check_registry, post_callback_hook
-from .http_headers import HeaderCheckerXContentTypeOptions
-from .http_headers import HeaderCheckerXXssProtection
-from .http_headers import HeaderCheckerReferrerPolicy
-from .http_headers import HeaderCheckerXFrameOptions
-from .http_headers import HeaderCheckerContentSecurityPolicy
-from .http_headers import http_headers_check
-from .shared import results_per_domain, aggregate_subreports
-from .. import categories
-from .. import batch, batch_shared_task
-from ..models import WebTestAppsecpriv, DomainTestAppsecpriv
+from checks.tasks import SetupUnboundContext, shared
+from checks.tasks.dispatcher import check_registry, post_callback_hook
+from checks.tasks.http_headers import HeaderCheckerXContentTypeOptions
+from checks.tasks.http_headers import HeaderCheckerXXssProtection
+from checks.tasks.http_headers import HeaderCheckerReferrerPolicy
+from checks.tasks.http_headers import HeaderCheckerXFrameOptions
+from checks.tasks.http_headers import HeaderCheckerContentSecurityPolicy
+from checks.tasks.http_headers import http_headers_check
+from checks.tasks.shared import results_per_domain, aggregate_subreports
+from checks import categories
+from interface import batch, batch_shared_task
+from checks.models import WebTestAppsecpriv, DomainTestAppsecpriv
 
 
 @shared_task(bind=True)
@@ -28,7 +28,7 @@ def web_callback(self, results, domain, req_limit_id):
     category = categories.WebAppsecpriv()
     webdomain, results = callback(results, domain, category)
     # Always calculate scores on saving.
-    from ..probes import web_probe_appsecpriv
+    from checks.probes import web_probe_appsecpriv
     web_probe_appsecpriv.rated_results_by_model(webdomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -43,7 +43,7 @@ def batch_web_callback(self, results, domain):
     category = categories.WebAppsecpriv()
     webdomain, results = callback(results, domain, category)
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_appsecpriv
+    from checks.probes import batch_web_probe_appsecpriv
     batch_web_probe_appsecpriv.rated_results_by_model(webdomain)
     batch.scheduler.batch_callback_hook(webdomain, self.request.id)
 

@@ -14,13 +14,14 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from . import SetupUnboundContext
-from . import shared
-from .dispatcher import check_registry, post_callback_hook
-from .. import batch, batch_shared_task
-from .. import scoring, categories, redis_id
-from ..models import DomainTestDnssec, DnssecStatus, MailTestDnssec
-from ..models import MxStatus
+from checks.tasks import SetupUnboundContext
+from checks.tasks import shared
+from checks.tasks.dispatcher import check_registry, post_callback_hook
+from interface import batch, batch_shared_task
+from checks import scoring, categories
+from interface import redis_id
+from checks.models import DomainTestDnssec, DnssecStatus, MailTestDnssec
+from checks.models import MxStatus
 
 
 UNBOUND_PATCHED_DS_LOG = "internetnl - DS unsupported"
@@ -31,7 +32,7 @@ def web_callback(self, results, addr, req_limit_id):
     category = categories.WebDnssec()
     dtdnssec = save_results_web(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import web_probe_dnssec
+    from checks.probes import web_probe_dnssec
     web_probe_dnssec.rated_results_by_model(dtdnssec)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -42,7 +43,7 @@ def batch_web_callback(self, results, addr):
     category = categories.WebDnssec()
     dtdnssec = save_results_web(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_dnssec
+    from checks.probes import batch_web_probe_dnssec
     batch_web_probe_dnssec.rated_results_by_model(dtdnssec)
     batch.scheduler.batch_callback_hook(dtdnssec, self.request.id)
 
@@ -52,7 +53,7 @@ def mail_callback(self, results, addr, req_limit_id):
     category = categories.MailDnssec()
     maildomain = save_results_mail(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import mail_probe_dnssec
+    from checks.probes import mail_probe_dnssec
     mail_probe_dnssec.rated_results_by_model(maildomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -63,7 +64,7 @@ def batch_mail_callback(self, results, addr):
     category = categories.MailDnssec()
     maildomain = save_results_mail(addr, results, category)
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_dnssec
+    from checks.probes import batch_mail_probe_dnssec
     batch_mail_probe_dnssec.rated_results_by_model(maildomain)
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 

@@ -1,7 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import idna
-import re
 import time
 
 from celery import shared_task
@@ -11,18 +10,18 @@ from django.core.cache import cache
 from urllib.parse import urlparse
 import unbound
 
-from . import SetupUnboundContext
-from .tls_connection import http_get
-from .dispatcher import post_callback_hook, check_registry
-from .dmarc_parser import parse as dmarc_parse
-from .spf_parser import parse as spf_parse
-from .. import scoring, categories, redis_id
-from .. import batch, batch_shared_task
-from ..models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
+from checks.tasks import SetupUnboundContext
+from checks.tasks.tls_connection import http_get
 
-DMARC_NON_SENDING_POLICY = re.compile(r'^v=DMARC1;\ *p=reject;?')
-DMARC_NON_SENDING_POLICY_ORG = re.compile(r'v=DMARC1;(?:.*sp=reject|\ *p=reject(?!.*sp=))')
-SPF_NON_SENDING_POLICY = re.compile(r'^v=spf1\ +(?:exp=[^ ]+\ +)?-all;?(?:\ +exp=[^ ]+)?$')
+
+from checks.tasks.dispatcher import post_callback_hook, check_registry
+from checks.tasks.dmarc_parser import parse as dmarc_parse
+from checks.tasks.spf_parser import parse as spf_parse
+from checks import scoring, categories, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
+    SPF_NON_SENDING_POLICY
+from interface import redis_id
+from interface import batch, batch_shared_task
+from checks.models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
 
 
 @shared_task(bind=True)
@@ -30,7 +29,7 @@ def mail_callback(self, results, addr, req_limit_id):
     category = categories.MailAuth()
     mtauth = callback(results, addr, category)
     # Always calculate scores on saving.
-    from ..probes import mail_probe_auth
+    from checks.probes import mail_probe_auth
     mail_probe_auth.rated_results_by_model(mtauth)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -41,7 +40,7 @@ def batch_mail_callback(self, results, addr):
     category = categories.MailAuth()
     mtauth = callback(results, addr, category)
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_auth
+    from checks.probes import batch_mail_probe_auth
     batch_mail_probe_auth.rated_results_by_model(mtauth)
     batch.scheduler.batch_callback_hook(mtauth, self.request.id)
 

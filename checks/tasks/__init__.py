@@ -9,6 +9,8 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 import unbound
 
+from internetnl import log
+
 
 class SetupUnboundContext(Task):
     """
@@ -50,6 +52,7 @@ class SetupUnboundContext(Task):
             cb_data['done'] = False
 
         try:
+            log.debug("Attempting resolving of qname: %s" % qname)
             retval, async_id = self.ub_ctx.resolve_async(
                 qname, cb_data, callback, qtype, unbound.RR_CLASS_IN)
             while retval == 0 and not cb_data["done"]:
@@ -57,6 +60,7 @@ class SetupUnboundContext(Task):
                 retval = self.ub_ctx.process()
 
         except SoftTimeLimitExceeded as e:
+            log.debug("Failed resolving of qname: %s" % qname)
             if async_id:
                 self.ub_ctx.cancel(async_id)
             raise e

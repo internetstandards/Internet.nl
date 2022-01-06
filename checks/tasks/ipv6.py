@@ -5,6 +5,7 @@ import http.client
 import socket
 import time
 
+from internetnl import log
 from unbound import ub_ctx, RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS, RR_CLASS_IN
 
 from bs4 import BeautifulSoup
@@ -14,17 +15,19 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from . import dispatcher
-from . import SetupUnboundContext
-from . import shared
-from .tls_connection import http_fetch, NoIpError, ConnectionHandshakeException
-from .tls_connection import ConnectionSocketException
-from .dispatcher import check_registry
-from .. import scoring, categories, redis_id
-from .. import batch, batch_shared_task
-from ..models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
-from ..models import WebDomain, MxStatus
-from ..views.shared import pretty_domain_name
+from checks.tasks import dispatcher
+from checks.tasks import SetupUnboundContext
+from checks.tasks import shared
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks.tasks.dispatcher import check_registry
+from checks import scoring, categories
+from interface import redis_id
+from interface import batch, batch_shared_task
+from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
+from checks.models import WebDomain, MxStatus
+from interface.views.shared import pretty_domain_name
+
+from checks.tasks.tls_connection import http_fetch
 
 
 # mapping tasks to models
@@ -40,7 +43,7 @@ def web_callback(self, results, addr, req_limit_id):
     domainipv6 = callback(
         results, addr, DomainTestIpv6(), "domaintestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import web_probe_ipv6
+    from checks.probes import web_probe_ipv6
     web_probe_ipv6.rated_results_by_model(domainipv6)
     dispatcher.post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -52,7 +55,7 @@ def batch_web_callback(self, results, addr):
     domainipv6 = callback(
         results, addr, DomainTestIpv6(), "domaintestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import batch_web_probe_ipv6
+    from checks.probes import batch_web_probe_ipv6
     batch_web_probe_ipv6.rated_results_by_model(domainipv6)
     batch.scheduler.batch_callback_hook(domainipv6, self.request.id)
 
@@ -63,7 +66,7 @@ def mail_callback(self, results, addr, req_limit_id):
     mailipv6 = callback(
         results, addr, MailTestIpv6(), "mailtestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import mail_probe_ipv6
+    from checks.probes import mail_probe_ipv6
     mail_probe_ipv6.rated_results_by_model(mailipv6)
     dispatcher.post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -75,7 +78,7 @@ def batch_mail_callback(self, results, addr):
     mailipv6 = callback(
         results, addr, MailTestIpv6(), "mailtestipv6", category)
     # Always calculate scores on saving.
-    from ..probes import batch_mail_probe_ipv6
+    from checks.probes import batch_mail_probe_ipv6
     batch_mail_probe_ipv6.rated_results_by_model(mailipv6)
     batch.scheduler.batch_callback_hook(mailipv6, self.request.id)
 
@@ -303,6 +306,7 @@ def test_ns_connectivity(ip, port, domain):
 
 
 def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
+    log.debug("Testing connectivity on %s, on port %s, is_ns: %s, test_domain: %s" % (ips, ports, is_ns, test_domain))
     good = set()
     bad = set()
     reachable_ports = set()
@@ -327,6 +331,7 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
                 reachable_ports.add(port)
 
     bad = set(ips) - set(good)
+    log.debug("Conclusion on %s:%s: good: %s, bad: %s, ports: %s" % (ips, ports, good, bad, reachable_ports))
     return list(good), list(bad), reachable_ports
 
 
@@ -338,9 +343,11 @@ def get_domain_results(
 
     """
     v6 = task.resolve(domain, RR_TYPE_AAAA)
+    log.debug("V6 resolve: %s" % v6)
     v6_good, v6_bad, v6_ports = test_connectivity(
         v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
     v4 = task.resolve(domain, RR_TYPE_A)
+    log.debug("V4 resolve: %s" % v4)
     v4_good, v4_bad, v4_ports = test_connectivity(
         v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
     v6_conn_diff = v4_ports - v6_ports
@@ -542,6 +549,7 @@ def simhash(url, task=None):
 
 def do_web(self, url, *args, **kwargs):
     try:
+        log.debug("Performing IPv6 check")
         domain = []
         simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
         simhash_distance = settings.SIMHASH_MAX + 100
@@ -567,6 +575,7 @@ def do_web(self, url, *args, **kwargs):
             simhash_score, simhash_distance = simhash(url, task=self)
 
     except SoftTimeLimitExceeded:
+        log.debug("Error: SoftTimeLimitExceeded")
         if not domain:
             domain = dict(
                 domain=url,

@@ -8,10 +8,10 @@ from celery import shared_task
 from django.conf import settings
 import unbound
 
-from . import SetupUnboundContext
-from .. import batch_shared_task
-from ..scoring import STATUS_MAX, ORDERED_STATUSES
-from ..models import MxStatus
+from checks.tasks import SetupUnboundContext
+from interface import batch_shared_task
+from checks.scoring import STATUS_MAX, ORDERED_STATUSES
+from checks.models import MxStatus
 
 
 MAX_MAILSERVERS = 10

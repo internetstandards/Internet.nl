@@ -13,14 +13,17 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks()
 
+
 @app.task(bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print('Debug Task. Request: {0!r}'.format(self.request))
+    return True
+
 
 if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         'run_batch': {
-                'task': 'checks.batch.scheduler.run',
+                'task': 'interface.batch.scheduler.run',
                 'schedule': app.conf.BATCH_SCHEDULER_INTERVAL
         }
     }
@@ -28,7 +31,7 @@ else:
     # Disable HoF when on batch mode, too much DB activity.
     app.conf.beat_schedule = {
         'generate_HoF': {
-                'task': 'checks.tasks.update.update_hof',
-                'schedule': app.conf.HOF_UPDATE_INTERVAL
+            'task': 'update_HoF_ranking',
+            'schedule': crontab(hour='*', minute='*/10', day_of_week='*'),
         }
     }

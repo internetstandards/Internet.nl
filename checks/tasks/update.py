@@ -5,10 +5,12 @@ from django.db import transaction
 from django.conf import settings
 from django.core.cache import cache
 
-from .. import redis_id
-from ..models import DomainTestReport, MailTestReport
-from ..batch import util
+from interface import redis_id
+from checks.models import DomainTestReport, MailTestReport
+from interface.batch import util
+from internetnl.celery import app
 from celery import shared_task
+
 
 logger = get_task_logger(__name__)
 

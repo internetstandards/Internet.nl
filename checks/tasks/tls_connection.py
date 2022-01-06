@@ -22,8 +22,9 @@ from nassl.ssl_client import ClientCertificateRequested
 
 from django.conf import settings
 from internetnl import celery_app
-from . import unbound
-from ..views.shared import ub_resolve_with_timeout
+from checks.tasks import unbound
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from interface.views.shared import ub_resolve_with_timeout
 
 
 # Use a dedicated logger as this logging can be very verbose
@@ -53,10 +54,6 @@ http.client._MAXHEADERS = 200
 MAX_TRIES = 2
 MAX_REDIRECT_DEPTH = 8
 DEFAULT_TIMEOUT = 10
-
-
-class NoIpError(Exception):
-    pass
 
 
 def sock_connect(
@@ -117,12 +114,6 @@ def sock_connect(
 
 # TODO: factor out TLS test specific functionality (used in tls.py) from basic
 # connectivity (used here by http_fetch and also by tls.py).
-class ConnectionHandshakeException(Exception):
-    pass
-
-
-class ConnectionSocketException(Exception):
-    pass
 
 
 # Almost identical to HTTPConnection::_create_conn()
@@ -358,7 +349,7 @@ class ModernConnection(ConnectionCommon, SslClient):
 
         """
         if not cls.ALL_TLS13_CIPHERS:
-            from .cipher_info import cipher_infos
+            from checks.tasks.cipher_info import cipher_infos
             # There is no 'ALL' or other meta cipher suite names when building
             # a TLS 1.3 cipher suite list for OpenSSL, instead one must
             # construct it using only the colon ':' character to separate TLS

@@ -12,6 +12,47 @@ from django.db import models, transaction, connection
 from django.utils import timezone
 
 
+class ListField(models.TextField):
+    def __init__(self, *args, **kwargs):
+        super(ListField, self).__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection, context="Null"):
+        if value is None:
+            return value
+        return ast.literal_eval(value)
+
+    def to_python(self, value):
+        if not value:
+            value = []
+        if isinstance(value, list):
+            return value
+        if isinstance(value, dict):
+            return value
+        return ast.literal_eval(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+        return str(value)
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self.get_db_prep_value(value)
+
+
+class AutoConfOption(Enum):
+    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
+    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
+
+
+class MxStatus(LabelEnum):
+    has_mx = 0
+    no_mx = 1
+    no_null_mx = 2
+    invalid_null_mx = 3
+    null_mx = 4
+
+
 class DnssecStatus(Enum):
     insecure = 0
     secure = 1
@@ -59,14 +100,6 @@ class CipherOrderStatus(Enum):
     na = 4  # Don't care about order; only GOOD ciphers.
 
 
-class MxStatus(LabelEnum):
-    has_mx = 0
-    no_mx = 1
-    no_null_mx = 2
-    invalid_null_mx = 3
-    null_mx = 4
-
-
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -91,42 +124,11 @@ def batch_request_id():
     raise Exception("Not able to get random id")
 
 
-class ListField(models.TextField):
-    def __init__(self, *args, **kwargs):
-        super(ListField, self).__init__(*args, **kwargs)
-
-    def from_db_value(self, value, expression, connection, context="Null"):
-        if value is None:
-            return value
-        return ast.literal_eval(value)
-
-    def to_python(self, value):
-        if not value:
-            value = []
-        if isinstance(value, list):
-            return value
-        if isinstance(value, dict):
-            return value
-        return ast.literal_eval(value)
-
-    def get_prep_value(self, value):
-        if value is None:
-            return value
-        return str(value)
-
-    def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
-        return self.get_db_prep_value(value)
-
-
 class BaseTestModel(models.Model):
     """
     Base class for the models.
 
     """
-
-    class Meta:
-        abstract = True
 
     def totalscore(self, score_fields):
         if self.score is not None:
@@ -146,6 +148,9 @@ class BaseTestModel(models.Model):
 
     def details_set(self, probe):
         return [("", "", self.details(probe))]
+
+    class Meta:
+        abstract = True
 
 
 ###
@@ -235,6 +240,9 @@ class ConnectionTest(BaseTestModel):
             'score_dnssec_max', 'finished'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class Resolver(models.Model):
     connectiontest = models.ForeignKey(ConnectionTest,on_delete=models.CASCADE)
@@ -247,6 +255,9 @@ class Resolver(models.Model):
     def __dir__(self):
         return ['connectiontest', 'address', 'owner', 'origin_as', 'reverse']
 
+    class Meta:
+        app_label = 'checks'
+
 
 class ASRecord(models.Model):
     number = models.PositiveIntegerField(unique=True)
@@ -254,6 +265,9 @@ class ASRecord(models.Model):
 
     def __dir__(self):
         return ['number', 'description']
+
+    class Meta:
+        app_label = 'checks'
 
 
 ###
@@ -281,6 +295,9 @@ class DomainTestIpv6(BaseTestModel):
             'max_score'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class IPv6TestDomain(models.Model):
     domain = models.CharField(max_length=255)
@@ -306,6 +323,9 @@ class WebDomain(IPv6TestDomain):
             'domaintestipv6',
         ])
 
+    class Meta:
+        app_label = 'checks'
+
 
 class DomainServersModel(models.Model):
     """
@@ -313,9 +333,6 @@ class DomainServersModel(models.Model):
     Use this class to map server results to domain.
 
     """
-    class Meta:
-        abstract = True
-
     domain = models.CharField(max_length=255, default="")
     report = ListField(default="")
     score = models.IntegerField(null=True)
@@ -343,6 +360,9 @@ class DomainServersModel(models.Model):
     def __dir__(self):
         return ['domain', 'report', 'score', 'max_score']
 
+    class Meta:
+        abstract = True
+
 
 class MailTestTls(DomainServersModel):
     mx_status = EnumIntegerField(MxStatus, null=True,default=False)
@@ -358,6 +378,9 @@ class MailTestTls(DomainServersModel):
     def __dir__(self):
         return ['mx_status'] + super(MailTestTls, self).__dir__()
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MailTestDnssec(DomainServersModel):
     mx_status = EnumIntegerField(MxStatus, null=True,default=False)
@@ -371,6 +394,9 @@ class MailTestDnssec(DomainServersModel):
 
     def __dir__(self):
         return ['mx_status'] + super(MailTestDnssec, self).__dir__()
+
+    class Meta:
+        app_label = 'checks'
 
 
 # DNSSEC
@@ -391,6 +417,9 @@ class DomainTestDnssec(BaseTestModel):
             'max_score', 'maildomain'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class WebTestTls(DomainServersModel):
     def totalscore(self, score_fields):
@@ -399,6 +428,9 @@ class WebTestTls(DomainServersModel):
 
     def details_set(self, probe):
         return super(WebTestTls, self).details_set(probe, self.webtestset)
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DomainTestTls(BaseTestModel):
@@ -564,6 +596,9 @@ class DomainTestTls(BaseTestModel):
             'cert_hostmatch_bad': self.cert_hostmatch_bad,
         }
 
+    class Meta:
+        app_label = 'checks'
+
 
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
@@ -574,6 +609,9 @@ class WebTestAppsecpriv(DomainServersModel):
     def details_set(self, probe):
         return super(WebTestAppsecpriv, self).details_set(
             probe, self.webtestset)
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DomainTestAppsecpriv(BaseTestModel):
@@ -633,6 +671,9 @@ class DomainTestAppsecpriv(BaseTestModel):
             #'x_xss_protection_values': self.x_xss_protection_values,
         }
 
+    class Meta:
+        app_label = 'checks'
+
 
 class DomainTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -650,6 +691,8 @@ class DomainTestReport(models.Model):
             'tls', 'appsecpriv',
         ]
 
+    class Meta:
+        app_label = 'checks'
 
 ###
 # Mail test
@@ -672,6 +715,8 @@ class MailTestIpv6(BaseTestModel):
             'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
             'max_score', 'mx_status'
         ]
+    class Meta:
+        app_label = 'checks'
 
 
 class NsDomain(IPv6TestDomain):
@@ -686,6 +731,9 @@ class NsDomain(IPv6TestDomain):
             'mailtestipv6',
         ])
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MxDomain(IPv6TestDomain):
     mailtestipv6 = models.ForeignKey(
@@ -695,6 +743,9 @@ class MxDomain(IPv6TestDomain):
         return super(MxDomain, self).__dir__().extend([
             'mailtestipv6',
         ])
+
+    class Meta:
+        app_label = 'checks'
 
 
 class DmarcPolicyStatus(LabelEnum):
@@ -745,6 +796,9 @@ class MailTestAuth(BaseTestModel):
             'score', 'max_score'
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class MailTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -761,6 +815,9 @@ class MailTestReport(models.Model):
             'timestamp', 'domain', 'registrar', 'score', 'ipv6', 'dnssec',
             'auth', 'tls'
         ]
+
+    class Meta:
+        app_label = 'checks'
 
 
 class BatchUser(models.Model):
@@ -787,6 +844,9 @@ class BatchUser(models.Model):
 
         if delete_self:
             self.delete()
+
+    class Meta:
+        app_label = 'checks'
 
 
 class BatchRequestType(LabelEnum):
@@ -895,6 +955,9 @@ class BatchRequest(models.Model):
         if delete_self:
             self.delete()
 
+    class Meta:
+        app_label = 'checks'
+
 
 class BatchDomainStatus(LabelEnum):
     # Inital statuses (0-9)
@@ -934,6 +997,9 @@ class BatchDomain(models.Model):
             'domain', 'batch_result', 'status', 'status_changed', 'webtest',
             'mailtest'
         ]
+
+    class Meta:
+        app_label = 'checks'
 
 
 class BatchTestStatus(LabelEnum):
@@ -988,6 +1054,9 @@ class BatchWebTest(models.Model):
             'appsecpriv_errors',
         ]
 
+    class Meta:
+        app_label = 'checks'
+
 
 class BatchMailTest(models.Model):
     """
@@ -1020,10 +1089,8 @@ class BatchMailTest(models.Model):
             'auth_errors', 'tls', 'tls_status', 'tls_errors'
         ]
 
-
-class AutoConfOption(Enum):
-    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
-    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
+    class Meta:
+        app_label = 'checks'
 
 
 class AutoConf(models.Model):
@@ -1055,3 +1122,6 @@ class AutoConf(models.Model):
 
     def __dir__(self):
         return ['name', 'value']
+
+    class Meta:
+        app_label = 'checks'

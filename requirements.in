@@ -1,0 +1,52 @@
+# Wheel is not installed by default when using venv for creating Python
+# virtual environments
+wheel
+
+# The current LTS of django is 3.2, see: https://www.djangoproject.com/download/#supported-versions
+# We'll probably wait until 4.2 LTS to be available for the next upgrade.
+Django<4
+
+django-redis==4.12.1
+
+
+amqp==5.0.6
+celery==5.1.2
+kombu==5.1.0
+vine==5.0.0
+
+setuptools-rust
+beautifulsoup4
+cryptography
+django-bleach
+django-csp
+django-enumfields
+django-hosts
+django-markdown_deux
+eventlet
+gevent
+idna
+libsass
+markdown
+polib
+psycopg2-binary==2.9.1
+pyparsing
+pyrabbit2
+pyyaml
+rjsmin
+argparse
+GitPython
+pathlib2
+py
+pytest
+selenium
+chardet
+requests
+hiredis
+
+colorlog
+
+# Webserver used for batch
+gunicorn
+
+# Needed in celery/kombu, but not installed automatically?
+cached-property

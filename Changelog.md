@@ -36,6 +36,13 @@ Settings
 - add DEFAULT_AUTO_FIELD to default config file [(#599)]
 - Added information/guidance for developers about the batch logic/code.
 
+### Development updates
+- Added installation steps to makefile for easier installation of python dependencies.
+- Added more service examples for batch rollout
+- Fixed django-app bootstrapping
+- Added a logger with dictconfig
+- Split checks from the UI (the batch needs to be split still)
+
 
 ## 1.3.2
 
@@ -119,7 +126,7 @@ Bug Fixes
 - ARIA and DSS algorithms not detected. [(#477)]
 
 Dependencies
-- Updated python-pip-requirements.txt:
+- Updated requirements.txt:
   - django-redis pinned to 4.10
   - celery bumped to 4.3.1 (vine dependency)
   - vine pinned to 1.3.0
