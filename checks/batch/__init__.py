@@ -660,14 +660,14 @@ REPORT_METADATA_MAIL_MAP = [
                 'translation_key': 'web-mail rpki ns-valid',
             },
             {
-                'name': 'mx_ns_rpki_exists',
-                'name_on_report': 'mx_ns_rpki_exists',
+                'name': 'mail_mx_ns_rpki_exists',
+                'name_on_report': 'mail_mx_ns_rpki_exists',
                 'type': 'test',
                 'translation_key': 'mail rpki mx-ns-exists',
             },
             {
-                'name': 'mx_ns_rpki_valid',
-                'name_on_report': 'mx_ns_rpki_valid',
+                'name': 'mail_mx_ns_rpki_valid',
+                'name_on_report': 'mail_mx_ns_rpki_valid',
                 'type': 'test',
                 'translation_key': 'mail rpki mx-ns-valid',
             },
