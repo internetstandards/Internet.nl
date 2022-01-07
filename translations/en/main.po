@@ -2769,6 +2769,9 @@ msgstr ""
 msgid "detail web-mail rpki ns-exists verdict good"
 msgstr ""
 
+msgid "detail web-mail rpki ns-exists verdict no-addresses"
+msgstr ""
+
 msgid "detail web-mail rpki ns-valid exp"
 msgstr ""
 

@@ -362,6 +362,10 @@ class NsRpkiExists(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-exists verdict good"
 
+    def result_no_addresses(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web-mail rpki ns-exists verdict no-addresses"
+
     def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
