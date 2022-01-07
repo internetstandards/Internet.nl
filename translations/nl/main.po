@@ -4053,6 +4053,36 @@ msgid "test mailipv6 warning summary"
 msgstr ""
 "*Niet* bereikbaar via modern internetadres, of verbetering mogelijk (IPv6)"
 
+msgid "test mailrpki failed description"
+msgstr ""
+
+msgid "test mailrpki failed summary"
+msgstr ""
+
+msgid "test mailrpki info description"
+msgstr ""
+
+msgid "test mailrpki info summary"
+msgstr ""
+
+msgid "test mailrpki label"
+msgstr ""
+
+msgid "test mailrpki passed description"
+msgstr ""
+
+msgid "test mailrpki passed summary"
+msgstr ""
+
+msgid "test mailrpki title"
+msgstr ""
+
+msgid "test mailrpki warning description"
+msgstr ""
+
+msgid "test mailrpki warning summary"
+msgstr ""
+
 msgid "test mailtls failed description"
 msgstr ""
 "Helaas! Verzendende mailservers die beveiligd e-mailtransport ([STARTTLS en DANE](/faqs/starttls/)) ondersteunen, kunnen met jouw \n"
