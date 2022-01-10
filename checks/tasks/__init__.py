@@ -3,7 +3,6 @@
 import os
 import requests
 import socket
-import threading
 import time
 
 from celery import Task
