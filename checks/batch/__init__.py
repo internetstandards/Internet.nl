@@ -336,13 +336,13 @@ REPORT_METADATA_WEB_MAP = [
                 'translation_key': 'web rpki valid',
             },
             {
-                'name': 'ns_rpki_exists',
+                'name': 'web_ns_rpki_exists',
                 'name_on_report': 'ns_rpki_exists',
                 'type': 'test',
                 'translation_key': 'web-mail rpki ns-exists',
             },
             {
-                'name': 'ns_rpki_valid',
+                'name': 'web_ns_rpki_valid',
                 'name_on_report': 'ns_rpki_valid',
                 'type': 'test',
                 'translation_key': 'web-mail rpki ns-valid',
@@ -648,13 +648,13 @@ REPORT_METADATA_MAIL_MAP = [
                 'translation_key': 'mail rpki valid',
             },
             {
-                'name': 'ns_rpki_exists',
+                'name': 'mail_ns_rpki_exists',
                 'name_on_report': 'ns_rpki_exists',
                 'type': 'test',
                 'translation_key': 'web-mail rpki ns-exists',
             },
             {
-                'name': 'ns_rpki_valid',
+                'name': 'mail_ns_rpki_valid',
                 'name_on_report': 'ns_rpki_valid',
                 'type': 'test',
                 'translation_key': 'web-mail rpki ns-valid',
