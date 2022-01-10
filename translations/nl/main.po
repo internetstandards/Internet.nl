@@ -3736,6 +3736,9 @@ msgstr "Mailserver(s)"
 msgid "results mail rpki mail-servers label"
 msgstr ""
 
+msgid "results mail rpki mx-name-servers label"
+msgstr ""
+
 msgid "results mail tls starttls label"
 msgstr "TLS"
 
