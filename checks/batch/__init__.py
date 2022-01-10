@@ -15,7 +15,9 @@ BATCH_INDEXES = [
     ('checks_mailtestauth', 'domain', 'checks_mailtestauth_domain'),
     ('checks_mailtestdnssec', 'domain', 'checks_mailtestdnssec_domain'),
     ('checks_mailtestipv6', 'domain', 'checks_mailtestipv6_domain'),
+    ('checks_mailtestrpki', 'domain', 'checks_mailtestrpki_domain'),
     ('checks_mailtesttls', 'domain', 'checks_mailtesttls_domain'),
+    ('checks_webtestrpki', 'domain', 'checks_webtestrpki_domain'),
     ('checks_webtesttls', 'domain', 'checks_webtesttls_domain'),
     ('checks_webtestappsecpriv', 'domain', 'checks_webtestappsecpriv_domain'),
 ]
