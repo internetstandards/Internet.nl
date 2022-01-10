@@ -324,29 +324,43 @@ REPORT_METADATA_WEB_MAP = [
         'translation_key': 'siterpki',
         'children': [
             {
-                'name': 'web_rpki_exists',
-                'name_on_report': 'web_rpki_exists',
-                'type': 'test',
-                'translation_key': 'web rpki exists',
+                'name': 'web_rpki',
+                'type': 'section',
+                'translation_key': 'domain rpki web-server',
+                'children': [
+                    {
+                        'name': 'web_rpki_exists',
+                        'name_on_report': 'web_rpki_exists',
+                        'type': 'test',
+                        'translation_key': 'web rpki exists',
+                    },
+                    {
+                        'name': 'web_rpki_valid',
+                        'name_on_report': 'web_rpki_valid',
+                        'type': 'test',
+                        'translation_key': 'web rpki valid',
+                    },
+                ]
             },
             {
-                'name': 'web_rpki_valid',
-                'name_on_report': 'web_rpki_valid',
-                'type': 'test',
-                'translation_key': 'web rpki valid',
-            },
-            {
-                'name': 'web_ns_rpki_exists',
-                'name_on_report': 'ns_rpki_exists',
-                'type': 'test',
-                'translation_key': 'web-mail rpki ns-exists',
-            },
-            {
-                'name': 'web_ns_rpki_valid',
-                'name_on_report': 'ns_rpki_valid',
-                'type': 'test',
-                'translation_key': 'web-mail rpki ns-valid',
-            },
+                'name': 'web_ns_rpki',
+                'type': 'section',
+                'translation_key': 'domain-mail rpki name-servers',
+                'children': [
+                    {
+                        'name': 'web_ns_rpki_exists',
+                        'name_on_report': 'ns_rpki_exists',
+                        'type': 'test',
+                        'translation_key': 'web-mail rpki ns-exists',
+                    },
+                    {
+                        'name': 'web_ns_rpki_valid',
+                        'name_on_report': 'ns_rpki_valid',
+                        'type': 'test',
+                        'translation_key': 'web-mail rpki ns-valid',
+                    },
+                ]
+            }
         ]
     },
 ]
@@ -636,40 +650,61 @@ REPORT_METADATA_MAIL_MAP = [
         'translation_key': 'siterpki',
         'children': [
             {
-                'name': 'mail_rpki_exists',
-                'name_on_report': 'mail_rpki_exists',
-                'type': 'test',
-                'translation_key': 'mail rpki exists',
+                'name': 'mail_rpki',
+                'type': 'section',
+                'translation_key': 'mail rpki mail-servers',
+                'children': [
+                    {
+                        'name': 'mail_rpki_exists',
+                        'name_on_report': 'mail_rpki_exists',
+                        'type': 'test',
+                        'translation_key': 'mail rpki exists',
+                    },
+                    {
+                        'name': 'mail_rpki_valid',
+                        'name_on_report': 'mail_rpki_valid',
+                        'type': 'test',
+                        'translation_key': 'mail rpki valid',
+                    },
+                ]
             },
             {
-                'name': 'mail_rpki_valid',
-                'name_on_report': 'mail_rpki_valid',
-                'type': 'test',
-                'translation_key': 'mail rpki valid',
+                'name': 'mail_ns_rpki',
+                'type': 'section',
+                'translation_key': 'domain-mail rpki name-servers',
+                'children': [
+                    {
+                        'name': 'mail_ns_rpki_exists',
+                        'name_on_report': 'ns_rpki_exists',
+                        'type': 'test',
+                        'translation_key': 'web-mail rpki ns-exists',
+                    },
+                    {
+                        'name': 'mail_ns_rpki_valid',
+                        'name_on_report': 'ns_rpki_valid',
+                        'type': 'test',
+                        'translation_key': 'web-mail rpki ns-valid',
+                    },
+                ]
             },
             {
-                'name': 'mail_ns_rpki_exists',
-                'name_on_report': 'ns_rpki_exists',
-                'type': 'test',
-                'translation_key': 'web-mail rpki ns-exists',
-            },
-            {
-                'name': 'mail_ns_rpki_valid',
-                'name_on_report': 'ns_rpki_valid',
-                'type': 'test',
-                'translation_key': 'web-mail rpki ns-valid',
-            },
-            {
-                'name': 'mail_mx_ns_rpki_exists',
-                'name_on_report': 'mail_mx_ns_rpki_exists',
-                'type': 'test',
-                'translation_key': 'mail rpki mx-ns-exists',
-            },
-            {
-                'name': 'mail_mx_ns_rpki_valid',
-                'name_on_report': 'mail_mx_ns_rpki_valid',
-                'type': 'test',
-                'translation_key': 'mail rpki mx-ns-valid',
+                'name': 'mail_mx_ns_rpki',
+                'type': 'section',
+                'translation_key': 'domain-mail rpki mx-name-servers',
+                'children': [
+                    {
+                        'name': 'mail_mx_ns_rpki_exists',
+                        'name_on_report': 'mail_mx_ns_rpki_exists',
+                        'type': 'test',
+                        'translation_key': 'mail rpki mx-ns-exists',
+                    },
+                    {
+                        'name': 'mail_mx_ns_rpki_valid',
+                        'name_on_report': 'mail_mx_ns_rpki_valid',
+                        'type': 'test',
+                        'translation_key': 'mail rpki mx-ns-valid',
+                    },
+                ]
             },
         ]
     },
