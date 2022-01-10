@@ -196,14 +196,6 @@ def find_result(batch_domain, model):
             result = model.objects.filter(
                 domain=batch_domain.domain,
                 webtestset__timestamp__gte=submit_date).latest('id')
-        elif model is WebTestRpki:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                timestamp__gte=submit_date).latest('id')
-        elif model is MailTestRpki:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                timestamp__gte=submit_date).latest('id')
         elif model is DomainTestDnssec:
             result = model.objects.filter(
                 domain=batch_domain.domain,
