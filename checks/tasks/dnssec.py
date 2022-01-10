@@ -1,28 +1,23 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from collections import OrderedDict
 import socket
+import sys
 import time
+from collections import OrderedDict
 
 import pythonwhois
-import sys
-import unbound
-
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from checks.tasks import SetupUnboundContext
-from checks.tasks import shared
+import unbound
+from checks import categories, scoring
+from checks.models import DnssecStatus, DomainTestDnssec, MailTestDnssec, MxStatus
+from checks.tasks import SetupUnboundContext, shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
-from interface import batch, batch_shared_task
-from checks import scoring, categories
-from interface import redis_id
-from checks.models import DomainTestDnssec, DnssecStatus, MailTestDnssec
-from checks.models import MxStatus
-
+from interface import batch, batch_shared_task, redis_id
 
 UNBOUND_PATCHED_DS_LOG = "internetnl - DS unsupported"
 
@@ -33,6 +28,7 @@ def web_callback(self, results, addr, req_limit_id):
     dtdnssec = save_results_web(addr, results, category)
     # Always calculate scores on saving.
     from checks.probes import web_probe_dnssec
+
     web_probe_dnssec.rated_results_by_model(dtdnssec)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -44,6 +40,7 @@ def batch_web_callback(self, results, addr):
     dtdnssec = save_results_web(addr, results, category)
     # Always calculate scores on saving.
     from checks.probes import batch_web_probe_dnssec
+
     batch_web_probe_dnssec.rated_results_by_model(dtdnssec)
     batch.scheduler.batch_callback_hook(dtdnssec, self.request.id)
 
@@ -54,6 +51,7 @@ def mail_callback(self, results, addr, req_limit_id):
     maildomain = save_results_mail(addr, results, category)
     # Always calculate scores on saving.
     from checks.probes import mail_probe_dnssec
+
     mail_probe_dnssec.rated_results_by_model(maildomain)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -65,16 +63,15 @@ def batch_mail_callback(self, results, addr):
     maildomain = save_results_mail(addr, results, category)
     # Always calculate scores on saving.
     from checks.probes import batch_mail_probe_dnssec
+
     batch_mail_probe_dnssec.rated_results_by_model(maildomain)
     batch.scheduler.batch_callback_hook(maildomain, self.request.id)
 
 
 web_registered = check_registry("dnssec", web_callback)
-mail_registered = check_registry(
-    "mail_dnssec", mail_callback, shared.mail_get_servers)
+mail_registered = check_registry("mail_dnssec", mail_callback, shared.mail_get_servers)
 batch_web_registered = check_registry("batch_dnssec", batch_web_callback)
-batch_mail_registered = check_registry(
-    "batch_mail_dnssec", batch_mail_callback, shared.batch_mail_get_servers)
+batch_mail_registered = check_registry("batch_mail_dnssec", batch_mail_callback, shared.batch_mail_get_servers)
 
 
 @web_registered
@@ -82,7 +79,8 @@ batch_mail_registered = check_registry(
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
 
@@ -92,7 +90,8 @@ def web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
 
@@ -102,7 +101,8 @@ def batch_web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
 
@@ -112,7 +112,8 @@ def mail_is_secure(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
 
@@ -125,10 +126,7 @@ def registrar_lookup(addr):
 
     """
     res = ""
-    if (
-        'pythonwhois' in sys.modules
-        and not settings.ENABLE_BATCH
-    ):
+    if "pythonwhois" in sys.modules and not settings.ENABLE_BATCH:
         cache_id = redis_id.whois.id.format(addr)
         cache_ttl = redis_id.whois.ttl
         cached = cache.get(cache_id)
@@ -137,11 +135,9 @@ def registrar_lookup(addr):
         else:
             try:
                 whois = pythonwhois.get_whois(".".join(addr.split(".")[-2:]))
-                if (whois and isinstance(whois, dict)
-                        and whois.get("registrar")):
+                if whois and isinstance(whois, dict) and whois.get("registrar"):
                     res = ", ".join(whois["registrar"])[:250]
-            except (socket.error, pythonwhois.shared.WhoisException,
-                    UnicodeDecodeError, IndexError):
+            except (socket.error, pythonwhois.shared.WhoisException, UnicodeDecodeError, IndexError):
                 pass
 
             cache.set(cache_id, res, cache_ttl)
@@ -164,13 +160,12 @@ def save_results_mail(addr, results, category):
         category = category.__class__()
         dtdnssec = DomainTestDnssec(domain=domain)
         if i == 0:
-            report, status, score, log = get_domain_results(
-                domain, r, category)
-            mailtdnssec.mx_status = r.get('mx_status')
+            report, status, score, log = get_domain_results(domain, r, category)
+            mailtdnssec.mx_status = r.get("mx_status")
             # We get the domain results here, domain does not belong to a
             # summary report like the MX.
-            domain_report['dnssec_exists'] = report['dnssec_exists']
-            domain_report['dnssec_valid'] = report['dnssec_valid']
+            domain_report["dnssec_exists"] = report["dnssec_exists"]
+            domain_report["dnssec_valid"] = report["dnssec_valid"]
         else:
             report, status, score, log = get_mx_results(r, category)
             subreports[domain] = report
@@ -186,13 +181,13 @@ def save_results_mail(addr, results, category):
 
     # Handle the case where there are no mailservers or NULL MX variants.
     if mailtdnssec.mx_status == MxStatus.no_mx:
-        category.subtests['dnssec_mx_exists'].result_no_mailservers()
+        category.subtests["dnssec_mx_exists"].result_no_mailservers()
     elif mailtdnssec.mx_status == MxStatus.no_null_mx:
-        category.subtests['dnssec_mx_exists'].result_no_null_mx()
+        category.subtests["dnssec_mx_exists"].result_no_null_mx()
     elif mailtdnssec.mx_status == MxStatus.invalid_null_mx:
-        category.subtests['dnssec_mx_exists'].result_invalid_null_mx()
+        category.subtests["dnssec_mx_exists"].result_invalid_null_mx()
     elif mailtdnssec.mx_status == MxStatus.null_mx:
-        category.subtests['dnssec_mx_exists'].result_null_mx()
+        category.subtests["dnssec_mx_exists"].result_null_mx()
 
     mx_report = category.gen_report()
     shared.aggregate_subreports(subreports, mx_report)
@@ -222,60 +217,48 @@ def save_results_web(addr, results, category):
 
 
 def get_domain_results(domain, r, category):
-    status = r.get('status')
-    score = r.get('score')
+    status = r.get("status")
+    score = r.get("score")
     log = ""
     registrar = registrar_lookup(domain)
     if status == DnssecStatus.secure.value:
         status = DnssecStatus.secure
-        category.subtests['dnssec_exists'].result_good(
-            [[domain, registrar]])
+        category.subtests["dnssec_exists"].result_good([[domain, registrar]])
 
-        category.subtests['dnssec_valid'].result_good(
-            [[domain, "detail tech data secure"]])
+        category.subtests["dnssec_valid"].result_good([[domain, "detail tech data secure"]])
 
     elif status == DnssecStatus.insecure.value:
         status = DnssecStatus.insecure
-        log = r.get('log')
+        log = r.get("log")
         unsupported_ds_algo = UNBOUND_PATCHED_DS_LOG in log
         if unsupported_ds_algo:
-            category.subtests['dnssec_exists'].result_good(
-                [[domain, registrar]])
+            category.subtests["dnssec_exists"].result_good([[domain, registrar]])
 
-            category.subtests['dnssec_valid'].result_unsupported_ds_algo(
-                [[domain, "detail tech data insecure"]])
+            category.subtests["dnssec_valid"].result_unsupported_ds_algo([[domain, "detail tech data insecure"]])
         else:
             log = ""  # Don't store the log for simple insecure.
-            category.subtests['dnssec_exists'].result_bad(
-                [[domain, registrar]])
+            category.subtests["dnssec_exists"].result_bad([[domain, registrar]])
 
-            category.subtests['dnssec_valid'].result_insecure(
-                [[domain, "detail tech data insecure"]])
+            category.subtests["dnssec_valid"].result_insecure([[domain, "detail tech data insecure"]])
 
     elif status == DnssecStatus.bogus.value:
         status = DnssecStatus.bogus
-        log = r.get('log')
-        category.subtests['dnssec_exists'].result_good(
-            [[domain, registrar]])
+        log = r.get("log")
+        category.subtests["dnssec_exists"].result_good([[domain, registrar]])
 
-        category.subtests['dnssec_valid'].result_bad(
-            [[domain, "detail tech data bogus"]])
+        category.subtests["dnssec_valid"].result_bad([[domain, "detail tech data bogus"]])
 
     elif status == DnssecStatus.servfail.value:
         status = DnssecStatus.servfail
-        category.subtests['dnssec_exists'].result_servfail(
-            [[domain, registrar]])
+        category.subtests["dnssec_exists"].result_servfail([[domain, registrar]])
 
-        category.subtests['dnssec_valid'].result_servfail(
-            [[domain, "detail tech data not-tested"]])
+        category.subtests["dnssec_valid"].result_servfail([[domain, "detail tech data not-tested"]])
 
     else:
         status = DnssecStatus.dnserror
-        category.subtests['dnssec_exists'].result_resolver_error(
-            [[domain, registrar]])
+        category.subtests["dnssec_exists"].result_resolver_error([[domain, registrar]])
 
-        category.subtests['dnssec_valid'].result_resolver_error(
-            [[domain, "detail tech data not-tested"]])
+        category.subtests["dnssec_valid"].result_resolver_error([[domain, "detail tech data not-tested"]])
 
     report = category.gen_report()
 
@@ -288,34 +271,34 @@ def get_mx_results(results, category):
     log = ""
     if status == DnssecStatus.secure.value:
         status = DnssecStatus.secure
-        category.subtests['dnssec_mx_exists'].result_good()
-        category.subtests['dnssec_mx_valid'].result_good()
+        category.subtests["dnssec_mx_exists"].result_good()
+        category.subtests["dnssec_mx_valid"].result_good()
 
     elif status == DnssecStatus.insecure.value:
         status = DnssecStatus.insecure
-        log = results.get('log')
+        log = results.get("log")
         unsupported_ds_algo = UNBOUND_PATCHED_DS_LOG in log
         if unsupported_ds_algo:
-            category.subtests['dnssec_mx_exists'].result_good()
-            category.subtests['dnssec_mx_valid'].result_unsupported_ds_algo()
+            category.subtests["dnssec_mx_exists"].result_good()
+            category.subtests["dnssec_mx_valid"].result_unsupported_ds_algo()
         else:
             log = ""  # Don't store the log for simple insecure.
-            category.subtests['dnssec_mx_exists'].result_bad()
-            category.subtests['dnssec_mx_valid'].result_insecure()
+            category.subtests["dnssec_mx_exists"].result_bad()
+            category.subtests["dnssec_mx_valid"].result_insecure()
 
     elif status == DnssecStatus.bogus.value:
         status = DnssecStatus.bogus
-        log = results.get('log')
-        category.subtests['dnssec_mx_exists'].result_good()
-        category.subtests['dnssec_mx_valid'].result_bad()
+        log = results.get("log")
+        category.subtests["dnssec_mx_exists"].result_good()
+        category.subtests["dnssec_mx_valid"].result_bad()
 
     elif status == DnssecStatus.servfail.value:
         status = DnssecStatus.servfail
-        category.subtests['dnssec_mx_exists'].result_servfail()
+        category.subtests["dnssec_mx_exists"].result_servfail()
 
     else:
         status = DnssecStatus.dnserror
-        category.subtests['dnssec_mx_exists'].result_resolver_error()
+        category.subtests["dnssec_mx_exists"].result_resolver_error()
 
     report = category.gen_report()
 
@@ -328,46 +311,46 @@ def unbound_callback(data, status, r):
     the callback data.
 
     """
-    data['score'] = data['score_error']
-    data['log'] = ""
+    data["score"] = data["score_error"]
+    data["log"] = ""
     if status == 0:
         log = ""
         if r.rcode == unbound.RCODE_SERVFAIL:
             status = DnssecStatus.servfail.value
-            score = data['score_error']
+            score = data["score_error"]
         elif r.secure:
             status = DnssecStatus.secure.value
-            score = data['score_secure']
+            score = data["score_secure"]
         elif r.bogus:
             status = DnssecStatus.bogus.value
             log = r.why_bogus
-            score = data['score_bogus']
+            score = data["score_bogus"]
         else:
             status = DnssecStatus.insecure.value
             log = r.why_bogus
-            score = data['score_insecure']
-        data['score'] = score
-        data['log'] = log or ""
-        data['status'] = status
-    data['done'] = True
+            score = data["score_insecure"]
+        data["score"] = score
+        data["log"] = log or ""
+        data["status"] = status
+    data["done"] = True
 
 
 def do_web_is_secure(self, url, *args, **kwargs):
     try:
         dnssec_result = dnssec_status(
-            url, self, False,
+            url,
+            self,
+            False,
             score_secure=scoring.WEB_DNSSEC_SECURE,
             score_insecure=scoring.WEB_DNSSEC_INSECURE,
             score_bogus=scoring.WEB_DNSSEC_BOGUS,
-            score_error=scoring.WEB_DNSSEC_ERROR)
+            score_error=scoring.WEB_DNSSEC_ERROR,
+        )
 
     except SoftTimeLimitExceeded:
-        dnssec_result = dict(
-            status=DnssecStatus.dnserror.value,
-            score=scoring.WEB_DNSSEC_ERROR,
-            log="Timed out")
+        dnssec_result = dict(status=DnssecStatus.dnserror.value, score=scoring.WEB_DNSSEC_ERROR, log="Timed out")
 
-    return ('is_secure', {url: dnssec_result})
+    return ("is_secure", {url: dnssec_result})
 
 
 def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
@@ -382,11 +365,14 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
         for domain, _, mx_status in mailservers:
             if domain != "":
                 res[domain] = dnssec_status(
-                    domain, self, mx_status,
+                    domain,
+                    self,
+                    mx_status,
                     score_secure=scoring.MAIL_DNSSEC_SECURE,
                     score_insecure=scoring.MAIL_DNSSEC_INSECURE,
                     score_bogus=scoring.MAIL_DNSSEC_BOGUS,
-                    score_error=scoring.MAIL_DNSSEC_ERROR)
+                    score_error=scoring.MAIL_DNSSEC_ERROR,
+                )
 
     except SoftTimeLimitExceeded:
         for domain, _, mx_status in mailservers:
@@ -395,26 +381,31 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
                     status=DnssecStatus.dnserror.value,
                     score=scoring.MAIL_DNSSEC_ERROR,
                     log="Timed out",
-                    mx_status=mx_status)
+                    mx_status=mx_status,
+                )
 
-    return ('is_secure', res)
+    return ("is_secure", res)
 
 
-def dnssec_status(
-        domain, ub_task, mx_status, score_secure, score_insecure,
-        score_bogus, score_error):
+def dnssec_status(domain, ub_task, mx_status, score_secure, score_insecure, score_bogus, score_error):
     """
     Check the DNSSEC status of the domain.
 
     """
     try:
         cb_data = dict(
-            done=False, status=None, log="", score=score_error,
-            score_secure=score_secure, score_insecure=score_insecure,
-            score_bogus=score_bogus, score_error=score_error)
+            done=False,
+            status=None,
+            log="",
+            score=score_error,
+            score_secure=score_secure,
+            score_insecure=score_insecure,
+            score_bogus=score_bogus,
+            score_error=score_error,
+        )
         retval, async_id = ub_task.ub_ctx.resolve_async(
-            domain, cb_data, unbound_callback, unbound.RR_TYPE_SOA,
-            unbound.RR_CLASS_IN)
+            domain, cb_data, unbound_callback, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN
+        )
         status = DnssecStatus.dnserror.value
         if retval == 0:
             while not cb_data["done"]:
@@ -430,8 +421,4 @@ def dnssec_status(
             ub_task.ub_ctx.cancel(async_id)
         raise e
 
-    return dict(
-        status=status,
-        score=cb_data["score"],
-        log=cb_data["log"],
-        mx_status=mx_status)
+    return dict(status=status, score=cb_data["score"], log=cb_data["log"], mx_status=mx_status)

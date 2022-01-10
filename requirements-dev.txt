@@ -15,6 +15,12 @@ attrs==21.2.0
     #   outcome
     #   pytest
     #   trio
+autoflake==1.4
+    # via -r requirements-dev.in
+autopep8==1.6.0
+    # via -r requirements-dev.in
+black==21.12b0
+    # via -r requirements-dev.in
 certifi==2021.10.8
     # via
     #   -c requirements.txt
@@ -28,6 +34,10 @@ charset-normalizer==2.0.7
     # via
     #   -c requirements.txt
     #   requests
+click==7.1.2
+    # via
+    #   -c requirements.txt
+    #   black
 coverage[toml]==6.2
     # via
     #   -r requirements-dev.in
@@ -55,8 +65,12 @@ iniconfig==1.1.1
     # via
     #   -c requirements.txt
     #   pytest
+isort==5.10.1
+    # via -r requirements-dev.in
 mccabe==0.6.1
     # via pylama
+mypy-extensions==0.4.3
+    # via black
 outcome==1.1.0
     # via
     #   -c requirements.txt
@@ -65,6 +79,10 @@ packaging==21.2
     # via
     #   -c requirements.txt
     #   pytest
+pathspec==0.9.0
+    # via black
+platformdirs==2.4.1
+    # via black
 pluggy==1.0.0
     # via
     #   -c requirements.txt
@@ -74,7 +92,9 @@ py==1.11.0
     #   -c requirements.txt
     #   pytest
 pycodestyle==2.8.0
-    # via pylama
+    # via
+    #   autopep8
+    #   pylama
 pycparser==2.21
     # via
     #   -c requirements.txt
@@ -82,7 +102,9 @@ pycparser==2.21
 pydocstyle==6.1.1
     # via pylama
 pyflakes==2.4.0
-    # via pylama
+    # via
+    #   autoflake
+    #   pylama
 pylama==8.2.1
     # via -r requirements-dev.in
 pyopenssl==21.0.0
@@ -169,9 +191,12 @@ tenacity==6.3.1
 toml==0.10.2
     # via
     #   -c requirements.txt
+    #   autopep8
     #   pytest
 tomli==1.2.2
-    # via coverage
+    # via
+    #   black
+    #   coverage
 trio==0.19.0
     # via
     #   -c requirements.txt
@@ -181,6 +206,10 @@ trio-websocket==0.9.2
     # via
     #   -c requirements.txt
     #   selenium
+typing-extensions==4.0.0
+    # via
+    #   -c requirements.txt
+    #   black
 urllib3[secure]==1.26.7
     # via
     #   -c requirements.txt

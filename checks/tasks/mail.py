@@ -1,27 +1,23 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import idna
 import time
+from urllib.parse import urlparse
 
+import idna
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
-from urllib.parse import urlparse
+
 import unbound
-
+from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY, categories, scoring
+from checks.models import DmarcPolicyStatus, MailTestAuth, SpfPolicyStatus
 from checks.tasks import SetupUnboundContext
-from checks.tasks.tls_connection import http_get
-
-
-from checks.tasks.dispatcher import post_callback_hook, check_registry
+from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
-from checks import scoring, categories, DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, \
-    SPF_NON_SENDING_POLICY
-from interface import redis_id
-from interface import batch, batch_shared_task
-from checks.models import MailTestAuth, SpfPolicyStatus, DmarcPolicyStatus
+from checks.tasks.tls_connection import http_get
+from interface import batch, batch_shared_task, redis_id
 
 
 @shared_task(bind=True)
@@ -30,6 +26,7 @@ def mail_callback(self, results, addr, req_limit_id):
     mtauth = callback(results, addr, category)
     # Always calculate scores on saving.
     from checks.probes import mail_probe_auth
+
     mail_probe_auth.rated_results_by_model(mtauth)
     post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -41,6 +38,7 @@ def batch_mail_callback(self, results, addr):
     mtauth = callback(results, addr, category)
     # Always calculate scores on saving.
     from checks.probes import batch_mail_probe_auth
+
     batch_mail_probe_auth.rated_results_by_model(mtauth)
     batch.scheduler.batch_callback_hook(mtauth, self.request.id)
 
@@ -54,7 +52,8 @@ batch_mail_registered = check_registry("batch_mail_auth", batch_mail_callback)
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def dmarc(self, url, *args, **kwargs):
     return do_dmarc(self, url, *args, **kwargs)
 
@@ -64,7 +63,8 @@ def dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_dmarc(self, url, *args, **kwargs):
     return do_dmarc(self, url, *args, **kwargs)
 
@@ -74,7 +74,8 @@ def batch_dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def dkim(self, url, *args, **kwargs):
     return do_dkim(self, url, *args, **kwargs)
 
@@ -84,7 +85,8 @@ def dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_dkim(self, url, *args, **kwargs):
     return do_dkim(self, url, *args, **kwargs)
 
@@ -94,7 +96,8 @@ def batch_dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def spf(self, url, *args, **kwargs):
     return do_spf(self, url, *args, **kwargs)
 
@@ -104,7 +107,8 @@ def spf(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_spf(self, url, *args, **kwargs):
     return do_spf(self, url, *args, **kwargs)
 
@@ -115,16 +119,18 @@ def skip_dkim_for_non_sending_domain(mtauth):
     sending domain and skip the DKIM results.
     """
     is_org = mtauth.dmarc_record_org_domain
-    if (not mtauth.dkim_available
-            and mtauth.dmarc_available
-            and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
-            and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
-                    mtauth.dmarc_record[0]))
-                 or (not is_org and DMARC_NON_SENDING_POLICY.match(
-                     mtauth.dmarc_record[0])))
-            and mtauth.spf_available
-            and mtauth.spf_policy_status == SpfPolicyStatus.valid
-            and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])):
+    if (
+        not mtauth.dkim_available
+        and mtauth.dmarc_available
+        and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
+        and (
+            (is_org and DMARC_NON_SENDING_POLICY_ORG.match(mtauth.dmarc_record[0]))
+            or (not is_org and DMARC_NON_SENDING_POLICY.match(mtauth.dmarc_record[0]))
+        )
+        and mtauth.spf_available
+        and mtauth.spf_policy_status == SpfPolicyStatus.valid
+        and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])
+    ):
         return True
     return False
 
@@ -133,16 +139,16 @@ def callback(results, addr, category):
     subtests = category.subtests
     mtauth = MailTestAuth(domain=addr)
     for testname, result in results:
-        if testname == 'dkim':
+        if testname == "dkim":
             dkim_available = result.get("available")
             mtauth.dkim_available = dkim_available
             mtauth.dkim_score = result.get("score")
             if dkim_available:
-                subtests['dkim'].result_good()
+                subtests["dkim"].result_good()
             else:
-                subtests['dkim'].result_bad()
+                subtests["dkim"].result_bad()
 
-        elif testname == 'dmarc':
+        elif testname == "dmarc":
             dmarc_available = result.get("available")
             dmarc_record = result.get("record")
             dmarc_score = result.get("score")
@@ -160,22 +166,22 @@ def callback(results, addr, category):
             tech_data = [[r, dmarc_domain] for r in dmarc_record]
 
             if dmarc_available:
-                subtests['dmarc'].result_good(tech_data)
+                subtests["dmarc"].result_good(tech_data)
 
                 if dmarc_policy_status == DmarcPolicyStatus.valid:
-                    subtests['dmarc_policy'].result_good()
+                    subtests["dmarc_policy"].result_good()
                 elif dmarc_policy_status == DmarcPolicyStatus.invalid_external:
-                    subtests['dmarc_policy'].result_invalid_external(tech_data)
+                    subtests["dmarc_policy"].result_invalid_external(tech_data)
                 else:
                     if dmarc_policy_status == DmarcPolicyStatus.invalid_syntax:
-                        subtests['dmarc_policy'].result_bad_syntax(tech_data)
+                        subtests["dmarc_policy"].result_bad_syntax(tech_data)
                     elif dmarc_policy_status == DmarcPolicyStatus.invalid_p_sp:
-                        subtests['dmarc_policy'].result_bad_policy(tech_data)
+                        subtests["dmarc_policy"].result_bad_policy(tech_data)
 
             else:
-                subtests['dmarc'].result_bad(tech_data)
+                subtests["dmarc"].result_bad(tech_data)
 
-        elif testname == 'spf':
+        elif testname == "spf":
             spf_available = result.get("available")
             spf_record = result.get("record")
             spf_score = result.get("score")
@@ -189,36 +195,31 @@ def callback(results, addr, category):
             mtauth.spf_policy_score = spf_policy_score
             mtauth.spf_policy_records = spf_policy_records
             if spf_available:
-                subtests['spf'].result_good(spf_record)
+                subtests["spf"].result_good(spf_record)
 
                 if spf_policy_status == SpfPolicyStatus.valid:
-                    subtests['spf_policy'].result_good()
+                    subtests["spf_policy"].result_good()
                 else:
                     # Show the records in the encountered ordered.
                     # Erronoeous record last.
                     spf_records = spf_policy_records[::-1]
                     if spf_policy_status == SpfPolicyStatus.invalid_syntax:
-                        subtests['spf_policy'].result_bad_syntax(
-                            spf_records)
+                        subtests["spf_policy"].result_bad_syntax(spf_records)
                     elif spf_policy_status == SpfPolicyStatus.max_dns_lookups:
-                        subtests['spf_policy'].result_bad_max_lookups(
-                            spf_records)
+                        subtests["spf_policy"].result_bad_max_lookups(spf_records)
                     elif spf_policy_status == SpfPolicyStatus.invalid_all:
-                        subtests['spf_policy'].result_bad_policy(
-                            spf_records)
+                        subtests["spf_policy"].result_bad_policy(spf_records)
                     elif spf_policy_status == SpfPolicyStatus.invalid_include:
-                        subtests['spf_policy'].result_bad_include(
-                            spf_records)
+                        subtests["spf_policy"].result_bad_include(spf_records)
                     elif spf_policy_status == SpfPolicyStatus.invalid_redirect:
-                        subtests['spf_policy'].result_bad_redirect(
-                            spf_records)
+                        subtests["spf_policy"].result_bad_redirect(spf_records)
 
             else:
-                subtests['spf'].result_bad(spf_record)
+                subtests["spf"].result_bad(spf_record)
 
-    if (skip_dkim_for_non_sending_domain(mtauth)):
+    if skip_dkim_for_non_sending_domain(mtauth):
         mtauth.dkim_score = scoring.MAIL_AUTH_DKIM_PASS
-        subtests['dkim'].result_no_email()
+        subtests["dkim"].result_no_email()
 
     mtauth.report = category.gen_report()
     mtauth.save()
@@ -256,16 +257,11 @@ def dkim_callback(data, status, r):
 
 def do_dkim(self, url, *args, **kwargs):
     try:
-        cb_data = self.async_resolv(
-            "_domainkey.{}".format(url), unbound.RR_TYPE_TXT, dkim_callback)
-        result = dict(
-            available="available" in cb_data and cb_data["available"],
-            score=cb_data["score"])
+        cb_data = self.async_resolv("_domainkey.{}".format(url), unbound.RR_TYPE_TXT, dkim_callback)
+        result = dict(available="available" in cb_data and cb_data["available"], score=cb_data["score"])
 
     except SoftTimeLimitExceeded:
-        result = dict(
-            available=False,
-            score=scoring.MAIL_AUTH_DKIM_FAIL)
+        result = dict(available=False, score=scoring.MAIL_AUTH_DKIM_FAIL)
 
     return ("dkim", result)
 
@@ -292,8 +288,7 @@ def spf_callback(data, status, r):
                     else:
                         available = True
                         score = scoring.MAIL_AUTH_SPF_PASS
-        elif (r.rcode == unbound.RCODE_NXDOMAIN
-                or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0)):
+        elif r.rcode == unbound.RCODE_NXDOMAIN or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0):
             # we know for sure there is no SPF record
             score = scoring.MAIL_AUTH_SPF_FAIL
         else:
@@ -307,23 +302,21 @@ def spf_callback(data, status, r):
 
 
 def resolve_spf_record(url, task):
-    return task.async_resolv(
-        url, unbound.RR_TYPE_TXT, callback=spf_callback)
+    return task.async_resolv(url, unbound.RR_TYPE_TXT, callback=spf_callback)
 
 
 def do_spf(self, url, *args, **kwargs):
     try:
         cb_data = resolve_spf_record(url, self)
-        available = 'available' in cb_data and cb_data['available']
-        score = cb_data['score']
-        record = cb_data['record']
+        available = "available" in cb_data and cb_data["available"]
+        score = cb_data["score"]
+        record = cb_data["record"]
         policy_status = None
         policy_score = scoring.MAIL_AUTH_SPF_POLICY_FAIL
         policy_records = []
 
         if len(record) == 1:
-            policy_status, policy_score, _ = spf_check_policy(
-                url, record[0], self, policy_records=policy_records)
+            policy_status, policy_score, _ = spf_check_policy(url, record[0], self, policy_records=policy_records)
 
         result = dict(
             available=available,
@@ -331,7 +324,8 @@ def do_spf(self, url, *args, **kwargs):
             record=record,
             policy_status=policy_status,
             policy_score=policy_score,
-            policy_records=policy_records)
+            policy_records=policy_records,
+        )
 
     except SoftTimeLimitExceeded:
         result = dict(
@@ -340,14 +334,15 @@ def do_spf(self, url, *args, **kwargs):
             record=[],
             policy_status=None,
             policy_score=scoring.MAIL_AUTH_SPF_POLICY_FAIL,
-            policy_records=[])
+            policy_records=[],
+        )
 
     return ("spf", result)
 
 
 def spf_check_include_redirect(
-        domain, term, task, policy_records, max_lookups, assignment_operator,
-        bad_status, is_include=False):
+    domain, term, task, policy_records, max_lookups, assignment_operator, bad_status, is_include=False
+):
     """
     Check the 'include' and 'redirect' terms.
 
@@ -367,12 +362,12 @@ def spf_check_include_redirect(
     if status == SpfPolicyStatus.valid:
         url = term.split(assignment_operator)[1].strip()
         # Don't expand macros.
-        if '{' in url:
+        if "{" in url:
             return status, score, left_lookups
 
     if status == SpfPolicyStatus.valid:
         cb_data = resolve_spf_record(url, task)
-        new_spf = cb_data['record']
+        new_spf = cb_data["record"]
         left_lookups -= 1
         if not new_spf:
             status = bad_status
@@ -387,11 +382,10 @@ def spf_check_include_redirect(
     if status == SpfPolicyStatus.valid:
         new_spf = new_spf[0]
         status, score, left_lookups = spf_check_policy(
-            url, new_spf, task, policy_records=policy_records,
-            max_lookups=left_lookups, is_include=is_include)
+            url, new_spf, task, policy_records=policy_records, max_lookups=left_lookups, is_include=is_include
+        )
 
-    if (status != SpfPolicyStatus.valid
-            and status != SpfPolicyStatus.max_dns_lookups):
+    if status != SpfPolicyStatus.valid and status != SpfPolicyStatus.max_dns_lookups:
         status = bad_status
 
     return status, score, left_lookups
@@ -399,19 +393,17 @@ def spf_check_include_redirect(
 
 def spf_check_redirect(domain, term, task, policy_records, max_lookups):
     return spf_check_include_redirect(
-        domain, term, task, policy_records, max_lookups, '=',
-        SpfPolicyStatus.invalid_redirect)
+        domain, term, task, policy_records, max_lookups, "=", SpfPolicyStatus.invalid_redirect
+    )
 
 
 def spf_check_include(domain, term, task, policy_records, max_lookups):
     return spf_check_include_redirect(
-        domain, term, task, policy_records, max_lookups, ':',
-        SpfPolicyStatus.invalid_include, is_include=True)
+        domain, term, task, policy_records, max_lookups, ":", SpfPolicyStatus.invalid_include, is_include=True
+    )
 
 
-def spf_check_policy(
-        domain, spf_record, task, policy_records, max_lookups=10,
-        is_include=False):
+def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, is_include=False):
     """
     Check the SPF policy for syntax and efficiency.
 
@@ -427,7 +419,7 @@ def spf_check_policy(
         status = SpfPolicyStatus.invalid_syntax
         score = scoring.MAIL_AUTH_SPF_POLICY_FAIL
 
-    elif not parsed.get('terms'):
+    elif not parsed.get("terms"):
         # Defaults to '?all'.
         status = SpfPolicyStatus.invalid_all
         score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
@@ -436,25 +428,24 @@ def spf_check_policy(
         terms = []
         redirect_terms = []
         all_found = False
-        for term in (t.lower() for t in parsed['terms']):
-            if term.startswith('redirect'):
+        for term in (t.lower() for t in parsed["terms"]):
+            if term.startswith("redirect"):
                 redirect_terms.append(term)
-            elif 'include:' in term:
+            elif "include:" in term:
                 terms.append(term)
-            elif 'mx' in term:
+            elif "mx" in term:
                 left_lookups -= 1
-            elif 'ptr' in term:
+            elif "ptr" in term:
                 left_lookups -= 1
-            elif 'exists' in term:
+            elif "exists" in term:
                 left_lookups -= 1
-            elif 'a' == term:
+            elif "a" == term:
                 left_lookups -= 1
-            elif term.endswith('all') and len(term) < 5:
+            elif term.endswith("all") and len(term) < 5:
                 all_found = True
 
                 # Check 'all'
-                if (term.startswith(('+', 'a'))
-                        or (not is_include and term.startswith('?'))):
+                if term.startswith(("+", "a")) or (not is_include and term.startswith("?")):
                     status = SpfPolicyStatus.invalid_all
                     score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
                 break
@@ -476,14 +467,12 @@ def spf_check_policy(
                     break
 
                 if "redirect=" in term and not all_found:
-                    status, score, left_lookups = spf_check_redirect(
-                        domain, term, task, policy_records, left_lookups)
+                    status, score, left_lookups = spf_check_redirect(domain, term, task, policy_records, left_lookups)
                     # Only one redirect is followed
                     break
 
                 elif "include:" in term:
-                    status, score, left_lookups = spf_check_include(
-                        domain, term, task, policy_records, left_lookups)
+                    status, score, left_lookups = spf_check_include(domain, term, task, policy_records, left_lookups)
 
     if status != SpfPolicyStatus.valid:
         policy_records.append((domain, spf_record))
@@ -520,8 +509,7 @@ def dmarc_callback(data, status, r):
             if not record:
                 score = scoring.MAIL_AUTH_DMARC_FAIL
                 continue_looking = True
-        elif (r.rcode == unbound.RCODE_NXDOMAIN
-                or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0)):
+        elif r.rcode == unbound.RCODE_NXDOMAIN or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0):
             # we know for sure there is no DMARC policy
             score = scoring.MAIL_AUTH_DMARC_FAIL
             continue_looking = True
@@ -546,15 +534,13 @@ def do_dmarc(self, url, *args, **kwargs):
             # Raise SoftTimeLimitExceeded to easily fail the test.
             raise SoftTimeLimitExceeded
 
-        cb_data = self.async_resolv(
-            "_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
+        cb_data = self.async_resolv("_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
         if cb_data.get("cont"):
             url = dmarc_find_organizational_domain(url, public_suffix_list)
-            cb_data = self.async_resolv(
-                "_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
+            cb_data = self.async_resolv("_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
             is_org_domain = True
 
-        available = 'available' in cb_data and cb_data['available']
+        available = "available" in cb_data and cb_data["available"]
         score = cb_data["score"]
         record = cb_data["record"]
         policy_status = None
@@ -562,9 +548,7 @@ def do_dmarc(self, url, *args, **kwargs):
         org_domain = is_org_domain and url or None
 
         if len(record) == 1:
-            policy_status, policy_score = dmarc_check_policy(
-                record[0], url, self, is_org_domain,
-                public_suffix_list)
+            policy_status, policy_score = dmarc_check_policy(record[0], url, self, is_org_domain, public_suffix_list)
 
         result = dict(
             available=available,
@@ -572,7 +556,8 @@ def do_dmarc(self, url, *args, **kwargs):
             record=record,
             policy_status=policy_status,
             policy_score=policy_score,
-            org_domain=org_domain)
+            org_domain=org_domain,
+        )
 
     except SoftTimeLimitExceeded:
         result = dict(
@@ -581,14 +566,13 @@ def do_dmarc(self, url, *args, **kwargs):
             record=[],
             policy_status=None,
             policy_score=scoring.MAIL_AUTH_DMARC_POLICY_FAIL,
-            org_domain=None)
+            org_domain=None,
+        )
 
     return ("dmarc", result)
 
 
-def dmarc_check_policy(
-        dmarc_record, domain, task, is_org_domain,
-        public_suffix_list):
+def dmarc_check_policy(dmarc_record, domain, task, is_org_domain, public_suffix_list):
     """
     Check the DMARC record for syntax and efficiency.
 
@@ -597,19 +581,16 @@ def dmarc_check_policy(
     external destinations.
 
     """
-    domain = domain.lower().rstrip('.')
+    domain = domain.lower().rstrip(".")
     parsed = dmarc_parse(dmarc_record)
-    status, score = dmarc_verify_sufficient_policy(
-        parsed, is_org_domain, public_suffix_list)
+    status, score = dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list)
 
-    if status == DmarcPolicyStatus.valid and parsed.get('directives'):
-        status, score = dmarc_verify_external_destinations(
-            domain, parsed, task, public_suffix_list)
+    if status == DmarcPolicyStatus.valid and parsed.get("directives"):
+        status, score = dmarc_verify_external_destinations(domain, parsed, task, public_suffix_list)
     return (status, score)
 
 
-def dmarc_verify_sufficient_policy(
-        parsed, is_org_domain, public_suffix_list):
+def dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list):
     """
     Verify that the s=(sp=) policy is not 'none'.
 
@@ -622,29 +603,28 @@ def dmarc_verify_sufficient_policy(
 
     request = None
     if status == DmarcPolicyStatus.valid:
-        if not parsed.get('directives'):
+        if not parsed.get("directives"):
             status = DmarcPolicyStatus.invalid_p_sp
             score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
         else:
             if is_org_domain:
-                if (not parsed['directives'].get('srequest')
-                        and not parsed['directives'].get('request')):
+                if not parsed["directives"].get("srequest") and not parsed["directives"].get("request"):
                     status = DmarcPolicyStatus.invalid_p_sp
                     score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
                 else:
-                    if parsed['directives'].get('srequest'):
-                        request = parsed['directives']['srequest']
-                    elif parsed['directives'].get('request'):
-                        request = parsed['directives']['request']
+                    if parsed["directives"].get("srequest"):
+                        request = parsed["directives"]["srequest"]
+                    elif parsed["directives"].get("request"):
+                        request = parsed["directives"]["request"]
             else:
-                if not parsed['directives'].get('request'):
+                if not parsed["directives"].get("request"):
                     status = DmarcPolicyStatus.invalid_p_sp
                     score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
                 else:
-                    request = parsed['directives']['request']
+                    request = parsed["directives"]["request"]
 
             if request is not None:
-                value = request.split('=')[1]
+                value = request.split("=")[1]
                 if value.lower() == "none":
                     status = DmarcPolicyStatus.invalid_p_sp
                     score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
@@ -656,22 +636,21 @@ def _dmarc_get_ru_host(parsed):
     Generator for returning the host for rua and ruf directives.
 
     """
-    for directive in ('auri', 'furi'):
-        if parsed['directives'].get(directive):
-            value = parsed['directives'][directive].split('=')[1]
-            uris = value.split(',')
+    for directive in ("auri", "furi"):
+        if parsed["directives"].get(directive):
+            value = parsed["directives"][directive].split("=")[1]
+            uris = value.split(",")
             for uri in uris:
                 uri = urlparse(uri)
-                if uri.netloc == '' and uri.path:
+                if uri.netloc == "" and uri.path:
                     host = uri.path
-                    if '@' in host:
-                        host = host.split('@', 1)[1].split('!', 1)[0]
-                    host = host.strip().lower().rstrip('.')
+                    if "@" in host:
+                        host = host.split("@", 1)[1].split("!", 1)[0]
+                    host = host.strip().lower().rstrip(".")
                     yield host
 
 
-def dmarc_verify_external_destinations(
-        domain, parsed, task, public_suffix_list):
+def dmarc_verify_external_destinations(domain, parsed, task, public_suffix_list):
     """
     Verify external destinations as per section 7.1 (RFC7489).
 
@@ -749,9 +728,9 @@ def dmarc_find_organizational_domain(domain, public_suffix_list):
 
     if matching_rule:
         if matching_exception:
-            organizational_domain = ".".join(labels[:len(matching_rule)][::-1])
+            organizational_domain = ".".join(labels[: len(matching_rule)][::-1])
         elif len(labels) > len(matching_rule):
-            organizational_domain = ".".join(labels[:matching_count+1][::-1])
+            organizational_domain = ".".join(labels[: matching_count + 1][::-1])
     # Default matching rule is "*"
     elif len(labels) > 1:
         organizational_domain = ".".join(labels[:2][::-1])
@@ -782,11 +761,11 @@ def dmarc_fetch_public_suffix_list():
             # Convert to punnycode.
             # This is how we are going to compare domain names later.
             try:
-                for label in line.split('.'):
-                    if label == '*':
+                for label in line.split("."):
+                    if label == "*":
                         labels.append(label)
                     else:
-                        labels.append(idna.encode(label).decode('ascii'))
+                        labels.append(idna.encode(label).decode("ascii"))
                 public_suffix_list.append((labels[::-1], exception))
             except (UnicodeError, ValueError, idna.IDNAError):
                 pass
@@ -820,15 +799,11 @@ def dmarc_get_public_suffix_list():
         break
 
     if not is_loading:
-        status = cache.add(
-            public_suffix_list_loading_id, True,
-            timeout=public_suffix_list_loading_ttl)
+        status = cache.add(public_suffix_list_loading_id, True, timeout=public_suffix_list_loading_ttl)
         if status:
             public_suffix_list = dmarc_fetch_public_suffix_list()
             if public_suffix_list:
-                cache.set(
-                    public_suffix_list_id, public_suffix_list,
-                    timeout=public_suffix_list_ttl)
+                cache.set(public_suffix_list_id, public_suffix_list, timeout=public_suffix_list_ttl)
                 cache.delete(public_suffix_list_loading_id)
         else:
             # Lost the race; call this again to wait for the list.

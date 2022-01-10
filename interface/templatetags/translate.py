@@ -1,18 +1,26 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
-import idna as IDNA
 
+import idna as IDNA
 from django import template
 from django.conf import settings
 from django.template import Template
 from django.utils.translation import ugettext as _
 
-from checks.scoring import STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED
-from checks.scoring import STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL
-from checks.scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
+from checks.scoring import (
+    STATUS_ERROR,
+    STATUS_FAIL,
+    STATUS_GOOD_NOT_TESTED,
+    STATUS_INFO,
+    STATUS_NOT_TESTED,
+    STATUS_NOTICE,
+    STATUS_SUCCESS,
+    STATUSES_HTML_CSS_TEXT_MAP,
+)
 
 register = template.Library()
+
 
 @register.simple_tag(takes_context=True)
 def translate(context, longname):
@@ -29,7 +37,7 @@ def expand(context, pattern):
 @register.simple_tag(takes_context=True)
 def lookup(context, pattern):
     contenttemplate = Template(pattern)
-    return _(contenttemplate.render(context)+" .index").split()
+    return _(contenttemplate.render(context) + " .index").split()
 
 
 @register.filter()
@@ -63,7 +71,7 @@ def maxlength(adjustment, *args):
     return max([len(s) for s in args]) + adjustment
 
 
-@register.inclusion_tag('details-table.html')
+@register.inclusion_tag("details-table.html")
 def render_details_table(headers, arguments):
     """
     Figure out the table's header and content and render them based on the
@@ -71,7 +79,7 @@ def render_details_table(headers, arguments):
 
     """
     headers = _(headers)
-    headers = headers.split('|')
+    headers = headers.split("|")
 
     table_length = len(headers)
     final_rows = []
@@ -96,21 +104,21 @@ def render_details_table(headers, arguments):
                 if cell_deque:
                     value = cell_deque.popleft()
                     if not value:
-                        value = _('results empty-argument-alt-text')
+                        value = _("results empty-argument-alt-text")
                     elif value in [
-                            'detail tech data yes',
-                            'detail tech data no',
-                            'detail tech data secure',
-                            'detail tech data insecure',
-                            'detail tech data bogus',
-                            'detail tech data not-applicable',
-                            'detail tech data not-tested',
-                            'detail tech data not-testable',
-                            'detail tech data not-reachable',
-                            'detail tech data phase-out',
-                            'detail tech data sufficient',
-                            'detail tech data insufficient'
-                            ]:
+                        "detail tech data yes",
+                        "detail tech data no",
+                        "detail tech data secure",
+                        "detail tech data insecure",
+                        "detail tech data bogus",
+                        "detail tech data not-applicable",
+                        "detail tech data not-tested",
+                        "detail tech data not-testable",
+                        "detail tech data not-reachable",
+                        "detail tech data phase-out",
+                        "detail tech data sufficient",
+                        "detail tech data insufficient",
+                    ]:
                         value = _(value)
                     row.append(value)
                 else:
@@ -119,12 +127,12 @@ def render_details_table(headers, arguments):
                         # ellipses for the further rows to indicate that data
                         # refers to the afforementioned hostname in previous
                         # rows.
-                        row.append('...')
+                        row.append("...")
                     else:
                         # All other data get a dash.
-                        row.append('-')
+                        row.append("-")
 
-            max_columns = max(max_columns, column+1)
+            max_columns = max(max_columns, column + 1)
             final_rows.append(row)
 
     # Skip headers when the content is not that long.
@@ -132,9 +140,7 @@ def render_details_table(headers, arguments):
     # when there is no data to apply a security level to.
     headers = headers[:max_columns]
 
-    return {
-        'details_table_headers': headers,
-        'details_table_rows': final_rows}
+    return {"details_table_headers": headers, "details_table_rows": final_rows}
 
 
 @register.filter()
@@ -148,10 +154,16 @@ def get_type(value):
 
 @register.filter()
 def get_testitem_div_class_and_text_status(testitem):
-    status = testitem['status']
+    status = testitem["status"]
     if status not in (
-            STATUS_SUCCESS, STATUS_NOTICE, STATUS_GOOD_NOT_TESTED,
-            STATUS_NOT_TESTED, STATUS_INFO, STATUS_FAIL, STATUS_ERROR):
+        STATUS_SUCCESS,
+        STATUS_NOTICE,
+        STATUS_GOOD_NOT_TESTED,
+        STATUS_NOT_TESTED,
+        STATUS_INFO,
+        STATUS_FAIL,
+        STATUS_ERROR,
+    ):
         status = STATUS_FAIL
     div_class = STATUSES_HTML_CSS_TEXT_MAP[status]
     text_status = _(f"results no-icon-status {div_class}")

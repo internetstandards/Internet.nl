@@ -2,10 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC, abstractmethod
 
-from checks.models import DomainTestReport, MailTestReport, ZeroRttStatus
-from checks.models import BatchRequestType, DmarcPolicyStatus, SpfPolicyStatus
-from checks.categories import MailTlsStarttlsExists
 from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY
+from checks.categories import MailTlsStarttlsExists
+from checks.models import (
+    BatchRequestType,
+    DmarcPolicyStatus,
+    DomainTestReport,
+    MailTestReport,
+    SpfPolicyStatus,
+    ZeroRttStatus,
+)
 
 
 def _create_custom_results_map(instances):
@@ -21,6 +27,7 @@ class CustomResult(ABC):
     Abstract class for custom results.
 
     """
+
     @abstractmethod
     def get_data(self, report_table):
         """
@@ -33,7 +40,6 @@ class CustomResult(ABC):
         can navigate away to individual test tables from there.
 
         """
-        pass
 
     @abstractmethod
     def related_db_tables(self, batch_request_type):
@@ -49,7 +55,6 @@ class CustomResult(ABC):
         batchdomain__<webtest/mailtest>__report__<testtable>__<relative_name>
 
         """
-        pass
 
     @property
     @abstractmethod
@@ -59,7 +64,6 @@ class CustomResult(ABC):
         API spec and output.
 
         """
-        pass
 
     @property
     @abstractmethod
@@ -69,7 +73,6 @@ class CustomResult(ABC):
         required or not.
 
         """
-        pass
 
     @property
     @abstractmethod
@@ -78,7 +81,6 @@ class CustomResult(ABC):
         Should return a dict with the desired OPENAPI specification.
 
         """
-        pass
 
 
 class MailNonSendingDomain(CustomResult):
@@ -86,6 +88,7 @@ class MailNonSendingDomain(CustomResult):
     Checks if the domain seems configured for no outgoing email.
 
     """
+
     @property
     def name(self):
         return "mail_non_sending_domain"
@@ -97,8 +100,8 @@ class MailNonSendingDomain(CustomResult):
     @property
     def openapi_spec(self):
         return {
-            'type': 'boolean',
-            'description': """_[Only for mailtests]_
+            "type": "boolean",
+            "description": """_[Only for mailtests]_
 
 Checks if the domain is configured for *not* sending email. For this test this
 is translated as:
@@ -122,15 +125,17 @@ is translated as:
             return False
         is_org = mtauth.dmarc_record_org_domain
 
-        if (mtauth.dmarc_available
-                and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
-                and ((is_org and DMARC_NON_SENDING_POLICY_ORG.match(
-                        mtauth.dmarc_record[0]))
-                     or (not is_org and DMARC_NON_SENDING_POLICY.match(
-                         mtauth.dmarc_record[0])))
-                and mtauth.spf_available
-                and mtauth.spf_policy_status == SpfPolicyStatus.valid
-                and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])):
+        if (
+            mtauth.dmarc_available
+            and mtauth.dmarc_policy_status == DmarcPolicyStatus.valid
+            and (
+                (is_org and DMARC_NON_SENDING_POLICY_ORG.match(mtauth.dmarc_record[0]))
+                or (not is_org and DMARC_NON_SENDING_POLICY.match(mtauth.dmarc_record[0]))
+            )
+            and mtauth.spf_available
+            and mtauth.spf_policy_status == SpfPolicyStatus.valid
+            and SPF_NON_SENDING_POLICY.match(mtauth.spf_record[0])
+        ):
             return True
         return False
 
@@ -140,6 +145,7 @@ class MailServersTestableStatus(CustomResult):
     Checks if all mail servers could be tested.
 
     """
+
     @property
     def name(self):
         return "mail_servers_testable_status"
@@ -151,10 +157,9 @@ class MailServersTestableStatus(CustomResult):
     @property
     def openapi_spec(self):
         return {
-            'type': 'string',
-            'enum': ['no_mx', 'unreachable', 'untestable', 'ok'],
-
-            'description': """_[Only for mailtests; relates to the STARTTLS
+            "type": "string",
+            "enum": ["no_mx", "unreachable", "untestable", "ok"],
+            "description": """_[Only for mailtests; relates to the STARTTLS
 category]_
 
 This result gives a clearer insight on the STARTTLS testability status:
@@ -186,15 +191,15 @@ This result gives a clearer insight on the STARTTLS testability status:
         report = report_table.tls.report
         test_instance = MailTlsStarttlsExists()
         test_instance.result_no_mailservers()
-        if report[test_instance.name]['verdict'] == test_instance.verdict:
-            return 'no_mx'
+        if report[test_instance.name]["verdict"] == test_instance.verdict:
+            return "no_mx"
         test_instance.result_could_not_test()
-        if report[test_instance.name]['verdict'] == test_instance.verdict:
-            return 'untestable'
+        if report[test_instance.name]["verdict"] == test_instance.verdict:
+            return "untestable"
         test_instance.result_unreachable()
-        if report[test_instance.name]['verdict'] == test_instance.verdict:
-            return 'unreachable'
-        return 'ok'
+        if report[test_instance.name]["verdict"] == test_instance.verdict:
+            return "unreachable"
+        return "ok"
 
 
 class Tls13Support(CustomResult):
@@ -202,6 +207,7 @@ class Tls13Support(CustomResult):
     Checks TLS1.3 support through the 0-RTT test.
 
     """
+
     @property
     def name(self):
         return "tls_1_3_support"
@@ -213,9 +219,9 @@ class Tls13Support(CustomResult):
     @property
     def openapi_spec(self):
         return {
-            'type': 'string',
-            'enum': ['yes', 'no', 'undetermined'],
-            'description': """Derives TLS1.3 support through the 0-RTT test.
+            "type": "string",
+            "enum": ["yes", "no", "undetermined"],
+            "description": """Derives TLS1.3 support through the 0-RTT test.
 Explicitly testing for TLS1.3 support is not part of the compliance tool.
 However, TLS1.3 support could be derived from the 0-RTT test as the function
 is only available starting from TLS1.3. As there is no explicit TLS1.3
@@ -232,37 +238,37 @@ given the opportunity to do so.
     def related_db_tables(self, batch_request_type):
         related = set()
         if batch_request_type is BatchRequestType.web:
-            related.add('tls__webtestset')
+            related.add("tls__webtestset")
         else:
-            related.add('tls__testset')
+            related.add("tls__testset")
         return related
 
     def get_data(self, report_table):
-        status = 'yes'
-        testset = 'testset'
+        status = "yes"
+        testset = "testset"
         if isinstance(report_table, DomainTestReport):
-            testset = 'webtestset'
+            testset = "webtestset"
         try:
             servers = getattr(report_table.tls, testset).all()
         except AttributeError:
             # if tls tests are not run, there is no webtestset inside of reporttable.tls as .tls is None:
-            return 'no'
+            return "no"
 
         if not servers:
-            status = 'no'
+            status = "no"
         for dttls in servers:
-            if (dttls.could_not_test_smtp_starttls
-                    or not dttls.server_reachable):
-                status = 'undetermined'
+            if dttls.could_not_test_smtp_starttls or not dttls.server_reachable:
+                status = "undetermined"
                 break
-            if (not dttls.tls_enabled
-                    or dttls.zero_rtt == ZeroRttStatus.na):
-                status = 'no'
+            if not dttls.tls_enabled or dttls.zero_rtt == ZeroRttStatus.na:
+                status = "no"
         return status
 
 
-CUSTOM_RESULTS_MAP = _create_custom_results_map([
-    MailNonSendingDomain(),
-    MailServersTestableStatus(),
-    Tls13Support(),
-])
+CUSTOM_RESULTS_MAP = _create_custom_results_map(
+    [
+        MailNonSendingDomain(),
+        MailServersTestableStatus(),
+        Tls13Support(),
+    ]
+)

@@ -5,23 +5,16 @@ import re
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.utils import translation
 from django.utils.translation import ugettext as _
 
 from interface import redis_id, simple_cache_page
-from interface.views.shared import get_hof_champions, get_hof_web, get_hof_mail
-from interface.views.shared import update_base_stats, get_hof_manual
+from interface.views.shared import get_hof_champions, get_hof_mail, get_hof_manual, get_hof_web, update_base_stats
 
 
-def page404(request,exception):
-    return render(
-        request, '404.html',
-        dict(
-            pageclass="error404",
-            pagetitle=_("page404 title"),
-            pagemenu="home"
-        ))
+def page404(request, exception):
+    return render(request, "404.html", dict(pageclass="error404", pagetitle=_("page404 title"), pagemenu="home"))
 
 
 @simple_cache_page
@@ -37,14 +30,13 @@ def indexpage(request):
     statsmailgood = cache.get(cache_id.format("statsmailgood"), novalue)
     statsmailbad = cache.get(cache_id.format("statsmailbad"), novalue)
     statsconnection = cache.get(cache_id.format("statsconnection"), novalue)
-    statsconnectiongood = cache.get(
-        cache_id.format("statsconnectiongood"), novalue)
-    statsconnectionbad = cache.get(
-        cache_id.format("statsconnectionbad"), novalue)
+    statsconnectiongood = cache.get(cache_id.format("statsconnectiongood"), novalue)
+    statsconnectionbad = cache.get(cache_id.format("statsconnectionbad"), novalue)
     update_base_stats()
     hof_date, hof_count, hof_entries = get_hof_champions(10)
     return render(
-        request, 'index.html',
+        request,
+        "index.html",
         dict(
             pageclass="home",
             pagemenu="home",
@@ -61,100 +53,67 @@ def indexpage(request):
             statsmailgood=statsmailgood,
             statsmailbad=statsmailbad,
             latest=hof_date,
-            articles=articles
-        ))
+            articles=articles,
+        ),
+    )
 
 
 # URL: /clear/<dname>
 def clear(request, dname):
     url = dname.lower()
     if url in settings.CACHE_RESET_WHITELIST:
-        for test in [
-                "mail_auth", "dnssec", "web_ipv6", "mail_ipv6",
-                "web_tls", "web_appsecpriv"]:
+        for test in ["mail_auth", "dnssec", "web_ipv6", "mail_ipv6", "web_tls", "web_appsecpriv"]:
             cache.delete(redis_id.dom_task.id.format(url, test))
         return HttpResponse("ok")
     return HttpResponse("nope")
 
 
 def testconnectionpage(request):
-    return render(
-        request, 'test-connection.html',
-        dict(pagemenu="faqs", pagetitle=_("base test connection title")))
+    return render(request, "test-connection.html", dict(pagemenu="faqs", pagetitle=_("base test connection title")))
 
 
 def testsitepage(request):
-    return render(
-        request, 'test-site.html',
-        dict(pagemenu="faqs", pagetitle=_("base test website title")))
+    return render(request, "test-site.html", dict(pagemenu="faqs", pagetitle=_("base test website title")))
 
 
 def testmailpage(request):
-    return render(
-        request, 'test-mail.html',
-        dict(pagemenu="faqs", pagetitle=_("base test mail title")))
+    return render(request, "test-mail.html", dict(pagemenu="faqs", pagetitle=_("base test mail title")))
 
 
 def disclosurepage(request):
-    return render(
-        request, 'disclosure.html',
-        dict(pagemenu="home", pagetitle=_("base disclosure")))
+    return render(request, "disclosure.html", dict(pagemenu="home", pagetitle=_("base disclosure")))
 
 
 def copyrightpage(request):
-    return render(
-        request, 'copyright.html',
-        dict(pagemenu="home", pagetitle=_("base copyright")))
+    return render(request, "copyright.html", dict(pagemenu="home", pagetitle=_("base copyright")))
 
 
 def privacypage(request):
-    return render(
-        request, 'privacy.html',
-        dict(pagemenu="home", pagetitle=_("base privacy")))
+    return render(request, "privacy.html", dict(pagemenu="home", pagetitle=_("base privacy")))
 
 
 def aboutpage(request):
-    return render(
-        request, 'about.html',
-        dict(pagemenu="about", pageclass="contact", pagetitle=_("base about")))
+    return render(request, "about.html", dict(pagemenu="about", pageclass="contact", pagetitle=_("base about")))
 
 
 def widgetsitepage(request):
-    return render(
-        request, 'widget-site.html', dict(
-            pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget site")))
+    return render(request, "widget-site.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget site")))
 
 
 def widgetmailpage(request):
-    return render(
-        request, 'widget-mail.html', dict(
-            pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget mail")))
+    return render(request, "widget-mail.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget mail")))
 
 
 def faqindexpage(request):
-    return render(
-        request, 'faqindex.html',
-        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base faqs")))
+    return render(request, "faqindex.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base faqs")))
 
 
 def faqreport(request):
-    return render(
-        request, 'faq-report.html',
-        dict(
-            pagemenu="faqs",
-            pageclass="faqs",
-            pagetitle=_("faqs report title")
-        ))
+    return render(request, "faq-report.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("faqs report title")))
 
 
 def faqbadges(request):
-    return render(
-        request, 'faq-badges.html',
-        dict(
-            pagemenu="faqs",
-            pageclass="faqs",
-            pagetitle=_("faqs badges title")
-        ))
+    return render(request, "faq-badges.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("faqs badges title")))
 
 
 def faqarticlepage(request, subject):
@@ -165,42 +124,36 @@ def faqarticlepage(request, subject):
 
     content = "faqs " + subject + " content"
     return render(
-        request, 'faqarticle.html',
-        dict(
-            pagemenu="faqs",
-            pageclass="faqs",
-            pagetitle=_(title),
-            title=title,
-            content=content
-        ))
+        request,
+        "faqarticle.html",
+        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_(title), title=title, content=content),
+    )
 
 
 def accessibility(request):
-    return render(
-        request, 'accessibility.html',
-        dict(pagemenu="home", pagetitle=_("base accessibility")))
+    return render(request, "accessibility.html", dict(pagemenu="home", pagetitle=_("base accessibility")))
 
 
 def blogindexpage(request):
-    return redirect('/articles/')
+    return redirect("/articles/")
 
 
 def blogarticlepage(request, author, article):
-    return redirect('/article/'+article)
+    return redirect("/article/" + article)
 
 
 def newsindexpage(request):
-    return redirect('/article/')
+    return redirect("/article/")
 
 
 def newsarticlepage(request, article):
-    return redirect('/article/'+article)
+    return redirect("/article/" + article)
 
 
 def articlespage(request):
     articles = _("article .index").split()
     article = articles[0]
-    return redirect('/article/'+article)
+    return redirect("/article/" + article)
 
 
 def articleindexpage(request):
@@ -208,13 +161,10 @@ def articleindexpage(request):
     if len(articles) < 1:
         articles = []
     return render(
-        request, 'articles.html',
-        dict(
-            pageclass="newsitem",
-            pagetitle=_("base news"),
-            pagemenu="news",
-            articles=articles
-        ))
+        request,
+        "articles.html",
+        dict(pageclass="newsitem", pagetitle=_("base news"), pagemenu="news", articles=articles),
+    )
 
 
 def articlepage(request, article):
@@ -232,7 +182,8 @@ def articlepage(request, article):
     if author == "article " + article + " author":
         author = ""
     return render(
-        request, 'article.html',
+        request,
+        "article.html",
         dict(
             pageclass="newsitem",
             pagetitle=_(title),
@@ -243,21 +194,35 @@ def articlepage(request, article):
             title=title,
             lead=lead,
             author=author,
-            body=body
-        ))
+            body=body,
+        ),
+    )
 
 
 def _update_hof_with_manual(template_dict, current=None):
-    if hasattr(settings, 'MANUAL_HOF') and settings.MANUAL_HOF:
-        template_dict.update(dict(
-            manuals=[
-                (k, f"manual halloffame {'translate_key' in v and v['translate_key'] or k} menu")
-                for k, v in settings.MANUAL_HOF.items()]))
+    # todo: inverse if statements to reduce indents.
+    if hasattr(settings, "MANUAL_HOF") and settings.MANUAL_HOF:
+        template_dict.update(
+            dict(
+                manuals=[
+                    (k, f"manual halloffame {'translate_key' in v and v['translate_key'] or k} menu")
+                    for k, v in settings.MANUAL_HOF.items()
+                ]
+            )
+        )
         if current:
-            if 'icon_file' in settings.MANUAL_HOF[current]:
-                template_dict.update(dict(
-                    manual_icon=f"{settings.MANUAL_HOF[current]['icon_file']}",
-                    manual_icon_alt=f"manual halloffame {'translate_key' in settings.MANUAL_HOF[current] and settings.MANUAL_HOF[current]['translate_key'] or current} badge"))
+            if "icon_file" in settings.MANUAL_HOF[current]:
+                icon_type = (
+                    "translate_key" in settings.MANUAL_HOF[current]
+                    and settings.MANUAL_HOF[current]["translate_key"]
+                    or current
+                )
+                template_dict.update(
+                    dict(
+                        manual_icon=f"{settings.MANUAL_HOF[current]['icon_file']}",
+                        manual_icon_alt=f"manual halloffame {icon_type} badge",
+                    )
+                )
 
 
 @simple_cache_page
@@ -273,9 +238,10 @@ def hofchampionspage(request):
         hof_subtitle="halloffame champions subtitle",
         latest=hof_date,
         count=hof_count,
-        halloffame=hof_entries)
+        halloffame=hof_entries,
+    )
     _update_hof_with_manual(template_dict)
-    return render(request, 'halloffame.html', template_dict)
+    return render(request, "halloffame.html", template_dict)
 
 
 @simple_cache_page
@@ -291,9 +257,10 @@ def hofwebpage(request):
         hof_subtitle="halloffame web subtitle",
         latest=hof_date,
         count=hof_count,
-        halloffame=hof_entries)
+        halloffame=hof_entries,
+    )
     _update_hof_with_manual(template_dict)
-    return render(request, 'halloffame.html', template_dict)
+    return render(request, "halloffame.html", template_dict)
 
 
 @simple_cache_page
@@ -309,21 +276,20 @@ def hofmailpage(request):
         hof_subtitle="halloffame mail subtitle",
         latest=hof_date,
         count=hof_count,
-        halloffame=hof_entries)
+        halloffame=hof_entries,
+    )
     _update_hof_with_manual(template_dict)
-    return render(request, 'halloffame.html', template_dict)
+    return render(request, "halloffame.html", template_dict)
 
 
 @simple_cache_page
 def hofmanualpage(request, manual_url):
     translate_key = (
-        ('translate_key' in settings.MANUAL_HOF[manual_url]
-            and settings.MANUAL_HOF[manual_url]['translate_key'])
-        or manual_url)
+        "translate_key" in settings.MANUAL_HOF[manual_url] and settings.MANUAL_HOF[manual_url]["translate_key"]
+    ) or manual_url
     template_file = (
-        ('template_file' in settings.MANUAL_HOF[manual_url]
-            and settings.MANUAL_HOF[manual_url]['template_file'])
-        or 'halloffame.html')
+        "template_file" in settings.MANUAL_HOF[manual_url] and settings.MANUAL_HOF[manual_url]["template_file"]
+    ) or "halloffame.html"
     hof_count, hof_entries = get_hof_manual(manual_url)
     template_dict = dict(
         pageclass="hall-of-fame",
@@ -334,7 +300,8 @@ def hofmanualpage(request, manual_url):
         hof_text=f"manual halloffame {translate_key} text",
         hof_subtitle=f"manual halloffame {translate_key} subtitle",
         count=hof_count,
-        halloffame=hof_entries)
+        halloffame=hof_entries,
+    )
     _update_hof_with_manual(template_dict, current=manual_url)
     return render(request, template_file, template_dict)
 
@@ -345,9 +312,9 @@ def change_language(request):
     The user will be redirected to the same page he was before.
 
     """
-    if request.method == 'POST':
-        hostname = request.get_host().split(':')[0]
-        previous_page = request.POST.get('previous-page', '/')
+    if request.method == "POST":
+        hostname = request.get_host().split(":")[0]
+        previous_page = request.POST.get("previous-page", "/")
 
         # The News category may have articles available only for certain
         # languages, so we redirect to the News index instead.
@@ -355,40 +322,37 @@ def change_language(request):
         #      of the urls.py definition.
         news_url = re.match(r"^/news/.*$", previous_page)
         if news_url:
-            previous_page = '/news/'
+            previous_page = "/news/"
         news_url = re.match(r"^/blogs/.*$", previous_page)
         if news_url:
-            previous_page = '/blogs/'
+            previous_page = "/blogs/"
         news_url = re.match(r"^/blogarticle/.*$", previous_page)
         if news_url:
-            previous_page = '/blogarticle/'
+            previous_page = "/blogarticle/"
         news_url = re.match(r"^/article/.*$", previous_page)
         if news_url:
-            previous_page = '/article/'
+            previous_page = "/article/"
 
-        new_language = request.POST.get('language')
+        new_language = request.POST.get("language")
         if new_language and translation.check_for_language(new_language):
             url_regex = re.compile("^(?P<protocol>http[s]?://).*$")
             uri = request.build_absolute_uri()
-            protocol = url_regex.match(uri).group('protocol')
+            protocol = url_regex.match(uri).group("protocol")
 
             # If the previous language is in the host remove it.
             # Also if the hostname starts with 'www.' (may appear in the
             # default language site) remove it so that the language prefix gets
             # applied to the domain name.
-            previous_language = hostname.split('.', 1)[0]
-            if (translation.check_for_language(previous_language) or
-                    previous_language == 'www'):
-                no_language_host = request.get_host().replace(
-                        previous_language + '.', '', 1)
+            previous_language = hostname.split(".", 1)[0]
+            if translation.check_for_language(previous_language) or previous_language == "www":
+                no_language_host = request.get_host().replace(previous_language + ".", "", 1)
             else:
                 no_language_host = request.get_host()
 
-            language_prefix = new_language + '.'
-            response = HttpResponseRedirect(protocol + language_prefix +
-                                            no_language_host + previous_page)
+            language_prefix = new_language + "."
+            response = HttpResponseRedirect(protocol + language_prefix + no_language_host + previous_page)
         else:
             response = HttpResponseRedirect(previous_page)
 
         return response
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect("/")

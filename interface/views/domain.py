@@ -1,24 +1,35 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import re
 import json
+import re
 
 from django.core.cache import cache
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from interface import simple_cache_page, redis_id
-from checks.models import DomainTestIpv6, DomainTestDnssec
-from checks.models import WebTestTls, DomainTestReport, WebTestAppsecpriv
-from checks.models import AutoConfOption
+from checks.models import (
+    AutoConfOption,
+    DomainTestDnssec,
+    DomainTestIpv6,
+    DomainTestReport,
+    WebTestAppsecpriv,
+    WebTestTls,
+)
 from checks.probes import webprobes
-from interface.views.shared import redirect_invalid_domain
-from interface.views.shared import proberesults, add_registrar_to_report
-from interface.views.shared import add_score_to_report, process, probestatuses
-from interface.views.shared import get_valid_domain_web, get_valid_domain_mail
-from interface.views.shared import get_retest_time, pretty_domain_name
-
+from interface import redis_id, simple_cache_page
+from interface.views.shared import (
+    add_registrar_to_report,
+    add_score_to_report,
+    get_retest_time,
+    get_valid_domain_mail,
+    get_valid_domain_web,
+    pretty_domain_name,
+    proberesults,
+    probestatuses,
+    process,
+    redirect_invalid_domain,
+)
 
 # Entrance after form submission.
 # URL: /(site|domain)/
@@ -27,12 +38,12 @@ from internetnl import log
 
 def index(request, *args):
     try:
-        url = request.POST.get('url', '').strip()
-        if url.endswith('/'):
+        url = request.POST.get("url", "").strip()
+        if url.endswith("/"):
             url = url[:-1]
         return validate_domain(request, url)
     except KeyError:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
 
 
 # Request to /site/<domain> without matching domain regex
@@ -42,23 +53,15 @@ def validate_domain(request, dname):
     if valid_domain is None:
         return redirect_invalid_domain(request, "domain")
 
-    return HttpResponseRedirect('/site/{}/'.format(valid_domain))
+    return HttpResponseRedirect("/site/{}/".format(valid_domain))
 
 
 def siteprocess(request, dname):
-    return process(
-        request, dname, 'domain.html', webprobes,
-        "test-in-progress", "domain pagetitle")
+    return process(request, dname, "domain.html", webprobes, "test-in-progress", "domain pagetitle")
 
 
 def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None):
-    report = DomainTestReport(
-        domain=domain,
-        ipv6=ipv6,
-        dnssec=dnssec,
-        tls=tls,
-        appsecpriv=appsecpriv
-    )
+    report = DomainTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, tls=tls, appsecpriv=appsecpriv)
     report.save()
     return report
 
@@ -97,15 +100,14 @@ def resultsrender(addr, report, request):
     webtest_direct, mailtest_direct = get_direct_domains(addr)
     prettyaddr = pretty_domain_name(addr)
     return render(
-        request, 'domain-results.html',
+        request,
+        "domain-results.html",
         dict(
             pageclass="websitetest",
-            pagetitle="{} {}".format(
-                _("domain pagetitle"), prettyaddr),
+            pagetitle="{} {}".format(_("domain pagetitle"), prettyaddr),
             addr=addr,
             prettyaddr=prettyaddr,
-            permalink=request.build_absolute_uri(
-                "/site/{}/{}/".format(addr, str(report.id))),
+            permalink=request.build_absolute_uri("/site/{}/{}/".format(addr, str(report.id))),
             permadate=report.timestamp,
             retest_time=retest_time,
             retest_link=request.build_absolute_uri("/site/{}/".format(addr)),
@@ -114,8 +116,9 @@ def resultsrender(addr, report, request):
             probes=probe_reports,
             score=report.score,
             report=report,
-            registrar=report.registrar
-        ))
+            registrar=report.registrar,
+        ),
+    )
 
 
 # URL: /(site|domain)/<dname>/results/
@@ -123,13 +126,10 @@ def resultscurrent(request, dname):
     addr = dname.lower()
     # Get latest test results
     try:
-        ipv6 = DomainTestIpv6.objects.filter(domain=addr).order_by('-id')[0]
-        dnssec = (
-            DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None)
-            .order_by('-id')[0])
-        tls = WebTestTls.objects.filter(domain=addr).order_by('-id')[0]
-        appsecpriv = (
-            WebTestAppsecpriv.objects.filter(domain=addr).order_by('-id')[0])
+        ipv6 = DomainTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
+        dnssec = DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None).order_by("-id")[0]
+        tls = WebTestTls.objects.filter(domain=addr).order_by("-id")[0]
+        appsecpriv = WebTestAppsecpriv.objects.filter(domain=addr).order_by("-id")[0]
     except IndexError:
         # Domain not tested, go back to start test
         return HttpResponseRedirect("/site/{}/".format(addr))
@@ -137,10 +137,13 @@ def resultscurrent(request, dname):
     # Do we already have a testreport for the latest results (needed
     # for persisent url-thingy)?
     try:
-        report = ipv6.domaintestreport_set.order_by('-id')[0]
-        if (not report.id == dnssec.domaintestreport_set.order_by('-id')[0].id
-                == tls.domaintestreport_set.order_by('-id')[0].id
-                == appsecpriv.domaintestreport_set.order_by('-id')[0].id):
+        report = ipv6.domaintestreport_set.order_by("-id")[0]
+        if (
+            not report.id
+            == dnssec.domaintestreport_set.order_by("-id")[0].id
+            == tls.domaintestreport_set.order_by("-id")[0].id
+            == appsecpriv.domaintestreport_set.order_by("-id")[0].id
+        ):
             report = create_report(addr, ipv6, dnssec, tls, appsecpriv)
     except IndexError:
         # one of the test results is not yet related to a report,
@@ -169,9 +172,9 @@ def resultsstored(request, dname, id):
         if report.domain == dname:
             return resultsrender(report.domain, report, request)
         else:
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect("/")
     except DomainTestReport.DoesNotExist:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
 
 
 # URL: /(site|domain)/(ipv6|dnssec|tls|appsecpriv)/<dname>/

@@ -4,32 +4,25 @@ import ipaddress
 import logging
 import socket
 import time
-
-
 from cgi import parse_header
 from collections import namedtuple
 from enum import Enum
 from io import BytesIO
 from urllib.parse import urlparse
 
-
+from django.conf import settings
 from nassl import _nassl
 from nassl.legacy_ssl_client import LegacySslClient
-from nassl.ssl_client import SslClient
-from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum
-from nassl.ssl_client import ClientCertificateRequested
+from nassl.ssl_client import ClientCertificateRequested, OpenSslVerifyEnum, OpenSslVersionEnum, SslClient
 
-
-from django.conf import settings
-from internetnl import celery_app
 from checks.tasks import unbound
 from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from interface.views.shared import ub_resolve_with_timeout
-
+from internetnl import celery_app
 
 # Use a dedicated logger as this logging can be very verbose
 logger = logging.getLogger(__name__)
-sslConnectLogger = logging.getLogger('internetnl.ssl.connect')
+sslConnectLogger = logging.getLogger("internetnl.ssl.connect")
 
 
 SSLV23 = OpenSslVersionEnum.SSLV23
@@ -56,8 +49,7 @@ MAX_REDIRECT_DEPTH = 8
 DEFAULT_TIMEOUT = 10
 
 
-def sock_connect(
-        host, ip, port, ipv6=False, task=None, timeout=DEFAULT_TIMEOUT):
+def sock_connect(host, ip, port, ipv6=False, task=None, timeout=DEFAULT_TIMEOUT):
     """
     Connect to the specified host or IP address on the specified port.
 
@@ -88,13 +80,11 @@ def sock_connect(
         if task:
             ips = task.resolve(host, rr_type)
         else:
-            cb_data = ub_resolve_with_timeout(
-                host, rr_type, unbound.RR_CLASS_IN, timeout)
+            cb_data = ub_resolve_with_timeout(host, rr_type, unbound.RR_CLASS_IN, timeout)
             af = socket.AF_INET6 if ipv6 else socket.AF_INET
             ips = [socket.inet_ntop(af, rr) for rr in cb_data["data"].data]
         if not ips:
-            raise NoIpError(
-                f"Unable to resolve {rr_type} record for host '{host}'")
+            raise NoIpError(f"Unable to resolve {rr_type} record for host '{host}'")
 
     # Return the connection details for the first IP address that we can
     # successfully connect to.
@@ -125,8 +115,7 @@ def plain_sock_setup(conn):
         try:
             conn.sock_connect()
             break
-        except (socket.gaierror, socket.error, IOError,
-                ConnectionRefusedError):
+        except (socket.gaierror, socket.error, IOError, ConnectionRefusedError):
             conn.safe_shutdown()
             tries_left -= 1
             if tries_left <= 0:
@@ -162,6 +151,7 @@ class ConnectionCommon:
       state (e.g. for SMTP STARTTLS).
 
     """
+
     def __enter__(self):
         return self
 
@@ -170,38 +160,35 @@ class ConnectionCommon:
 
     def __init__(self, **kwargs):
         self.sock = None
-        self.server_name = kwargs.get('server_name')
-        self.ip_address = kwargs.get('ip_address')
-        self.port = kwargs.get('port')
-        self.must_shutdown = kwargs.get('shutdown', False)
-        self.ipv6 = kwargs.get('ipv6', False)
-        self.options = kwargs.get('options')
-        self.send_SNI = kwargs.get('send_SNI', True)
-        self.signature_algorithms = kwargs.get('signature_algorithms', None)
-        self.tries = kwargs.get('tries', MAX_TRIES)
-        self.timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
-        self.task = kwargs.get('task', celery_app.current_worker_task)
-        self.sock_setup = kwargs.get('sock_setup', plain_sock_setup)
-        self.do_handshake_on_connect = kwargs.get(
-            'do_handshake_on_connect', True)
-        self.cipher_list_action = kwargs.get(
-            'cipher_list_action', CipherListAction.REPLACE)
+        self.server_name = kwargs.get("server_name")
+        self.ip_address = kwargs.get("ip_address")
+        self.port = kwargs.get("port")
+        self.must_shutdown = kwargs.get("shutdown", False)
+        self.ipv6 = kwargs.get("ipv6", False)
+        self.options = kwargs.get("options")
+        self.send_SNI = kwargs.get("send_SNI", True)
+        self.signature_algorithms = kwargs.get("signature_algorithms", None)
+        self.tries = kwargs.get("tries", MAX_TRIES)
+        self.timeout = kwargs.get("timeout", DEFAULT_TIMEOUT)
+        self.task = kwargs.get("task", celery_app.current_worker_task)
+        self.sock_setup = kwargs.get("sock_setup", plain_sock_setup)
+        self.do_handshake_on_connect = kwargs.get("do_handshake_on_connect", True)
+        self.cipher_list_action = kwargs.get("cipher_list_action", CipherListAction.REPLACE)
 
         # Catch non-sensical parameter combinations and values:
         if not self.server_name:
             if self.send_SNI:
-                raise ValueError('SNI requires a server name.')
+                raise ValueError("SNI requires a server name.")
             if not self.ip_address:
-                raise ValueError(
-                    'Either a server name or IP address is required')
+                raise ValueError("Either a server name or IP address is required")
         elif self.ip_address:
             # Can raise ValueError if the string is not a valid IP address
             ip_obj = ipaddress.ip_address(self.ip_address)
             ip_obj_is_v6 = isinstance(ip_obj, ipaddress.IPv6Address)
             if ip_obj_is_v6 != self.ipv6:
-                raise ValueError('Mismatched ip address type and ipv6 flag')
+                raise ValueError("Mismatched ip address type and ipv6 flag")
         elif not self.port:
-            raise ValueError('A port number is required')
+            raise ValueError("A port number is required")
 
         # If the server_name is a DNS label (mailtest) make sure to remove the
         # trailing dot.
@@ -215,9 +202,9 @@ class ConnectionCommon:
         if cipher_list_action == CipherListAction.REPLACE:
             self.ciphers = ciphers
         elif cipher_list_action == CipherListAction.APPEND:
-            self.ciphers = f'{self.ALL_CIPHERS}:{ciphers}'
+            self.ciphers = f"{self.ALL_CIPHERS}:{ciphers}"
         elif cipher_list_action == CipherListAction.PREPEND:
-            self.ciphers = f'{ciphers}:{self.ALL_CIPHERS}'
+            self.ciphers = f"{ciphers}:{self.ALL_CIPHERS}"
         else:
             raise ValueError()
 
@@ -234,21 +221,22 @@ class ConnectionCommon:
                     f" using SSL version {self.version.name}"
                     f" invoked by {inspect.stack()[4].function}"
                     f" > {inspect.stack()[5].function}"
-                    f" > {inspect.stack()[6].function}")
+                    f" > {inspect.stack()[6].function}"
+                )
             (self.ip_address, self.sock) = sock_connect(
-                self.server_name, self.ip_address, self.port, self.ipv6,
-                self.task, self.timeout)
+                self.server_name, self.ip_address, self.port, self.ipv6, self.task, self.timeout
+            )
         except (OSError, NoIpError):
             if not (any_af or self.ip_address):
                 raise
             self.ipv6 = not self.ipv6
             (self.ip_address, self.sock) = sock_connect(
-                self.server_name, self.ip_address, self.port, self.ipv6,
-                self.task, self.timeout)
+                self.server_name, self.ip_address, self.port, self.ipv6, self.task, self.timeout
+            )
 
     def connect(self, do_handshake_on_connect):
         if self.sock:
-            raise ValueError('Already connected')
+            raise ValueError("Already connected")
 
         self.sock_setup(self)
 
@@ -259,7 +247,8 @@ class ConnectionCommon:
                 ssl_verify=SSL_VERIFY_NONE,
                 ssl_verify_locations=settings.CA_CERTIFICATES,
                 ignore_client_authentication_requests=True,
-                signature_algorithms=self.signature_algorithms)
+                signature_algorithms=self.signature_algorithms,
+            )
             if self.options:
                 self.set_options(self.options)
 
@@ -275,8 +264,14 @@ class ConnectionCommon:
 
             if do_handshake_on_connect:
                 self.do_handshake()
-        except (socket.gaierror, socket.error, IOError, _nassl.OpenSSLError,
-                ClientCertificateRequested, NotImplementedError):
+        except (
+            socket.gaierror,
+            socket.error,
+            IOError,
+            _nassl.OpenSSLError,
+            ClientCertificateRequested,
+            NotImplementedError,
+        ):
             # Not able to connect to port 443
             self.safe_shutdown()
             raise ConnectionHandshakeException()
@@ -328,13 +323,12 @@ class ModernConnection(ConnectionCommon, SslClient):
     See ConnectionCommon for usage instructions.
 
     """
-    ALL_CIPHERS = 'ALL:COMPLEMENTOFALL@SECLEVEL=0'
+
+    ALL_CIPHERS = "ALL:COMPLEMENTOFALL@SECLEVEL=0"
 
     ALL_TLS13_CIPHERS = None
 
-    def __init__(
-            self, version=TLSV1_3, ciphers=ALL_CIPHERS,
-            tls13ciphers=None, **kwargs):
+    def __init__(self, version=TLSV1_3, ciphers=ALL_CIPHERS, tls13ciphers=None, **kwargs):
         self.init_all_tls13_ciphers()
         self.ciphers = ciphers
         self.tls13ciphers = tls13ciphers if tls13ciphers else self.ALL_TLS13_CIPHERS
@@ -350,6 +344,7 @@ class ModernConnection(ConnectionCommon, SslClient):
         """
         if not cls.ALL_TLS13_CIPHERS:
             from checks.tasks.cipher_info import cipher_infos
+
             # There is no 'ALL' or other meta cipher suite names when building
             # a TLS 1.3 cipher suite list for OpenSSL, instead one must
             # construct it using only the colon ':' character to separate TLS
@@ -357,18 +352,25 @@ class ModernConnection(ConnectionCommon, SslClient):
             # 1.1.1 library build doesn't support all of the TLS 1.3 ciphers
             # AND doesn't ignore unknown ciphers either. So, construct a list
             # of just those that we _do_ support.
-            cls.ALL_TLS13_CIPHERS = ':'.join(x.name for x in filter(
-                lambda x: x.tls_version == 'TLSv1.3', cipher_infos.values()))
+            cls.ALL_TLS13_CIPHERS = ":".join(
+                x.name for x in filter(lambda x: x.tls_version == "TLSv1.3", cipher_infos.values())
+            )
         return cls.ALL_TLS13_CIPHERS
 
     @staticmethod
     def from_conn(conn, *args, **kwargs):
         return ModernConnection(
             server_name=conn.server_name,
-            ip_address=conn.ip_address, port=conn.port, ipv6=conn.ipv6,
-            send_SNI=conn.send_SNI, task=conn.task, sock_setup=conn.sock_setup,
+            ip_address=conn.ip_address,
+            port=conn.port,
+            ipv6=conn.ipv6,
+            send_SNI=conn.send_SNI,
+            task=conn.task,
+            sock_setup=conn.sock_setup,
             timeout=conn.timeout,
-            *args, **kwargs)
+            *args,
+            **kwargs,
+        )
 
     def _set_ciphers(self):
         self.set_cipher_list(self.ciphers, self.tls13ciphers)
@@ -380,7 +382,8 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
     protocol version.
 
     """
-    ALL_CIPHERS = 'ALL:COMPLEMENTOFALL'
+
+    ALL_CIPHERS = "ALL:COMPLEMENTOFALL"
 
     def __init__(self, version=SSLV23, ciphers=ALL_CIPHERS, **kwargs):
         self.ciphers = ciphers
@@ -391,10 +394,16 @@ class DebugConnection(ConnectionCommon, LegacySslClient):
     def from_conn(conn, *args, **kwargs):
         return DebugConnection(
             server_name=conn.server_name,
-            ip_address=conn.ip_address, port=conn.port, ipv6=conn.ipv6,
-            send_SNI=conn.send_SNI, task=conn.task, sock_setup=conn.sock_setup,
+            ip_address=conn.ip_address,
+            port=conn.port,
+            ipv6=conn.ipv6,
+            send_SNI=conn.send_SNI,
+            task=conn.task,
+            sock_setup=conn.sock_setup,
             timeout=conn.timeout,
-            *args, **kwargs)
+            *args,
+            **kwargs,
+        )
 
     def _set_ciphers(self):
         self.set_cipher_list(self.ciphers)
@@ -414,6 +423,7 @@ class SSLConnectionWrapper:
     protocol features and ciphers.
 
     """
+
     def __init__(self, conn=None, **kwargs):
         if conn:
             # Use an existing connection
@@ -477,18 +487,33 @@ class HTTPSConnection(SSLConnectionWrapper):
     intended to be a general purpose rich HTTP client.
 
     """
+
     def __init__(
-            self, host=None, port=None,
-            timeout=DEFAULT_TIMEOUT, socket_af=socket.AF_INET,
-            task=None, ip_address=None, conn=None, **kwargs):
+        self,
+        host=None,
+        port=None,
+        timeout=DEFAULT_TIMEOUT,
+        socket_af=socket.AF_INET,
+        task=None,
+        ip_address=None,
+        conn=None,
+        **kwargs,
+    ):
         if conn:
             super().__init__(conn=conn)
         else:
             ipv6 = True if socket_af is socket.AF_INET6 else False
             port = 443 if not port else port
             super().__init__(
-                server_name=host, ip_address=ip_address, port=port, ipv6=ipv6,
-                tries=1, timeout=timeout, task=task, **kwargs)
+                server_name=host,
+                ip_address=ip_address,
+                port=port,
+                ipv6=ipv6,
+                tries=1,
+                timeout=timeout,
+                task=task,
+                **kwargs,
+            )
 
     @classmethod
     def fromconn(cls, conn):
@@ -500,19 +525,19 @@ class HTTPSConnection(SSLConnectionWrapper):
         elif self.conn.get_ssl_version() == TLSV1_3:
             self.conn.write_early_data(data)
 
-    def writestr(self, str, encoding='ascii'):
+    def writestr(self, str, encoding="ascii"):
         self.write(str.encode(encoding))
 
     def putrequest(self, method, path, skip_accept_encoding=True):
-        self.writestr('{} {} HTTP/1.1\r\n'.format(method, path))
-        self.putheader('Host', self.host)
-        self.putheader('Connection', 'close')
+        self.writestr("{} {} HTTP/1.1\r\n".format(method, path))
+        self.putheader("Host", self.host)
+        self.putheader("Connection", "close")
 
     def putheader(self, name, value):
-        self.writestr('{}: {}\r\n'.format(name, value))
+        self.writestr("{}: {}\r\n".format(name, value))
 
     def endheaders(self):
-        self.writestr('\r\n')
+        self.writestr("\r\n")
 
     def getresponse(self):
         # Based on: https://stackoverflow.com/a/47687312
@@ -532,7 +557,7 @@ class HTTPSConnection(SSLConnectionWrapper):
             def _fetch_headers(self):
                 # read all HTTP headers (i.e. until \r\n\r\n or EOF)
                 data = bytearray()
-                while b'\r\n\r\n' not in data:
+                while b"\r\n\r\n" not in data:
                     data.extend(self.conn.read(1024))
                 return data
 
@@ -551,8 +576,7 @@ class HTTPSConnection(SSLConnectionWrapper):
                 chunk_size = amt if amt and amt < 8192 else 8192
                 try:
                     while not amt or (self.bytesio.handle.tell() - pos) < amt:
-                        self.bytesio.handle.write(
-                            self.conn.read(chunk_size))
+                        self.bytesio.handle.write(self.conn.read(chunk_size))
                 except IOError:
                     pass
 
@@ -579,9 +603,15 @@ class HTTPSConnection(SSLConnectionWrapper):
 
 class HTTPConnection(http.client.HTTPConnection):
     def __init__(
-            self, host, port=None, timeout=DEFAULT_TIMEOUT,
-            source_address=None, socket_af=socket.AF_INET, task=None,
-            ip_address=None):
+        self,
+        host,
+        port=None,
+        timeout=DEFAULT_TIMEOUT,
+        source_address=None,
+        socket_af=socket.AF_INET,
+        task=None,
+        ip_address=None,
+    ):
         self.host = host
         self.port = port
         self.timeout = timeout
@@ -589,23 +619,32 @@ class HTTPConnection(http.client.HTTPConnection):
         self.task = task
         self.ip_address = ip_address
 
-        http.client.HTTPConnection.__init__(
-            self, host, port, timeout, source_address)
+        http.client.HTTPConnection.__init__(self, host, port, timeout, source_address)
 
     def connect(self):
         ipv6 = True if self.socket_af is socket.AF_INET6 else False
         (self.ip_address, self.sock) = sock_connect(
-            self.host, self.ip_address, self.port, ipv6, self.task,
-            self.timeout)
+            self.host, self.ip_address, self.port, ipv6, self.task, self.timeout
+        )
 
 
 # TODO: document and/or clean up the possible set of raised exceptions
 # TODO: remove task parameter and instead use celery_app.current_worker_task?
 def http_fetch(
-        host, af=socket.AF_INET, path="/", port=80, http_method="GET",
-        task=None, depth=0, ip_address=None, put_headers=[], ret_headers=None,
-        needed_headers=[], ret_visited_hosts=None,
-        keep_conn_open=False):
+    host,
+    af=socket.AF_INET,
+    path="/",
+    port=80,
+    http_method="GET",
+    task=None,
+    depth=0,
+    ip_address=None,
+    put_headers=[],
+    ret_headers=None,
+    needed_headers=[],
+    ret_visited_hosts=None,
+    keep_conn_open=False,
+):
     if path == "":
         path = "/"
 
@@ -616,12 +655,12 @@ def http_fetch(
             conn = None
             if port == 443:
                 conn = HTTPSConnection(
-                    host=host, ip_address=ip_address, port=port, socket_af=af,
-                    task=task, timeout=timeout)
+                    host=host, ip_address=ip_address, port=port, socket_af=af, task=task, timeout=timeout
+                )
             else:
                 conn = HTTPConnection(
-                    host=host, ip_address=ip_address, port=port, socket_af=af,
-                    task=task, timeout=timeout)
+                    host=host, ip_address=ip_address, port=port, socket_af=af, task=task, timeout=timeout
+                )
             conn.putrequest(http_method, path, skip_accept_encoding=True)
             # Must specify User-Agent. Some webservers return error otherwise.
             conn.putheader("User-Agent", "internetnl/1.0")
@@ -674,27 +713,32 @@ def http_fetch(
     ret_visited_hosts[port].append(host)
 
     # Follow redirects, MAX_REDIRECT_DEPTH times to prevent infloop.
-    if (300 <= res.status < 400 and depth < MAX_REDIRECT_DEPTH
-            and res.getheader('location')):
-        u = urlparse(res.getheader('location'))
-        if u.scheme == 'https':
+    if 300 <= res.status < 400 and depth < MAX_REDIRECT_DEPTH and res.getheader("location"):
+        u = urlparse(res.getheader("location"))
+        if u.scheme == "https":
             port = 443
         if u.netloc != "":
             host = u.netloc
         host = host.split(":")[0]
         path = u.path
-        if not path.startswith('/'):
-            path = '/' + path
+        if not path.startswith("/"):
+            path = "/" + path
         # If the connection was not closed earlier, close it.
         if keep_conn_open:
             conn.close()
         depth += 1
         return http_fetch(
-            host, af=af, path=path, port=port,
-            http_method=http_method, task=task, depth=depth,
+            host,
+            af=af,
+            path=path,
+            port=port,
+            http_method=http_method,
+            task=task,
+            depth=depth,
             ret_headers=ret_headers,
             ret_visited_hosts=ret_visited_hosts,
-            keep_conn_open=keep_conn_open)
+            keep_conn_open=keep_conn_open,
+        )
 
     return conn, res, ret_headers, ret_visited_hosts
 
@@ -716,22 +760,27 @@ def http_get(url):
     result = None
     try:
         scheme, netloc, path, *unused = urlparse(url)
-        port = 443 if scheme == 'https' else 80
-        conn, r, *unused = http_fetch(
-            host=netloc, path=path, port=port, keep_conn_open=True)
-        rr = namedtuple('Response', ['status_code', 'text'])
+        port = 443 if scheme == "https" else 80
+        conn, r, *unused = http_fetch(host=netloc, path=path, port=port, keep_conn_open=True)
+        rr = namedtuple("Response", ["status_code", "text"])
         rr.status_code = r.status
         if r.status == 200:
-            ct_header = r.getheader('Content-Type', None)
+            ct_header = r.getheader("Content-Type", None)
             if ct_header:
-                encoding = parse_header(ct_header)[1]['charset']
+                encoding = parse_header(ct_header)[1]["charset"]
             else:
-                encoding = 'utf-8'
+                encoding = "utf-8"
             rr.text = r.read().decode(encoding)
         conn.close()
         result = rr
-    except (ValueError, socket.error, ConnectionSocketException,
-            http.client.HTTPException, ConnectionHandshakeException, NoIpError,
-            OSError):
+    except (
+        ValueError,
+        socket.error,
+        ConnectionSocketException,
+        http.client.HTTPException,
+        ConnectionHandshakeException,
+        NoIpError,
+        OSError,
+    ):
         pass
     return result

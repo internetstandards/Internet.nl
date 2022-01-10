@@ -1,11 +1,11 @@
-from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
 from interface.batch.scheduler import Rabbit
 
 
 class Command(BaseCommand):
-    help = 'Attempt to connect to RabbitMQ, as a worker would do.'
+    help = "Attempt to connect to RabbitMQ, as a worker would do."
 
     def handle(self, *args, **options):
         print(f"Creating client to: RABBIT:{settings.RABBIT} USER: {settings.RABBIT_USER}.")

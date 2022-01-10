@@ -1,30 +1,28 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from datetime import datetime
-import idna
 import random
 import re
-from urllib.parse import urlparse
 import time
+from datetime import datetime
 from timeit import default_timer as timer
-import yaml
+from urllib.parse import urlparse
 
+import idna
+import yaml
 from celery import shared_task
-from django.core.cache import cache
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connection
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import ugettext as _
-import unbound
 
+import unbound
 from interface import redis_id
-from internetnl import log
 
 ub_ctx = unbound.ub_ctx()
-if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
-        and settings.ENABLE_INTEGRATION_TEST):
+if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
     ub_ctx.debuglevel(2)
     ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
     ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
@@ -40,10 +38,7 @@ if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
 # were legal under the original RFC-1035 but not according to the "ICANN
 # Application Guidebook for new TLDs (June 2012)" which stated that "The
 # ASCII label must consist entirely of letters (alphabetic characters a-z)".
-regex_dname = (
-    r'^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+'
-    '([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)$'
-)
+regex_dname = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" "([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)$"
 
 HOME_STATS_LOCK_ID = redis_id.home_stats_lock.id
 HOME_STATS_LOCK_TTL = redis_id.home_stats_lock.ttl
@@ -69,9 +64,9 @@ def validate_dname(dname):
     """
     try:
         urlp = urlparse(dname)
-        if urlp.netloc != '':
+        if urlp.netloc != "":
             dname = urlp.netloc
-        elif urlp.path != '':
+        elif urlp.path != "":
             dname = urlp.path
 
         # Convert to punnycode
@@ -116,7 +111,7 @@ def probestatuses(request, dname, probes):
     statuses = []
     for probe in probes:
         results = dict(name=probe.name)
-        results['done'] = probestatus(request, probe, dname)
+        results["done"] = probestatus(request, probe, dname)
         statuses.append(results)
     return statuses
 
@@ -129,9 +124,9 @@ def get_client_ip(request):
 
     """
     if settings.DJANGO_IS_PROXIED:
-        ip = request.META.get('HTTP_X_FORWARDED_FOR', None)
+        ip = request.META.get("HTTP_X_FORWARDED_FOR", None)
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        ip = request.META.get("REMOTE_ADDR")
     return ip
 
 
@@ -170,7 +165,8 @@ def process(request, dname, template, probes, pageclass, pagetitle):
     prettyaddr = pretty_domain_name(dname)
 
     return render(
-        request, template,
+        request,
+        template,
         dict(
             addr=addr,
             prettyaddr=prettyaddr,
@@ -179,8 +175,9 @@ def process(request, dname, template, probes, pageclass, pagetitle):
             probes=sorted_probes,
             no_javascript_redirect=no_javascript_redirect,
             javascript_retries=get_javascript_retries(),
-            javascript_timeout=settings.JAVASCRIPT_TIMEOUT * 1000
-        ))
+            javascript_timeout=settings.JAVASCRIPT_TIMEOUT * 1000,
+        ),
+    )
 
 
 def get_javascript_retries():
@@ -189,7 +186,7 @@ def get_javascript_retries():
     the CACHE_TTL. Prevents infinitely registering slow tests.
 
     """
-    return max(int(settings.CACHE_TTL/settings.JAVASCRIPT_TIMEOUT) - 2, 0)
+    return max(int(settings.CACHE_TTL / settings.JAVASCRIPT_TIMEOUT) - 2, 0)
 
 
 def add_registrar_to_report(report):
@@ -200,9 +197,8 @@ def add_registrar_to_report(report):
     if report.registrar:
         return
 
-    if (isinstance(report.dnssec.report, dict)
-            and report.dnssec.report.get('dnssec_exists')):
-        registrar = report.dnssec.report['dnssec_exists']['tech_data']
+    if isinstance(report.dnssec.report, dict) and report.dnssec.report.get("dnssec_exists"):
+        registrar = report.dnssec.report["dnssec_exists"]["tech_data"]
         registrar = registrar[0][1]
         report.registrar = registrar
         report.save()
@@ -222,8 +218,7 @@ def get_hof_cache(cache_id, count):
     cached_data = cache.get(cache_id, None)
     if cached_data is None:
         return "…", 0, []
-    return (
-        cached_data['date'], cached_data['count'], cached_data['data'][:count])
+    return (cached_data["date"], cached_data["count"], cached_data["data"][:count])
 
 
 def get_hof_champions(count=100000):
@@ -241,7 +236,7 @@ def get_hof_mail(count=100000):
 def get_hof_manual(manual):
     hof_entries = []
     try:
-        with open(settings.MANUAL_HOF[manual]['entries_file'], 'r') as f:
+        with open(settings.MANUAL_HOF[manual]["entries_file"], "r") as f:
             hof_entries = yaml.load(f, Loader=yaml.Loader)
     except Exception:
         pass
@@ -263,8 +258,7 @@ def ub_resolve_with_timeout(qname, qtype, rr_class, timeout):
         data["done"] = True
 
     cb_data = dict(done=False)
-    retval, async_id = ub_ctx.resolve_async(
-        qname, cb_data, ub_callback, qtype, rr_class)
+    retval, async_id = ub_ctx.resolve_async(qname, cb_data, ub_callback, qtype, rr_class)
 
     start = timer()
     while retval == 0 and not cb_data["done"]:
@@ -283,8 +277,7 @@ def get_valid_domain_web(dname, timeout=5):
         return None
 
     for qtype in (unbound.RR_TYPE_A, unbound.RR_TYPE_AAAA):
-        cb_data = ub_resolve_with_timeout(
-            dname, qtype, unbound.RR_CLASS_IN, timeout)
+        cb_data = ub_resolve_with_timeout(dname, qtype, unbound.RR_CLASS_IN, timeout)
         if cb_data.get("data") and cb_data["data"].data:
             return dname
 
@@ -296,8 +289,7 @@ def get_valid_domain_mail(mailaddr, timeout=5):
     if dname is None:
         return None
 
-    cb_data = ub_resolve_with_timeout(
-        dname, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN, timeout)
+    cb_data = ub_resolve_with_timeout(dname, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN, timeout)
 
     if cb_data.get("nxdomain") and cb_data["nxdomain"]:
         return None
@@ -306,9 +298,9 @@ def get_valid_domain_mail(mailaddr, timeout=5):
 
 
 def redirect_invalid_domain(request, domain_type):
-    if domain_type == 'domain':
+    if domain_type == "domain":
         return HttpResponseRedirect("/test-site/?invalid")
-    elif domain_type == 'mail':
+    elif domain_type == "mail":
         return HttpResponseRedirect("/test-mail/?invalid")
     else:
         return HttpResponseRedirect("/")
@@ -316,22 +308,113 @@ def redirect_invalid_domain(request, domain_type):
 
 @shared_task(
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
-    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW, ignore_result=True)
+    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    ignore_result=True,
+)
 def run_stats_queries():
     """
     Run the queries for the home page statistics and save the results in redis.
-
     """
-    statswebsite = execsql("select count(distinct r.domain) as count from checks_domaintestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_domaintestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp")
+
+    query = """
+         select
+            count(distinct r.domain) as count
+        from
+            checks_domaintestreport as r
+        inner join
+            (
+                select
+                    domain,
+                    max(timestamp) as timestamp
+                from
+                    checks_domaintestreport
+                group by
+                    domain
+            )          as rmax
+                on r.domain = rmax.domain
+                and r.timestamp = rmax.timestamp
+    """
+    statswebsite = execsql(query)
     statswebsitegood = get_hof_web(count=1)[1]
     statswebsitebad = max(statswebsite - statswebsitegood, 0)
 
-    statsmail = execsql("select count(distinct r.domain) as count from checks_mailtestreport as r inner join ( select domain, max(timestamp) as timestamp from checks_mailtestreport group by domain ) as rmax on r.domain = rmax.domain and r.timestamp = rmax.timestamp")
+    query = """
+        select
+            count(distinct r.domain) as count
+        from
+            checks_mailtestreport as r
+        inner join
+            (
+                select
+                    domain,
+                    max(timestamp) as timestamp
+                from
+                    checks_mailtestreport
+                group by
+                    domain
+            ) as rmax
+                on r.domain = rmax.domain
+                and r.timestamp = rmax.timestamp
+    """
+    statsmail = execsql(query)
     statsmailgood = get_hof_mail(count=1)[1]
     statsmailbad = max(statsmail - statsmailgood, 0)
 
-    statsconnection = execsql("select count(distinct coalesce(ipv4_addr, ipv6_addr)) as count from checks_connectiontest as r inner join ( select coalesce(ipv4_addr, ipv6_addr) as source, max(timestamp) as timestamp from checks_connectiontest where finished = true group by coalesce(ipv4_addr, ipv6_addr)) as rmax on coalesce(r.ipv4_addr, r.ipv6_addr) = rmax.source where finished = true")
-    statsconnectiongood = execsql("select count(distinct coalesce(ipv4_addr, ipv6_addr)) as count from checks_connectiontest as r inner join ( select coalesce(ipv4_addr, ipv6_addr) as source, max(timestamp) as timestamp from checks_connectiontest where finished = true group by coalesce(ipv4_addr, ipv6_addr)) as rmax on coalesce(r.ipv4_addr, r.ipv6_addr) = rmax.source where finished = true and score_dnssec = 100 and score_ipv6 = 100")
+    query = """
+        select
+            count(distinct coalesce(ipv4_addr,
+            ipv6_addr)) as count
+        from
+            checks_connectiontest as r
+        inner join
+            (
+                select
+                    coalesce(ipv4_addr,
+                    ipv6_addr) as source,
+                    max(timestamp) as timestamp
+                from
+                    checks_connectiontest
+                where
+                    finished = true
+                group by
+                    coalesce(ipv4_addr,
+                    ipv6_addr)
+            ) as rmax
+                on coalesce(r.ipv4_addr,
+            r.ipv6_addr) = rmax.source
+        where
+            finished = true
+    """
+    statsconnection = execsql(query)
+
+    query = """
+        select
+            count(distinct coalesce(ipv4_addr,
+            ipv6_addr)) as count
+        from
+            checks_connectiontest as r
+        inner join
+            (
+                select
+                    coalesce(ipv4_addr,
+                    ipv6_addr) as      source,
+                    max(timestamp) as timestamp
+                from
+                    checks_connectiontest
+                where
+                    finished = true
+                group by
+                    coalesce(ipv4_addr,
+                    ipv6_addr)
+            ) as rmax
+                on coalesce(r.ipv4_addr,
+            r.ipv6_addr) = rmax.source
+        where
+            finished = true
+            and score_dnssec = 100
+            and score_ipv6 = 100
+    """
+    statsconnectiongood = execsql(query)
     statsconnectionbad = max(statsconnection - statsconnectiongood, 0)
 
     cache_id = redis_id.home_stats_data.id
@@ -343,15 +426,15 @@ def run_stats_queries():
     cache.set(cache_id.format("statsmailgood"), statsmailgood, cache_ttl)
     cache.set(cache_id.format("statsmailbad"), statsmailbad, cache_ttl)
     cache.set(cache_id.format("statsconnection"), statsconnection, cache_ttl)
-    cache.set(cache_id.format("statsconnectiongood"), statsconnectiongood,
-              cache_ttl)
-    cache.set(cache_id.format("statsconnectionbad"), statsconnectionbad,
-              cache_ttl)
+    cache.set(cache_id.format("statsconnectiongood"), statsconnectiongood, cache_ttl)
+    cache.set(cache_id.format("statsconnectionbad"), statsconnectionbad, cache_ttl)
 
 
 @shared_task(
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
-    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW, ignore_result=True)
+    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    ignore_result=True,
+)
 def update_running_status(results):
     """
     Signal that the queries for the home page statistics finished running.
@@ -377,5 +460,5 @@ def update_base_stats():
     cache_ttl = HOME_STATS_LOCK_TTL
     if not cache.get(cache_id):
         cache.set(cache_id, True, cache_ttl)
-        task_set = (run_stats_queries.s() | update_running_status.s())
+        task_set = run_stats_queries.s() | update_running_status.s()
         task_set()

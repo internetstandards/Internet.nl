@@ -1,36 +1,42 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import re
 import json
+import re
 
 from django.core.cache import cache
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.translation import ugettext as _
 
-from interface import redis_id
-from checks.models import MailTestIpv6, MailTestDnssec, MailTestAuth
-from checks.models import MailTestTls, MailTestReport, AutoConfOption
+from checks.models import AutoConfOption, MailTestAuth, MailTestDnssec, MailTestIpv6, MailTestReport, MailTestTls
 from checks.probes import mailprobes
-from interface.views.shared import proberesults, process, pretty_domain_name
-from interface.views.shared import redirect_invalid_domain, add_score_to_report
-from interface.views.shared import get_valid_domain_mail, add_registrar_to_report
-from interface.views.shared import get_valid_domain_web, get_retest_time
-from interface.views.shared import probestatuses
+from interface import redis_id
+from interface.views.shared import (
+    add_registrar_to_report,
+    add_score_to_report,
+    get_retest_time,
+    get_valid_domain_mail,
+    get_valid_domain_web,
+    pretty_domain_name,
+    proberesults,
+    probestatuses,
+    process,
+    redirect_invalid_domain,
+)
 
 regex_mailaddr = (
-    r'([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+'
-    '(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)')
+    r"([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" "(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)"
+)
 
 
 # Entrance after form submission.
 # URL: /mail/
 def index(request, *args):
     try:
-        url = request.POST.get('url', '').strip()
+        url = request.POST.get("url", "").strip()
         return validate_domain(request, url)
     except KeyError:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
 
 
 # Request to /mail/<domain> without matching domain regex
@@ -40,23 +46,16 @@ def validate_domain(request, mailaddr):
     if valid_domain is None:
         return redirect_invalid_domain(request, "mail")
 
-    return HttpResponseRedirect('/mail/{}/'.format(valid_domain))
+    return HttpResponseRedirect("/mail/{}/".format(valid_domain))
 
 
 def mailprocess(request, mailaddr):
     mailaddr = mailaddr.lower().split("@")[-1]
-    return process(
-        request, mailaddr, 'mail.html', mailprobes,
-        "test-in-progress", "mail pagetitle")
+    return process(request, mailaddr, "mail.html", mailprobes, "test-in-progress", "mail pagetitle")
 
 
 def create_report(domain, ipv6, dnssec, auth, tls):
-    report = MailTestReport(
-        domain=domain,
-        ipv6=ipv6,
-        dnssec=dnssec,
-        auth=auth,
-        tls=tls)
+    report = MailTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, auth=auth, tls=tls)
     report.save()
     return report
 
@@ -95,15 +94,14 @@ def resultsrender(addr, report, request):
     webtest_direct, mailtest_direct = get_direct_domains(addr)
     prettyaddr = pretty_domain_name(addr)
     return render(
-        request, 'mail-results.html',
+        request,
+        "mail-results.html",
         dict(
             pageclass="emailtest",
-            pagetitle="{} {}".format(
-                _("mail pagetitle"), prettyaddr),
+            pagetitle="{} {}".format(_("mail pagetitle"), prettyaddr),
             addr=addr,
             prettyaddr=prettyaddr,
-            permalink=request.build_absolute_uri(
-                "/mail/{}/{}/".format(addr, str(report.id))),
+            permalink=request.build_absolute_uri("/mail/{}/{}/".format(addr, str(report.id))),
             permadate=report.timestamp,
             retest_time=retest_time,
             retest_link=request.build_absolute_uri("/mail/{}/".format(addr)),
@@ -112,7 +110,9 @@ def resultsrender(addr, report, request):
             probes=probe_reports,
             score=report.score,
             report=report,
-            registrar=report.registrar))
+            registrar=report.registrar,
+        ),
+    )
 
 
 # URL: /mail/<dname>/results/
@@ -120,20 +120,23 @@ def resultscurrent(request, mailaddr):
     addr = mailaddr.lower().split("@")[-1]
     # Get latest test results
     try:
-        ipv6 = MailTestIpv6.objects.filter(domain=addr).order_by('-id')[0]
-        dnssec = MailTestDnssec.objects.filter(domain=addr).order_by('-id')[0]
-        auth = MailTestAuth.objects.filter(domain=addr).order_by('-id')[0]
-        tls = MailTestTls.objects.filter(domain=addr).order_by('-id')[0]
+        ipv6 = MailTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
+        dnssec = MailTestDnssec.objects.filter(domain=addr).order_by("-id")[0]
+        auth = MailTestAuth.objects.filter(domain=addr).order_by("-id")[0]
+        tls = MailTestTls.objects.filter(domain=addr).order_by("-id")[0]
     except IndexError:
         return HttpResponseRedirect("/mail/{}/".format(addr))
 
     # Do we already have a testreport for the latest results
     # (needed for persisent url-thingy)?
     try:
-        report = ipv6.mailtestreport_set.order_by('-id')[0]
-        if (not report.id == dnssec.mailtestreport_set.order_by('-id')[0].id
-                == auth.mailtestreport_set.order_by('-id')[0].id
-                == tls.mailtestreport_set.order_by('-id')[0].id):
+        report = ipv6.mailtestreport_set.order_by("-id")[0]
+        if (
+            not report.id
+            == dnssec.mailtestreport_set.order_by("-id")[0].id
+            == auth.mailtestreport_set.order_by("-id")[0].id
+            == tls.mailtestreport_set.order_by("-id")[0].id
+        ):
             report = create_report(addr, ipv6, dnssec, auth, tls)
     except IndexError:
         # one of the test results is not yet related to a report,
@@ -162,9 +165,9 @@ def resultsstored(request, dname, id):
         if report.domain == dname:
             return resultsrender(report.domain, report, request)
         else:
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect("/")
     except MailTestReport.DoesNotExist:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
 
 
 # URL: /mail/(ipv6|dnssec|auth|tls)/<dname>/

@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('checks', '0005_autoconf_db_options'),
+        ("checks", "0005_autoconf_db_options"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mailtestauth',
-            name='dmarc_record_org_domain',
+            model_name="mailtestauth",
+            name="dmarc_record_org_domain",
             field=models.CharField(max_length=255, null=True),
         ),
     ]

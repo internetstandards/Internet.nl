@@ -1,7 +1,5 @@
 import logging
 import re
-
-
 from collections import OrderedDict
 from enum import Enum
 from math import log, pow
@@ -11,8 +9,7 @@ from nassl.ssl_client import SslClient
 
 from checks.tasks.tls_connection import DebugConnection, ModernConnection
 
-
-logger = logging.getLogger('internetnl')
+logger = logging.getLogger("internetnl")
 
 
 class SecLevel(Enum):
@@ -30,27 +27,27 @@ class CipherScoreAndSecLevel:
 
     @staticmethod
     def get_subscore_ecdsa_rsa(ci, conn):
-        if ci.tls_version == 'TLSv1.3':
+        if ci.tls_version == "TLSv1.3":
             # negotiated, might be (2, SecLevel.GOOD) - can we check the conn
             # to find out?
             return (1, SecLevel.GOOD)
         else:
             return {
-                'ECDSA': (2, SecLevel.GOOD),
-                'RSA': (1, SecLevel.GOOD),
+                "ECDSA": (2, SecLevel.GOOD),
+                "RSA": (1, SecLevel.GOOD),
             }.get(ci.auth_alg, (0, SecLevel.INSUFFICIENT))
 
     @staticmethod
     def get_subscore_mac_alg(ci, conn):
         return {
-            'MD5': SecLevel.INSUFFICIENT,
-            'SHA1': SecLevel.SUFFICIENT,
+            "MD5": SecLevel.INSUFFICIENT,
+            "SHA1": SecLevel.SUFFICIENT,
         }.get(ci.mac_alg, SecLevel.GOOD)
 
     @staticmethod
     def get_subscore_aead(ci, conn):
         return {
-            'AEAD': (1, SecLevel.GOOD),
+            "AEAD": (1, SecLevel.GOOD),
         }.get(ci.mac_alg, (0, SecLevel.UNKNOWN))
 
     @staticmethod
@@ -76,8 +73,8 @@ class CipherScoreAndSecLevel:
         # certificate. For now we cheat and assume that if the cipher name
         # contains the extra E that means that it will be ephemeral but is this
         # a good assumption?
-        DHE_TERMS = frozenset(['DHE', 'EDH'])
-        ECDHE_TERMS = frozenset(['ECDHE', 'EECDH'])
+        DHE_TERMS = frozenset(["DHE", "EDH"])
+        ECDHE_TERMS = frozenset(["ECDHE", "EECDH"])
 
         def contains(haystack, needles):
             # This helper method exists because with OpenSSL 1.0.2 the cipher
@@ -87,55 +84,56 @@ class CipherScoreAndSecLevel:
             # https://www.openssl.org/docs/man1.0.2/man3/SSL_CIPHER_get_version.html
             return len([x for x in needles if x in haystack]) > 0
 
-        if ci.tls_version == 'TLSv1.3':
+        if ci.tls_version == "TLSv1.3":
             # negotiated
             # could actually be (4, SecLevel.SUFFICIENT) if DHE is used instead
             # of ECDHE - can we check the conn to find out?
             return (3, SecLevel.GOOD)
-        elif 'ECDH' in ci.kex_algs:
+        elif "ECDH" in ci.kex_algs:
             return {
                 False: (2, SecLevel.INSUFFICIENT),
-                True:  (4, SecLevel.GOOD),
+                True: (4, SecLevel.GOOD),
             }.get(contains(ci.name, ECDHE_TERMS))
-        elif 'DH' in ci.kex_algs:
+        elif "DH" in ci.kex_algs:
             return {
                 False: (1, SecLevel.INSUFFICIENT),
-                True:  (3, SecLevel.SUFFICIENT),
+                True: (3, SecLevel.SUFFICIENT),
             }.get(contains(ci.name, DHE_TERMS))
-        elif 'RSA' in ci.kex_algs:
+        elif "RSA" in ci.kex_algs:
             return (0, SecLevel.PHASE_OUT)
         else:
             return (0, SecLevel.INSUFFICIENT)
 
     @staticmethod
     def get_subscore_bulk_enc_alg(ci, conn):
-        if 'AES' in ci.bulk_enc_alg and ci.bulk_enc_alg_sec_len == 256:
+        if "AES" in ci.bulk_enc_alg and ci.bulk_enc_alg_sec_len == 256:
             score = 2
-        elif 'CHACHA20' in ci.bulk_enc_alg:
+        elif "CHACHA20" in ci.bulk_enc_alg:
             score = 1
         else:
             score = 0
 
         # See: https://blog.cloudflare.com/it-takes-two-to-chacha-poly/
-        if ((ci.bulk_enc_alg == 'AESGCM'
-                and ci.bulk_enc_alg_sec_len == 256) or
-            (ci.bulk_enc_alg == 'CHACHA20/POLY1305') or
-            (ci.bulk_enc_alg == 'AESGCM'
-                and ci.bulk_enc_alg_sec_len == 128) or
-            (ci.bulk_enc_alg == 'AESCCM'
-                and ci.bulk_enc_alg_sec_len == 256) or
-            (ci.bulk_enc_alg == 'AESCCM'
-                and ci.bulk_enc_alg_sec_len == 128)):
+        if (
+            (ci.bulk_enc_alg == "AESGCM" and ci.bulk_enc_alg_sec_len == 256)
+            or (ci.bulk_enc_alg == "CHACHA20/POLY1305")
+            or (ci.bulk_enc_alg == "AESGCM" and ci.bulk_enc_alg_sec_len == 128)
+            or (ci.bulk_enc_alg == "AESCCM" and ci.bulk_enc_alg_sec_len == 256)
+            or (ci.bulk_enc_alg == "AESCCM" and ci.bulk_enc_alg_sec_len == 128)
+        ):
             sec_level = SecLevel.GOOD
-        elif ((ci.bulk_enc_alg == 'AES' and ci.bulk_enc_alg_sec_len == 256) or
-              (ci.bulk_enc_alg == 'AES' and ci.bulk_enc_alg_sec_len == 128) or
-              (ci.bulk_enc_alg == 'Camellia')):
+        elif (
+            (ci.bulk_enc_alg == "AES" and ci.bulk_enc_alg_sec_len == 256)
+            or (ci.bulk_enc_alg == "AES" and ci.bulk_enc_alg_sec_len == 128)
+            or (ci.bulk_enc_alg == "Camellia")
+        ):
             sec_level = SecLevel.SUFFICIENT
-        elif ((ci.bulk_enc_alg == '3DES') or
-              (ci.bulk_enc_alg == 'SEED') or
-              (ci.bulk_enc_alg == 'ChaCha20'
-                and 'CHACHA20-POLY1305-OLD' in ci.name) or
-              (ci.bulk_enc_alg == 'ARIAGCM')):
+        elif (
+            (ci.bulk_enc_alg == "3DES")
+            or (ci.bulk_enc_alg == "SEED")
+            or (ci.bulk_enc_alg == "ChaCha20" and "CHACHA20-POLY1305-OLD" in ci.name)
+            or (ci.bulk_enc_alg == "ARIAGCM")
+        ):
             sec_level = SecLevel.PHASE_OUT
         else:
             sec_level = SecLevel.INSUFFICIENT
@@ -156,11 +154,11 @@ class CipherScoreAndSecLevel:
             digest = None
 
         return {
-            'SHA224': (224, SecLevel.SUFFICIENT),
-            'SHA256': (256, SecLevel.GOOD),
-            'SHA384': (384, SecLevel.GOOD),
-            'SHA512': (512, SecLevel.GOOD),
-            None:     (0,   SecLevel.GOOD),  # no hash func or undetermined.
+            "SHA224": (224, SecLevel.SUFFICIENT),
+            "SHA256": (256, SecLevel.GOOD),
+            "SHA384": (384, SecLevel.GOOD),
+            "SHA512": (512, SecLevel.GOOD),
+            None: (0, SecLevel.GOOD),  # no hash func or undetermined.
         }.get(digest, (160, SecLevel.PHASE_OUT))
 
     @staticmethod
@@ -252,7 +250,8 @@ class CipherScoreAndSecLevel:
             | (CipherScoreAndSecLevel.get_subscore_ecdsa_rsa(ci, conn)[0] << 34)
             | (CipherScoreAndSecLevel.get_subscore_key_size(ci, conn)[0] << 18)
             | (CipherScoreAndSecLevel.get_subscore_hash_size(ci, conn)[0] << 2)
-            | (CipherScoreAndSecLevel.get_subscore_bulk_enc_alg(ci, conn)[0]))
+            | (CipherScoreAndSecLevel.get_subscore_bulk_enc_alg(ci, conn)[0])
+        )
 
     @staticmethod
     def format_score(score):
@@ -260,7 +259,7 @@ class CipherScoreAndSecLevel:
 
     @staticmethod
     def get_score_header():
-        return 'DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC'
+        return "DHEAERKKKKKKKKKKKKKKKKHHHHHHHHHHHHHHHHAC"
 
     @staticmethod
     def is_in_seclevel_order(seclevel1, seclevel2):
@@ -305,8 +304,7 @@ class CipherScoreAndSecLevel:
             highbit1 = get_highest_set_bit(score1)
             highbit2 = get_highest_set_bit(score2)
             if highbit1 == highbit2:
-                bit_mask_to_keep_only_bits_below_highbit = (
-                    int(pow(2, highbit1)) - 1)
+                bit_mask_to_keep_only_bits_below_highbit = int(pow(2, highbit1)) - 1
                 score1 &= bit_mask_to_keep_only_bits_below_highbit
                 score2 &= bit_mask_to_keep_only_bits_below_highbit
             else:
@@ -340,27 +338,27 @@ def load_cipher_info():
     class CipherInfo:
         def __init__(self, conn_class, match):
             self.conn_class = conn_class
-            self.name = match.group('name')
-            self.tls_version = match.group('tls_version')
-            self.kex_algs = match.group('kex_algs')
-            self.auth_alg = match.group('auth_alg')
-            self.bulk_enc_alg = match.group('bulk_enc_alg')
-            self.mac_alg = match.group('mac_alg')
+            self.name = match.group("name")
+            self.tls_version = match.group("tls_version")
+            self.kex_algs = match.group("kex_algs")
+            self.auth_alg = match.group("auth_alg")
+            self.bulk_enc_alg = match.group("bulk_enc_alg")
+            self.mac_alg = match.group("mac_alg")
 
-            if match.group('bulk_enc_alg_sec_len'):
-                self.bulk_enc_alg_sec_len = int(
-                    match.group('bulk_enc_alg_sec_len'))
+            if match.group("bulk_enc_alg_sec_len"):
+                self.bulk_enc_alg_sec_len = int(match.group("bulk_enc_alg_sec_len"))
             else:
                 self.bulk_enc_alg_sec_len = 0
 
     # See: https://regex101.com/r/VPpuN4/2
     CIPHER_DESC_REGEX = re.compile(
-        r'(?P<name>[^\s]+)'
-        r'\s+(?P<tls_version>[^\s]+)'
-        r'\s+Kx=(?P<kex_algs>[^\s(]+(\((?P<unknown>[0-9]+)\))?)'
-        r'\s+Au=(?P<auth_alg>[^\s]+)'
-        r'\s+Enc=(?P<bulk_enc_alg>[^\s(]+)(\((?P<bulk_enc_alg_sec_len>[0-9]+)\))?'
-        r'\s+Mac=(?P<mac_alg>[^\s]+)')
+        r"(?P<name>[^\s]+)"
+        r"\s+(?P<tls_version>[^\s]+)"
+        r"\s+Kx=(?P<kex_algs>[^\s(]+(\((?P<unknown>[0-9]+)\))?)"
+        r"\s+Au=(?P<auth_alg>[^\s]+)"
+        r"\s+Enc=(?P<bulk_enc_alg>[^\s(]+)(\((?P<bulk_enc_alg_sec_len>[0-9]+)\))?"
+        r"\s+Mac=(?P<mac_alg>[^\s]+)"
+    )
 
     result = dict()
     for client_class, conn_class in [
@@ -391,8 +389,9 @@ def load_cipher_info():
                     result[cipher_name] = ci
                 else:
                     logger.warn(
-                        f'Unable to parse description of cipher {cipher_name} '
-                        f'output by {client_class.__name__}: "{desc}"')
+                        f"Unable to parse description of cipher {cipher_name} "
+                        f'output by {client_class.__name__}: "{desc}"'
+                    )
             else:
                 # Add this connection class to the set of supported connection
                 # classes.

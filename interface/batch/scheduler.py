@@ -1,76 +1,78 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import logging
-from datetime import timedelta
 import random
 from timeit import default_timer as timer
 
-from internetnl import log
-from internetnl.celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from pyrabbit2 import Client
-from pyrabbit2.http import HTTPError, NetworkError
 from pyrabbit2.api import APIError, PermissionError
+from pyrabbit2.http import HTTPError, NetworkError
 
-from interface.batch import util
-from interface import batch_shared_task, redis_id
-from checks.probes import batch_webprobes, batch_mailprobes
-
+from checks.models import (
+    BatchDomain,
+    BatchDomainStatus,
+    BatchRequest,
+    BatchRequestStatus,
+    BatchTestStatus,
+    BatchWebTest,
+    DomainTestDnssec,
+    DomainTestReport,
+    MailTestDnssec,
+    MailTestReport,
+    MailTestTls,
+    WebTestAppsecpriv,
+    WebTestTls,
+)
+from checks.probes import batch_mailprobes, batch_webprobes
 from checks.tasks import dispatcher
-from checks.models import BatchRequest, BatchRequestStatus, BatchDomain
-from checks.models import BatchDomainStatus, BatchTestStatus
-from checks.models import BatchWebTest
-from checks.models import WebTestTls, WebTestAppsecpriv
-from checks.models import DomainTestReport, MailTestReport, MailTestTls
-from checks.models import MailTestDnssec, DomainTestDnssec
+from interface import batch_shared_task, redis_id
+from interface.batch import util
 
 logger = get_task_logger(__name__)
 
-BATCH_WEBTEST = {
-    'subtests': {},
-    'report': {
-        'name': 'domaintestreport'
-    }
-}
+BATCH_WEBTEST = {"subtests": {}, "report": {"name": "domaintestreport"}}
 
-BATCH_MAILTEST = {
-    'subtests': {},
-    'report': {
-        'name': 'mailtestreport'
-    }
-}
+BATCH_MAILTEST = {"subtests": {}, "report": {"name": "mailtestreport"}}
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
-    BATCH_WEBTEST['subtests']['ipv6'] = ipv6_web_taskset
+
+    BATCH_WEBTEST["subtests"]["ipv6"] = ipv6_web_taskset
     from checks.tasks.ipv6 import batch_mail_registered as ipv6_mail_taskset
-    BATCH_MAILTEST['subtests']['ipv6'] = ipv6_mail_taskset
+
+    BATCH_MAILTEST["subtests"]["ipv6"] = ipv6_mail_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     from checks.tasks.dnssec import batch_web_registered as dnssec_web_taskset
-    BATCH_WEBTEST['subtests']['dnssec'] = dnssec_web_taskset
+
+    BATCH_WEBTEST["subtests"]["dnssec"] = dnssec_web_taskset
     from checks.tasks.dnssec import batch_mail_registered as dnssec_mail_taskset
-    BATCH_MAILTEST['subtests']['dnssec'] = dnssec_mail_taskset
+
+    BATCH_MAILTEST["subtests"]["dnssec"] = dnssec_mail_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     from checks.tasks.tls import batch_web_registered as tls_web_taskset
-    BATCH_WEBTEST['subtests']['tls'] = tls_web_taskset
+
+    BATCH_WEBTEST["subtests"]["tls"] = tls_web_taskset
     from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
-    BATCH_MAILTEST['subtests']['tls'] = tls_mail_taskset
+
+    BATCH_MAILTEST["subtests"]["tls"] = tls_mail_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     from checks.tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
-    BATCH_WEBTEST['subtests']['appsecpriv'] = appsecpriv_web_taskset
+
+    BATCH_WEBTEST["subtests"]["appsecpriv"] = appsecpriv_web_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
     from checks.tasks.mail import batch_mail_registered as auth_mail_taskset
-    BATCH_MAILTEST['subtests']['auth'] = auth_mail_taskset
+
+    BATCH_MAILTEST["subtests"]["auth"] = auth_mail_taskset
 
 
-class Rabbit():
+class Rabbit:
     """
     Wrapper class for the pyrabbit client.
 
@@ -102,8 +104,7 @@ class Rabbit():
         while tries > 0:
             try:
                 return self._cl.get_queue_depth(host, queue)
-            except (AttributeError, HTTPError, NetworkError, APIError,
-                    PermissionError) as e:
+            except (AttributeError, HTTPError, NetworkError, APIError, PermissionError) as e:
                 self._get_client()
                 tries -= 1
                 if tries <= 0:
@@ -115,8 +116,7 @@ def is_queue_loaded(client):
     Check if we consider the monitor queue loaded.
 
     """
-    current_load = client.get_queue_depth(
-        settings.RABBIT_VHOST, settings.RABBIT_MON_QUEUE)
+    current_load = client.get_queue_depth(settings.RABBIT_VHOST, settings.RABBIT_MON_QUEUE)
     if current_load >= settings.RABBIT_MON_THRESHOLD:
         return True
     return False
@@ -129,8 +129,7 @@ def get_live_requests():
 
     """
     live_requests = dict()
-    batch_requests = BatchRequest.objects.filter(
-        status=BatchRequestStatus.live).order_by('submit_date')
+    batch_requests = BatchRequest.objects.filter(status=BatchRequestStatus.live).order_by("submit_date")
     for request in batch_requests:
         if not live_requests.get(request.user):
             live_requests[request.user] = request
@@ -158,8 +157,9 @@ def pick_domain(batch_request):
 
     """
     try:
-        return BatchDomain.objects.filter(
-            status=BatchDomainStatus.waiting, batch_request=batch_request)[:1].get()  #.first()
+        return BatchDomain.objects.filter(status=BatchDomainStatus.waiting, batch_request=batch_request)[
+            :1
+        ].get()  # .first()
     except BatchDomain.DoesNotExist:
         return None
 
@@ -189,30 +189,23 @@ def find_result(batch_domain, model):
     submit_date = batch_domain.batch_request.submit_date
     try:
         if model is WebTestTls:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                webtestset__timestamp__gte=submit_date).latest('id')
+            result = model.objects.filter(domain=batch_domain.domain, webtestset__timestamp__gte=submit_date).latest(
+                "id"
+            )
         elif model is MailTestTls:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                testset__timestamp__gte=submit_date).latest('id')
+            result = model.objects.filter(domain=batch_domain.domain, testset__timestamp__gte=submit_date).latest("id")
         elif model is MailTestDnssec:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                testset__timestamp__gte=submit_date).latest('id')
+            result = model.objects.filter(domain=batch_domain.domain, testset__timestamp__gte=submit_date).latest("id")
         elif model is WebTestAppsecpriv:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                webtestset__timestamp__gte=submit_date).latest('id')
+            result = model.objects.filter(domain=batch_domain.domain, webtestset__timestamp__gte=submit_date).latest(
+                "id"
+            )
         elif model is DomainTestDnssec:
             result = model.objects.filter(
-                domain=batch_domain.domain,
-                maildomain_id=None,
-                timestamp__gte=submit_date).latest('id')
+                domain=batch_domain.domain, maildomain_id=None, timestamp__gte=submit_date
+            ).latest("id")
         else:
-            result = model.objects.filter(
-                domain=batch_domain.domain,
-                timestamp__gte=submit_date).latest('id')
+            result = model.objects.filter(domain=batch_domain.domain, timestamp__gte=submit_date).latest("id")
     except model.DoesNotExist:
         result = None
     return result
@@ -224,10 +217,8 @@ def save_result(batch_test, subtest, result):
 
     """
     setattr(batch_test, subtest, result)
-    setattr(batch_test, '{}_status'.format(subtest), BatchTestStatus.done)
-    batch_test.save(update_fields=[
-        '{}_id'.format(subtest),
-        '{}_status'.format(subtest)])
+    setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.done)
+    batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
 
 
 def start_test(batch_domain, batch_test, subtest, taskset):
@@ -236,8 +227,8 @@ def start_test(batch_domain, batch_test, subtest, taskset):
 
     """
     submit_test(batch_domain, subtest, taskset)
-    setattr(batch_test, '{}_status'.format(subtest), BatchTestStatus.running)
-    batch_test.save(update_fields=['{}_status'.format(subtest)])
+    setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.running)
+    batch_test.save(update_fields=["{}_status".format(subtest)])
 
 
 def submit_test(batch_domain, test, checks_registry):
@@ -246,8 +237,7 @@ def submit_test(batch_domain, test, checks_registry):
 
     """
     url = batch_domain.domain
-    task_set = dispatcher.submit_task_set(
-        url, checks_registry, error_cb=error_callback)
+    task_set = dispatcher.submit_task_set(url, checks_registry, error_cb=error_callback)
     # Need to cache it in redis, then the callback can look it up based
     # on the task id.
     cache_id = redis_id.running_batch_test.id.format(task_set.id)
@@ -263,9 +253,9 @@ def check_any_subtest_for_status(batch_test, status):
 
     """
     if isinstance(batch_test, BatchWebTest):
-        subtests = BATCH_WEBTEST['subtests']
+        subtests = BATCH_WEBTEST["subtests"]
     else:
-        subtests = BATCH_MAILTEST['subtests']
+        subtests = BATCH_MAILTEST["subtests"]
 
     for subtest in subtests:
         if getattr(batch_test, "{}_status".format(subtest)) == status:
@@ -279,7 +269,7 @@ def find_or_create_report(batch_domain):
     if report:
         batch_test = batch_domain.get_batch_test()
         batch_test.report = report
-        batch_test.save(update_fields=['report'])
+        batch_test.save(update_fields=["report"])
     else:
         create_report(batch_domain)
 
@@ -293,19 +283,17 @@ def get_common_report(batch_domain):
     """
     batch_test = batch_domain.get_batch_test()
     if isinstance(batch_test, BatchWebTest):
-        subtests = BATCH_WEBTEST['subtests']
-        report_details = BATCH_WEBTEST['report']
+        subtests = BATCH_WEBTEST["subtests"]
+        report_details = BATCH_WEBTEST["report"]
     else:
-        subtests = BATCH_MAILTEST['subtests']
-        report_details = BATCH_MAILTEST['report']
+        subtests = BATCH_MAILTEST["subtests"]
+        report_details = BATCH_MAILTEST["report"]
 
     report_ids = {}
     for subtest in subtests:
         report_ids[subtest] = set()
         # example: batch_test.ipv6.mailtestreport_set.all()
-        for report in getattr(
-                getattr(batch_test, subtest),
-                '{}_set'.format(report_details['name'])).all():
+        for report in getattr(getattr(batch_test, subtest), "{}_set".format(report_details["name"])).all():
             report_ids[subtest].add(report.id)
 
         if not report_ids[subtest]:
@@ -319,7 +307,7 @@ def get_common_report(batch_domain):
 
     if common_report_ids:
         common_report_id = max(common_report_ids)
-        report_model = batch_test._meta.get_field('report').remote_field.model
+        report_model = batch_test._meta.get_field("report").remote_field.model
         try:
             return report_model.objects.get(id=common_report_id)
         except report_model.DoesNotExist:
@@ -341,17 +329,15 @@ def create_report(batch_domain):
             ipv6=batch_test.ipv6,
             dnssec=batch_test.dnssec,
             tls=batch_test.tls,
-            appsecpriv=batch_test.appsecpriv)
+            appsecpriv=batch_test.appsecpriv,
+        )
         probe_reports = batch_webprobes.get_probe_reports(report)
         score = batch_webprobes.count_probe_reports_score(probe_reports)
     else:
         batch_test = batch_domain.mailtest
         report = MailTestReport(
-            domain=domain,
-            ipv6=batch_test.ipv6,
-            dnssec=batch_test.dnssec,
-            auth=batch_test.auth,
-            tls=batch_test.tls)
+            domain=domain, ipv6=batch_test.ipv6, dnssec=batch_test.dnssec, auth=batch_test.auth, tls=batch_test.tls
+        )
         probe_reports = batch_mailprobes.get_probe_reports(report)
         score = batch_mailprobes.count_probe_reports_score(probe_reports)
 
@@ -383,7 +369,7 @@ def update_domain_status(batch_domain):
         batch_domain.status = BatchDomainStatus.done
         find_or_create_report(batch_domain)
     batch_domain.status_changed = timezone.now()
-    batch_domain.save(update_fields=['status_changed', 'status'])
+    batch_domain.save(update_fields=["status_changed", "status"])
 
 
 def update_batch_status(batch_request):
@@ -392,16 +378,16 @@ def update_batch_status(batch_request):
     request's status if necessary.
 
     """
-    if batch_request.status in (BatchRequestStatus.cancelled,
-                                BatchRequestStatus.done,
-                                BatchRequestStatus.registering,
-                                BatchRequestStatus.error):
+    if batch_request.status in (
+        BatchRequestStatus.cancelled,
+        BatchRequestStatus.done,
+        BatchRequestStatus.registering,
+        BatchRequestStatus.error,
+    ):
         return
 
-    waiting = batch_request.domains.filter(
-        status=BatchDomainStatus.waiting).exists()
-    running = batch_request.domains.filter(
-        status=BatchDomainStatus.running).exists()
+    waiting = batch_request.domains.filter(status=BatchDomainStatus.waiting).exists()
+    running = batch_request.domains.filter(status=BatchDomainStatus.running).exists()
     if not waiting:
         if running:
             batch_request.status = BatchRequestStatus.running
@@ -410,7 +396,7 @@ def update_batch_status(batch_request):
             batch_request.finished_date = timezone.now()
     else:
         batch_request.status = BatchRequestStatus.live
-    batch_request.save(update_fields=['status', 'finished_date'])
+    batch_request.save(update_fields=["status", "finished_date"])
 
 
 def batch_callback_hook(result, task_id):
@@ -425,9 +411,7 @@ def batch_callback_hook(result, task_id):
     cache_id = redis_id.running_batch_test.id.format(task_id)
     cached = cache.get(cache_id)
     if not cached:
-        logger.error(
-            "Post callback, could not find task id '{}'"
-            "".format(task_id))
+        logger.error("Post callback, could not find task id '{}'" "".format(task_id))
         return
 
     batch_domain_id, subtest = cached
@@ -457,9 +441,7 @@ def error_callback(request, exc, traceback):
     cache_id = redis_id.running_batch_test.id.format(request.id)
     cached = cache.get(cache_id)
     if not cached:
-        logger.error(
-            "Error callback, could not find task id '{}'"
-            "".format(request.id))
+        logger.error("Error callback, could not find task id '{}'" "".format(request.id))
         return
 
     batch_domain_id, test = cached
@@ -479,19 +461,17 @@ def record_subtest_error(batch_test, subtest):
     the status if appropriate.
 
     """
-    error_count = getattr(batch_test, '{}_errors'.format(subtest))
-    status = getattr(batch_test, '{}_status'.format(subtest))
+    error_count = getattr(batch_test, "{}_errors".format(subtest))
+    status = getattr(batch_test, "{}_status".format(subtest))
     error_count += 1
     if status != BatchTestStatus.cancelled:
         if error_count > 2:
             status = BatchTestStatus.error
         else:
             status = BatchTestStatus.waiting
-        setattr(batch_test, '{}_status'.format(subtest), status)
-    setattr(batch_test, '{}_errors'.format(subtest), error_count)
-    batch_test.save(update_fields=[
-        '{}_status'.format(subtest),
-        '{}_errors'.format(subtest)])
+        setattr(batch_test, "{}_status".format(subtest), status)
+    setattr(batch_test, "{}_errors".format(subtest), error_count)
+    batch_test.save(update_fields=["{}_status".format(subtest), "{}_errors".format(subtest)])
     return error_count
 
 
@@ -501,32 +481,28 @@ def find_stalled_tests_and_update_db():
     threshold and update their status.
 
     """
-    running_domains = BatchDomain.objects.filter(
-        status=BatchDomainStatus.running)
+    running_domains = BatchDomain.objects.filter(status=BatchDomainStatus.running)
     now = timezone.now()
     for batch_domain in running_domains:
         timediff = (now - batch_domain.status_changed).total_seconds()
         if timediff >= settings.BATCH_MAX_RUNNING_TIME:
             if batch_domain.webtest:
                 batch_test = batch_domain.webtest
-                subtests = BATCH_WEBTEST['subtests']
+                subtests = BATCH_WEBTEST["subtests"]
             else:
                 batch_test = batch_domain.mailtest
-                subtests = BATCH_MAILTEST['subtests']
+                subtests = BATCH_MAILTEST["subtests"]
 
             for subtest in subtests:
-                status = getattr(batch_test, '{}_status'.format(subtest))
+                status = getattr(batch_test, "{}_status".format(subtest))
                 if status == BatchTestStatus.running:
                     errors = record_subtest_error(batch_test, subtest)
-                    logger.info(
-                        "{} errors for {}({})"
-                        "".format(errors, batch_domain.domain, subtest))
+                    logger.info("{} errors for {}({})" "".format(errors, batch_domain.domain, subtest))
             update_domain_status(batch_domain)
 
 
 def update_batch_request_status():
-    batch_requests = BatchRequest.objects.filter(
-        status__in=(BatchRequestStatus.live, BatchRequestStatus.running))
+    batch_requests = BatchRequest.objects.filter(status__in=(BatchRequestStatus.live, BatchRequestStatus.running))
     for batch_request in batch_requests:
         update_batch_status(batch_request)
 
@@ -537,8 +513,7 @@ def _run_scheduler():
     considered loaded.
 
     """
-    client = Rabbit(
-        settings.RABBIT, settings.RABBIT_USER, settings.RABBIT_PASS)
+    client = Rabbit(settings.RABBIT, settings.RABBIT_USER, settings.RABBIT_PASS)
     domains_to_test = settings.BATCH_SCHEDULER_DOMAINS
 
     start_time = timer()
@@ -566,16 +541,13 @@ def _run_scheduler():
             subtests_started = 0
             batch_test = batch_domain.get_batch_test()
             if isinstance(batch_test, BatchWebTest):
-                subtests = BATCH_WEBTEST['subtests']
+                subtests = BATCH_WEBTEST["subtests"]
             else:
-                subtests = BATCH_MAILTEST['subtests']
+                subtests = BATCH_MAILTEST["subtests"]
 
             for subtest in subtests:
-                if (getattr(batch_test, '{}_status'.format(subtest))
-                        == BatchTestStatus.waiting):
-                    started_test = check_for_result_or_start_test(
-                        batch_domain, batch_test, subtest,
-                        subtests[subtest])
+                if getattr(batch_test, "{}_status".format(subtest)) == BatchTestStatus.waiting:
+                    started_test = check_for_result_or_start_test(batch_domain, batch_test, subtest, subtests[subtest])
                     if started_test:
                         subtests_started += 1
 

@@ -30,6 +30,9 @@ else
 	POFILES_TAR_ARGS+=$(TAR)
 endif
 
+pysrcdirs = internetnl tests interface checks
+pysrc = $(shell find ${pysrcdirs} -name \*.py)
+
 bin = .venv/bin
 env = env PATH="${bin}:$$PATH"
 
@@ -269,7 +272,47 @@ test: .make.test	## run test suite
 	# ${env} python3 manage.py makemigrations --check
 
 
+
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
 	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} pytest -vvv --log-cli-level=10 -k ${case}
+
+
+check: .make.check.py .make.check.sh  ## code quality checks
+.make.check.py: ${pysrc}
+	# check code quality
+	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
+	# check formatting
+	${env} black --line-length 120 --check ${pysrcdirs}
+
+autofix fix: .make.fix  ## automatic fix of trivial code quality issues
+.make.fix: ${pysrc}
+	# remove unused imports
+	${env} autoflake -ri --remove-all-unused-imports ${pysrcdirs}
+	# autoformat code
+	# -q is used because a few files cannot be formatted with black, and will raise errors
+	${env} black --line-length 120 -q ${pysrcdirs}
+	# replaced by black: fix trivial pep8 style issues
+	# replaced by black: ${env} autopep8 -ri ${pysrcdirs}
+	# replaced by black: sort imports
+	# replaced by black: ${env} isort -rc ${pysrcdirs}
+	# do a check after autofixing to show remaining problems
+	${MAKE} check
+
+save-custom-deps:
+	# this saves building a ton of dependencies every sync.
+	mkdir -p custom-deps
+	# save unbound
+	cp .venv/lib/python3.8/site-packages/_unbound.la custom-deps
+	cp .venv/lib/python3.8/site-packages/_unbound.so custom-deps
+	cp .venv/lib/python3.8/site-packages/unbound.py custom-deps
+	cp -r .venv/lib/python3.8/site-packages/pythonwhois-2.4.3-py3.8.egg custom-deps
+	cp -r .venv/lib/python3.8/site-packages/nassl-1.1.3-py3.8-macosx-12-x86_64.egg custom-deps
+
+install-custom-deps:
+	cp -rf custom-deps .venv/lib/python3.8/site-packages/
+
+
+.QA: qa
+qa: fix check test

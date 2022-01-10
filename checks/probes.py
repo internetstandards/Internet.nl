@@ -1,17 +1,32 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from django.utils.translation import ugettext as _
 from django.conf import settings
+from django.utils.translation import ugettext as _
 
 from checks import categories
+from checks.categories import MailTlsStarttlsExists, WebTlsHttpsExists
+from checks.models import (
+    ConnectionTest,
+    DomainTestDnssec,
+    DomainTestIpv6,
+    MailTestAuth,
+    MailTestDnssec,
+    MailTestIpv6,
+    MailTestTls,
+    WebTestAppsecpriv,
+    WebTestTls,
+)
+from checks.scoring import (
+    STATUS_ERROR,
+    STATUS_FAIL,
+    STATUS_GOOD_NOT_TESTED,
+    STATUS_INFO,
+    STATUS_NOT_TESTED,
+    STATUS_NOTICE,
+    STATUS_SUCCESS,
+    STATUSES_HTML_CSS_TEXT_MAP,
+)
 from checks.tasks import dispatcher
-from checks.models import ConnectionTest, DomainTestIpv6, DomainTestDnssec
-from checks.models import WebTestTls, MailTestIpv6, MailTestDnssec, MailTestAuth
-from checks.models import MailTestTls, WebTestAppsecpriv
-from checks.categories import WebTlsHttpsExists, MailTlsStarttlsExists
-from checks.scoring import STATUS_SUCCESS, STATUS_FAIL, STATUS_NOTICE, STATUS_INFO
-from checks.scoring import STATUS_NOT_TESTED, STATUS_GOOD_NOT_TESTED
-from checks.scoring import STATUSES_HTML_CSS_TEXT_MAP, STATUS_ERROR
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     from checks.tasks import ipv6
@@ -85,8 +100,8 @@ class ProbeSet(object):
         """
         scores = []
         for pr in probe_reports:
-            total_score = pr['totalscore']
-            max_score = pr['maxscore']
+            total_score = pr["totalscore"]
+            max_score = pr["maxscore"]
             if max_score == 0:
                 continue
             scores.append(total_score)
@@ -96,8 +111,17 @@ class ProbeSet(object):
 
 class Probe(object):
     def __init__(
-            self, name, prefix, category=None, nourl=False, model=None,
-            taskset=None, reportfield="report", scorename=None, maxscore=None):
+        self,
+        name,
+        prefix,
+        category=None,
+        nourl=False,
+        model=None,
+        taskset=None,
+        reportfield="report",
+        scorename=None,
+        maxscore=None,
+    ):
         """
         Each category has a probe, a probe is the unit that can be passed to
         templates to start test, can start celery tasks, can get task results
@@ -150,8 +174,8 @@ class Probe(object):
         has_mandatory = False
         has_optional = False
         for name, subtest in report.items():
-            status = report[name]['status']
-            worst_status = report[name]['worst_status']
+            status = report[name]["status"]
+            worst_status = report[name]["worst_status"]
             if worst_status == STATUS_FAIL:
                 has_mandatory = True
             elif worst_status == STATUS_NOTICE:
@@ -177,12 +201,12 @@ class Probe(object):
         # TLS is kind of an anomally as the first test has no score but
         # reflects the overall verdict of the category if it is the only
         # result present.
-        if self.name == 'tls':
+        if self.name == "tls":
             if len(report) - 1 <= count[STATUS_NOT_TESTED]:
-                if self.prefix == 'mail':
-                    status = report['starttls_exists']['status']
+                if self.prefix == "mail":
+                    status = report["starttls_exists"]["status"]
                 else:
-                    status = report['https_exists']['status']
+                    status = report["https_exists"]["status"]
 
                 # Currently we don't have NOT_TESTED for a whole category.
                 if status == STATUS_NOT_TESTED:
@@ -215,8 +239,7 @@ class Probe(object):
             - results=Celery JSON output
 
         """
-        return dispatcher.check_results(
-            dname, self.taskset, remote_addr, get_results=True)
+        return dispatcher.check_results(dname, self.taskset, remote_addr, get_results=True)
 
     def check_results(self, dname, remote_addr):
         """
@@ -234,20 +257,17 @@ class Probe(object):
         """
         filter_value = dict(domain=dname)
         if self.model is DomainTestDnssec:
-            filter_value['maildomain_id'] = None
-        modelobj = self.model.objects.filter(**filter_value).order_by('-id')[0]
+            filter_value["maildomain_id"] = None
+        modelobj = self.model.objects.filter(**filter_value).order_by("-id")[0]
         return self.rated_results_by_model(modelobj)
 
     def rated_results_by_model(self, modelobj):
         if not modelobj:
             return None
 
-        max_score, total_score, verdict, text_verdict = (
-            self.get_scores_and_verdict(modelobj))
-        summary = _("test {}{} {} summary".format(
-            self.prefix, self.name, text_verdict))
-        description = _("test {}{} {} description".format(
-            self.prefix, self.name, text_verdict))
+        max_score, total_score, verdict, text_verdict = self.get_scores_and_verdict(modelobj)
+        summary = _("test {}{} {} summary".format(self.prefix, self.name, text_verdict))
+        description = _("test {}{} {} description".format(self.prefix, self.name, text_verdict))
 
         return dict(
             done=True,
@@ -285,8 +305,7 @@ class Probe(object):
             total_score = 0
             modelobj.totalscore(total_score_arg)
         else:
-            total_score = int(
-                100.0 / max_score * modelobj.totalscore(total_score_arg))
+            total_score = int(100.0 / max_score * modelobj.totalscore(total_score_arg))
 
         if self.prefix == "conn":
             verdict = self._verdict_connection(total_score)
@@ -307,39 +326,39 @@ class Probe(object):
         if isinstance(modelobj, WebTestTls):
             test_instance = WebTlsHttpsExists()
             test_instance.result_unreachable()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test sitetls unreachable description
                 # test sitetls unreachable summary
                 return "unreachable"
         elif isinstance(modelobj, MailTestTls):
             test_instance = MailTlsStarttlsExists()
             test_instance.result_unreachable()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test mailtls unreachable description
                 # test mailtls unreachable summary
                 return "unreachable"
             test_instance.result_could_not_test()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test mailtls untestable description
                 # test mailtls untestable summary
                 return "untestable"
             test_instance.result_no_mailservers()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test mailtls no-mx description
                 # test mailtls no-mx summary
                 return "no-mx"
             test_instance.result_null_mx()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test mailtls null-mx description
                 # test mailtls null-mx summary
                 return "null-mx"
             test_instance.result_no_null_mx()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test mailtls no-null-mx description
                 # test mailtls no-null-mx summary
                 return "no-null-mx"
             test_instance.result_invalid_null_mx()
-            if report[test_instance.name]['verdict'] == test_instance.verdict:
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
                 # test mailtls invalid-null-mx description
                 # test mailtls invalid-null-mx summary
                 return "invalid-null-mx"
@@ -377,51 +396,49 @@ class Probe(object):
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     web_probe_ipv6 = Probe(
-        "ipv6", "site", model=DomainTestIpv6,
-        category=categories.WebIpv6,
-        taskset=ipv6.web_registered)
+        "ipv6", "site", model=DomainTestIpv6, category=categories.WebIpv6, taskset=ipv6.web_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     web_probe_dnssec = Probe(
-        "dnssec", "site", model=DomainTestDnssec,
-        category=categories.WebDnssec,
-        taskset=dnssec.web_registered)
+        "dnssec", "site", model=DomainTestDnssec, category=categories.WebDnssec, taskset=dnssec.web_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    web_probe_tls = Probe(
-        "tls", "site", model=WebTestTls,
-        category=categories.WebTls,
-        taskset=tls.web_registered)
+    web_probe_tls = Probe("tls", "site", model=WebTestTls, category=categories.WebTls, taskset=tls.web_registered)
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     web_probe_appsecpriv = Probe(
-        "appsecpriv", "site", model=WebTestAppsecpriv,
+        "appsecpriv",
+        "site",
+        model=WebTestAppsecpriv,
         category=categories.WebAppsecpriv,
-        taskset=appsecpriv.web_registered)
+        taskset=appsecpriv.web_registered,
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     batch_web_probe_ipv6 = Probe(
-        "ipv6", "site", model=DomainTestIpv6,
-        category=categories.WebIpv6,
-        taskset=ipv6.batch_web_registered)
+        "ipv6", "site", model=DomainTestIpv6, category=categories.WebIpv6, taskset=ipv6.batch_web_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     batch_web_probe_dnssec = Probe(
-        "dnssec", "site", model=DomainTestDnssec,
-        category=categories.WebDnssec,
-        taskset=dnssec.batch_web_registered)
+        "dnssec", "site", model=DomainTestDnssec, category=categories.WebDnssec, taskset=dnssec.batch_web_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     batch_web_probe_tls = Probe(
-        "tls", "site", model=WebTestTls,
-        category=categories.WebTls,
-        taskset=tls.batch_web_registered)
+        "tls", "site", model=WebTestTls, category=categories.WebTls, taskset=tls.batch_web_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     batch_web_probe_appsecpriv = Probe(
-        "appsecpriv", "site", model=WebTestAppsecpriv,
+        "appsecpriv",
+        "site",
+        model=WebTestAppsecpriv,
         category=categories.WebAppsecpriv,
-        taskset=appsecpriv.batch_web_registered)
+        taskset=appsecpriv.batch_web_registered,
+    )
 
 webprobes = ProbeSet()
 counter = -1
@@ -455,51 +472,41 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     mail_probe_ipv6 = Probe(
-        "ipv6", "mail", model=MailTestIpv6,
-        category=categories.MailIpv6,
-        taskset=ipv6.mail_registered)
+        "ipv6", "mail", model=MailTestIpv6, category=categories.MailIpv6, taskset=ipv6.mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     mail_probe_dnssec = Probe(
-        "dnssec", "mail", model=MailTestDnssec,
-        category=categories.MailDnssec,
-        taskset=dnssec.mail_registered)
+        "dnssec", "mail", model=MailTestDnssec, category=categories.MailDnssec, taskset=dnssec.mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
     mail_probe_auth = Probe(
-        "auth", "mail", model=MailTestAuth,
-        category=categories.MailAuth,
-        taskset=mail.mail_registered)
+        "auth", "mail", model=MailTestAuth, category=categories.MailAuth, taskset=mail.mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    mail_probe_tls = Probe(
-        "tls", "mail", model=MailTestTls,
-        category=categories.MailTls,
-        taskset=tls.mail_registered)
+    mail_probe_tls = Probe("tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls.mail_registered)
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     batch_mail_probe_ipv6 = Probe(
-        "ipv6", "mail", model=MailTestIpv6,
-        category=categories.MailIpv6,
-        taskset=ipv6.batch_mail_registered)
+        "ipv6", "mail", model=MailTestIpv6, category=categories.MailIpv6, taskset=ipv6.batch_mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     batch_mail_probe_dnssec = Probe(
-        "dnssec", "mail", model=MailTestDnssec,
-        category=categories.MailDnssec,
-        taskset=dnssec.batch_mail_registered)
+        "dnssec", "mail", model=MailTestDnssec, category=categories.MailDnssec, taskset=dnssec.batch_mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
     batch_mail_probe_auth = Probe(
-        "auth", "mail", model=MailTestAuth,
-        category=categories.MailAuth,
-        taskset=mail.batch_mail_registered)
+        "auth", "mail", model=MailTestAuth, category=categories.MailAuth, taskset=mail.batch_mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     batch_mail_probe_tls = Probe(
-        "tls", "mail", model=MailTestTls,
-        category=categories.MailTls,
-        taskset=tls.batch_mail_registered)
+        "tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls.batch_mail_registered
+    )
 
 
 mailprobes = ProbeSet()

@@ -57,19 +57,19 @@ group by res
 ) as per_day
 group by res, ww, mm, cc
 order by res asc
-""", [start_date, end_date, start_date, end_date, start_date, end_date])
+""",
+            [start_date, end_date, start_date, end_date, start_date, end_date],
+        )
         table_content = c.fetchall()
 
-    per_test = [
-        sum(filter(None, x))
-        if i > 0 else ''
-        for i, x in enumerate(zip(*table_content))]
+    per_test = [sum(filter(None, x)) if i > 0 else "" for i, x in enumerate(zip(*table_content))]
     per_test[0] = "Total per period"
     return render(
-        request, 'statistics.html',
+        request,
+        "statistics.html",
         dict(
-            table_headers=[
-                "Date", "Website", "Mail", "Connection", "Total per day"],
+            table_headers=["Date", "Website", "Mail", "Connection", "Total per day"],
             table_content=table_content,
-            per_test=per_test
-        ))
+            per_test=per_test,
+        ),
+    )

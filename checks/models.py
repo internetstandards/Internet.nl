@@ -3,13 +3,13 @@
 import ast
 import os
 from enum import Enum
-from enumfields import EnumField, EnumIntegerField
-from enumfields import Enum as LabelEnum
 from uuid import uuid4 as uuid
 
 from django.core.exceptions import SuspiciousFileOperation
-from django.db import models, transaction, connection
+from django.db import models, transaction
 from django.utils import timezone
+from enumfields import Enum as LabelEnum
+from enumfields import EnumField, EnumIntegerField
 
 
 class ListField(models.TextField):
@@ -41,8 +41,8 @@ class ListField(models.TextField):
 
 
 class AutoConfOption(Enum):
-    DATED_REPORT_ID_THRESHOLD_WEB = 'DATED_REPORT_ID_THRESHOLD_WEB'
-    DATED_REPORT_ID_THRESHOLD_MAIL = 'DATED_REPORT_ID_THRESHOLD_MAIL'
+    DATED_REPORT_ID_THRESHOLD_WEB = "DATED_REPORT_ID_THRESHOLD_WEB"
+    DATED_REPORT_ID_THRESHOLD_MAIL = "DATED_REPORT_ID_THRESHOLD_MAIL"
 
 
 class MxStatus(LabelEnum):
@@ -159,34 +159,35 @@ class BaseTestModel(models.Model):
 class ConnectionTest(BaseTestModel):
     report = ListField(default="")
     reportdnssec = ListField(default="")
-    test_id = models.CharField(
-        unique=True, db_index=True, max_length=32, default=conn_test_id)
+    test_id = models.CharField(unique=True, db_index=True, max_length=32, default=conn_test_id)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     ipv4_addr = models.CharField(max_length=16, default="")
     ipv4_owner = models.CharField(max_length=255, default="")
     ipv4_origin_as = models.ForeignKey(
-        'ASRecord', null=True, related_name='ipv4_connection_tests',on_delete=models.CASCADE)
+        "ASRecord", null=True, related_name="ipv4_connection_tests", on_delete=models.CASCADE
+    )
     ipv4_reverse = models.CharField(max_length=255, default="")
 
     ipv6_addr = models.CharField(max_length=40, default="")
     ipv6_owner = models.CharField(max_length=255, default="")
     ipv6_origin_as = models.ForeignKey(
-        'ASRecord', null=True, related_name='ipv6_connection_tests',on_delete=models.CASCADE)
+        "ASRecord", null=True, related_name="ipv6_connection_tests", on_delete=models.CASCADE
+    )
     ipv6_reverse = models.CharField(max_length=255, default="")
-    aaaa_ipv6 = models.BooleanField(null=True,default=False)
-    addr_ipv6 = models.BooleanField(null=True,default=False)
+    aaaa_ipv6 = models.BooleanField(null=True, default=False)
+    addr_ipv6 = models.BooleanField(null=True, default=False)
 
-    resolv_ipv6 = models.BooleanField(null=True,default=False)
-    slaac_without_privext = models.BooleanField(null=True,default=False)
-    dnssec_val = models.BooleanField(null=True,default=False)
+    resolv_ipv6 = models.BooleanField(null=True, default=False)
+    slaac_without_privext = models.BooleanField(null=True, default=False)
+    dnssec_val = models.BooleanField(null=True, default=False)
 
     score_ipv6 = models.IntegerField(null=True)
     score_ipv6_max = models.IntegerField(null=True)
     score_dnssec = models.IntegerField(null=True)
     score_dnssec_max = models.IntegerField(null=True)
 
-    finished = models.BooleanField(null=True,default=False)
+    finished = models.BooleanField(null=True, default=False)
 
     def totalscore(self, probe):
         score = 0
@@ -232,31 +233,46 @@ class ConnectionTest(BaseTestModel):
 
     def __dir__(self):
         return [
-            'report', 'reportdnssec', 'test_id', 'timestamp', 'ipv4_addr',
-            'ipv4_owner', 'ipv4_origin_as', 'ipv4_reverse', 'ipv6_addr',
-            'ipv6_owner', 'ipv6_origin_as', 'ipv6_reverse', 'aaaa_ipv6',
-            'addr_ipv6', 'resolv_ipv6', 'slaac_without_privext',
-            'dnssec_val', 'score_ipv6', 'score_ipv6_max', 'score_dnssec',
-            'score_dnssec_max', 'finished'
+            "report",
+            "reportdnssec",
+            "test_id",
+            "timestamp",
+            "ipv4_addr",
+            "ipv4_owner",
+            "ipv4_origin_as",
+            "ipv4_reverse",
+            "ipv6_addr",
+            "ipv6_owner",
+            "ipv6_origin_as",
+            "ipv6_reverse",
+            "aaaa_ipv6",
+            "addr_ipv6",
+            "resolv_ipv6",
+            "slaac_without_privext",
+            "dnssec_val",
+            "score_ipv6",
+            "score_ipv6_max",
+            "score_dnssec",
+            "score_dnssec_max",
+            "finished",
         ]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class Resolver(models.Model):
-    connectiontest = models.ForeignKey(ConnectionTest,on_delete=models.CASCADE)
+    connectiontest = models.ForeignKey(ConnectionTest, on_delete=models.CASCADE)
     address = models.CharField(max_length=40)
     owner = models.CharField(max_length=255)
-    origin_as = models.ForeignKey(
-        'ASRecord', null=True, related_name='resolvers',on_delete=models.CASCADE)
+    origin_as = models.ForeignKey("ASRecord", null=True, related_name="resolvers", on_delete=models.CASCADE)
     reverse = models.CharField(max_length=255)
 
     def __dir__(self):
-        return ['connectiontest', 'address', 'owner', 'origin_as', 'reverse']
+        return ["connectiontest", "address", "owner", "origin_as", "reverse"]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class ASRecord(models.Model):
@@ -264,10 +280,10 @@ class ASRecord(models.Model):
     description = models.CharField(max_length=255)
 
     def __dir__(self):
-        return ['number', 'description']
+        return ["number", "description"]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 ###
@@ -290,13 +306,20 @@ class DomainTestIpv6(BaseTestModel):
 
     def __dir__(self):
         return [
-            'timestamp', 'domain', 'report', 'web_simhash_distance',
-            'web_simhash_score', 'web_score', 'mx_score', 'ns_score', 'score',
-            'max_score'
+            "timestamp",
+            "domain",
+            "report",
+            "web_simhash_distance",
+            "web_simhash_score",
+            "web_score",
+            "mx_score",
+            "ns_score",
+            "score",
+            "max_score",
         ]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class IPv6TestDomain(models.Model):
@@ -308,23 +331,28 @@ class IPv6TestDomain(models.Model):
     score = models.IntegerField(null=True)
 
     def __dir__(self):
-        return ['domain', 'v6_good', 'v6_bad', 'v4_good', 'v4_bad', 'score']
+        return ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
 
     class Meta:
         abstract = True
 
 
 class WebDomain(IPv6TestDomain):
-    domaintestipv6 = models.ForeignKey(
-        DomainTestIpv6, null=True, related_name='webdomains',on_delete=models.CASCADE)
+    domaintestipv6 = models.ForeignKey(DomainTestIpv6, null=True, related_name="webdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
-        return super(WebDomain, self).__dir__().extend([
-            'domaintestipv6',
-        ])
+        return (
+            super(WebDomain, self)
+            .__dir__()
+            .extend(
+                [
+                    "domaintestipv6",
+                ]
+            )
+        )
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class DomainServersModel(models.Model):
@@ -333,6 +361,7 @@ class DomainServersModel(models.Model):
     Use this class to map server results to domain.
 
     """
+
     domain = models.CharField(max_length=255, default="")
     report = ListField(default="")
     score = models.IntegerField(null=True)
@@ -345,58 +374,55 @@ class DomainServersModel(models.Model):
         if len(testset) == 0:
             total = 0
         else:
-            total = min(
-                [result.totalscore(score_fields) for result in testset])
+            total = min([result.totalscore(score_fields) for result in testset])
         self.score = total
         self.save()
         return self.score
 
     def details_set(self, probe, testset):
-        return [('', '', self.report)]
+        return [("", "", self.report)]
 
     def details(self, probe):
         return self.details_set(probe)
 
     def __dir__(self):
-        return ['domain', 'report', 'score', 'max_score']
+        return ["domain", "report", "score", "max_score"]
 
     class Meta:
         abstract = True
 
 
 class MailTestTls(DomainServersModel):
-    mx_status = EnumIntegerField(MxStatus, null=True,default=False)
+    mx_status = EnumIntegerField(MxStatus, null=True, default=False)
 
     def totalscore(self, score_fields):
         tests_subset = self.testset.all()
-        return super(MailTestTls, self).totalscore(
-            score_fields, tests_subset, mailtest=True)
+        return super(MailTestTls, self).totalscore(score_fields, tests_subset, mailtest=True)
 
     def details_set(self, probe):
         return super(MailTestTls, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['mx_status'] + super(MailTestTls, self).__dir__()
+        return ["mx_status"] + super(MailTestTls, self).__dir__()
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class MailTestDnssec(DomainServersModel):
-    mx_status = EnumIntegerField(MxStatus, null=True,default=False)
+    mx_status = EnumIntegerField(MxStatus, null=True, default=False)
 
     def totalscore(self, score_fields):
-        return super(MailTestDnssec, self).totalscore(
-            score_fields, self.testset.all(), mailtest=True)
+        return super(MailTestDnssec, self).totalscore(score_fields, self.testset.all(), mailtest=True)
 
     def details_set(self, probe):
         return super(MailTestDnssec, self).details_set(probe, self.testset)
 
     def __dir__(self):
-        return ['mx_status'] + super(MailTestDnssec, self).__dir__()
+        return ["mx_status"] + super(MailTestDnssec, self).__dir__()
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 # DNSSEC
@@ -408,17 +434,13 @@ class DomainTestDnssec(BaseTestModel):
     log = models.TextField(default="", null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
-    maildomain = models.ForeignKey(
-        MailTestDnssec, null=True, related_name="testset",on_delete=models.CASCADE)
+    maildomain = models.ForeignKey(MailTestDnssec, null=True, related_name="testset", on_delete=models.CASCADE)
 
     def __dir__(self):
-        return [
-            'timestamp', 'domain', 'report', 'status', 'log', 'score',
-            'max_score', 'maildomain'
-        ]
+        return ["timestamp", "domain", "report", "status", "log", "score", "max_score", "maildomain"]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class WebTestTls(DomainServersModel):
@@ -430,7 +452,7 @@ class WebTestTls(DomainServersModel):
         return super(WebTestTls, self).details_set(probe, self.webtestset)
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class DomainTestTls(BaseTestModel):
@@ -438,21 +460,19 @@ class DomainTestTls(BaseTestModel):
     domain = models.CharField(max_length=255, default="")
     report = ListField(default="")
     port = models.IntegerField(null=True)
-    maildomain = models.ForeignKey(
-        MailTestTls, null=True, related_name="testset",on_delete=models.CASCADE)
-    webdomain = models.ForeignKey(
-        WebTestTls, null=True, related_name="webtestset",on_delete=models.CASCADE)
-    server_reachable = models.BooleanField(null=True,default=True)
-    tls_enabled = models.BooleanField(null=True,default=False)
+    maildomain = models.ForeignKey(MailTestTls, null=True, related_name="testset", on_delete=models.CASCADE)
+    webdomain = models.ForeignKey(WebTestTls, null=True, related_name="webtestset", on_delete=models.CASCADE)
+    server_reachable = models.BooleanField(null=True, default=True)
+    tls_enabled = models.BooleanField(null=True, default=False)
     tls_enabled_score = models.IntegerField(null=True)
-    could_not_test_smtp_starttls = models.BooleanField(null=True,default=False)
+    could_not_test_smtp_starttls = models.BooleanField(null=True, default=False)
 
     # DANE
     dane_log = models.TextField(default="", null=True)
     dane_score = models.IntegerField(null=True)
     dane_status = EnumField(DaneStatus, default=DaneStatus.none)
     dane_records = ListField(default=[])
-    dane_rollover = models.BooleanField(null=True,default=False)
+    dane_rollover = models.BooleanField(null=True, default=False)
 
     # TLS connection
     dh_param = models.CharField(max_length=255, default="", null=True)
@@ -474,11 +494,11 @@ class DomainTestTls(BaseTestModel):
     protocols_phase_out = ListField(null=True)
     protocols_score = models.IntegerField(null=True)
 
-    compression = models.BooleanField(null=True,default=False)
+    compression = models.BooleanField(null=True, default=False)
     compression_score = models.IntegerField(null=True)
-    secure_reneg = models.BooleanField(null=True,default=False)
+    secure_reneg = models.BooleanField(null=True, default=False)
     secure_reneg_score = models.IntegerField(null=True)
-    client_reneg = models.BooleanField(null=True,default=False)
+    client_reneg = models.BooleanField(null=True, default=False)
     client_reneg_score = models.IntegerField(null=True)
 
     zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
@@ -494,10 +514,10 @@ class DomainTestTls(BaseTestModel):
     forced_https_score = models.IntegerField(null=True)
 
     # HTTP headers
-    http_compression_enabled = models.BooleanField(null=True,default=False)
+    http_compression_enabled = models.BooleanField(null=True, default=False)
     http_compression_score = models.IntegerField(null=True)
 
-    hsts_enabled = models.BooleanField(null=True,default=False)
+    hsts_enabled = models.BooleanField(null=True, default=False)
     hsts_policies = ListField(default=[])
     hsts_score = models.IntegerField(null=True)
 
@@ -521,158 +541,208 @@ class DomainTestTls(BaseTestModel):
 
     def __dir__(self):
         return [
-            'timestamp', 'domain', 'report', 'port', 'maildomain', 'webdomain',
-            'server_reachable', 'tls_enabled', 'tls_enabled_score',
-            'could_not_test_smtp_starttls', 'dane_log', 'dane_score',
-            'dane_status', 'dh_param', 'ecdh_param', 'fs_bad', 'fs_phase_out',
-            'fs_score', 'ciphers_bad', 'ciphers_phase_out', 'ciphers_score',
-            'cipher_order', 'cipher_order_violation', 'cipher_order_score',
-            'protocols_bad', 'protocols_phase_out', 'protocols_score',
-            'compression', 'compression_score', 'secure_reneg',
-            'secure_reneg_score', 'client_reneg', 'client_reneg_score',
-            'zero_rtt', 'zero_rtt_score', 'ocsp_stapling',
-            'ocsp_stapling_score', 'kex_hash_func', 'kex_hash_func_score',
-            'forced_https', 'forced_https_score', 'http_compression_enabled',
-            'http_compression_score', 'hsts_enabled', 'hsts_policies',
-            'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
-            'cert_pubkey_bad', 'cert_pubkey_phase_out', 'cert_pubkey_score',
-            'cert_signature_bad', 'cert_signature_score', 'cert_hostmatch_bad',
-            'cert_hostmatch_score', 'score', 'protocols_good',
+            "timestamp",
+            "domain",
+            "report",
+            "port",
+            "maildomain",
+            "webdomain",
+            "server_reachable",
+            "tls_enabled",
+            "tls_enabled_score",
+            "could_not_test_smtp_starttls",
+            "dane_log",
+            "dane_score",
+            "dane_status",
+            "dh_param",
+            "ecdh_param",
+            "fs_bad",
+            "fs_phase_out",
+            "fs_score",
+            "ciphers_bad",
+            "ciphers_phase_out",
+            "ciphers_score",
+            "cipher_order",
+            "cipher_order_violation",
+            "cipher_order_score",
+            "protocols_bad",
+            "protocols_phase_out",
+            "protocols_score",
+            "compression",
+            "compression_score",
+            "secure_reneg",
+            "secure_reneg_score",
+            "client_reneg",
+            "client_reneg_score",
+            "zero_rtt",
+            "zero_rtt_score",
+            "ocsp_stapling",
+            "ocsp_stapling_score",
+            "kex_hash_func",
+            "kex_hash_func_score",
+            "forced_https",
+            "forced_https_score",
+            "http_compression_enabled",
+            "http_compression_score",
+            "hsts_enabled",
+            "hsts_policies",
+            "hsts_score",
+            "cert_chain",
+            "cert_trusted",
+            "cert_trusted_score",
+            "cert_pubkey_bad",
+            "cert_pubkey_phase_out",
+            "cert_pubkey_score",
+            "cert_signature_bad",
+            "cert_signature_score",
+            "cert_hostmatch_bad",
+            "cert_hostmatch_score",
+            "score",
+            "protocols_good",
         ]
 
     def get_web_api_details(self):
         return {
-            'dane_status': self.dane_status.name,
-            'dane_records': self.dane_records,
-            'kex_params_bad': self.fs_bad,
-            'kex_params_phase_out': self.fs_phase_out,
-            'ciphers_bad': self.ciphers_bad,
-            'ciphers_phase_out': self.ciphers_phase_out,
-            'cipher_order': self.cipher_order.name,
-            'cipher_order_violation': self.cipher_order_violation,
-            'protocols_bad': self.protocols_bad,
-            'protocols_phase_out': self.protocols_phase_out,
-            'compression': self.compression,
-            'secure_reneg': self.secure_reneg,
-            'client_reneg': self.client_reneg,
-            'zero_rtt': self.zero_rtt.name,
-            'ocsp_stapling': self.ocsp_stapling.name,
-            'kex_hash_func': self.kex_hash_func.name,
-            'https_redirect': self.forced_https.name,
-            'http_compression': self.http_compression_enabled,
-            'hsts': self.hsts_enabled,
-            'hsts_policies': self.hsts_policies,
-            'cert_chain': self.cert_chain,
-            'cert_trusted': self.cert_trusted,
-            'cert_pubkey_bad': self.cert_pubkey_bad,
-            'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
-            'cert_signature_bad': self.cert_signature_bad,
-            'cert_hostmatch_bad': self.cert_hostmatch_bad,
+            "dane_status": self.dane_status.name,
+            "dane_records": self.dane_records,
+            "kex_params_bad": self.fs_bad,
+            "kex_params_phase_out": self.fs_phase_out,
+            "ciphers_bad": self.ciphers_bad,
+            "ciphers_phase_out": self.ciphers_phase_out,
+            "cipher_order": self.cipher_order.name,
+            "cipher_order_violation": self.cipher_order_violation,
+            "protocols_bad": self.protocols_bad,
+            "protocols_phase_out": self.protocols_phase_out,
+            "compression": self.compression,
+            "secure_reneg": self.secure_reneg,
+            "client_reneg": self.client_reneg,
+            "zero_rtt": self.zero_rtt.name,
+            "ocsp_stapling": self.ocsp_stapling.name,
+            "kex_hash_func": self.kex_hash_func.name,
+            "https_redirect": self.forced_https.name,
+            "http_compression": self.http_compression_enabled,
+            "hsts": self.hsts_enabled,
+            "hsts_policies": self.hsts_policies,
+            "cert_chain": self.cert_chain,
+            "cert_trusted": self.cert_trusted,
+            "cert_pubkey_bad": self.cert_pubkey_bad,
+            "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
+            "cert_signature_bad": self.cert_signature_bad,
+            "cert_hostmatch_bad": self.cert_hostmatch_bad,
         }
 
     def get_mail_api_details(self):
         return {
-            'dane_status': self.dane_status.name,
-            'dane_records': self.dane_records,
-            'dane_rollover': self.dane_rollover,
-            'kex_params_bad': self.fs_bad,
-            'kex_params_phase_out': self.fs_phase_out,
-            'ciphers_bad': self.ciphers_bad,
-            'ciphers_phase_out': self.ciphers_phase_out,
-            'cipher_order': self.cipher_order.name,
-            'cipher_order_violation': self.cipher_order_violation,
-            'protocols_bad': self.protocols_bad,
-            'protocols_phase_out': self.protocols_phase_out,
-            'compression': self.compression,
-            'secure_reneg': self.secure_reneg,
-            'client_reneg': self.client_reneg,
-            'zero_rtt': self.zero_rtt.name,
-            'kex_hash_func': self.kex_hash_func.name,
-            'cert_chain': self.cert_chain,
-            'cert_trusted': self.cert_trusted,
-            'cert_pubkey_bad': self.cert_pubkey_bad,
-            'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
-            'cert_signature_bad': self.cert_signature_bad,
-            'cert_hostmatch_bad': self.cert_hostmatch_bad,
+            "dane_status": self.dane_status.name,
+            "dane_records": self.dane_records,
+            "dane_rollover": self.dane_rollover,
+            "kex_params_bad": self.fs_bad,
+            "kex_params_phase_out": self.fs_phase_out,
+            "ciphers_bad": self.ciphers_bad,
+            "ciphers_phase_out": self.ciphers_phase_out,
+            "cipher_order": self.cipher_order.name,
+            "cipher_order_violation": self.cipher_order_violation,
+            "protocols_bad": self.protocols_bad,
+            "protocols_phase_out": self.protocols_phase_out,
+            "compression": self.compression,
+            "secure_reneg": self.secure_reneg,
+            "client_reneg": self.client_reneg,
+            "zero_rtt": self.zero_rtt.name,
+            "kex_hash_func": self.kex_hash_func.name,
+            "cert_chain": self.cert_chain,
+            "cert_trusted": self.cert_trusted,
+            "cert_pubkey_bad": self.cert_pubkey_bad,
+            "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
+            "cert_signature_bad": self.cert_signature_bad,
+            "cert_hostmatch_bad": self.cert_hostmatch_bad,
         }
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
         tests_subset = self.webtestset.all()
-        return super(WebTestAppsecpriv, self).totalscore(
-            score_fields, tests_subset)
+        return super(WebTestAppsecpriv, self).totalscore(score_fields, tests_subset)
 
     def details_set(self, probe):
-        return super(WebTestAppsecpriv, self).details_set(
-            probe, self.webtestset)
+        return super(WebTestAppsecpriv, self).details_set(probe, self.webtestset)
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class DomainTestAppsecpriv(BaseTestModel):
     timestamp = models.DateTimeField(auto_now_add=True)
     domain = models.CharField(max_length=255, default="")
     report = ListField(default="")
-    webdomain = models.ForeignKey(
-        WebTestAppsecpriv, null=True, related_name="webtestset",on_delete=models.CASCADE)
-    server_reachable = models.BooleanField(null=True,default=True)
+    webdomain = models.ForeignKey(WebTestAppsecpriv, null=True, related_name="webtestset", on_delete=models.CASCADE)
+    server_reachable = models.BooleanField(null=True, default=True)
     score = models.IntegerField(null=True)
 
-    x_frame_options_enabled = models.BooleanField(null=True,default=False)
+    x_frame_options_enabled = models.BooleanField(null=True, default=False)
     x_frame_options_values = ListField(default=[])
     x_frame_options_score = models.IntegerField(null=True)
 
-    x_xss_protection_enabled = models.BooleanField(null=True,default=False)
+    x_xss_protection_enabled = models.BooleanField(null=True, default=False)
     x_xss_protection_values = ListField(default=[])
     x_xss_protection_score = models.IntegerField(null=True)
 
-    referrer_policy_enabled = models.BooleanField(null=True,default=False)
+    referrer_policy_enabled = models.BooleanField(null=True, default=False)
     referrer_policy_values = ListField(default=[])
     referrer_policy_score = models.IntegerField(null=True)
 
-    content_security_policy_enabled = models.BooleanField(null=True,default=False)
+    content_security_policy_enabled = models.BooleanField(null=True, default=False)
     content_security_policy_values = ListField(default=[])
     content_security_policy_score = models.IntegerField(null=True)
 
-    x_content_type_options_enabled = models.BooleanField(null=True,default=False)
+    x_content_type_options_enabled = models.BooleanField(null=True, default=False)
     x_content_type_options_values = ListField(default=[])
     x_content_type_options_score = models.IntegerField(null=True)
 
     def __dir__(self):
         return [
-            'timestamp', 'domain', 'report', 'webdomain', 'server_reachable',
-            'score', 'x_frame_options_enabled', 'x_frame_options_values',
-            'x_frame_options_score', 'x_xss_protection_enabled',
-            'x_xss_protection_values', 'x_xss_protection_score',
-            'referrer_policy_enabled', 'referrer_policy_values',
-            'referrer_policy_score', 'content_security_policy_enabled',
-            'content_security_policy_values', 'content_security_policy_score',
-            'x_content_type_options_enabled', 'x_content_type_options_values',
-            'x_content_type_options_score',
+            "timestamp",
+            "domain",
+            "report",
+            "webdomain",
+            "server_reachable",
+            "score",
+            "x_frame_options_enabled",
+            "x_frame_options_values",
+            "x_frame_options_score",
+            "x_xss_protection_enabled",
+            "x_xss_protection_values",
+            "x_xss_protection_score",
+            "referrer_policy_enabled",
+            "referrer_policy_values",
+            "referrer_policy_score",
+            "content_security_policy_enabled",
+            "content_security_policy_values",
+            "content_security_policy_score",
+            "x_content_type_options_enabled",
+            "x_content_type_options_values",
+            "x_content_type_options_score",
         ]
 
     def get_web_api_details(self):
         return {
-            'content_security_policy_enabled': self.content_security_policy_enabled,
-            'content_security_policy_values': self.content_security_policy_values,
-            'referrer_policy_enabled': self.referrer_policy_enabled,
-            'referrer_policy_values': self.referrer_policy_values,
-            'x_content_type_options_enabled': self.x_content_type_options_enabled,
-            'x_content_type_options_values': self.x_content_type_options_values,
-            'x_frame_options_enabled': self.x_frame_options_enabled,
-            'x_frame_options_values': self.x_frame_options_values,
+            "content_security_policy_enabled": self.content_security_policy_enabled,
+            "content_security_policy_values": self.content_security_policy_values,
+            "referrer_policy_enabled": self.referrer_policy_enabled,
+            "referrer_policy_values": self.referrer_policy_values,
+            "x_content_type_options_enabled": self.x_content_type_options_enabled,
+            "x_content_type_options_values": self.x_content_type_options_values,
+            "x_frame_options_enabled": self.x_frame_options_enabled,
+            "x_frame_options_values": self.x_frame_options_values,
             # TODO: to be removed in the future.
-            #'x_xss_protection_enabled': self.x_xss_protection_enabled,
-            #'x_xss_protection_values': self.x_xss_protection_values,
+            # 'x_xss_protection_enabled': self.x_xss_protection_enabled,
+            # 'x_xss_protection_values': self.x_xss_protection_values,
         }
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class DomainTestReport(models.Model):
@@ -680,19 +750,26 @@ class DomainTestReport(models.Model):
     domain = models.CharField(max_length=255, default="")
     registrar = models.CharField(max_length=255, default="")
     score = models.IntegerField(null=True)
-    ipv6 = models.ForeignKey(DomainTestIpv6, null=True,on_delete=models.CASCADE)
-    dnssec = models.ForeignKey(DomainTestDnssec, null=True,on_delete=models.CASCADE)
-    tls = models.ForeignKey(WebTestTls, null=True,on_delete=models.CASCADE)
-    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True,on_delete=models.CASCADE)
+    ipv6 = models.ForeignKey(DomainTestIpv6, null=True, on_delete=models.CASCADE)
+    dnssec = models.ForeignKey(DomainTestDnssec, null=True, on_delete=models.CASCADE)
+    tls = models.ForeignKey(WebTestTls, null=True, on_delete=models.CASCADE)
+    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True, on_delete=models.CASCADE)
 
     def __dir__(self):
         return [
-            'timestamp', 'domain', 'registrar', 'score', 'ipv6', 'dnssec',
-            'tls', 'appsecpriv',
+            "timestamp",
+            "domain",
+            "registrar",
+            "score",
+            "ipv6",
+            "dnssec",
+            "tls",
+            "appsecpriv",
         ]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
+
 
 ###
 # Mail test
@@ -708,44 +785,51 @@ class MailTestIpv6(BaseTestModel):
     ns_score = models.IntegerField(null=True)
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
-    mx_status = EnumIntegerField(MxStatus, null=True,default=False)
+    mx_status = EnumIntegerField(MxStatus, null=True, default=False)
 
     def __dir__(self):
-        return [
-            'timestamp', 'domain', 'report', 'mx_score', 'ns_score', 'score',
-            'max_score', 'mx_status'
-        ]
+        return ["timestamp", "domain", "report", "mx_score", "ns_score", "score", "max_score", "mx_status"]
+
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class NsDomain(IPv6TestDomain):
-    domaintestipv6 = models.ForeignKey(
-        DomainTestIpv6, null=True, related_name='nsdomains',on_delete=models.CASCADE)
-    mailtestipv6 = models.ForeignKey(
-        MailTestIpv6, null=True, related_name='nsdomains',on_delete=models.CASCADE)
+    domaintestipv6 = models.ForeignKey(DomainTestIpv6, null=True, related_name="nsdomains", on_delete=models.CASCADE)
+    mailtestipv6 = models.ForeignKey(MailTestIpv6, null=True, related_name="nsdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
-        return super(NsDomain, self).__dir__().extend([
-            'domaintestipv6',
-            'mailtestipv6',
-        ])
+        return (
+            super(NsDomain, self)
+            .__dir__()
+            .extend(
+                [
+                    "domaintestipv6",
+                    "mailtestipv6",
+                ]
+            )
+        )
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class MxDomain(IPv6TestDomain):
-    mailtestipv6 = models.ForeignKey(
-        MailTestIpv6, null=True, related_name='mxdomains',on_delete=models.CASCADE)
+    mailtestipv6 = models.ForeignKey(MailTestIpv6, null=True, related_name="mxdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
-        return super(MxDomain, self).__dir__().extend([
-            'mailtestipv6',
-        ])
+        return (
+            super(MxDomain, self)
+            .__dir__()
+            .extend(
+                [
+                    "mailtestipv6",
+                ]
+            )
+        )
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class DmarcPolicyStatus(LabelEnum):
@@ -770,15 +854,15 @@ class MailTestAuth(BaseTestModel):
     domain = models.CharField(max_length=255)
     report = ListField(default="")
     dkim_score = models.IntegerField(null=True)
-    dkim_available = models.BooleanField(null=True,default=False)
+    dkim_available = models.BooleanField(null=True, default=False)
     dmarc_score = models.IntegerField(null=True)
-    dmarc_available = models.BooleanField(null=True,default=False)
+    dmarc_available = models.BooleanField(null=True, default=False)
     dmarc_record = ListField(default=[])
     dmarc_record_org_domain = models.CharField(max_length=255, null=True)
     dmarc_policy_status = EnumIntegerField(DmarcPolicyStatus, null=True)
     dmarc_policy_score = models.IntegerField(null=True)
     spf_score = models.IntegerField(null=True)
-    spf_available = models.BooleanField(null=True,default=False)
+    spf_available = models.BooleanField(null=True, default=False)
     spf_record = ListField(default=[])
     spf_policy_status = EnumIntegerField(SpfPolicyStatus, null=True)
     spf_policy_score = models.IntegerField(null=True)
@@ -788,16 +872,29 @@ class MailTestAuth(BaseTestModel):
 
     def __dir__(self):
         return [
-            'timestamp', 'domain', 'report', 'dkim_score', 'dkim_available',
-            'dmarc_score', 'dmarc_available', 'dmarc_record',
-            'dmarc_record_org_domain', 'dmarc_policy_status',
-            'dmarc_policy_score', 'spf_score', 'spf_available', 'spf_record',
-            'spf_policy_status', 'spf_policy_score', 'spf_policy_records',
-            'score', 'max_score'
+            "timestamp",
+            "domain",
+            "report",
+            "dkim_score",
+            "dkim_available",
+            "dmarc_score",
+            "dmarc_available",
+            "dmarc_record",
+            "dmarc_record_org_domain",
+            "dmarc_policy_status",
+            "dmarc_policy_score",
+            "spf_score",
+            "spf_available",
+            "spf_record",
+            "spf_policy_status",
+            "spf_policy_score",
+            "spf_policy_records",
+            "score",
+            "max_score",
         ]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class MailTestReport(models.Model):
@@ -805,19 +902,16 @@ class MailTestReport(models.Model):
     domain = models.CharField(max_length=255, default="")
     registrar = models.CharField(max_length=255, default="")
     score = models.IntegerField(null=True)
-    ipv6 = models.ForeignKey(MailTestIpv6, null=True,on_delete=models.CASCADE)
-    dnssec = models.ForeignKey(MailTestDnssec, null=True,on_delete=models.CASCADE)
-    auth = models.ForeignKey(MailTestAuth, null=True,on_delete=models.CASCADE)
-    tls = models.ForeignKey(MailTestTls, null=True,on_delete=models.CASCADE)
+    ipv6 = models.ForeignKey(MailTestIpv6, null=True, on_delete=models.CASCADE)
+    dnssec = models.ForeignKey(MailTestDnssec, null=True, on_delete=models.CASCADE)
+    auth = models.ForeignKey(MailTestAuth, null=True, on_delete=models.CASCADE)
+    tls = models.ForeignKey(MailTestTls, null=True, on_delete=models.CASCADE)
 
     def __dir__(self):
-        return [
-            'timestamp', 'domain', 'registrar', 'score', 'ipv6', 'dnssec',
-            'auth', 'tls'
-        ]
+        return ["timestamp", "domain", "registrar", "score", "ipv6", "dnssec", "auth", "tls"]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class BatchUser(models.Model):
@@ -827,13 +921,14 @@ class BatchUser(models.Model):
     .. note:: Must be in sync with the web authorization scheme.
 
     """
+
     username = models.CharField(unique=True, max_length=255)
     name = models.CharField(max_length=255)
     organization = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
 
     def __dir__(self):
-        return ['username', 'name', 'organization', 'email']
+        return ["username", "name", "organization", "email"]
 
     @transaction.atomic
     def delete_related_data(self, delete_self=False):
@@ -846,7 +941,7 @@ class BatchUser(models.Model):
             self.delete()
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class BatchRequestType(LabelEnum):
@@ -875,24 +970,28 @@ class BatchRequest(models.Model):
     The main table for batch requests.
 
     """
-    user = models.ForeignKey(BatchUser, related_name="batch_requests",on_delete=models.CASCADE)
+
+    user = models.ForeignKey(BatchUser, related_name="batch_requests", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     submit_date = models.DateTimeField(auto_now_add=True)
     finished_date = models.DateTimeField(null=True)
     type = EnumIntegerField(BatchRequestType)
-    status = EnumIntegerField(
-        BatchRequestStatus,
-        default=BatchRequestStatus.registering,
-        db_index=True)
-    request_id = models.CharField(
-        unique=True, db_index=True, max_length=32, default=batch_request_id)
-    report_file = models.FileField(upload_to='batch_results/')
-    report_technical_file = models.FileField(upload_to='batch_results/', null=True)
+    status = EnumIntegerField(BatchRequestStatus, default=BatchRequestStatus.registering, db_index=True)
+    request_id = models.CharField(unique=True, db_index=True, max_length=32, default=batch_request_id)
+    report_file = models.FileField(upload_to="batch_results/")
+    report_technical_file = models.FileField(upload_to="batch_results/", null=True)
 
     def __dir__(self):
         return [
-            'user', 'name', 'submit_date', 'finished_date', 'type', 'status',
-            'request_id', 'report_file', 'report_technical_file'
+            "user",
+            "name",
+            "submit_date",
+            "finished_date",
+            "type",
+            "status",
+            "request_id",
+            "report_file",
+            "report_technical_file",
         ]
 
     def _api_status(self):
@@ -911,10 +1010,12 @@ class BatchRequest(models.Model):
         return "-"
 
     def has_report_file(self):
-        return (self.report_file
-                and os.path.isfile(self.report_file.path)
-                and self.report_technical_file
-                and os.path.isfile(self.report_technical_file.path))
+        return (
+            self.report_file
+            and os.path.isfile(self.report_file.path)
+            and self.report_technical_file
+            and os.path.isfile(self.report_technical_file.path)
+        )
 
     def get_report_file(self, technical=False):
         if technical:
@@ -931,7 +1032,8 @@ class BatchRequest(models.Model):
             finished_date=finished_date,
             request_type=self.type.label.lower(),
             status=self._api_status(),
-            request_id=self.request_id)
+            request_id=self.request_id,
+        )
 
     @transaction.atomic
     def delete_related_data(self, delete_self=False):
@@ -943,12 +1045,8 @@ class BatchRequest(models.Model):
             pass
 
         # Remove the related BatchWebTest and BatchMailTest entries.
-        batch_webtest_ids = {
-            d.webtest_id for d in
-            BatchDomain.objects.filter(batch_request=self).all()}
-        batch_mailtest_ids = {
-            d.mailtest_id for d in
-            BatchDomain.objects.filter(batch_request=self).all()}
+        batch_webtest_ids = {d.webtest_id for d in BatchDomain.objects.filter(batch_request=self).all()}
+        batch_mailtest_ids = {d.mailtest_id for d in BatchDomain.objects.filter(batch_request=self).all()}
         BatchWebTest.objects.filter(id__in=batch_webtest_ids).delete()
         BatchMailTest.objects.filter(id__in=batch_mailtest_ids).delete()
 
@@ -956,7 +1054,7 @@ class BatchRequest(models.Model):
             self.delete()
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class BatchDomainStatus(LabelEnum):
@@ -979,13 +1077,13 @@ class BatchDomain(models.Model):
     Table to hold the domains being registered for batch testing.
 
     """
+
     domain = models.CharField(max_length=255, default="")
-    batch_request = models.ForeignKey(BatchRequest, related_name="domains",on_delete=models.CASCADE)
-    status = EnumIntegerField(
-        BatchDomainStatus, default=BatchDomainStatus.waiting, db_index=True)
+    batch_request = models.ForeignKey(BatchRequest, related_name="domains", on_delete=models.CASCADE)
+    status = EnumIntegerField(BatchDomainStatus, default=BatchDomainStatus.waiting, db_index=True)
     status_changed = models.DateTimeField(default=timezone.now)
-    webtest = models.ForeignKey('BatchWebTest', null=True,on_delete=models.CASCADE)
-    mailtest = models.ForeignKey('BatchMailTest', null=True,on_delete=models.CASCADE)
+    webtest = models.ForeignKey("BatchWebTest", null=True, on_delete=models.CASCADE)
+    mailtest = models.ForeignKey("BatchMailTest", null=True, on_delete=models.CASCADE)
 
     def get_batch_test(self):
         if self.webtest:
@@ -993,13 +1091,10 @@ class BatchDomain(models.Model):
         return self.mailtest
 
     def __dir__(self):
-        return [
-            'domain', 'batch_result', 'status', 'status_changed', 'webtest',
-            'mailtest'
-        ]
+        return ["domain", "batch_result", "status", "status_changed", "webtest", "mailtest"]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class BatchTestStatus(LabelEnum):
@@ -1008,6 +1103,7 @@ class BatchTestStatus(LabelEnum):
     Python does not allow for Enum subclassing.
 
     """
+
     # Inital statuses (0-9)
     waiting = 0
 
@@ -1028,34 +1124,40 @@ class BatchWebTest(models.Model):
     web tests.
 
     """
-    report = models.ForeignKey(DomainTestReport, null=True,on_delete=models.CASCADE)
-    ipv6 = models.ForeignKey(DomainTestIpv6, null=True,on_delete=models.CASCADE)
-    ipv6_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+
+    report = models.ForeignKey(DomainTestReport, null=True, on_delete=models.CASCADE)
+    ipv6 = models.ForeignKey(DomainTestIpv6, null=True, on_delete=models.CASCADE)
+    ipv6_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     ipv6_errors = models.PositiveSmallIntegerField(default=0)
-    dnssec = models.ForeignKey(DomainTestDnssec, null=True,on_delete=models.CASCADE)
-    dnssec_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+    dnssec = models.ForeignKey(DomainTestDnssec, null=True, on_delete=models.CASCADE)
+    dnssec_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     dnssec_errors = models.PositiveSmallIntegerField(default=0)
-    tls = models.ForeignKey(WebTestTls, null=True,on_delete=models.CASCADE)
-    tls_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+    tls = models.ForeignKey(WebTestTls, null=True, on_delete=models.CASCADE)
+    tls_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     tls_errors = models.PositiveSmallIntegerField(default=0)
-    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True,on_delete=models.CASCADE)
-    appsecpriv_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+    appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True, on_delete=models.CASCADE)
+    appsecpriv_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     appsecpriv_errors = models.PositiveSmallIntegerField(default=0)
 
     def __dir__(self):
         return [
-            'report', 'ipv6', 'ipv6_status', 'ipv6_errors', 'dnssec',
-            'dnssec_status', 'dnssec_errors', 'tls', 'tls_status',
-            'tls_errors', 'appsecpriv', 'appsecpriv_status',
-            'appsecpriv_errors',
+            "report",
+            "ipv6",
+            "ipv6_status",
+            "ipv6_errors",
+            "dnssec",
+            "dnssec_status",
+            "dnssec_errors",
+            "tls",
+            "tls_status",
+            "tls_errors",
+            "appsecpriv",
+            "appsecpriv_status",
+            "appsecpriv_errors",
         ]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class BatchMailTest(models.Model):
@@ -1064,33 +1166,40 @@ class BatchMailTest(models.Model):
     mail tests.
 
     """
-    report = models.ForeignKey(MailTestReport, null=True,on_delete=models.CASCADE)
-    ipv6 = models.ForeignKey(MailTestIpv6, null=True,on_delete=models.CASCADE)
-    ipv6_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+
+    report = models.ForeignKey(MailTestReport, null=True, on_delete=models.CASCADE)
+    ipv6 = models.ForeignKey(MailTestIpv6, null=True, on_delete=models.CASCADE)
+    ipv6_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     ipv6_errors = models.PositiveSmallIntegerField(default=0)
-    dnssec = models.ForeignKey(MailTestDnssec, null=True,on_delete=models.CASCADE)
-    dnssec_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+    dnssec = models.ForeignKey(MailTestDnssec, null=True, on_delete=models.CASCADE)
+    dnssec_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     dnssec_errors = models.PositiveSmallIntegerField(default=0)
-    auth = models.ForeignKey(MailTestAuth, null=True,on_delete=models.CASCADE)
-    auth_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+    auth = models.ForeignKey(MailTestAuth, null=True, on_delete=models.CASCADE)
+    auth_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     auth_errors = models.PositiveSmallIntegerField(default=0)
-    tls = models.ForeignKey(MailTestTls, null=True,on_delete=models.CASCADE)
-    tls_status = EnumIntegerField(
-        BatchTestStatus, default=BatchTestStatus.waiting)
+    tls = models.ForeignKey(MailTestTls, null=True, on_delete=models.CASCADE)
+    tls_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     tls_errors = models.PositiveSmallIntegerField(default=0)
 
     def __dir__(self):
         return [
-            'report', 'ipv6', 'ipv6_status', 'ipv6_errors', 'dnssec',
-            'dnssec_status', 'dnssec_errors', 'auth', 'auth_status',
-            'auth_errors', 'tls', 'tls_status', 'tls_errors'
+            "report",
+            "ipv6",
+            "ipv6_status",
+            "ipv6_errors",
+            "dnssec",
+            "dnssec_status",
+            "dnssec_errors",
+            "auth",
+            "auth_status",
+            "auth_errors",
+            "tls",
+            "tls_status",
+            "tls_errors",
         ]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"
 
 
 class AutoConf(models.Model):
@@ -1101,6 +1210,7 @@ class AutoConf(models.Model):
     Any available options are defined in AutoConfOption above.
 
     """
+
     name = EnumField(AutoConfOption, max_length=255, primary_key=True)
     value = models.CharField(max_length=255, default=None)
 
@@ -1121,7 +1231,7 @@ class AutoConf(models.Model):
         op.save()
 
     def __dir__(self):
-        return ['name', 'value']
+        return ["name", "value"]
 
     class Meta:
-        app_label = 'checks'
+        app_label = "checks"

@@ -15,3 +15,8 @@ requests_mock
 freezegun
 pytest-html
 pytest-selenium
+
+# linting
+autoflake
+black
+pylama

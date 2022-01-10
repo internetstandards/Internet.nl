@@ -27,10 +27,10 @@ mail_ipv6 = REDIS_RECORD("mx:ipv6:{}", settings.CACHE_TTL)
 dom_task = REDIS_RECORD("dom:task:{}:{}", settings.CACHE_TTL)
 
 # Request limit per address
-req_limit = REDIS_RECORD("dom:req_limit:{}", 2*60*60)
+req_limit = REDIS_RECORD("dom:req_limit:{}", 2 * 60 * 60)
 
 # Lock for HoF updater
-hof_lock = REDIS_RECORD("hof:updater:lock", 60*5)
+hof_lock = REDIS_RECORD("hof:updater:lock", 60 * 5)
 
 # HoF data
 hof_champions = REDIS_RECORD("hof:champions", None)
@@ -38,8 +38,7 @@ hof_web = REDIS_RECORD("hof:web", None)
 hof_mail = REDIS_RECORD("hof:mail", None)
 
 # Public suffix list data
-psl_data = REDIS_RECORD(
-    "public:suffix:list", settings.PUBLIC_SUFFIX_LIST_RENEWAL)
+psl_data = REDIS_RECORD("public:suffix:list", settings.PUBLIC_SUFFIX_LIST_RENEWAL)
 
 # Public suffix list loading flag
 psl_loading = REDIS_RECORD("public:suffix:list:loading", 60)
@@ -48,7 +47,7 @@ psl_loading = REDIS_RECORD("public:suffix:list:loading", 60)
 home_stats_data = REDIS_RECORD("home:stats:{}", None)
 
 # Home page stats lock
-home_stats_lock = REDIS_RECORD("home:stats:lock", 60*2)
+home_stats_lock = REDIS_RECORD("home:stats:lock", 60 * 2)
 
 # Started connection test
 conn_test = REDIS_RECORD("conn:{}", settings.CACHE_TTL)
@@ -81,17 +80,16 @@ conn_test_v4 = REDIS_RECORD("conn:{}:ipv4", settings.CACHE_TTL)
 conn_test_as = REDIS_RECORD("asn:{}", settings.CACHE_TTL)
 
 # Simple request cache for batch users
-simple_cache_page = REDIS_RECORD(
-    "cached_page:{}:{}:{}", getattr(settings, 'PAGE_CACHE_TIME', 60*5))
+simple_cache_page = REDIS_RECORD("cached_page:{}:{}:{}", getattr(settings, "PAGE_CACHE_TIME", 60 * 5))
 
 # Lock for generating batch results
 batch_results_lock = REDIS_RECORD("batch:results:gen:{}:{}", None)
 
 # Lock for batch scheduler
-batch_scheduler_lock = REDIS_RECORD("batch:scheduler:lock", 60*5)
+batch_scheduler_lock = REDIS_RECORD("batch:scheduler:lock", 60 * 5)
 
 # Running batch test id
-running_batch_test = REDIS_RECORD("batch:task_id:{}", 60*10)
+running_batch_test = REDIS_RECORD("batch:task_id:{}", 60 * 10)
 
 # Report metadata
 # .. note:: The TTL value is not used and set explicitly to not expire.

@@ -1,12 +1,9 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from difflib import SequenceMatcher
 import http.client
 import socket
 import time
-
-from internetnl import log
-from unbound import ub_ctx, RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS, RR_CLASS_IN
+from difflib import SequenceMatcher
 
 from bs4 import BeautifulSoup
 from celery import shared_task
@@ -15,35 +12,28 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from checks.tasks import dispatcher
-from checks.tasks import SetupUnboundContext
-from checks.tasks import shared
-from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks import categories, scoring
+from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
+from checks.tasks import SetupUnboundContext, dispatcher, shared
 from checks.tasks.dispatcher import check_registry
-from checks import scoring, categories
-from interface import redis_id
-from interface import batch, batch_shared_task
-from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, NsDomain
-from checks.models import WebDomain, MxStatus
-from interface.views.shared import pretty_domain_name
-
 from checks.tasks.tls_connection import http_fetch
-
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from interface import batch, batch_shared_task, redis_id
+from interface.views.shared import pretty_domain_name
+from internetnl import log
+from unbound import RR_CLASS_IN, RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS, ub_ctx
 
 # mapping tasks to models
-model_map = dict(
-    web=WebDomain,
-    ns=NsDomain,
-    mx=MxDomain)
+model_map = dict(web=WebDomain, ns=NsDomain, mx=MxDomain)
 
 
 @shared_task(bind=True)
 def web_callback(self, results, addr, req_limit_id):
     category = categories.WebIpv6()
-    domainipv6 = callback(
-        results, addr, DomainTestIpv6(), "domaintestipv6", category)
+    domainipv6 = callback(results, addr, DomainTestIpv6(), "domaintestipv6", category)
     # Always calculate scores on saving.
     from checks.probes import web_probe_ipv6
+
     web_probe_ipv6.rated_results_by_model(domainipv6)
     dispatcher.post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -52,10 +42,10 @@ def web_callback(self, results, addr, req_limit_id):
 @batch_shared_task(bind=True)
 def batch_web_callback(self, results, addr):
     category = categories.WebIpv6()
-    domainipv6 = callback(
-        results, addr, DomainTestIpv6(), "domaintestipv6", category)
+    domainipv6 = callback(results, addr, DomainTestIpv6(), "domaintestipv6", category)
     # Always calculate scores on saving.
     from checks.probes import batch_web_probe_ipv6
+
     batch_web_probe_ipv6.rated_results_by_model(domainipv6)
     batch.scheduler.batch_callback_hook(domainipv6, self.request.id)
 
@@ -63,10 +53,10 @@ def batch_web_callback(self, results, addr):
 @shared_task(bind=True)
 def mail_callback(self, results, addr, req_limit_id):
     category = categories.MailIpv6()
-    mailipv6 = callback(
-        results, addr, MailTestIpv6(), "mailtestipv6", category)
+    mailipv6 = callback(results, addr, MailTestIpv6(), "mailtestipv6", category)
     # Always calculate scores on saving.
     from checks.probes import mail_probe_ipv6
+
     mail_probe_ipv6.rated_results_by_model(mailipv6)
     dispatcher.post_callback_hook(req_limit_id, self.request.id)
     return results
@@ -75,10 +65,10 @@ def mail_callback(self, results, addr, req_limit_id):
 @batch_shared_task(bind=True)
 def batch_mail_callback(self, results, addr):
     category = categories.MailIpv6()
-    mailipv6 = callback(
-        results, addr, MailTestIpv6(), "mailtestipv6", category)
+    mailipv6 = callback(results, addr, MailTestIpv6(), "mailtestipv6", category)
     # Always calculate scores on saving.
     from checks.probes import batch_mail_probe_ipv6
+
     batch_mail_probe_ipv6.rated_results_by_model(mailipv6)
     batch.scheduler.batch_callback_hook(mailipv6, self.request.id)
 
@@ -92,9 +82,11 @@ batch_mail_registered = check_registry("batch_mail_ipv6", batch_mail_callback)
 @mail_registered
 @web_registered
 @shared_task(
-    bind=True, soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
+    bind=True,
+    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_MEDIUM,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
 
@@ -102,45 +94,55 @@ def ns(self, url, *args, **kwargs):
 @batch_mail_registered
 @batch_web_registered
 @batch_shared_task(
-    bind=True, soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    bind=True,
+    soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
 
 
 @mail_registered
 @shared_task(
-    bind=True, soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
+    bind=True,
+    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_MEDIUM,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
 
 
 @batch_mail_registered
 @batch_shared_task(
-    bind=True, soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    bind=True,
+    soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
 
 
 @web_registered
 @shared_task(
-    bind=True, soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    bind=True,
+    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
 
 
 @batch_web_registered
 @batch_shared_task(
-    bind=True, soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    bind=True,
+    soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
 
@@ -180,19 +182,17 @@ def callback(results, addr, parent, parent_name, category):
 
             kw = {
                 parent_name: parent,
-                'domain': domain,
-                'score': dom.get("score"),
-                'v4_good': v4_good,
-                'v4_bad': v4_bad,
-                'v6_good': v6_good,
-                'v6_bad': v6_bad}
+                "domain": domain,
+                "score": dom.get("score"),
+                "v4_good": v4_good,
+                "v4_bad": v4_bad,
+                "v6_good": v6_good,
+                "v6_bad": v6_bad,
+            }
             dm = model_map.get(testname)(**kw)
             dm.save()
 
-            dom_addresses.append((
-                pretty_domain_name(domain),
-                v6_good + v6_bad,
-                v4_good + v4_bad))
+            dom_addresses.append((pretty_domain_name(domain), v6_good + v6_bad, v4_good + v4_bad))
 
             if v6_bad:
                 dom_unreachable.append((domain, v6_bad))
@@ -202,17 +202,17 @@ def callback(results, addr, parent, parent_name, category):
             parent.ns_score = result.get("score")
 
             if len(no_conn) + len(good_conn) == 0:
-                category.subtests['ns_aaaa'].result_bad(dom_addresses)
+                category.subtests["ns_aaaa"].result_bad(dom_addresses)
             else:
                 if len(has_aaaa) > 1:
-                    category.subtests['ns_aaaa'].result_good(dom_addresses)
+                    category.subtests["ns_aaaa"].result_good(dom_addresses)
                 else:
-                    category.subtests['ns_aaaa'].result_only_one(dom_addresses)
+                    category.subtests["ns_aaaa"].result_only_one(dom_addresses)
 
                 if dom_unreachable:
-                    category.subtests['ns_reach'].result_bad(dom_unreachable)
+                    category.subtests["ns_reach"].result_bad(dom_unreachable)
                 else:
-                    category.subtests['ns_reach'].result_good()
+                    category.subtests["ns_reach"].result_good()
 
         elif testname == "mx":
             parent.mx_score = result.get("score")
@@ -221,27 +221,27 @@ def callback(results, addr, parent, parent_name, category):
             if len(no_conn) + len(good_conn) == 0:
                 if len(result.get("domains")) == 0:
                     if parent.mx_status == MxStatus.no_null_mx:
-                        category.subtests['mx_aaaa'].result_no_null_mx()
+                        category.subtests["mx_aaaa"].result_no_null_mx()
                     elif parent.mx_status == MxStatus.invalid_null_mx:
-                        category.subtests['mx_aaaa'].result_invalid_null_mx()
+                        category.subtests["mx_aaaa"].result_invalid_null_mx()
                     elif parent.mx_status == MxStatus.null_mx:
-                        category.subtests['mx_aaaa'].result_null_mx()
+                        category.subtests["mx_aaaa"].result_null_mx()
                     else:
-                        category.subtests['mx_aaaa'].result_no_mailservers()
+                        category.subtests["mx_aaaa"].result_no_mailservers()
                 else:
-                    category.subtests['mx_aaaa'].result_bad(dom_addresses)
-                    category.subtests['mx_reach'].result_not_tested_bad()
+                    category.subtests["mx_aaaa"].result_bad(dom_addresses)
+                    category.subtests["mx_reach"].result_not_tested_bad()
 
             else:
                 if len(has_aaaa) == len(result.get("domains")):
-                    category.subtests['mx_aaaa'].result_good(dom_addresses)
+                    category.subtests["mx_aaaa"].result_good(dom_addresses)
                 else:
-                    category.subtests['mx_aaaa'].result_bad(dom_addresses)
+                    category.subtests["mx_aaaa"].result_bad(dom_addresses)
 
                 if dom_unreachable:
-                    category.subtests['mx_reach'].result_bad(dom_unreachable)
+                    category.subtests["mx_reach"].result_bad(dom_unreachable)
                 else:
-                    category.subtests['mx_reach'].result_good()
+                    category.subtests["mx_reach"].result_good()
 
         elif testname == "web":
             parent.web_simhash_score = result.get("simhash_score")
@@ -250,23 +250,22 @@ def callback(results, addr, parent, parent_name, category):
             parent.web_score = result.get("score")
 
             if len(no_conn) + len(good_conn) == 0:
-                category.subtests['web_aaaa'].result_bad(dom_addresses)
+                category.subtests["web_aaaa"].result_bad(dom_addresses)
             else:
-                category.subtests['web_aaaa'].result_good(dom_addresses)
+                category.subtests["web_aaaa"].result_good(dom_addresses)
 
                 if dom_unreachable:
-                    category.subtests['web_reach'].result_bad(dom_unreachable)
+                    category.subtests["web_reach"].result_bad(dom_unreachable)
                 else:
-                    category.subtests['web_reach'].result_good()
+                    category.subtests["web_reach"].result_good()
 
                 if len(good_conn) > 0:
-                    if (web_simhash_distance <= settings.SIMHASH_MAX
-                            and web_simhash_distance >= 0):
-                        category.subtests['web_ipv46'].result_good()
+                    if web_simhash_distance <= settings.SIMHASH_MAX and web_simhash_distance >= 0:
+                        category.subtests["web_ipv46"].result_good()
                     elif web_simhash_distance >= 0:
-                        category.subtests['web_ipv46'].result_bad()
+                        category.subtests["web_ipv46"].result_bad()
                     else:
-                        category.subtests['web_ipv46'].result_no_v4()
+                        category.subtests["web_ipv46"].result_no_v4()
 
     parent.report = category.gen_report()
     parent.save()
@@ -280,12 +279,12 @@ def test_ns_connectivity(ip, port, domain):
     # question he can't refuse.
     def ub_callback(data, status, result):
         if status != 0:
-            data['result'] = False
+            data["result"] = False
         elif result.rcode == 2:  # SERVFAIL
-            data['result'] = False
+            data["result"] = False
         else:
-            data['result'] = True
-        data['done'] = True
+            data["result"] = True
+        data["done"] = True
 
     ctx = ub_ctx()
     # XXX: Remove for now; inconsistency with applying settings on celery.
@@ -293,16 +292,15 @@ def test_ns_connectivity(ip, port, domain):
     ctx.set_fwd(ip)
     cb_data = dict(done=False)
     try:
-        retval, async_id = ctx.resolve_async(
-            domain, cb_data, ub_callback, RR_TYPE_NS, RR_CLASS_IN)
-        while retval == 0 and not cb_data['done']:
+        retval, async_id = ctx.resolve_async(domain, cb_data, ub_callback, RR_TYPE_NS, RR_CLASS_IN)
+        while retval == 0 and not cb_data["done"]:
             time.sleep(0.1)
             retval = ctx.process()
     except SoftTimeLimitExceeded:
         if async_id:
             ctx.cancel(async_id)
         raise
-    return cb_data['result']
+    return cb_data["result"]
 
 
 def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
@@ -336,20 +334,18 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
 
 
 def get_domain_results(
-        domain, sock_type, ports, task, score_good, score_bad, score_partial,
-        is_ns=False, test_domain=""):
+    domain, sock_type, ports, task, score_good, score_bad, score_partial, is_ns=False, test_domain=""
+):
     """
     Resolve IPv4 and IPv6 addresses and check connectivity.
 
     """
     v6 = task.resolve(domain, RR_TYPE_AAAA)
     log.debug("V6 resolve: %s" % v6)
-    v6_good, v6_bad, v6_ports = test_connectivity(
-        v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
+    v6_good, v6_bad, v6_ports = test_connectivity(v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
     v4 = task.resolve(domain, RR_TYPE_A)
     log.debug("V4 resolve: %s" % v4)
-    v4_good, v4_bad, v4_ports = test_connectivity(
-        v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
+    v4_good, v4_bad, v4_ports = test_connectivity(v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
     v6_conn_diff = v4_ports - v6_ports
 
     score = score_good
@@ -366,7 +362,8 @@ def get_domain_results(
         v6_good=v6_good,
         v6_bad=v6_bad,
         v6_conn_diff=list(v6_conn_diff),
-        score=score)
+        score=score,
+    )
 
 
 def do_mx(self, url, *args, **kwargs):
@@ -385,19 +382,21 @@ def do_mx(self, url, *args, **kwargs):
             d = cache.get(cache_id)
             if not d:
                 d = get_domain_results(
-                    mailserver, socket.SOCK_STREAM, [25], self,
+                    mailserver,
+                    socket.SOCK_STREAM,
+                    [25],
+                    self,
                     score_good=scoring.MAIL_IPV6_MX_CONN_GOOD,
                     score_bad=scoring.MAIL_IPV6_MX_CONN_FAIL,
-                    score_partial=scoring.MAIL_IPV6_MX_CONN_PARTIAL)
+                    score_partial=scoring.MAIL_IPV6_MX_CONN_PARTIAL,
+                )
                 cache.set(cache_id, d, cache_ttl)
 
             score += d["score"]
             domains.append(d)
 
         if len(domains) > 0:
-            score = (
-                float(score) / (len(domains) * scoring.MAIL_IPV6_MX_CONN_GOOD)
-                * scoring.MAIL_IPV6_MX_CONN_GOOD)
+            score = float(score) / (len(domains) * scoring.MAIL_IPV6_MX_CONN_GOOD) * scoring.MAIL_IPV6_MX_CONN_GOOD
         else:
             # No MX records or NULL MX means full IPv6 score.
             score = scoring.MAIL_IPV6_MX_CONN_GOOD
@@ -406,10 +405,7 @@ def do_mx(self, url, *args, **kwargs):
         domains = []
         score = scoring.MAIL_IPV6_MX_CONN_FAIL
 
-    return ("mx", dict(
-        domains=domains,
-        score=int(score),
-        mx_status=mx_status))
+    return ("mx", dict(domains=domains, score=int(score), mx_status=mx_status))
 
 
 def do_ns(self, url, *args, **kwargs):
@@ -420,18 +416,23 @@ def do_ns(self, url, *args, **kwargs):
         next_label = url
         while not rrset and "." in next_label:
             rrset = self.resolve(next_label, RR_TYPE_NS)
-            next_label = next_label[next_label.find(".")+1:]
+            next_label = next_label[next_label.find(".") + 1 :]
 
         has_a = set()  # Name servers that have IPv4.
         has_aaaa = set()  # Name servers that have IPv6.
         if rrset:
             for domain in rrset:
                 d = get_domain_results(
-                    domain, socket.SOCK_STREAM, [53], self,
+                    domain,
+                    socket.SOCK_STREAM,
+                    [53],
+                    self,
                     score_good=scoring.IPV6_NS_CONN_GOOD,
                     score_bad=scoring.IPV6_NS_CONN_FAIL,
                     score_partial=scoring.IPV6_NS_CONN_PARTIAL,
-                    is_ns=True, test_domain=next_label)
+                    is_ns=True,
+                    test_domain=next_label,
+                )
                 if len(d["v4_good"]) + len(d["v4_bad"]) > 0:
                     has_a.add(d["domain"])
                 if len(d["v6_good"]) + len(d["v6_bad"]) > 0:
@@ -445,25 +446,20 @@ def do_ns(self, url, *args, **kwargs):
         # any IPv4-only name servers or nameservers with no addresses at all.
         if len(has_aaaa) > 1:
             for domain in domains:
-                if (domain["domain"] in ipv4_only
-                        or domain["domain"] not in has_aaaa):
+                if domain["domain"] in ipv4_only or domain["domain"] not in has_aaaa:
                     dom_len -= 1
 
         # For one name server give at most half the points, calculate for rest.
         if dom_len == 1:
             score = min(float(scoring.IPV6_NS_CONN_GOOD) / 2, score)
         elif dom_len > 1:
-            score = (
-                float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD)
-                * scoring.IPV6_NS_CONN_GOOD)
+            score = float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD) * scoring.IPV6_NS_CONN_GOOD
 
     except SoftTimeLimitExceeded:
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
 
-    return ("ns", dict(
-        domains=domains,
-        score=int(score)))
+    return ("ns", dict(domains=domains, score=int(score)))
 
 
 def simhash(url, task=None):
@@ -476,6 +472,7 @@ def simhash(url, task=None):
     It uses SequenceMatcher to compare the contents.
 
     """
+
     def strip_irrelevant_html(html):
         """
         Strip irrelevant HTML for correct comparison.
@@ -483,11 +480,10 @@ def simhash(url, task=None):
         This currently strips nonces from script and style tags.
 
         """
-        soup = BeautifulSoup(html, 'html.parser')
-        for tag in soup.select(','.join([
-                f'{t}[nonce]' for t in ('script', 'style')])):
-            del tag['nonce']
-        hidden_tags = soup.find_all("input", {'name':'__VIEWSTATE'})
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup.select(",".join([f"{t}[nonce]" for t in ("script", "style")])):
+            del tag["nonce"]
+        hidden_tags = soup.find_all("input", {"name": "__VIEWSTATE"})
         for tag in hidden_tags:
             tag.extract()
         try:
@@ -502,15 +498,16 @@ def simhash(url, task=None):
     v6_conn = None
     for port in [80, 443]:
         try:
-            v4_conn, v4_res, _, _ = http_fetch(
-                url, socket.AF_INET, port=port, task=task,
-                keep_conn_open=True)
-            v6_conn, v6_res, _, _ = http_fetch(
-                url, socket.AF_INET6, port=port, task=task,
-                keep_conn_open=True)
+            v4_conn, v4_res, _, _ = http_fetch(url, socket.AF_INET, port=port, task=task, keep_conn_open=True)
+            v6_conn, v6_res, _, _ = http_fetch(url, socket.AF_INET6, port=port, task=task, keep_conn_open=True)
             break
-        except (socket.error, NoIpError, http.client.BadStatusLine,
-                ConnectionHandshakeException, ConnectionSocketException):
+        except (
+            socket.error,
+            NoIpError,
+            http.client.BadStatusLine,
+            ConnectionHandshakeException,
+            ConnectionSocketException,
+        ):
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
             if v4_conn:
@@ -556,10 +553,14 @@ def do_web(self, url, *args, **kwargs):
         score = scoring.WEB_IPV6_WS_CONN_FAIL
 
         domain = get_domain_results(
-            url, socket.SOCK_STREAM, [80, 443], self,
+            url,
+            socket.SOCK_STREAM,
+            [80, 443],
+            self,
             score_good=scoring.WEB_IPV6_WS_CONN_GOOD,
             score_bad=scoring.WEB_IPV6_WS_CONN_FAIL,
-            score_partial=scoring.WEB_IPV6_WS_CONN_PARTIAL)
+            score_partial=scoring.WEB_IPV6_WS_CONN_PARTIAL,
+        )
 
         v6_good = domain["v6_good"]
         v4_good = domain["v4_good"]
@@ -584,10 +585,7 @@ def do_web(self, url, *args, **kwargs):
                 v6_good=[],
                 v6_bad=[],
                 v6_conn_diff=[],
-                score=scoring.WEB_IPV6_WS_CONN_FAIL)
+                score=scoring.WEB_IPV6_WS_CONN_FAIL,
+            )
 
-    return ("web", dict(
-        domains=[domain],
-        simhash_score=simhash_score,
-        simhash_distance=simhash_distance,
-        score=score))
+    return ("web", dict(domains=[domain], simhash_score=simhash_score, simhash_distance=simhash_distance, score=score))

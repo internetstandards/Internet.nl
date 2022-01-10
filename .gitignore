@@ -47,3 +47,6 @@ nassl_freebsd
 # Test coverage database is not relevant
 .coverage
 .make.test
+
+# custom dependencies temp storage
+custom-deps
