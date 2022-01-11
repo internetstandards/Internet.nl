@@ -32,7 +32,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get update
-          sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev libffi
+          sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev libcffi
       - name: Make unbound
         run: make unbound-${{ matrix.python-version }}
         if: steps.cache-venv.outputs.cache-hit != 'true'
