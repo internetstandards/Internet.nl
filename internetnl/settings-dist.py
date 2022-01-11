@@ -10,131 +10,66 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 MEDIA_ROOT = BASE_DIR
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'secret'
+SECRET_KEY = os.getenv("SECRET_KEY", "secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DEBUG", False))
+DEBUG = os.getenv("DEBUG", False) == "True"
+
+if not DEBUG and SECRET_KEY == "secret":
+    print("Danger: the secret key in the config has not yet been configured!")
+    # Todo: exit the app. Currently not known how things run exactly in production.
+
 
 # If Django is proxied (eg. webserver proxying to django/gunicorn) enable this setting.
 # Make sure that the `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers;
 # and the option to Preserve the Host are set by your proxy.
 DJANGO_IS_PROXIED = False
 if DJANGO_IS_PROXIED:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# --- Batch configuration
-#
-ENABLE_BATCH = bool(os.environ.get("ENABLE_BATCH", False))
-if ENABLE_BATCH:
-    # RABBITMQ values
-    RABBIT = 'localhost:15672'  # Note: Management port
-    RABBIT_USER = 'guest'
-    RABBIT_PASS = 'guest'
-    RABBIT_VHOST = '/'
-    RABBIT_MON_QUEUE = 'batch_main'
-    # Keep the queue length relatively small.
-    RABBIT_MON_THRESHOLD = 200
-
-    # Test user to run without HTTP-AUTH.
-    BATCH_TEST_USER = 'test_user'
-
-    BATCH_SCHEDULER_INTERVAL = 20  # seconds
-    # Number of *domains* to start per scheduler run.
-    BATCH_SCHEDULER_DOMAINS = 50
-    # Time in seconds from when a task is sumbitted *to a queue*.
-    BATCH_MAX_RUNNING_TIME = 60 * 10  # seconds
-
-    # Central unbound where all the pyunbounds forward to. Used for better
-    # cache performance while batch testing. Format is "ip@port".
-    # Leave empty ("") for disabling the feature; NOT recommended.
-    # By default unbound runs on port 53 (...), so there is a different unbound setup recommended, but not documented
-    CENTRAL_UNBOUND = "127.0.0.1@4321"
-
-    # Note that all the following queues need to be defined in the celery
-    # service configuration.
-    CELERY_BATCH_TASK_ROUTES = {
-        'checks.tasks.dnssec.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.dnssec.batch_mail_is_secure': {'queue': 'batch_main'},
-        'checks.tasks.dnssec.batch_web_callback': {'queue': 'batch_callback'},
-        'checks.tasks.dnssec.batch_web_is_secure': {'queue': 'batch_main'},
-
-        'checks.tasks.ipv6.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.ipv6.batch_mx': {'queue': 'batch_main'},
-        'checks.tasks.ipv6.batch_ns': {'queue': 'batch_main'},
-        'checks.tasks.ipv6.batch_web': {'queue': 'batch_main'},
-        'checks.tasks.ipv6.batch_web_callback': {'queue': 'batch_callback'},
-
-        'checks.tasks.mail.batch_dkim': {'queue': 'batch_main'},
-        'checks.tasks.mail.batch_dmarc': {'queue': 'batch_main'},
-        'checks.tasks.mail.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.mail.batch_spf': {'queue': 'batch_main'},
-
-        'checks.tasks.shared.batch_mail_get_servers': {'queue': 'batch_main'},
-        'checks.tasks.shared.batch_resolve_a_aaaa': {'queue': 'batch_main'},
-
-        'checks.tasks.tls.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.tls.batch_mail_smtp_starttls': {'queue': 'batch_main'},
-        'checks.tasks.tls.batch_web_callback': {'queue': 'batch_callback'},
-        'checks.tasks.tls.batch_web_cert': {'queue': 'batch_main'},
-        'checks.tasks.tls.batch_web_conn': {'queue': 'batch_main'},
-        'checks.tasks.tls.batch_web_http': {'queue': 'batch_main'},
-
-        'checks.tasks.appsecpriv.batch_web_appsecpriv': {'queue': 'batch_main'},
-        'checks.tasks.appsecpriv.batch_web_callback': {'queue': 'batch_callback'},
-
-        'interface.batch.util.batch_async_generate_results': {'queue': 'batch_slow'},
-        'interface.batch.util.batch_async_register': {'queue': 'batch_slow'},
-
-        'interface.batch.scheduler.run': {'queue': 'batch_scheduler'},
-    }
-
-    # Custom results for the /results endpoint.
-    # Set to `True` to activate, `False` to deactivate.
-    BATCH_API_CUSTOM_RESULTS = {
-        "MailNonSendingDomain": True,
-        "MailServersTestableStatus": True,
-        "Tls13Support": True,
-    }
+# This flag is used throughout the code to enable various features.
+ENABLE_BATCH = os.getenv("ENABLE_BATCH", False) == "True"
 
 # issue 599 https://github.com/internetstandards/Internet.nl/issues/599
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # --- Application definition
 #
 IPV6_TEST_ADDR = "::1"
 ALLOWED_HOSTS = [".internet.nl", "internet.nl", IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
-ADMINS = (('Administrator', 'django@internet.nl'),)
-SERVER_EMAIL = 'django@internet.nl'
-INTERNAL_IPS = [ "localhost", "127.0.0.1" ]
+ADMINS = (("Administrator", "django@internet.nl"),)
+SERVER_EMAIL = "django@internet.nl"
+INTERNAL_IPS = ["localhost", "127.0.0.1"]
 CONN_TEST_DOMAIN = "internet.nl"
 SMTP_EHLO_DOMAIN = "internet.nl"  # MUST be ASCII; A-label for IDNs (i.e., xn--)
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_bleach',
-    'markdown_deux',
-    'frontend',
-    'interface',
-    'checks',
-    'django_hosts',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_bleach",
+    "markdown_deux",
+    "frontend",
+    "interface",
+    "checks",
+    "django_hosts",
 ]
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['', 'interface', 'interface/templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": ["", "interface", "interface/templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.i18n",
@@ -144,32 +79,30 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
             ],
-            'libraries': {
-                'translate': 'interface.templatetags.translate'
-            }
+            "libraries": {"translate": "interface.templatetags.translate"},
         },
     },
 ]
 
 MIDDLEWARE = [
-    'django_hosts.middleware.HostsRequestMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django_hosts.middleware.HostsResponseMiddleware',
-    'internetnl.custom_middlewares.ActivateTranslationMiddleware',
-    'csp.middleware.CSPMiddleware',
+    "django_hosts.middleware.HostsRequestMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django_hosts.middleware.HostsResponseMiddleware",
+    "internetnl.custom_middlewares.ActivateTranslationMiddleware",
+    "csp.middleware.CSPMiddleware",
 ]
 
 CSP_DEFAULT_SRC = ("'self'", "*.internet.nl")
-CSP_FRAME_ANCESTORS = ("'none'")
+CSP_FRAME_ANCESTORS = "'none'"
 
-ROOT_URLCONF = 'internetnl.urls'
-ROOT_HOSTCONF = 'internetnl.hosts'
-DEFAULT_HOST = 'www'
+ROOT_URLCONF = "internetnl.urls"
+ROOT_HOSTCONF = "internetnl.hosts"
+DEFAULT_HOST = "www"
 
-WSGI_APPLICATION = 'internetnl.wsgi.application'
+WSGI_APPLICATION = "internetnl.wsgi.application"
 
 
 # --- Database configuration
@@ -198,13 +131,13 @@ DATABASES_SETTINGS = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.environ.get("DB_NAME", "db.sqlite3"),
     },
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get("DB_NAME", "internetnl"),
-        'USER': os.environ.get("DB_USER", "internetnluser"),
-        'PASSWORD': os.environ.get("DB_PASSWORD", "internetnluser"),
-        'HOST': os.environ.get("DB_HOST", '127.0.0.1')
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.environ.get("DB_NAME", "internetnl"),
+        "USER": os.environ.get("DB_USER", "internetnluser"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "internetnluser"),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+    },
 }
 
 # For development, use dev in your own settings.py:
@@ -220,7 +153,7 @@ CACHES = {
         "LOCATION": "redis://localhost:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        },
     }
 }
 
@@ -233,8 +166,8 @@ CACHE_RESET_WHITELIST = ["domain.name.com"]
 #
 # Internationalization and Locatization fixed to dutch at this time.
 # A single installation will only server one target audience.
-LANGUAGE_CODE = 'en'
-TIME_ZONE = 'CET'
+LANGUAGE_CODE = "en"
+TIME_ZONE = "CET"
 USE_I18N = True
 USE_L10N = False
 USE_TZ = True
@@ -242,65 +175,126 @@ USE_TZ = True
 # Supported languages.
 # NOTE: Make sure that a DNS record for each language exists.
 #       More information can be found in the README file.
-LANGUAGES = sorted([
-    ('nl', 'Dutch'),
-    ('en', 'English'),
-    ], key=lambda x: x[0])
+LANGUAGES = sorted(
+    [
+        ("nl", "Dutch"),
+        ("en", "English"),
+    ],
+    key=lambda x: x[0],
+)
 
 
 # --- Static files (CSS, JavaScript, Images)
 #     https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'interface/assets'),
+    os.path.join(BASE_DIR, "interface/assets"),
 ]
 
 
 # --- Celery configuration
 #
-CELERY_BROKER_URL = 'amqp://guest@localhost//'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = "amqp://guest@localhost//"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 CELERY_RESULT_EXPIRES = 7200
 CELERY_BROKER_HEARTBEAT = 0  # Workaround for https://github.com/celery/celery/issues/4817
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
 CELERY_IMPORTS = (
-    'checks.tasks.update',
-    'interface.batch.scheduler',
-    'interface.batch.util',
+    "checks.tasks.update",
+    "interface.batch.scheduler",
+    "interface.batch.util",
 )
 
 # Celery 4 settings
-CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_SERIALIZER = 'pickle'
-CELERY_ACCEPT_CONTENT = ['pickle']
+CELERY_TASK_SERIALIZER = "pickle"
+CELERY_RESULT_SERIALIZER = "pickle"
+CELERY_ACCEPT_CONTENT = ["pickle"]
 
 # Note that all the following queues need to be defined in the celery
 # service configuration.
 CELERY_TASK_ROUTES = {
-        'checks.tasks.dnssec.mail_callback': {'queue': 'db_worker'},
-        'checks.tasks.dnssec.web_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.ipv6.mail_callback': {'queue': 'db_worker'},
-        'checks.tasks.ipv6.web_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.mail.mail_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.tls.mail_callback': {'queue': 'db_worker'},
-        'checks.tasks.tls.web_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.appsecpriv.web_callback': {'queue': 'db_worker'},
-
-        'interface.views.shared.run_stats_queries': {'queue': 'slow_db_worker'},
-        'interface.views.shared.update_running_status': {'queue': 'slow_db_worker'},
-        'checks.tasks.update.update_hof': {'queue': 'slow_db_worker'},
+    "checks.tasks.dnssec.mail_callback": {"queue": "db_worker"},
+    "checks.tasks.dnssec.web_callback": {"queue": "db_worker"},
+    "checks.tasks.ipv6.mail_callback": {"queue": "db_worker"},
+    "checks.tasks.ipv6.web_callback": {"queue": "db_worker"},
+    "checks.tasks.mail.mail_callback": {"queue": "db_worker"},
+    "checks.tasks.tls.mail_callback": {"queue": "db_worker"},
+    "checks.tasks.tls.web_callback": {"queue": "db_worker"},
+    "checks.tasks.appsecpriv.web_callback": {"queue": "db_worker"},
+    "interface.views.shared.run_stats_queries": {"queue": "slow_db_worker"},
+    "interface.views.shared.update_running_status": {"queue": "slow_db_worker"},
+    "checks.tasks.update.update_hof": {"queue": "slow_db_worker"},
 }
 
-if ENABLE_BATCH:
-    CELERY_TASK_ROUTES.update(CELERY_BATCH_TASK_ROUTES)
+
+# --- Batch configuration
+# RABBITMQ values
+CELERY_BATCH_TASK_ROUTES = {
+    "checks.tasks.dnssec.batch_mail_callback": {"queue": "batch_callback"},
+    "checks.tasks.dnssec.batch_mail_is_secure": {"queue": "batch_main"},
+    "checks.tasks.dnssec.batch_web_callback": {"queue": "batch_callback"},
+    "checks.tasks.dnssec.batch_web_is_secure": {"queue": "batch_main"},
+    "checks.tasks.ipv6.batch_mail_callback": {"queue": "batch_callback"},
+    "checks.tasks.ipv6.batch_mx": {"queue": "batch_main"},
+    "checks.tasks.ipv6.batch_ns": {"queue": "batch_main"},
+    "checks.tasks.ipv6.batch_web": {"queue": "batch_main"},
+    "checks.tasks.ipv6.batch_web_callback": {"queue": "batch_callback"},
+    "checks.tasks.mail.batch_dkim": {"queue": "batch_main"},
+    "checks.tasks.mail.batch_dmarc": {"queue": "batch_main"},
+    "checks.tasks.mail.batch_mail_callback": {"queue": "batch_callback"},
+    "checks.tasks.mail.batch_spf": {"queue": "batch_main"},
+    "checks.tasks.shared.batch_mail_get_servers": {"queue": "batch_main"},
+    "checks.tasks.shared.batch_resolve_a_aaaa": {"queue": "batch_main"},
+    "checks.tasks.tls.batch_mail_callback": {"queue": "batch_callback"},
+    "checks.tasks.tls.batch_mail_smtp_starttls": {"queue": "batch_main"},
+    "checks.tasks.tls.batch_web_callback": {"queue": "batch_callback"},
+    "checks.tasks.tls.batch_web_cert": {"queue": "batch_main"},
+    "checks.tasks.tls.batch_web_conn": {"queue": "batch_main"},
+    "checks.tasks.tls.batch_web_http": {"queue": "batch_main"},
+    "checks.tasks.appsecpriv.batch_web_appsecpriv": {"queue": "batch_main"},
+    "checks.tasks.appsecpriv.batch_web_callback": {"queue": "batch_callback"},
+    "interface.batch.util.batch_async_generate_results": {"queue": "batch_slow"},
+    "interface.batch.util.batch_async_register": {"queue": "batch_slow"},
+    "interface.batch.scheduler.run": {"queue": "batch_scheduler"},
+}
+CELERY_TASK_ROUTES.update(CELERY_BATCH_TASK_ROUTES)
+
+RABBIT = "localhost:15672"  # Note: Management port
+RABBIT_USER = "guest"
+RABBIT_PASS = "guest"
+RABBIT_VHOST = "/"
+RABBIT_MON_QUEUE = "batch_main"
+# Keep the queue length relatively small.
+RABBIT_MON_THRESHOLD = 200
+
+# Test user to run without HTTP-AUTH.
+BATCH_TEST_USER = "test_user"
+
+BATCH_SCHEDULER_INTERVAL = 20  # seconds
+# Number of *domains* to start per scheduler run.
+BATCH_SCHEDULER_DOMAINS = 50
+# Time in seconds from when a task is sumbitted *to a queue*.
+BATCH_MAX_RUNNING_TIME = 60 * 10  # seconds
+
+# Central unbound where all the pyunbounds forward to. Used for better
+# cache performance while batch testing. Format is "ip@port".
+# Leave empty ("") for disabling the feature; NOT recommended.
+# By default unbound runs on port 53 (...), so there is a different unbound setup recommended, but not documented
+CENTRAL_UNBOUND = "127.0.0.1@4321"
+
+# Custom results for the /results endpoint.
+# Set to `True` to activate, `False` to deactivate.
+BATCH_API_CUSTOM_RESULTS = {
+    "MailNonSendingDomain": True,
+    "MailServersTestableStatus": True,
+    "Tls13Support": True,
+}
+
+# --- END Batch configuration
 
 # Shared task timings
 SHARED_TASK_SOFT_TIME_LIMIT_HIGH = 90
@@ -315,11 +309,11 @@ SHARED_TASK_SOFT_TIME_LIMIT_LOW = 10
 SHARED_TASK_TIME_LIMIT_LOW = 15
 
 
-#--- TLS configuration
+# --- TLS configuration
 #
-LDNS_DANE = './ldns-dane-wrapper'
-CA_CERTIFICATES = os.path.join(BASE_DIR, 'remote_data/certs/ca-bundle.crt')
-CA_FINGERPRINTS = os.path.join(BASE_DIR, 'remote_data/certs/root_fingerprints')
+LDNS_DANE = "./ldns-dane-wrapper"
+CA_CERTIFICATES = os.path.join(BASE_DIR, "remote_data/certs/ca-bundle.crt")
+CA_FINGERPRINTS = os.path.join(BASE_DIR, "remote_data/certs/root_fingerprints")
 
 # --- Markdown/HTML settings
 #
@@ -338,10 +332,21 @@ MARKDOWN_DEUX_STYLES = {
 }
 
 BLEACH_ALLOWED_TAGS = [
-    'b', 'i', 'u', 'em', 'strong', 'a', 'br', 'table', 'thead', 'th', 'tbody',
-    'tr', 'td',
+    "b",
+    "i",
+    "u",
+    "em",
+    "strong",
+    "a",
+    "br",
+    "table",
+    "thead",
+    "th",
+    "tbody",
+    "tr",
+    "td",
 ]
-BLEACH_ALLOWED_ATTRIBUTES = ['href', 'title', 'alt']
+BLEACH_ALLOWED_ATTRIBUTES = ["href", "title", "alt"]
 BLEACH_ALLOWED_STYLES = []
 BLEACH_STRIP_TAGS = True
 BLEACH_STRIP_COMMENTS = True
@@ -354,8 +359,8 @@ JAVASCRIPT_TIMEOUT = 3  # seconds
 
 # --- Miscellaneous settings
 #
-PADDED_MACS = os.path.join(BASE_DIR, 'remote_data/macs/padded_macs.json')
-DNS_ROOT_KEY = os.path.join(BASE_DIR, 'remote_data/dns/root.key')
+PADDED_MACS = os.path.join(BASE_DIR, "remote_data/macs/padded_macs.json")
+DNS_ROOT_KEY = os.path.join(BASE_DIR, "remote_data/dns/root.key")
 # Time to cache consecutive requests to taxing pages.
 PAGE_CACHE_TIME = 60 * 5  # seconds
 SIMHASH_MAX = 10
@@ -373,7 +378,7 @@ MATOMO_SITEID = "site_id"
 MATOMO_SUBDOMAIN_TRACKING = ""
 
 # --- HoF update interval
-HOF_UPDATE_INTERVAL = 600 # seconds
+HOF_UPDATE_INTERVAL = 600  # seconds
 
 # --- Extra manual HoF page(s)
 #
@@ -429,11 +434,11 @@ other dependencies for more advanced tests if they are not needed.
 
 By default everything is set to False and you need to enable everything.
 """
-INTERNET_NL_CHECK_SUPPORT_IPV6 = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_IPV6", True))
-INTERNET_NL_CHECK_SUPPORT_DNSSEC = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_DNSSEC", True))
-INTERNET_NL_CHECK_SUPPORT_MAIL = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", True))
-INTERNET_NL_CHECK_SUPPORT_TLS = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True))
-INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True))
+INTERNET_NL_CHECK_SUPPORT_IPV6 = os.environ.get("INTERNET_NL_CHECK_SUPPORT_IPV6", True) == "True"
+INTERNET_NL_CHECK_SUPPORT_DNSSEC = os.environ.get("INTERNET_NL_CHECK_SUPPORT_DNSSEC", True) == "True"
+INTERNET_NL_CHECK_SUPPORT_MAIL = os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", True) == "True"
+INTERNET_NL_CHECK_SUPPORT_TLS = os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True) == "True"
+INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True) == "True"
 
 
 LOGGING = {
