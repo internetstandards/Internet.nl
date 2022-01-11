@@ -1,4 +1,4 @@
-name: Python application
+name: Internet.nl
 
 on: [ pull_request ]
 
