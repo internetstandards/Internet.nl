@@ -29,7 +29,7 @@ jobs:
         run: make venv
         if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Make unbound
-        run: make unbound-x86-3.8
+        run: make unbound-${{ matrix.python-version }}
         if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Make nassl
         run: make nassl
