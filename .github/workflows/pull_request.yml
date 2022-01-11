@@ -1,6 +1,6 @@
 name: Python application
 
-on: [ push, pull_request ]
+on: [ pull_request ]
 
 jobs:
   build:
@@ -28,6 +28,11 @@ jobs:
       - name: Make venv
         run: make venv
         if: steps.cache-venv.outputs.cache-hit != 'true'
+      - name: Install system dependencies for unbound/nassl
+        run: |
+          sudo apt update
+          sudo apt-get update
+          sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev libffi
       - name: Make unbound
         run: make unbound-${{ matrix.python-version }}
         if: steps.cache-venv.outputs.cache-hit != 'true'

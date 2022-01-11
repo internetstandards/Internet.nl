@@ -189,7 +189,7 @@ unbound-3.9: venv .unbound-3.9
 	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
 	touch .unbound-3.9
 
-unbound-3.8: venv .unbound-38
+unbound-3.8: venv .unbound-3.8
 .unbound-3.8:
 	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
 	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
