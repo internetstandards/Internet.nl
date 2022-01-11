@@ -213,6 +213,14 @@ unbound-3.7: venv .unbound-3.7
 	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound-3.7
 
+unbound-3.7-github: venv .unbound-3.7-github
+.unbound-3.7-github:
+	# Installs unbound on the github worker.
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && ${env} ./configure --prefix=$(ROOT_DIR)/_unbound/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	touch .unbound-3.7-github
+
 unbound-x86-3.9: .unbound-x86-3.9
 .unbound-x86-3.9:
 	# For m1 users:
