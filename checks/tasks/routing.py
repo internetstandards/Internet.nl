@@ -73,7 +73,9 @@ class RouteView(ABC):
         prefix = ipaddress.ip_network(ip)
         roas = rp.lookup(task, prefix)
 
-        return cls(ip, [], {prefix: roas})
+        # roa dict indexed by (ASN0, max length prefix),
+        # we don't have actual routing information
+        return cls(ip, [], {(0, ip): roas})
 
     def validate(self, task: T, rp: Type[Rp]) -> None:
         """Validate pairs of asn, prefix using a provided `RelyingPartySoftware`."""
