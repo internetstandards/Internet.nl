@@ -1,5 +1,5 @@
 [Unit]
-Description=Celery Beat for Internet.nl
+Description=Celery Beat for Internet.nl Batch Scan Version
 After=network.target internetnl-gunicorn.service
 
 [Service]
