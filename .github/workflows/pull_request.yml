@@ -11,6 +11,17 @@ jobs:
         python-version: [ 3.7 ]
     continue-on-error: false
 
+    services:
+      postgres:
+        image: postgres:12.5
+        env:
+          POSTGRES_USER: internetnluser
+          POSTGRES_PASSWORD: internetnluser
+          POSTGRES_DB: internetnl
+        ports:
+          - 5433:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 2
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
