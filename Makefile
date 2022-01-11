@@ -298,7 +298,7 @@ testcase: ${app}
 	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} pytest -vvv --log-cli-level=10 -k ${case}
 
 
-check: .make.check.py .make.check.sh  ## code quality checks
+check: .make.check.py  ## code quality checks
 .make.check.py: ${pysrc}
 	# check code quality
 	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
