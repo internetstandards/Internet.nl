@@ -513,7 +513,7 @@ def _run_scheduler():
     considered loaded.
 
     """
-    client = Rabbit(settings.RABBIT, settings.RABBIT_USER, settings.RABBIT_PASS)
+    client = Rabbit(settings.RABBIT_HOST, settings.RABBIT_USER, settings.RABBIT_PASS)
     domains_to_test = settings.BATCH_SCHEDULER_DOMAINS
 
     start_time = timer()

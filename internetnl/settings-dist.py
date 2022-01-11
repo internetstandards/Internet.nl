@@ -150,7 +150,7 @@ DATABASES = {"default": DATABASES_SETTINGS[DATABASE]}
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/0",
+        "LOCATION": os.getenv("CACHE_LOCATION", "redis://localhost:6379/0"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -196,8 +196,8 @@ STATICFILES_DIRS = [
 
 # --- Celery configuration
 #
-CELERY_BROKER_URL = "amqp://guest@localhost//"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://guest@localhost//")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_RESULT_EXPIRES = 7200
 CELERY_BROKER_HEARTBEAT = 0  # Workaround for https://github.com/celery/celery/issues/4817
 CELERY_TASK_ACKS_LATE = True
@@ -232,7 +232,6 @@ CELERY_TASK_ROUTES = {
 
 
 # --- Batch configuration
-# RABBITMQ values
 CELERY_BATCH_TASK_ROUTES = {
     "checks.tasks.dnssec.batch_mail_callback": {"queue": "batch_callback"},
     "checks.tasks.dnssec.batch_mail_is_secure": {"queue": "batch_main"},
@@ -263,9 +262,10 @@ CELERY_BATCH_TASK_ROUTES = {
 }
 CELERY_TASK_ROUTES.update(CELERY_BATCH_TASK_ROUTES)
 
-RABBIT = "localhost:15672"  # Note: Management port
-RABBIT_USER = "guest"
-RABBIT_PASS = "guest"
+# Batch uses rabbitmq
+RABBIT_HOST = "localhost:15672"  # Note: Management port
+RABBIT_USER = os.getenv("RABBIT_USER", "guest")
+RABBIT_PASS = os.getenv("RABBIT_PASS", "guest")
 RABBIT_VHOST = "/"
 RABBIT_MON_QUEUE = "batch_main"
 # Keep the queue length relatively small.
@@ -293,7 +293,6 @@ BATCH_API_CUSTOM_RESULTS = {
     "MailServersTestableStatus": True,
     "Tls13Support": True,
 }
-
 # --- END Batch configuration
 
 # Shared task timings
