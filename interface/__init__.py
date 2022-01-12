@@ -4,7 +4,6 @@ import mimetypes
 from functools import wraps
 
 from celery import shared_task
-from django.conf import settings
 from django.core.cache import cache
 
 from interface import redis_id
@@ -24,7 +23,7 @@ def dummy_wrapper(*args, **kwargs):
     return dummy_function
 
 
-# Do not register the batch tasks when batch is not enabled. Because... why?
+# Do not register the batch tasks when batch is not enabled. Because... why? What does it save or prevent?
 batch_shared_task = shared_task  # if settings.ENABLE_BATCH else dummy_wrapper
 
 
