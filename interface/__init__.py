@@ -24,8 +24,8 @@ def dummy_wrapper(*args, **kwargs):
     return dummy_function
 
 
-# Do not register the batch tasks when batch is not enabled.
-batch_shared_task = shared_task if settings.ENABLE_BATCH else dummy_wrapper
+# Do not register the batch tasks when batch is not enabled. Because... why?
+batch_shared_task = shared_task  # if settings.ENABLE_BATCH else dummy_wrapper
 
 
 def simple_cache_page(function):
