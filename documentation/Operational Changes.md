@@ -5,6 +5,34 @@ hosters.
 
 ## Change overview for version 1.4
 
+### Deployment script (TODO)
+
+```bash
+sudo su -
+
+# Get latest sources
+cd /opt/internetnl/Internet.nl/
+git pull
+
+# Add configuration to environment of the internetnl user, this affects the settings.py file
+...
+
+
+# Deploy new configuration file
+...
+
+
+# Deploy new system services and disable old ones
+...
+
+# Restart services
+...
+
+
+```
+
+
+
 
 ### Python installation management
 The makefile is 'the way to go' for running and installing the application. Inside the makefile there are a bunch

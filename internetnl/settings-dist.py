@@ -8,45 +8,89 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from typing import List
 
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-MEDIA_ROOT = BASE_DIR
+
+
+def split_csv_trim(value: str) -> List[str]:
+    # Helper for csv values from the environment.
+    # Example: "internet.nl, mysite.org" -> ["internet.nl", "mysite.org"]
+    return [x.strip() for x in value.split(',')]
+
+
+# Infrastructure
+# # Generic
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv("DEBUG", False) == "True"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", "secret")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", False) == "True"
-
-if not DEBUG and SECRET_KEY == "secret":
-    print("Danger: the secret key in the config has not yet been configured!")
-    # Todo: exit the app. Currently not known how things run exactly in production.
-
-
 # If Django is proxied (eg. webserver proxying to django/gunicorn) enable this setting.
 # Make sure that the `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers;
 # and the option to Preserve the Host are set by your proxy.
-DJANGO_IS_PROXIED = False
-if DJANGO_IS_PROXIED:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+DJANGO_IS_PROXIED = os.getenv("DJANGO_IS_PROXIED", False) == "True"
+
+# Used for scanning as well as allowed hosts:
+IPV6_TEST_ADDR = "::1"
+
+ALLOWED_HOSTS = split_csv_trim(os.getenv("ENABLE_BATCH", ".internet.nl, internet.nl")) + [IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
+ADMINS = ((os.getenv("ADMIN_NAME", "Administrator"), os.getenv("ADMIN_EMAIL", "django@internet.nl")),)
+SERVER_EMAIL = os.getenv("ADMIN_EMAIL", "django@internet.nl")
+
+CONN_TEST_DOMAIN = "internet.nl"
+SMTP_EHLO_DOMAIN = "internet.nl"  # MUST be ASCII; A-label for IDNs (i.e., xn--)
+CSP_DEFAULT_SRC = ("'self'", "*.internet.nl")
+
+# Infrastructure
+# # Database
+DJANGO_DATABASE = os.environ.get("DJANGO_DATABASE", "default")
+DB_NAME = os.environ.get("DB_NAME", "internetnl")
+DB_USER = os.environ.get("DB_USER", "internetnl")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_HOST = os.environ.get("DB_HOST", "127.0.0.1")
+DB_DB_PORT = int(os.environ.get("DB_NAME", 6432))
+
+
+# Infrastructure
+# # Celery
+
+
+
+
+
+
+
+
+
+# TODO: parameterize in ENV:
+INTERNAL_IPS = ["localhost", "127.0.0.1"]
+
+
 
 # This flag is used throughout the code to enable various features.
 ENABLE_BATCH = os.getenv("ENABLE_BATCH", False) == "True"
 
+
+
+
+
+
 # issue 599 https://github.com/internetstandards/Internet.nl/issues/599
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-# --- Application definition
-#
-IPV6_TEST_ADDR = "::1"
-ALLOWED_HOSTS = [".internet.nl", "internet.nl", IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
-ADMINS = (("Administrator", "django@internet.nl"),)
-SERVER_EMAIL = "django@internet.nl"
-INTERNAL_IPS = ["localhost", "127.0.0.1"]
-CONN_TEST_DOMAIN = "internet.nl"
-SMTP_EHLO_DOMAIN = "internet.nl"  # MUST be ASCII; A-label for IDNs (i.e., xn--)
+
+
+# -- End of manual configuration
+
+"""
+Do not edit below this line, unless you know what you are doing.
+Settings below are application/django settings that are intended to be generic for each installation.
+"""
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -95,7 +139,7 @@ MIDDLEWARE = [
     "csp.middleware.CSPMiddleware",
 ]
 
-CSP_DEFAULT_SRC = ("'self'", "*.internet.nl")
+
 CSP_FRAME_ANCESTORS = "'none'"
 
 ROOT_URLCONF = "internetnl.urls"
@@ -133,10 +177,11 @@ DATABASES_SETTINGS = {
     },
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("DB_NAME", "internetnl"),
+        "NAME": DB_NAME,
         "USER": os.environ.get("DB_USER", "internetnluser"),
         "PASSWORD": os.environ.get("DB_PASSWORD", "internetnluser"),
         "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("DB_PORT", 6432),
     },
 }
 
@@ -365,7 +410,7 @@ PAGE_CACHE_TIME = 60 * 5  # seconds
 SIMHASH_MAX = 10
 PUBLIC_SUFFIX_LIST_URL = "https://publicsuffix.org/list/public_suffix_list.dat"
 PUBLIC_SUFFIX_LIST_RENEWAL = 86400  # 24h
-HAS_ACCESSIBILITY_PAGE = False
+HAS_ACCESSIBILITY_PAGE = True
 
 
 # --- Matomo settings
@@ -376,8 +421,6 @@ MATOMO_SITEID = "site_id"
 # Used for subdomain tracking eg. *.internet.nl
 MATOMO_SUBDOMAIN_TRACKING = ""
 
-# --- HoF update interval
-HOF_UPDATE_INTERVAL = 600  # seconds
 
 # --- Extra manual HoF page(s)
 #
@@ -421,6 +464,15 @@ HOF_UPDATE_INTERVAL = 600  # seconds
 # agreement) to be included in a hosters HoF.
 MANUAL_HOF = {}
 
+if "hosters" in os.environ.get("MANUAL_HOF", ""):
+    MANUAL_HOF['hosters'] = {
+        'translate_key': '',
+        'entries_file': os.path.join(BASE_DIR, 'manual-hall-of-fame/hosters.yaml'),
+        'template_file': 'halloffame-hosters.html',
+        'icon_file': 'embed-badge-hosters-v3.svg'
+    },
+
+
 """
 Feature flags:
 
@@ -433,11 +485,11 @@ other dependencies for more advanced tests if they are not needed.
 
 By default everything is set to False and you need to enable everything.
 """
-INTERNET_NL_CHECK_SUPPORT_IPV6 = os.environ.get("INTERNET_NL_CHECK_SUPPORT_IPV6", True) == "True"
-INTERNET_NL_CHECK_SUPPORT_DNSSEC = os.environ.get("INTERNET_NL_CHECK_SUPPORT_DNSSEC", True) == "True"
-INTERNET_NL_CHECK_SUPPORT_MAIL = os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", True) == "True"
-INTERNET_NL_CHECK_SUPPORT_TLS = os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True) == "True"
-INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True) == "True"
+INTERNET_NL_CHECK_SUPPORT_IPV6 = os.environ.get("INTERNET_NL_CHECK_SUPPORT_IPV6", "True") == "True"
+INTERNET_NL_CHECK_SUPPORT_DNSSEC = os.environ.get("INTERNET_NL_CHECK_SUPPORT_DNSSEC", "True") == "True"
+INTERNET_NL_CHECK_SUPPORT_MAIL = os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", "True") == "True"
+INTERNET_NL_CHECK_SUPPORT_TLS = os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", "True") == "True"
+INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", "True") == "True"
 
 
 LOGGING = {
@@ -476,15 +528,24 @@ LOGGING = {
         },
         "internetnl": {
             "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
+            "level": os.getenv("INTERNETNL_LOG_LEVEL", "INFO"),
         },
-        # disable verbose task logging (ie: "received task...", "...succeeded in...")
+        # ERROR disables verbose task logging (ie: "received task...", "...succeeded in...")
         "celery.app.trace": {
             "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG") if DEBUG else "ERROR",
+            "level": os.getenv("CELERY_LOG_LEVEL", "ERROR"),
         },
         "celery.worker.strategy": {
             "level": "INFO" if DEBUG else "ERROR",
         },
     },
 }
+
+MEDIA_ROOT = BASE_DIR
+
+if not DEBUG and SECRET_KEY == "secret":
+    print("Danger: the secret key in the config has not yet been configured!")
+    # Todo: exit the app. Currently not known how things run exactly in production.
+
+if DJANGO_IS_PROXIED:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
