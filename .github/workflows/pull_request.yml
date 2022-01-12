@@ -4,8 +4,9 @@ on: [ pull_request ]
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
+    env:
+      GITHUB_ACTIONS: True
     strategy:
       matrix:
         python-version: [ 3.7 ]
