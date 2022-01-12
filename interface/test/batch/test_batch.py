@@ -37,3 +37,4 @@ def test_convert_batch_request_type():
 
 #  todo: add testcase where data is available and an API response is created.
 #  this requires a scan to be ran etc.
+#
