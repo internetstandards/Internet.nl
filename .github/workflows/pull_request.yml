@@ -36,8 +36,14 @@ jobs:
       - uses: actions/cache@v2
         id: cache-venv
         with:
-          path: ./.venv/  # Prevent re-building the venv when all requirements.txts stays the same.
-          key: ${{ runner.os }}-${{ matrix.python-version }}-venv-${{ hashFiles('**/requirements*.txt') }}
+          # Prevent re-building the venv when all requirements.txts stays the same.
+          path: |
+            ./.venv/
+            ./unbound/
+            ./_unbound/
+            ./nassl_freebsd/
+            ./python-whois/
+          key: ${{ runner.os }}-${{ matrix.python-version }}-venv-and-deps-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.python-version }}-venv-
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
