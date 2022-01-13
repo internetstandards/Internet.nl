@@ -40,13 +40,13 @@ sed -i "s/ALLOWED_HOSTS=.*/ALLOWED_HOSTS=localhost,dev.internet.nl,.dev.internet
 sed -i "s/MATOMO_SITEID=.*/MATOMO_SITEID=10/g" ~/internet.nl.env
 sed -i "s/ENABLE_BATCH=.*/ENABLE_BATCH=False/g" ~/internet.nl.env
 
-# Load the env file for this user
-echo "source ~/internet.nl.env"
+# Always load the env file for this user
+echo "source ~/internet.nl.env" >>~/.profile
 
-# Load the file now:
+# Load the file now, in this session:
 source ~/internet.nl.env
 
-# Setup the environment
+# Setup the environment and dependencies
 make venv
 make unbound-37
 make python-whois
@@ -54,7 +54,6 @@ make nassl
 
 # Run migrations
 make migrate
-
 
 # The next step need a privileged user
 sudo su -
@@ -81,6 +80,7 @@ cp documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internet
 * service internetnl-unbound restart
 ```
 
+Todo: ship an unbound configuration.
 
 
 
