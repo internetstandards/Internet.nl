@@ -13,7 +13,7 @@ For an example, see internet.nl.dist.env.
 
 import os
 from os import getenv
-from settings_utils import split_csv_trim, BASE_DIR, get_boolean_env, check_if_environment_present
+from internetnl.settings_utils import split_csv_trim, BASE_DIR, get_boolean_env, check_if_environment_present
 
 check_if_environment_present()
 
