@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       GITHUB_ACTIONS: True
+      ENABLE_BATCH: True
+      SECRET_KEY: Github
+      DEBUG: True
     strategy:
       matrix:
         python-version: [ 3.7 ]

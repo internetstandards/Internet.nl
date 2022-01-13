@@ -13,7 +13,7 @@ For an example, see internet.nl.dist.env.
 
 import os
 from os import getenv
-from settings_utils import split_csv_trim, BASE_DIR, get_boolean_env, check_if_environment_present
+from internetnl.settings_utils import split_csv_trim, BASE_DIR, get_boolean_env, check_if_environment_present
 
 check_if_environment_present()
 
@@ -49,7 +49,7 @@ DB_NAME = getenv("DB_NAME", "internetnl")
 DB_USER = getenv("DB_USER", "internetnl")
 DB_PASSWORD = getenv("DB_PASSWORD", "secret")
 DB_HOST = getenv("DB_HOST", "127.0.0.1")
-DB_PORT = int(getenv("DB_PORT", 6432))
+DB_PORT = int(getenv("DB_PORT", 5432))
 
 # Infrastructure
 # # Celery
