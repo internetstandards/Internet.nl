@@ -5,30 +5,80 @@ hosters.
 
 ## Change overview for version 1.4
 
-### Deployment script (TODO)
+### Deployment script
+
+What you need:
+* A copy of the previous settings file, to migrate settings from (especially passwords).
+* Know if this is a single or batch installation internet.nl, can't be both. (ENABLE BATCH)
 
 ```bash
-sudo su -
+sudo su - internetnl
 
 # Get latest sources
 cd /opt/internetnl/Internet.nl/
+git checkout main
 git pull
 
-# Add configuration to environment of the internetnl user, this affects the settings.py file
-...
+# Backup the existing configuration, as that will be overwritten
+cp internetnl/settings.py ~/settings_1.3.py
+
+# Create a new settings file
+cp internetnl/settings-dist.py internetnl/settings.py
+
+# You can now either change the defaults in the settings.py file or use the ENV file supplied.
+cp internetnl/internet.nl.dist.env ~/internet.nl.env
+
+# Setup the password and such correctly in the env file:
+# The following is setup for dev.internet.nl
+sed -i "s/SECRET_KEY=.*/SECRET_KEY=secret/g" ~/internet.nl.env
+sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=secret/g" ~/internet.nl.env
+sed -i "s/IPV6_TEST_ADDR=.*/IPV6_TEST_ADDR=2a00:d00:ff:162:62:204:66:15/g" ~/internet.nl.env
+sed -i "s/CONN_TEST_DOMAIN=.*/CONN_TEST_DOMAIN=dev.internet.nl/g" ~/internet.nl.env
+sed -i "s/CSP_DEFAULT_SRC=.*/CSP_DEFAULT_SRC='self',dev.internet.nl/g" ~/internet.nl.env
+sed -i "s/SMTP_EHLO_DOMAIN=.*/SMTP_EHLO_DOMAIN='self',dev.internet.nl/g" ~/internet.nl.env
+sed -i "s/ALLOWED_HOSTS=.*/ALLOWED_HOSTS=localhost,dev.internet.nl,.dev.internet.nl/g" ~/internet.nl.env
+sed -i "s/MATOMO_SITEID=.*/MATOMO_SITEID=10/g" ~/internet.nl.env
+sed -i "s/ENABLE_BATCH=.*/ENABLE_BATCH=False/g" ~/internet.nl.env
+
+# Load the env file for this user
+echo "source ~/internet.nl.env"
+
+# Load the file now:
+source ~/internet.nl.env
+
+# Setup the environment
+make venv
+make unbound-37
+make python-whois
+make nassl
+
+# Run migrations
+make migrate
 
 
-# Deploy new configuration file
-...
+# The next step need a privileged user
+sudo su -
+# Stop all internet.nl services
+* `for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done`
 
+# Deploy new services
+rm /etc/systemd/system/internetnl*
+cp documentation/example_configuration/etc_systemd_system/* /etc/systemd/system/
+cp documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
+cp documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internetnl/bin/
 
-# Deploy new system services and disable old ones
-...
+# Restart services, depending if this a batch or single instance server:
+# Single:
+* `for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done`
+* `for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`; done`
 
-# Restart services
-...
+# Batch:
+# * `for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done`
+# * `for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`; done`
 
-
+# Always:
+* service internetnl-gunicorn restart
+* service internetnl-unbound restart
 ```
 
 
@@ -86,249 +136,6 @@ Some simple tools have been added to check your installation. Which are:
 `make manage api_check_ipv6`: performs an ipv6 test against internet.nl. This verifies that unbound is running.
 `make manage api_check_rabbit`: performs a test to see if rabbitmq is correctly installed with management module.
 
-
-### Changes in Django settings.py
-
-All below changes are copied from settings.py-dist
-
-A bunch of settings have been added:
-
-Feature flags that disable/enable bits of the test suite:
-```python
-INTERNET_NL_CHECK_SUPPORT_IPV6 = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_IPV6", True))
-INTERNET_NL_CHECK_SUPPORT_DNSSEC = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_DNSSEC", True))
-INTERNET_NL_CHECK_SUPPORT_MAIL = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_MAIL", True))
-INTERNET_NL_CHECK_SUPPORT_TLS = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_TLS", True))
-INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = bool(os.environ.get("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True))
-```
-
-A logging section, configured with a dictconfig:
-
-```python
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",  # sys.stdout
-            "formatter": "color",
-        },
-    },
-    "formatters": {
-        "debug": {
-            "format": "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - " "%(funcName)20s() - %(message)s",
-        },
-        "color": {
-            "()": "colorlog.ColoredFormatter",
-            # to get the name of the logger a message came from, add %(name)s.
-            "format": "%(log_color)s%(asctime)s\t%(levelname)-8s - " "%(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-            "log_colors": {
-                "DEBUG": "green",
-                "INFO": "white",
-                "WARNING": "yellow",
-                "ERROR": "red",
-                "CRITICAL": "bold_red",
-            },
-        },
-    },
-    "loggers": {
-        # Default Django logging, we expect django to work, and therefore only show INFO messages.
-        # https://docs.djangoproject.com/en/2.1/topics/logging/#django-s-logging-extensions
-        "django": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-        },
-        "internetnl": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
-        },
-        # disable verbose task logging (ie: "received task...", "...succeeded in...")
-        "celery.app.trace": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG") if DEBUG else "ERROR",
-        },
-        "celery.worker.strategy": {
-            "level": "INFO" if DEBUG else "ERROR",
-        },
-    },
-}
-```
-
-Some routing changed for the single-app:
-
-```python
-CELERY_TASK_ROUTES = {
-        'checks.tasks.dnssec.mail_callback': {'queue': 'db_worker'},
-        'checks.tasks.dnssec.web_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.ipv6.mail_callback': {'queue': 'db_worker'},
-        'checks.tasks.ipv6.web_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.mail.mail_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.tls.mail_callback': {'queue': 'db_worker'},
-        'checks.tasks.tls.web_callback': {'queue': 'db_worker'},
-
-        'checks.tasks.appsecpriv.web_callback': {'queue': 'db_worker'},
-
-        'interface.views.shared.run_stats_queries': {'queue': 'slow_db_worker'},
-        'interface.views.shared.update_running_status': {'queue': 'slow_db_worker'},
-        'checks.tasks.update.update_hof': {'queue': 'slow_db_worker'},
-}
-```
-
-Routing has changed for the batch instance:
-
-```python
-CELERY_BATCH_TASK_ROUTES = {
-        'checks.tasks.dnssec.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.dnssec.batch_mail_is_secure': {'queue': 'batch_main'},
-        'checks.tasks.dnssec.batch_web_callback': {'queue': 'batch_callback'},
-        'checks.tasks.dnssec.batch_web_is_secure': {'queue': 'batch_main'},
-
-        'checks.tasks.ipv6.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.ipv6.batch_mx': {'queue': 'batch_main'},
-        'checks.tasks.ipv6.batch_ns': {'queue': 'batch_main'},
-        'checks.tasks.ipv6.batch_web': {'queue': 'batch_main'},
-        'checks.tasks.ipv6.batch_web_callback': {'queue': 'batch_callback'},
-
-        'checks.tasks.mail.batch_dkim': {'queue': 'batch_main'},
-        'checks.tasks.mail.batch_dmarc': {'queue': 'batch_main'},
-        'checks.tasks.mail.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.mail.batch_spf': {'queue': 'batch_main'},
-
-        'checks.tasks.shared.batch_mail_get_servers': {'queue': 'batch_main'},
-        'checks.tasks.shared.batch_resolve_a_aaaa': {'queue': 'batch_main'},
-
-        'checks.tasks.tls.batch_mail_callback': {'queue': 'batch_callback'},
-        'checks.tasks.tls.batch_mail_smtp_starttls': {'queue': 'batch_main'},
-        'checks.tasks.tls.batch_web_callback': {'queue': 'batch_callback'},
-        'checks.tasks.tls.batch_web_cert': {'queue': 'batch_main'},
-        'checks.tasks.tls.batch_web_conn': {'queue': 'batch_main'},
-        'checks.tasks.tls.batch_web_http': {'queue': 'batch_main'},
-
-        'checks.tasks.appsecpriv.batch_web_appsecpriv': {'queue': 'batch_main'},
-        'checks.tasks.appsecpriv.batch_web_callback': {'queue': 'batch_callback'},
-
-        'interface.batch.util.batch_async_generate_results': {'queue': 'batch_slow'},
-        'interface.batch.util.batch_async_register': {'queue': 'batch_slow'},
-
-        'interface.batch.scheduler.run': {'queue': 'batch_scheduler'},
-    }
-```
-
-
-And celery imports have changed:
-
-```python
-CELERY_IMPORTS = (
-    'checks.tasks.update',
-    'interface.batch.scheduler',
-    'interface.batch.util',
-)
-```
-
-
-
-Some more options can be controlled using environment variables:
-```python
-DEBUG = bool(os.environ.get("DEBUG", False))
-
-ENABLE_BATCH = bool(os.environ.get("ENABLE_BATCH", False))
-```
-
-
-
-
-Database settings from the environment, making way for deployment using environment variables.
-Also including some commands to get a development psql service working.
-
-```python
-"""
-PSQL settings for development purposes (no db restrictions for this user):
-This creates the standard development database ('internetnl') and one for test: test_internetnl
-
-create database internetnl;
-create role internetnluser with password 'internetnluser';
-grant connect on database internetnl to internetnluser;
-grant all on database internetnl to internetnluser;
-alter role internetnluser login;
-
-create database test_internetnl;
-grant connect on database test_internetnl to internetnluser;
-grant all on database test_internetnl to internetnluser;
-
-GRANT ALL ON ALL TABLES IN SCHEMA public to internetnluser;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public to internetnluser;
-GRANT ALL ON ALL FUNCTIONS IN SCHEMA public to internetnluser;
-ALTER USER internetnluser CREATEDB;
-"""
-DATABASES_SETTINGS = {
-    "dev": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("DB_NAME", "db.sqlite3"),
-    },
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get("DB_NAME", "internetnl"),
-        'USER': os.environ.get("DB_USER", "internetnluser"),
-        'PASSWORD': os.environ.get("DB_PASSWORD", "internetnluser"),
-        'HOST': os.environ.get("DB_HOST", '127.0.0.1')
-    }
-}
-
-# For development, use dev in your own settings.py:
-DATABASE = os.environ.get("DJANGO_DATABASE", "default")
-DATABASES = {"default": DATABASES_SETTINGS[DATABASE]}
-```
-
-
-Templates are now explicitly mentioned and parser functions are explicitly listed:
-
-```python
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['', 'interface', 'interface/templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                "django.contrib.auth.context_processors.auth",
-                "django.template.context_processors.debug",
-                "django.template.context_processors.i18n",
-                "django.template.context_processors.media",
-                "django.template.context_processors.static",
-                "django.template.context_processors.tz",
-                "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.request",
-            ],
-            'libraries': {
-                'translate': 'interface.templatetags.translate'
-            }
-        },
-    },
-]
-```
-
-Apps are split, changing INSTALLED_APPS:
-
-```python
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_bleach',
-    'markdown_deux',
-    'frontend',
-    'interface',
-    'checks',
-    'django_hosts',
-]
-```
 
 
 ### Changes in testing 

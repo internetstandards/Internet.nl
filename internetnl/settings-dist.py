@@ -103,6 +103,11 @@ Do not edit below this line, unless you know what you are doing.
 Settings below are application/django settings that are intended to be generic for each installation.
 """
 
+if ENABLE_BATCH:
+    print("Batch enabled, single domain scanning via User Interface not available.")
+else:
+    print("Single domain scan enabled, batch scanning and API not available.")
+
 ALLOWED_HOSTS = ALLOWED_HOSTS + [IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
 
 INSTALLED_APPS = [
