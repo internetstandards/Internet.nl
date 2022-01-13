@@ -49,7 +49,7 @@ DB_NAME = getenv("DB_NAME", "internetnl")
 DB_USER = getenv("DB_USER", "internetnl")
 DB_PASSWORD = getenv("DB_PASSWORD", "secret")
 DB_HOST = getenv("DB_HOST", "127.0.0.1")
-DB_PORT = int(getenv("DB_PORT", 6432))
+DB_PORT = int(getenv("DB_PORT", 5432))
 
 # Infrastructure
 # # Celery
