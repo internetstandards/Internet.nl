@@ -31,6 +31,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # Let's start by telling all workers are on concurrency 2
 # -c is used for --concurrency, -Q is used for Queues (the longhand is not allowed)
 # All queues: db_worker, slow_db_worker, batch_callback, batch_main, worker_slow, batch_slow
+# Warning: 50 workers CAN overload your system. 4GB will not cut it in that case!
 CELERYD_OPTS="--without-gossip --events --time-limit=300 8 -c 1 -c:1-6 1 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -c:7 50 -Q:7 batch_main -c:8 2 -Q:8 batch_callback"
 
 # %N will be replaced with the first part of the nodename.

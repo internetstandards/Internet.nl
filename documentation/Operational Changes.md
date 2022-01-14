@@ -90,21 +90,26 @@ service internetnl-gunicorn restart
 service internetnl-unbound restart
 
 # Single:
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`; done
 
 # Batch:
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`; done
 
 # Verify services are running
+# You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
 systemctl list-units --type=service
 
 # In case services failed to start, you can start debugging using these commands:
 tail -f /opt/internetnl/log/*
 journalctl -xe
 
-# You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
+# If your system runs out of memory, consider reducing the amount of workers in /opt/internetnl/etc/...-celery-workers
+# 10 workers consume about 1 to 2 gigabyte of ram. You can do so by stopping the workers service, altering the config 
+# file and restarting it again.
 
 # Done! :)
 ```
