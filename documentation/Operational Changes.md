@@ -67,6 +67,7 @@ source ~/internet.nl.env
 cp ~/internet.nl.env ~/internet.nl.systemd.env
 sed -i 's/\export //g'  ~/internet.nl.systemd.env
 mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
+chown internetnl:internetnl /opt/internetnl/etc/internet.nl.systemd.env
 
 # Setup the environment and dependencies
 make venv
