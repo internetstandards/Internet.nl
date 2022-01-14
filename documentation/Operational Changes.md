@@ -97,6 +97,15 @@ for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl di
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`; done
 
+# Verify services are running
+systemctl list-units --type=service
+
+# In case services failed to start, you can start debugging using these commands:
+tail -f /opt/internetnl/log/*
+journalctl -xe
+
+# You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
+
 # Done! :)
 ```
 
