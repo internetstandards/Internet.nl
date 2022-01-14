@@ -5,22 +5,38 @@ hosters.
 
 ## Change overview for version 1.4
 
-### Deployment script
+### Deployment instructions
 
 What you need:
 * A copy of the previous settings file, to migrate settings from (especially passwords).
-* Know if this is a single or batch installation internet.nl, can't be both. (ENABLE BATCH)
+* Know if this is a single or batch installation internet.nl, can't be both. (Impacts the ENABLE BATCH and services)
+* Python 3.7 in the command line for unbound compilation
+
+The installation is pretty involved, as we're moving away from changes to the settings.py file and using environment
+variables. This is convenient for automated deployment of the app in the future (think ansible etc).
+
+As an in-between patch an environment file is provided which requires you to set up the settings as they were before.
+One of the steps in these instructions below copies the settings.py file to a backup location so your passwords can
+be retrieved.
 
 ```bash
-sudo su - internetnl
+# The next step need a privileged user
+sudo su -
+# Stop all internet.nl services
+for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done
 
-# Get latest sources
-cd /opt/internetnl/Internet.nl/
-git checkout main
-git pull
+sudo su - internetnl
 
 # Backup the existing configuration, as that will be overwritten
 cp internetnl/settings.py ~/settings_1.3.py
+
+# Get latest sources
+cd /opt/internetnl/Internet.nl/
+# Clean any manual modifications and untracked files
+git reset HEAD --hard
+git clean -fdx
+git pull
+git checkout master
 
 # Create a new settings file
 cp internetnl/settings-dist.py internetnl/settings.py
@@ -46,19 +62,20 @@ echo "source ~/internet.nl.env" >>~/.profile
 # Load the file now, in this session:
 source ~/internet.nl.env
 
+# The internetnl user also needs these settings. They are loaded through the EnvironmentFile instruction in the
+# systemd services. The syntax is a bit different compared to including this for a user. So what we do is:
+cp ~/internet.nl.env ~/internet.nl.systemd.env
+sed -i 's/\export //g'  ~/internet.nl.systemd.env
+mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
+
 # Setup the environment and dependencies
 make venv
-make unbound-37
+make unbound-3.7-github
 make python-whois
 make nassl
 
 # Run migrations
 make migrate
-
-# The next step need a privileged user
-sudo su -
-# Stop all internet.nl services
-* `for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done`
 
 # Deploy new services
 rm /etc/systemd/system/internetnl*
@@ -67,17 +84,19 @@ cp documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
 cp documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internetnl/bin/
 
 # Restart services, depending if this a batch or single instance server:
+systemctl daemon-reload
+service internetnl-gunicorn restart
+service internetnl-unbound restart
+
 # Single:
-* `for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done`
-* `for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`; done`
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`; done
 
 # Batch:
-# * `for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done`
-# * `for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`; done`
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`; done
 
-# Always:
-* service internetnl-gunicorn restart
-* service internetnl-unbound restart
+# Done! :)
 ```
 
 Todo: ship an unbound configuration.
@@ -87,6 +106,9 @@ Todo: ship an unbound configuration.
 ### Python installation management
 The makefile is 'the way to go' for running and installing the application. Inside the makefile there are a bunch
 of automated procedures that supersede the manual sets from the [Installation.md](Installation.md) file. 
+
+The makefile is the point of truth to set up and manage the virtual environment and dependencies 
+(unbound, python-whois and nassl).
 
 To setup a complete virtual environment with all needed dependencies run the following:
 ```bash

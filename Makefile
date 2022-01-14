@@ -213,9 +213,24 @@ unbound-3.7: venv .unbound-3.7
 	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound-3.7
 
+
+unbound-3.7-non-standard: venv .unbound-3.7-non-standard
+.unbound-3.7-non-standard:
+	# Installing python3.9 for ubuntu users: https://gist.github.com/plembo/6bc141a150cff0369574ce0b0a92f5e7
+	# -I/usr/include/python3.9 -> contains Python.h and other .h files.
+	# -L/usr/lib -L/usr/lib/python3.9 -lpython3.9 -> contains tons of .py files, for example chunk.py and tstats.py
+	# The --prefix will be the location where unbound code is dumped, the content of that directory are the following dirs:
+	#  etc  include  lib  sbin  share
+
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/bin/python3.7"  PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8 -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8/config-3.8-darwin -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib -lpython3.7" PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	touch .unbound-3.7-non-standard
+
 unbound-3.7-github: venv .unbound-3.7-github
 .unbound-3.7-github:
 	# Installs unbound on the github worker.
+	# Todo: would it make sense to enable the venv before this so we always have the right python binaries?
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
 	cd unbound && ${env} ./configure --prefix=$(ROOT_DIR)/_unbound/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
@@ -232,7 +247,8 @@ unbound-x86-3.9: .unbound-x86-3.9
 
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && /usr/bin/arch -x86_64 ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.9/3.9.9/bin/python3.9" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9 -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9/config-3.9-darwin -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib -lpython3.9" PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9" PYTHON_LIBDIR="/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib" && make install
+	pydir = "/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/"
+	cd unbound && /usr/bin/arch -x86_64 ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.9/3.9.9/bin/python3.9" PYTHON_LDFLAGS="-L$(pydir)lib/python3.9 -L$(pydir)lib/python3.9/config-3.9-darwin -L$(pydir)/lib -lpython3.9" PYTHON_CPPFLAGS="-I$(pydir)/include/python3.9" PYTHON_LIBDIR="$(pydir)/lib" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages && make install
 	touch .unbound-x86-3.9
 
 unbound-x86-3.8: .unbound-x86-3.8

@@ -7,6 +7,7 @@ Type=forking
 User=internetnl
 Group=internetnl
 EnvironmentFile=/opt/internetnl/etc/single-celery-workers
+EnvironmentFile=/opt/internetnl/etc/internet.nl.systemd.env
 WorkingDirectory=/opt/internetnl/Internet.nl
 ExecStartPre=/bin/sleep 5
 ExecStart=/bin/sh -c '${CELERY_BIN} multi start ${CELERYD_NODES} \
