@@ -46,7 +46,7 @@ CELERY_LOG_LEVEL = getenv("CELERY_LOG_LEVEL", "ERROR")
 # # Database
 DJANGO_DATABASE = getenv("DJANGO_DATABASE", "default")
 DB_NAME = getenv("DB_NAME", "internetnl")
-DB_USER = getenv("DB_USER", "internetnl")
+DB_USER = getenv("DB_USER", "internetnluser")
 DB_PASSWORD = getenv("DB_PASSWORD", "secret")
 DB_HOST = getenv("DB_HOST", "127.0.0.1")
 DB_PORT = int(getenv("DB_PORT", 5432))
@@ -177,6 +177,7 @@ This creates the standard development database ('internetnl') and one for test: 
 
 create database internetnl;
 create role internetnluser with password 'internetnluser';
+ALTER role internetnluser with password 'internetnluser';
 grant connect on database internetnl to internetnluser;
 grant all on database internetnl to internetnluser;
 alter role internetnluser login;
