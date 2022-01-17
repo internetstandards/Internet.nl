@@ -56,6 +56,8 @@ sed -i "s/SMTP_EHLO_DOMAIN=.*/SMTP_EHLO_DOMAIN='self',dev.internet.nl/g" ~/inter
 sed -i "s/ALLOWED_HOSTS=.*/ALLOWED_HOSTS=localhost,dev.internet.nl,.dev.internet.nl/g" ~/internet.nl.env
 sed -i "s/MATOMO_SITEID=.*/MATOMO_SITEID=10/g" ~/internet.nl.env
 sed -i "s/ENABLE_BATCH=.*/ENABLE_BATCH=False/g" ~/internet.nl.env
+# this environment uses pgbouncer, you might use the default port 5432
+sed -i "s/DB_PORT=.*/DB_PORT=6432/g" ~/internet.nl.env
 
 # Always load the env file for this user
 echo "source ~/internet.nl.env" >>~/.profile
