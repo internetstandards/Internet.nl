@@ -87,6 +87,10 @@ cp documentation/example_configuration/etc_systemd_system/* /etc/systemd/system/
 cp documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
 cp documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internetnl/bin/
 
+# Copy the unbound configuration settings from 1.3 to the newly compiled directory (this is not ideal)
+cp -ravi /opt/internetnl/unbound/etc/unbound/* /opt/internetnl/Internet.nl/_unbound/etc/unbound/ 
+
+
 # Restart services, depending if this a batch or single instance server:
 systemctl daemon-reload
 service internetnl-gunicorn restart
