@@ -56,3 +56,5 @@ nassl_freebsd
 
 # custom dependencies temp storage
 custom-deps
+
+/manual-hall-of-fame
