@@ -83,7 +83,7 @@ INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = get_boolean_env("INTERNET_NL_CHECK_SUPPOR
 
 # Features
 # # User Tracking
-MATOMO_URL = getenv("MATOMO_URL", "//matomo_url/")
+MATOMO_URL = getenv("MATOMO_URL", "//matomo.internet.nl/")
 MATOMO_SITEID = int(getenv("MATOMO_SITEID", "1"))
 # # Used for subdomain tracking eg. *.internet.nl
 MATOMO_SUBDOMAIN_TRACKING = getenv("MATOMO_SUBDOMAIN_TRACKING", "")
@@ -325,14 +325,14 @@ CELERY_TASK_ROUTES.update(CELERY_BATCH_TASK_ROUTES)
 RABBIT_VHOST = "/"
 RABBIT_MON_QUEUE = "batch_main"
 # Keep the queue length relatively small.
-RABBIT_MON_THRESHOLD = 200
+RABBIT_MON_THRESHOLD = 80
 
 # Test user to run without HTTP-AUTH.
 BATCH_TEST_USER = "test_user"
 
 BATCH_SCHEDULER_INTERVAL = 20  # seconds
 # Number of *domains* to start per scheduler run.
-BATCH_SCHEDULER_DOMAINS = 50
+BATCH_SCHEDULER_DOMAINS = 25
 # Time in seconds from when a task is sumbitted *to a queue*.
 BATCH_MAX_RUNNING_TIME = 60 * 10  # seconds
 

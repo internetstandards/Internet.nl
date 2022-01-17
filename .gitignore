@@ -3,6 +3,10 @@
 /internetnl/settings.dev.batch.internet.nl.py
 /internetnl/settings.dev.internet.nl.py
 /internetnl/batch_api_doc_conf.py
+/internetnl/internet.nl.settings.batch.live.py
+/internetnl/internet.nl.settings.single.live.py
+/internetnl/internet.nl.single.settings.live.py
+/internetnl/internet.nl.batch.settings.live.py
 __pycache__
 *.mo
 *.pyc
