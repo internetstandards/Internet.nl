@@ -27,11 +27,12 @@ for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `b
 
 sudo su - internetnl
 
+# Get latest sources
+cd /opt/internetnl/Internet.nl/
+
 # Backup the existing configuration, as that will be overwritten
 cp internetnl/settings.py ~/settings_1.3.py
 
-# Get latest sources
-cd /opt/internetnl/Internet.nl/
 # Clean any manual modifications and untracked files
 git reset HEAD --hard
 git clean -fdx
