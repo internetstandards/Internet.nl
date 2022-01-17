@@ -97,6 +97,7 @@ service internetnl-gunicorn restart
 service internetnl-unbound restart
 
 # Single:
+# todo: add --now to start now.
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`; done

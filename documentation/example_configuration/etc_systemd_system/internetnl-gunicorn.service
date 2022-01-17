@@ -5,6 +5,7 @@ After=network.target postgresql.service pgbouncer.service redis-server.service r
 [Service]
 User=internetnl
 Group=internetnl
+EnvironmentFile=/opt/internetnl/etc/internet.nl.systemd.env
 WorkingDirectory=/opt/internetnl/Internet.nl
 ExecStartPre=/bin/sleep 5
 ExecStart=/opt/internetnl/Internet.nl/.venv/bin/python3 /opt/internetnl/bin/gunicorn -b localhost:8000 -w 3 -k gevent internetnl.wsgi:application --access-logfile /opt/internetnl/log/gunicorn-access.log --error-logfile /opt/internetnl/log/gunicorn-error.log
