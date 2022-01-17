@@ -79,7 +79,7 @@ make python-whois
 make nassl
 
 # Run migrations
-make migrate
+make manage migrate
 
 # Deploy new services
 rm /etc/systemd/system/internetnl*
