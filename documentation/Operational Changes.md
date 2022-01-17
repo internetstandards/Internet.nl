@@ -119,6 +119,11 @@ journalctl -xe
 # 10 workers consume about 1 to 2 gigabyte of ram. You can do so by stopping the workers service, altering the config 
 # file and restarting it again.
 
+# The site might look bad, so you need to run some translations and such:
+make frontend
+make translations
+make manage collectstatic
+
 # Done! :)
 ```
 
