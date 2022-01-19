@@ -60,6 +60,10 @@ CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/
 # # Redis Cache
 CACHE_LOCATION = getenv("CACHE_LOCATION", "redis://localhost:6379/0")
 
+# Infrastructure
+# # LDNS Dane / or ldns-dane-wrapper ('./ldns-dane-wrapper')
+LDNS_DANE = getenv("LDNS_DANE", "/usr/local/bin/ldns-dane")
+
 # Features
 # # Site
 MANUAL_HOF_PAGES = split_csv_trim(getenv("MANUAL_HOF_PAGES", ""))
@@ -365,7 +369,6 @@ SHARED_TASK_TIME_LIMIT_LOW = 15
 
 # --- TLS configuration
 #
-LDNS_DANE = "./ldns-dane-wrapper"
 CA_CERTIFICATES = os.path.join(BASE_DIR, "remote_data/certs/ca-bundle.crt")
 CA_FINGERPRINTS = os.path.join(BASE_DIR, "remote_data/certs/root_fingerprints")
 

@@ -125,6 +125,36 @@ make frontend
 # Done! :)
 ```
 
+
+### Changing variables manually
+todo: this can be added to the makefile as well, which simplifies rolling this out.
+```bash
+# Make sure you have the latest config file:
+cp internetnl/settings-dist.py internetnl/settings.py
+
+
+# Edit the ~/internet.nl.env file and add what you need, for example at line 65:
+## LDNS Dane
+### String, system path to ldns-dane executable or ldns-wrapper file with substituted paths.
+export LDNS_DANE=/usr/local/bin/ldns-dane
+
+
+# Load it into your environment
+source ~/internet.nl.env
+
+# And prepare it for the internet.nl services
+cp ~/internet.nl.env ~/internet.nl.systemd.env
+sed -i 's/\export //g'  ~/internet.nl.systemd.env
+mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
+chown internetnl:internetnl /opt/internetnl/etc/internet.nl.systemd.env
+
+# Restart the services:
+# single:
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done
+# batch
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done
+```
+
 Todo: ship an unbound configuration.
 
 
