@@ -58,8 +58,12 @@ translations_tar:
 	. .venv/bin/activate && ${env} python3 $(POFILESEXEC) $(POFILES_TAR_ARGS)
 
 frontend:
+	# Rebuilds entire frontend, with minified styles and current translations.
 	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) js
 	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) css
+	${MAKE} translations
+	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
+	. .venv/bin/activate && ${env} python3 manage.py collectstatic
 
 update_padded_macs:
 	cd $(MACSDIR); ./update-macs.sh
@@ -148,15 +152,29 @@ run-rabbit:
 	docker run --rm --name=redis -p 6379:6379 redis
 
 
-%:
-    @:
+# %:
+#     @:
+#
+# args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 
-args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
+# If the first argument is "run"...
+ifeq (manage,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
+
+prog: # ...
+    # ...
+
 
 # usage: make manage <command in manage.py>
+.PHONY: manage
 manage: venv
 	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
-	. .venv/bin/activate && ${env} python3 manage.py $(call args,defaultstring)
+	. .venv/bin/activate && ${env} python3 manage.py $(RUN_ARGS)
 
 
 # compiling unbound for an x86_64 system:

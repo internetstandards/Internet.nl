@@ -121,8 +121,6 @@ journalctl -xe
 
 # The site might look bad, so you need to run some translations and such:
 make frontend
-make translations
-make manage collectstatic
 
 # Done! :)
 ```
