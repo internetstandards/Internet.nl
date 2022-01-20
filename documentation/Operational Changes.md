@@ -84,7 +84,8 @@ make manage migrate
 # Deploy new services
 rm /etc/systemd/system/internetnl*
 cp documentation/example_configuration/etc_systemd_system/* /etc/systemd/system/
-cp documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
+cp documentation/example_configuration/opt_internetnl_etc/batch-* /opt/internetnl/etc/
+cp documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
 cp documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internetnl/bin/
 
 # Copy the unbound configuration settings from 1.3 to the newly compiled directory (this is not ideal)
