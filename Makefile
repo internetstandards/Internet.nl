@@ -174,7 +174,8 @@ prog: # ...
 .PHONY: manage
 manage: venv
 	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
-	. .venv/bin/activate && ${env} python3 manage.py $(RUN_ARGS)
+	# Example: make manage api_check_ipv6 ARGS="--domain nu.nl"
+	. .venv/bin/activate && ${env} python3 manage.py $(RUN_ARGS) $(ARGS)
 
 
 # compiling unbound for an x86_64 system:
@@ -186,6 +187,10 @@ PYTHON_LDFLAGS="-L -L/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framew
 PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/include/python3.9"
 endif
 
+
+version:
+	. .venv/bin/activate && ${env} python3 --version
+	. .venv/bin/activate && ${env} python3 manage.py version
 
 reinstall-production-dependencies:
 	# You need to do this after pip-sync, since pip-sync does not recognize these dependencies.
@@ -282,6 +287,9 @@ unbound-x86-3.8: .unbound-x86-3.8
 	git clone https://github.com/internetstandards/unbound
 	cd unbound && /usr/bin/arch -x86_64 ./configure --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/Cellar/python@3.8/3.8.12_1/bin/python3.8" PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.8/site-packages PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8 -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8/config-3.8-darwin -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib -lpython3.8" PYTHON_CPPFLAGS="-I/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/include/python3.8" PYTHON_LIBDIR="/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib" && make install
 	touch .unbound-x86-3.8
+
+	# To use it, and not the one that comes with brew:
+	# sudo /usr/local/sbin/unbound
 
 
 python-whois: venv .python-whois

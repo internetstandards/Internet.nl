@@ -20,6 +20,7 @@ from django.utils.translation import ugettext as _
 
 import unbound
 from interface import redis_id
+from internetnl import log
 
 ub_ctx = unbound.ub_ctx()
 if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
@@ -73,10 +74,13 @@ def validate_dname(dname):
         dname = idna.encode(dname).decode("ascii")
 
         if re.match(regex_dname, dname):
+            log.debug(f"Domain {dname} is valid.")
             return dname
         else:
+            log.debug(f"Domain {dname} is not valid.")
             return None
     except (UnicodeError, ValueError, idna.IDNAError):
+        log.debug(f"Domain {dname} is not valid and caused an exception.")
         return None
 
 
@@ -281,6 +285,7 @@ def get_valid_domain_web(dname, timeout=5):
         if cb_data.get("data") and cb_data["data"].data:
             return dname
 
+    log.debug(f"{dname}: Could not retrieve RR_TYPE_A / RR_TYPE_AAAA record from unbound.")
     return None
 
 

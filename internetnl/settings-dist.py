@@ -344,6 +344,7 @@ BATCH_MAX_RUNNING_TIME = 60 * 10  # seconds
 # cache performance while batch testing. Format is "ip@port".
 # Leave empty ("") for disabling the feature; NOT recommended.
 # By default unbound runs on port 53 (...), so there is a different unbound setup recommended, but not documented
+# You can verify it running by: dig internet.nl @localhost
 CENTRAL_UNBOUND = UNBOUND_ADDRESS
 
 # Custom results for the /results endpoint.

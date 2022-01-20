@@ -61,6 +61,8 @@ class SetupUnboundContext(Task):
             if async_id:
                 self.ub_ctx.cancel(async_id)
             raise e
+
+        log.debug(f"Got data: {cb_data}, retval: {retval}.")
         return cb_data
 
     def resolve(self, qname, qtype):

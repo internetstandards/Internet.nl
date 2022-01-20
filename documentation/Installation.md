@@ -124,6 +124,41 @@ installation.
 
 _Note that extra DNS records are needed._
 
+Manually running unbound can be done with `unbound -d -vvvv`. This opens unbound in a console with maximum debug logging.
+This helps figuring out if everything is set up properly. Unbound will use syslog after starting, and you'll need to
+look in the system log for unbound. On mac os you can use the console.app to filter on unbound and see errors there.
+
+You can verify unbound running by:
+
+```
+dig internet.nl @localhost
+```
+When not running the query will hang or say "@localhost" not found.
+
+When running it should give an answer like this:
+```
+; <<>> DiG 9.10.6 <<>> internet.nl @localhost
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 32270
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;internet.nl.			IN	A
+
+;; ANSWER SECTION:
+internet.nl.		3054	IN	A	62.204.66.10
+
+;; Query time: 24 msec
+;; SERVER: ::1#53(::1)
+;; WHEN: Wed Jan 19 16:02:18 CET 2022
+;; MSG SIZE  rcvd: 56
+```
+
+
+
 
 ### ldns-dane
 
