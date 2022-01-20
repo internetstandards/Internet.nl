@@ -33,6 +33,7 @@ __pycache__
 
 # When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
 unbound
+_unbound
 python-whois
 pythonwhois.egg-info
 nassl_freebsd
@@ -43,6 +44,7 @@ nassl_freebsd
 
 # make targets
 .unbound
+.unbound-3.7-github
 .unbound-x86
 .unbound-x86-3.8
 .unbound-x86-3.9
