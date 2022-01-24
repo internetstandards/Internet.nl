@@ -473,6 +473,8 @@ if "hosters" in MANUAL_HOF_PAGES:
         "icon_file": "embed-badge-hosters-v3.svg",
     }
 
+HOF_UPDATE_INTERVAL = 600  # seconds
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
