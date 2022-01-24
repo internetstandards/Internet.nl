@@ -3,7 +3,6 @@
 import os
 
 from celery import Celery
-from celery.schedules import crontab
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 
@@ -27,8 +26,5 @@ if app.conf.ENABLE_BATCH:
 else:
     # Disable HoF when on batch mode, too much DB activity.
     app.conf.beat_schedule = {
-        "generate_HoF": {
-            "task": "update_HoF_ranking",
-            "schedule": crontab(hour="*", minute="*/10", day_of_week="*"),
-        }
+        "generate_HoF": {"task": "checks.tasks.update.update_hof", "schedule": app.conf.HOF_UPDATE_INTERVAL}
     }
