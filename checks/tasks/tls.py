@@ -10,11 +10,6 @@ from binascii import hexlify
 from enum import Enum
 from itertools import product
 from timeit import default_timer as timer
-
-# Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
-# while monkey patching. That way we can still catch subprocess.TimeoutExpired
-# instead of just Exception which may intervene with Celery's own exceptions.
-# Gevent does not have the same issue.
 import eventlet
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -88,6 +83,10 @@ from checks.tasks.tls_connection import (
 from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from interface import batch, batch_shared_task, redis_id
 
+# Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
+# while monkey patching. That way we can still catch subprocess.TimeoutExpired
+# instead of just Exception which may intervene with Celery's own exceptions.
+# Gevent does not have the same issue.
 if eventlet.patcher.is_monkey_patched("subprocess"):
     subprocess = eventlet.import_patched("subprocess")
 else:
