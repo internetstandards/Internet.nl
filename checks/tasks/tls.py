@@ -6,13 +6,14 @@ import logging
 import socket
 import ssl
 import time
+
 from binascii import hexlify
 from enum import Enum
 from itertools import product
 from timeit import default_timer as timer
 import eventlet
 from celery import shared_task
-from celery.exceptions import SoftTimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.backends.openssl.dh import _DHPublicKey
 from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
@@ -1587,7 +1588,7 @@ def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
         results = {}
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = cert_checks(url, ChecksMode.WEB, task, af_ip_pair, *args, **kwargs)
-    except SoftTimeLimitExceeded:
+    except (SoftTimeLimitExceeded, TimeLimitExceeded):
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
                 results[af_ip_pair[1]] = dict(tls_cert=False)
@@ -1704,7 +1705,7 @@ def do_web_conn(af_ip_pairs, url, *args, **kwargs):
         results = {}
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = check_web_tls(url, af_ip_pair, args, kwargs)
-    except SoftTimeLimitExceeded:
+    except (SoftTimeLimitExceeded, TimeLimitExceeded):
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
                 results[af_ip_pair[1]] = dict(server_reachable=False, tls_enabled=False)
@@ -1753,7 +1754,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
 
-    except SoftTimeLimitExceeded:
+    except (SoftTimeLimitExceeded, TimeLimitExceeded):
         for server in results:
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
@@ -2884,7 +2885,7 @@ def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
 
-    except SoftTimeLimitExceeded:
+    except (SoftTimeLimitExceeded, TimeLimitExceeded):
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
                 results[af_ip_pair[1]] = dict(

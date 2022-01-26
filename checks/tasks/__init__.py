@@ -5,7 +5,7 @@ import socket
 import time
 
 from celery import Task
-from celery.exceptions import SoftTimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
 from django.conf import settings
 
 import unbound
@@ -56,7 +56,7 @@ class SetupUnboundContext(Task):
                 time.sleep(0.1)
                 retval = self.ub_ctx.process()
 
-        except SoftTimeLimitExceeded as e:
+        except (SoftTimeLimitExceeded, TimeLimitExceeded) as e:
             log.debug("Failed resolving of qname: %s" % qname)
             if async_id:
                 self.ub_ctx.cancel(async_id)

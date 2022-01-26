@@ -1,7 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from celery import shared_task
-from celery.exceptions import SoftTimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
 
@@ -195,7 +195,7 @@ def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = http_headers_check(af_ip_pair, url, header_checkers, task)
 
-    except SoftTimeLimitExceeded:
+    except (SoftTimeLimitExceeded, TimeLimitExceeded):
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
                 d = {"server_reachable": False}
