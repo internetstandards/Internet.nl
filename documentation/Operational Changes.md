@@ -52,7 +52,7 @@ sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=secret/g" ~/internet.nl.env
 sed -i "s/IPV6_TEST_ADDR=.*/IPV6_TEST_ADDR=2a00:d00:ff:162:62:204:66:15/g" ~/internet.nl.env
 sed -i "s/CONN_TEST_DOMAIN=.*/CONN_TEST_DOMAIN=dev.internet.nl/g" ~/internet.nl.env
 sed -i "s/CSP_DEFAULT_SRC=.*/CSP_DEFAULT_SRC='self',dev.internet.nl/g" ~/internet.nl.env
-sed -i "s/SMTP_EHLO_DOMAIN=.*/SMTP_EHLO_DOMAIN='self',dev.internet.nl/g" ~/internet.nl.env
+sed -i "s/SMTP_EHLO_DOMAIN=.*/SMTP_EHLO_DOMAIN=dev.internet.nl/g" ~/internet.nl.env
 sed -i "s/ALLOWED_HOSTS=.*/ALLOWED_HOSTS=localhost,dev.internet.nl,.dev.internet.nl/g" ~/internet.nl.env
 sed -i "s/MATOMO_SITEID=.*/MATOMO_SITEID=10/g" ~/internet.nl.env
 sed -i "s/ENABLE_BATCH=.*/ENABLE_BATCH=False/g" ~/internet.nl.env
@@ -138,7 +138,6 @@ cp internetnl/settings-dist.py internetnl/settings.py
 ## LDNS Dane
 ### String, system path to ldns-dane executable or ldns-wrapper file with substituted paths.
 export LDNS_DANE=/usr/local/bin/ldns-dane
-
 
 # Load it into your environment
 source ~/internet.nl.env
