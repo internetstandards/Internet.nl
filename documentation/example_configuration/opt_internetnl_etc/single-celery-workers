@@ -13,8 +13,13 @@ CELERY_APP="internetnl"
 CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 
 # Extra command-line arguments to the worker
-#CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
-CELERYD_OPTS="--without-gossip --time-limit=300 -P gevent -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
+# Note that using gevent is not an option here, as it sends TimeLimitExceeded exceptions which are not catchable,
+#  see: https://docs.celeryproject.org/en/latest/userguide/workers.html#time-limits
+# Even more: The documentation states that time limit support only exists for prefork and gevent. It does not
+#  mention eventlet. So eventlet _might_ work, prefork _will_ work. Eventlet seems to hang in later versions
+# The -P option is documented here:
+#  https://docs.celeryproject.org/en/latest/reference/cli.html#cmdoption-celery-worker-P
+CELERYD_OPTS="--without-gossip --time-limit=300 -P prefork -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
