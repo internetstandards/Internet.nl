@@ -312,6 +312,16 @@ class WebRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki valid verdict good"
 
+    def result_invalid(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL, override=True)
+        self.verdict = "detail web rpki valid verdict invalid"
+
+    def result_not_routed(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web rpki valid verdict not-routed"
+
     def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
@@ -336,6 +346,16 @@ class MailRpkiValid(Subtest):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki valid verdict good"
+
+    def result_invalid(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL, override=True)
+        self.verdict = "detail mail rpki valid verdict invalid"
+
+    def result_not_routed(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail rpki valid verdict not-routed"
 
     def result_validator_error(self):
         self.tech_type = ""
@@ -391,6 +411,16 @@ class NsRpkiValid(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-valid verdict good"
 
+    def result_invalid(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL, override=True)
+        self.verdict = "detail web-mail rpki ns-valid verdict invalid"
+
+    def result_not_routed(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web-mail rpki ns-valid verdict not-routed"
+
     def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
@@ -444,6 +474,16 @@ class MailMxNsRpkiValid(Subtest):
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-valid verdict good"
+
+    def result_invalid(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL, override=True)
+        self.verdict = "detail mail rpki mx-ns-valid verdict invalid"
+
+    def result_not_routed(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail rpki mx-ns-valid verdict not-routed"
 
     def result_validator_error(self):
         self.tech_type = ""

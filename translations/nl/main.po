@@ -860,6 +860,12 @@ msgstr ""
 msgid "detail mail rpki mx-ns-valid verdict good"
 msgstr ""
 
+msgid "detail mail rpki mx-ns-valid verdict invalid"
+msgstr ""
+
+msgid "detail mail rpki mx-ns-valid verdict not-routed"
+msgstr ""
+
 msgid "detail mail rpki valid exp"
 msgstr ""
 
@@ -873,6 +879,12 @@ msgid "detail mail rpki valid verdict bad"
 msgstr ""
 
 msgid "detail mail rpki valid verdict good"
+msgstr ""
+
+msgid "detail mail rpki valid verdict invalid"
+msgstr ""
+
+msgid "detail mail rpki valid verdict not-routed"
 msgstr ""
 
 msgid "detail mail tls cert-hostmatch exp"
@@ -1956,6 +1968,12 @@ msgstr ""
 msgid "detail web rpki valid verdict good"
 msgstr ""
 
+msgid "detail web rpki valid verdict invalid"
+msgstr ""
+
+msgid "detail web rpki valid verdict not-routed"
+msgstr ""
+
 msgid "detail web tls cert-hostmatch exp"
 msgstr ""
 "We testen of de domeinnaam van je website overeenkomt met de domeinnaam op het certificaat. \n"
@@ -2780,6 +2798,12 @@ msgid "detail web-mail rpki ns-valid verdict bad"
 msgstr ""
 
 msgid "detail web-mail rpki ns-valid verdict good"
+msgstr ""
+
+msgid "detail web-mail rpki ns-valid verdict invalid"
+msgstr ""
+
+msgid "detail web-mail rpki ns-valid verdict not-routed"
 msgstr ""
 
 msgid "disclosure content"

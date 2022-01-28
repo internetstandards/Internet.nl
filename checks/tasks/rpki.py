@@ -248,7 +248,7 @@ def report_exists(subtestname, category, domainset) -> None:
 
         return row
 
-    failure_count = 0
+    missing_count = 0
     tech_data = []
 
     prev_domain = None
@@ -265,18 +265,17 @@ def report_exists(subtestname, category, domainset) -> None:
                               ip['validity']))
 
             if not any(route['vrps'] for route in ip['validity'].values()):
-                failure_count += 1
+                missing_count += 1
 
             prev_domain = domain.domain
 
-        prev_domain = domain.domain
     if not domainset:
         # no A/AAAA records exist
         category.subtests[subtestname].result_no_addresses()
-    elif not failure_count:
-        category.subtests[subtestname].result_good(tech_data)
-    else:
+    elif missing_count > 0:
         category.subtests[subtestname].result_bad(tech_data)
+    else:
+        category.subtests[subtestname].result_good(tech_data)
 
 
 def report_valid(subtestname, category, domainset) -> None:
@@ -291,17 +290,23 @@ def report_valid(subtestname, category, domainset) -> None:
         # --------------------------------------------------------
         # example.nl | 192.168.0.0/16 | AS64496 | valid
         # example.nl | 192.168.0.0/26 | AS64497 | invalid
+        # example.nl | 10.0.0.0/8     | ?       | not-tested
+
+        asn = f"AS{asn}"
 
         if validity['state'] is None:
+            asn = '?'
             state = "detail tech data not-tested"
         elif validity['state'] == 'invalid':
             state = f"{validity['state']} ({validity['reason']})"
         else:
             state = validity['state']
 
-        return [domain, prefix, f"AS{asn}", state]
+        return [domain, prefix, asn, state]
 
-    failure_count = 0
+    not_routed_count = 0  # count of validation failures due to unavailability of routes
+    invalid_count = 0     # count of validation resulting in 'invalid'
+    not_valid_count = 0   # count of validations not resulting in 'valid'
     tech_data = []
 
     prev_domain = None
@@ -319,15 +324,23 @@ def report_valid(subtestname, category, domainset) -> None:
                     gen_tech_data(domain.domain if domain.domain != prev_domain else '...',
                                   asn, prefix, validity))
 
-                if validity['state'] != 'valid':
-                    failure_count += 1
+                if validity['state'] is None:  # no BGP data available
+                    not_routed_count += 1
+                elif validity['state'] == 'invalid':
+                    invalid_count += 1
+                elif validity['state'] != 'valid':
+                    not_valid_count += 1
 
                 prev_domain = domain.domain
 
-    if not failure_count:
-        category.subtests[subtestname].result_good(tech_data)
-    else:
+    if invalid_count > 0:
+        category.subtests[subtestname].result_invalid(tech_data)
+    elif not_valid_count > 0:
         category.subtests[subtestname].result_bad(tech_data)
+    elif not_routed_count > 0:
+        category.subtests[subtestname].result_not_routed(tech_data)
+    else:
+        category.subtests[subtestname].result_good(tech_data)
 
 
 def build_summary_report(parent, parent_name, category) -> None:
@@ -415,30 +428,30 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                           'errors' : []}
 
                 try:
-                # fetch ASN, prefixes from BGP
-                routeview = TeamCymruIPtoASN.from_bgp(task, ip)
+                    # fetch ASN, prefixes from BGP
+                    routeview = TeamCymruIPtoASN.from_bgp(task, ip)
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
                     logger.error(e.msg)
                     result['errors'].append(e.__name__)
 
                 try:
-                if routeview:
-                    # and try to validate corresponding Roas
-                    routeview.validate(task, Routinator)
-                else:
+                    if routeview:
+                        # and try to validate corresponding Roas
+                        routeview.validate(task, Routinator)
+                    else:
                         # if the ip is not covered by a BGP announcement
-                    # we can still show the existence of Roas,
-                    # but validation is meaningless
+                        # we can still show the existence of Roas,
+                        # but validation is meaningless
                         result['errors'].append(NoRoutesError.__name__)
 
-                    routeview = TeamCymruIPtoASN.from_rpki(
-                                    task, Routinator, ip)
+                        routeview = TeamCymruIPtoASN.from_rpki(
+                                        task, Routinator, ip)
                 except RelyingPartyUnvailableError as e:
                     logger.error(e.msg)
                     result['errors'].append(e.__name__)
                 else:
-                result['routes'] = routeview.routes
-                result['validity'] = routeview.validity
+                    result['routes'] = routeview.routes
+                    result['validity'] = routeview.validity
 
                 results[fqdn].append(result)
 
