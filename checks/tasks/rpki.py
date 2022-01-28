@@ -7,11 +7,12 @@ from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
+import logging
 
 from . import SetupUnboundContext
 from . import shared
 from .dispatcher import check_registry, post_callback_hook
-from .routing import Routinator, TeamCymruIPtoASN
+from .routing import BGPSourceUnavailableError, InvalidIPError, NoRoutesError, Routinator, TeamCymruIPtoASN, RelyingPartyUnvailableError
 from .. import categories
 from .. import batch, batch_shared_task
 from ..models import MailTestRpki, WebTestRpki, RpkiMxDomain, RpkiMxNsDomain, RpkiNsDomain
@@ -20,6 +21,8 @@ from ..models import RpkiWebDomain
 from typing import Dict, List, Mapping, NewType, Tuple, Union
 TestName = NewType('TestName', str)
 TestResult = Dict[TestName, List[Dict[str, Union[Dict, List, str]]]]
+
+logger = logging.getLogger('internetnl')
 
 # mapping services to models
 model_map = dict(
@@ -251,8 +254,8 @@ def report_exists(subtestname, category, domainset) -> None:
     prev_domain = None
     for domain in domainset:
         for ip in domain.routing:
-            # failure to validate, team cymru or routinator was unavailable
-            if not ip['routes'] or not all(ip['validity'].values()):
+            # failure to validate routinator was unavailable
+            if RelyingPartyUnvailableError.__name__ in ip['errors']:
                 category.subtests[subtestname].result_validator_error()
                 return
 
@@ -305,7 +308,8 @@ def report_valid(subtestname, category, domainset) -> None:
     for domain in domainset:
         for ip in domain.routing:
             # failure to validate, team cymru or routinator was unavailable
-            if not ip['routes'] or not all(ip['validity'].values()):
+            if (RelyingPartyUnvailableError.__name__ in ip['errors'] or
+                BGPSourceUnavailableError.__name__ in ip['errors']):
                 category.subtests[subtestname].result_validator_error()
                 return
 
@@ -407,19 +411,32 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
         for fqdn, af_ip_pairs in fqdn_ips_pairs:
             for af_ip_pair in af_ip_pairs:
                 ip = af_ip_pair[1]
-                result = {'ip': ip, 'routes': [], 'validity': {}}
+                result = {'ip': ip, 'routes': [], 'validity': {},
+                          'errors' : []}
 
+                try:
                 # fetch ASN, prefixes from BGP
                 routeview = TeamCymruIPtoASN.from_bgp(task, ip)
+                except (InvalidIPError, BGPSourceUnavailableError) as e:
+                    logger.error(e.msg)
+                    result['errors'].append(e.__name__)
+
+                try:
                 if routeview:
                     # and try to validate corresponding Roas
                     routeview.validate(task, Routinator)
                 else:
-                    # if BGP data is unavailable,
+                        # if the ip is not covered by a BGP announcement
                     # we can still show the existence of Roas,
                     # but validation is meaningless
+                        result['errors'].append(NoRoutesError.__name__)
+
                     routeview = TeamCymruIPtoASN.from_rpki(
                                     task, Routinator, ip)
+                except RelyingPartyUnvailableError as e:
+                    logger.error(e.msg)
+                    result['errors'].append(e.__name__)
+                else:
                 result['routes'] = routeview.routes
                 result['validity'] = routeview.validity
 
@@ -429,7 +446,8 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
         for fqdn, af_ip_pairs in fqdn_ips_pairs:
             for af_ip_pair in af_ip_pairs:
                 ip = af_ip_pair[1]
-                d = {'ip': ip, 'routes': [], 'validity': {}}
+                d = {'ip': ip, 'routes': [], 'validity': {}
+                    ,'errors': ['timeout']}
                 results[fqdn].append(d)
 
     return results

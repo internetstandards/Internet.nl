@@ -21,6 +21,30 @@ T = TypeVar('T', bound=SetupUnboundContext)
 AsnPrefix = Tuple[Asn, Prefix]
 
 
+class Error(Exception):
+    """Base-class for all exceptions raised by this module."""
+
+
+class InvalidAsnError(Error):
+    """There was a problem with the obtained AS number."""
+
+
+class InvalidIPError(Error):
+    """There was a problem with the provided IP address."""
+
+
+class NoRoutesError(Error):
+    """No routes where found for the given prefix."""
+
+
+class BGPSourceUnavailableError(NoRoutesError):
+    """There was a problem with the availability of BGP data."""
+
+
+class RelyingPartyUnvailableError(Error):
+    """There was a problem with the availability of the Relying Party Software."""
+
+
 class RouteView(ABC):
     """A view on Internet routing data for a given IP address.
 
@@ -55,6 +79,13 @@ class RouteView(ABC):
         self.routes = routes
         self.validity = validity
 
+    def __len__(self):
+        """Returns number of routes in this RouteView.
+
+        A length of zero corresponds to either failure to obtain a BGP data, or
+        an absense of announcements for a given prefix."""
+        return len(self.routes)
+
     @classmethod
     @abstractmethod
     def from_bgp(cls: Type[Rv], task: T, ip: Ip) -> Rv:
@@ -69,17 +100,28 @@ class RouteView(ABC):
         validation against a maximum length prefix and ASN0. It is only intended
         as a fallback. Without a view on BGP routes, it is meaningless to
         perform RPKI validation on the inferred information.
+
+        Raises:
+            RelyingPartyUnavailableError: Relying Party Software not available.
         """
         prefix = ipaddress.ip_network(ip)
         roas = rp.lookup(task, prefix)
 
         # roa dict indexed by (ASN0, max length prefix),
         # we don't have actual routing information
-        return cls(ip, [], {(0, ip): roas})
+        return cls(ip, [], {(0, prefix.compressed): roas})
 
     def validate(self, task: T, rp: Type[Rp]) -> None:
-        """Validate pairs of asn, prefix using a provided `RelyingPartySoftware`."""
+        """Validate pairs of asn, prefix using a provided `RelyingPartySoftware`.
+
+        Raises:
+            NoRoutesError: No routes where found, Route Origin Validation is meaningless.
+            RelyingPartyUnavailableError: Relying Party Software not available.
+        """
         self.validity = {}  # FIXME: why is this necessary?
+
+        if not self.routes:
+            raise NoRoutesError
 
         for asn, prefix in self.routes:
             result = rp.validate(task, asn, prefix)
@@ -101,6 +143,10 @@ class TeamCymruIPtoASN(RouteView):
         """Use the Team Cymru IP to ASN mapping service via DNS.
 
         see: https://team-cymru.com/community-services/ip-asn-mapping/#dns
+
+        Raises:
+            InvalidIPError: for invalid ip_in
+            BGPSourceUnavailableError: when DNS resolving returns SERVFAIL
 
         TODO:   some of the following code is adapted from views/connection.py,
                 is it worth it to switch that code over to this implementation?
@@ -131,13 +177,17 @@ class TeamCymruIPtoASN(RouteView):
                 reversed_ip = '.'.join(reversed_ip)
                 ip2asn_query = "{}.origin6.asn.cymru.com.".format(reversed_ip)
             else:
-                raise ValueError
+                raise InvalidIPError(f"Unknown IP version for address {ip_in}.")
         except ValueError:
-            raise
+            raise InvalidIPError(f"Error parsing IP address {ip_in}.")
 
-        result = task.resolve(ip2asn_query, unbound.RR_TYPE_TXT)
-        if not result:
+        result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)
+        if result['nxdomain']:
             return []
+        elif result['rcode'] == unbound.RCODE_SERVFAIL:
+            raise BGPSourceUnavailableError(f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?")
+        else:
+            result = [unbound.ub_data.dname2str(d) for d in result["data"].data]
 
         # The values in the TXT record are separated by '|' and the ASN is the
         # first value. There may be more than one ASN, separated by a space.
@@ -152,8 +202,8 @@ class TeamCymruIPtoASN(RouteView):
                 ipaddress.ip_network(prefix)
                 for asn in ASNs:
                     if int(asn) >= 2**32:
-                        raise ValueError
-            except ValueError:
+                        raise InvalidAsnError
+            except (ValueError, InvalidAsnError):
                 continue
 
             for asn in ASNs:
@@ -202,6 +252,9 @@ class Routinator(RelyingPartySoftware):
         """Look up covering ROAs by attempting to validate against ASN0.
 
         This is a hack to fetch covering ROAs for a given prefix.
+
+        Raises:
+            RelyingPartyUnavailableError
         """
         result = Routinator.validate(task, Asn(0), prefix)
 
@@ -213,7 +266,11 @@ class Routinator(RelyingPartySoftware):
 
     @staticmethod
     def validate(task: T, asn: Asn, prefix: Prefix) -> Dict[str, Any]:
-        """Use routinator to perform Route Origin Validation."""
+        """Use routinator to perform Route Origin Validation.
+
+        Raises:
+            RelyingPartyUnavailableError
+        """
         reason = None
         state = None
         vrps = {}
@@ -242,7 +299,7 @@ class Routinator(RelyingPartySoftware):
                 ipaddress.ip_network(vrp['prefix'])
                 int(vrp['max_length'])
 
-        except (json.JSONDecodeError, requests.RequestException, ValueError):
+        except (json.JSONDecodeError, ValueError):
             return {}
 
         return {'state': state, 'reason': reason, 'vrps': vrps}
@@ -251,13 +308,16 @@ class Routinator(RelyingPartySoftware):
     def query(task: T, asn: Asn, prefix: Prefix) -> Dict:
         """Query Routinator's /api/v1/validity endpoint and return json response.
 
-        :throws: requests.RequestException, requests.HTTPError, json.JSONDecodeError
+        Note that Routinator's API is unavailable during its initial validation run.
+
+        Raises:
+            RelyingPartyUnavailableError
         """
         request = f"{settings.ROUTINATOR_URL}/{asn}/{prefix}"
-        response = task.get(request)
+        try:
+            response = task.get(request)
 
-        # API unavailable during Routinator's initial validation
-        if response.status_code == 503:
-            raise requests.HTTPError
+            return response.json()
+        except requests.RequestException:
+            raise RelyingPartyUnvailableError
 
-        return response.json()
