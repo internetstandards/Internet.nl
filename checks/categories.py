@@ -1,7 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
-from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
+from .scoring import STATUS_FAIL, STATUS_GOOD_NOT_TESTED, STATUS_NOT_TESTED
 from .scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
@@ -255,7 +255,7 @@ class WebRpkiExists(Subtest):
         self.verdict = "detail web rpki exists verdict good"
 
     def result_no_addresses(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_GOOD_NOT_TESTED)
         self.verdict = "detail web rpki exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -284,7 +284,7 @@ class MailRpkiExists(Subtest):
         self.verdict = "detail mail rpki exists verdict good"
 
     def result_no_addresses(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_GOOD_NOT_TESTED)
         self.verdict = "detail mail rpki exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -383,7 +383,7 @@ class NsRpkiExists(Subtest):
         self.verdict = "detail web-mail rpki ns-exists verdict good"
 
     def result_no_addresses(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_GOOD_NOT_TESTED)
         self.verdict = "detail web-mail rpki ns-exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -447,7 +447,7 @@ class MailMxNsRpkiExists(Subtest):
         self.verdict = "detail mail rpki mx-ns-exists verdict good"
 
     def result_no_addresses(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_GOOD_NOT_TESTED)
         self.verdict = "detail mail rpki mx-ns-exists verdict no-addresses"
 
     def result_validator_error(self):
