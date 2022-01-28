@@ -228,7 +228,6 @@ class RelyingPartySoftware(object):
         published Route Origin Authorisations in RPKI.
       - lookup of ROAs covering a given IP address in absence of information on
         originating ASNs
-
     """
 
     @staticmethod

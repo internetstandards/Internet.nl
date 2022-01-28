@@ -402,8 +402,8 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
     """Check IP-addresses for a service for the existence of valid Roas.
 
     Arguments:
-    task -- celery task context
-    fqdn_ips_pairs --   list of fqdn, af_ip_pairs pairs (to iterate over
+        task: celery task context
+        fqdn_ips_pairs: list of fqdn, af_ip_pairs pairs (to iterate over
                         multiple MX or NS records)
     """
     try:
