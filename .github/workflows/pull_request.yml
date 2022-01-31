@@ -78,5 +78,7 @@ jobs:
         run: make check
       - name: Test
         run: make test
-      - name: Verify if Build API documentation command works
-        run: make manage api_generate_doc
+      - name: Verify if Build API documentation command works (needs /static/ dir to exist)
+        run: |
+          mkdir -p static
+          make manage api_generate_doc
