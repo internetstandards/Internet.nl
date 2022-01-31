@@ -84,7 +84,7 @@ if [ ${ENABLE_BATCH} == "True" ]; then
     # guarantee the existence of a test_user in the db
     ./manage.py api_users register -u test_user -n test_user -o test_user -e test_user || :
     # generate API documentation
-    cp ${APP_PATH}/internetnl/batch_api_doc_conf.py{-dist,}
+    cp ${APP_PATH}/internetnl/batch_api_doc_conf{_dist,}.py
     ln -sf ${APP_PATH}/checks/static ${APP_PATH}/static # static/ is not served, checks/static is
     ./manage.py api_generate_doc # creates openapi.yaml in static/
 fi

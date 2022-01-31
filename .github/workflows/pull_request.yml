@@ -78,3 +78,5 @@ jobs:
         run: make check
       - name: Test
         run: make test
+      - name: Verify if Build API documentation command works
+        run: make manage api_generate_doc

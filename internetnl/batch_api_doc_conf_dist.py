@@ -7,28 +7,20 @@
 #
 TITLE = "Internet.nl Batch API"
 TERMS = ""
-CONTACT = {
-    "name": "Internet.nl Help desk",
-    "email": "vraag@internet.nl"
-}
+CONTACT = {"name": "Internet.nl Help desk", "email": "vraag@internet.nl"}
 LOGO = {
     "url": "https://batch.internet.nl/static/logo_en.svg",
     "backgroundColor": "#FAFAFA",
     "altText": "Internet.nl logo",
 }
 SERVERS = [
-    {
-        "url": "https://batch.internet.nl/api/batch/v2",
-        "description": "Production server"
-    },
+    {"url": "https://batch.internet.nl/api/batch/v2", "description": "Production server"},
     {
         "url": "https://dev.batch.internet.nl/api/batch/v2",
-        "description": "Development server (data longevity is not guaranteed)"
+        "description": "Development server (data longevity is not guaranteed)",
     },
-
 ]
 # Get API version from the batch code to update section in the documentation
-from checks.batch import BATCH_API_FULL_VERSION
 
 #
 # These values will replace text in the documentation.

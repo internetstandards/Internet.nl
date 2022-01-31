@@ -14,9 +14,20 @@ from django.core.management.base import BaseCommand
 
 from checks import models
 from interface.batch.custom_results import CUSTOM_RESULTS_MAP
-from internetnl import batch_api_doc_conf as batch_settings
+from internetnl import log
 
-OPENAPIFILE = "checks/batch/openapi.yaml"
+try:
+    from internetnl import batch_api_doc_conf as batch_settings
+except ImportError:
+    log.warning(
+        "Using example settings. "
+        "Please customize your API documentation output using settings by creating your own "
+        "batch_api_doc_conf.py file. You can copy that from the _dist file included. See Batch.md for more"
+        "instructions."
+    )
+    from internetnl import batch_api_doc_conf_dist as batch_settings
+
+OPENAPIFILE = "interface/batch/openapi.yaml"
 DOC_DESTINATION = os.path.join(settings.STATIC_ROOT, "openapi.yaml")
 VALUES_MAP = {
     "TITLE": ["info", "title"],
