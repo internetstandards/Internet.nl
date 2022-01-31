@@ -1,3 +1,10 @@
+# Get API version from the batch code to update section in the documentation
+from interface.batch import BATCH_API_FULL_VERSION
+
+# explicitly declare the imported value, otherwise pyflakes thinks this is an unused variable
+__all__ = BATCH_API_FULL_VERSION  #
+
+
 # These values will update/replace values in the API documentation when the
 # manage.py api_generate_doc command is used.
 # Leave empty [''] if you want to skip something.
@@ -20,7 +27,6 @@ SERVERS = [
         "description": "Development server (data longevity is not guaranteed)",
     },
 ]
-# Get API version from the batch code to update section in the documentation
 
 #
 # These values will replace text in the documentation.
