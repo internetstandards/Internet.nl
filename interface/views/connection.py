@@ -525,7 +525,8 @@ def get_slaac_mac_vendor(ip):
     return mac_vendor
 
 
-def network_ipv6(request, test_id):
+def network_ipv6(request, test_id: int = 0):
+    # Normally this test can only be reached via an AAAA address, which ensures that the client_ip is an IPv6 address.
     cache_id = redis_id.conn_test_v6.id.format(test_id)
     cache_ttl = redis_id.conn_test_v6.ttl
     if not cache.add(cache_id, False, cache_ttl):
@@ -550,17 +551,21 @@ def network_ipv6(request, test_id):
 
 
 @jsonp
-def network_ipv4(request):
+def network_ipv4(request, test_id: int = 0):
     ip = get_client_ip(request)
     asn = find_AS_by_IP(ip)
+
+    # Overwrite the test_id using data from django-hosts.
+    if hasattr(request, "test_id"):
+        test_id = request.test_id
 
     ipv4 = ipaddress.IPv4Address(ip)
     reverse_pointer = ipv4.reverse_pointer
     ptr_list = unbound_ptr(reverse_pointer)
     reverse = ", ".join(ptr_list)
-    resolv = resolv_list(request.get_host(), request.test_id)
+    resolv = resolv_list(request.get_host(), test_id)
     results = dict(ip=ip, asn=asn, reverse=reverse)
-    cache_id = redis_id.conn_test_v4.id.format(request.test_id)
+    cache_id = redis_id.conn_test_v4.id.format(test_id)
     cache_ttl = redis_id.conn_test_v4.ttl
     cache.set(cache_id, results, cache_ttl)
     results.update(dict(resolv=resolv))
@@ -568,5 +573,10 @@ def network_ipv4(request):
 
 
 @jsonp
-def network_resolver(request):
-    return HttpResponse(json.dumps(dict(resolv=resolv_list(request.get_host(), request.test_id))))
+def network_resolver(request, test_id: int = 0):
+
+    # Overwrite the test_id using data from django-hosts.
+    if hasattr(request, "test_id"):
+        test_id = request.test_id
+
+    return HttpResponse(json.dumps(dict(resolv=resolv_list(request.get_host(), test_id))))

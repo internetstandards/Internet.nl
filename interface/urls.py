@@ -74,6 +74,16 @@ urlpatterns = [
     url(r"^change_language/$", views.change_language, name="change_language"),
 ]
 
+# Host-urls that are accessible by host-only, which should be approachable by developers as well during
+# development (although your DNS is probably not set correctly to deal with the tests.
+# This is not enabled by default because it returns the ip address (pii) of the requester.
+if settings.DEBUG:
+    urlpatterns += [
+        url(r"^network_ipv4/(?P<test_id>[0-9abcdef]+)/$", views.connection.network_ipv4),
+        url(r"^network_ipv6/(?P<test_id>[0-9abcdef]+)/$", views.connection.network_ipv6),
+        url(r"^network_resolver/(?P<test_id>[0-9abcdef]+)/$", views.connection.network_resolver),
+    ]
+
 if hasattr(settings, "MANUAL_HOF") and settings.MANUAL_HOF:
     for key in settings.MANUAL_HOF:
         urlpatterns += [
