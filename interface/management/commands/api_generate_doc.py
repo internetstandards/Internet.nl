@@ -12,7 +12,7 @@ except ImportError:
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from interface import models
+from checks import models
 from interface.batch.custom_results import CUSTOM_RESULTS_MAP
 from internetnl import batch_api_doc_conf as batch_settings
 
