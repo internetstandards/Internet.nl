@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from django.conf.urls import url
 
-from interface import views
+from interface.views.connection import network_resolver
 
 urlpatterns = [
-    url(r"^$", views.connection.network_resolver),
+    url(r"^$", network_resolver),
 ]
