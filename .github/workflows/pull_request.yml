@@ -6,6 +6,14 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 15
+    env:
+      GITHUB_ACTIONS: True
+      ENABLE_BATCH: True
+      SECRET_KEY: Github
+      DEBUG: True
+      DB_NAME: internetnl
+      DB_USER: internetnluser
+      DB_PASSWORD: internetnluser
     strategy:
       matrix:
         python-version: [ 3.7 ]
