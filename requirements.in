@@ -6,17 +6,14 @@ wheel
 # We'll probably wait until 4.2 LTS to be available for the next upgrade.
 Django<4
 
-django-redis==4.12.1
+django-redis<5
 
-
-amqp==5.0.6
-celery==5.1.2
-kombu==5.1.0
-vine==5.0.0
+# 5.2 is the last one with python 3.7 support, which is our target platform
+celery<5.3
+kombu<5.3
 
 setuptools-rust
 beautifulsoup4
-cryptography
 django-bleach
 django-csp
 django-enumfields
@@ -24,11 +21,10 @@ django-hosts
 django-markdown_deux
 eventlet
 gevent
-idna
 libsass
 markdown
 polib
-psycopg2-binary==2.9.1
+psycopg2-binary<3
 pyparsing
 pyrabbit2
 pyyaml
@@ -36,7 +32,6 @@ rjsmin
 argparse
 GitPython
 pathlib2
-py
 pytest
 selenium
 chardet
@@ -45,7 +40,7 @@ hiredis
 
 colorlog
 
-# Webserver used for batch
+# Webserver
 gunicorn
 
 # Needed in celery/kombu, but not installed automatically?

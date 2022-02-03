@@ -1,9 +1,20 @@
 import pytest
 from py.xml import html
+import os
+import signal
+import subprocess
+import sys
+import time
+from internetnl import log
+from internetnl.celery import waitsome
+
+
+TEST_WORKER_TIMEOUT = 10
 
 # -----------------------------------------------------------------------------
 # BEGIN: add two custom columns to the HTML report created by pytest-html.
 # -----------------------------------------------------------------------------
+
 subresult_mappings = {
     "x": ("failed", "red"),
     "!": ("warning", "orange"),
@@ -187,3 +198,38 @@ def pytest_generate_tests(metafunc):
 # -----------------------------------------------------------------------------
 # END: configure pytest to accept batch-like related command line arguments.
 # -----------------------------------------------------------------------------
+
+
+@pytest.fixture(params=["prefork", "gevent", "eventlet"])
+def custom_celery_worker(request):
+    """Spawn celery worker to be used during test.
+
+    This worker only listens on specified queues to ensure test integrity!
+
+    Tests on both implementations of worker."""
+    pool = request.param
+
+    # there is a set and limited number of queues, for convenience listen to all of them.
+    worker_command = ["make", "run-test-worker", pool]  # "--queues", ",".join(queues)
+    worker_env = dict(os.environ, WORKER_ROLE="default_ipv4")
+
+    log.info("Running worker with: %s", " ".join(worker_command))
+    worker_process = subprocess.Popen(
+        worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer, preexec_fn=os.setsid, env=worker_env
+    )
+    # catch early errors
+    time.sleep(1)
+    assert not worker_process.poll(), "Worker exited early."
+
+    # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
+    try:
+        # wait for worker to start accepting tasks before turning to test function
+        assert waitsome.apply_async([0], expires=TEST_WORKER_TIMEOUT).get(
+            timeout=TEST_WORKER_TIMEOUT
+        ), "Worker failed to become ready and execute test task."
+        # give worker stderr time to output into 'Captured stderr setup' and not spill over into 'Captured stderr call'
+        time.sleep(0.1)
+        yield worker_process
+    finally:
+        # stop worker and all child threads
+        os.killpg(os.getpgid(worker_process.pid), signal.SIGKILL)

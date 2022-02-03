@@ -9,7 +9,7 @@ async-generator==1.10
     #   -c requirements.txt
     #   trio
     #   trio-websocket
-attrs==21.2.0
+attrs==21.4.0
     # via
     #   -c requirements.txt
     #   outcome
@@ -17,9 +17,7 @@ attrs==21.2.0
     #   trio
 autoflake==1.4
     # via -r requirements-dev.in
-autopep8==1.6.0
-    # via -r requirements-dev.in
-black==21.12b0
+black==22.1.0
     # via -r requirements-dev.in
 certifi==2021.10.8
     # via
@@ -30,19 +28,19 @@ cffi==1.15.0
     # via
     #   -c requirements.txt
     #   cryptography
-charset-normalizer==2.0.7
+charset-normalizer==2.0.11
     # via
     #   -c requirements.txt
     #   requests
-click==7.1.2
+click==8.0.3
     # via
     #   -c requirements.txt
     #   black
-coverage[toml]==6.2
+coverage[toml]==6.3.1
     # via
     #   -r requirements-dev.in
     #   pytest-cov
-cryptography==35.0.0
+cryptography==36.0.1
     # via
     #   -c requirements.txt
     #   pyopenssl
@@ -51,7 +49,7 @@ django-coverage==1.2.4
     # via -r requirements-dev.in
 freezegun==1.1.0
     # via -r requirements-dev.in
-h11==0.12.0
+h11==0.13.0
     # via
     #   -c requirements.txt
     #   wsproto
@@ -65,9 +63,7 @@ iniconfig==1.1.1
     # via
     #   -c requirements.txt
     #   pytest
-isort==5.10.1
-    # via -r requirements-dev.in
-mccabe==0.6.1
+mccabe==0.7.0
     # via pylama
 mypy-extensions==0.4.3
     # via black
@@ -75,7 +71,7 @@ outcome==1.1.0
     # via
     #   -c requirements.txt
     #   trio
-packaging==21.2
+packaging==21.3
     # via
     #   -c requirements.txt
     #   pytest
@@ -92,9 +88,7 @@ py==1.11.0
     #   -c requirements.txt
     #   pytest
 pycodestyle==2.8.0
-    # via
-    #   autopep8
-    #   pylama
+    # via pylama
 pycparser==2.21
     # via
     #   -c requirements.txt
@@ -105,13 +99,13 @@ pyflakes==2.4.0
     # via
     #   autoflake
     #   pylama
-pylama==8.2.1
+pylama==8.3.7
     # via -r requirements-dev.in
-pyopenssl==21.0.0
+pyopenssl==22.0.0
     # via
     #   -c requirements.txt
     #   urllib3
-pyparsing==2.4.7
+pyparsing==3.0.7
     # via
     #   -c requirements.txt
     #   packaging
@@ -133,7 +127,7 @@ pytest-base-url==1.4.2
     # via pytest-selenium
 pytest-cov==3.0.0
     # via -r requirements-dev.in
-pytest-django==4.4.0
+pytest-django==4.5.2
     # via -r requirements-dev.in
 pytest-html==3.1.1
     # via
@@ -143,7 +137,7 @@ pytest-logging==2015.11.4
     # via -r requirements-dev.in
 pytest-metadata==1.11.0
     # via pytest-html
-pytest-mock==3.6.1
+pytest-mock==3.7.0
     # via -r requirements-dev.in
 pytest-responses==0.5.0
     # via -r requirements-dev.in
@@ -153,7 +147,7 @@ pytest-variables==1.9.0
     # via pytest-selenium
 python-dateutil==2.8.2
     # via freezegun
-requests==2.26.0
+requests==2.27.1
     # via
     #   -c requirements.txt
     #   pytest-base-url
@@ -162,19 +156,17 @@ requests==2.26.0
     #   responses
 requests-mock==1.9.3
     # via -r requirements-dev.in
-responses==0.16.0
+responses==0.18.0
     # via pytest-responses
-selenium==4.0.0
+selenium==4.1.0
     # via
     #   -c requirements.txt
     #   pytest-selenium
 six==1.16.0
     # via
     #   -c requirements.txt
-    #   pyopenssl
     #   python-dateutil
     #   requests-mock
-    #   responses
     #   tenacity
 sniffio==1.2.0
     # via
@@ -191,9 +183,8 @@ tenacity==6.3.1
 toml==0.10.2
     # via
     #   -c requirements.txt
-    #   autopep8
     #   pytest
-tomli==1.2.2
+tomli==2.0.0
     # via
     #   black
     #   coverage
@@ -206,11 +197,11 @@ trio-websocket==0.9.2
     # via
     #   -c requirements.txt
     #   selenium
-typing-extensions==4.0.0
+typing-extensions==4.0.1
     # via
     #   -c requirements.txt
     #   black
-urllib3[secure]==1.26.7
+urllib3[secure]==1.26.8
     # via
     #   -c requirements.txt
     #   requests

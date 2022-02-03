@@ -125,11 +125,6 @@ run-worker: venv
 	# Todo: Eventlet results in a database deadlock, gevent does not.
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 --concurrency=20 -n generic_worker
 
-run-test-worker: venv
-	# Know that the worker will complain that the database is plainly been dropped, this is exactly what happens during
-	# tests. It will keep on running, and the tests will run well.
-	. .venv/bin/activate && DJANGO_DATABASE=testworker ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 --concurrency=20 -n generic_worker
-
 run-worker-batch-main: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300 --concurrency=20 -n batch_main
 
@@ -165,6 +160,14 @@ ifeq (manage,$(firstword $(MAKECMDGOALS)))
   $(eval $(RUN_ARGS):;@:)
 endif
 
+ifeq (run-test-worker,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
+
 
 prog: # ...
     # ...
@@ -176,6 +179,13 @@ manage: venv
 	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
 	# Example: make manage api_check_ipv6 ARGS="--domain nu.nl"
 	. .venv/bin/activate && ${env} python3 manage.py $(RUN_ARGS) $(ARGS)
+
+
+run-test-worker: venv
+	# Know that the worker will complain that the database is plainly been dropped, this is exactly what happens during
+	# tests. It will keep on running, and the tests will run well.
+	# DJANGO_DATABASE=testworker
+	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,celery,default --time-limit=300 --concurrency=20 -n generic_worker
 
 
 # compiling unbound for an x86_64 system:

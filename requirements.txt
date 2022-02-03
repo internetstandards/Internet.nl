@@ -4,19 +4,17 @@
 #
 #    pip-compile requirements.in
 #
-amqp==5.0.6
-    # via
-    #   -r requirements.in
-    #   kombu
+amqp==5.0.9
+    # via kombu
 argparse==1.4.0
     # via -r requirements.in
-asgiref==3.4.1
+asgiref==3.5.0
     # via django
 async-generator==1.10
     # via
     #   trio
     #   trio-websocket
-attrs==21.2.0
+attrs==21.4.0
     # via
     #   outcome
     #   pytest
@@ -29,7 +27,7 @@ bleach==4.1.0
     # via django-bleach
 cached-property==1.5.2
     # via -r requirements.in
-celery==5.1.2
+celery==5.2.3
     # via -r requirements.in
 certifi==2021.10.8
     # via
@@ -39,9 +37,9 @@ cffi==1.15.0
     # via cryptography
 chardet==4.0.0
     # via -r requirements.in
-charset-normalizer==2.0.7
+charset-normalizer==2.0.11
     # via requests
-click==7.1.2
+click==8.0.3
     # via
     #   celery
     #   click-didyoumean
@@ -55,14 +53,13 @@ click-repl==0.2.0
     # via celery
 colorlog==6.6.0
     # via -r requirements.in
-cryptography==35.0.0
+cryptography==36.0.1
     # via
-    #   -r requirements.in
     #   pyopenssl
     #   urllib3
 deprecated==1.2.13
     # via redis
-django==3.2.10
+django==3.2.12
     # via
     #   -r requirements.in
     #   django-bleach
@@ -74,21 +71,21 @@ django-csp==3.7
     # via -r requirements.in
 django-enumfields==2.1.1
     # via -r requirements.in
-django-hosts==4.0
+django-hosts==5.1
     # via -r requirements.in
 django-markdown-deux==1.0.5
     # via -r requirements.in
 django-redis==4.12.1
     # via -r requirements.in
-dnspython==2.1.0
+dnspython==2.2.0
     # via eventlet
-eventlet==0.32.0
+eventlet==0.33.0
     # via -r requirements.in
-gevent==21.8.0
+gevent==21.12.0
     # via -r requirements.in
 gitdb==4.0.9
     # via gitpython
-gitpython==3.1.24
+gitpython==3.1.26
     # via -r requirements.in
 greenlet==1.1.2
     # via
@@ -96,53 +93,53 @@ greenlet==1.1.2
     #   gevent
 gunicorn==20.1.0
     # via -r requirements.in
-h11==0.12.0
+h11==0.13.0
     # via wsproto
 hiredis==2.0.0
     # via -r requirements.in
 idna==3.3
     # via
-    #   -r requirements.in
     #   requests
     #   trio
     #   urllib3
+importlib-metadata==4.10.1
+    # via markdown
 iniconfig==1.1.1
     # via pytest
-kombu==5.1.0
+kombu==5.2.3
     # via
     #   -r requirements.in
     #   celery
 libsass==0.21.0
     # via -r requirements.in
-markdown==3.3.4
+markdown==3.3.6
     # via -r requirements.in
-markdown2==2.4.1
+markdown2==2.4.2
     # via django-markdown-deux
 outcome==1.1.0
     # via trio
-packaging==21.2
+packaging==21.3
     # via
     #   bleach
     #   pytest
+    #   redis
 pathlib2==2.3.6
     # via -r requirements.in
 pluggy==1.0.0
     # via pytest
 polib==1.1.1
     # via -r requirements.in
-prompt-toolkit==3.0.22
+prompt-toolkit==3.0.26
     # via click-repl
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.3
     # via -r requirements.in
 py==1.11.0
-    # via
-    #   -r requirements.in
-    #   pytest
+    # via pytest
 pycparser==2.21
     # via cffi
-pyopenssl==21.0.0
+pyopenssl==22.0.0
     # via urllib3
-pyparsing==2.4.7
+pyparsing==3.0.7
     # via
     #   -r requirements.in
     #   packaging
@@ -156,19 +153,19 @@ pytz==2021.3
     #   django
 pyyaml==6.0
     # via -r requirements.in
-redis==4.0.0
+redis==4.1.2
     # via django-redis
-requests==2.26.0
+requests==2.27.1
     # via
     #   -r requirements.in
     #   pyrabbit2
 rjsmin==1.2.0
     # via -r requirements.in
-selenium==4.0.0
+selenium==4.1.0
     # via -r requirements.in
 semantic-version==2.8.5
     # via setuptools-rust
-setuptools-rust==0.12.1
+setuptools-rust==1.1.2
     # via -r requirements.in
 six==1.16.0
     # via
@@ -177,7 +174,6 @@ six==1.16.0
     #   eventlet
     #   libsass
     #   pathlib2
-    #   pyopenssl
 smmap==5.0.0
     # via gitdb
 sniffio==1.2.0
@@ -189,24 +185,21 @@ soupsieve==2.3.1
 sqlparse==0.4.2
     # via django
 toml==0.10.2
-    # via
-    #   pytest
-    #   setuptools-rust
+    # via pytest
 trio==0.19.0
     # via
     #   selenium
     #   trio-websocket
 trio-websocket==0.9.2
     # via selenium
-typing-extensions==4.0.0
-    # via gitpython
-urllib3[secure]==1.26.7
+typing-extensions==4.0.1
+    # via setuptools-rust
+urllib3[secure]==1.26.8
     # via
     #   requests
     #   selenium
 vine==5.0.0
     # via
-    #   -r requirements.in
     #   amqp
     #   celery
     #   kombu
@@ -214,12 +207,14 @@ wcwidth==0.2.5
     # via prompt-toolkit
 webencodings==0.5.1
     # via bleach
-wheel==0.37.0
+wheel==0.37.1
     # via -r requirements.in
 wrapt==1.13.3
     # via deprecated
 wsproto==1.0.0
     # via trio-websocket
+zipp==3.7.0
+    # via importlib-metadata
 zope.event==4.5.0
     # via gevent
 zope.interface==5.4.0

@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import os
+import time
 
 from celery import Celery
 
@@ -17,6 +18,20 @@ app.autodiscover_tasks()
 def debug_task(self):
     print("Debug Task. Request: {0!r}".format(self.request))
     return True
+
+
+@app.task()
+def waitsome(sleep):
+    """Wait some time and return epoch at completion."""
+
+    time.sleep(sleep)
+    return time.time()
+
+
+@app.task()
+def dummy_task(number: int = 0):
+    time.sleep(1)
+    return number * number
 
 
 if app.conf.ENABLE_BATCH:

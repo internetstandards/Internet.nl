@@ -540,8 +540,8 @@ other_tests = [
         "tls13ipv4only.test.nlnetlabs.tk",
         expected_error={
             TESTS.HTTPS_HTTP_HTTPS_AVAILABLE: [
-                [MustMatch(fr"({NOTREACHABLE_TEXT}|yes)")],  # IPv6/IPv4
-                [MustMatch(fr"({NOTREACHABLE_TEXT}|yes)")],  # IPv6/IPv4
+                [MustMatch(rf"({NOTREACHABLE_TEXT}|yes)")],  # IPv6/IPv4
+                [MustMatch(rf"({NOTREACHABLE_TEXT}|yes)")],  # IPv6/IPv4
             ]
         },
         expected_failures={
