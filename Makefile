@@ -123,7 +123,7 @@ run-worker: venv
 	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
 	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
 	# Todo: Eventlet results in a database deadlock, gevent does not.
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 --concurrency=20 -n generic_worker
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker --pool eventlet -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler --time-limit=300 --concurrency=20 -n generic_worker
 
 run-worker-batch-main: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300 --concurrency=20 -n batch_main
