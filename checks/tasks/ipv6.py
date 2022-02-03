@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 
 from bs4 import BeautifulSoup
 from celery import shared_task
-from celery.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
@@ -296,7 +296,7 @@ def test_ns_connectivity(ip, port, domain):
         while retval == 0 and not cb_data["done"]:
             time.sleep(0.1)
             retval = ctx.process()
-    except (SoftTimeLimitExceeded, TimeLimitExceeded):
+    except (SoftTimeLimitExceeded):
         if async_id:
             ctx.cancel(async_id)
         raise
@@ -401,7 +401,7 @@ def do_mx(self, url, *args, **kwargs):
             # No MX records or NULL MX means full IPv6 score.
             score = scoring.MAIL_IPV6_MX_CONN_GOOD
 
-    except (SoftTimeLimitExceeded, TimeLimitExceeded):
+    except (SoftTimeLimitExceeded):
         domains = []
         score = scoring.MAIL_IPV6_MX_CONN_FAIL
 
@@ -455,7 +455,7 @@ def do_ns(self, url, *args, **kwargs):
         elif dom_len > 1:
             score = float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD) * scoring.IPV6_NS_CONN_GOOD
 
-    except (SoftTimeLimitExceeded, TimeLimitExceeded):
+    except (SoftTimeLimitExceeded):
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
 
@@ -575,8 +575,8 @@ def do_web(self, url, *args, **kwargs):
         elif len(v6_good) > 0 and len(v4_good) > 0 and len(v6_conn_diff) == 0:
             simhash_score, simhash_distance = simhash(url, task=self)
 
-    except (SoftTimeLimitExceeded, TimeLimitExceeded):
-        log.debug("Error: SoftTimeLimitExceeded/TimeLimitExceeded")
+    except (SoftTimeLimitExceeded):
+        log.debug("Error: SoftTimeLimitExceeded")
         if not domain:
             domain = dict(
                 domain=url,

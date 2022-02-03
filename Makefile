@@ -368,5 +368,11 @@ install-custom-deps:
 	cp -rf custom-deps .venv/lib/python3.8/site-packages/
 
 
+run-gunicorn:
+	# 2022 02 03: gunicorn does not work with eventlet > 0.30.2, but that version has security issue GHSA-9p9m-jm8w-94p2
+	# See: https://stackoverflow.com/questions/67409452/gunicorn-importerror-cannot-import-name-already-handled-from-eve
+	# Running this older version is a no go. So running with gevent is required.
+	. .venv/bin/activate && ${env} gunicorn --bind localhost:8000 --workers 3 --worker-class gevent internetnl.wsgi:application
+
 .QA: qa
 qa: fix check test

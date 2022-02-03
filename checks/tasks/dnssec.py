@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 import pythonwhois
 from celery import shared_task
-from celery.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
@@ -347,7 +347,7 @@ def do_web_is_secure(self, url, *args, **kwargs):
             score_error=scoring.WEB_DNSSEC_ERROR,
         )
 
-    except (SoftTimeLimitExceeded, TimeLimitExceeded):
+    except (SoftTimeLimitExceeded):
         dnssec_result = dict(status=DnssecStatus.dnserror.value, score=scoring.WEB_DNSSEC_ERROR, log="Timed out")
 
     return ("is_secure", {url: dnssec_result})
@@ -374,7 +374,7 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
                     score_error=scoring.MAIL_DNSSEC_ERROR,
                 )
 
-    except (SoftTimeLimitExceeded, TimeLimitExceeded):
+    except (SoftTimeLimitExceeded):
         for domain, _, mx_status in mailservers:
             if domain != "" and not res.get(domain):
                 res[domain] = dict(
@@ -416,7 +416,7 @@ def dnssec_status(domain, ub_task, mx_status, score_secure, score_insecure, scor
                     break
             status = cb_data["status"]
 
-    except (SoftTimeLimitExceeded, TimeLimitExceeded) as e:
+    except (SoftTimeLimitExceeded) as e:
         if async_id:
             ub_task.ub_ctx.cancel(async_id)
         raise e
