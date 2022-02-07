@@ -336,7 +336,9 @@ def report_valid(subtestname, category, domainset) -> None:
 
                 prev_domain = domain.domain
 
-    if invalid_count > 0:
+    if count == 0:
+        category.subtests[subtestname].result_no_addresses()
+    elif invalid_count > 0:
         category.subtests[subtestname].result_invalid(tech_data)
     elif not_valid_count > 0:
         category.subtests[subtestname].result_bad(tech_data)
