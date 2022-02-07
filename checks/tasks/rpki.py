@@ -283,7 +283,7 @@ def report_valid(subtestname, category, domainset) -> None:
 
     This compares routing data from BGP with published ROAs.
     """
-    def gen_tech_data(domain, asn, prefix, validity) -> List[str]:
+    def gen_tech_data(domain, asn, prefix, validity, errors) -> List[str]:
         # Provide tech_data to generate a table of the following form
         #
         # Server     | Route          | Origin  | Validation state
@@ -294,7 +294,7 @@ def report_valid(subtestname, category, domainset) -> None:
 
         asn = f"AS{asn}"
 
-        if validity['state'] is None:
+        if NoRoutesError.__name__ in errors:
             asn = '?'
             state = "detail tech data not-tested"
         elif validity['state'] == 'invalid':
@@ -312,9 +312,10 @@ def report_valid(subtestname, category, domainset) -> None:
     prev_domain = None
     for domain in domainset:
         for ip in domain.routing:
+            errors = ip['errors']
             # failure to validate, team cymru or routinator was unavailable
-            if (RelyingPartyUnvailableError.__name__ in ip['errors'] or
-                BGPSourceUnavailableError.__name__ in ip['errors']):
+            if (RelyingPartyUnvailableError.__name__ in errors or
+                BGPSourceUnavailableError.__name__ in errors):
                 category.subtests[subtestname].result_validator_error()
                 return
 
@@ -322,9 +323,9 @@ def report_valid(subtestname, category, domainset) -> None:
                 asn, prefix = route
                 tech_data.append(
                     gen_tech_data(domain.domain if domain.domain != prev_domain else '...',
-                                  asn, prefix, validity))
+                                  asn, prefix, validity, errors))
 
-                if validity['state'] is None:  # no BGP data available
+                if NoRoutesError.__name__ in errors:  # no BGP data available
                     not_routed_count += 1
                 elif validity['state'] == 'invalid':
                     invalid_count += 1
