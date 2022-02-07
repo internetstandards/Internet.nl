@@ -304,6 +304,7 @@ def report_valid(subtestname, category, domainset) -> None:
 
         return [domain, prefix, asn, state]
 
+    count = 0
     not_routed_count = 0  # count of validation failures due to unavailability of routes
     invalid_count = 0     # count of validation resulting in 'invalid'
     not_valid_count = 0   # count of validations not resulting in 'valid'
@@ -325,6 +326,7 @@ def report_valid(subtestname, category, domainset) -> None:
                     gen_tech_data(domain.domain if domain.domain != prev_domain else '...',
                                   asn, prefix, validity, errors))
 
+                count += 1
                 if NoRoutesError.__name__ in errors:  # no BGP data available
                     not_routed_count += 1
                 elif validity['state'] == 'invalid':
@@ -338,7 +340,7 @@ def report_valid(subtestname, category, domainset) -> None:
         category.subtests[subtestname].result_invalid(tech_data)
     elif not_valid_count > 0:
         category.subtests[subtestname].result_bad(tech_data)
-    elif not_routed_count > 0:
+    elif not_routed_count == count:  # no BGP data for all IPs
         category.subtests[subtestname].result_not_routed(tech_data)
     else:
         category.subtests[subtestname].result_good(tech_data)
