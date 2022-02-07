@@ -316,7 +316,10 @@ class Routinator(RelyingPartySoftware):
         try:
             response = task.get(request)
 
+            # throw exception during Routinator initialization
+            response.raise_for_status()
+
             return response.json()
-        except requests.RequestException:
-            raise RelyingPartyUnvailableError
+        except requests.RequestException as e:
+            raise RelyingPartyUnvailableError(str(e))
 
