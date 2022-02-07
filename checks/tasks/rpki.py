@@ -441,7 +441,8 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
 
                 try:
                     if routeview:
-                        # and try to validate corresponding Roas
+                        # if the ip is covered by a BGP announcement
+                        # try to validate corresponding Roas
                         routeview.validate(task, Routinator)
                     else:
                         # if the ip is not covered by a BGP announcement
