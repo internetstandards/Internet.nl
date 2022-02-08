@@ -45,7 +45,7 @@ if ENABLE_BATCH:
     BATCH_SCHEDULER_INTERVAL = 20  # seconds
     # Number of *domains* to start per scheduler run.
     BATCH_SCHEDULER_DOMAINS = 50
-    # Time in seconds from when a task is sumbitted *to a queue*.
+    # Time in seconds from when a task is submitted *to a queue*.
     BATCH_MAX_RUNNING_TIME = 60 * 10  # seconds
 
     # Central unbound where all the pyunbounds forward to. Used for better
@@ -194,12 +194,12 @@ CACHES = {
 
 CACHE_TTL = 200
 CACHE_WHOIS_TTL = 60 * 60 * 24
-CACHE_RESET_WHITELIST = ["domain.name.com"]
+CACHE_RESET_WHITELIST = [] # Specify domain names for which the cache may be reset through /clear/<dname>
 
 
 # --- Language settings
 #
-# Internationalization and Locatization fixed to dutch at this time.
+# Internationalization and Localization.
 # A single installation will only server one target audience.
 LANGUAGE_CODE = 'en'
 TIME_ZONE = 'CET'

@@ -73,8 +73,8 @@ def clear(request, dname):
                 "mail_auth", "dnssec", "web_ipv6", "mail_ipv6",
                 "web_tls", "web_appsecpriv"]:
             cache.delete(redis_id.dom_task.id.format(url, test))
-        return HttpResponse("ok")
-    return HttpResponse("nope")
+        return HttpResponse("Domain name cleared from cache.")
+    return HttpResponse("Domain name not whitelisted.")
 
 
 def testconnectionpage(request):
