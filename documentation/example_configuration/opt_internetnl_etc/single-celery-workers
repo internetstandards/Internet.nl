@@ -21,7 +21,10 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # communication to async is now the preferred option. Even though it conflicts with issue #495.
 # The -P option is documented here:
 #  https://docs.celeryproject.org/en/latest/reference/cli.html#cmdoption-celery-worker-P
-CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 100 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker"
+# Note that a larger amount of workers will result in too many open files. To have a fixed number of open files,
+# Prefork has been chosen. This seems just as fast. Otherwise we have to adjust the max number of open files, which
+# feels a bit scary to do right in a structural way.
+CELERYD_OPTS="--without-gossip --time-limit=300 -P prefork -c:1 40 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
