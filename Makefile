@@ -298,7 +298,7 @@ nassl: venv .nassl
 .nassl:
 	rm -rf nassl_freebsd
 	git clone https://github.com/internetstandards/nassl.git nassl_freebsd --branch internetnl
-	# cd nassl_freebsd && git checkout internetnl
+	#  cd nassl_freebsd && git checkout internetnl
 	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
 	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
 	cd nassl_freebsd && wget http://zlib.net/zlib-1.2.11.tar.gz

@@ -65,11 +65,11 @@ jobs:
           sudo apt update
           sudo apt-get update
           sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev
-      - name: Make unbound
-        run: make unbound-${{ matrix.python-version }}-github
-        if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Make nassl
         run: make nassl
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+      - name: Make unbound
+        run: make unbound-${{ matrix.python-version }}-github
         if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Make python-whois
         run: make python-whois

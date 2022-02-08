@@ -16,10 +16,12 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # Note that using gevent is not an option here, as it sends TimeLimitExceeded exceptions which are not catchable,
 #  see: https://docs.celeryproject.org/en/latest/userguide/workers.html#time-limits
 # Even more: The documentation states that time limit support only exists for prefork and gevent. It does not
-#  mention eventlet. So eventlet _might_ work, prefork _will_ work. Eventlet seems to hang in later versions
+#  mention eventlet. So eventlet _might_ work, prefork _will_ work. Eventlet is more efficient, so that's the go to.
+# We've seen hangs in the past with sync communication to unbound, this occurs in any pooling option. Setting unbound
+# communication to async is now the preferred option. Even though it conflicts with issue #495.
 # The -P option is documented here:
 #  https://docs.celeryproject.org/en/latest/reference/cli.html#cmdoption-celery-worker-P
-CELERYD_OPTS="--without-gossip --time-limit=300 -P prefork -c:1 20 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker"
+CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 100 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
@@ -36,35 +38,3 @@ CELERYD_GROUP="internetnl"
 # If enabled pid and log directories will be created if missing,
 # and owned by the userid/group configured.
 CELERY_CREATE_DIRS=1
-
-
-# Probably a pre 1.4 version, that might not be anywhere else...
-# Names of nodes to start
-# CELERYD_NODES="worker db_worker slow_db_worker"
-#
-# # Absolute or relative path to the 'celery' command:
-# CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
-#
-# # App instance to use
-# CELERY_APP="internetnl"
-#
-# # Where to chdir at start.
-# CELERYD_CHDIR="<path-to-internetnl>"
-#
-# # Extra command-line arguments to the worker
-# CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 250 -c:2 1 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker"
-#
-# # %N will be replaced with the first part of the nodename.
-# CELERYD_LOG_FILE="/opt/internetnl/log/celery/%N.log"
-# CELERYD_PID_FILE="/opt/internetnl/run/celery/%N.pid"
-#
-# # Workers should run as an unprivileged user.
-# #   You need to create this user manually (or you can choose
-# #   a user/group combination that already exists, e.g. nobody).
-# CELERYD_USER="celery"
-# CELERYD_GROUP="celery"
-#
-# # If enabled pid and log directories will be created if missing,
-# # and owned by the userid/group configured.
-# CELERY_CREATE_DIRS=1
-#

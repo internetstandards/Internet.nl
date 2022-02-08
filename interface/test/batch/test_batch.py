@@ -38,5 +38,6 @@ def test_register_batch_request(db):
     assert response_data["request"]["request_type"] == "mail"
     assert response_data["request"]["status"] == "registering"
 
+
 #  todo: add testcase where data is available and an API response is created.
 #  this requires a scan to be ran etc.

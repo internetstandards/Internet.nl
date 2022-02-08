@@ -40,6 +40,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
         req_limit_id = redis_id.req_limit.id.format(remote_addr)
         req_limit_ttl = redis_id.req_limit.ttl
         if user_limit_exceeded(req_limit_id):
+            log.debug("User limit exceeded. Too many requests from this IP. Blocked.")
             return (False, dict(status="User limit exceeded, try again later"))
         # Try to aquire lock and start tasks
         elif cache.add(cache_id, False, cache_ttl):
