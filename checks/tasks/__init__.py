@@ -33,7 +33,8 @@ class SetupUnboundContext(Task):
                 self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # XXX: Remove for now; inconsistency with applying settings on celery.
-            # self._ub_ctx.set_async(True)
+            # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
+            self._ub_ctx.set_async(True)
             if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
                 self._ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
 

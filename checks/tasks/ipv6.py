@@ -288,7 +288,8 @@ def test_ns_connectivity(ip, port, domain):
 
     ctx = ub_ctx()
     # XXX: Remove for now; inconsistency with applying settings on celery.
-    # ctx.set_async(True)
+    # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
+    ctx.set_async(True)
     ctx.set_fwd(ip)
     cb_data = dict(done=False)
     try:

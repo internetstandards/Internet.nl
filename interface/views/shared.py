@@ -28,7 +28,8 @@ if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_
     ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
     ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
 # XXX: Remove for now; inconsistency with applying settings on celery.
-# ub_ctx.set_async(True)
+# YYY: Removal caused infinite waiting on pipe to unbound. Added again.
+ub_ctx.set_async(True)
 if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
     ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
 
