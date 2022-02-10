@@ -3,7 +3,7 @@
 wheel
 
 # The currently supported Django version
-Django==3.2.10
+Django==3.2.12
 django-redis==4.12.1
 
 
