@@ -88,6 +88,8 @@ from interface import batch, batch_shared_task, redis_id
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
 # instead of just Exception which may intervene with Celery's own exceptions.
 # Gevent does not have the same issue.
+from internetnl import log
+
 if eventlet.patcher.is_monkey_patched("subprocess"):
     subprocess = eventlet.import_patched("subprocess")
 else:
@@ -2601,11 +2603,13 @@ class ConnectionChecker:
             cipher_order_tested = CipherOrderStatus.good
             # Which ciphers seen so far during checks are relevant for self._conn?
             relevant_ciphers = self._get_seen_ciphers_for_conn(a_connection)
+            log.debug("Retrieved ciphers: %s.", relevant_ciphers)
             # Get the cipher name of at least one cipher that works with self._conn
             first_cipher = relevant_ciphers[0]
             ignore_ciphers = [first_cipher]
             second_cipher = _get_nth_or_default(relevant_ciphers, 1, first_cipher)
             if first_cipher == second_cipher:
+                log.debug("Returning. Conclusion: First and second cipher are the same.")
                 # only one cipher supported, order is irrelevant
                 return cipher_order_tested, cipher_order_score
             # Try to get a non CHACHA cipher to avoid the possible
@@ -2641,7 +2645,7 @@ class ConnectionChecker:
 
                 except ConnectionHandshakeException:
                     # Unable to connect with reversed cipher order.
-                    pass
+                    log.debug("Unable to connect with reversed cipher order.")
 
             # Did a previous call to self.check_cipher_sec_level() discover a
             # prescribed order violation?
@@ -2661,13 +2665,16 @@ class ConnectionChecker:
             if cipher_order_tested == CipherOrderStatus.bad:
                 # Server does not respect its own preference; ignore any order
                 # violation.
-                pass
+                log.debug("Server does not respect its own preference; ignore any order violation.")
             elif self._cipher_order_violation:
                 if self._cipher_order_violation[2] == "":
                     cipher_order_tested = CipherOrderStatus.not_seclevel
                     cipher_order_score = self._score_tls_cipher_order_bad
+                    log.debug("Cipher not on seclevel, expected empty, got %s", self._cipher_order_violation[2])
                 else:
                     cipher_order_tested = CipherOrderStatus.not_prescribed
+                    log.debug("Cipher not on prescribed, got %s", self._cipher_order_violation[2])
+            log.debug("Returning. order tested: %s, order score: %s", cipher_order_tested, cipher_order_score)
             return cipher_order_tested, cipher_order_score
 
         def _get_nth_or_default(collection, index, default):
@@ -2713,41 +2720,51 @@ class ConnectionChecker:
         # about the cipher order.
         if not (self._bad_ciphers or self._phase_out_ciphers or self._sufficient_ciphers):
             self._cipher_order_violation = []
+            log.debug("Returning. Server only supports good ciphers.")
             return (cipher_order_score, CipherOrderStatus.na, self._cipher_order_violation)
 
         # for each connection that has ciphers other than 'good' only, test if order is enforced
         # test only if we haven't found a order violation yet
+        log.debug(f"Current cipher_order == {cipher_order}, will only test when this is: {CipherOrderStatus.good}.")
+
         if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_3:
+            log.debug("Testing cipher order for TLS1.3")
             cipher_order, cipher_order_score = _test_cipher_order(
                 ModernConnection.from_conn(self._conn, version=TLSV1_3), cipher_order_score
             )
 
         if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_2:
+            log.debug("Testing cipher order for TLS1.2")
             cipher_order, cipher_order_score = _test_cipher_order(
                 DebugConnection.from_conn(self._conn, version=TLSV1_2), cipher_order_score
             )
 
         if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_1:
+            log.debug("Testing cipher order for TLS1.1")
             cipher_order, cipher_order_score = _test_cipher_order(
                 DebugConnection.from_conn(self._conn, version=TLSV1_1), cipher_order_score
             )
 
         if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1:
+            log.debug("Testing cipher order for TLS1")
             cipher_order, cipher_order_score = _test_cipher_order(
                 DebugConnection.from_conn(self._conn, version=TLSV1), cipher_order_score
             )
 
         if cipher_order == CipherOrderStatus.good and self._test_order_on_sslv3:
+            log.debug("Testing cipher order for SSL3")
             cipher_order, cipher_order_score = _test_cipher_order(
                 DebugConnection.from_conn(self._conn, version=SSLV3), cipher_order_score
             )
 
         if cipher_order == CipherOrderStatus.good and self._test_order_on_sslv23:
+            log.debug("Testing cipher order for SSL23")
             cipher_order, cipher_order_score = _test_cipher_order(
                 DebugConnection.from_conn(self._conn, version=SSLV23), cipher_order_score
             )
 
         if cipher_order == CipherOrderStatus.good and self._test_order_on_sslv2:
+            log.debug("Testing cipher order for SSL2")
             cipher_order, cipher_order_score = _test_cipher_order(
                 DebugConnection.from_conn(self._conn, version=SSLV2), cipher_order_score
             )
