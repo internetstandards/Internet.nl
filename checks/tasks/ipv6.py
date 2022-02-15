@@ -560,6 +560,8 @@ def simhash(url, task=None):
         # FAIL: Could not establish a connection on both addresses.
         return simhash_score, distance
 
+    html_v4 = ""
+    html_v6 = ""
     try:
         # read max 0.5MB
         html_v4 = v4_res.read(500000)
@@ -569,7 +571,12 @@ def simhash(url, task=None):
         html_v6 = v6_res.read(500000)
         v6_conn.close()
         v6_conn = None
-    except (socket.error, http.client.IncompleteRead):
+    except http.client.IncompleteRead:
+        log.debug(
+            "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
+            "need to enlarge it, logging for statistical purposes"
+        )
+    except (socket.error):
         if v4_conn:
             v4_conn.close()
         if v6_conn:
