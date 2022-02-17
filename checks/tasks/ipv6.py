@@ -423,6 +423,7 @@ def do_ns(self, url, *args, **kwargs):
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
         rrset = self.resolve(url, RR_TYPE_NS)
+        log.debug("rrset %s: %s", rrset)
         next_label = url
         while not rrset and "." in next_label:
             rrset = self.resolve(next_label, RR_TYPE_NS)
@@ -432,6 +433,7 @@ def do_ns(self, url, *args, **kwargs):
         has_aaaa = set()  # Name servers that have IPv6.
         if rrset:
             for domain in rrset:
+                log.debug("Getting domain result of %s", domain)
                 d = get_domain_results(
                     domain,
                     socket.SOCK_STREAM,
@@ -465,11 +467,12 @@ def do_ns(self, url, *args, **kwargs):
         elif dom_len > 1:
             score = float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD) * scoring.IPV6_NS_CONN_GOOD
 
-    except (SoftTimeLimitExceeded):
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
 
-    return ("ns", dict(domains=domains, score=int(score)))
+    return "ns", dict(domains=domains, score=int(score))
 
 
 def simhash(url, task=None):
