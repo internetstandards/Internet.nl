@@ -77,6 +77,8 @@ jobs:
       # Perform QA
       - name: Check linting
         run: make check
+        env:
+          GITHUB_ACTIONS: True
       - name: Test
         run: make test
         env:
