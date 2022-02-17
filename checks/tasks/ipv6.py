@@ -423,11 +423,14 @@ def do_ns(self, url, *args, **kwargs):
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
         rrset = self.resolve(url, RR_TYPE_NS)
-        log.debug("rrset: %s", [rr.domain for rr in rrset if rrset])
         next_label = url
         while not rrset and "." in next_label:
             rrset = self.resolve(next_label, RR_TYPE_NS)
             next_label = next_label[next_label.find(".") + 1 :]
+
+        log.debug("rrset: %s", rrset)
+        log.debug("rrset: %s", [rr.domain for rr in rrset if rrset])
+        log.debug("next_label: %s", next_label)
 
         has_a = set()  # Name servers that have IPv4.
         has_aaaa = set()  # Name servers that have IPv6.
