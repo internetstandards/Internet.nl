@@ -16,8 +16,6 @@ generic_models = [
     models.DomainTestTls,
     models.WebTestAppsecpriv,
     models.DomainTestAppsecpriv,
-    models.NsDomain,
-    models.MxDomain,
     models.MailTestAuth,
     models.MailTestReport,
     models.BatchUser,
@@ -119,3 +117,15 @@ class DomainTestReportAdmin(admin.ModelAdmin):
     readonly_fields = ["timestamp", "domain", "registrar", "score", "ipv6", "dnssec", "tls", "appsecpriv"]
     search_fields = ["domain"]
     list_filter = ["timestamp"]
+
+
+@admin.register(models.NsDomain)
+class NsDomainAdmin(admin.ModelAdmin):
+    list_display = models.IPv6TestDomain
+    search_fields = ["domain", "report"]
+    list_filter = ["timestamp"]
+
+
+
+@admin.register(models.MxDomain)
+class MxDomainAdmin(admin.ModelAdmin):
