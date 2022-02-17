@@ -3519,9 +3519,6 @@ msgstr "Name servers"
 msgid "results domain-mail rpki name-servers label"
 msgstr ""
 
-msgid "results domain-mail rpki mx-name-servers label"
-msgstr ""
-
 msgid "results domain-mail tls certificate label"
 msgstr "Certificate"
 
