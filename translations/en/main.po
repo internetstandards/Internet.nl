@@ -802,7 +802,7 @@ msgid "detail mail rpki exists exp"
 msgstr ""
 
 msgid "detail mail rpki exists label"
-msgstr ""
+msgstr "Route Origin Authorisation existence"
 
 msgid "detail mail rpki exists tech table"
 msgstr "Mailserver|IP address|ROA exists"
@@ -817,7 +817,7 @@ msgid "detail mail rpki exists verdict no-addresses"
 msgstr ""
 
 msgid "detail mail rpki mx-ns-exists label"
-msgstr ""
+msgstr "Route Origin Authorisation existence"
 
 msgid "detail mail rpki mx-ns-exists exp"
 msgstr ""
@@ -835,7 +835,7 @@ msgid "detail mail rpki mx-ns-exists verdict no-addresses"
 msgstr ""
 
 msgid "detail mail rpki mx-ns-valid label"
-msgstr ""
+msgstr "Route announcement validity"
 
 msgid "detail mail rpki mx-ns-valid exp"
 msgstr ""
@@ -853,13 +853,13 @@ msgid "detail mail rpki mx-ns-valid verdict invalid"
 msgstr ""
 
 msgid "detail mail rpki mx-ns-valid verdict not-routed"
-msgstr ""
+msgstr "This subtest did not run, because routing information was not available for all IP addresses."
 
 msgid "detail mail rpki valid exp"
 msgstr ""
 
 msgid "detail mail rpki valid label"
-msgstr ""
+msgstr "Route announcement validity"
 
 msgid "detail mail rpki valid tech table"
 msgstr "Mailserver|Route|Origin|Validation state"
@@ -874,7 +874,7 @@ msgid "detail mail rpki valid verdict invalid"
 msgstr ""
 
 msgid "detail mail rpki valid verdict not-routed"
-msgstr ""
+msgstr "This subtest did not run, because routing information was not available for all IP addresses."
 
 msgid "detail mail tls cert-hostmatch exp"
 msgstr ""
@@ -1934,7 +1934,7 @@ msgid "detail web rpki exists exp"
 msgstr ""
 
 msgid "detail web rpki exists label"
-msgstr ""
+msgstr "Route Origin Authorisation existence"
 
 msgid "detail web rpki exists tech table"
 msgstr "Webserver|IP address|ROA exists"
@@ -1952,7 +1952,7 @@ msgid "detail web rpki valid exp"
 msgstr ""
 
 msgid "detail web rpki valid label"
-msgstr ""
+msgstr "Route announcement validity"
 
 msgid "detail web rpki valid tech table"
 msgstr "Webserver|Route|Origin|Validation state"
@@ -1967,7 +1967,7 @@ msgid "detail web rpki valid verdict invalid"
 msgstr ""
 
 msgid "detail web rpki valid verdict not-routed"
-msgstr ""
+msgstr "This subtest did not run, because routing information was not available for all IP addresses."
 
 msgid "detail web tls cert-hostmatch exp"
 msgstr ""
@@ -2776,7 +2776,7 @@ msgid "detail web-mail rpki ns-exists exp"
 msgstr ""
 
 msgid "detail web-mail rpki ns-exists label"
-msgstr ""
+msgstr "Route Origin Authorisation existence"
 
 msgid "detail web-mail rpki ns-exists tech table"
 msgstr "Nameserver|IP address|ROA exists"
@@ -2794,7 +2794,7 @@ msgid "detail web-mail rpki ns-valid exp"
 msgstr ""
 
 msgid "detail web-mail rpki ns-valid label"
-msgstr ""
+msgstr "Route announcement validity"
 
 msgid "detail web-mail rpki ns-valid tech table"
 msgstr "Nameserver|Route|Origin|Validation state"
@@ -2809,7 +2809,7 @@ msgid "detail web-mail rpki ns-valid verdict invalid"
 msgstr ""
 
 msgid "detail web-mail rpki ns-valid verdict not-routed"
-msgstr ""
+msgstr "This subtest did not run, because routing information was not available for all IP addresses."
 
 msgid "disclosure content"
 msgstr ""
@@ -3502,7 +3502,7 @@ msgid "results domain ipv6 web-server label"
 msgstr "Web server"
 
 msgid "results domain rpki web-server label"
-msgstr ""
+msgstr "Web server"
 
 msgid "results domain tls http-headers label"
 msgstr "HTTP headers"
@@ -3517,7 +3517,7 @@ msgid "results domain-mail ipv6 name-servers label"
 msgstr "Name servers"
 
 msgid "results domain-mail rpki name-servers label"
-msgstr ""
+msgstr "Name servers"
 
 msgid "results domain-mail tls certificate label"
 msgstr "Certificate"
@@ -3600,10 +3600,10 @@ msgid "results mail ipv6 mail-servers label"
 msgstr "Mail server(s)"
 
 msgid "results mail rpki mail-servers label"
-msgstr ""
+msgstr "Mail server(s)"
 
 msgid "results mail rpki mx-name-servers label"
-msgstr ""
+msgstr "Name servers for the mail server(s)"
 
 msgid "results mail tls starttls label"
 msgstr "TLS"
@@ -3922,7 +3922,7 @@ msgid "test mailrpki failed description"
 msgstr ""
 
 msgid "test mailrpki failed summary"
-msgstr ""
+msgstr "*Unauthorised* route announcements found (RPKI)"
 
 msgid "test mailrpki info description"
 msgstr ""
@@ -3931,22 +3931,22 @@ msgid "test mailrpki info summary"
 msgstr ""
 
 msgid "test mailrpki label"
-msgstr ""
+msgstr "Authorisations for routing (RPKI)"
 
 msgid "test mailrpki passed description"
 msgstr ""
 
 msgid "test mailrpki passed summary"
-msgstr ""
+msgstr "Authorisations published for routing (RPKI)"
 
 msgid "test mailrpki title"
-msgstr ""
+msgstr "Authorisations published for routing?"
 
 msgid "test mailrpki warning description"
 msgstr ""
 
 msgid "test mailrpki warning summary"
-msgstr ""
+msgstr "*Missing* authorisations for routing (RPKI)"
 
 msgid "test mailtls failed description"
 msgstr ""
@@ -4216,7 +4216,7 @@ msgid "test siterpki failed description"
 msgstr ""
 
 msgid "test siterpki failed summary"
-msgstr ""
+msgstr "*Unauthorised* route announcements found (RPKI)"
 
 msgid "test siterpki info description"
 msgstr ""
@@ -4225,22 +4225,22 @@ msgid "test siterpki info summary"
 msgstr ""
 
 msgid "test siterpki label"
-msgstr ""
+msgstr "Authorisations for routing (RPKI)"
 
 msgid "test siterpki passed description"
 msgstr ""
 
 msgid "test siterpki passed summary"
-msgstr ""
+msgstr "Authorisations published for routing"
 
 msgid "test siterpki title"
-msgstr ""
+msgstr "Authorisations published for routing?"
 
 msgid "test siterpki warning description"
 msgstr ""
 
 msgid "test siterpki warning summary"
-msgstr ""
+msgstr "*Missing* authorisations for routing (RPKI)"
 
 msgid "test sitetls failed description"
 msgstr ""
