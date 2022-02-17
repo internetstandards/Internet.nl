@@ -4,28 +4,83 @@ from django.contrib import admin
 
 from checks import models
 
-admin.site.register(models.ConnectionTest)
-admin.site.register(models.Resolver)
-admin.site.register(models.ASRecord)
+# Bare bone admin interface:
+generic_models = [
+    models.ConnectionTest,
+    models.Resolver,
+    models.ASRecord,
+    models.WebDomain,
+    models.MailTestTls,
+    models.MailTestDnssec,
+    models.DomainTestDnssec,
+    models.DomainTestTls,
+    models.WebTestAppsecpriv,
+    models.DomainTestAppsecpriv,
+    models.NsDomain,
+    models.MxDomain,
+    models.MailTestAuth,
+    models.MailTestReport,
+    models.BatchUser,
+    models.BatchRequest,
+    models.BatchDomain,
+    models.BatchWebTest,
+    models.BatchMailTest,
+    models.AutoConf,
+]
 
-admin.site.register(models.WebDomain)
-admin.site.register(models.MailTestTls)
-admin.site.register(models.MailTestDnssec)
-admin.site.register(models.DomainTestDnssec)
-admin.site.register(models.DomainTestTls)
-admin.site.register(models.WebTestAppsecpriv)
-admin.site.register(models.DomainTestAppsecpriv)
-admin.site.register(models.DomainTestReport)
-admin.site.register(models.NsDomain)
-admin.site.register(models.MxDomain)
-admin.site.register(models.MailTestAuth)
-admin.site.register(models.MailTestReport)
-admin.site.register(models.BatchUser)
-admin.site.register(models.BatchRequest)
-admin.site.register(models.BatchDomain)
-admin.site.register(models.BatchWebTest)
-admin.site.register(models.BatchMailTest)
-admin.site.register(models.AutoConf)
+for my_model in generic_models:
+    admin.site.register(my_model)
+
+
+class NsDomainInline(admin.TabularInline):
+    model = models.NsDomain
+    fields = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
+    readonly_fields = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
+
+
+class MxDomainInline(admin.TabularInline):
+    model = models.MxDomain
+    fields = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
+    readonly_fields = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
+
+
+class WebDomainInline(admin.TabularInline):
+    model = models.WebDomain
+    fields = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
+    readonly_fields = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score"]
+
+
+class BatchWebTestInline(admin.TabularInline):
+    model = models.BatchWebTest
+    readonly_fields = [
+        "report",
+        "ipv6",
+        "ipv6_status",
+        "ipv6_errors",
+        "dnssec",
+        "dnssec_status",
+        "dnssec_errors",
+        "tls",
+        "tls_status",
+        "tls_errors",
+        "appsecpriv",
+        "appsecpriv_status",
+        "appsecpriv_errors",
+    ]
+
+
+class DomainTestReportInline(admin.TabularInline):
+    model = models.DomainTestReport
+    readonly_fields = [
+        "timestamp",
+        "domain",
+        "registrar",
+        "score",
+        "ipv6",
+        "dnssec",
+        "tls",
+        "appsecpriv",
+    ]
 
 
 @admin.register(models.DomainTestIpv6)
@@ -45,9 +100,22 @@ class DomainTestIpv6Admin(admin.ModelAdmin):
     search_fields = ["domain", "report"]
     list_filter = ["timestamp"]
 
+    inlines = [NsDomainInline, WebDomainInline, BatchWebTestInline, DomainTestReportInline]
+
 
 @admin.register(models.MailTestIpv6)
 class MailTestIpv6(admin.ModelAdmin):
     list_display = ["timestamp", "domain", "report", "mx_score", "ns_score", "score", "max_score", "mx_status"]
     search_fields = ["domain", "report"]
+    list_filter = ["timestamp"]
+
+    inlines = [NsDomainInline, MxDomainInline]
+
+
+@admin.register(models.DomainTestReport)
+class DomainTestReportAdmin(admin.ModelAdmin):
+    list_display = ["timestamp", "domain", "registrar", "score", "ipv6", "dnssec", "tls", "appsecpriv"]
+
+    readonly_fields = ["timestamp", "domain", "registrar", "score", "ipv6", "dnssec", "tls", "appsecpriv"]
+    search_fields = ["domain"]
     list_filter = ["timestamp"]
