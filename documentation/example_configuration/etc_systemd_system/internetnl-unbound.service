@@ -8,7 +8,7 @@ Wants=nss-lookup.target
 WorkingDirectory=/opt/internetnl/Internet.nl/_unbound/etc/unbound
 Type=simple
 ExecStartPre=/opt/internetnl/Internet.nl/_unbound/sbin/unbound-checkconf
-ExecStart=/opt/internetnl/Internet.nl/_unbound/sbin/unbound -d
+ExecStart=/opt/internetnl/Internet.nl/_unbound/sbin/unbound -c /opt/internetnl/Internet.nl/_unbound/etc/unbound/unbound.conf -d
 
 [Install]
 WantedBy=multi-user.target
