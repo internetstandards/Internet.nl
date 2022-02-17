@@ -318,6 +318,9 @@ class DomainTestIpv6(BaseTestModel):
             "max_score",
         ]
 
+    def __str__(self):
+        return f"{self.id} {self.domain} {self.score}"
+
     class Meta:
         app_label = "checks"
 

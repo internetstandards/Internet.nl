@@ -121,11 +121,7 @@ class DomainTestReportAdmin(admin.ModelAdmin):
 
 @admin.register(models.NsDomain)
 class NsDomainAdmin(admin.ModelAdmin):
-    list_display = models.IPv6TestDomain
-    search_fields = ["domain", "report"]
-    list_filter = ["timestamp"]
-
-
-
-@admin.register(models.MxDomain)
-class MxDomainAdmin(admin.ModelAdmin):
+    # Todo: why can't i use dir to get the fields?
+    list_display = ["domain", "v6_good", "v6_bad", "v4_good", "v4_bad", "score", "domaintestipv6", "mailtestipv6"]
+    search_fields = ["domain"]
+    readonly_fields = ["domaintestipv6", "mailtestipv6"]
