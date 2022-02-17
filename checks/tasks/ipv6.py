@@ -149,6 +149,15 @@ def batch_web(self, url, *args, **kwargs):
 
 @transaction.atomic
 def callback(results, addr, parent, parent_name, category):
+    log.debug(
+        "Going to store ipv6 results. Results: %s, addr: %s, parent: %s, parent_name: %s, category, %s",
+        results,
+        addr,
+        parent,
+        parent_name,
+        category,
+    )
+
     parent.report = {}
     parent.save()
 
