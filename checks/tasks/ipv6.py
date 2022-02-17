@@ -5,6 +5,7 @@ import http.client
 import socket
 import time
 
+import gevent
 from unbound import ub_ctx, RR_TYPE_AAAA, RR_TYPE_A, RR_TYPE_NS, RR_CLASS_IN
 
 from bs4 import BeautifulSoup
@@ -14,7 +15,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from . import dispatcher
+from . import dispatcher, gevent_soft_timeout
 from . import SetupUnboundContext
 from . import shared
 from .tls_connection import http_fetch, NoIpError, ConnectionHandshakeException
@@ -295,7 +296,7 @@ def test_ns_connectivity(ip, port, domain):
         while retval == 0 and not cb_data['done']:
             time.sleep(0.1)
             retval = ctx.process()
-    except SoftTimeLimitExceeded:
+    except (SoftTimeLimitExceeded, gevent.Timeout):
         if async_id:
             ctx.cancel(async_id)
         raise
@@ -364,36 +365,37 @@ def get_domain_results(
 
 def do_mx(self, url, *args, **kwargs):
     try:
-        domains = []
-        mailservers = shared.do_mail_get_servers(self, url, *args, **kwargs)
-        score = scoring.MAIL_IPV6_MX_CONN_FAIL
-        mx_status = shared.get_mail_servers_mxstatus(mailservers)
-        if mx_status != MxStatus.has_mx:
-            mailservers = []
+        with gevent_soft_timeout(self):
+            domains = []
+            mailservers = shared.do_mail_get_servers(self, url, *args, **kwargs)
+            score = scoring.MAIL_IPV6_MX_CONN_FAIL
+            mx_status = shared.get_mail_servers_mxstatus(mailservers)
+            if mx_status != MxStatus.has_mx:
+                mailservers = []
 
-        for mailserver, _, _ in mailservers:
-            # Check if we already have cached results.
-            cache_id = redis_id.mail_ipv6.id.format(mailserver)
-            cache_ttl = redis_id.mail_ipv6.ttl
-            d = cache.get(cache_id)
-            if not d:
-                d = get_domain_results(
-                    mailserver, socket.SOCK_STREAM, [25], self,
-                    score_good=scoring.MAIL_IPV6_MX_CONN_GOOD,
-                    score_bad=scoring.MAIL_IPV6_MX_CONN_FAIL,
-                    score_partial=scoring.MAIL_IPV6_MX_CONN_PARTIAL)
-                cache.set(cache_id, d, cache_ttl)
+            for mailserver, _, _ in mailservers:
+                # Check if we already have cached results.
+                cache_id = redis_id.mail_ipv6.id.format(mailserver)
+                cache_ttl = redis_id.mail_ipv6.ttl
+                d = cache.get(cache_id)
+                if not d:
+                    d = get_domain_results(
+                        mailserver, socket.SOCK_STREAM, [25], self,
+                        score_good=scoring.MAIL_IPV6_MX_CONN_GOOD,
+                        score_bad=scoring.MAIL_IPV6_MX_CONN_FAIL,
+                        score_partial=scoring.MAIL_IPV6_MX_CONN_PARTIAL)
+                    cache.set(cache_id, d, cache_ttl)
 
-            score += d["score"]
-            domains.append(d)
+                score += d["score"]
+                domains.append(d)
 
-        if len(domains) > 0:
-            score = (
-                float(score) / (len(domains) * scoring.MAIL_IPV6_MX_CONN_GOOD)
-                * scoring.MAIL_IPV6_MX_CONN_GOOD)
-        else:
-            # No MX records or NULL MX means full IPv6 score.
-            score = scoring.MAIL_IPV6_MX_CONN_GOOD
+            if len(domains) > 0:
+                score = (
+                    float(score) / (len(domains) * scoring.MAIL_IPV6_MX_CONN_GOOD)
+                    * scoring.MAIL_IPV6_MX_CONN_GOOD)
+            else:
+                # No MX records or NULL MX means full IPv6 score.
+                score = scoring.MAIL_IPV6_MX_CONN_GOOD
 
     except SoftTimeLimitExceeded:
         domains = []
@@ -407,48 +409,49 @@ def do_mx(self, url, *args, **kwargs):
 
 def do_ns(self, url, *args, **kwargs):
     try:
-        domains = []
-        score = scoring.IPV6_NS_CONN_FAIL
-        rrset = self.resolve(url, RR_TYPE_NS)
-        next_label = url
-        while not rrset and "." in next_label:
-            rrset = self.resolve(next_label, RR_TYPE_NS)
-            next_label = next_label[next_label.find(".")+1:]
+        with gevent_soft_timeout(self):
+            domains = []
+            score = scoring.IPV6_NS_CONN_FAIL
+            rrset = self.resolve(url, RR_TYPE_NS)
+            next_label = url
+            while not rrset and "." in next_label:
+                rrset = self.resolve(next_label, RR_TYPE_NS)
+                next_label = next_label[next_label.find(".")+1:]
 
-        has_a = set()  # Name servers that have IPv4.
-        has_aaaa = set()  # Name servers that have IPv6.
-        if rrset:
-            for domain in rrset:
-                d = get_domain_results(
-                    domain, socket.SOCK_STREAM, [53], self,
-                    score_good=scoring.IPV6_NS_CONN_GOOD,
-                    score_bad=scoring.IPV6_NS_CONN_FAIL,
-                    score_partial=scoring.IPV6_NS_CONN_PARTIAL,
-                    is_ns=True, test_domain=next_label)
-                if len(d["v4_good"]) + len(d["v4_bad"]) > 0:
-                    has_a.add(d["domain"])
-                if len(d["v6_good"]) + len(d["v6_bad"]) > 0:
-                    has_aaaa.add(d["domain"])
-                score += d["score"]
-                domains.append(d)
-        dom_len = len(domains)
-        ipv4_only = has_a - has_aaaa
+            has_a = set()  # Name servers that have IPv4.
+            has_aaaa = set()  # Name servers that have IPv6.
+            if rrset:
+                for domain in rrset:
+                    d = get_domain_results(
+                        domain, socket.SOCK_STREAM, [53], self,
+                        score_good=scoring.IPV6_NS_CONN_GOOD,
+                        score_bad=scoring.IPV6_NS_CONN_FAIL,
+                        score_partial=scoring.IPV6_NS_CONN_PARTIAL,
+                        is_ns=True, test_domain=next_label)
+                    if len(d["v4_good"]) + len(d["v4_bad"]) > 0:
+                        has_a.add(d["domain"])
+                    if len(d["v6_good"]) + len(d["v6_bad"]) > 0:
+                        has_aaaa.add(d["domain"])
+                    score += d["score"]
+                    domains.append(d)
+            dom_len = len(domains)
+            ipv4_only = has_a - has_aaaa
 
-        # If the number of IPv6 name servers is sufficient (at least 2), ignore
-        # any IPv4-only name servers or nameservers with no addresses at all.
-        if len(has_aaaa) > 1:
-            for domain in domains:
-                if (domain["domain"] in ipv4_only
-                        or domain["domain"] not in has_aaaa):
-                    dom_len -= 1
+            # If the number of IPv6 name servers is sufficient (at least 2), ignore
+            # any IPv4-only name servers or nameservers with no addresses at all.
+            if len(has_aaaa) > 1:
+                for domain in domains:
+                    if (domain["domain"] in ipv4_only
+                            or domain["domain"] not in has_aaaa):
+                        dom_len -= 1
 
-        # For one name server give at most half the points, calculate for rest.
-        if dom_len == 1:
-            score = min(float(scoring.IPV6_NS_CONN_GOOD) / 2, score)
-        elif dom_len > 1:
-            score = (
-                float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD)
-                * scoring.IPV6_NS_CONN_GOOD)
+            # For one name server give at most half the points, calculate for rest.
+            if dom_len == 1:
+                score = min(float(scoring.IPV6_NS_CONN_GOOD) / 2, score)
+            elif dom_len > 1:
+                score = (
+                    float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD)
+                    * scoring.IPV6_NS_CONN_GOOD)
 
     except SoftTimeLimitExceeded:
         domains = []
@@ -542,29 +545,30 @@ def simhash(url, task=None):
 
 def do_web(self, url, *args, **kwargs):
     try:
-        domain = []
-        simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
-        simhash_distance = settings.SIMHASH_MAX + 100
-        score = scoring.WEB_IPV6_WS_CONN_FAIL
+        with gevent_soft_timeout(self):
+            domain = []
+            simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
+            simhash_distance = settings.SIMHASH_MAX + 100
+            score = scoring.WEB_IPV6_WS_CONN_FAIL
 
-        domain = get_domain_results(
-            url, socket.SOCK_STREAM, [80, 443], self,
-            score_good=scoring.WEB_IPV6_WS_CONN_GOOD,
-            score_bad=scoring.WEB_IPV6_WS_CONN_FAIL,
-            score_partial=scoring.WEB_IPV6_WS_CONN_PARTIAL)
+            domain = get_domain_results(
+                url, socket.SOCK_STREAM, [80, 443], self,
+                score_good=scoring.WEB_IPV6_WS_CONN_GOOD,
+                score_bad=scoring.WEB_IPV6_WS_CONN_FAIL,
+                score_partial=scoring.WEB_IPV6_WS_CONN_PARTIAL)
 
-        v6_good = domain["v6_good"]
-        v4_good = domain["v4_good"]
-        v4_bad = domain["v4_bad"]
-        v6_conn_diff = domain["v6_conn_diff"]
-        score = domain["score"]
+            v6_good = domain["v6_good"]
+            v4_good = domain["v4_good"]
+            v4_bad = domain["v4_bad"]
+            v6_conn_diff = domain["v6_conn_diff"]
+            score = domain["score"]
 
-        # Give points to IPv6-only domains
-        if len(v6_good) > 0 and len(v4_good) == 0 and len(v4_bad) == 0:
-            simhash_score = scoring.WEB_IPV6_WS_SIMHASH_OK
-            simhash_distance = -1
-        elif len(v6_good) > 0 and len(v4_good) > 0 and len(v6_conn_diff) == 0:
-            simhash_score, simhash_distance = simhash(url, task=self)
+            # Give points to IPv6-only domains
+            if len(v6_good) > 0 and len(v4_good) == 0 and len(v4_bad) == 0:
+                simhash_score = scoring.WEB_IPV6_WS_SIMHASH_OK
+                simhash_distance = -1
+            elif len(v6_good) > 0 and len(v4_good) > 0 and len(v6_conn_diff) == 0:
+                simhash_score, simhash_distance = simhash(url, task=self)
 
     except SoftTimeLimitExceeded:
         if not domain:

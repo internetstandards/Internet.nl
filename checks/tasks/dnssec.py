@@ -14,7 +14,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from . import SetupUnboundContext
+from . import SetupUnboundContext, gevent_soft_timeout
 from . import shared
 from .dispatcher import check_registry, post_callback_hook
 from .. import batch, batch_shared_task
@@ -353,12 +353,13 @@ def unbound_callback(data, status, r):
 
 def do_web_is_secure(self, url, *args, **kwargs):
     try:
-        dnssec_result = dnssec_status(
-            url, self, False,
-            score_secure=scoring.WEB_DNSSEC_SECURE,
-            score_insecure=scoring.WEB_DNSSEC_INSECURE,
-            score_bogus=scoring.WEB_DNSSEC_BOGUS,
-            score_error=scoring.WEB_DNSSEC_ERROR)
+        with gevent_soft_timeout(self):
+            dnssec_result = dnssec_status(
+                url, self, False,
+                score_secure=scoring.WEB_DNSSEC_SECURE,
+                score_insecure=scoring.WEB_DNSSEC_INSECURE,
+                score_bogus=scoring.WEB_DNSSEC_BOGUS,
+                score_error=scoring.WEB_DNSSEC_ERROR)
 
     except SoftTimeLimitExceeded:
         dnssec_result = dict(
@@ -371,21 +372,22 @@ def do_web_is_secure(self, url, *args, **kwargs):
 
 def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
     try:
-        mx_status = shared.get_mail_servers_mxstatus(mailservers)
-        if mx_status != MxStatus.has_mx:
-            mailservers = [(url, None, mx_status)]
-        else:
-            mailservers.insert(0, (url, None, mx_status))
+        with gevent_soft_timeout(self):
+            mx_status = shared.get_mail_servers_mxstatus(mailservers)
+            if mx_status != MxStatus.has_mx:
+                mailservers = [(url, None, mx_status)]
+            else:
+                mailservers.insert(0, (url, None, mx_status))
 
-        res = OrderedDict()
-        for domain, _, mx_status in mailservers:
-            if domain != "":
-                res[domain] = dnssec_status(
-                    domain, self, mx_status,
-                    score_secure=scoring.MAIL_DNSSEC_SECURE,
-                    score_insecure=scoring.MAIL_DNSSEC_INSECURE,
-                    score_bogus=scoring.MAIL_DNSSEC_BOGUS,
-                    score_error=scoring.MAIL_DNSSEC_ERROR)
+            res = OrderedDict()
+            for domain, _, mx_status in mailservers:
+                if domain != "":
+                    res[domain] = dnssec_status(
+                        domain, self, mx_status,
+                        score_secure=scoring.MAIL_DNSSEC_SECURE,
+                        score_insecure=scoring.MAIL_DNSSEC_INSECURE,
+                        score_bogus=scoring.MAIL_DNSSEC_BOGUS,
+                        score_error=scoring.MAIL_DNSSEC_ERROR)
 
     except SoftTimeLimitExceeded:
         for domain, _, mx_status in mailservers:

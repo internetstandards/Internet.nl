@@ -1,5 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from contextlib import contextmanager
 import os
 import socket
 import time
@@ -7,6 +8,7 @@ import time
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+import gevent
 import unbound
 
 
@@ -56,10 +58,10 @@ class SetupUnboundContext(Task):
                 time.sleep(0.1)
                 retval = self.ub_ctx.process()
 
-        except SoftTimeLimitExceeded as e:
+        except (SoftTimeLimitExceeded, gevent.Timeout):
             if async_id:
                 self.ub_ctx.cancel(async_id)
-            raise e
+            raise
         return cb_data
 
     def resolve(self, qname, qtype):
@@ -102,3 +104,27 @@ class SetupUnboundContext(Task):
                 data["data"] = result.data
                 data["rcode"] = result.rcode
         data["done"] = True
+
+
+def is_gevent_monkey_patched():
+    try:
+        from gevent import monkey
+    except ImportError:
+        return False
+    else:
+        return monkey.is_module_patched('__builtin__')
+
+
+@contextmanager
+def gevent_soft_timeout(task):
+    if not is_gevent_monkey_patched:
+        yield
+    else:
+        with gevent.Timeout(task.soft_time_limit) as timeout:
+            try:
+                yield
+            except gevent.Timeout as e:
+                if e is timeout:
+                    raise SoftTimeLimitExceeded
+                else:
+                    raise e

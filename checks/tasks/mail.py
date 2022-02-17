@@ -8,10 +8,11 @@ from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
+import gevent
 from urllib.parse import urlparse
 import unbound
 
-from . import SetupUnboundContext
+from . import SetupUnboundContext, gevent_soft_timeout
 from .tls_connection import http_get
 from .dispatcher import post_callback_hook, check_registry
 from .dmarc_parser import parse as dmarc_parse
@@ -257,11 +258,12 @@ def dkim_callback(data, status, r):
 
 def do_dkim(self, url, *args, **kwargs):
     try:
-        cb_data = self.async_resolv(
-            "_domainkey.{}".format(url), unbound.RR_TYPE_TXT, dkim_callback)
-        result = dict(
-            available="available" in cb_data and cb_data["available"],
-            score=cb_data["score"])
+        with gevent_soft_timeout(self):
+            cb_data = self.async_resolv(
+                "_domainkey.{}".format(url), unbound.RR_TYPE_TXT, dkim_callback)
+            result = dict(
+                available="available" in cb_data and cb_data["available"],
+                score=cb_data["score"])
 
     except SoftTimeLimitExceeded:
         result = dict(
@@ -314,25 +316,26 @@ def resolve_spf_record(url, task):
 
 def do_spf(self, url, *args, **kwargs):
     try:
-        cb_data = resolve_spf_record(url, self)
-        available = 'available' in cb_data and cb_data['available']
-        score = cb_data['score']
-        record = cb_data['record']
-        policy_status = None
-        policy_score = scoring.MAIL_AUTH_SPF_POLICY_FAIL
-        policy_records = []
+        with gevent_soft_timeout(self):
+            cb_data = resolve_spf_record(url, self)
+            available = 'available' in cb_data and cb_data['available']
+            score = cb_data['score']
+            record = cb_data['record']
+            policy_status = None
+            policy_score = scoring.MAIL_AUTH_SPF_POLICY_FAIL
+            policy_records = []
 
-        if len(record) == 1:
-            policy_status, policy_score, _ = spf_check_policy(
-                url, record[0], self, policy_records=policy_records)
+            if len(record) == 1:
+                policy_status, policy_score, _ = spf_check_policy(
+                    url, record[0], self, policy_records=policy_records)
 
-        result = dict(
-            available=available,
-            score=score,
-            record=record,
-            policy_status=policy_status,
-            policy_score=policy_score,
-            policy_records=policy_records)
+            result = dict(
+                available=available,
+                score=score,
+                record=record,
+                policy_status=policy_status,
+                policy_score=policy_score,
+                policy_records=policy_records)
 
     except SoftTimeLimitExceeded:
         result = dict(
@@ -539,41 +542,42 @@ def dmarc_callback(data, status, r):
 
 def do_dmarc(self, url, *args, **kwargs):
     try:
-        cb_data = dict(cont=True)
-        is_org_domain = False
-        public_suffix_list = dmarc_get_public_suffix_list()
-        if not public_suffix_list:
-            # We don't have the public suffix list.
-            # Raise SoftTimeLimitExceeded to easily fail the test.
-            raise SoftTimeLimitExceeded
+        with gevent_soft_timeout(self):
+            cb_data = dict(cont=True)
+            is_org_domain = False
+            public_suffix_list = dmarc_get_public_suffix_list()
+            if not public_suffix_list:
+                # We don't have the public suffix list.
+                # Raise SoftTimeLimitExceeded to easily fail the test.
+                raise SoftTimeLimitExceeded
 
-        cb_data = self.async_resolv(
-            "_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
-        if cb_data.get("cont"):
-            url = dmarc_find_organizational_domain(url, public_suffix_list)
             cb_data = self.async_resolv(
                 "_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
-            is_org_domain = True
+            if cb_data.get("cont"):
+                url = dmarc_find_organizational_domain(url, public_suffix_list)
+                cb_data = self.async_resolv(
+                    "_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
+                is_org_domain = True
 
-        available = 'available' in cb_data and cb_data['available']
-        score = cb_data["score"]
-        record = cb_data["record"]
-        policy_status = None
-        policy_score = scoring.MAIL_AUTH_DMARC_POLICY_FAIL
-        org_domain = is_org_domain and url or None
+            available = 'available' in cb_data and cb_data['available']
+            score = cb_data["score"]
+            record = cb_data["record"]
+            policy_status = None
+            policy_score = scoring.MAIL_AUTH_DMARC_POLICY_FAIL
+            org_domain = is_org_domain and url or None
 
-        if len(record) == 1:
-            policy_status, policy_score = dmarc_check_policy(
-                record[0], url, self, is_org_domain,
-                public_suffix_list)
+            if len(record) == 1:
+                policy_status, policy_score = dmarc_check_policy(
+                    record[0], url, self, is_org_domain,
+                    public_suffix_list)
 
-        result = dict(
-            available=available,
-            score=score,
-            record=record,
-            policy_status=policy_status,
-            policy_score=policy_score,
-            org_domain=org_domain)
+            result = dict(
+                available=available,
+                score=score,
+                record=record,
+                policy_status=policy_status,
+                policy_score=policy_score,
+                org_domain=org_domain)
 
     except SoftTimeLimitExceeded:
         result = dict(

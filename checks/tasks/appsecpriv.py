@@ -5,7 +5,7 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
 
-from . import SetupUnboundContext, shared
+from . import SetupUnboundContext, gevent_soft_timeout, shared
 from .dispatcher import check_registry, post_callback_hook
 from .http_headers import HeaderCheckerXContentTypeOptions
 from .http_headers import HeaderCheckerXXssProtection
@@ -203,17 +203,18 @@ def build_summary_report(testappsecpriv, category):
 
 def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
     try:
-        results = {}
-        header_checkers = [
-            HeaderCheckerContentSecurityPolicy(),
-            HeaderCheckerXFrameOptions(),
-            HeaderCheckerReferrerPolicy(),
-            HeaderCheckerXXssProtection(),
-            HeaderCheckerXContentTypeOptions(),
-        ]
-        for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = http_headers_check(
-                af_ip_pair, url, header_checkers, task)
+        with gevent_soft_timeout(task):
+            results = {}
+            header_checkers = [
+                HeaderCheckerContentSecurityPolicy(),
+                HeaderCheckerXFrameOptions(),
+                HeaderCheckerReferrerPolicy(),
+                HeaderCheckerXXssProtection(),
+                HeaderCheckerXContentTypeOptions(),
+            ]
+            for af_ip_pair in af_ip_pairs:
+                results[af_ip_pair[1]] = http_headers_check(
+                    af_ip_pair, url, header_checkers, task)
 
     except SoftTimeLimitExceeded:
         for af_ip_pair in af_ip_pairs:

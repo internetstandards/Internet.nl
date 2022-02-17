@@ -27,7 +27,7 @@ from itertools import product
 from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
-from . import SetupUnboundContext
+from . import SetupUnboundContext, gevent_soft_timeout
 from .dispatcher import check_registry, post_callback_hook
 from .http_headers import HeaderCheckerContentEncoding, http_headers_check
 from .http_headers import HeaderCheckerStrictTransportSecurity
@@ -473,7 +473,7 @@ def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
 def web_conn(self, af_ip_pairs, url, *args, **kwargs):
-    return do_web_conn(af_ip_pairs, url, *args, **kwargs)
+    return do_web_conn(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @batch_web_registered
@@ -483,7 +483,7 @@ def web_conn(self, af_ip_pairs, url, *args, **kwargs):
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
     base=SetupUnboundContext)
 def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
-    return do_web_conn(af_ip_pairs, url, *args, **kwargs)
+    return do_web_conn(af_ip_pairs, url, self, *args, **kwargs)
 
 
 @mail_registered
@@ -1533,10 +1533,11 @@ def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
 
     """
     try:
-        results = {}
-        for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = cert_checks(
-                url, ChecksMode.WEB, task, af_ip_pair, *args, **kwargs)
+        with gevent_soft_timeout(task):
+            results = {}
+            for af_ip_pair in af_ip_pairs:
+                results[af_ip_pair[1]] = cert_checks(
+                    url, ChecksMode.WEB, task, af_ip_pair, *args, **kwargs)
     except SoftTimeLimitExceeded:
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
@@ -1637,16 +1638,17 @@ def cert_checks(
         return results
 
 
-def do_web_conn(af_ip_pairs, url, *args, **kwargs):
+def do_web_conn(af_ip_pairs, url, task, *args, **kwargs):
     """
     Start all the TLS related checks for the web test.
 
     """
     try:
-        results = {}
-        for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = check_web_tls(
-                url, af_ip_pair, args, kwargs)
+        with gevent_soft_timeout(task):
+            results = {}
+            for af_ip_pair in af_ip_pairs:
+                results[af_ip_pair[1]] = check_web_tls(
+                    url, af_ip_pair, args, kwargs)
     except SoftTimeLimitExceeded:
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
@@ -1677,27 +1679,28 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # concurrent connection per IP.
         time.sleep(5)
 
-        # Always try to get cached results (within the allowed time frame) to
-        # avoid continuously testing popular mail hosting providers.
-        cache_ttl = redis_id.mail_starttls.ttl
-        while timer() - start < cache_ttl and not all(results.values()) > 0:
-            for server, dane_cb_data, _ in mailservers:
-                if results[server]:
-                    continue
-                # Check if we already have cached results.
-                cache_id = redis_id.mail_starttls.id.format(server)
-                if cache.add(cache_id, False, cache_ttl):
-                    # We do not have cached results, get them and cache them.
-                    results[server] = check_mail_tls(
-                        server, dane_cb_data, task)
-                    cache.set(cache_id, results[server], cache_ttl)
-                else:
-                    results[server] = cache.get(cache_id, False)
-            time.sleep(1)
-        for server in results:
-            if results[server] is False:
-                results[server] = dict(
-                    tls_enabled=False, could_not_test_smtp_starttls=True)
+        with gevent_soft_timeout(task):
+            # Always try to get cached results (within the allowed time frame) to
+            # avoid continuously testing popular mail hosting providers.
+            cache_ttl = redis_id.mail_starttls.ttl
+            while timer() - start < cache_ttl and not all(results.values()) > 0:
+                for server, dane_cb_data, _ in mailservers:
+                    if results[server]:
+                        continue
+                    # Check if we already have cached results.
+                    cache_id = redis_id.mail_starttls.id.format(server)
+                    if cache.add(cache_id, False, cache_ttl):
+                        # We do not have cached results, get them and cache them.
+                        results[server] = check_mail_tls(
+                            server, dane_cb_data, task)
+                        cache.set(cache_id, results[server], cache_ttl)
+                    else:
+                        results[server] = cache.get(cache_id, False)
+                time.sleep(1)
+            for server in results:
+                if results[server] is False:
+                    results[server] = dict(
+                        tls_enabled=False, could_not_test_smtp_starttls=True)
 
     except SoftTimeLimitExceeded:
         for server in results:
@@ -2868,9 +2871,10 @@ def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
 
     """
     try:
-        results = {}
-        for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
+        with gevent_soft_timeout(task):
+            results = {}
+            for af_ip_pair in af_ip_pairs:
+                results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
 
     except SoftTimeLimitExceeded:
         for af_ip_pair in af_ip_pairs:
