@@ -423,7 +423,7 @@ def do_ns(self, url, *args, **kwargs):
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
         rrset = self.resolve(url, RR_TYPE_NS)
-        log.debug("rrset %s: %s", rrset)
+        log.debug("rrset: %s", rrset)
         next_label = url
         while not rrset and "." in next_label:
             rrset = self.resolve(next_label, RR_TYPE_NS)
