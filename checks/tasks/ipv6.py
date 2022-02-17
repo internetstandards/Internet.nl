@@ -429,7 +429,6 @@ def do_ns(self, url, *args, **kwargs):
             next_label = next_label[next_label.find(".") + 1 :]
 
         log.debug("rrset: %s", rrset)
-        log.debug("rrset: %s", [rr.domain for rr in rrset if rrset])
         log.debug("next_label: %s", next_label)
 
         has_a = set()  # Name servers that have IPv4.
