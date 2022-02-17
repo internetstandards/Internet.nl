@@ -436,8 +436,8 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                     # fetch ASN, prefixes from BGP
                     routeview = TeamCymruIPtoASN.from_bgp(task, ip)
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
-                    logger.error(e.msg)
-                    result['errors'].append(e.__name__)
+                    logger.error(repr(e))
+                    result['errors'].append(e.__class__.__name__)
 
                 try:
                     if routeview:
@@ -453,8 +453,8 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                         routeview = TeamCymruIPtoASN.from_rpki(
                                         task, Routinator, ip)
                 except RelyingPartyUnvailableError as e:
-                    logger.error(e.msg)
-                    result['errors'].append(e.__name__)
+                    logger.error(repr(e))
+                    result['errors'].append(e.__class__.__name__)
                 else:
                     result['routes'] = routeview.routes
                     result['validity'] = routeview.validity
