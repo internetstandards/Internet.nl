@@ -242,14 +242,19 @@ class WebRpkiExists(Subtest):
             explanation="detail web rpki exists exp",
             tech_string="detail web rpki exists tech table",
             init_tech_type="table_multi_col",
-            worst_status=scoring.WEB_RPKI_EXISTENCE_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.WEB_RPKI_EXISTENCE_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail web rpki exists verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki exists verdict good"
@@ -272,14 +277,19 @@ class MailRpkiExists(Subtest):
             explanation="detail mail rpki exists exp",
             tech_string="detail mail rpki exists tech table",
             init_tech_type="table_multi_col",
-            worst_status=scoring.MAIL_RPKI_EXISTENCE_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_RPKI_EXISTENCE_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail mail rpki exists verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki exists verdict good"
@@ -302,19 +312,25 @@ class WebRpkiValid(Subtest):
             explanation="detail web rpki valid exp",
             tech_string="detail web rpki valid tech table",
             init_tech_type="table",
-            worst_status=scoring.WEB_RPKI_VALIDITY_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.WEB_RPKI_VALIDITY_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail web rpki valid verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web rpki valid verdict good"
 
     def result_invalid(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL, override=True)
         self.verdict = "detail web rpki valid verdict invalid"
@@ -341,19 +357,25 @@ class MailRpkiValid(Subtest):
             explanation="detail mail rpki valid exp",
             tech_string="detail mail rpki valid tech table",
             init_tech_type="table",
-            worst_status=scoring.MAIL_RPKI_VALIDITY_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_RPKI_VALIDITY_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail mail rpki valid verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki valid verdict good"
 
     def result_invalid(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL, override=True)
         self.verdict = "detail mail rpki valid verdict invalid"
@@ -380,14 +402,19 @@ class NsRpkiExists(Subtest):
             explanation="detail web-mail rpki ns-exists exp",
             tech_string="detail web-mail rpki ns-exists tech table",
             init_tech_type="table",
-            worst_status=scoring.RPKI_NS_EXISTENCE_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.RPKI_NS_EXISTENCE_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail web-mail rpki ns-exists verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-exists verdict good"
@@ -410,19 +437,25 @@ class NsRpkiValid(Subtest):
             explanation="detail web-mail rpki ns-valid exp",
             tech_string="detail web-mail rpki ns-valid tech table",
             init_tech_type="table",
-            worst_status=scoring.RPKI_NS_VALIDITY_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.RPKI_NS_VALIDITY_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail web-mail rpki ns-valid verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web-mail rpki ns-valid verdict good"
 
     def result_invalid(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL, override=True)
         self.verdict = "detail web-mail rpki ns-valid verdict invalid"
@@ -449,14 +482,19 @@ class MailMxNsRpkiExists(Subtest):
             explanation="detail mail rpki mx-ns-exists exp",
             tech_string="detail mail rpki mx-ns-exists tech table",
             init_tech_type="table",
-            worst_status=scoring.MAIL_RPKI_MX_NS_EXISTENCE_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_RPKI_MX_NS_EXISTENCE_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail mail rpki mx-ns-exists verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-exists verdict good"
@@ -479,19 +517,25 @@ class MailMxNsRpkiValid(Subtest):
             explanation="detail mail rpki mx-ns-valid exp",
             tech_string="detail mail rpki mx-ns-valid tech table",
             init_tech_type="table",
-            worst_status=scoring.MAIL_RPKI_MX_NS_VALIDITY_WORST_STATUS)
+            worst_status=STATUS_INFO)
+
+    def was_tested(self):
+        self.worst_status = scoring.MAIL_RPKI_MX_NS_VALIDITY_WORST_STATUS
 
     def result_bad(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
         self.verdict = "detail mail rpki mx-ns-valid verdict bad"
 
     def result_good(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail rpki mx-ns-valid verdict good"
 
     def result_invalid(self, tech_data):
+        self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL, override=True)
         self.verdict = "detail mail rpki mx-ns-valid verdict invalid"
