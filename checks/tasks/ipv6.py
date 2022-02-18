@@ -282,10 +282,12 @@ def callback(results, addr, parent, parent_name, category):
 
 
 def test_ns_connectivity(ip, port, domain):
+    log.debug("Testing fallback NS connectivity")
     # NS connectivity is first tried with TCP (in test_connectivity).
     # If that fails, maybe the NS is not doing TCP. As a last resort
     # (expensive) we initiate an unbound context that will ask the NS a
     # question he can't refuse.
+
     def ub_callback(data, status, result):
         if status != 0:
             data["result"] = False
@@ -310,6 +312,8 @@ def test_ns_connectivity(ip, port, domain):
         if async_id:
             ctx.cancel(async_id)
         raise
+
+    log.debug("Result of fallback NS connectivity: %s", cb_data["result"])
     return cb_data["result"]
 
 
@@ -322,9 +326,17 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
         for port in ports:
             sock = None
             try:
+                # The 'settimeout' of this socket is being ignored.
+                # 2022-02-18 08:20:29	DEBUG    - Testing connectivity on ['IP'], on port [53], is_ns:....
+                # 2022-02-18 08:20:51	DEBUG    - Conclusion on ['IP']:[53]: good: set(), bad: {'....
+                # Why would it take 22 seconds now.
+                log.debug("Creating socket")
                 sock = socket.socket(af, sock_type)
+                log.debug("Setting timeout to 4 seconds")
                 sock.settimeout(4)
+                log.debug("Connecting to %s on port %s", ip, port)
                 sock.connect((ip, port))
+                log.debug("Adding IP to good list")
                 good.add(ip)
                 reachable_ports.add(port)
                 continue
@@ -332,8 +344,11 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
                 pass
             finally:
                 if sock:
+                    log.debug("Closing socket")
                     sock.close()
 
+            # todo: according to test_ns_connectivity this should only be called as a last result, not every
+            #  ip. When is it called?
             if is_ns and test_ns_connectivity(ip, port, test_domain):
                 good.add(ip)
                 reachable_ports.add(port)
@@ -419,6 +434,12 @@ def do_mx(self, url, *args, **kwargs):
 
 
 def do_ns(self, url, *args, **kwargs):
+    """
+    Resolving name servers is done sequentially and each of them may time out / take more time to
+    deliver a result. Having 6 nameservers, common with large CDNs, on a bad day may cause this
+    test to take more time than needed. The total time limit is thus easily exceeded by large
+    CDNs.
+    """
     try:
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
@@ -470,8 +491,8 @@ def do_ns(self, url, *args, **kwargs):
         elif dom_len > 1:
             score = float(score) / (dom_len * scoring.IPV6_NS_CONN_GOOD) * scoring.IPV6_NS_CONN_GOOD
 
-    except SoftTimeLimitExceeded:
-        log.debug("Soft time limit exceeded.")
+    except SoftTimeLimitExceeded as specific_exception:
+        log.debug("Soft time limit exceeded: %s", specific_exception)
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
 
