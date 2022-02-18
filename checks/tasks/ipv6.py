@@ -475,6 +475,7 @@ def do_ns(self, url, *args, **kwargs):
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
 
+    log.debug("Done with do_ns: returning: %s", dict(domains=domains, score=int(score)))
     return "ns", dict(domains=domains, score=int(score))
 
 
