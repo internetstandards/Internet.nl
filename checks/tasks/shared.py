@@ -136,6 +136,7 @@ def get_mail_servers_mxstatus(mailservers):
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):
+    """Resolve A and AAAA records and return a single result for each type."""
     af_ip_pairs = []
     ip4 = self.resolve(qname, unbound.RR_TYPE_A)
     if len(ip4) > 0:
@@ -152,12 +153,18 @@ def do_resolve_mx(self, url, *args, **kwargs):
     """
     mx_ips_pairs = []
 
-    for rr, _, status in do_mail_get_servers(self, url, *args, **kwargs):
+    for qname, _, status in do_mail_get_servers(self, url, *args, **kwargs):
         if status is not MxStatus.has_mx:
             continue
 
-        ips = do_resolve_a_aaaa(self, rr)
-        mx_ips_pairs.append((rr, ips))
+        af_ip_pairs = []
+        ip4 = self.resolve(qname, unbound.RR_TYPE_A)
+        for ip in ip4:
+            af_ip_pairs.append((socket.AF_INET, ip))
+        ip6 = self.resolve(qname, unbound.RR_TYPE_AAAA)
+        for ip in ip6:
+            af_ip_pairs.append((socket.AF_INET6, ip6))
+        mx_ips_pairs.append((qname, af_ip_pairs))
 
     return mx_ips_pairs
 
