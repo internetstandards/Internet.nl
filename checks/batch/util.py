@@ -32,6 +32,7 @@ from ..models import BatchWebTest, BatchMailTest
 from ..models import BatchDomain, BatchRequestStatus, BatchRequest
 from ..models import DomainTestReport
 from ..scoring import STATUSES_API_TEXT_MAP
+from ..tasks.routing import BGPSourceUnavailableError, NoRoutesError
 from ..views.shared import pretty_domain_name, validate_dname
 
 
@@ -442,7 +443,7 @@ class DomainTechnicalResults:
 
     @classmethod
     def _add_routing_info(cls, domain_table, addresses_info):
-        if addresses_info is None:
+        if not addresses_info:
             addresses_info = {'ipv4': {'addresses': []}, 'ipv6': {'addresses': []}}
 
         routing_info = cls._get_routing_info(domain_table)
@@ -480,12 +481,16 @@ class DomainTechnicalResults:
             ip = r['ip']
             routes = []
             for route, validity in r['validity'].items():
+                if (BGPSourceUnavailableError.__name__ in r['errors'] or
+                    NoRoutesError.__name__ in r['errors']):
+                    continue
+
                 origin, prefix = route
                 routes.append({'origin': f"AS{origin}",
                                'route': prefix,
                                'rov_state': pp_validity(validity)})
 
-            addr[ip].append(routes)
+            addr[ip].extend(routes)
 
         return addr
 
