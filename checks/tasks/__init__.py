@@ -82,11 +82,15 @@ class SetupUnboundContext(Task):
                 dane_records = []
                 for record in dane_data:
                     chars = record.split()
-                    cert_usage = int(chars[0])
-                    selector = int(chars[1])
-                    match = int(chars[2])
-                    data = "".join(chars[3:])
-                    dane_records.append((cert_usage, selector, match, data))
+                    try:
+                        cert_usage = int(chars[0], 16)
+                        selector = int(chars[1], 16)
+                        match = int(chars[2], 16)
+                        data = "".join(chars[3:])
+                        dane_records.append((cert_usage, selector, match, data))
+                    except (ValueError, IndexError):
+                        # Invalid record; ignore.
+                        pass
                 resp["data"] = dane_records
                 return resp
             else:
