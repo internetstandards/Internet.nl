@@ -348,7 +348,7 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
                     sock.close()
 
             # todo: according to test_ns_connectivity this should only be called as a last result, not every
-            #  ip. When is it called?
+            #  ip. When is it called? -> this works because of the continue statement above.
             if is_ns and test_ns_connectivity(ip, port, test_domain):
                 good.add(ip)
                 reachable_ports.add(port)

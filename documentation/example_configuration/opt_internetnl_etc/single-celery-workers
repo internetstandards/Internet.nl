@@ -1,6 +1,6 @@
 # Names of nodes to start
 #   most will only start one node:
-CELERYD_NODES="worker db_worker slow_db_worker"
+CELERYD_NODES="worker db_worker slow_db_worker nassl_worker"
 
 # Absolute or relative path to the 'celery' command:
 CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
@@ -24,7 +24,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # Note that a larger amount of workers will result in too many open files. To have a fixed number of open files,
 # Prefork has been chosen. This seems just as fast. Otherwise we have to adjust the max number of open files, which
 # feels a bit scary to do right in a structural way.
-CELERYD_OPTS="--without-gossip --time-limit=300 -P prefork -c:1 40 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker"
+CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
@@ -34,7 +34,7 @@ CELERYD_LOG_LEVEL="INFO"
 
 # Workers should run as an unprivileged user.
 #   You need to create this user manually (or you can choose
-#   a user/group combination that already exists, e.g. nobody).
+#   a user/group combination that already  exists, e.g. nobody).
 CELERYD_USER="internetnl"
 CELERYD_GROUP="internetnl"
 

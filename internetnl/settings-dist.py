@@ -292,6 +292,9 @@ CELERY_TASK_ROUTES = {
     "interface.views.shared.run_stats_queries": {"queue": "slow_db_worker"},
     "interface.views.shared.update_running_status": {"queue": "slow_db_worker"},
     "checks.tasks.update.update_hof": {"queue": "slow_db_worker"},
+    "checks.tasks.tls.web_cert": {"queue": "nassl_worker"},
+    "checks.tasks.tls.web_conn": {"queue": "nassl_worker"},
+    "checks.tasks.tls.mail_smtp_starttls": {"queue": "nassl_worker"},
 }
 
 # --- Batch configuration
@@ -362,6 +365,9 @@ SHARED_TASK_TIME_LIMIT_HIGH = 100
 BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH = 60 * 7
 BATCH_SHARED_TASK_TIME_LIMIT_HIGH = 60 * 8
 
+# If there is not enough time tests will time out and will not show results. So if it's really really busy
+# tasks might have to wait on other tasks. In that case there will be all kinds of weird timeout issues like
+# missing the complete TLS tests etc. The time itself does really need to be raised.
 SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM = 20
 SHARED_TASK_TIME_LIMIT_MEDIUM = 30
 
