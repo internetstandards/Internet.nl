@@ -23,7 +23,9 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 #  https://docs.celeryproject.org/en/latest/reference/cli.html#cmdoption-celery-worker-P
 # Note that a larger amount of workers will result in too many open files. To have a fixed number of open files,
 # Prefork has been chosen. This seems just as fast. Otherwise we have to adjust the max number of open files, which
-# feels a bit scary to do right in a structural way.
+# feels a bit scary to do right in a structural way
+# Eventlet _still_ keeps files open. The open file limit needs to be raised and perhaps to get rid of this symptom the
+# workers restarted every night or so.
 CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
 
 # %N will be replaced with the first part of the nodename.

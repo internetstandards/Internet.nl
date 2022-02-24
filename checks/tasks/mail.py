@@ -18,6 +18,7 @@ from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.tasks.tls_connection import http_get
 from interface import batch, batch_shared_task, redis_id
+from internetnl import log
 
 
 @shared_task(bind=True)
@@ -370,6 +371,7 @@ def spf_check_include_redirect(
     if status == SpfPolicyStatus.valid:
         cb_data = resolve_spf_record(url, task)
         new_spf = cb_data["record"]
+        log.debug("redirect is correct, reduing left_lookups with 1")
         left_lookups -= 1
         if not new_spf:
             status = bad_status
@@ -414,6 +416,7 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
 
     """
     left_lookups = max_lookups
+    log.debug("Left lookups: %s" % left_lookups)
     status = SpfPolicyStatus.valid
     score = scoring.MAIL_AUTH_SPF_POLICY_PASS
     parsed = spf_parse(spf_record)
@@ -431,17 +434,22 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
         redirect_terms = []
         all_found = False
         for term in (t.lower() for t in parsed["terms"]):
+            log.debug("Reducing max lookups per term: %s" % term)
             if term.startswith("redirect"):
                 redirect_terms.append(term)
             elif "include:" in term:
                 terms.append(term)
             elif "mx" in term:
+                log.debug("mx found in term, reducing left_lookups with 1")
                 left_lookups -= 1
             elif "ptr" in term:
+                log.debug("ptr found in term, reducing left_lookups with 1")
                 left_lookups -= 1
             elif "exists" in term:
+                log.debug("exists found in term, reducing left_lookups with 1")
                 left_lookups -= 1
             elif "a" == term:
+                log.debug("a found in term, reducing left_lookups with 1")
                 left_lookups -= 1
             elif term.endswith("all") and len(term) < 5:
                 all_found = True
