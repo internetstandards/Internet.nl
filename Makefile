@@ -331,7 +331,7 @@ nassl: venv .nassl_from_archive
 test: .make.test	## run test suite
 .make.test:
 	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
-		-m pytest -vv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+		-m pytest --log-cli-level=10  -vvv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
 	# generate coverage
 	${env} coverage report
 	# and pretty html
