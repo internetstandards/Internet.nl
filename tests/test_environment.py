@@ -10,3 +10,6 @@ def test_redis_connection():
 
     red.expire("testing", 0)
     assert red.scard("testing") == 0
+
+
+def test_rabbitmq_connection():
