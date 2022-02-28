@@ -217,33 +217,28 @@ def custom_celery_worker(request):
         worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer, preexec_fn=os.setsid, env=worker_env
     )
     # catch early errors
-    log.info("Trying to catch early errors")
     time.sleep(1)
     assert not worker_process.poll(), "Worker exited early."
 
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
     try:
         # wait for worker to start accepting tasks before turning to test function
-        log.info("Trying to waitsome to see if expiry works")
-
-        # horrible debugging included
-        try:
-            time.sleep(10)
-            with open("debug.log") as f:
-                log.info("Reading debug file")
-                log.info(f.readlines())
-        except FileNotFoundError:
-            log.info("File not found")
+        # horrible debugging included, yes, github has options
+        # Removing the bad debugging since the issue was discovered using this method.
+        # try:
+        #     time.sleep(10)
+        #     with open("debug.log") as f:
+        #         log.info("Reading debug file")
+        #         log.info(f.readlines())
+        # except FileNotFoundError:
+        #     log.info("File not found")
 
         assert waitsome.apply_async([0], expires=TEST_WORKER_TIMEOUT, queue="db_worker").get(
             timeout=TEST_WORKER_TIMEOUT
         ), "Worker failed to become ready and execute test task."
         # give worker stderr time to output into 'Captured stderr setup' and not spill over into 'Captured stderr call'
-        log.info("Adding even more sleep")
         time.sleep(0.1)
-        log.info("Yielding worker process")
         yield worker_process
     finally:
         # stop worker and all child threads
-        log.info("Cleaning up worker process")
         os.killpg(os.getpgid(worker_process.pid), signal.SIGKILL)
