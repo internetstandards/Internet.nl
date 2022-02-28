@@ -1,6 +1,5 @@
 # this tests if a task can be executed using gevent, eventlet, and to see if tasks with an unbound context also function
 # This due to hanging tasks
-import os
 
 import pytest
 
