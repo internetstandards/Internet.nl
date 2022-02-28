@@ -2,7 +2,6 @@
 # This due to hanging tasks
 # import os
 
-import pytest
 
 from internetnl import log
 from internetnl.celery import dummy_task
@@ -38,7 +37,7 @@ def test_various_workers(custom_celery_worker):
 
 
 # @pytest.mark.skipif(os.getenv("GITHUB_ACTIONS", "") == "True", reason="Redis hang? at github actions")
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_task_with_unbound_context(custom_celery_worker):
     """Verify a task can be started with unbound context. The unbound context works fine in prefork,
     but does it also function well in gevent and eventlet situations. We'll find out.
