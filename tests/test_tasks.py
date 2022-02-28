@@ -46,9 +46,11 @@ def test_task_with_unbound_context(custom_celery_worker):
     Note: this will not lead to more test coverage as there the execution of this code happens somewhere else.
     """
     # Todo: test if there is a connection with a fixture.
-
+    log.info("Creating a task")
     task = web.si("internet.nl").apply_async()
+    log.info("Waiting for result")
     result = wait_for_result(task)
+    log.info("Done waiting for result")
 
     """
     This is a live test, so it needs an internet connection.

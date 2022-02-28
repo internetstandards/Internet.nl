@@ -208,7 +208,6 @@ def custom_celery_worker(request):
 
     Tests on both implementations of worker."""
     pool = request.param
-
     # there is a set and limited number of queues, for convenience listen to all of them.
     worker_command = ["make", "run-test-worker", pool]  # "--queues", ",".join(queues)
     worker_env = dict(os.environ, WORKER_ROLE="default_ipv4")
@@ -218,18 +217,22 @@ def custom_celery_worker(request):
         worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer, preexec_fn=os.setsid, env=worker_env
     )
     # catch early errors
+    log.info("Trying to catch early errors")
     time.sleep(1)
     assert not worker_process.poll(), "Worker exited early."
 
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
     try:
         # wait for worker to start accepting tasks before turning to test function
+        log.info("Trying to waitsome to see if expiry works")
         assert waitsome.apply_async([0], expires=TEST_WORKER_TIMEOUT).get(
             timeout=TEST_WORKER_TIMEOUT
         ), "Worker failed to become ready and execute test task."
         # give worker stderr time to output into 'Captured stderr setup' and not spill over into 'Captured stderr call'
         time.sleep(0.1)
+        log.info("Yielding worker process")
         yield worker_process
     finally:
         # stop worker and all child threads
+        log.info("Cleaning up worker process")
         os.killpg(os.getpgid(worker_process.pid), signal.SIGKILL)
