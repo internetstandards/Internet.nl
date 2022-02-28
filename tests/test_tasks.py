@@ -1,5 +1,6 @@
 # this tests if a task can be executed using gevent, eventlet, and to see if tasks with an unbound context also function
 # This due to hanging tasks
+# import os
 
 import pytest
 
@@ -24,7 +25,7 @@ def wait_for_result(task_id):
 
 
 # @pytest.mark.skipif(os.getenv("GITHUB_ACTIONS", "") == "True", reason="Redis hang? at github actions")
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_various_workers(custom_celery_worker):
     """Simple test that starts a task on all different worker-types (gevent, prefork, eventlet) to
     verify that operations are normal. This requires a redis server to be reachable on the configured port in
