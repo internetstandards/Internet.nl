@@ -9,7 +9,7 @@ from internetnl import log
 from internetnl.celery import waitsome
 
 
-TEST_WORKER_TIMEOUT = 10
+TEST_WORKER_TIMEOUT = 5
 
 # -----------------------------------------------------------------------------
 # BEGIN: add two custom columns to the HTML report created by pytest-html.
@@ -225,10 +225,11 @@ def custom_celery_worker(request):
     try:
         # wait for worker to start accepting tasks before turning to test function
         log.info("Trying to waitsome to see if expiry works")
-        assert waitsome.apply_async([0], expires=TEST_WORKER_TIMEOUT).get(
+        assert waitsome.apply_async([0], expires=TEST_WORKER_TIMEOUT, queue="db_worker").get(
             timeout=TEST_WORKER_TIMEOUT
         ), "Worker failed to become ready and execute test task."
         # give worker stderr time to output into 'Captured stderr setup' and not spill over into 'Captured stderr call'
+        log.info("Adding even more sleep")
         time.sleep(0.1)
         log.info("Yielding worker process")
         yield worker_process
