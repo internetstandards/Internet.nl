@@ -186,7 +186,7 @@ run-test-worker: venv
 	# tests. It will keep on running, and the tests will run well.
 	# DJANGO_DATABASE=testworker
 	echo "Starting test worker with pool $(RUN_ARGS)"
-	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,celery,default,worker_nassl --time-limit=300 --concurrency=20 -n generic_worker
+	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,celery,default,worker_nassl --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
 	echo "Stopping test worker with pool $(RUN_ARGS)"
 
 # compiling unbound for an x86_64 system:

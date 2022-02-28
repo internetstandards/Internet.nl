@@ -225,6 +225,16 @@ def custom_celery_worker(request):
     try:
         # wait for worker to start accepting tasks before turning to test function
         log.info("Trying to waitsome to see if expiry works")
+
+        # horrible debugging included
+        try:
+            time.sleep(10)
+            with open("debug.log") as f:
+                log.info("Reading debug file")
+                log.info(f.readlines())
+        except FileNotFoundError:
+            log.info("File not found")
+
         assert waitsome.apply_async([0], expires=TEST_WORKER_TIMEOUT, queue="db_worker").get(
             timeout=TEST_WORKER_TIMEOUT
         ), "Worker failed to become ready and execute test task."
