@@ -1,5 +1,7 @@
 from django_redis import get_redis_connection
 
+from interface.management.commands.api_check_rabbit import get_rabbit_load
+
 
 def test_redis_connection():
     # Sends a few trivial queries to redis, to see if the build can talk to it without infinite waits
@@ -13,3 +15,4 @@ def test_redis_connection():
 
 
 def test_rabbitmq_connection():
+    get_rabbit_load()
