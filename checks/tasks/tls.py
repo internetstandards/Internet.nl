@@ -5,6 +5,7 @@ import http.client
 import socket
 import ssl
 import time
+import unbound
 from urllib.parse import urlparse
 
 import requests
@@ -652,6 +653,8 @@ def save_results(model, results, addr, domain, category):
                 model.cert_signature_score = result.get("sigalg_score")
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
+                model.cert_caa_score = result.get("caa_score")
+                model.cert_caa_record = result.get("caa_record")
                 model.dane_log = result.get("dane_log")
                 model.dane_score = result.get("dane_score")
                 model.dane_status = result.get("dane_status")
@@ -720,6 +723,7 @@ def save_results(model, results, addr, domain, category):
                     model.cert_signature_score = result.get("sigalg_score")
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
+                    model.cert_caa_score = result.get("caa_score")
                     model.dane_log = result.get("dane_log")
                     model.dane_score = result.get("dane_score")
                     model.dane_status = result.get("dane_status")
@@ -876,6 +880,13 @@ def build_report(dttls, category):
                     category.subtests["cert_hostmatch"].result_bad(dttls.cert_hostmatch_bad)
                 else:
                     category.subtests["cert_hostmatch"].result_good()
+
+                if dttls.cert_caa_score is None:
+                    category.subtests["cert_caa"].result_info(dttls.cert_caa_record)
+                elif dttls.cert_caa_score is scoring.CAA_WORST_STATUS:
+                    category.subtests["cert_caa"].result_info(dttls.cert_caa_record)
+                else:
+                    category.subtests["cert_caa"].result_good(dttls.cert_caa_record)
 
             if dttls.dane_status == DaneStatus.none:
                 category.subtests["dane_exists"].result_bad()
@@ -1619,6 +1630,50 @@ def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     return ("cert", results)
 
 
+def as_txt(data):
+    try:
+        txt = "".join(unbound.ub_data.dname2str(data))
+    except UnicodeError:
+        txt = "<Non ASCII characters found>"
+    return txt
+
+
+def caa_callback(data, status, r):
+    data["score"] = scoring.CAA_WORST_STATUS
+    data["available"] = False
+    data["record"] = []
+    if status == 0:
+        available = False
+        if r.rcode == unbound.RCODE_NOERROR and r.havedata == 1:
+            available = True
+            score = scoring.CAA_GOOD
+            for d in r.data.data:
+                txt = as_txt(d)
+                data["record"].append(txt)
+        elif r.rcode == unbound.RCODE_NXDOMAIN:
+            # we know for sure there is no DKIM pubkey
+            score = scoring.CAA_WORST_STATUS
+        else:
+            # resolving problems, servfail probably
+            score = scoring.CAA_WORST_STATUS
+        data["score"] = score
+        data["available"] = available
+    data["done"] = True
+
+
+def check_caa(task, url):
+    caa_score = scoring.CAA_GOOD
+    try:
+        cb_data = task.async_resolv(url, unbound.RR_TYPE_CAA, caa_callback)
+        result = dict(available="available" in cb_data and cb_data["available"], score=cb_data["score"])
+        caa_score = cb_data["score"]
+        # KeyError is due to score missing, happens in case of timeout on non resolving domain
+    except (SoftTimeLimitExceeded, KeyError):
+        result = dict(available=False, score=scoring.scoring.CAA_WORST_STATUS)
+        caa_score = scoring.CAA_WORST_STATUS
+    return (caa_score, cb_data["record"])
+
+
 def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, **kwargs):
     """
     Perform certificate checks.
@@ -1689,6 +1744,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
         pubkey_score, pubkey_bad, pubkey_phase_out = debug_chain.check_pubkey()
         sigalg_score, sigalg_bad = debug_chain.check_sigalg()
         chain_str = debug_chain.chain_str()
+        caa_score, caa_record = check_caa(task, url)
 
         if starttls_details:
             dane_results = debug_chain.check_dane(url, conn_port, task, dane_cb_data=starttls_details.dane_cb_data)
@@ -1707,6 +1763,8 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
             sigalg_score=sigalg_score,
             hostmatch_bad=hostmatch_bad,
             hostmatch_score=hostmatch_score,
+            caa_score=caa_score,
+            caa_record=caa_record,
         )
         results.update(dane_results)
 
