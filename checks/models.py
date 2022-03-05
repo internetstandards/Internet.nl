@@ -485,6 +485,9 @@ class DomainTestTls(BaseTestModel):
     cert_hostmatch_bad = ListField(null=True)
     cert_hostmatch_score = models.IntegerField(null=True)
 
+    cert_caa_score = models.IntegerField(null=True)
+    cert_caa_record = ListField(default=[])
+
     score = models.IntegerField(null=True)
 
     def __dir__(self):
@@ -505,7 +508,7 @@ class DomainTestTls(BaseTestModel):
             'hsts_score', 'cert_chain', 'cert_trusted', 'cert_trusted_score',
             'cert_pubkey_bad', 'cert_pubkey_phase_out', 'cert_pubkey_score',
             'cert_signature_bad', 'cert_signature_score', 'cert_hostmatch_bad',
-            'cert_hostmatch_score', 'score', 'protocols_good',
+            'cert_hostmatch_score', 'cert_caa_score','cert_caa_record','score', 'protocols_good',
         ]
 
     def get_web_api_details(self):
@@ -536,6 +539,7 @@ class DomainTestTls(BaseTestModel):
             'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
             'cert_signature_bad': self.cert_signature_bad,
             'cert_hostmatch_bad': self.cert_hostmatch_bad,
+            'cert_caa_bad': self.cert_caa_bad,
         }
 
     def get_mail_api_details(self):
@@ -562,7 +566,8 @@ class DomainTestTls(BaseTestModel):
             'cert_pubkey_phase_out': self.cert_pubkey_phase_out,
             'cert_signature_bad': self.cert_signature_bad,
             'cert_hostmatch_bad': self.cert_hostmatch_bad,
-        }
+            'cert_caa_bad': self.cert_caa_bad,
+       }
 
 
 class WebTestAppsecpriv(DomainServersModel):

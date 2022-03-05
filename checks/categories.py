@@ -149,6 +149,7 @@ class WebTls(Category):
             WebTlsCertPubkey,
             WebTlsCertSignature,
             WebTlsCertHostmatch,
+            WebCaa,
             WebTlsDaneExists,
             WebTlsDaneValid,
             WebTlsZeroRTT,
@@ -221,6 +222,7 @@ class MailTls(Category):
             MailTlsCertPubkey,
             MailTlsCertSignature,
             MailTlsCertHostmatch,
+            MailCaa,
             MailTlsDaneExists,
             MailTlsDaneValid,
             MailTlsDaneRollover,
@@ -1041,6 +1043,35 @@ class WebTlsCertHostmatch(Subtest):
         self.tech_data = tech_data
 
 
+class WebCaa(Subtest):
+    def __init__(self):
+        super(WebCaa, self).__init__(
+            name="cert_caa",
+            label="detail web cert-caa label",
+            explanation="detail web cert-caa exp",
+            tech_string="",
+            init_tech_type="",
+            worst_status=scoring.CAA_WORST_STATUS,
+            full_score=scoring.CAA_GOOD,
+            model_score_field="cert_caa_score",
+        )
+
+    def result_good(self,tech_data):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web cert-caa verdict good"
+        self.tech_data = ""
+
+    def result_info(self, tech_data):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web cert-caa verdict warning"
+        self.tech_data = ""
+
+    def result_bad(self, tech_data):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web cert-caa verdict bad"
+        self.tech_data = ""
+
+
 class WebTlsDaneExists(Subtest):
     def __init__(self):
         super(WebTlsDaneExists, self).__init__(
@@ -1617,6 +1648,38 @@ class MailTlsCertHostmatch(Subtest):
         self.status = STATUS_FAIL
         self.verdict = "detail mail tls cert-hostmatch verdict bad"
         self.tech_data = tech_data
+
+
+class MailCaa(Subtest):
+    def __init__(self):
+        super(MailCaa, self).__init__(
+            name="cert_caa",
+            label="detail mail cert-caa label",
+            explanation="detail mail cert-caa exp",
+            tech_string="detail mail cert-caa tech table",
+            init_tech_type="",
+            worst_status=scoring.CAA_WORST_STATUS,
+            full_score=scoring.CAA_GOOD,
+            model_score_field="cert_caa_score",
+        )
+
+    def result_good(self, tech_data):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail cert-caa verdict good"
+        self.tech_data = ""
+
+    def result_info(self, tech_data):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail cert-caa verdict warning"
+        self.tech_data = ""
+
+    def result_bad(self, tech_data):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail cert-caa verdict bad"
+        self.tech_data = ""
+
+
+
 
 
 class MailTlsZeroRTT(Subtest):
