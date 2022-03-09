@@ -19,6 +19,7 @@ from checks.tasks.http_headers import (
 )
 from checks.tasks.shared import aggregate_subreports, results_per_domain
 from interface import batch, batch_shared_task
+from internetnl import log
 
 
 @shared_task(bind=True)
@@ -195,7 +196,8 @@ def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = http_headers_check(af_ip_pair, url, header_checkers, task)
 
-    except (SoftTimeLimitExceeded):
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
                 d = {"server_reachable": False}

@@ -262,7 +262,8 @@ def do_dkim(self, url, *args, **kwargs):
         result = dict(available="available" in cb_data and cb_data["available"], score=cb_data["score"])
 
     # KeyError is due to score missing, happens in case of timeout on non resolving domain
-    except (SoftTimeLimitExceeded, KeyError):
+    except (SoftTimeLimitExceeded, KeyError) as specific_exception:
+        log.debug("Soft time limit exceeded: %s", specific_exception)
         result = dict(available=False, score=scoring.MAIL_AUTH_DKIM_FAIL)
 
     return ("dkim", result)
@@ -330,7 +331,8 @@ def do_spf(self, url, *args, **kwargs):
         )
 
     # KeyError is due to score missing, happens in case of timeout on non resolving domain
-    except (SoftTimeLimitExceeded, KeyError):
+    except (SoftTimeLimitExceeded, KeyError) as specific_exception:
+        log.debug("Soft time limit exceeded: %s", specific_exception)
         result = dict(
             available=False,
             score=scoring.MAIL_AUTH_SPF_FAIL,
@@ -570,7 +572,8 @@ def do_dmarc(self, url, *args, **kwargs):
         )
 
     # KeyError is due to score missing, happens in case of timeout on non resolving domain
-    except (SoftTimeLimitExceeded, KeyError):
+    except (SoftTimeLimitExceeded, KeyError) as specific_exception:
+        log.debug("Soft time limit exceeded: %s", specific_exception)
         result = dict(
             available=False,
             score=scoring.MAIL_AUTH_DMARC_FAIL,

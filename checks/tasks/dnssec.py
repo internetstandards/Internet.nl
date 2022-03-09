@@ -18,6 +18,7 @@ from checks.models import DnssecStatus, DomainTestDnssec, MailTestDnssec, MxStat
 from checks.tasks import SetupUnboundContext, shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from interface import batch, batch_shared_task, redis_id
+from internetnl import log
 
 UNBOUND_PATCHED_DS_LOG = "internetnl - DS unsupported"
 
@@ -347,7 +348,8 @@ def do_web_is_secure(self, url, *args, **kwargs):
             score_error=scoring.WEB_DNSSEC_ERROR,
         )
 
-    except (SoftTimeLimitExceeded):
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         dnssec_result = dict(status=DnssecStatus.dnserror.value, score=scoring.WEB_DNSSEC_ERROR, log="Timed out")
 
     return ("is_secure", {url: dnssec_result})
@@ -374,7 +376,8 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
                     score_error=scoring.MAIL_DNSSEC_ERROR,
                 )
 
-    except (SoftTimeLimitExceeded):
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         for domain, _, mx_status in mailservers:
             if domain != "" and not res.get(domain):
                 res[domain] = dict(
@@ -416,7 +419,8 @@ def dnssec_status(domain, ub_task, mx_status, score_secure, score_insecure, scor
                     break
             status = cb_data["status"]
 
-    except (SoftTimeLimitExceeded) as e:
+    except SoftTimeLimitExceeded as e:
+        log.debug("Soft time limit exceeded.")
         if async_id:
             ub_task.ub_ctx.cancel(async_id)
         raise e

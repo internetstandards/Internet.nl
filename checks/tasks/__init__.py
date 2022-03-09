@@ -57,7 +57,8 @@ class SetupUnboundContext(Task):
                 time.sleep(0.1)
                 retval = self.ub_ctx.process()
 
-        except (SoftTimeLimitExceeded) as e:
+        except SoftTimeLimitExceeded as e:
+            log.debug("Soft time limit exceeded.")
             log.debug("Failed resolving of qname: %s" % qname)
             if async_id:
                 self.ub_ctx.cancel(async_id)

@@ -308,7 +308,8 @@ def test_ns_connectivity(ip, port, domain):
         while retval == 0 and not cb_data["done"]:
             time.sleep(0.1)
             retval = ctx.process()
-    except (SoftTimeLimitExceeded):
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         if async_id:
             ctx.cancel(async_id)
         raise
@@ -426,7 +427,8 @@ def do_mx(self, url, *args, **kwargs):
             # No MX records or NULL MX means full IPv6 score.
             score = scoring.MAIL_IPV6_MX_CONN_GOOD
 
-    except (SoftTimeLimitExceeded):
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         domains = []
         score = scoring.MAIL_IPV6_MX_CONN_FAIL
 
@@ -613,8 +615,8 @@ def do_web(self, url, *args, **kwargs):
         elif len(v6_good) > 0 and len(v4_good) > 0 and len(v6_conn_diff) == 0:
             simhash_score, simhash_distance = simhash(url, task=self)
 
-    except (SoftTimeLimitExceeded):
-        log.debug("Error: SoftTimeLimitExceeded")
+    except SoftTimeLimitExceeded:
+        log.debug("Soft time limit exceeded.")
         if not domain:
             domain = dict(
                 domain=url,
