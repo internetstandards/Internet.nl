@@ -1,6 +1,7 @@
 # Names of nodes to start
 #   most will only start one node:
-CELERYD_NODES="worker db_worker slow_db_worker nassl_worker"
+# ipv6_worker, mail_worker, web_worker, resolv_worker, dnssec_worker
+CELERYD_NODES="worker db_worker slow_db_worker nassl_worker ipv6_worker mail_worker web_worker resolv_worker dnssec_worker"
 
 # Absolute or relative path to the 'celery' command:
 CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
@@ -26,6 +27,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # feels a bit scary to do right in a structural way
 # Eventlet _still_ keeps files open. The open file limit needs to be raised and perhaps to get rid of this symptom the
 # workers restarted every night or so.
+# If you want more spread: -c:5 10 -Q:5 ipv6_worker -c:6 10 -Q:6 mail_worker -c:7 10 -Q:7 web_worker -c:8 10 -Q:8 resolv_worker -c:9 10 -Q:9 dnssec_worker
 CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 50 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker"
 
 # %N will be replaced with the first part of the nodename.

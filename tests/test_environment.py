@@ -11,6 +11,8 @@ def test_redis_connection():
     red.expire("testing", 0)
     assert red.scard("testing") == 0
 
+    red.close()
+
 
 def test_rabbitmq_connection(requests_mock):
     # We want to test the real deal, not this mocked response.

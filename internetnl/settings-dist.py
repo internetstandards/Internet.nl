@@ -216,12 +216,18 @@ DATABASES = {"default": DATABASES_SETTINGS[DATABASE]}
 
 # --- Cache configuration
 #
+# This is the setting for django-redis https://pypi.org/project/django-redis/
+#
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": CACHE_LOCATION,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # In newer versions of redis, connections are not automatically closed. This means that
+            # if you don't close the connection or don't terminate the client the connections will pile up.
+            # especially if you have a 1000 workers. You still need to call close().
+            "CLOSE_CONNECTION": True,
         },
     }
 }
@@ -295,6 +301,21 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.tls.web_cert": {"queue": "nassl_worker"},
     "checks.tasks.tls.web_conn": {"queue": "nassl_worker"},
     "checks.tasks.tls.mail_smtp_starttls": {"queue": "nassl_worker"},
+    # spread all the other tasks to find out the one that hangs
+    # ipv6_worker, mail_worker, web_worker, resolv_worker, dnssec_worker
+    # This is not the issue.
+    # "checks.tasks.ipv6.ns": {"queue": "ipv6_worker"},
+    # "checks.tasks.ipv6.mx": {"queue": "ipv6_worker"},
+    # "checks.tasks.ipv6.web": {"queue": "ipv6_worker"},
+    # "checks.tasks.mail.dmarc": {"queue": "mail_worker"},
+    # "checks.tasks.mail.dkim": {"queue": "mail_worker"},
+    # "checks.tasks.mail.spf": {"queue": "mail_worker"},
+    # "checks.tasks.tls.web_http": {"queue": "web_worker"},
+    # "checks.tasks.appsecpriv.web_appsecpriv": {"queue": "web_worker"},
+    # "checks.tasks.shared.mail_get_servers": {"queue": "resolv_worker"},
+    # "checks.tasks.shared.resolve_a_aaaa": {"queue": "resolv_worker"},
+    # "checks.tasks.dnssec.mail_is_secure": {"queue": "dnssec_worker"},
+    # "checks.tasks.dnssec.web_is_secure": {"queue": "dnssec_worker"},
 }
 
 # --- Batch configuration
@@ -539,3 +560,8 @@ if not DEBUG and SECRET_KEY == "secret":
 
 if DJANGO_IS_PROXIED:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+# Limit the number of tests a client can perform in a while. The exact implementation is to be documented.
+# raise the roof of this number to remove this cap. 30 was a limit inherited that comes across as sane.
+CLIENT_RATE_LIMIT = 30

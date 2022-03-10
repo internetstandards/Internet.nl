@@ -45,6 +45,7 @@ def _load_padded_macs_in_cache():
     red = get_redis_connection()
     with open(settings.PADDED_MACS) as f:
         red.hmset(redis_id.padded_macs.id, json.load(f))
+    red.close()
 
 
 def _clear_cached_pages():

@@ -4,6 +4,7 @@ from celery import group
 from celery.result import AsyncResult
 from django.core.cache import cache
 from django_redis import get_redis_connection
+from django.conf import settings
 
 from interface import redis_id
 from internetnl import log
@@ -16,7 +17,9 @@ def user_limit_exceeded(req_limit_id):
 
     """
     red = get_redis_connection("default")
-    return red.scard(req_limit_id) > 30
+    current_usage = red.scard(req_limit_id)
+    red.close()
+    return current_usage > settings.CLIENT_RATE_LIMIT
 
 
 def check_results(url, checks_registry, remote_addr, get_results=False):
@@ -54,6 +57,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             red = get_redis_connection("default")
             red.sadd(req_limit_id, task_id)
             red.expire(req_limit_id, req_limit_ttl)
+            red.close()
 
     log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
     callback = AsyncResult(task_id)
@@ -115,3 +119,4 @@ def post_callback_hook(req_limit_id, task_id):
     """
     red = get_redis_connection("default")
     red.srem(req_limit_id, task_id)
+    red.close()

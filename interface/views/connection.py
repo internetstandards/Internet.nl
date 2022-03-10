@@ -175,6 +175,7 @@ def finished(request, request_id):
     resolv = []
     resolv_owner = set()
     resolvers = red.smembers(redis_id.conn_test_resolvers.id.format(request_id))
+    red.close()
     for resolver in resolvers:
         resolver = resolver.decode("ascii")
         cache_id = redis_id.conn_test_resolver_as.id.format(request_id, resolver)
@@ -463,6 +464,8 @@ def resolv_list(host, test_id):
             resolver_owner[resolver] = as_record.description
         else:
             resolver_owner[resolver] = ""
+
+    red.close()
     return resolver_owner
 
 
@@ -518,6 +521,7 @@ def get_slaac_mac_vendor(ip):
 
     red = get_redis_connection("default")
     mac_vendor = red.hget(redis_id.padded_macs.id, mac_oui)
+    red.close()
     if mac_vendor is None:
         mac_vendor = "false"
     else:
