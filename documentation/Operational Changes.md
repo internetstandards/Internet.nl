@@ -123,6 +123,25 @@ journalctl -xe
 # The site might look bad, so you need to run some translations and such:
 make frontend
 
+
+# An annoying bug is causing redis backend connection leaks. This issue is persistent with the most trivial of tasks
+# and opens tons of connections to redis, but not closing all of them properly. Over time this means that the
+# system will run out of file handles (the default is 1024). The below fix ups the number of open file handles
+# to something ridiculous. It also configures redis to drop connections after a while so redis will not get clogged.
+
+# The file handle limits are already in the systemd services for the single scanner. It is not needed to add these to
+# the batch it seems, as this does not occur there (at least we did not see that happen).
+
+cp documentation/example_configuration/etc_redis/redis.conf /etc/redis/redis.conf
+cp documentation/example_configuration/etc_security/limits.conf /etc/security/limits.conf
+
+# Add the contents of documentation/example_configuration/crontab into `crontab -e` for the root user.
+# Currently this is:
+`0 */6 * * * for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done`
+`0 3 * * * service internetnl-gunicorn restart`
+
+# Scans started during this service reboot will timeout, unfortunately. Perhaps lets do this at 3 at night.
+
 # Done! :)
 ```
 

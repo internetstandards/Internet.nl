@@ -6,3 +6,4 @@
 # differ. Therefore this resets just a bit more. The only issue is basically running out of ram, as file descriptors
 # and max clients for redis can be huge. To be safe, lets do this every 6 hours.
 0 */6 * * * for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done
+0 3 * * * service internetnl-gunicorn restart
