@@ -376,19 +376,20 @@ BATCH_API_CUSTOM_RESULTS = {
 # --- END Batch configuration
 
 # Shared task timings
-SHARED_TASK_SOFT_TIME_LIMIT_HIGH = 90
-SHARED_TASK_TIME_LIMIT_HIGH = 100
+# These limits have been raised a bit in 2022, as servers with a ton of name servers etc just need more time.
+SHARED_TASK_SOFT_TIME_LIMIT_HIGH = 130  # was 90
+SHARED_TASK_TIME_LIMIT_HIGH = 150  # was 100
 BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH = 60 * 7
 BATCH_SHARED_TASK_TIME_LIMIT_HIGH = 60 * 8
 
 # If there is not enough time tests will time out and will not show results. So if it's really really busy
 # tasks might have to wait on other tasks. In that case there will be all kinds of weird timeout issues like
 # missing the complete TLS tests etc. The time itself does really need to be raised.
-SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM = 20
-SHARED_TASK_TIME_LIMIT_MEDIUM = 30
+SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM = 40  # was 20
+SHARED_TASK_TIME_LIMIT_MEDIUM = 60  # was 30
 
-SHARED_TASK_SOFT_TIME_LIMIT_LOW = 10
-SHARED_TASK_TIME_LIMIT_LOW = 15
+SHARED_TASK_SOFT_TIME_LIMIT_LOW = 20  # was 10
+SHARED_TASK_TIME_LIMIT_LOW = 30  # was 15
 
 # --- TLS configuration
 #
