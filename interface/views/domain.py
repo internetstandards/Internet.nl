@@ -164,6 +164,7 @@ def resultsstored(request, dname, id):
     option = AutoConfOption.DATED_REPORT_ID_THRESHOLD_WEB
     cache_id = redis_id.autoconf.id.format(option.value)
     id_threshold = cache.get(cache_id)
+    cache.close()
     if id_threshold and int(id) <= id_threshold:
         return HttpResponseRedirect("/site/{}/".format(dname))
 

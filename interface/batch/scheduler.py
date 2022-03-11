@@ -244,6 +244,8 @@ def submit_test(batch_domain, test, checks_registry):
     cache_ttl = redis_id.running_batch_test.ttl
     cache.set(cache_id, (batch_domain.id, test), cache_ttl)
 
+    cache.close()
+
     return task_set
 
 
@@ -423,6 +425,8 @@ def batch_callback_hook(result, task_id):
 
     save_result(batch_test, subtest, result)
     cache.delete(cache_id)
+
+    cache.close()
     update_domain_status(batch_domain)
 
 
@@ -453,6 +457,7 @@ def error_callback(request, exc, traceback):
     record_subtest_error(batch_test, test)
     update_domain_status(batch_domain)
     cache.delete(cache_id)
+    cache.close()
 
 
 def record_subtest_error(batch_test, subtest):

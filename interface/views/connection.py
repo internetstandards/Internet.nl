@@ -71,6 +71,7 @@ def gettestid(request, *arg, **kw):
     cache_id = redis_id.conn_test.id.format(ct.test_id)
     cache_ttl = redis_id.conn_test.ttl
     cache.set(cache_id, True, cache_ttl)
+    cache.close()
     return HttpResponse(json.dumps(dict(test_id=ct.test_id)))
 
 
@@ -280,6 +281,8 @@ def finished(request, request_id):
         reportdnssec["validation"]["verdict"] = "detail conn dnssec validation verdict bad"
         reportdnssec["validation"]["tech_data"] = [resolv_owner]
 
+    cache.close()
+
     ct.report = report
     ct.reportdnssec = reportdnssec
     ct.save()
@@ -424,6 +427,7 @@ def find_AS_by_IP(ip):
         cache_id = redis_id.conn_test_as.id.format(asn)
         cache_ttl = redis_id.conn_test_as.ttl
         cache.set(cache_id, as_record, cache_ttl)
+    cache.close()
 
     return as_record.number
 
@@ -466,6 +470,7 @@ def resolv_list(host, test_id):
             resolver_owner[resolver] = ""
 
     red.close()
+    cache.close()
     return resolver_owner
 
 
@@ -495,6 +500,7 @@ def aaaa_ipv6(request):
     cache_id = redis_id.conn_test_aaaa.id.format(request.test_id)
     cache_ttl = redis_id.conn_test_aaaa.ttl
     cache.set(cache_id, True, cache_ttl)
+    cache.close()
     return network_ipv6(request, request.test_id)
 
 
@@ -503,6 +509,7 @@ def addr_ipv6(request, request_id):
     cache_id = redis_id.conn_test_v6_reach.id.format(request_id)
     cache_ttl = redis_id.conn_test_v6_reach.ttl
     cache.set(cache_id, True, cache_ttl)
+    cache.close()
     return network_ipv6(request, request_id)
 
 
@@ -550,6 +557,7 @@ def network_ipv6(request, test_id: int = 0):
 
     results = dict(ip=ip, asn=asn, reverse=reverse, mac_vendor=mac_vendor)
     cache.set(cache_id, results, settings.CACHE_TTL)
+    cache.close()
     results.update(dict(resolv=resolv))
     return HttpResponse(json.dumps(results))
 
@@ -572,6 +580,7 @@ def network_ipv4(request, test_id: int = 0):
     cache_id = redis_id.conn_test_v4.id.format(test_id)
     cache_ttl = redis_id.conn_test_v4.ttl
     cache.set(cache_id, results, cache_ttl)
+    cache.close()
     results.update(dict(resolv=resolv))
     return HttpResponse(json.dumps(results))
 
