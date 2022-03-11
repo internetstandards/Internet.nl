@@ -140,7 +140,7 @@ cp documentation/example_configuration/etc_security/limits.conf /etc/security/li
 `0 */6 * * * for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done`
 `0 3 * * * service internetnl-gunicorn restart`
 
-# Scans started during this service reboot will timeout, unfortunately. Perhaps lets do this at 3 at night.
+# Scans started during this service reboot will continue, but take a bit longer.
 
 # Done! :)
 ```
