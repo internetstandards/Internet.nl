@@ -29,7 +29,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # workers restarted every night or so.
 # If you want more spread: -c:5 10 -Q:5 ipv6_worker -c:6 10 -Q:6 mail_worker -c:7 10 -Q:7 web_worker -c:8 10 -Q:8 resolv_worker -c:9 10 -Q:9 dnssec_worker
 # CELERYD_OPTS="--without-gossip --time-limit=300 -P prefork -c:1 5 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 5 -Q:4 nassl_worker"
-CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 10 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 50 -Q:4 nassl_worker -c:5 20 -Q:5 ipv6_worker -c:6 20 -Q:6 mail_worker -c:7 20 -Q:7 web_worker -c:8 50 -Q:8 resolv_worker -c:9 20 -Q:9 dnssec_worker"
+CELERYD_OPTS="--without-gossip --time-limit=300 -P eventlet -c:1 10 -c:2 3 -Q:2 db_worker -c:3 3 -Q:3 slow_db_worker -c:4 150 -Q:4 nassl_worker -c:5 20 -Q:5 ipv6_worker -c:6 20 -Q:6 mail_worker -c:7 20 -Q:7 web_worker -c:8 50 -Q:8 resolv_worker -c:9 20 -Q:9 dnssec_worker"
 
 
 # %N will be replaced with the first part of the nodename.
