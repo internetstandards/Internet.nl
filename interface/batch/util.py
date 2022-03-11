@@ -67,7 +67,6 @@ class APIMetadata:
 
         cache_id = redis_id.report_metadata.id
         cache.set(cache_id, metadata, None)
-        cache.close()
 
     @staticmethod
     def _gather_status_verdict_map(item, data, name_map, category):
@@ -111,7 +110,6 @@ class APIMetadata:
         if not cache.get(cache_id, None):
             cls.build_metadata()
         data = cache.get(cache_id, None)
-        cache.close()
         return data
 
     @classmethod
@@ -120,7 +118,6 @@ class APIMetadata:
         if not cache.get(cache_id, None):
             cls.build_metadata()
         data = cache.get(cache_id, None)
-        cache.close()
         return data
 
     @classmethod
@@ -238,7 +235,6 @@ def memcache_lock(lock_id, lock_duration=60 * 5):
             # owned by someone else
             # also don't release the lock if we didn't acquire it
             cache.delete(lock_id)
-            cache.close()
 
 
 def get_active_custom_result_instances():
@@ -263,7 +259,6 @@ def batch_async_generate_results(self, user, batch_request, site_url):
         batch_request = kwargs["batch_request"]
         lock_id = lock_id_name.format(user.username, batch_request.request_id)
         cache.delete(lock_id)
-        cache.close()
 
     self.on_failure = on_failure
 
@@ -367,7 +362,6 @@ def get_batch_request_info(batch_request, prefetch_related, custom_instances):
         url_arg = []
         related_testset = "mailtest"
         name_map = cache.get(redis_id.batch_metadata.id)["mail"]
-        cache.close()
 
     # Quering for the related rows upfront minimizes further DB queries and
     # gives ~33% boost to performance.

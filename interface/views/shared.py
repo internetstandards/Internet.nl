@@ -221,7 +221,6 @@ def add_score_to_report(report, score):
 
 def get_hof_cache(cache_id, count):
     cached_data = cache.get(cache_id, None)
-    cache.close()
     if cached_data is None:
         return "…", 0, []
     return (cached_data["date"], cached_data["count"], cached_data["data"][:count])
@@ -452,8 +451,6 @@ def update_running_status(results):
     if cache.get(cache_id):
         cache.set(cache_id, False, cache_ttl)
 
-    cache.close()
-
 
 def update_base_stats():
     """
@@ -471,5 +468,3 @@ def update_base_stats():
         cache.set(cache_id, True, cache_ttl)
         task_set = run_stats_queries.s() | update_running_status.s()
         task_set()
-
-    cache.close()

@@ -1,5 +1,4 @@
 from django_redis import get_redis_connection
-from django.core.cache import cache
 
 
 def test_redis_connection():
@@ -12,8 +11,6 @@ def test_redis_connection():
     red.expire("testing", 0)
     assert red.scard("testing") == 0
 
-    red.close()
-
 
 def test_rabbitmq_connection(requests_mock):
     # We want to test the real deal, not this mocked response.
@@ -21,13 +18,3 @@ def test_rabbitmq_connection(requests_mock):
     # requests_mock.get('http://localhost:15672/api/queues/%2F/batch_main', real_http=True)
     # get_rabbit_load()
     ...
-
-
-def test_cache_closing():
-    # Does the connection reopen automatically?
-    cache.set("a", 1)
-    cache.get("a")
-    cache.close()
-    cache.set("a", 1)
-    cache.get("a")
-    cache.close()

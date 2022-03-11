@@ -49,7 +49,6 @@ def simple_cache_page(function):
         response = function(request, *args, **kwargs)
         cache.set(cache_id, response, timeout=cache_ttl)
 
-        cache.close()
         return response
 
     return wrap

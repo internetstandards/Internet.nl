@@ -224,14 +224,9 @@ CACHES = {
         "LOCATION": CACHE_LOCATION,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            # In newer versions of redis, connections are not automatically closed. This means that
-            # if you don't close the connection or don't terminate the client the connections will pile up.
-            # especially if you have a 1000 workers. You still need to call close().
-            "CLOSE_CONNECTION": True,
         },
     }
 }
-DJANGO_REDIS_CLOSE_CONNECTION = True
 
 CACHE_TTL = 200
 CACHE_WHOIS_TTL = 60 * 60 * 24
@@ -302,21 +297,20 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.tls.web_cert": {"queue": "nassl_worker"},
     "checks.tasks.tls.web_conn": {"queue": "nassl_worker"},
     "checks.tasks.tls.mail_smtp_starttls": {"queue": "nassl_worker"},
-    # spread all the other tasks to find out the one that hangs
-    # ipv6_worker, mail_worker, web_worker, resolv_worker, dnssec_worker
-    # This is not the issue.
-    # "checks.tasks.ipv6.ns": {"queue": "ipv6_worker"},
-    # "checks.tasks.ipv6.mx": {"queue": "ipv6_worker"},
-    # "checks.tasks.ipv6.web": {"queue": "ipv6_worker"},
-    # "checks.tasks.mail.dmarc": {"queue": "mail_worker"},
-    # "checks.tasks.mail.dkim": {"queue": "mail_worker"},
-    # "checks.tasks.mail.spf": {"queue": "mail_worker"},
-    # "checks.tasks.tls.web_http": {"queue": "web_worker"},
-    # "checks.tasks.appsecpriv.web_appsecpriv": {"queue": "web_worker"},
-    # "checks.tasks.shared.mail_get_servers": {"queue": "resolv_worker"},
-    # "checks.tasks.shared.resolve_a_aaaa": {"queue": "resolv_worker"},
-    # "checks.tasks.dnssec.mail_is_secure": {"queue": "dnssec_worker"},
-    # "checks.tasks.dnssec.web_is_secure": {"queue": "dnssec_worker"},
+    # Spread out all the work of all workers, the resolv worker has most issues with
+    #  https://github.com/celery/celery/issues/6819 - so that should be rebooted a bit more often.
+    "checks.tasks.ipv6.ns": {"queue": "ipv6_worker"},
+    "checks.tasks.ipv6.mx": {"queue": "ipv6_worker"},
+    "checks.tasks.ipv6.web": {"queue": "ipv6_worker"},
+    "checks.tasks.mail.dmarc": {"queue": "mail_worker"},
+    "checks.tasks.mail.dkim": {"queue": "mail_worker"},
+    "checks.tasks.mail.spf": {"queue": "mail_worker"},
+    "checks.tasks.tls.web_http": {"queue": "web_worker"},
+    "checks.tasks.appsecpriv.web_appsecpriv": {"queue": "web_worker"},
+    "checks.tasks.shared.mail_get_servers": {"queue": "resolv_worker"},
+    "checks.tasks.shared.resolve_a_aaaa": {"queue": "resolv_worker"},
+    "checks.tasks.dnssec.mail_is_secure": {"queue": "dnssec_worker"},
+    "checks.tasks.dnssec.web_is_secure": {"queue": "dnssec_worker"},
 }
 
 # --- Batch configuration

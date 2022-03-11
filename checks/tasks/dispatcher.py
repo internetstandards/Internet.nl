@@ -18,7 +18,6 @@ def user_limit_exceeded(req_limit_id):
     """
     red = get_redis_connection("default")
     current_usage = red.scard(req_limit_id)
-    red.close()
     return current_usage > settings.CLIENT_RATE_LIMIT
 
 
@@ -57,9 +56,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             red = get_redis_connection("default")
             red.sadd(req_limit_id, task_id)
             red.expire(req_limit_id, req_limit_ttl)
-            red.close()
 
-    cache.close()
     log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
     callback = AsyncResult(task_id)
     if callback.task_id and callback.ready():
@@ -120,4 +117,3 @@ def post_callback_hook(req_limit_id, task_id):
     """
     red = get_redis_connection("default")
     red.srem(req_limit_id, task_id)
-    red.close()

@@ -143,7 +143,6 @@ def registrar_lookup(addr):
 
             cache.set(cache_id, res, cache_ttl)
 
-        cache.close()
     return res
 
 
