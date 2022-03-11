@@ -185,7 +185,7 @@ run-test-worker: venv
 	# Know that the worker will complain that the database is plainly been dropped, this is exactly what happens during
 	# tests. It will keep on running, and the tests will run well.
 	# DJANGO_DATABASE=testworker
-	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,celery,default,worker_nassl --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
+	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
 
 # compiling unbound for an x86_64 system:
 ifeq ($(shell uname -m),arm64)
