@@ -142,6 +142,8 @@ def registrar_lookup(addr):
                 pass
 
             cache.set(cache_id, res, cache_ttl)
+
+        cache.close()
     return res
 
 

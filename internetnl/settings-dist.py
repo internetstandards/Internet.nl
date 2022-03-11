@@ -231,6 +231,7 @@ CACHES = {
         },
     }
 }
+DJANGO_REDIS_CLOSE_CONNECTION = True
 
 CACHE_TTL = 200
 CACHE_WHOIS_TTL = 60 * 60 * 24

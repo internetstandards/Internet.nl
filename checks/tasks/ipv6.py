@@ -421,6 +421,8 @@ def do_mx(self, url, *args, **kwargs):
             score += d["score"]
             domains.append(d)
 
+        cache.close()
+
         if len(domains) > 0:
             score = float(score) / (len(domains) * scoring.MAIL_IPV6_MX_CONN_GOOD) * scoring.MAIL_IPV6_MX_CONN_GOOD
         else:

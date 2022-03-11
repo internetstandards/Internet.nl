@@ -1757,8 +1757,9 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         for server in results:
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
-
+        cache.close()
     except SoftTimeLimitExceeded:
+        cache.close()
         log.debug("Soft time limit exceeded.")
         for server in results:
             if results[server] is False:

@@ -59,6 +59,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             red.expire(req_limit_id, req_limit_ttl)
             red.close()
 
+    cache.close()
     log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
     callback = AsyncResult(task_id)
     if callback.task_id and callback.ready():

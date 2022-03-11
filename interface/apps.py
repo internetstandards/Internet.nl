@@ -36,6 +36,8 @@ def _load_autoconf_in_cache():
         # when the table is not there yet.
         pass
 
+    cache.close()
+
 
 def _load_padded_macs_in_cache():
     """
@@ -55,6 +57,7 @@ def _clear_cached_pages():
     """
     pattern = redis_id.simple_cache_page.id.split(":", 1)[0]
     cache.delete_pattern("{}*".format(pattern))
+    cache.close()
 
 
 def _batch_startup_checks():

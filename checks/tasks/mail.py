@@ -823,4 +823,6 @@ def dmarc_get_public_suffix_list():
             # Lost the race; call this again to wait for the list.
             public_suffix_list = dmarc_get_public_suffix_list()
 
+    cache.close()
+
     return public_suffix_list
