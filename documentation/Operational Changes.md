@@ -135,10 +135,16 @@ make frontend
 cp documentation/example_configuration/etc_redis/redis.conf /etc/redis/redis.conf
 cp documentation/example_configuration/etc_security/limits.conf /etc/security/limits.conf
 
+# As root:
+# Deploy the restart scripts to the proper location:
+mkdir /opt/internetnl/etc/cron
+cp documentation/example_configuration/opt_internetnl_etc/cron/* /opt/internetnl/etc/cron
+chmod +x /opt/internetnl/etc/cron/*
+
 # Add the contents of documentation/example_configuration/crontab into `crontab -e` for the root user.
 # Currently this is:
-`0 */6 * * * for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done`
-`0 3 * * * service internetnl-gunicorn restart`
+0 */6 * * *     /opt/internetnl/etc/cron/restart_services.sh
+0 3 * * *       /opt/internetnl/etc/cron/restart_gunicorn.sh
 
 # Scans started during this service reboot will continue, but take a bit longer.
 
