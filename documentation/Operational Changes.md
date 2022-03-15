@@ -123,6 +123,8 @@ journalctl -xe
 # The site might look bad, so you need to run some translations and such:
 make frontend
 
+# Please note:
+# The following is only needed for single scan installations.
 
 # An annoying bug is causing redis backend connection leaks. This issue is persistent with the most trivial of tasks
 # and opens tons of connections to redis, but not closing all of them properly. Over time this means that the
