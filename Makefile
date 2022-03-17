@@ -401,5 +401,9 @@ run-gunicorn:
 	# python3 -m celery --app internetnl worker -E -ldebug --pool prefork --queues db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,celery,default --time-limit=300 --concurrency=5 -n generic_worker
 	. .venv/bin/activate && ${env} gunicorn --bind localhost:8000 --workers 3 --worker-class gevent internetnl.wsgi:application --access-logfile gunicorn-access.log --error-logfile gunicorn-error.log
 
+enable:
+	source /opt/internetnl/internet.nl.env
+	source /opt/internetnl/Internet.nl/.venv/bin/activate
+
 .QA: qa
 qa: fix check test

@@ -150,6 +150,9 @@ chmod +x /opt/internetnl/etc/cron/*
 
 # Scans started during this service reboot will continue, but take a bit longer.
 
+# View logs with:
+tail -f /opt/internetnl/log/*log /opt/internetnl/log/*log.1 /var/log/*.log /var/log/*.log.1
+
 # Done! :)
 ```
 
