@@ -37,10 +37,15 @@ Settings
 - Added information/guidance for developers about the batch logic/code.
 
 ### Development updates
+- Added workaround / configs for redis-backend-connection leak: https://github.com/celery/celery/issues/6819 on single scan mode. This restarts the scan services every 6 hours, and can deal with tens of thousands of scans per this interval. A proper solution is still a todo.
+- Added Github actions file that checks for code linting and runs tests. More QA tools to come. 
+- Added workaround for hanging workers / hanging redis connections
 - Added installation steps to makefile for easier installation of python dependencies.
-- Added more service examples for batch rollout
+- Added configuration examples for redis, workers, services etc
 - Fixed django-app bootstrapping
 - Added a logger with dictconfig
+- Added (debug) log statements for further code inspection
+- Increased the test duration for all tests on single mode, to deal with slow servers or servers that have a lot of MX records.
 - Split checks from the UI (the batch needs to be split still)
 
 
