@@ -35,19 +35,28 @@ Settings
 - updated jquery (also stops support for very old browsers) [(#565)]
 - add DEFAULT_AUTO_FIELD to default config file [(#599)]
 - Added information/guidance for developers about the batch logic/code.
+- Increased the test duration for all tests on single mode, to deal with slow servers or servers that have a lot of MX records.
+- Remove certificate from the certificate chain [#614]
 
 ### Development updates
-- Added workaround / configs for redis-backend-connection leak: https://github.com/celery/celery/issues/6819 on single scan mode. This restarts the scan services every 6 hours, and can deal with tens of thousands of scans per this interval. A proper solution is still a todo.
-- Added Github actions file that checks for code linting and runs tests. More QA tools to come.
-- Spread out tasks over more dedicated workers in single scan mode
-- Added workaround for hanging workers / hanging redis connections
+- Generally moving towards easier (automated) deployment, CI and higher code quality through linting.
+- Added Github actions that checks for code linting and runs tests. More QA tools to come.
+- Added various tests and moved the existing tests to be run in pytest. Coverage today: 32%.
 - Added installation steps to makefile for easier installation of python dependencies.
+- Moved django settings to an environment file, so it can be more easily configured in automated environments
+- Made a clear distinction between user configurated settings and 'standard app settings'
+- Added venv in makefile, with dependency management using pip tools.
+- Added a partial admin interface for debugging the contents of the database via the app.
+- Added an ERD diagram image of the database to the documentation.
+- Removed infinite wait on unbound pipe, which made the leaking connections issue even more complicated
 - Added configuration examples for redis, workers, services etc
-- Fixed django-app bootstrapping
-- Added a logger with dictconfig
-- Added (debug) log statements for further code inspection
-- Increased the test duration for all tests on single mode, to deal with slow servers or servers that have a lot of MX records.
+- Made the rate limiting feature of starting new scans configurable in the settings (not via environment)
+- Added a logger with dictconfig, this allows run time logging of the application
+- Added (debug) log statements for further code inspection, especially on expiring tasks
 - Split checks from the UI (the batch needs to be split still)
+- Added workaround / configs for redis-backend-connection leak: https://github.com/celery/celery/issues/6819 on single scan mode. Cron settings and some bash scripts that restart the scan services every 6 hours. This allows tens of thousands of scans per recycle.
+- Spread out tasks over more dedicated workers to be able to manage bottlenecks
+- Fixed django-app bootstrapping, which prevented the app from loading correctly
 
 
 ## 1.3.2

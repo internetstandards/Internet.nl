@@ -5,6 +5,8 @@ based application and therefore inherits its requirements.
 
 Current install base is Django 3.2 LTS with Python 3.7.
 
+Note that previous installation instructions have been moved to a makefile. This prevents a lot of copy pasting of commands.
+
 The following instructions should work on most Debian-based systems. Tested on Ubuntu 18.04
 
 ## System requirements
