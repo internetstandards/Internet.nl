@@ -38,7 +38,8 @@ Settings
 
 ### Development updates
 - Added workaround / configs for redis-backend-connection leak: https://github.com/celery/celery/issues/6819 on single scan mode. This restarts the scan services every 6 hours, and can deal with tens of thousands of scans per this interval. A proper solution is still a todo.
-- Added Github actions file that checks for code linting and runs tests. More QA tools to come. 
+- Added Github actions file that checks for code linting and runs tests. More QA tools to come.
+- Spread out tasks over more dedicated workers in single scan mode
 - Added workaround for hanging workers / hanging redis connections
 - Added installation steps to makefile for easier installation of python dependencies.
 - Added configuration examples for redis, workers, services etc
