@@ -1,62 +1,61 @@
 # Change Log
 
-## Next unreleased version
 
---- Brief description for next version ---
+## 1.4.0
+Software update and development & documentation release.
 
 New
+- Mention LinkedIn next to Twitter in footer [(#496)]
+- Add security.txt based on https://securitytxt.org/ [(#493)]
 
 Changes
+- Improve description of the ipv4-ipv6 comparison results and what may be a reason for the differences [(#540)]
+- Refer to https://dutchcloudcommunity.nl/ on https://internet.nl/about/ [(#589)]
+- Check for max of 10 DNS lookups in SPF test [(#286)]
+- System administrators can disable/enable categories of tests (for example, only run IPv6 tests)
+- Files from the /static/ directory are now cached by the client for one day by default (instead of none)
 
-Bug Fixes
-- Typos.
+Bugfixes
+- Fix some minor typos and broken link [(#574)] [(#575)]
+- Add a missing ' in the frame-ancestors explanation [(#578)]
+- An empty part of Content Security Policy gives an error [(#583)]
+- Recursion error when stripping nonces in IPv4 and IPv6 comparison [(#587)] 
+- Remove certificate from the certificate chain in the shipped cert chain file [(#614)]
 
 Dependencies
-
-Migrations
-- Transfer the repository to Platform Internetstandaarden [(#569)]
+- Update Django version to latest LTS version, together with dependencies [(#486)]
+- Update version of Celery to the latest LTS version, together with dependencies [(#586)]
+- Updated jQuery (also stops support for very old browsers) [(#565)]
+- Pinned all dependencies on specific versions with pip-tools.
 
 Settings
-
-[(#569)]: https://github.com/internetstandards/Internet.nl/issues/569
-
-## 1.4
-
-- Mention LinkedIn next to Twitter in footer. [(#496)]
-- Add security.txt based on https://securitytxt.org/ [(#493)]
-- Update Django version to latest LTS version, together with dependencies [(#486)]
-- update version of Celery to the latest LTS version, together with dependencies [(#586)]
-- Improve description of the ipv4-ipv6 comparison results and what may be a reason for the differences [(#540)]
-- Add accessibility statement [(#562)]
-- Fix some minor typos and a broken [(#574)] [(#575)]
-- add a missing ' in the frame-ancestors explanation [(#578)]
-- an empty part of Content Security Policy gives an error [(#583)]
-- Refer to https://dutchcloudcommunity.nl/ on https://internet.nl/about/ [(#589)]
-- updated jquery (also stops support for very old browsers) [(#565)]
-- add DEFAULT_AUTO_FIELD to default config file [(#599)]
-- Added information/guidance for developers about the batch logic/code.
-- Increased the test duration for all tests on single mode, to deal with slow servers or servers that have a lot of MX records.
-- Remove certificate from the certificate chain [#614]
-
-### Development updates
-- Generally moving towards easier (automated) deployment, CI and higher code quality through linting.
-- Added Github actions that checks for code linting and runs tests. More QA tools to come.
-- Added various tests and moved the existing tests to be run in pytest. Coverage today: 32%.
-- Added installation steps to makefile for easier installation of python dependencies.
-- Moved django settings to an environment file, so it can be more easily configured in automated environments
-- Made a clear distinction between user configurated settings and 'standard app settings'
-- Added venv in makefile, with dependency management using pip tools.
-- Added a partial admin interface for debugging the contents of the database via the app.
-- Added an ERD diagram image of the database to the documentation.
-- Removed infinite wait on unbound pipe, which made the leaking connections issue even more complicated
-- Added configuration examples for redis, workers, services etc
+- Moved Django settings to an environment file, so it can be more easily configured in automated environments (containers)
+- Made a clear distinction between user confgured settings and 'standard app settings'
+- Add DEFAULT_AUTO_FIELD to default config file [(#599)]
+- Increased the test duration 50%-100% for all tests on single mode, to deal with slow servers or servers that have a lot of MX records.
 - Made the rate limiting feature of starting new scans configurable in the settings (not via environment)
+
+Migrations
+- Administrative movements of models to a new subproject (checks).
+
+Development & documentation
+- Added installation steps to makefile for easier installation of the virtual environment and custom python dependencies
+- Added Github action that checks for code linting and runs tests. More QA tools to come.
+- Added various tests and moved the existing tests to be run in pytest. Coverage today: 32%
+- Added a partial admin web interface that is available during development, to more easily inspect the contents of the database
+- Added an ERD diagram image of the database to the documentation
+- Removed infinite wait on Unbound pipe, to reduce complexity in the connection leakage issue (see ahead)
+- Added example and usable configuration examples for Redis, workers, services, Apache etc
 - Added a logger with dictconfig, this allows run time logging of the application
 - Added (debug) log statements for further code inspection, especially on expiring tasks
-- Split checks from the UI (the batch needs to be split still)
-- Added workaround / configs for redis-backend-connection leak: https://github.com/celery/celery/issues/6819 on single scan mode. Cron settings and some bash scripts that restart the scan services every 6 hours. This allows tens of thousands of scans per recycle.
-- Spread out tasks over more dedicated workers to be able to manage bottlenecks
-- Fixed django-app bootstrapping, which prevented the app from loading correctly
+- Separate scanning code from UI code via a new django app "checks"
+- Added workaround / configs for Redis-backend-connection leak: https://github.com/internetstandards/Internet.nl/issues/676 on single scan mode. Cron settings and some bash scripts that restart the scan services every 6 hours. This allows tens of thousands of scans per recycle.
+- Spread out tasks over more dedicated workers to be able to inspect and manage bottlenecks
+- Fixed Django-app bootstrapping, which prevented the app from loading correctly
+- Building and testing for Python 3.7 and 3.10 to transit to the new version
+- Added caching of static files in the apache config
+- Simplified and deduplicated the apache config
+
 
 
 ## 1.3.2
@@ -319,3 +318,27 @@ Bug Fixes
 ## 1.0.0
 
 Initial public release.
+
+
+# Template:
+## Next unreleased version
+
+--- Brief description for next version ---
+
+New
+- 
+
+Changes
+- 
+
+Bug Fixes
+-
+
+Dependencies
+- 
+
+Migrations
+- 
+
+Settings
+- 

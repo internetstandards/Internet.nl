@@ -2,6 +2,7 @@
 # docker-compose build --no-cache --progress=plain
 # Building will take some time, especially the libsass, unbound and nassl.
 # todo: fix nassl build, has the anoying unknown argument -m64, even though the shell is not -m64...
+# todo: the docker image is 1.5 gigabyte, which probably contains a lot of unneeded stuff
 
 # Choose an LTS. The version mentioned was not supported for a while (19)
 # See the release schedule here: https://ubuntu.com/blog/what-is-an-ubuntu-lts-release
@@ -124,6 +125,7 @@ COPY --chown=internetnl:internetnl requirements.txt requirements.txt
 COPY --chown=internetnl:internetnl requirements-dev.txt requirements-dev.txt
 COPY --chown=internetnl:internetnl robots.txt robots.txt
 COPY --chown=internetnl:internetnl setup.cfg setup.cfg
+COPY --chown=internetnl:internetnl docker docker
 RUN chown -R internetnl: .
 
 RUN make venv
