@@ -103,8 +103,13 @@ RUN make nassl_complete
 RUN make unbound-3.8
 RUN make python-whois
 
+# Cleanup temporary build files
+RUN rm -rf nassl_freebsd
+RUN rm -rf unbound
+RUN rm -rf python-whois
 
-# Old
+# These manual steps should be the same as in the makefile of the project. Otherise it's basically impossible to maintain.
+# Therefore these are replaced with the few make commands above.
 # Install forked pythonwhois
 # WORKDIR /tmp/build/python-whois
 # RUN curl -fsSLo- 'https://github.com/internetstandards/python-whois/tarball/internetnl' | tar zx --strip-components 1
@@ -138,10 +143,11 @@ RUN make python-whois
 #     make install
 
 # Point unbound-anchor and Python at the standard location for the unbound lib
-# ENV LD_LIBRARY_PATH /usr/local/lib
+ENV LD_LIBRARY_PATH /usr/local/lib
 
 # Configure Unbound for use by Internet.nl, in particular so that LDNS-DANE can depend on a resolver that is DNSSEC
 # enabled, which might not be true of the host resolver made available by Docker by default.
+# The "unbound.conf" was a product from the previous unbound step? Probably from the `make install`.
 WORKDIR /usr/local/etc/unbound
 RUN useradd unbound && \
     cp unbound.conf unbound.conf.org && \
@@ -152,14 +158,33 @@ RUN useradd unbound && \
     unbound-anchor || test $? -eq 1 && \
     chown -R unbound: .
 
-# Cleanup temporary build files
-RUN rm -rf /tmp/build
-
 USER internetnl
 
-# Configure internetnl to know where LDNS-DANE is installed
-RUN sed -i -e "s|LDNS_DANE = .*|LDNS_DANE = '/usr/bin/ldns-dane'|g" ${APP_PATH}/internetnl/settings.py-dist
-RUN sed -i -e "s|TIME_ZONE = .*|TIME_ZONE = 'UTC'|g" ${APP_PATH}/internetnl/settings.py-dist
+# Configure the Internet.nl Django app, e.g. to know how to connect to RabbitMQ, Redis and PostgreSQL.
+# Default values for the environment variables referred to below are provided by the Docker image but can be
+# overridden at container start time.
+
+# The ENV variables are also available inside the container _and_ can be changed on startup of the container.
+# @see: https://stackoverflow.com/questions/39597925/how-do-i-set-environment-variables-during-the-build-in-docker
+# More details about specific settings in the shipped settings-dist.py file.
+# Cannot use the shipped environemnt file as the syntax is different and the values are specific.
+ENV LDNS_DANE /usr/bin/ldns-dane
+ENV TIME_ZONE UTC
+ENV ADMIN_EMAIL admin@i.dont.exist
+ENV ENABLE_BATCH False
+ENV DB_NAME internetnl_db1
+ENV DB_USER internetnl
+ENV DB_PASSWORD password
+ENV DB_HOST localhost
+ENV DB_PORT 5432
+ENV RABBIT_HOST localhost:15672
+ENV CELERY_BROKER_URL amqp://guest@localhost//
+ENV CELERY_RESULT_BACKEND redis://localhost:6379/0
+ENV CACHE_LOCATION redis://localhost:6379/0
+
+# Stuff not in the settings.py file, but in the entrypoint of the container (entrypoint.sh)
+ENV RUN_SERVER_CMD runserver
+ENV LDNS_DANE_VALIDATION_DOMAIN internet.nl
 
 # Prepare translations
 RUN make translations

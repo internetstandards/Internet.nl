@@ -35,6 +35,7 @@ ADMIN_EMAIL = getenv("ADMIN_EMAIL", "Administrator")
 SERVER_EMAIL = getenv("SERVER_EMAIL", "django@internet.nl")
 CSP_DEFAULT_SRC = split_csv_trim(getenv("CSP_DEFAULT_SRC", "'self',*.internet.nl"))
 INTERNAL_IPS = split_csv_trim(getenv("INTERNAL_IPS", ""))
+TIME_ZONE = getenv("TIME_ZONE", "UTC")
 
 # Infrastructure
 # # Application logging:
@@ -237,7 +238,6 @@ CACHE_RESET_WHITELIST = ["domain.name.com"]
 # Internationalization and Locatization fixed to dutch at this time.
 # A single installation will only server one target audience.
 LANGUAGE_CODE = "en"
-TIME_ZONE = "CET"
 USE_I18N = True
 USE_L10N = False
 USE_TZ = True
