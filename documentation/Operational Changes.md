@@ -153,6 +153,25 @@ chmod +x /opt/internetnl/etc/cron/*
 # View logs with:
 tail -f /opt/internetnl/log/*log /opt/internetnl/log/*log.1 /var/log/*.log /var/log/*.log.1
 
+
+# The Apache webserver config has been optimized and updated: 
+# - with aggressive caching on the /static/ files.
+# - with security.txt being served
+# - Single place to manage access limitations and shared settings
+sudo su -
+a2enmod expires
+cp documentation/example_configuration/etc_apache2_sites-available/internet_nl* /etc/apache2/sites-available/
+
+# Remove the old config file and pointer and replace it with the new one
+rm /etc/apache2/sites-available/internetnl.conf
+rm /etc/apache2/sites-enabled/internetnl.conf
+ln -s /etc/apache2/sites-available/internet_nl.conf /etc/apache2/sites-enabled/internet_nl.conf
+apachectl configtest
+service apache2 restart
+
+# Visit the site and verify there are no errors:
+tail -f /var/log/apache2/*.log /var/log/apache2/*.log.1
+
 # Done! :)
 ```
 

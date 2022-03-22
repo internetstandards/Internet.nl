@@ -79,7 +79,7 @@ venv: .venv/make_venv_complete ## Create virtual environment
 .venv/make_venv_complete:
 	${MAKE} clean
 	# todo: how to set python3 correctly on m1 macs??
-	python3.7 -m venv .venv
+	python3 -m venv .venv
 	. .venv/bin/activate && ${env} pip install -U pip pip-tools
 	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt

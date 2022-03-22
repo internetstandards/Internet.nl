@@ -16,7 +16,12 @@ jobs:
       DB_PASSWORD: internetnluser
     strategy:
       matrix:
-        python-version: [ 3.7 ]
+        # Support Matrix from python.org/downloads:
+        # 3.7, 2023-06-27
+        # 3.8, 2024-10
+        # 3.9, 2025-10
+        # 3.10 2026-10
+        python-version: [ 3.7, 3.10 ]
     continue-on-error: false
 
     services:
