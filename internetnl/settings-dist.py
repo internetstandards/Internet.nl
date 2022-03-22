@@ -506,6 +506,11 @@ LOGGING = {
             "class": "logging.StreamHandler",  # sys.stdout
             "formatter": "color",
         },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'django.log',
+        },
     },
     "formatters": {
         "debug": {
@@ -529,11 +534,11 @@ LOGGING = {
         # Default Django logging, we expect django to work, and therefore only show INFO messages.
         # https://docs.djangoproject.com/en/2.1/topics/logging/#django-s-logging-extensions
         "django": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": DJANGO_LOG_LEVEL,
         },
         "internetnl": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": INTERNETNL_LOG_LEVEL,
         },
         # ERROR disables verbose task logging (ie: "received task...", "...succeeded in...")
@@ -556,7 +561,6 @@ if not DEBUG and SECRET_KEY == "secret":
 
 if DJANGO_IS_PROXIED:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
 
 # Limit the number of tests a client can perform in a while. The exact implementation is to be documented.
 # raise the roof of this number to remove this cap. 30 was a limit inherited that comes across as sane.

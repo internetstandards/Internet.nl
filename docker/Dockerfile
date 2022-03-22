@@ -3,11 +3,15 @@
 # Building will take some time, especially the libsass, unbound and nassl.
 # todo: fix nassl build, has the anoying unknown argument -m64, even though the shell is not -m64...
 # todo: the docker image is 1.5 gigabyte, which probably contains a lot of unneeded stuff
+# debian:10-slim is a bit smaller, with 1.4 gigabyte, which is still insane.
+# debugging the container if it does not start: docker run -it --entrypoint sh internetnl/internetnl
+# todo: given there is no mapping to redis from localhost, this has never worked...
 
+# Todo: reduce file size, use alpine instead of ubuntu. At least use debian, as the GUI is not needed.
 # Choose an LTS. The version mentioned was not supported for a while (19)
 # See the release schedule here: https://ubuntu.com/blog/what-is-an-ubuntu-lts-release
-# So it would be either 18.04, 20.04 or 22.04
-FROM ubuntu:20.04
+# So it would be either 18.04, 20.04 or 22.04, debian buster....
+FROM debian:10-slim
 
 LABEL vendor="Internet Standards" \
       license="Apache License, Version 2.0"
@@ -60,10 +64,8 @@ RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releas
 # builds and steps to get unbound to find the right libraries.
 # 18.4 has postgresql 10, not 11. 20.4 has 12. 20.4 uses python 3.8. https://packages.ubuntu.com/focal/python3
 # Bison is needed to compile unbound
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y \
-        build-essential \
+# # https://dajobe.org/blog/2015/04/18/making-debian-docker-images-smaller/
+ARG BUILD_PACKAGES="build-essential \
         curl \
         gcc \
         gettext \
@@ -71,11 +73,11 @@ RUN apt-get update && \
         ldnsutils \
         libevent-dev \
         libhiredis-dev \
-        libssl-dev=1.1.1\* \
+        libssl-dev \
         libwww-perl \
-        openssl=1.1.1\* \
-        postgresql-client-12 \
-        postgresql-server-dev-12 \
+        openssl \
+        postgresql-client-11 \
+        postgresql-server-dev-11 \
         python3-gdbm \
         python3 \
         python3-dev \
@@ -84,15 +86,22 @@ RUN apt-get update && \
         swig3.0 \
         wget \
         bison \
-        sudo && \
-    rm -rf /var/lib/apt/lists/*
+        sudo"
+
+RUN apt update && \
+    apt upgrade -y && \
+    apt install --no-install-recommends -y \
+         $BUILD_PACKAGES \
+    && rm -rf /var/lib/apt/lists/*
+    # && apt remove --purge -y $BUILD_PACKAGES $(apt-mark showauto) && rm -rf /var/lib/apt/lists/*
+
 
 # Create a user for the internetnl app to run as
 RUN useradd -ms /bin/bash -G sudo internetnl && echo "internetnl ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/internetnl
 
 # Ensure python 3.7 and pip3 are available as 'python' and 'pip' respectively
 # probably not needed anymore given this is the system default...
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1 && \
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # Upgrade pip, and install setuptools (needed below to build Python whois)
@@ -105,43 +114,49 @@ WORKDIR ${APP_PATH}
 # dependencies avoids re-installing dependencies when the set of dependencies
 # is unchanged. Do not copy any unneeded files.
 # todo: the app source should not be mixed with all kinds of other directories and junk
-COPY --chown=internetnl:internetnl .well-known .well-known
-COPY --chown=internetnl:internetnl bin bin
-COPY --chown=internetnl:internetnl checks checks
-COPY --chown=internetnl:internetnl documentation documentation
-COPY --chown=internetnl:internetnl frontend frontend
-COPY --chown=internetnl:internetnl interface interface
-COPY --chown=internetnl:internetnl internetnl internetnl
-COPY --chown=internetnl:internetnl remote_data remote_data
-COPY --chown=internetnl:internetnl tests tests
-COPY --chown=internetnl:internetnl frontend frontend
-COPY --chown=internetnl:internetnl translations translations
-COPY --chown=internetnl:internetnl Changelog.md Changelog
-COPY --chown=internetnl:internetnl LICENSE.spdx LICENSE.spdx
-COPY --chown=internetnl:internetnl Makefile Makefile
-COPY --chown=internetnl:internetnl manage.py manage.py
-COPY --chown=internetnl:internetnl README.md README.md
-COPY --chown=internetnl:internetnl requirements.txt requirements.txt
-COPY --chown=internetnl:internetnl requirements-dev.txt requirements-dev.txt
-COPY --chown=internetnl:internetnl robots.txt robots.txt
-COPY --chown=internetnl:internetnl setup.cfg setup.cfg
-COPY --chown=internetnl:internetnl docker docker
-RUN chown -R internetnl: .
-
-RUN make venv
+COPY --chown=internetnl:internetnl .well-known ${APP_PATH}/.well-known
+COPY --chown=internetnl:internetnl bin ${APP_PATH}/bin
+COPY --chown=internetnl:internetnl checks ${APP_PATH}/checks
+COPY --chown=internetnl:internetnl documentation ${APP_PATH}/documentation
+COPY --chown=internetnl:internetnl frontend ${APP_PATH}/frontend
+COPY --chown=internetnl:internetnl interface ${APP_PATH}/interface
+COPY --chown=internetnl:internetnl internetnl ${APP_PATH}/internetnl
+COPY --chown=internetnl:internetnl remote_data ${APP_PATH}/remote_data
+COPY --chown=internetnl:internetnl tests ${APP_PATH}/tests
+COPY --chown=internetnl:internetnl frontend ${APP_PATH}/frontend
+COPY --chown=internetnl:internetnl translations ${APP_PATH}/translations
+COPY --chown=internetnl:internetnl Changelog.md ${APP_PATH}/Changelog
+COPY --chown=internetnl:internetnl LICENSE.spdx ${APP_PATH}/LICENSE.spdx
+COPY --chown=internetnl:internetnl Makefile ${APP_PATH}/Makefile
+COPY --chown=internetnl:internetnl manage.py ${APP_PATH}/manage.py
+COPY --chown=internetnl:internetnl README.md ${APP_PATH}/README.md
+COPY --chown=internetnl:internetnl requirements.txt ${APP_PATH}/requirements.txt
+COPY --chown=internetnl:internetnl requirements-dev.txt ${APP_PATH}/requirements-dev.txt
+COPY --chown=internetnl:internetnl robots.txt ${APP_PATH}/robots.txt
+COPY --chown=internetnl:internetnl setup.cfg ${APP_PATH}/setup.cfg
+COPY --chown=internetnl:internetnl docker ${APP_PATH}/docker
 
 # Failed to find the swig tool:
 RUN ln -s /usr/bin/swig3.0 /usr/bin/swig
+RUN chmod +x ${APP_PATH}/docker/entrypoint.sh
+
+RUN make venv
+RUN chmod +x ${APP_PATH}/.venv/bin/activate
+RUN chmod +x ${APP_PATH}/docker/celery-ping.sh
+RUN chmod +x ${APP_PATH}/docker/postgres-ping.sh
 
 # Todo: this will currently not work on arm machines as somehow the build will still say arch -m64 during build.
-RUN make nassl_complete
-RUN make unbound-3.8
+# RUN make nassl_complete
+RUN make unbound-3.7
 RUN make python-whois
 
 # Cleanup temporary build files
 RUN rm -rf nassl_freebsd
 RUN rm -rf unbound
 RUN rm -rf python-whois
+
+# Make sure internetnl user can access all code in the app.
+RUN chown -R internetnl:internetnl ${APP_PATH}
 
 # These manual steps should be the same as in the makefile of the project. Otherise it's basically impossible to maintain.
 # Therefore these are replaced with the few make commands above.
@@ -184,6 +199,7 @@ ENV LD_LIBRARY_PATH /usr/local/lib
 # enabled, which might not be true of the host resolver made available by Docker by default.
 # The "unbound.conf" was a product from the previous unbound step? Probably from the `make install`.
 # The previous version (1.3) did also not contain an unbound conf. So this probably never worked?
+USER root
 WORKDIR /usr/local/etc/unbound
 RUN useradd unbound && \
     cp unbound.conf unbound.conf.org && \
