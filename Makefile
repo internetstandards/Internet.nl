@@ -65,6 +65,19 @@ frontend:
 	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
 	. .venv/bin/activate && ${env} python3 manage.py collectstatic
 
+
+translate_content_to_main:
+	# This retrieves the content from the content repository and merges it with the .po files of this repo.
+	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/news-item_PLIS-meeting_on_IPv6/.README.md
+	rm -rf tmp/locale_files/
+	rm -f tmp/content_repo.tar.gz
+	git clone https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
+	tar zcvf tmp/content_repo.tar.gz tmp/locale_files/*
+	${MAKE} translations_tar TAR=tmp/tmp/content_repo.tar.gz
+	${MAKE} translations
+	${MAKE} manage compilemessages
+
+
 update_padded_macs:
 	cd $(MACSDIR); ./update-macs.sh
 
