@@ -233,6 +233,13 @@ reinstall-production-dependencies:
 
 #
 
+unbound-3.10: venv .unbound-3.10
+.unbound-3.10:
+	rm -rf unbound
+	git clone https://github.com/internetstandards/unbound
+	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.10 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.10/site-packages &&  make install
+	touch .unbound-3.10
+
 unbound-3.9: venv .unbound-3.9
 .unbound-3.9:
 	rm -rf unbound
