@@ -67,6 +67,7 @@ frontend:
 
 
 translate_content_to_main:
+	# Note: you may need to run this a few times to get rid of the access denied errors...
 	# This retrieves the content from the content repository and merges it with the .po files of this repo.
 	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
 	rm -rf tmp/locale_files/

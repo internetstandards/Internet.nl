@@ -4,6 +4,8 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"report_IPv6-meeting\n"
+"paneldiscussie-the-power-of-internet-standards\n"
 "new-release-with-improved-tests-for-TLS-and-CSP\n"
 "hall-of-fame-for-hosters\n"
 "x-xss-protection-removed-and-improvement-for-no-mx-domains\n"
