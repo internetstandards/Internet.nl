@@ -506,10 +506,10 @@ LOGGING = {
             "class": "logging.StreamHandler",  # sys.stdout
             "formatter": "color",
         },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'django.log',
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": "django.log",
         },
     },
     "formatters": {

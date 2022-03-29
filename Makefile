@@ -68,14 +68,20 @@ frontend:
 
 translate_content_to_main:
 	# This retrieves the content from the content repository and merges it with the .po files of this repo.
-	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/news-item_PLIS-meeting_on_IPv6/.README.md
+	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
 	rm -rf tmp/locale_files/
 	rm -f tmp/content_repo.tar.gz
 	git clone https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
-	tar zcvf tmp/content_repo.tar.gz tmp/locale_files/*
-	${MAKE} translations_tar TAR=tmp/tmp/content_repo.tar.gz
+
+	# If you need a specific branch people are working on:
+	# git clone -b news-item_PLIS-meeting_on_IPv6 https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
+
+	# change dir to tmp to prevent the /tmp dir being mentioned in the resulting tar file.
+	cd tmp && tar zcvf content_repo.tar.gz locale_files/*
+	${MAKE} translations_tar TAR=tmp/content_repo.tar.gz
 	${MAKE} translations
-	${MAKE} manage compilemessages
+	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
+	# Purposefully _not_ deleting things in the tmp dir so it allows inspection after execution.
 
 
 update_padded_macs:
