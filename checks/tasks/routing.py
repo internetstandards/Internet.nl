@@ -12,12 +12,13 @@ from django.conf import settings
 from . import SetupUnboundContext
 
 from typing import Any, Dict, List, NewType, Tuple, Type, TypeVar
-Asn = NewType('Asn', int)
-Ip = NewType('Ip', str)
-Prefix = NewType('Prefix', str)
-Rp = TypeVar('Rp', bound='RelyingPartySoftware')
-Rv = TypeVar('Rv', bound='RouteView')
-T = TypeVar('T', bound=SetupUnboundContext)
+
+Asn = NewType("Asn", int)
+Ip = NewType("Ip", str)
+Prefix = NewType("Prefix", str)
+Rp = TypeVar("Rp", bound="RelyingPartySoftware")
+Rv = TypeVar("Rv", bound="RouteView")
+T = TypeVar("T", bound=SetupUnboundContext)
 AsnPrefix = Tuple[Asn, Prefix]
 
 
@@ -62,8 +63,9 @@ class RouteView(ABC):
         unavailable without (1).
     """
 
-    def __init__(self, ip: Ip, routes: List[AsnPrefix],
-                 validity: Dict[AsnPrefix, Dict] = {}) -> None:
+    def __init__(
+        self, ip: Ip, routes: List[AsnPrefix], validity: Dict[AsnPrefix, Dict] = {}
+    ) -> None:
         """Initialize RouteView.
 
         Args:
@@ -163,9 +165,9 @@ class TeamCymruIPtoASN(RouteView):
                 # specifics are not globally routable.  This anonymizes the
                 # specific IPs looked up and improves our chances of hitting
                 # our resolver cache.
-                split_ip = str(ip).split('.')[0:3]
+                split_ip = str(ip).split(".")[0:3]
                 split_ip.reverse()
-                reversed_ip = '.'.join(split_ip)
+                reversed_ip = ".".join(split_ip)
                 ip2asn_query = "{}.origin.asn.cymru.com.".format(reversed_ip)
             elif ip.version == 6:
                 exploded_ip = str(ip.exploded)
@@ -173,8 +175,8 @@ class TeamCymruIPtoASN(RouteView):
                 # specifics are not globally routable.  This anonymizes the
                 # specific IPs looked up and improves our chances of hitting
                 # our resolver cache.
-                reversed_ip = exploded_ip.replace(':', '')[11::-1]
-                reversed_ip = '.'.join(reversed_ip)
+                reversed_ip = exploded_ip.replace(":", "")[11::-1]
+                reversed_ip = ".".join(reversed_ip)
                 ip2asn_query = "{}.origin6.asn.cymru.com.".format(reversed_ip)
             else:
                 raise InvalidIPError(f"Unknown IP version for address {ip_in}.")
@@ -182,10 +184,12 @@ class TeamCymruIPtoASN(RouteView):
             raise InvalidIPError(f"Error parsing IP address {ip_in}.")
 
         result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)
-        if result['nxdomain']:
+        if result["nxdomain"]:
             return []
-        elif result['rcode'] == unbound.RCODE_SERVFAIL:
-            raise BGPSourceUnavailableError(f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?")
+        elif result["rcode"] == unbound.RCODE_SERVFAIL:
+            raise BGPSourceUnavailableError(
+                f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?"
+            )
         else:
             result = [unbound.ub_data.dname2str(d) for d in result["data"].data]
 
@@ -195,7 +199,7 @@ class TeamCymruIPtoASN(RouteView):
         asn_prefix_pairs = []
         for txt in result:
             try:
-                ASNs = txt[0].split("|")[0].strip().split(' ')
+                ASNs = txt[0].split("|")[0].strip().split(" ")
                 prefix = txt[0].split("|")[1].strip()
 
                 # Check that we didn't get any gibberish back.
@@ -258,8 +262,8 @@ class Routinator(RelyingPartySoftware):
         result = Routinator.validate(task, Asn(0), prefix)
 
         # no routes to validate against
-        result['state'] = None
-        result['reason'] = None
+        result["state"] = None
+        result["reason"] = None
 
         return result
 
@@ -276,32 +280,32 @@ class Routinator(RelyingPartySoftware):
 
         try:
             output = Routinator.query(task, asn, prefix)
-            validity = output['validated_route']['validity']
+            validity = output["validated_route"]["validity"]
 
-            state = validity['state'].lower()
+            state = validity["state"].lower()
 
-            if state not in ('valid', 'invalid', 'not-found'):
+            if state not in ("valid", "invalid", "not-found"):
                 raise ValueError
 
-            if state == 'valid':
-                vrps = validity['VRPs']['matched']
-            elif state == 'invalid':
-                reason = validity['reason']
-                vrps = validity['VRPs'][f'unmatched_{reason}']
+            if state == "valid":
+                vrps = validity["VRPs"]["matched"]
+            elif state == "invalid":
+                reason = validity["reason"]
+                vrps = validity["VRPs"][f"unmatched_{reason}"]
 
             for vrp in vrps:
-                vrp['asn'] = vrp['asn'][2:]  # strip leading 'AS'
+                vrp["asn"] = vrp["asn"][2:]  # strip leading 'AS'
 
                 # input validation
-                if int(vrp['asn']) >= 2**32:
+                if int(vrp["asn"]) >= 2**32:
                     raise ValueError
-                ipaddress.ip_network(vrp['prefix'])
-                int(vrp['max_length'])
+                ipaddress.ip_network(vrp["prefix"])
+                int(vrp["max_length"])
 
         except (json.JSONDecodeError, ValueError):
             return {}
 
-        return {'state': state, 'reason': reason, 'vrps': vrps}
+        return {"state": state, "reason": reason, "vrps": vrps}
 
     @staticmethod
     def query(task: T, asn: Asn, prefix: Prefix) -> Dict:
@@ -322,4 +326,3 @@ class Routinator(RelyingPartySoftware):
             return response.json()
         except requests.RequestException as e:
             raise RelyingPartyUnvailableError(str(e))
-
