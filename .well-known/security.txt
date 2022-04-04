@@ -1,3 +1,5 @@
+# Note: this file has not yet been signed and thus might be invalid.
+
 # Canonical URL
 Canonical: https://internet.nl/.well-known/security.txt
 
@@ -9,5 +11,3 @@ Encryption: https://internet.nl/disclosure/
 
 # Our security policy
 Policy: https://internet.nl/disclosure/
-
-# todo: exclude this file from any proxy forwarding on your front-end webserver
