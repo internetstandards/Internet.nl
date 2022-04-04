@@ -31,7 +31,7 @@ sudo su - internetnl
 cd /opt/internetnl/Internet.nl/
 
 # Backup the existing configuration, as that will be overwritten
-cp internetnl/settings.py ~/settings_1.3.py
+cp -v internetnl/settings.py ~/settings_1.3.py
 
 # Clean any manual modifications and untracked files
 git reset HEAD --hard
@@ -40,10 +40,10 @@ git pull
 git checkout master
 
 # Create a new settings file
-cp internetnl/settings-dist.py internetnl/settings.py
+cp -v internetnl/settings-dist.py internetnl/settings.py
 
 # You can now either change the defaults in the settings.py file or use the ENV file supplied.
-cp internetnl/internet.nl.dist.env ~/internet.nl.env
+cp -v internetnl/internet.nl.dist.env ~/internet.nl.env
 
 # Setup the password and such correctly in the env file:
 # The following is setup for dev.internet.nl
@@ -67,7 +67,7 @@ source ~/internet.nl.env
 
 # The internetnl user also needs these settings. They are loaded through the EnvironmentFile instruction in the
 # systemd services. The syntax is a bit different compared to including this for a user. So what we do is:
-cp ~/internet.nl.env ~/internet.nl.systemd.env
+cp -v ~/internet.nl.env ~/internet.nl.systemd.env
 sed -i 's/\export //g'  ~/internet.nl.systemd.env
 mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
 chown internetnl:internetnl /opt/internetnl/etc/internet.nl.systemd.env
@@ -83,10 +83,10 @@ make manage migrate
 
 # Deploy new services
 rm /etc/systemd/system/internetnl*
-cp documentation/example_configuration/etc_systemd_system/* /etc/systemd/system/
-cp documentation/example_configuration/opt_internetnl_etc/batch-* /opt/internetnl/etc/
-cp documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
-cp documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internetnl/bin/
+cp -v documentation/example_configuration/etc_systemd_system/* /etc/systemd/system/
+cp -v documentation/example_configuration/opt_internetnl_etc/batch-* /opt/internetnl/etc/
+cp -v documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
+cp -v documentation/example_configuration/opt_internetnl_bin/gunicorn /opt/internetnl/bin/
 
 # Copy the unbound configuration settings from 1.3 to the newly compiled directory (this is not ideal)
 cp -ravi /opt/internetnl/unbound/etc/unbound/* /opt/internetnl/Internet.nl/_unbound/etc/unbound/ 
@@ -134,13 +134,13 @@ make frontend
 # The file handle limits are already in the systemd services for the single scanner. It is not needed to add these to
 # the batch it seems, as this does not occur there (at least we did not see that happen).
 
-cp documentation/example_configuration/etc_redis/redis.conf /etc/redis/redis.conf
-cp documentation/example_configuration/etc_security/limits.conf /etc/security/limits.conf
+cp -v documentation/example_configuration/etc_redis/redis.conf /etc/redis/redis.conf
+cp -v documentation/example_configuration/etc_security/limits.conf /etc/security/limits.conf
 
 # As root:
 # Deploy the restart scripts to the proper location:
 mkdir /opt/internetnl/etc/cron
-cp documentation/example_configuration/opt_internetnl_etc/cron/* /opt/internetnl/etc/cron
+cp -v documentation/example_configuration/opt_internetnl_etc/cron/* /opt/internetnl/etc/cron
 chmod +x /opt/internetnl/etc/cron/*
 
 # Add the contents of documentation/example_configuration/crontab into `crontab -e` for the root user.
@@ -160,7 +160,7 @@ tail -f /opt/internetnl/log/*log /opt/internetnl/log/*log.1 /var/log/*.log /var/
 # - Single place to manage access limitations and shared settings
 sudo su -
 a2enmod expires
-cp documentation/example_configuration/etc_apache2_sites-available/internet_nl* /etc/apache2/sites-available/
+cp -v documentation/example_configuration/etc_apache2_sites-available/internet_nl* /etc/apache2/sites-available/
 
 # Remove the old config file and pointer and replace it with the new one
 rm /etc/apache2/sites-available/internetnl.conf

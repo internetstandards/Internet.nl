@@ -330,8 +330,8 @@ nassl_complete: venv .nassl
 	#  cd nassl_freebsd && git checkout internetnl
 	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
 	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
-	cd nassl_freebsd && wget http://zlib.net/zlib-1.2.11.tar.gz
-	cd nassl_freebsd && tar xvfz  zlib-1.2.11.tar.gz
+	cd nassl_freebsd && wget http://zlib.net/zlib-1.2.12.tar.gz
+	cd nassl_freebsd && tar xvfz  zlib-1.2.12.tar.gz
 	cd nassl_freebsd && git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
 	cd nassl_freebsd && cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..
 	cd nassl_freebsd && git clone https://github.com/openssl/openssl.git openssl-master
