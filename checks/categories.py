@@ -1,7 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from . import scoring
-from .scoring import STATUS_FAIL, STATUS_GOOD_NOT_TESTED, STATUS_NOT_TESTED
+from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
 from .scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
 from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
 
@@ -261,7 +261,7 @@ class WebRpkiExists(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web rpki exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -296,7 +296,7 @@ class MailRpkiExists(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail rpki exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -337,7 +337,7 @@ class WebRpkiValid(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
 
     def result_not_routed(self, tech_data):
         self.tech_data = tech_data
@@ -387,7 +387,7 @@ class MailRpkiValid(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
 
     def result_validator_error(self):
         self.tech_type = ""
@@ -421,7 +421,7 @@ class NsRpkiExists(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web-mail rpki ns-exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -462,7 +462,7 @@ class NsRpkiValid(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
 
     def result_not_routed(self, tech_data):
         self.tech_data = tech_data
@@ -501,7 +501,7 @@ class MailMxNsRpkiExists(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail rpki mx-ns-exists verdict no-addresses"
 
     def result_validator_error(self):
@@ -542,7 +542,7 @@ class MailMxNsRpkiValid(Subtest):
 
     def result_no_addresses(self):
         self.tech_type = ""
-        self._status(STATUS_GOOD_NOT_TESTED)
+        self._status(STATUS_NOT_TESTED)
 
     def result_not_routed(self, tech_data):
         self.tech_data = tech_data
