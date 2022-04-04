@@ -146,18 +146,3 @@ file for details.
 Both the name Internet.nl and the Internet.nl logo are explicitly excluded from
 the above licensing. Thus we do not grant permission to use these when our
 content or software code is reused.
-
-
-## Development quickstart (debian/ubuntu)
-
-Expects python3.7 but you might get it to work with other versions.
-
-* Install the system requirements from the installation page
-* Run `make venv`
-* Install nassl, python-whois and an unbound version. See the makefile for the unbound versions.
-
-After everything is installed run a webserver with `make run`.
-
-Start a worker that supports all queues with: `make-run-worker`
-
-Note that NASSL is not yet supported on AMD64 platforms, see: https://github.com/nabla-c0d3/nassl/issues/86
