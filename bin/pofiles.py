@@ -28,8 +28,8 @@ KNOWN_PO_FILES = [
 PO_FILES_DIR = "translations"
 PO_FILES_LOCALES = PO_FILES_DIR + "/{}"
 
-DJANGO_PO_FILE = "checks/locale/{}/LC_MESSAGES/django.po"
-DJANGO_ASSETS_DIR = "checks/assets"
+DJANGO_PO_FILE = "interface/locale/{}/LC_MESSAGES/django.po"
+DJANGO_ASSETS_DIR = "interface/assets"
 
 TAR_UNPACK_DIR = "locale_files"
 TAR_NAME = TAR_UNPACK_DIR + ".tar.gz"
@@ -230,7 +230,10 @@ def read_tar(args):
         return
 
     print("Removing previous directory structure...")
-    shutil.rmtree(TAR_UNPACK_DIR)
+    try:
+        shutil.rmtree(TAR_UNPACK_DIR)
+    except FileNotFoundError:
+        pass
 
     print("Decompressing the tar...")
     run(["tar", "-zxvf", args.tar_file])
@@ -246,7 +249,9 @@ def read_tar(args):
 
     locales = set(locale for locale in translations)
     assets = []
+    print(f"Going to walk over files in {TAR_UNPACK_DIR}.")
     for root, _, files in os.walk(TAR_UNPACK_DIR):
+        print(f"Walking over files: {files}")
         msgid_start = root.replace(TAR_UNPACK_DIR + "/", "").replace("/", " ")
         for filename in files:
             filepath = os.path.join(root, filename)
@@ -267,6 +272,8 @@ def read_tar(args):
                         for known_string in known_strings:
                             if po_entry.msgid.startswith(known_string):
                                 target_filename = filename
+
+                print(f"Adding {target_filename} to {locale} with entry: {po_entry}.")
                 read_po_files[locale][target_filename].append(po_entry)
 
                 locales.add(locale)

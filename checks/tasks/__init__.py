@@ -7,7 +7,9 @@ import time
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+
 import unbound
+from internetnl import log
 
 
 class SetupUnboundContext(Task):
@@ -15,6 +17,7 @@ class SetupUnboundContext(Task):
     Abstract class to initiate unbound context. Use as celery baseclass.
 
     """
+
     abstract = True
     _ub_ctx = None
 
@@ -22,18 +25,16 @@ class SetupUnboundContext(Task):
     def ub_ctx(self):
         if self._ub_ctx is None:
             self._ub_ctx = unbound.ub_ctx()
-            if (hasattr(settings, 'ENABLE_INTEGRATION_TEST')
-                    and settings.ENABLE_INTEGRATION_TEST):
+            if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
                 self._ub_ctx.debuglevel(2)
                 self._ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
                 self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
             else:
-                self._ub_ctx.add_ta_file(
-                    os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
-            self._ub_ctx.set_option(
-                "cache-max-ttl:", str(settings.CACHE_TTL*0.9))
+                self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
+            self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # XXX: Remove for now; inconsistency with applying settings on celery.
-            # self._ub_ctx.set_async(True)
+            # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
+            self._ub_ctx.set_async(True)
             if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
                 self._ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
 
@@ -47,35 +48,36 @@ class SetupUnboundContext(Task):
             cb_data = dict(done=False)
         else:
             # Make sure the provided cb_data has the required value.
-            cb_data['done'] = False
+            cb_data["done"] = False
 
         try:
-            retval, async_id = self.ub_ctx.resolve_async(
-                qname, cb_data, callback, qtype, unbound.RR_CLASS_IN)
+            log.debug("Attempting resolving of qname: %s" % qname)
+            retval, async_id = self.ub_ctx.resolve_async(qname, cb_data, callback, qtype, unbound.RR_CLASS_IN)
             while retval == 0 and not cb_data["done"]:
                 time.sleep(0.1)
                 retval = self.ub_ctx.process()
 
         except SoftTimeLimitExceeded as e:
+            log.debug("Soft time limit exceeded.")
+            log.debug("Failed resolving of qname: %s" % qname)
             if async_id:
                 self.ub_ctx.cancel(async_id)
             raise e
+
+        log.debug(f"Got data: {cb_data}, retval: {retval}.")
         return cb_data
 
     def resolve(self, qname, qtype):
         resp = self.async_resolv(qname, qtype)
         if "data" in resp:
             if qtype == unbound.RR_TYPE_AAAA:
-                return [socket.inet_ntop(socket.AF_INET6, rr)
-                        for rr in resp["data"].data]
+                return [socket.inet_ntop(socket.AF_INET6, rr) for rr in resp["data"].data]
             elif qtype == unbound.RR_TYPE_A:
-                return [socket.inet_ntop(socket.AF_INET, rr)
-                        for rr in resp["data"].data]
+                return [socket.inet_ntop(socket.AF_INET, rr) for rr in resp["data"].data]
             elif qtype == unbound.RR_TYPE_MX:
                 return resp["data"].as_mx_list()
             elif qtype == unbound.RR_TYPE_TXT:
-                return [unbound.ub_data.dname2str(d)
-                        for d in resp["data"].data]
+                return [unbound.ub_data.dname2str(d) for d in resp["data"].data]
             elif qtype == 52:  # unbound.RR_TYPE_TLSA
                 # RDATA is split with ';' by pyunbound.
                 dane_data = str(resp["data"]).split(";")

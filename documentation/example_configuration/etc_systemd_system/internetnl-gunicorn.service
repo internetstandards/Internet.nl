@@ -1,0 +1,16 @@
+[Unit]
+Description=Gunicorn for internet.nl
+After=network.target postgresql.service pgbouncer.service redis-server.service rabbitmq-server.service
+
+[Service]
+User=internetnl
+Group=internetnl
+EnvironmentFile=/opt/internetnl/etc/internet.nl.systemd.env
+WorkingDirectory=/opt/internetnl/Internet.nl
+ExecStartPre=/bin/sleep 5
+LimitNOFILE=300000
+# Number of workers is 2 * nproc + 1, see: https://docs.gunicorn.org/en/stable/design.html and https://docs.gunicorn.org/en/stable/settings.html
+ExecStart=/opt/internetnl/Internet.nl/.venv/bin/python3 /opt/internetnl/bin/gunicorn --bind localhost:8000 --workers 3 --worker-class gevent internetnl.wsgi:application --access-logfile /opt/internetnl/log/gunicorn-access.log --error-logfile /opt/internetnl/log/gunicorn-error.log
+
+[Install]
+WantedBy=multi-user.target

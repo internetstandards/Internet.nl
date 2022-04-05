@@ -1,9 +1,15 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from . import scoring
-from .scoring import STATUS_FAIL, STATUS_NOT_TESTED
-from .scoring import STATUS_NOTICE, STATUS_INFO, STATUS_ERROR
-from .scoring import STATUS_SUCCESS, ORDERED_STATUSES
+from checks import scoring
+from checks.scoring import (
+    ORDERED_STATUSES,
+    STATUS_ERROR,
+    STATUS_FAIL,
+    STATUS_INFO,
+    STATUS_NOT_TESTED,
+    STATUS_NOTICE,
+    STATUS_SUCCESS,
+)
 
 
 # --- Base classes
@@ -46,8 +52,7 @@ class Category(object):
         max_score = 0
         score_fields = []
         for name, subtest in self.subtests.items():
-            if (subtest.worst_status == scoring.STATUS_FAIL
-                    and subtest.model_score_field):
+            if subtest.worst_status == scoring.STATUS_FAIL and subtest.model_score_field:
                 score_fields.append(subtest.model_score_field)
                 if subtest.full_score:
                     max_score += subtest.full_score
@@ -56,14 +61,19 @@ class Category(object):
 
 class Subtest(object):
     def __init__(
-            self, name="", label="", explanation="", tech_string="",
-            model_score_field=None,
-            full_score=None,
-            worst_status=STATUS_FAIL,
-            init_status=STATUS_NOT_TESTED,
-            init_verdict="detail verdict not-tested",
-            init_tech_type="table",
-            init_tech_data="detail tech data not-tested"):
+        self,
+        name="",
+        label="",
+        explanation="",
+        tech_string="",
+        model_score_field=None,
+        full_score=None,
+        worst_status=STATUS_FAIL,
+        init_status=STATUS_NOT_TESTED,
+        init_verdict="detail verdict not-tested",
+        init_tech_type="table",
+        init_tech_data="detail tech data not-tested",
+    ):
         self.name = name
         self.label = label
         self.explanation = explanation
@@ -97,14 +107,14 @@ class Subtest(object):
 
         """
         return {
-            'label': self.label,
-            'status': self.status,
-            'worst_status': self.worst_status,
-            'verdict': self.verdict,
-            'exp': self.explanation,
-            'tech_type': self.tech_type,
-            'tech_string': self.tech_string,
-            'tech_data': self.tech_data,
+            "label": self.label,
+            "status": self.status,
+            "worst_status": self.worst_status,
+            "verdict": self.verdict,
+            "exp": self.explanation,
+            "tech_type": self.tech_type,
+            "tech_string": self.tech_string,
+            "tech_data": self.tech_data,
         }
 
 
@@ -167,7 +177,7 @@ class WebAppsecpriv(Category):
             WebAppsecprivHttpCsp,
             WebAppsecprivHttpXContentType,
             # TODO: To be removed in the future.
-            #WebAppsecprivHttpXXss,
+            # WebAppsecprivHttpXXss,
         ]
         super(WebAppsecpriv, self).__init__(name, subtests)
 
@@ -241,7 +251,8 @@ class Ipv6NsAaaa(Subtest):
             label="detail web-mail ipv6 ns-AAAA label",
             explanation="detail web-mail ipv6 ns-AAAA exp",
             tech_string="detail web-mail ipv6 ns-AAAA tech table",
-            worst_status=scoring.IPV6_NS_CONN_WORST_STATUS)
+            worst_status=scoring.IPV6_NS_CONN_WORST_STATUS,
+        )
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
@@ -269,7 +280,8 @@ class Ipv6NsReach(Subtest):
             init_tech_type="",
             worst_status=scoring.IPV6_NS_CONN_WORST_STATUS,
             full_score=scoring.IPV6_NS_CONN_GOOD,
-            model_score_field="ns_score")
+            model_score_field="ns_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -289,7 +301,8 @@ class WebIpv6WsAaaa(Subtest):
             label="detail web ipv6 web-AAAA label",
             explanation="detail web ipv6 web-AAAA exp",
             tech_string="detail web ipv6 web-AAAA tech table",
-            worst_status=scoring.WEB_IPV6_WS_CONN_WORST_STATUS)
+            worst_status=scoring.WEB_IPV6_WS_CONN_WORST_STATUS,
+        )
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
@@ -312,7 +325,8 @@ class WebIpv6WsReach(Subtest):
             init_tech_type="",
             worst_status=scoring.WEB_IPV6_WS_CONN_WORST_STATUS,
             full_score=scoring.WEB_IPV6_WS_CONN_GOOD,
-            model_score_field="web_score")
+            model_score_field="web_score",
+        )
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
@@ -334,7 +348,8 @@ class WebIpv6WsIpv46(Subtest):
             init_tech_type="",
             worst_status=scoring.WEB_IPV6_WS_SIMHASH_WORST_STATUS,
             full_score=scoring.WEB_IPV6_WS_SIMHASH_OK,
-            model_score_field="web_simhash_score")
+            model_score_field="web_simhash_score",
+        )
 
     def result_bad(self):
         self._status(STATUS_FAIL)
@@ -355,7 +370,8 @@ class MailIpv6MxAaaa(Subtest):
             label="detail mail ipv6 mx-AAAA label",
             explanation="detail mail ipv6 mx-AAAA exp",
             tech_string="detail mail ipv6 mx-AAAA tech table",
-            worst_status=STATUS_NOTICE)
+            worst_status=STATUS_NOTICE,
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_IPV6_MX_CONN_WORST_STATUS
@@ -403,7 +419,8 @@ class MailIpv6MxReach(Subtest):
             init_tech_type="",
             worst_status=STATUS_NOTICE,
             full_score=scoring.MAIL_IPV6_MX_CONN_GOOD,
-            model_score_field="mx_score")
+            model_score_field="mx_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_IPV6_MX_CONN_WORST_STATUS
@@ -432,7 +449,8 @@ class WebDnssecExists(Subtest):
             label="detail web dnssec exists label",
             explanation="detail web dnssec exists exp",
             tech_string="detail web dnssec exists tech table",
-            worst_status=scoring.WEB_DNSSEC_WORST_STATUS)
+            worst_status=scoring.WEB_DNSSEC_WORST_STATUS,
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -464,7 +482,8 @@ class WebDnssecValid(Subtest):
             tech_string="detail web dnssec valid tech table",
             worst_status=scoring.WEB_DNSSEC_WORST_STATUS,
             full_score=scoring.WEB_DNSSEC_SECURE,
-            model_score_field="score")
+            model_score_field="score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -498,7 +517,8 @@ class MailDnssecExists(Subtest):
             label="detail mail dnssec exists label",
             explanation="detail mail dnssec exists exp",
             tech_string="detail mail dnssec exists tech table",
-            worst_status=scoring.MAIL_DNSSEC_WORST_STATUS)
+            worst_status=scoring.MAIL_DNSSEC_WORST_STATUS,
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -530,7 +550,8 @@ class MailDnssecValid(Subtest):
             tech_string="detail mail dnssec valid tech table",
             worst_status=scoring.MAIL_DNSSEC_WORST_STATUS,
             full_score=scoring.MAIL_DNSSEC_SECURE,
-            model_score_field="score")
+            model_score_field="score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -564,7 +585,8 @@ class MailDnssecMxExists(Subtest):
             label="detail mail dnssec mx-exists label",
             explanation="detail mail dnssec mx-exists exp",
             tech_string="detail mail dnssec mx-exists tech table",
-            worst_status=STATUS_NOTICE)
+            worst_status=STATUS_NOTICE,
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_DNSSEC_WORST_STATUS
@@ -615,7 +637,8 @@ class MailDnssecMxValid(Subtest):
             label="detail mail dnssec mx-valid label",
             explanation="detail mail dnssec mx-valid exp",
             tech_string="detail mail dnssec mx-valid tech table",
-            worst_status=STATUS_NOTICE)
+            worst_status=STATUS_NOTICE,
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_DNSSEC_WORST_STATUS
@@ -635,8 +658,7 @@ class MailDnssecMxValid(Subtest):
     def result_unsupported_ds_algo(self):
         self.was_tested()
         self._status(STATUS_NOTICE)
-        self.verdict = (
-            "detail mail dnssec mx-valid verdict unsupported-ds-algo")
+        self.verdict = "detail mail dnssec mx-valid verdict unsupported-ds-algo"
         self.tech_data = "detail tech data insecure"
 
     def result_insecure(self):
@@ -652,7 +674,8 @@ class WebTlsHttpsExists(Subtest):
             label="detail web tls https-exists label",
             explanation="detail web tls https-exists exp",
             tech_string="detail web tls https-exists tech table",
-            worst_status=scoring.WEB_TLS_HTTPS_EXISTS_WORST_STATUS)
+            worst_status=scoring.WEB_TLS_HTTPS_EXISTS_WORST_STATUS,
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -679,7 +702,8 @@ class WebTlsHttpsForced(Subtest):
             tech_string="detail web tls https-forced tech table",
             worst_status=scoring.WEB_TLS_FORCED_HTTPS_WORST_STATUS,
             full_score=scoring.WEB_TLS_FORCED_HTTPS_GOOD,
-            model_score_field="forced_https_score")
+            model_score_field="forced_https_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -706,7 +730,8 @@ class WebTlsHttpsHsts(Subtest):
             tech_string="detail web tls https-hsts tech table",
             worst_status=scoring.WEB_TLS_HSTS_WORST_STATUS,
             full_score=scoring.WEB_TLS_HSTS_GOOD,
-            model_score_field="hsts_score")
+            model_score_field="hsts_score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -733,7 +758,8 @@ class WebTlsHttpCompression(Subtest):
             tech_string="detail web tls http-compression tech table",
             worst_status=scoring.WEB_TLS_HTTP_COMPRESSION_WORST_STATUS,
             full_score=scoring.WEB_TLS_HTTP_COMPRESSION_GOOD,
-            model_score_field="http_compression_score")
+            model_score_field="http_compression_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -756,7 +782,8 @@ class WebTlsFsParams(Subtest):
             tech_string="detail web tls fs-params tech table",
             worst_status=scoring.WEB_TLS_FS_WORST_STATUS,
             full_score=scoring.WEB_TLS_FS_GOOD,
-            model_score_field="fs_score")
+            model_score_field="fs_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -789,7 +816,8 @@ class WebTlsCiphers(Subtest):
             tech_string="detail web tls ciphers tech table",
             worst_status=scoring.WEB_TLS_SUITES_WORST_STATUS,
             full_score=scoring.WEB_TLS_SUITES_GOOD,
-            model_score_field="ciphers_score")
+            model_score_field="ciphers_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -817,7 +845,8 @@ class WebTlsCipherOrder(Subtest):
             tech_string="detail web tls cipher-order tech table",
             worst_status=scoring.WEB_TLS_CIPHER_ORDER_WORST_STATUS,
             full_score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
-            model_score_field="cipher_order_score")
+            model_score_field="cipher_order_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -860,9 +889,10 @@ class WebTlsVersion(Subtest):
             tech_string="detail web tls version tech table",
             worst_status=scoring.WEB_TLS_PROTOCOLS_WORST_STATUS,
             full_score=scoring.WEB_TLS_PROTOCOLS_GOOD,
-            model_score_field="protocols_score")
+            model_score_field="protocols_score",
+        )
 
-    def result_good(self,tech_data):
+    def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls version verdict good"
         self.tech_data = tech_data
@@ -887,7 +917,8 @@ class WebTlsCompression(Subtest):
             tech_string="detail web tls compression tech table",
             worst_status=scoring.WEB_TLS_COMPRESSION_WORST_STATUS,
             full_score=scoring.WEB_TLS_COMPRESSION_GOOD,
-            model_score_field="compression_score")
+            model_score_field="compression_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -909,7 +940,8 @@ class WebTlsRenegotiationSecure(Subtest):
             tech_string="detail web tls renegotiation-secure tech table",
             worst_status=scoring.WEB_TLS_SECURE_RENEG_WORST_STATUS,
             full_score=scoring.WEB_TLS_SECURE_RENEG_GOOD,
-            model_score_field="secure_reneg_score")
+            model_score_field="secure_reneg_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -931,7 +963,8 @@ class WebTlsRenegotiationClient(Subtest):
             tech_string="detail web tls renegotiation-client tech table",
             worst_status=scoring.WEB_TLS_CLIENT_RENEG_WORST_STATUS,
             full_score=scoring.WEB_TLS_CLIENT_RENEG_GOOD,
-            model_score_field="client_reneg_score")
+            model_score_field="client_reneg_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -953,7 +986,8 @@ class WebTlsCertTrust(Subtest):
             tech_string="detail web tls cert-trust tech table",
             worst_status=scoring.WEB_TLS_TRUSTED_WORST_STATUS,
             full_score=scoring.WEB_TLS_TRUSTED_GOOD,
-            model_score_field="cert_trusted_score")
+            model_score_field="cert_trusted_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -978,7 +1012,8 @@ class WebTlsCertPubkey(Subtest):
             tech_string="detail web tls cert-pubkey tech table",
             worst_status=scoring.WEB_TLS_PUBKEY_WORST_STATUS,
             full_score=scoring.WEB_TLS_PUBKEY_GOOD,
-            model_score_field="cert_pubkey_score")
+            model_score_field="cert_pubkey_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1006,7 +1041,8 @@ class WebTlsCertSignature(Subtest):
             tech_string="detail web tls cert-signature tech table",
             worst_status=scoring.WEB_TLS_SIGNATURE_WORST_STATUS,
             full_score=scoring.WEB_TLS_SIGNATURE_GOOD,
-            model_score_field="cert_signature_score")
+            model_score_field="cert_signature_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1028,7 +1064,8 @@ class WebTlsCertHostmatch(Subtest):
             tech_string="detail web tls cert-hostmatch tech table",
             worst_status=scoring.WEB_TLS_HOSTMATCH_WORST_STATUS,
             full_score=scoring.WEB_TLS_HOSTMATCH_GOOD,
-            model_score_field="cert_hostmatch_score")
+            model_score_field="cert_hostmatch_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1048,7 +1085,8 @@ class WebTlsDaneExists(Subtest):
             label="detail web tls dane-exists label",
             explanation="detail web tls dane-exists exp",
             tech_string="detail web tls dane-exists tech table",
-            worst_status=scoring.WEB_TLS_DANE_EXISTS_WORST_STATUS)
+            worst_status=scoring.WEB_TLS_DANE_EXISTS_WORST_STATUS,
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -1075,7 +1113,8 @@ class WebTlsDaneValid(Subtest):
             tech_string="detail web tls dane-valid tech table",
             worst_status=scoring.WEB_TLS_DANE_VALID_WORST_STATUS,
             full_score=scoring.WEB_TLS_DANE_VALIDATED,
-            model_score_field="dane_score")
+            model_score_field="dane_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1093,13 +1132,15 @@ class WebTlsDaneRollover(Subtest):
     .. note:: Disabled for now. May also disable DANE for web in the future.
 
     """
+
     def __init__(self):
         super(WebTlsDaneRollover, self).__init__(
             name="dane_rollover",
             label="detail web tls dane-rollover label",
             explanation="detail web tls dane-rollover exp",
             tech_string="detail web tls dane-rollover tech table",
-            worst_status=scoring.WEB_TLS_DANE_ROLLOVER_WORST_STATUS)
+            worst_status=scoring.WEB_TLS_DANE_ROLLOVER_WORST_STATUS,
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1121,7 +1162,8 @@ class WebTlsZeroRTT(Subtest):
             tech_string="detail web tls zero-rtt tech table",
             worst_status=scoring.WEB_TLS_ZERO_RTT_WORST_STATUS,
             full_score=scoring.WEB_TLS_ZERO_RTT_GOOD,
-            model_score_field="zero_rtt_score")
+            model_score_field="zero_rtt_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1148,7 +1190,8 @@ class WebTlsOCSPStapling(Subtest):
             tech_string="detail web tls ocsp-stapling tech table",
             worst_status=scoring.WEB_TLS_OCSP_STAPLING_WORST_STATUS,
             full_score=scoring.WEB_TLS_OCSP_STAPLING_GOOD,
-            model_score_field="ocsp_stapling_score")
+            model_score_field="ocsp_stapling_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1175,7 +1218,8 @@ class WebTlsKexHashFunc(Subtest):
             tech_string="detail web tls kex-hash-func tech table",
             worst_status=scoring.WEB_TLS_KEX_HASH_FUNC_WORST_STATUS,
             full_score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
-            model_score_field="kex_hash_func_score")
+            model_score_field="kex_hash_func_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1202,7 +1246,8 @@ class MailTlsStarttlsExists(Subtest):
             tech_string="detail mail tls starttls-exists tech table",
             full_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
             worst_status=STATUS_INFO,
-            model_score_field="tls_enabled_score")
+            model_score_field="tls_enabled_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_STARTTLS_EXISTS_WORST_STATUS
@@ -1262,7 +1307,8 @@ class MailTlsFsParams(Subtest):
             tech_string="detail mail tls fs-params tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_FS_GOOD,
-            model_score_field="fs_score")
+            model_score_field="fs_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_FS_WORST_STATUS
@@ -1302,7 +1348,8 @@ class MailTlsCiphers(Subtest):
             tech_string="detail mail tls ciphers tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_SUITES_GOOD,
-            model_score_field="ciphers_score")
+            model_score_field="ciphers_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_SUITES_WORST_STATUS
@@ -1336,7 +1383,8 @@ class MailTlsCipherOrder(Subtest):
             tech_string="detail mail tls cipher-order tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_CIPHER_ORDER_GOOD,
-            model_score_field="cipher_order_score")
+            model_score_field="cipher_order_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_CIPHER_ORDER_WORST_STATUS
@@ -1388,7 +1436,8 @@ class MailTlsVersion(Subtest):
             tech_string="detail mail tls version tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_PROTOCOLS_GOOD,
-            model_score_field="protocols_score")
+            model_score_field="protocols_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_PROTOCOLS_WORST_STATUS
@@ -1421,7 +1470,8 @@ class MailTlsCompression(Subtest):
             tech_string="detail mail tls compression tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_COMPRESSION_GOOD,
-            model_score_field="compression_score")
+            model_score_field="compression_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_COMPRESSION_WORST_STATUS
@@ -1448,7 +1498,8 @@ class MailTlsRenegotiationSecure(Subtest):
             tech_string="detail mail tls renegotiation-secure tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_SECURE_RENEG_GOOD,
-            model_score_field="secure_reneg_score")
+            model_score_field="secure_reneg_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_SECURE_RENEG_WORST_STATUS
@@ -1475,7 +1526,8 @@ class MailTlsRenegotiationClient(Subtest):
             tech_string="detail mail tls renegotiation-client tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_CLIENT_RENEG_GOOD,
-            model_score_field="client_reneg_score")
+            model_score_field="client_reneg_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_CLIENT_RENEG_WORST_STATUS
@@ -1502,7 +1554,8 @@ class MailTlsCertTrust(Subtest):
             tech_string="detail mail tls cert-trust tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_TRUSTED_GOOD,
-            model_score_field="cert_trusted_score")
+            model_score_field="cert_trusted_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_TRUSTED_WORST_STATUS
@@ -1532,7 +1585,8 @@ class MailTlsCertPubkey(Subtest):
             tech_string="detail mail tls cert-pubkey tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_PUBKEY_GOOD,
-            model_score_field="cert_pubkey_score")
+            model_score_field="cert_pubkey_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_PUBKEY_WORST_STATUS
@@ -1566,7 +1620,8 @@ class MailTlsCertSignature(Subtest):
             tech_string="detail mail tls cert-signature tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_SIGNATURE_GOOD,
-            model_score_field="cert_signature_score")
+            model_score_field="cert_signature_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_SIGNATURE_WORST_STATUS
@@ -1593,7 +1648,8 @@ class MailTlsCertHostmatch(Subtest):
             tech_string="detail mail tls cert-hostmatch tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_HOSTMATCH_GOOD,
-            model_score_field="cert_hostmatch_score")
+            model_score_field="cert_hostmatch_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_HOSTMATCH_WORST_STATUS
@@ -1628,7 +1684,8 @@ class MailTlsZeroRTT(Subtest):
             tech_string="detail mail tls zero-rtt tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_ZERO_RTT_GOOD,
-            model_score_field="zero_rtt_score")
+            model_score_field="zero_rtt_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_ZERO_RTT_WORST_STATUS
@@ -1657,6 +1714,7 @@ class MailTlsOCSPStapling(Subtest):
     .. note:: Disabled for mail.
 
     """
+
     def __init__(self):
         super(MailTlsOCSPStapling, self).__init__(
             name="ocsp_stapling",
@@ -1665,7 +1723,8 @@ class MailTlsOCSPStapling(Subtest):
             tech_string="detail mail tls ocsp-stapling tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_OCSP_STAPLING_GOOD,
-            model_score_field="ocsp_stapling_score")
+            model_score_field="ocsp_stapling_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_OCSP_STAPLING_WORST_STATUS
@@ -1698,10 +1757,11 @@ class MailTlsKexHashFunc(Subtest):
             tech_string="detail mail tls kex-hash-func tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD,
-            model_score_field="kex_hash_func_score")
+            model_score_field="kex_hash_func_score",
+        )
 
     def was_tested(self):
-        self. worst_status = scoring.MAIL_TLS_KEX_HASH_FUNC_WORST_STATUS
+        self.worst_status = scoring.MAIL_TLS_KEX_HASH_FUNC_WORST_STATUS
 
     def result_good(self):
         self.was_tested()
@@ -1731,7 +1791,8 @@ class MailTlsDaneExists(Subtest):
             tech_string="detail mail tls dane-exists tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_DANE_VALIDATED,
-            model_score_field="dane_score")
+            model_score_field="dane_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_DANE_EXISTS_WORST_STATUS
@@ -1764,7 +1825,8 @@ class MailTlsDaneValid(Subtest):
             tech_string="detail mail tls dane-valid tech table",
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_DANE_VALIDATED,
-            model_score_field="dane_score")
+            model_score_field="dane_score",
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_DANE_VALID_WORST_STATUS
@@ -1789,7 +1851,8 @@ class MailTlsDaneRollover(Subtest):
             label="detail mail tls dane-rollover label",
             explanation="detail mail tls dane-rollover exp",
             tech_string="detail mail tls dane-rollover tech table",
-            worst_status=STATUS_INFO)
+            worst_status=STATUS_INFO,
+        )
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_TLS_DANE_ROLLOVER_WORST_STATUS
@@ -1818,7 +1881,8 @@ class MailAuthDkim(Subtest):
             init_tech_type="",
             worst_status=scoring.MAIL_AUTH_DKIM_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DKIM_PASS,
-            model_score_field="dkim_score")
+            model_score_field="dkim_score",
+        )
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
@@ -1843,7 +1907,8 @@ class MailAuthDmarc(Subtest):
             tech_string="detail mail auth dmarc tech table",
             worst_status=scoring.MAIL_AUTH_DMARC_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DMARC_PASS,
-            model_score_field="dmarc_score")
+            model_score_field="dmarc_score",
+        )
         # Fix for one line, one value data (not-tested case)
         self.tech_data = [[self.tech_data]]
 
@@ -1872,7 +1937,8 @@ class MailAuthDmarcPolicy(Subtest):
             tech_string="detail mail auth dmarc tech table",
             worst_status=scoring.MAIL_AUTH_DMARC_POLICY_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_DMARC_POLICY_PASS,
-            model_score_field="dmarc_policy_score")
+            model_score_field="dmarc_policy_score",
+        )
         # Fix for one line, one value data (not-tested case)
         self.tech_data = [[self.tech_data]]
 
@@ -1906,7 +1972,8 @@ class MailAuthSpf(Subtest):
             tech_string="detail mail auth spf tech table",
             worst_status=scoring.MAIL_AUTH_SPF_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_SPF_PASS,
-            model_score_field="spf_score")
+            model_score_field="spf_score",
+        )
         # Fix for one line, one value data.
         self.tech_data = [[self.tech_data]]
 
@@ -1935,7 +2002,8 @@ class MailAuthSpfPolicy(Subtest):
             tech_string="detail mail auth spf-policy tech table",
             worst_status=scoring.MAIL_AUTH_SPF_POLICY_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_SPF_POLICY_PASS,
-            model_score_field="spf_policy_score")
+            model_score_field="spf_policy_score",
+        )
         # Fix for one line, one value data.
         self.tech_data = [[self.tech_data]]
 
@@ -1980,7 +2048,8 @@ class WebAppsecprivHttpXFrame(Subtest):
             tech_string="detail web appsecpriv http-x-frame tech table",
             worst_status=scoring.WEB_APPSECPRIV_X_FRAME_OPTIONS_WORST_STATUS,
             full_score=scoring.WEB_APPSECPRIV_X_FRAME_OPTIONS_GOOD,
-            model_score_field="x_frame_options_score")
+            model_score_field="x_frame_options_score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -2002,7 +2071,8 @@ class WebAppsecprivHttpXXss(Subtest):
             tech_string="detail web appsecpriv http-x-xss tech table",
             worst_status=scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_WORST_STATUS,
             full_score=scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_GOOD,
-            model_score_field="x_xss_protection_score")
+            model_score_field="x_xss_protection_score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -2022,10 +2092,10 @@ class WebAppsecprivHttpXContentType(Subtest):
             label="detail web appsecpriv http-x-content-type label",
             explanation="detail web appsecpriv http-x-content-type exp",
             tech_string="detail web appsecpriv http-x-content-type tech table",
-            worst_status=(
-                scoring.WEB_APPSECPRIV_X_CONTENT_TYPE_OPTIONS_WORST_STATUS),
+            worst_status=(scoring.WEB_APPSECPRIV_X_CONTENT_TYPE_OPTIONS_WORST_STATUS),
             full_score=scoring.WEB_APPSECPRIV_X_CONTENT_TYPE_OPTIONS_GOOD,
-            model_score_field="x_content_type_options_score")
+            model_score_field="x_content_type_options_score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -2045,10 +2115,10 @@ class WebAppsecprivHttpCsp(Subtest):
             label="detail web appsecpriv http-csp label",
             explanation="detail web appsecpriv http-csp exp",
             tech_string="detail web appsecpriv http-csp tech table",
-            worst_status=(
-                scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_WORST_STATUS),
+            worst_status=(scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_WORST_STATUS),
             full_score=scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD,
-            model_score_field="content_security_policy_score")
+            model_score_field="content_security_policy_score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
@@ -2067,20 +2137,18 @@ class WebAppsecprivHttpReferrerPolicy(Subtest):
             name="http_referrer_policy",
             label="detail web appsecpriv http-referrer-policy label",
             explanation="detail web appsecpriv http-referrer-policy exp",
-            tech_string=(
-                "detail web appsecpriv http-referrer-policy tech table"),
+            tech_string=("detail web appsecpriv http-referrer-policy tech table"),
             worst_status=scoring.WEB_APPSECPRIV_REFERRER_POLICY_WORST_STATUS,
             full_score=scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD,
-            model_score_field="referrer_policy_score")
+            model_score_field="referrer_policy_score",
+        )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
-        self.verdict = (
-            "detail web appsecpriv http-referrer-policy verdict good")
+        self.verdict = "detail web appsecpriv http-referrer-policy verdict good"
         self.tech_data = tech_data
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
-        self.verdict = (
-            "detail web appsecpriv http-referrer-policy verdict bad")
+        self.verdict = "detail web appsecpriv http-referrer-policy verdict bad"
         self.tech_data = tech_data or ""

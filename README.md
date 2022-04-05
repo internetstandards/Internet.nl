@@ -18,7 +18,11 @@ Platform which is a collaboration of partners from the internet community and
 the Dutch government. The platform's mission is to jointly promote the use of
 modern internet standards keeping the internet reliable and accessible for
 everybody. [ECP](https://ecp.nl/) provides for the administrative home of the
-platform. [NLnet Labs](https://nlnetlabs.nl/) laid the foundation for Internet.nl and the underlying tooling. From 1 April 2021 onwards, maintenance and further development will be carried out by the project team of the Internet Standards Platform.
+platform. [NLnet Labs](https://nlnetlabs.nl/) laid the foundation for 
+Internet.nl and the underlying tooling. 
+
+From 1 April 2021 onwards, maintenance and further development will be carried
+out by the project team of the Internet Standards Platform.
 
 
 ## Scope
@@ -48,7 +52,7 @@ intended as an internet standards compliance test and not as a security test.
 Internet.nl is a [Django](https://www.djangoproject.com/)
 based application.
 
-Current install base is Django 1.11 with Python 3.7+.
+Current install base is Django 3.2 with Python 3.7.
 
 
 ### Quick start
@@ -58,6 +62,35 @@ transparency on the tool and the way the tests are run, there is (currently) no
 trivial way to install the software. Nonetheless, you could easily spin up a
 ready to use local dockerized environment for local development and testing
 purposes by following the [docker instructions](https://github.com/internetstandards/Internet.nl/blob/master/docker/README.md).
+
+
+### Dev start
+Currently x86_64 only. So m1 mac users should `arch -x86_64 /bin/sh` before continuing (the makefile does that too).
+
+Install the required system requirements from the [installation instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md).
+
+```bash
+git clone https://github.com/internetstandards/Internet.nl/
+cd Internet.nl
+make venv
+
+# Install separate dependencies, for which no wheels are available:
+# Note that unbound comes in a variety of flavors in the makefile(!)
+make unbound
+make python-whois
+make nassl
+
+# Run the application, and the workers
+make run
+make run-worker
+make run-heartbeat
+```
+
+Running tests is not yet streamlined, it requires a test worker to be ran.
+```bash
+make run-testworker
+make test
+```
 
 
 ### Slow start

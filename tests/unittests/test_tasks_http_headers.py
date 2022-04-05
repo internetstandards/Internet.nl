@@ -5,7 +5,8 @@ from checks.tasks import http_headers
 
 # Set this to true for more information per test. Then you probably want to run
 # with a specific test only like:
-# ./manage.py test tests.unittests.test_tasks_http_headers..HeaderCheckerContentSecurityPolicyTestCase.test_no_default_src
+# ./manage.py test tests.unittests.test_tasks_http_
+#       headers..HeaderCheckerContentSecurityPolicyTestCase.test_no_default_src
 DEBUG = False
 
 
@@ -14,12 +15,12 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.checker = http_headers.HeaderCheckerContentSecurityPolicy()
-        cls.score = 'content_security_policy_score'
-        cls.enabled = 'content_security_policy_enabled'
+        cls.score = "content_security_policy_score"
+        cls.enabled = "content_security_policy_enabled"
 
     def setUp(self):
         self.results = self.checker.get_positive_values()
-        self.domain = 'internet.nl'
+        self.domain = "internet.nl"
 
     def _checker_check(self, headers):
         self.checker.check(headers, self.results, self.domain)
@@ -29,39 +30,29 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     def _is_good(self, headers):
         self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
-        self.assertEqual(
-            self.results[self.score],
-            scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
+        self.assertEqual(self.results[self.score], scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
 
     def _is_good_and_parsed(self, headers, directive):
         self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
-        self.assertEqual(
-            self.results[self.score],
-            scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
+        self.assertEqual(self.results[self.score], scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
         self.assertTrue(directive in self.checker.parsed)
 
     def _is_good_and_not_parsed(self, headers, directive):
         self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], True)
-        self.assertEqual(
-            self.results[self.score],
-            scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
+        self.assertEqual(self.results[self.score], scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD)
         self.assertTrue(directive not in self.checker.parsed)
 
     def _is_bad(self, headers):
         self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], False)
-        self.assertEqual(
-            self.results[self.score],
-            scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD)
+        self.assertEqual(self.results[self.score], scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD)
 
     def _is_bad_and_parsed(self, headers, directive):
         self._checker_check(headers)
         self.assertEqual(self.results[self.enabled], False)
-        self.assertEqual(
-            self.results[self.score],
-            scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD)
+        self.assertEqual(self.results[self.score], scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD)
         self.assertTrue(directive in self.checker.parsed)
 
     def test_no_value(self):
@@ -254,96 +245,96 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_syntax_trusted_types_1(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_2(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types 'none'"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_3(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types asdfad"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_4(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types asdfad asdfd"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_5(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types asdfad asdfd 'allow-duplicates'"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_6(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types asdfad * 'allow-duplicates'"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_7(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types * asdfad 'allow-duplicates'"
-        self._is_good_and_parsed(headers, 'trusted-types')
+        self._is_good_and_parsed(headers, "trusted-types")
 
     def test_syntax_trusted_types_8(self):
         headers = "default-src 'self'; frame-ancestors 'none', trusted-types asdfad 'allow-duplicates'"
-        self._is_good_and_not_parsed(headers, 'trusted-types')
+        self._is_good_and_not_parsed(headers, "trusted-types")
 
     def test_syntax_upgrade_insecure_requests_1(self):
         headers = "default-src 'self'; frame-ancestors 'none', upgrade-insecure-requests"
-        self._is_good_and_parsed(headers, 'upgrade-insecure-requests')
+        self._is_good_and_parsed(headers, "upgrade-insecure-requests")
 
     def test_syntax_upgrade_insecure_requests_2(self):
         headers = "default-src 'self'; frame-ancestors 'none', upgrade-insecure-requests adfad"
-        self._is_good_and_not_parsed(headers, 'upgrade-insecure-requests')
+        self._is_good_and_not_parsed(headers, "upgrade-insecure-requests")
 
     def test_host_source_1(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src https://fas.com:443"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_host_source_2(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src fas.com:443"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_host_source_3(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src fas.com"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_scheme_source_1(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src https:"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_scheme_source_2(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src http:"
-        self._is_bad_and_parsed(headers, 'style-src')
+        self._is_bad_and_parsed(headers, "style-src")
 
     def test_scheme_source_3(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src fasdf:"
-        self._is_good_and_not_parsed(headers, 'style-src')
+        self._is_good_and_not_parsed(headers, "style-src")
 
     def test_other_source_nonce_1(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'nonce-fdasdfas5678589+5346/sfdg'"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_other_source_nonce_2(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'nonce-fdasdfas5678589+5346/sfdg=='"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_other_source_nonce_3(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'nonce-fdasdfas56=78589+5346/sfdg=='"
-        self._is_good_and_not_parsed(headers, 'style-src')
+        self._is_good_and_not_parsed(headers, "style-src")
 
     def test_other_source_nonce_4(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'nonce-fdasdfas56*78589+5346/sfdg=='"
-        self._is_good_and_not_parsed(headers, 'style-src')
+        self._is_good_and_not_parsed(headers, "style-src")
 
     def test_other_source_hash_1(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'sha256-fdasdfas5678589+5346/sfdg=='"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_other_source_hash_2(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'sha384-fdasdfas5678589+5346/sfdg=='"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_other_source_hash_3(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'sha512-fdasdfas5678589+5346/sfdg=='"
-        self._is_good_and_parsed(headers, 'style-src')
+        self._is_good_and_parsed(headers, "style-src")
 
     def test_other_source_hash_4(self):
         headers = "default-src 'self'; frame-ancestors 'none', style-src 'sha513-fdasdfas5678589+5346/sfdg=='"
-        self._is_good_and_not_parsed(headers, 'style-src')
+        self._is_good_and_not_parsed(headers, "style-src")

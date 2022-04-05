@@ -1,0 +1,15 @@
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
+
+# App instance to use
+# comment out this line if you don't use an app
+CELERY_APP="internetnl"
+
+CELERYBEAT_USER="internetnl"
+CELERYBEAT_GROUP="internetnl"
+
+CELERYBEAT_PID_FILE="/opt/internetnl/run/celery-beat.pid"
+CELERYBEAT_LOG_FILE="/opt/internetnl/log/celery-beat.log"
+
+CELERYD_LOG_LEVEL="INFO"
+CELERY_CREATE_DIRS=1
