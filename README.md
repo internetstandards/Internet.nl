@@ -49,6 +49,8 @@ intended as an internet standards compliance test and not as a security test.
 
 ## Getting started
 
+Note: the docker image will not build at the moment, this is a work in progress and will be in 1.4.1.
+
 Internet.nl is a [Django](https://www.djangoproject.com/)
 based application.
 

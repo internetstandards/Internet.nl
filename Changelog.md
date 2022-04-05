@@ -4,6 +4,8 @@
 ## 1.4.0
 Software update and development & documentation release.
 
+Note: the docker image will not build at the moment, this is a work in progress and will be in 1.4.1.
+
 New
 - Mention LinkedIn next to Twitter in footer [(#496)]
 - Add security.txt based on https://securitytxt.org/ [(#493)]
