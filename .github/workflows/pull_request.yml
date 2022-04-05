@@ -54,8 +54,8 @@ jobs:
         id: cache-venv
         with:
           # Prevent re-building the venv when all requirements.txts stays the same.
+          # rebuild venv to make sure everything still builds ./.venv/
           path: |
-            ./.venv/
             ./unbound/
             ./_unbound/
             ./nassl_freebsd/
@@ -69,7 +69,7 @@ jobs:
           cp ./internetnl/settings-dist.py ./internetnl/settings.py
       - name: Make venv
         run: make venv
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+        # if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Install system dependencies for unbound/nassl
         run: |
           sudo apt update
