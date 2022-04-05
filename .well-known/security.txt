@@ -1,4 +1,5 @@
-# Note: this file has not yet been signed and thus might be invalid.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
 # Canonical URL
 Canonical: https://internet.nl/.well-known/security.txt
@@ -11,3 +12,19 @@ Encryption: https://internet.nl/disclosure/
 
 # Our security policy
 Policy: https://internet.nl/disclosure/
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmJLVowACgkQ2JThX0UC
+hWNxxg/8DOS1syYYp9KersKhzemo0gqNpDB63w2Uu5hLOGaKN6fJSLfFri7HK9UR
+jdXL/rYiIci+c4y9a5wSjoztXF0dtQLpRPfkZnotJCLbyJUNB6qcVsfUYsGyVAMy
+c7v+BDPvd3409OeaSH9bI3w2fiunBW3QrwUJpNujHeGrZx3TrrJtPoY9dsnGC9Qb
+k8nkT2bhFGs4YLbQhjjUQI8hMWFNBjVG0cwSeGP6LlMVIfaRWBYlxHI+jIMCUZTR
+sjMVDUWPSEW9fWfV/506U1wG01aydvTUAz146XVMboDhh2lqOosrgvz+0W4mv0d9
+aN0wiKDJgDo/+V+fBaVm+/STLULUb2BYr48gERkEIczctdrMvzOocqjvys0UWhfX
+3Q242Z3n+72Fl2t6ZnLwt0JjFsYhmPfueIm6rs9vMglTJXWWj6jkMbUoAhkMQsiU
+TJYtU0hMILZNRFt3EGr0MVhpqm/EoS2owZBmKuItUeAXxqD6XOD/D3uOHo6wLRPt
+rYlDvZLtuZPY89ADFWLNAhhINdlbX2/iKHEkJCVuVAAa1X/wjOtGo5uBSkP9UD5F
+rwOYxD1bmgBZN1NgGzuRBpWZrwDUQwMKqDKTrgAu6ZRWsgb65ujGohUs+3cd7wbT
+h7z1W8fkSpn+jIdpe4gRWuZZVqL8Di7NG4VlDekaIcLiJMbZyRI=3D
+=3D/w66
+-----END PGP SIGNATURE-----
