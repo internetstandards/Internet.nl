@@ -36,7 +36,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 env = env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-sync run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github python-whois nassl test check autofix
 
 help:
 	@echo 'Makefile for internet.nl'
