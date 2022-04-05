@@ -86,9 +86,12 @@ translate_content_to_main:
 
 
 update_padded_macs:
+	chmod +x $(MACSDIR)/update-macs.sh
 	cd $(MACSDIR); ./update-macs.sh
 
 update_cert_fingerprints:
+	chmod +x $(CERTSSDIR)/update-certs.sh
+	chmod +x $(CERTSSDIR)/mk-ca-bundle.pl
 	cd $(CERTSSDIR); ./update-certs.sh
 
 update_root_key_file:
