@@ -59,7 +59,7 @@ cryptography==36.0.1
     #   urllib3
 deprecated==1.2.13
     # via redis
-django==3.2.12
+django==3.2.13
     # via
     #   -r requirements.in
     #   django-bleach
@@ -102,8 +102,6 @@ idna==3.3
     #   requests
     #   trio
     #   urllib3
-importlib-metadata==4.10.1
-    # via markdown
 iniconfig==1.1.1
     # via pytest
 kombu==5.2.3
@@ -213,11 +211,9 @@ wrapt==1.13.3
     # via deprecated
 wsproto==1.0.0
     # via trio-websocket
-zipp==3.7.0
-    # via importlib-metadata
-zope.event==4.5.0
+zope-event==4.5.0
     # via gevent
-zope.interface==5.4.0
+zope-interface==5.4.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
