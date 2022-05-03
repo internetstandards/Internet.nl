@@ -2,7 +2,7 @@
 # Manual: https://docs.celeryproject.org/en/latest/userguide/daemonizing.html
 
 # Names of nodes to start, with celery and default added for non-addressed tasks (should not happen)
-CELERYD_NODES="db_worker slow_db_worker worker_slow batch_slow batch_main batch_callback celery default nassl_worker ipv6_worker mail_worker web_worker resolv_worker dnssec_worker"
+CELERYD_NODES="db_worker slow_db_worker worker_slow batch_slow celery default batch_main batch_callback nassl_worker ipv6_worker mail_worker web_worker resolv_worker dnssec_worker"
 
 # Absolute or relative path to the 'celery' command:
 CELERY_BIN="/opt/internetnl/Internet.nl/.venv/bin/celery"
@@ -32,6 +32,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # -c is used for --concurrency, -Q is used for Queues (the longhand is not allowed)
 # All queues: db_worker, slow_db_worker, batch_callback, batch_main, worker_slow, batch_slow
 # Warning: 50 workers CAN overload your system. 4GB will not cut it in that case!
+# celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker
 CELERYD_OPTS="--without-gossip --events --time-limit=300 -P gevent 8 -c 1 -c:1-6 1 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -c:7 50 -Q:7 batch_main -c:8 2 -Q:8 batch_callback -c:9 150 -Q:9 nassl_worker -c:10 20 -Q:10 ipv6_worker -c:11 20 -Q:11 mail_worker -c:12 20 -Q:12 web_worker -c:13 50 -Q:13 resolv_worker -c:14 20 -Q:14 dnssec_worker"
 
 # %N will be replaced with the first part of the nodename.
