@@ -33,7 +33,7 @@ CELERYD_CHDIR="/opt/internetnl/Internet.nl/"
 # All queues: db_worker, slow_db_worker, batch_callback, batch_main, worker_slow, batch_slow
 # Warning: 50 workers CAN overload your system. 4GB will not cut it in that case!
 # celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker
-CELERYD_OPTS="--without-gossip --events --time-limit=300 -P gevent 8 -c 1 -c:1-6 1 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -c:7 50 -Q:7 batch_main -c:8 2 -Q:8 batch_callback -c:9 150 -Q:9 nassl_worker -c:10 20 -Q:10 ipv6_worker -c:11 20 -Q:11 mail_worker -c:12 20 -Q:12 web_worker -c:13 50 -Q:13 resolv_worker -c:14 20 -Q:14 dnssec_worker"
+CELERYD_OPTS="--without-gossip --events --time-limit=300 -P gevent 8 -c 1 -c:1-6 1 -Q:1 db_worker -Q:2 slow_db_worker -Q:3 worker_slow -Q:4 batch_slow -Q:5 celery -Q:6 default -c:7 50 -Q:7 batch_main -c:8 50 -Q:8 batch_callback -c:9 150 -Q:9 nassl_worker -c:10 20 -Q:10 ipv6_worker -c:11 20 -Q:11 mail_worker -c:12 20 -Q:12 web_worker -c:13 50 -Q:13 resolv_worker -c:14 20 -Q:14 dnssec_worker"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/opt/internetnl/log/celery-%N.log"
