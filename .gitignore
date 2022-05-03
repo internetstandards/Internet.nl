@@ -50,6 +50,7 @@ nassl_freebsd
 .unbound-x86-3.9
 .python-whois
 .nassl
+nassl_freebsd_prebuilt*
 
 # testing
 # Test coverage database is not relevant
@@ -58,6 +59,7 @@ nassl_freebsd
 
 # custom dependencies temp storage
 custom-deps
+.custom-dependency-backup/
 
 /manual-hall-of-fame
 
