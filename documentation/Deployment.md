@@ -1,6 +1,6 @@
 # Deployment
 
-_The deployment intructions described here are mostly generic. Specific
+_The deployment instructions described here are mostly generic. Specific
 instructions are not given because they rely heavily on the preferred chosen
 environment of one's installation._
 

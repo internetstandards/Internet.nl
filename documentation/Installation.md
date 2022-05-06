@@ -8,6 +8,8 @@ Current install base is Django 3.2 LTS with Python 3.7.
 Note that previous installation instructions have been moved to a makefile. This prevents a lot of copy pasting of commands.
 
 The following instructions should work on most Debian-based systems. Tested on Ubuntu 18.04
+Example configuration files for the internet.nl ecosystem can be found
+[here](https://github.com/internetstandards/Internet.nl/blob/master/documentation/example_configuration).
 
 ## System requirements
 
@@ -60,10 +62,13 @@ Make sure to use the `internetnl` branch and follow the
 [README.md](https://github.com/internetstandards/unbound/blob/internetnl/README.md)
 instructions for installation.
 
+Note: beore compiling unbound you also need to edit the DNS labels for your
+connection test domain.
+
 If you setup a python virtual environment you should enable it for unbound's
 installation.
 
-_Note that extra DNS records are needed._
+For the connection test, [specific DNS records are needed](https://github.com/internetstandards/unbound#configuration=).
 
 Manually running unbound can be done with `unbound -d -vvvv`. This opens unbound in a console with maximum debug logging.
 This helps figuring out if everything is set up properly. Unbound will use syslog after starting, and you'll need to
