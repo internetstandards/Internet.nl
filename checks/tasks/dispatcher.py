@@ -1,5 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import time
 from celery import group
 from celery.result import AsyncResult
 from django.core.cache import cache
@@ -56,6 +57,9 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             red = get_redis_connection("default")
             red.sadd(req_limit_id, task_id)
             red.expire(req_limit_id, req_limit_ttl)
+        else:
+            time.sleep(0.1)
+            task_id = cache.get(cache_id)
 
     log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
     callback = AsyncResult(task_id)
