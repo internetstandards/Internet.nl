@@ -5,5 +5,5 @@
 # This means we should be good to go to restart every day at midnight. For other installations this might
 # differ. Therefore this resets just a bit more. The only issue is basically running out of ram, as file descriptors
 # and max clients for redis can be huge. To be safe, lets do this every 6 hours.
-0 */6 * * *     /opt/internetnl/etc/cron/single-restart_services.sh
+0 */6 * * *     /opt/internetnl/etc/cron/single_restart_services.sh
 0 3 * * *       /opt/internetnl/etc/cron/restart_gunicorn.sh
