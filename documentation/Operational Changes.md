@@ -143,7 +143,7 @@ mkdir /opt/internetnl/etc/cron
 cp -v documentation/example_configuration/opt_internetnl_etc/cron/* /opt/internetnl/etc/cron
 chmod +x /opt/internetnl/etc/cron/*
 
-# Add the contents of documentation/example_configuration/crontab into `crontab -e` for the root user.
+# Add the contents of documentation/example_configuration/cron/crontab into `crontab -e` for the root user.
 # Currently this is:
 0 */6 * * *     /opt/internetnl/etc/cron/restart_services.sh
 0 3 * * *       /opt/internetnl/etc/cron/restart_gunicorn.sh
