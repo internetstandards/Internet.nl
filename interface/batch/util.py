@@ -515,6 +515,9 @@ class DomainTechnicalResults:
             ip_similarity = distance <= settings.SIMHASH_MAX
             webservers["ip_similarity"] = ip_similarity
 
+        if not report_table.ipv6.webdomains.all():
+            return webservers
+
         webdomain = report_table.ipv6.webdomains.all()[0]
         webservers.update(cls._get_addresses_info(webdomain))
 
