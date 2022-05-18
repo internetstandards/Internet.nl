@@ -22,6 +22,7 @@ from interface.views.shared import (
     probestatuses,
     process,
     redirect_invalid_domain,
+    update_report_with_registrar_and_score,
 )
 
 regex_mailaddr = (
@@ -57,6 +58,7 @@ def mailprocess(request, mailaddr):
 def create_report(domain, ipv6, dnssec, auth, tls):
     report = MailTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, auth=auth, tls=tls)
     report.save()
+    update_report_with_registrar_and_score(report, mailprobes)
     return report
 
 

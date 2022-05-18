@@ -219,6 +219,18 @@ def add_score_to_report(report, score):
         report.save()
 
 
+def update_report_with_registrar_and_score(report, probes):
+    """
+    Adds registrar information (from DNSSEC test if any) and score
+    to a newly created report.
+
+    """
+    probe_reports = probes.get_probe_reports(report)
+    add_registrar_to_report(report)
+    score = probes.count_probe_reports_score(probe_reports)
+    add_score_to_report(report, score)
+
+
 def get_hof_cache(cache_id, count):
     cached_data = cache.get(cache_id, None)
     if cached_data is None:

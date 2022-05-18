@@ -29,6 +29,7 @@ from interface.views.shared import (
     probestatuses,
     process,
     redirect_invalid_domain,
+    update_report_with_registrar_and_score,
 )
 
 # Entrance after form submission.
@@ -63,6 +64,7 @@ def siteprocess(request, dname):
 def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None):
     report = DomainTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, tls=tls, appsecpriv=appsecpriv)
     report.save()
+    update_report_with_registrar_and_score(report, webprobes)
     return report
 
 
