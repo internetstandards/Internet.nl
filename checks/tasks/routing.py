@@ -63,9 +63,7 @@ class RouteView(ABC):
         unavailable without (1).
     """
 
-    def __init__(
-        self, ip: Ip, routes: List[AsnPrefix], validity: Dict[AsnPrefix, Dict] = {}
-    ) -> None:
+    def __init__(self, ip: Ip, routes: List[AsnPrefix], validity: Dict[AsnPrefix, Dict] = {}) -> None:
         """Initialize RouteView.
 
         Args:
@@ -92,7 +90,6 @@ class RouteView(ABC):
     @abstractmethod
     def from_bgp(cls: Type[Rv], task: T, ip: Ip) -> Rv:
         """Construct a RouteView from a source of BGP data."""
-        pass
 
     @classmethod
     def from_rpki(cls: Type[Rv], task: T, rp: Type[Rp], ip: Ip) -> Rv:
@@ -238,13 +235,11 @@ class RelyingPartySoftware(object):
     @abstractmethod
     def lookup(task: T, prefix_in: Prefix) -> Dict[str, Any]:
         """Look up ROAs covering a given prefix."""
-        pass
 
     @staticmethod
     @abstractmethod
     def validate(task: T, asn: Asn, prefix: Prefix) -> Dict[str, Any]:
         """Validate a origin ASN and prefix against published ROAs."""
-        pass
 
 
 class Routinator(RelyingPartySoftware):

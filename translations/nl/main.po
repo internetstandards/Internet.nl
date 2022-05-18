@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2021-10-07 09:53:47.692849\n"
+"PO-Revision-Date: 2022-04-04 11:57:54.876031\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -107,11 +107,11 @@ msgstr "Kwetsbaarheid melden"
 msgid "base faqs"
 msgstr "Kennisbank"
 
-msgid "base followtwitter"
-msgstr "Volg ons op Twitter"
-
 msgid "base followlinkedin"
 msgstr "Volg ons op LinkedIn"
+
+msgid "base followtwitter"
+msgstr "Volg ons op Twitter"
 
 msgid "base halloffame"
 msgstr "Hall of Fame"

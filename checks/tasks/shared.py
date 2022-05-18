@@ -1,18 +1,17 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from collections import defaultdict
 import re
 import socket
+from collections import defaultdict
 
 from celery import shared_task
 from django.conf import settings
+
 import unbound
-
-from . import SetupUnboundContext
-from .. import batch_shared_task
-from ..scoring import STATUS_MAX, ORDERED_STATUSES
-from ..models import MxStatus
-
+from checks.models import MxStatus
+from checks.scoring import ORDERED_STATUSES, STATUS_MAX
+from checks.tasks import SetupUnboundContext
+from interface import batch_shared_task
 
 MAX_MAILSERVERS = 10
 MX_LOCALHOST_RE = re.compile("^localhost\.?$")
@@ -27,7 +26,8 @@ with open(settings.CA_FINGERPRINTS) as f:
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def mail_get_servers(self, url, *args, **kwargs):
     return do_mail_get_servers(self, url, *args, **kwargs)
 
@@ -36,7 +36,8 @@ def mail_get_servers(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_mail_get_servers(self, url, *args, **kwargs):
     return do_mail_get_servers(self, url, *args, **kwargs)
 
@@ -45,7 +46,8 @@ def batch_mail_get_servers(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def resolve_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_a_aaaa(self, qname, *args, **kwargs)
 
@@ -54,7 +56,8 @@ def resolve_a_aaaa(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_a_aaaa(self, qname, *args, **kwargs)
 
@@ -63,7 +66,8 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def resolve_mx(self, qname, *args, **kwargs):
     return do_resolve_mx(self, qname, *args, **kwargs)
 
@@ -72,7 +76,8 @@ def resolve_mx(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_resolve_mx(self, qname, *args, **kwargs):
     return do_resolve_mx(self, qname, *args, **kwargs)
 
@@ -81,7 +86,8 @@ def batch_resolve_mx(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def resolve_ns(self, qname, *args, **kwargs):
     return do_resolve_ns(self, qname, *args, **kwargs)
 
@@ -90,7 +96,8 @@ def resolve_ns(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext)
+    base=SetupUnboundContext,
+)
 def batch_resolve_ns(self, qname, *args, **kwargs):
     return do_resolve_ns(self, qname, *args, **kwargs)
 
@@ -104,7 +111,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
     mailservers = []
     mxlist = self.resolve(url, unbound.RR_TYPE_MX)
     for prio, rdata in mxlist:
-        is_null_mx = prio == 0 and rdata == ''
+        is_null_mx = prio == 0 and rdata == ""
         if is_null_mx:
             if len(mxlist) > 1 or not do_resolve_a_aaaa(self, url):
                 # Invalid NULL MX next to other MX or no A/AAAA.
@@ -112,8 +119,8 @@ def do_mail_get_servers(self, url, *args, **kwargs):
             return [(None, None, MxStatus.null_mx)]
 
         rdata = rdata.lower().strip()
-        if rdata == '':
-            rdata = '.'
+        if rdata == "":
+            rdata = "."
         elif re.match(MX_LOCALHOST_RE, rdata):
             # Ignore "localhost".
             continue
@@ -177,7 +184,7 @@ def do_resolve_ns(self, url, *args, **kwargs):
     next_label = url
     while not rrset and "." in next_label:
         rrset = self.resolve(next_label, unbound.RR_TYPE_NS)
-        next_label = next_label[next_label.find(".")+1:]
+        next_label = next_label[next_label.find(".") + 1 :]
 
     for rr in rrset:
         yield (rr, do_resolve_a_aaaa(self, rr))
@@ -220,33 +227,31 @@ def aggregate_subreports(subreports, report):
         for test_item in report:
             status = STATUS_MAX
             worst_status = STATUS_MAX
-            report[test_item]['tech_data'] = []
+            report[test_item]["tech_data"] = []
             for server, subreport in subreports.items():
-                substatus = subreport[test_item]['status']
-                subworststatus = subreport[test_item]['worst_status']
+                substatus = subreport[test_item]["status"]
+                subworststatus = subreport[test_item]["worst_status"]
                 if ORDERED_STATUSES[substatus] <= ORDERED_STATUSES[status]:
                     status = substatus
-                    verdict = subreport[test_item]['verdict']
-                    report[test_item]['status'] = status
-                    report[test_item]['verdict'] = verdict
+                    verdict = subreport[test_item]["verdict"]
+                    report[test_item]["status"] = status
+                    report[test_item]["verdict"] = verdict
                 if ORDERED_STATUSES[subworststatus] <= ORDERED_STATUSES[worst_status]:
                     worst_status = subworststatus
-                    report[test_item]['worst_status'] = worst_status
+                    report[test_item]["worst_status"] = worst_status
 
-                if (subreport[test_item]['tech_type'] and
-                        not report[test_item]['tech_type']):
-                    tech_type = subreport[test_item]['tech_type']
-                    report[test_item]['tech_type'] = tech_type
+                if subreport[test_item]["tech_type"] and not report[test_item]["tech_type"]:
+                    tech_type = subreport[test_item]["tech_type"]
+                    report[test_item]["tech_type"] = tech_type
 
-                subtechdata = subreport[test_item]['tech_data']
-                if (subreport[test_item]['tech_type'] == "table_multi_col" and
-                        isinstance(subtechdata, list)):
+                subtechdata = subreport[test_item]["tech_data"]
+                if subreport[test_item]["tech_type"] == "table_multi_col" and isinstance(subtechdata, list):
                     # Enable more columns in the aggregated tech table.
                     data = (server, *subtechdata)
                 else:
                     data = (server, subtechdata)
-                report[test_item]['tech_data'].append(data)
+                report[test_item]["tech_data"].append(data)
 
     else:
         for test_name, test_item in report.items():
-            test_item['tech_type'] = ""
+            test_item["tech_type"] = ""

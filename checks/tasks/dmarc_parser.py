@@ -1,12 +1,25 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from pyparsing import Word, Regex, White, Optional, ZeroOrMore
-from pyparsing import Group, CaselessLiteral, ParseException, Literal
-from pyparsing import alphanums, nums
-from pyparsing import ParserElement, StringEnd, Combine
 from urllib.parse import urlparse
 
-ParserElement.setDefaultWhitespaceChars('')  # Whitespace is in the grammar
+from pyparsing import (
+    CaselessLiteral,
+    Combine,
+    Group,
+    Literal,
+    Optional,
+    ParseException,
+    ParserElement,
+    Regex,
+    StringEnd,
+    White,
+    Word,
+    ZeroOrMore,
+    alphanums,
+    nums,
+)
+
+ParserElement.setDefaultWhitespaceChars("")  # Whitespace is in the grammar
 
 # Parser for DMARC records.
 #
@@ -28,23 +41,23 @@ ParserElement.setDefaultWhitespaceChars('')  # Whitespace is in the grammar
 #     - rfmt, (rf=);
 #     - percent, (pct=).
 
-WSP = Optional(White(ws=' ')).suppress()
+WSP = Optional(White(ws=" ")).suppress()
 
-sep = (WSP + CaselessLiteral(';') + WSP).suppress()
-equal = WSP + Literal('=') + WSP
+sep = (WSP + CaselessLiteral(";") + WSP).suppress()
+equal = WSP + Literal("=") + WSP
 
 
 def _check_keyword(tokens):
-    if tokens[0][-1] == '-':
+    if tokens[0][-1] == "-":
         raise ParseException("'-' found at the end of keyword.")
     return None
 
 
-keyword = Word(alphanums + '-').setParseAction(_check_keyword)
+keyword = Word(alphanums + "-").setParseAction(_check_keyword)
 
 dmarc_uri_numeric = Word(nums) + Optional(
-    CaselessLiteral('k') | CaselessLiteral('m') | CaselessLiteral('g')
-    | CaselessLiteral('t'))
+    CaselessLiteral("k") | CaselessLiteral("m") | CaselessLiteral("g") | CaselessLiteral("t")
+)
 
 
 def _check_dmarc_uri(tokens):
@@ -53,11 +66,11 @@ def _check_dmarc_uri(tokens):
 
     """
     uri = tokens[0]
-    ex_num = uri.count('!')
+    ex_num = uri.count("!")
     if ex_num > 1:
         raise ParseException("Non-encoded '!' found in url.")
     elif ex_num == 1:
-        uri, numeric = uri.split('!')
+        uri, numeric = uri.split("!")
         dmarc_uri_numeric.parseString(numeric)
     try:
         urlparse(uri)
@@ -66,47 +79,37 @@ def _check_dmarc_uri(tokens):
     return None
 
 
-dmarc_uri = Regex('[^ ,;]+').setParseAction(_check_dmarc_uri)
-percent = Combine(
-    CaselessLiteral('pct') + equal + Word(nums, max=3))('percent')
-rfmt = Combine(
-    CaselessLiteral('rf') + equal + keyword
-    + ZeroOrMore(WSP + Literal(':') + keyword))('rfmt')
+dmarc_uri = Regex("[^ ,;]+").setParseAction(_check_dmarc_uri)
+percent = Combine(CaselessLiteral("pct") + equal + Word(nums, max=3))("percent")
+rfmt = Combine(CaselessLiteral("rf") + equal + keyword + ZeroOrMore(WSP + Literal(":") + keyword))("rfmt")
 fo = Combine(
-    CaselessLiteral('fo') + equal + (
-        CaselessLiteral('0') | CaselessLiteral('1') | CaselessLiteral('d')
-        | CaselessLiteral('s'))
-    + ZeroOrMore(WSP + Literal(':') + WSP + (
-        CaselessLiteral('0') | CaselessLiteral('1') | CaselessLiteral('d')
-        | CaselessLiteral('s'))))('fo')
-ainterval = Combine(
-    CaselessLiteral('ri') + equal + Word(nums))('ainterval')
-aspf = Combine(
-    CaselessLiteral('aspf') + equal + (
-        CaselessLiteral('r') | CaselessLiteral('s')))('aspf')
-adkim = Combine(
-    CaselessLiteral('adkim') + equal + (
-        CaselessLiteral('r') | CaselessLiteral('s')))('adkim')
-furi = Combine(
-    CaselessLiteral('ruf') + equal + dmarc_uri
-    + ZeroOrMore(WSP + Literal(',') + WSP + dmarc_uri))('furi')
-auri = Combine(
-    CaselessLiteral('rua') + equal + dmarc_uri
-    + ZeroOrMore(WSP + Literal(',') + WSP + dmarc_uri))('auri')
+    CaselessLiteral("fo")
+    + equal
+    + (CaselessLiteral("0") | CaselessLiteral("1") | CaselessLiteral("d") | CaselessLiteral("s"))
+    + ZeroOrMore(
+        WSP
+        + Literal(":")
+        + WSP
+        + (CaselessLiteral("0") | CaselessLiteral("1") | CaselessLiteral("d") | CaselessLiteral("s"))
+    )
+)("fo")
+ainterval = Combine(CaselessLiteral("ri") + equal + Word(nums))("ainterval")
+aspf = Combine(CaselessLiteral("aspf") + equal + (CaselessLiteral("r") | CaselessLiteral("s")))("aspf")
+adkim = Combine(CaselessLiteral("adkim") + equal + (CaselessLiteral("r") | CaselessLiteral("s")))("adkim")
+furi = Combine(CaselessLiteral("ruf") + equal + dmarc_uri + ZeroOrMore(WSP + Literal(",") + WSP + dmarc_uri))("furi")
+auri = Combine(CaselessLiteral("rua") + equal + dmarc_uri + ZeroOrMore(WSP + Literal(",") + WSP + dmarc_uri))("auri")
 srequest = Combine(
-    CaselessLiteral('sp') + equal + (
-        CaselessLiteral('none')
-        | CaselessLiteral('quarantine')
-        | CaselessLiteral('reject')))('srequest')
+    CaselessLiteral("sp")
+    + equal
+    + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
+)("srequest")
 request = Combine(
-    CaselessLiteral('p') + equal + (
-        CaselessLiteral('none')
-        | CaselessLiteral('quarantine')
-        | CaselessLiteral('reject')))('request')
-version = Combine(
-    CaselessLiteral('v') + equal + Literal('DMARC1'))
+    CaselessLiteral("p") + equal + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
+)("request")
+version = Combine(CaselessLiteral("v") + equal + Literal("DMARC1"))
 directives = (
-    Optional(request) + (
+    Optional(request)
+    + (
         Optional(sep + srequest)
         & Optional(sep + auri)
         & Optional(sep + furi)
@@ -115,9 +118,11 @@ directives = (
         & Optional(sep + ainterval)
         & Optional(sep + fo)
         & Optional(sep + rfmt)
-        & Optional(sep + percent)) + Optional(sep))
-record = (
-    version('version') + sep + Group(directives)('directives') + StringEnd())
+        & Optional(sep + percent)
+    )
+    + Optional(sep)
+)
+record = version("version") + sep + Group(directives)("directives") + StringEnd()
 
 
 def parse(dmarc_record):

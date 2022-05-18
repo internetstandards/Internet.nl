@@ -1,6 +1,12 @@
 *.sqlite3
 /internetnl/settings.py
+/internetnl/settings.dev.batch.internet.nl.py
+/internetnl/settings.dev.internet.nl.py
 /internetnl/batch_api_doc_conf.py
+/internetnl/internet.nl.settings.batch.live.py
+/internetnl/internet.nl.settings.single.live.py
+/internetnl/internet.nl.single.settings.live.py
+/internetnl/internet.nl.batch.settings.live.py
 __pycache__
 *.mo
 *.pyc
@@ -20,3 +26,41 @@ __pycache__
 *.log
 *.pid
 /tests/.pytest_cache/
+
+# Pycharm defaults
+.idea
+.venv
+
+# When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
+unbound
+_unbound
+python-whois
+pythonwhois.egg-info
+nassl_freebsd
+
+# Mac os via ubuntu
+._.DS_Store
+.DS_Store
+
+# make targets
+.unbound
+.unbound-3.7-github
+.unbound-x86
+.unbound-x86-3.8
+.unbound-x86-3.9
+.python-whois
+.nassl
+
+# testing
+# Test coverage database is not relevant
+.coverage
+.make.test
+
+# custom dependencies temp storage
+custom-deps
+
+/manual-hall-of-fame
+
+# Any tmp stuff, like for compilations, translations, unzipping / downloading you name it. Any content in this
+# directory can and will be deleted at random intervals at any moment.
+tmp

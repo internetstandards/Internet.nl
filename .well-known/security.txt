@@ -1,6 +1,5 @@
-#
-# placeholder file. Needs to be edited and pgp signed
-# also make sure to exclude this file from any proxy forwarding on your front-end webserver
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
 # Canonical URL
 Canonical: https://internet.nl/.well-known/security.txt
@@ -14,3 +13,20 @@ Encryption: https://internet.nl/disclosure/
 # Our security policy
 Policy: https://internet.nl/disclosure/
 
+Expires: 2023-05-09T15:00:00z
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmJ5EGoACgkQ2JThX0UC
+hWOI6xAAmrax+znwe3b7zODvdk4aZzWGzYtorCxjUyiOSAiT9GxLvcw+27j/iNJg
+D/CDv2oMoChN8Dtadhki4n0n3YqQ+XhtjJ2AKZs2jqmHXqIrTUntsK8bdbsBUxUf
+ozbRXoHih+LxXZONY3svoXLRiSbCW1cN5StLr4UXeU1uMoZSXY8BHuknbb7UUggN
+Wq863v3aqWxFa+4IIklO9tnQJyi8f8bcgOO0cJBDr3L0BseSfs0K4zDCAyQQXXB/
+LyHtmiDF7fnSm5zE0rzIdrNaFrE2GO4R49kWCmGBWCYZZcDlvjR4ZMOK88ihXxBO
++mU1AlIq7LXT/mrVtXUjx7cIq3FSBq0++t3n93vWGEeDdQTA2r4EaINYuec7vA6R
+wmlsOLCxv40cPATBEJDCsvFjV9LNWHUDLewWrYTjhxW/iEtvmi77++kx4lClYUt4
+O8CoiMrTfgnStpVrIQH8O6C7TF+G94HAGxULaVtuNq7uKniKn9AhpWlbPK93QXwC
+8iT9nH/mujKZwWkQ6NLBsooFC6P2fgKtKFwsbPePVoV6m6sLqO1V+IKy9E7BcUg8
+Iay1kQ/02XIJs0KYjcGccoxPF1CCK1sdv6NvtySsKFzEfqQAnlWIvYn4B0g0P6Li
++rcwhhsbpp5/5AozP0+rdISUEFjbWMSp+FiEakCJrhMN5t8M/A0=
+=phO3
+-----END PGP SIGNATURE-----

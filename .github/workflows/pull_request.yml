@@ -1,0 +1,105 @@
+name: Internet.nl
+
+on: [ pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    env:
+      GITHUB_ACTIONS: True
+      ENABLE_BATCH: True
+      SECRET_KEY: Github
+      DEBUG: True
+      DB_NAME: internetnl
+      DB_USER: internetnluser
+      DB_PASSWORD: internetnluser
+    strategy:
+      matrix:
+        # Support Matrix from python.org/downloads:
+        # 3.7, 2023-06-27
+        # 3.8, 2024-10
+        # 3.9, 2025-10
+        # 3.10 2026-10
+        python-version: [ 3.7, "3.10" ]
+    continue-on-error: false
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 15672:15672
+          - 5672:5672
+      postgres:
+        image: postgres:12.5
+        env:
+          POSTGRES_DB: internetnl
+          POSTGRES_USER: internetnluser
+          POSTGRES_PASSWORD: internetnluser
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 2
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run Redis 6
+        uses: supercharge/redis-github-action@1.4.0
+        with:
+          redis-version: 6
+      - uses: actions/cache@v2
+        id: cache-venv
+        with:
+          # Prevent re-building the venv when all requirements.txts stays the same.
+          # rebuild venv to make sure everything still builds ./.venv/
+          path: |
+            ./unbound/
+            ./_unbound/
+            ./nassl_freebsd/
+            ./python-whois/
+          key: ${{ runner.os }}-${{ matrix.python-version }}-venv-and-deps-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.python-version }}-venv-
+      # the venv and all (slow) custom dependencies is only built when there was no cache hit.
+      - name: Setup Application Configuration
+        run: |
+          cp ./internetnl/settings-dist.py ./internetnl/settings.py
+      - name: Make venv
+        run: make venv
+        # if: steps.cache-venv.outputs.cache-hit != 'true'
+      - name: Install system dependencies for unbound/nassl
+        run: |
+          sudo apt update
+          sudo apt-get update
+          sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev
+      - name: Make nassl
+        run: make nassl
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+      - name: Make unbound
+        run: make unbound-${{ matrix.python-version }}-github
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+      - name: Make python-whois
+        run: make python-whois
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+      # Perform QA
+      - name: Check linting
+        run: make check
+        env:
+          GITHUB_ACTIONS: True
+      - name: Test
+        run: make test
+        env:
+          GITHUB_ACTIONS: True
+          ENABLE_BATCH: True
+          SECRET_KEY: Github
+          DEBUG: True
+          DB_NAME: internetnl
+          DB_USER: internetnluser
+          DB_PASSWORD: internetnluser
+      - name: Verify if Build API documentation command works (needs /static/ dir to exist)
+        run: |
+          mkdir -p static
+          make manage api_generate_doc

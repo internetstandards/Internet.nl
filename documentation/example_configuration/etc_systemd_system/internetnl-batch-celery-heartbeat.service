@@ -1,0 +1,18 @@
+[Unit]
+Description=Celery Beat for Internet.nl Batch Scan Version
+After=network.target internetnl-gunicorn.service
+
+[Service]
+Type=simple
+User=internetnl
+Group=internetnl
+EnvironmentFile=/opt/internetnl/etc/batch-celery-heartbeat
+EnvironmentFile=/opt/internetnl/etc/internet.nl.systemd.env
+WorkingDirectory=/opt/internetnl/Internet.nl
+ExecStartPre=/bin/sleep 5
+ExecStart=/bin/sh -c '${CELERY_BIN} -A ${CELERY_APP} beat \
+  --pidfile=${CELERYBEAT_PID_FILE} \
+  --logfile=${CELERYBEAT_LOG_FILE} --loglevel=${CELERYD_LOG_LEVEL}'
+
+[Install]
+WantedBy=multi-user.target

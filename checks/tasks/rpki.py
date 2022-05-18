@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import transaction
 import logging
 
+from interface import batch, batch_shared_task
 from . import SetupUnboundContext
 from . import shared
 from .dispatcher import check_registry, post_callback_hook
@@ -21,7 +22,6 @@ from .routing import (
     RelyingPartyUnvailableError,
 )
 from .. import categories
-from .. import batch, batch_shared_task
 from ..models import (
     MailTestRpki,
     WebTestRpki,
@@ -51,9 +51,7 @@ model_map = dict(
 def mail_callback(self, results, domain, req_limit_id):
     """Save results in the DB."""
     category = categories.MailRpki()
-    maildomain, results = callback(
-        results, domain, MailTestRpki(), "mailtestrpki", category
-    )
+    maildomain, results = callback(results, domain, MailTestRpki(), "mailtestrpki", category)
     # Always calculate scores on saving.
     from ..probes import mail_probe_rpki
 
@@ -66,9 +64,7 @@ def mail_callback(self, results, domain, req_limit_id):
 def batch_mail_callback(self, results, domain):
     """Save results in the DB."""
     category = categories.MailRpki()
-    maildomain, results = callback(
-        results, domain, MailTestRpki(), "mailtestrpki", category
-    )
+    maildomain, results = callback(results, domain, MailTestRpki(), "mailtestrpki", category)
     # Always calculate scores on saving.
     from ..probes import batch_mail_probe_rpki
 
@@ -80,9 +76,7 @@ def batch_mail_callback(self, results, domain):
 def web_callback(self, results, domain, req_limit_id):
     """Save results in the DB."""
     category = categories.WebRpki()
-    webdomain, results = callback(
-        results, domain, WebTestRpki(), "webtestrpki", category
-    )
+    webdomain, results = callback(results, domain, WebTestRpki(), "webtestrpki", category)
     # Always calculate scores on saving.
     from ..probes import web_probe_rpki
 
@@ -104,9 +98,7 @@ def batch_web_callback(self, results, domain):
 
 
 @transaction.atomic
-def callback(
-    results: Mapping[TestName, TestResult], domain, parent, parent_name, category
-):
+def callback(results: Mapping[TestName, TestResult], domain, parent, parent_name, category):
     """Get the results, create the necessary tables and commit in the DB."""
     # parent stores the result for the domain under test
     parent.report = {}
@@ -132,13 +124,9 @@ def callback(
 
 
 web_registered = check_registry("web_rpki", web_callback, shared.resolve_a_aaaa)
-batch_web_registered = check_registry(
-    "batch_web_rpki", batch_web_callback, shared.batch_resolve_a_aaaa
-)
+batch_web_registered = check_registry("batch_web_rpki", batch_web_callback, shared.batch_resolve_a_aaaa)
 mail_registered = check_registry("mail_rpki", mail_callback, shared.resolve_mx)
-batch_mail_registered = check_registry(
-    "batch_mail_rpki", batch_mail_callback, shared.batch_resolve_mx
-)
+batch_mail_registered = check_registry("batch_mail_rpki", batch_mail_callback, shared.batch_resolve_mx)
 
 
 @web_registered
@@ -351,10 +339,7 @@ def report_valid(subtestname, category, domainset) -> None:
         for ip in domain.routing:
             errors = ip["errors"]
             # failure to validate, team cymru or routinator was unavailable
-            if (
-                RelyingPartyUnvailableError.__name__ in errors
-                or BGPSourceUnavailableError.__name__ in errors
-            ):
+            if RelyingPartyUnvailableError.__name__ in errors or BGPSourceUnavailableError.__name__ in errors:
                 category.subtests[subtestname].result_validator_error()
                 return
 
@@ -434,9 +419,7 @@ def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     return (TestName("rpki_ns"), ns)
 
 
-def do_mx_ns_rpki(
-    mx_ips_pairs, url, task, *args, **kwargs
-) -> Tuple[TestName, TestResult]:
+def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers for the mx record of a domain.
 
     These may or may not be the same as the nameservers for the domain itself.
@@ -451,9 +434,7 @@ def do_mx_ns_rpki(
     return (TestName("rpki_mx_ns"), mxns)
 
 
-def do_mail_rpki(
-    mx_ips_pairs, url, task, *args, **kwargs
-) -> Tuple[TestName, TestResult]:
+def do_mail_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check mailservers."""
     mail = do_rpki(task, mx_ips_pairs, *args, **kwargs)
 

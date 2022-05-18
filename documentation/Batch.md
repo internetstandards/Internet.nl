@@ -26,7 +26,7 @@ This is accomplished through a REST API.
 ### Generating the documentation
 The API follows the [OpenAPI specification](https://swagger.io/specification/).
 
-Copy `internetnl/batch_api_doc_conf.py-dist` to
+Copy `internetnl/batch_api_doc_conf_dist.py` to
 `internetnl/batch_api_doc_conf.py` and change any appropriate settings to your
 liking.
 

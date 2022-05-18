@@ -23,31 +23,28 @@ ORDERED_STATUSES = {
     STATUS_INFO: 3,
     STATUS_NOT_TESTED: 4,
     STATUS_GOOD_NOT_TESTED: 5,
-    STATUS_SUCCESS: 6
+    STATUS_SUCCESS: 6,
 }
 
 # Text used for HTML/CSS.
 STATUSES_HTML_CSS_TEXT_MAP = {
-    STATUS_FAIL: 'failed',
-    STATUS_SUCCESS: 'passed',
-    STATUS_NOTICE: 'warning',
-    STATUS_GOOD_NOT_TESTED: 'not-tested',  # same as not-tested
-    STATUS_NOT_TESTED: 'not-tested',
-    STATUS_INFO: 'info',
-    STATUS_ERROR: 'error',
+    STATUS_FAIL: "failed",
+    STATUS_SUCCESS: "passed",
+    STATUS_NOTICE: "warning",
+    STATUS_GOOD_NOT_TESTED: "not-tested",  # same as not-tested
+    STATUS_NOT_TESTED: "not-tested",
+    STATUS_INFO: "info",
+    STATUS_ERROR: "error",
 }
 # Text used for the API output.
-STATUSES_API_TEXT_MAP = {
-    k: v.replace('-', '_')
-    for k, v in STATUSES_HTML_CSS_TEXT_MAP.items()
-}
+STATUSES_API_TEXT_MAP = {k: v.replace("-", "_") for k, v in STATUSES_HTML_CSS_TEXT_MAP.items()}
 
 
 # --- SCORES
 #
 FULL_WEIGHT_POINTS = 10  # These are three levels of weighing results.
-HALF_WEIGHT_POINTS = 5   # All three can be used for passed tests, the
-LESS_WEIGHT_POINTS = 2   # difference is the effect on the overall score.
+HALF_WEIGHT_POINTS = 5  # All three can be used for passed tests, the
+LESS_WEIGHT_POINTS = 2  # difference is the effect on the overall score.
 NO_POINTS = 0
 
 

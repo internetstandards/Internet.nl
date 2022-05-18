@@ -9,23 +9,23 @@ import enumfields.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('checks', '0009_rpki'),
+        ("checks", "0009_rpki"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='batchmailtest',
-            name='rpki',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='checks.mailtestrpki'),
+            model_name="batchmailtest",
+            name="rpki",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="checks.mailtestrpki"),
         ),
         migrations.AddField(
-            model_name='batchmailtest',
-            name='rpki_errors',
+            model_name="batchmailtest",
+            name="rpki_errors",
             field=models.PositiveSmallIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='batchmailtest',
-            name='rpki_status',
+            model_name="batchmailtest",
+            name="rpki_status",
             field=enumfields.fields.EnumIntegerField(default=0, enum=checks.models.BatchTestStatus),
         ),
     ]
