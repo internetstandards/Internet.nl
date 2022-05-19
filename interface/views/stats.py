@@ -63,7 +63,8 @@ order by res asc
         table_content = c.fetchall()
 
     per_test = [sum(filter(None, x)) if i > 0 else "" for i, x in enumerate(zip(*table_content))]
-    per_test[0] = "Total per period"
+    if per_test:
+        per_test[0] = "Total per period"
     return render(
         request,
         "statistics.html",

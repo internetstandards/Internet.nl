@@ -126,9 +126,15 @@ clean_venv:  # Remove venv
 
 pip-compile:  ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
+
+pip-compile-dev:  ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements-dev.in
 
 pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
+
+pip-upgrade-dev: ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements-dev.in
 
@@ -137,6 +143,9 @@ pip-upgrade-package: ## Upgrades a package in the requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade-package ${package}
 
 pip-sync:  ## synchronizes the .venv with the state of requirements.txt
+	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
+
+pip-sync-dev:  ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt requirements-dev.txt
 
 run: venv
@@ -395,18 +404,32 @@ autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
 
-save-custom-deps:
-	# this saves building a ton of dependencies every sync.
-	mkdir -p custom-deps
-	# save unbound
-	cp .venv/lib/python3.8/site-packages/_unbound.la custom-deps
-	cp .venv/lib/python3.8/site-packages/_unbound.so custom-deps
-	cp .venv/lib/python3.8/site-packages/unbound.py custom-deps
-	cp -r .venv/lib/python3.8/site-packages/pythonwhois-2.4.3-py3.8.egg custom-deps
-	cp -r .venv/lib/python3.8/site-packages/nassl-1.1.3-py3.8-macosx-12-x86_64.egg custom-deps
 
-install-custom-deps:
-	cp -rf custom-deps .venv/lib/python3.8/site-packages/
+PYTHON_VERSION=3.7
+backup-custom-dependencies:
+	# this saves building a ton of dependencies every sync.
+	# Used in the Vulnerability patching process, unless of course unbound, pythonwhois or nassl are vulnerable.
+	mkdir -p .custom-dependency-backup
+	cp .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.la .custom-dependency-backup
+	cp .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.so .custom-dependency-backup
+	cp .venv/lib/python${PYTHON_VERSION}/site-packages/unbound.py .custom-dependency-backup
+	cp .venv/lib/python${PYTHON_VERSION}/site-packages/pythonwhois-* .custom-dependency-backup
+	cp -r .venv/lib/python${PYTHON_VERSION}/site-packages/nassl* .custom-dependency-backup
+	cp -r .venv/lib/python${PYTHON_VERSION}/site-packages/OpenSSL .custom-dependency-backup
+	cp .venv/lib/python${PYTHON_VERSION}/site-packages/easy-install.pth .custom-dependency-backup
+
+remove-custom-dependencies:
+	rm .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.la
+	rm .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.so
+	rm .venv/lib/python${PYTHON_VERSION}/site-packages/unbound.py
+	rm .venv/lib/python${PYTHON_VERSION}/site-packages/pythonwhois-*
+	rm -rf .venv/lib/python${PYTHON_VERSION}/site-packages/nassl*
+	rm -r .venv/lib/python${PYTHON_VERSION}/site-packages/OpenSSL
+	rm .venv/lib/python${PYTHON_VERSION}/site-packages/easy-install.pth
+
+
+restore-custom-dependencies:
+	cp -r .custom-dependency-backup/* .venv/lib/python${PYTHON_VERSION}/site-packages/
 
 
 run-gunicorn:

@@ -37,7 +37,7 @@ cp -v internetnl/settings.py ~/settings_1.3.py
 git reset HEAD --hard
 git clean -fdx
 git pull
-git checkout master
+git checkout main
 
 # Create a new settings file
 cp -v internetnl/settings-dist.py internetnl/settings.py
@@ -48,6 +48,7 @@ cp -v internetnl/internet.nl.dist.env ~/internet.nl.env
 # Setup the password and such correctly in the env file:
 # The following is setup for dev.internet.nl
 sed -i "s/SECRET_KEY=.*/SECRET_KEY=secret/g" ~/internet.nl.env
+sed -i "s/DB_USER=.*/DB_USER=internetnl/g" ~/internet.nl.env
 sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=secret/g" ~/internet.nl.env
 sed -i "s/IPV6_TEST_ADDR=.*/IPV6_TEST_ADDR=2a00:d00:ff:162:62:204:66:15/g" ~/internet.nl.env
 sed -i "s/CONN_TEST_DOMAIN=.*/CONN_TEST_DOMAIN=dev.internet.nl/g" ~/internet.nl.env
@@ -56,6 +57,8 @@ sed -i "s/SMTP_EHLO_DOMAIN=.*/SMTP_EHLO_DOMAIN=dev.internet.nl/g" ~/internet.nl.
 sed -i "s/ALLOWED_HOSTS=.*/ALLOWED_HOSTS=localhost,dev.internet.nl,.dev.internet.nl/g" ~/internet.nl.env
 sed -i "s/MATOMO_SITEID=.*/MATOMO_SITEID=10/g" ~/internet.nl.env
 sed -i "s/ENABLE_BATCH=.*/ENABLE_BATCH=False/g" ~/internet.nl.env
+sed -i "s/UNBOUND_ADDRESS=.*/UNBOUND_ADDRESS=127.0.0.1@53/g" ~/internet.nl.env
+
 # this environment uses pgbouncer, you might use the default port 5432
 sed -i "s/DB_PORT=.*/DB_PORT=6432/g" ~/internet.nl.env
 
@@ -81,6 +84,7 @@ make nassl
 # Run migrations
 make manage migrate
 
+sudo su -
 # Deploy new services
 rm /etc/systemd/system/internetnl*
 cp -v documentation/example_configuration/etc_systemd_system/* /etc/systemd/system/
@@ -121,11 +125,11 @@ journalctl -xe
 # file and restarting it again.
 
 # The site might look bad, so you need to run some translations and such:
+sudo su internetnl
 make frontend
 
-# Please note:
-# The following is only needed for single scan installations.
 
+sudo su -
 # An annoying bug is causing redis backend connection leaks. This issue is persistent with the most trivial of tasks
 # and opens tons of connections to redis, but not closing all of them properly. Over time this means that the
 # system will run out of file handles (the default is 1024). The below fix ups the number of open file handles
@@ -134,7 +138,8 @@ make frontend
 # The file handle limits are already in the systemd services for the single scanner. It is not needed to add these to
 # the batch it seems, as this does not occur there (at least we did not see that happen).
 
-cp -v documentation/example_configuration/etc_redis/redis.conf /etc/redis/redis.conf
+# Note: this file might not work for your redis. Just replace timeout to 300 instead of 0 in the existing config file.
+# cp -v documentation/example_configuration/etc_redis/redis.conf /etc/redis/redis.conf
 cp -v documentation/example_configuration/etc_security/limits.conf /etc/security/limits.conf
 
 # As root:
@@ -143,10 +148,9 @@ mkdir /opt/internetnl/etc/cron
 cp -v documentation/example_configuration/opt_internetnl_etc/cron/* /opt/internetnl/etc/cron
 chmod +x /opt/internetnl/etc/cron/*
 
-# Add the contents of documentation/example_configuration/crontab into `crontab -e` for the root user.
-# Currently this is:
-0 */6 * * *     /opt/internetnl/etc/cron/restart_services.sh
-0 3 * * *       /opt/internetnl/etc/cron/restart_gunicorn.sh
+# See examples for single scans in: /opt/internetnl/etc/cron/single_crontab
+# See examples for batch scans in: /opt/internetnl/etc/cron/batch_crontab
+
 
 # Scans started during this service reboot will continue, but take a bit longer.
 
