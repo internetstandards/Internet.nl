@@ -516,7 +516,7 @@ msgstr "Your DMARC policy is *not* sufficiently strict."
 
 msgid "detail mail auth spf exp"
 msgstr ""
-"We check if your domain has an SPF record. A receiving mail server can use your whitelisted sending mail servers and the accompanying policy from your SPF record to determine the authenticity of a received email with your domain as sender. Having more than one SPF record in the same domain is not valid and will lead to a test failure.\n"
+"We check if your domain has an SPF record. A receiving mail server can use your allow-listed sending mail servers and the accompanying policy from your SPF record to determine the authenticity of a received email with your domain as sender. Having more than one SPF record in the same domain is not valid and will lead to a test failure.\n"
 "\n"
 "For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
 

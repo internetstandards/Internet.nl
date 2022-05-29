@@ -521,7 +521,7 @@ msgstr "Je DMARC-policy is *niet* voldoende strikt."
 
 msgid "detail mail auth spf exp"
 msgstr ""
-"We testen of je domeinnaam een SPF-record heeft. Een ontvangende mailserver kan je 'ge-whiteliste' verzendende mailservers en de bijbehorende policy uit het SPF-record gebruiken om de authenticiteit van een e-mail met jouw domein als verzender te bepalen. Meer dan één SPF-record op hetzelfde domein is niet geldig en zorgt ervoor dat het domein voor de test faalt.\n"
+"We testen of je domeinnaam een SPF-record heeft. Een ontvangende mailserver kan je 'ge-allow-liste' verzendende mailservers en de bijbehorende policy uit het SPF-record gebruiken om de authenticiteit van een e-mail met jouw domein als verzender te bepalen. Meer dan één SPF-record op hetzelfde domein is niet geldig en zorgt ervoor dat het domein voor de test faalt.\n"
 "\n"
 "Voor een \"good practice voor domeinnamen zonder mail\" zie de [uitleg van de \"DMARC-policy\" subtest](#control-panel-9)."
 
