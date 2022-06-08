@@ -250,7 +250,7 @@ def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     return do_mx_ns_rpki(mx_ips_pairs, url, self, *args, **kwargs)
 
 
-def report_exists(subtestname, category, domainset) -> None:
+def generate_roa_existence_report(subtestname, category, domainset) -> None:
     """Generate a test report for the existence of ROAs."""
 
     def gen_tech_data(domain, ip, validity) -> List[List[str]]:
@@ -301,7 +301,7 @@ def report_exists(subtestname, category, domainset) -> None:
         category.subtests[subtestname].result_good(tech_data)
 
 
-def report_valid(subtestname, category, domainset) -> None:
+def generate_validity_report(subtestname, category, domainset) -> None:
     """Generate a test report based on Route Origin Validation.
 
     This compares routing data from BGP with published ROAs.
@@ -383,22 +383,22 @@ def build_summary_report(parent, parent_name, category) -> None:
         webset = parent.webdomains.all().order_by("domain")
         nsset = parent.nsdomains.all().order_by("domain")
 
-        report_exists("web_rpki_exists", category, webset)
-        report_valid("web_rpki_valid", category, webset)
-        report_exists("ns_rpki_exists", category, nsset)
-        report_valid("ns_rpki_valid", category, nsset)
+        generate_roa_existence_report("web_rpki_exists", category, webset)
+        generate_validity_report("web_rpki_valid", category, webset)
+        generate_roa_existence_report("ns_rpki_exists", category, nsset)
+        generate_validity_report("ns_rpki_valid", category, nsset)
 
     elif parent_name == "mailtestrpki":
         mxset = parent.mxdomains.all().order_by("domain")
         nsset = parent.nsdomains.all().order_by("domain")
         mxnsset = parent.mxnsdomains.all().order_by("domain")
 
-        report_exists("mail_rpki_exists", category, mxset)
-        report_valid("mail_rpki_valid", category, mxset)
-        report_exists("ns_rpki_exists", category, nsset)
-        report_valid("ns_rpki_valid", category, nsset)
-        report_exists("mail_mx_ns_rpki_exists", category, mxnsset)
-        report_valid("mail_mx_ns_rpki_valid", category, mxnsset)
+        generate_roa_existence_report("mail_rpki_exists", category, mxset)
+        generate_validity_report("mail_rpki_valid", category, mxset)
+        generate_roa_existence_report("ns_rpki_exists", category, nsset)
+        generate_validity_report("ns_rpki_valid", category, nsset)
+        generate_roa_existence_report("mail_mx_ns_rpki_exists", category, mxnsset)
+        generate_validity_report("mail_mx_ns_rpki_valid", category, mxnsset)
 
     parent.report = category.gen_report()
     parent.save()
@@ -413,7 +413,7 @@ def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, Test
 
 def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers."""
-    ns_ips_pairs = shared.do_resolve_ns(task, url)
+    ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
     ns = do_rpki(task, ns_ips_pairs, *args, **kwargs)
 
     return (TestName("rpki_ns"), ns)
@@ -426,7 +426,7 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, T
     """
     mx_ns_ips_pairs = set()
     for mx, _ in mx_ips_pairs:
-        for ns, ips in shared.do_resolve_ns(task, mx):
+        for ns, ips in shared.do_resolve_ns_ips(task, mx):
             mx_ns_ips_pairs.add((ns, tuple(ips)))
 
     mxns = do_rpki(task, mx_ns_ips_pairs, *args, **kwargs)

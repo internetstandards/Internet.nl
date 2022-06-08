@@ -26,10 +26,6 @@ class Error(Exception):
     """Base-class for all exceptions raised by this module."""
 
 
-class InvalidAsnError(Error):
-    """There was a problem with the obtained AS number."""
-
-
 class InvalidIPError(Error):
     """There was a problem with the provided IP address."""
 
@@ -63,7 +59,7 @@ class RouteView(ABC):
         unavailable without (1).
     """
 
-    def __init__(self, ip: Ip, routes: List[AsnPrefix], validity: Dict[AsnPrefix, Dict] = {}) -> None:
+    def __init__(self, ip: Ip, routes: List[AsnPrefix]) -> None:
         """Initialize RouteView.
 
         Args:
@@ -71,13 +67,10 @@ class RouteView(ABC):
             subject IP address for the RouteView
         routes
             list of (origin asn, prefix) pairs
-        validity
-            dict containing validation state, reason (if applicable) and vrps,
-            indexed by (asn, prefix).
         """
         self.ip = ip
         self.routes = routes
-        self.validity = validity
+        self.validity = {}
 
     def __len__(self):
         """Returns number of routes in this RouteView.
@@ -97,8 +90,9 @@ class RouteView(ABC):
 
         This looks up covering ROAs for a given ip by performing route origin
         validation against a maximum length prefix and ASN0. It is only intended
-        as a fallback. Without a view on BGP routes, it is meaningless to
-        perform RPKI validation on the inferred information.
+        as a fallback to show ROA info to the user even if there is no BGP prefix.
+        Without a view on BGP routes, it is meaningless to perform RPKI validation
+        on the inferred information.
 
         Raises:
             RelyingPartyUnavailableError: Relying Party Software not available.
@@ -117,8 +111,6 @@ class RouteView(ABC):
             NoRoutesError: No routes where found, Route Origin Validation is meaningless.
             RelyingPartyUnavailableError: Relying Party Software not available.
         """
-        self.validity = {}  # FIXME: why is this necessary?
-
         if not self.routes:
             raise NoRoutesError
 
@@ -133,12 +125,12 @@ class TeamCymruIPtoASN(RouteView):
     @classmethod
     def from_bgp(cls: Type[Rv], task: T, ip: Ip) -> Rv:
         """Construct a RouteView based on the Team Cymru IP to ASN mapping service."""
-        pairs = TeamCymruIPtoASN.ASN_prefix_pairs_by_IP(task, ip)
+        pairs = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(task, ip)
 
         return cls(ip, pairs)
 
     @staticmethod
-    def ASN_prefix_pairs_by_IP(task: T, ip_in: Ip) -> List[AsnPrefix]:
+    def asn_prefix_pairs_for_ip(task: T, ip_in: Ip) -> List[AsnPrefix]:
         """Use the Team Cymru IP to ASN mapping service via DNS.
 
         see: https://team-cymru.com/community-services/ip-asn-mapping/#dns
@@ -153,6 +145,45 @@ class TeamCymruIPtoASN(RouteView):
                 # # allow for use by Django views
                 # if task is None:
                 #     task = SetupUnboundContext()
+        """
+        ip2asn_query = TeamCymruIPtoASN.ip_to_dns_query(ip_in)
+
+        result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)
+        if result["nxdomain"]:
+            return []
+        elif result["rcode"] == unbound.RCODE_SERVFAIL:
+            raise BGPSourceUnavailableError(
+                f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?"
+            )
+        else:
+            result = [unbound.ub_data.dname2str(d) for d in result["data"].data]
+
+        # The values in the TXT record are separated by '|' and the ASN is the
+        # first value. There may be more than one ASN, separated by a space.
+        # The second value contains the prefix.
+        asn_prefix_pairs = []
+        for txt in result:
+            try:
+                asns = txt[0].split("|")[0].strip().split(" ")
+                prefix = txt[0].split("|")[1].strip()
+
+                # Check that we didn't get any gibberish back.
+                ipaddress.ip_network(prefix)
+                for asn in asns:
+                    if int(asn) >= 2**32:
+                        continue
+            except ValueError:
+                continue
+
+            for asn in asns:
+                asn_prefix_pairs.append((asn, prefix))
+
+        return asn_prefix_pairs
+
+    @staticmethod
+    def ip_to_dns_query(ip_in: str) -> str:
+        """
+        Convert an IP address to a Cymru origin ASN query DNS label.
         """
         try:
             ip = ipaddress.ip_address(ip_in)
@@ -179,38 +210,7 @@ class TeamCymruIPtoASN(RouteView):
                 raise InvalidIPError(f"Unknown IP version for address {ip_in}.")
         except ValueError:
             raise InvalidIPError(f"Error parsing IP address {ip_in}.")
-
-        result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)
-        if result["nxdomain"]:
-            return []
-        elif result["rcode"] == unbound.RCODE_SERVFAIL:
-            raise BGPSourceUnavailableError(
-                f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?"
-            )
-        else:
-            result = [unbound.ub_data.dname2str(d) for d in result["data"].data]
-
-        # The values in the TXT record are separated by '|' and the ASN is the
-        # first value. There may be more than one ASN, separated by a space.
-        # The second value contains the prefix.
-        asn_prefix_pairs = []
-        for txt in result:
-            try:
-                ASNs = txt[0].split("|")[0].strip().split(" ")
-                prefix = txt[0].split("|")[1].strip()
-
-                # Check that we didn't get any gibberish back.
-                ipaddress.ip_network(prefix)
-                for asn in ASNs:
-                    if int(asn) >= 2**32:
-                        raise InvalidAsnError
-            except (ValueError, InvalidAsnError):
-                continue
-
-            for asn in ASNs:
-                asn_prefix_pairs.append((asn, prefix))
-
-        return asn_prefix_pairs
+        return ip2asn_query
 
 
 # RouteView could also be implemented based on NLnetLabs roto-api
@@ -270,7 +270,6 @@ class Routinator(RelyingPartySoftware):
             RelyingPartyUnavailableError
         """
         reason = None
-        state = None
         vrps = {}
 
         try:
@@ -298,7 +297,7 @@ class Routinator(RelyingPartySoftware):
                 int(vrp["max_length"])
 
         except (json.JSONDecodeError, ValueError):
-            return {}
+            raise RelyingPartyUnvailableError
 
         return {"state": state, "reason": reason, "vrps": vrps}
 

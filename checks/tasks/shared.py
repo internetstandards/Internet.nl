@@ -69,7 +69,7 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def resolve_mx(self, qname, *args, **kwargs):
-    return do_resolve_mx(self, qname, *args, **kwargs)
+    return do_resolve_mx_ips(self, qname, *args, **kwargs)
 
 
 @batch_shared_task(
@@ -79,7 +79,7 @@ def resolve_mx(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_resolve_mx(self, qname, *args, **kwargs):
-    return do_resolve_mx(self, qname, *args, **kwargs)
+    return do_resolve_mx_ips(self, qname, *args, **kwargs)
 
 
 @shared_task(
@@ -89,7 +89,7 @@ def batch_resolve_mx(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def resolve_ns(self, qname, *args, **kwargs):
-    return do_resolve_ns(self, qname, *args, **kwargs)
+    return do_resolve_ns_ips(self, qname, *args, **kwargs)
 
 
 @batch_shared_task(
@@ -99,7 +99,7 @@ def resolve_ns(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_resolve_ns(self, qname, *args, **kwargs):
-    return do_resolve_ns(self, qname, *args, **kwargs)
+    return do_resolve_ns_ips(self, qname, *args, **kwargs)
 
 
 def do_mail_get_servers(self, url, *args, **kwargs):
@@ -154,7 +154,7 @@ def do_resolve_a_aaaa(self, qname, *args, **kwargs):
     return af_ip_pairs
 
 
-def do_resolve_mx(self, url, *args, **kwargs):
+def do_resolve_mx_ips(self, url, *args, **kwargs):
     """Resolve the domain's mailservers
     returns [(mailserver, af_ip_pairs)]
     """
@@ -176,7 +176,7 @@ def do_resolve_mx(self, url, *args, **kwargs):
     return mx_ips_pairs
 
 
-def do_resolve_ns(self, url, *args, **kwargs):
+def do_resolve_ns_ips(self, url, *args, **kwargs):
     """Resolve the domain's nameservers
     Returns [(nameserver, af_ip_pairs)]
     """
