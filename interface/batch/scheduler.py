@@ -62,9 +62,9 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     BATCH_MAILTEST["subtests"]["tls"] = tls_mail_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
-    pass
+    from checks.tasks.rpki import batch_web_registered as rpki_web_taskset
 
-    BATCH_WEBTEST["subtests"]["rpki"] = tls_web_taskset
+    BATCH_WEBTEST["subtests"]["rpki"] = rpki_web_taskset
     from checks.tasks.rpki import batch_mail_registered as rpki_mail_taskset
 
     BATCH_MAILTEST["subtests"]["rpki"] = rpki_mail_taskset
