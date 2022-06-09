@@ -244,332 +244,164 @@ class MailTls(Category):
 # --- Subtests
 #
 # ---rpki
-class WebRpkiExists(Subtest):
+
+
+class RpkiExists(Subtest):
+    _label = None
+    _test_label = "exists"
+    _test_name = None
+
     def __init__(self):
         super().__init__(
-            name="web_rpki_exists",
-            label="detail web rpki exists label",
-            explanation="detail web rpki exists exp",
-            tech_string="detail web rpki exists tech table",
+            name=self._test_name,
+            label=f"detail {self._label} rpki {self._test_label} label",
+            explanation=f"detail {self._label} rpki {self._test_label} exp",
+            tech_string=f"detail {self._label} rpki {self._test_label} tech table",
             init_tech_type="table_multi_col",
             worst_status=STATUS_INFO,
         )
+
+    def was_tested(self):
+        raise NotImplementedError
+
+    def result_bad(self, tech_data):
+        self.was_tested()
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL)
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict bad"
+
+    def result_good(self, tech_data):
+        self.was_tested()
+        self.tech_data = tech_data
+        self._status(STATUS_SUCCESS)
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict good"
+
+    def result_no_addresses(self):
+        self.tech_type = ""
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict no-addresses"
+
+    def result_validator_error(self):
+        self.tech_type = ""
+        self._status(STATUS_ERROR, override=True)
+
+
+class WebRpkiExists(RpkiExists):
+    _label = "web"
+    _test_name = "web_rpki_exists"
 
     def was_tested(self):
         self.worst_status = scoring.WEB_RPKI_EXISTENCE_WORST_STATUS
 
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web rpki exists verdict bad"
 
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web rpki exists verdict good"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web rpki exists verdict no-addresses"
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
-
-
-class MailRpkiExists(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="mail_rpki_exists",
-            label="detail mail rpki exists label",
-            explanation="detail mail rpki exists exp",
-            tech_string="detail mail rpki exists tech table",
-            init_tech_type="table_multi_col",
-            worst_status=STATUS_INFO,
-        )
+class MailRpkiExists(RpkiExists):
+    _label = "mail"
+    _test_name = "mail_rpki_exists"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_EXISTENCE_WORST_STATUS
 
+
+class RpkiValid(Subtest):
+    _label = None
+    _test_label = "valid"
+    _test_name = None
+
+    def __init__(self):
+        super().__init__(
+            name=self._test_name,
+            label=f"detail {self._label} rpki {self._test_label} label",
+            explanation=f"detail {self._label} rpki {self._test_label} exp",
+            tech_string=f"detail {self._label} rpki {self._test_label} tech table",
+            init_tech_type="table",
+            worst_status=STATUS_INFO,
+        )
+
+    def was_tested(self):
+        raise NotImplementedError
+
     def result_bad(self, tech_data):
         self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail rpki exists verdict bad"
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict bad"
 
     def result_good(self, tech_data):
         self.was_tested()
         self.tech_data = tech_data
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki exists verdict good"
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict good"
+
+    def result_invalid(self, tech_data):
+        self.was_tested()
+        self.tech_data = tech_data
+        self._status(STATUS_FAIL, override=True)
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict invalid"
 
     def result_no_addresses(self):
         self.tech_type = ""
         self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail mail rpki exists verdict no-addresses"
+
+    def result_not_routed(self, tech_data):
+        self.tech_data = tech_data
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = f"detail {self._label} rpki {self._test_label} verdict not-routed"
 
     def result_validator_error(self):
         self.tech_type = ""
         self._status(STATUS_ERROR, override=True)
 
 
-class WebRpkiValid(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="web_rpki_valid",
-            label="detail web rpki valid label",
-            explanation="detail web rpki valid exp",
-            tech_string="detail web rpki valid tech table",
-            init_tech_type="table",
-            worst_status=STATUS_INFO,
-        )
+class WebRpkiValid(RpkiValid):
+    _label = "web"
+    _test_name = "web_rpki_valid"
 
     def was_tested(self):
         self.worst_status = scoring.WEB_RPKI_VALIDITY_WORST_STATUS
 
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web rpki valid verdict bad"
 
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web rpki valid verdict good"
-
-    def result_invalid(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL, override=True)
-        self.verdict = "detail web rpki valid verdict invalid"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-
-    def result_not_routed(self, tech_data):
-        self.tech_data = tech_data
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web rpki valid verdict not-routed"
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
-
-
-class MailRpkiValid(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="mail_rpki_valid",
-            label="detail mail rpki valid label",
-            explanation="detail mail rpki valid exp",
-            tech_string="detail mail rpki valid tech table",
-            init_tech_type="table",
-            worst_status=STATUS_INFO,
-        )
+class MailRpkiValid(RpkiValid):
+    _label = "mail"
+    _test_name = "mail_rpki_valid"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_VALIDITY_WORST_STATUS
 
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail rpki valid verdict bad"
 
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki valid verdict good"
-
-    def result_invalid(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL, override=True)
-        self.verdict = "detail mail rpki valid verdict invalid"
-
-    def result_not_routed(self, tech_data):
-        self.tech_data = tech_data
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail mail rpki valid verdict not-routed"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
-
-
-class NsRpkiExists(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="ns_rpki_exists",
-            label="detail web-mail rpki ns-exists label",
-            explanation="detail web-mail rpki ns-exists exp",
-            tech_string="detail web-mail rpki ns-exists tech table",
-            init_tech_type="table",
-            worst_status=STATUS_INFO,
-        )
+class NsRpkiExists(RpkiExists):
+    _label = "web-mail"
+    _test_label = "ns-exists"
+    _test_name = "ns_rpki_exists"
 
     def was_tested(self):
         self.worst_status = scoring.RPKI_NS_EXISTENCE_WORST_STATUS
 
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web-mail rpki ns-exists verdict bad"
 
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns-exists verdict good"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web-mail rpki ns-exists verdict no-addresses"
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
-
-
-class NsRpkiValid(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="ns_rpki_valid",
-            label="detail web-mail rpki ns-valid label",
-            explanation="detail web-mail rpki ns-valid exp",
-            tech_string="detail web-mail rpki ns-valid tech table",
-            init_tech_type="table",
-            worst_status=STATUS_INFO,
-        )
+class NsRpkiValid(RpkiValid):
+    _label = "web-mail"
+    _test_label = "ns-valid"
+    _test_name = "ns_rpki_valid"
 
     def was_tested(self):
         self.worst_status = scoring.RPKI_NS_VALIDITY_WORST_STATUS
 
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web-mail rpki ns-valid verdict bad"
 
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web-mail rpki ns-valid verdict good"
-
-    def result_invalid(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL, override=True)
-        self.verdict = "detail web-mail rpki ns-valid verdict invalid"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-
-    def result_not_routed(self, tech_data):
-        self.tech_data = tech_data
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web-mail rpki ns-valid verdict not-routed"
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
-
-
-class MailMxNsRpkiExists(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="mail_mx_ns_rpki_exists",
-            label="detail mail rpki mx-ns-exists label",
-            explanation="detail mail rpki mx-ns-exists exp",
-            tech_string="detail mail rpki mx-ns-exists tech table",
-            init_tech_type="table",
-            worst_status=STATUS_INFO,
-        )
+class MailMxNsRpkiExists(RpkiExists):
+    _label = "mail"
+    _test_label = "mx-ns-exists"
+    _test_name = "mail_mx_ns_rpki_exists"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_MX_NS_EXISTENCE_WORST_STATUS
 
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail rpki mx-ns-exists verdict bad"
 
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki mx-ns-exists verdict good"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail mail rpki mx-ns-exists verdict no-addresses"
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
-
-
-class MailMxNsRpkiValid(Subtest):
-    def __init__(self):
-        super().__init__(
-            name="mail_mx_ns_rpki_valid",
-            label="detail mail rpki mx-ns-valid label",
-            explanation="detail mail rpki mx-ns-valid exp",
-            tech_string="detail mail rpki mx-ns-valid tech table",
-            init_tech_type="table",
-            worst_status=STATUS_INFO,
-        )
+class MailMxNsRpkiValid(RpkiValid):
+    _label = "mail"
+    _test_label = "mx-ns-valid"
+    _test_name = "mail_mx_ns_rpki_valid"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_MX_NS_VALIDITY_WORST_STATUS
-
-    def result_bad(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail rpki mx-ns-valid verdict bad"
-
-    def result_good(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail rpki mx-ns-valid verdict good"
-
-    def result_invalid(self, tech_data):
-        self.was_tested()
-        self.tech_data = tech_data
-        self._status(STATUS_FAIL, override=True)
-        self.verdict = "detail mail rpki mx-ns-valid verdict invalid"
-
-    def result_no_addresses(self):
-        self.tech_type = ""
-        self._status(STATUS_NOT_TESTED)
-
-    def result_not_routed(self, tech_data):
-        self.tech_data = tech_data
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail mail rpki mx-ns-valid verdict not-routed"
-
-    def result_validator_error(self):
-        self.tech_type = ""
-        self._status(STATUS_ERROR, override=True)
 
 
 class WebRpki(Category):
