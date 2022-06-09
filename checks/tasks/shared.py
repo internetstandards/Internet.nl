@@ -170,7 +170,7 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
             af_ip_pairs.append((socket.AF_INET, ip))
         ip6 = self.resolve(qname, unbound.RR_TYPE_AAAA)
         for ip in ip6:
-            af_ip_pairs.append((socket.AF_INET6, ip6))
+            af_ip_pairs.append((socket.AF_INET6, ip))
         mx_ips_pairs.append((qname, af_ip_pairs))
 
     return mx_ips_pairs
