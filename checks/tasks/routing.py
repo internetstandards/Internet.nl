@@ -26,6 +26,10 @@ class Error(Exception):
     """Base-class for all exceptions raised by this module."""
 
 
+class InvalidAsnError(Error):
+    """There was a problem with the obtained AS number."""
+
+
 class InvalidIPError(Error):
     """There was a problem with the provided IP address."""
 
@@ -57,9 +61,12 @@ class RouteView(ABC):
       - `RelyingPartySoftware` for RPKI (using the `from_rpki` constructor,
         which yields (2)). This is only intended as a fallback, because (3) is
         unavailable without (1).
+      - validity
+        dict containing validation state, reason (if applicable) and vrps,
+        indexed by (asn, prefix). Used by from_rpki()
     """
 
-    def __init__(self, ip: Ip, routes: List[AsnPrefix]) -> None:
+    def __init__(self, ip: Ip, routes: List[AsnPrefix], validity: Dict[AsnPrefix, Dict] = None) -> None:
         """Initialize RouteView.
 
         Args:
@@ -70,7 +77,7 @@ class RouteView(ABC):
         """
         self.ip = ip
         self.routes = routes
-        self.validity = {}
+        self.validity = validity if validity else {}
 
     def __len__(self):
         """Returns number of routes in this RouteView.
@@ -171,9 +178,12 @@ class TeamCymruIPtoASN(RouteView):
                 ipaddress.ip_network(prefix)
                 for asn in asns:
                     if int(asn) >= 2**32:
-                        continue
-            except ValueError:
-                continue
+                        raise InvalidAsnError
+            except (ValueError, IndexError, InvalidAsnError) as error:
+                raise BGPSourceUnavailableError(
+                    "Team Cymru IP to ASN mapping service returned invalid value for "
+                    f"{ip2asn_query} IN TXT: {txt}: {error}"
+                )
 
             for asn in asns:
                 asn_prefix_pairs.append((asn, prefix))

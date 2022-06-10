@@ -460,6 +460,7 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                     # fetch ASN, prefixes from BGP
                     routeview = TeamCymruIPtoASN.from_bgp(task, ip)
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
+                    routeview = None
                     logger.error(repr(e))
                     result["errors"].append(e.__class__.__name__)
 
