@@ -145,13 +145,6 @@ class TeamCymruIPtoASN(RouteView):
         Raises:
             InvalidIPError: for invalid ip_in
             BGPSourceUnavailableError: when DNS resolving returns SERVFAIL
-
-        TODO:   some of the following code is adapted from views/connection.py,
-                is it worth it to switch that code over to this implementation?
-                if so, the following could make that work:
-                # # allow for use by Django views
-                # if task is None:
-                #     task = SetupUnboundContext()
         """
         ip2asn_query = TeamCymruIPtoASN.ip_to_dns_query(ip_in)
 
