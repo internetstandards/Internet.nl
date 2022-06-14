@@ -33,6 +33,8 @@ class SetupUnboundContext(Task):
             else:
                 self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
+            # Some (unknown) tests probably depend on consistent ordering in unbound responses
+            # https://github.com/internetstandards/Internet.nl/pull/613#discussion_r892196819
             self._ub_ctx.set_option("rrset-roundrobin:", "no")
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # XXX: Remove for now; inconsistency with applying settings on celery.

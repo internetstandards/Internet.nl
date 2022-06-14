@@ -26,11 +26,12 @@ BATCH_PROBE_NAME_TO_API_CATEGORY = {
     "sitednssec": "web_dnssec",
     "sitetls": "web_https",
     "siteappsecpriv": "web_appsecpriv",
+    "siterpki": "web_rpki",
     "mailipv6": "mail_ipv6",
     "maildnssec": "mail_dnssec",
     "mailauth": "mail_auth",
     "mailtls": "mail_starttls",
-    "siterpki": "web_rpki",
+    "mailrpki": "mail_rpki",
 }
 BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "web_ipv6": "ipv6",
@@ -42,7 +43,7 @@ BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "mail_dnssec": "dnssec",
     "mail_auth": "auth",
     "mail_starttls": "tls",
-    "mailrpki": "mail_rpki",
+    "mail_rpki": "rpki",
 }
 
 REPORT_METADATA_WEB_MAP = []
@@ -681,12 +682,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
         }
     )
 
-if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
     REPORT_METADATA_MAIL_MAP.append(
         {
             "name": "mail_rpki",
             "type": "category",
-            "translation_key": "siterpki",
+            "translation_key": "mailrpki",
             "children": [
                 {
                     "name": "mail_rpki",
