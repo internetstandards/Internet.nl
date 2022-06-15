@@ -15,6 +15,8 @@ generic_models = [
     models.DomainTestDnssec,
     models.DomainTestTls,
     models.WebTestAppsecpriv,
+    models.WebTestRpki,
+    models.MailTestRpki,
     models.DomainTestAppsecpriv,
     models.MailTestAuth,
     models.MailTestReport,
