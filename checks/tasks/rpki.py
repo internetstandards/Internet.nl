@@ -25,11 +25,11 @@ from .. import categories
 from ..models import (
     MailTestRpki,
     WebTestRpki,
-    RpkiMxDomain,
-    RpkiMxNsDomain,
-    RpkiNsDomain,
+    RpkiMxHost,
+    RpkiMxNsHost,
+    RpkiNsHost,
+    RpkiWebHost,
 )
-from ..models import RpkiWebDomain
 
 from typing import Dict, List, Mapping, NewType, Tuple, Union
 
@@ -40,10 +40,10 @@ logger = logging.getLogger("internetnl")
 
 # mapping services to models
 model_map = dict(
-    rpki_mail=RpkiMxDomain,
-    rpki_ns=RpkiNsDomain,
-    rpki_mx_ns=RpkiMxNsDomain,
-    rpki_web=RpkiWebDomain,
+    rpki_mail=RpkiMxHost,
+    rpki_ns=RpkiNsHost,
+    rpki_mx_ns=RpkiMxNsHost,
+    rpki_web=RpkiWebHost,
 )
 
 
@@ -106,11 +106,11 @@ def callback(results: Mapping[TestName, TestResult], domain, parent, parent_name
     parent.save()
 
     for testname, serviceresults in results:
-        for domain, routing in serviceresults.items():
+        for host, routing in serviceresults.items():
 
             kw = {
                 parent_name: parent,
-                "domain": domain,
+                "host": host,
                 "routing": routing,
             }
 
@@ -250,10 +250,10 @@ def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     return do_mx_ns_rpki(mx_ips_pairs, url, self, *args, **kwargs)
 
 
-def generate_roa_existence_report(subtestname, category, domainset) -> None:
+def generate_roa_existence_report(subtestname, category, hostset) -> None:
     """Generate a test report for the existence of ROAs."""
 
-    def gen_tech_data(domain, ip, validity) -> List[List[str]]:
+    def gen_tech_data(host, ip, validity) -> List[List[str]]:
         # Provide tech_data to generate a table of the following form
         #
         # Server     | IP address  | ROA exists
@@ -262,18 +262,18 @@ def generate_roa_existence_report(subtestname, category, domainset) -> None:
         # example.nl | 192.168.0.2 | no
 
         if any(route["vrps"] for route in validity.values()):
-            row = [domain, ip, "detail tech data yes"]
+            row = [host, ip, "detail tech data yes"]
         else:
-            row = [domain, ip, "detail tech data no"]
+            row = [host, ip, "detail tech data no"]
 
         return row
 
     missing_count = 0
     tech_data = []
 
-    prev_domain = None
-    for domain in domainset:
-        for ip in domain.routing:
+    prev_host = None
+    for host in hostset:
+        for ip in host.routing:
             # failure to validate routinator was unavailable
             if RelyingPartyUnvailableError.__name__ in ip["errors"]:
                 category.subtests[subtestname].result_validator_error()
@@ -281,7 +281,7 @@ def generate_roa_existence_report(subtestname, category, domainset) -> None:
 
             tech_data.append(
                 gen_tech_data(
-                    domain.domain if domain.domain != prev_domain else "...",
+                    host.host if host.host != prev_host else "...",
                     ip["ip"],
                     ip["validity"],
                 )
@@ -290,9 +290,9 @@ def generate_roa_existence_report(subtestname, category, domainset) -> None:
             if not any(route["vrps"] for route in ip["validity"].values()):
                 missing_count += 1
 
-            prev_domain = domain.domain
+            prev_host = host.host
 
-    if not domainset:
+    if not hostset:
         # no A/AAAA records exist
         category.subtests[subtestname].result_no_addresses()
     elif missing_count > 0:
@@ -301,13 +301,13 @@ def generate_roa_existence_report(subtestname, category, domainset) -> None:
         category.subtests[subtestname].result_good(tech_data)
 
 
-def generate_validity_report(subtestname, category, domainset) -> None:
+def generate_validity_report(subtestname, category, hostset) -> None:
     """Generate a test report based on Route Origin Validation.
 
     This compares routing data from BGP with published ROAs.
     """
 
-    def gen_tech_data(domain, asn, prefix, validity, errors) -> List[str]:
+    def gen_tech_data(host, asn, prefix, validity, errors) -> List[str]:
         # Provide tech_data to generate a table of the following form
         #
         # Server     | Route          | Origin  | Validation state
@@ -326,7 +326,7 @@ def generate_validity_report(subtestname, category, domainset) -> None:
         else:
             state = validity["state"]
 
-        return [domain, prefix, asn, state]
+        return [host, prefix, asn, state]
 
     count = 0
     not_routed_count = 0  # count of validation failures due to unavailability of routes
@@ -334,9 +334,9 @@ def generate_validity_report(subtestname, category, domainset) -> None:
     not_valid_count = 0  # count of validations not resulting in 'valid'
     tech_data = []
 
-    prev_domain = None
-    for domain in domainset:
-        for ip in domain.routing:
+    prev_host = None
+    for host in hostset:
+        for ip in host.routing:
             errors = ip["errors"]
             # failure to validate, team cymru or routinator was unavailable
             if RelyingPartyUnvailableError.__name__ in errors or BGPSourceUnavailableError.__name__ in errors:
@@ -347,7 +347,7 @@ def generate_validity_report(subtestname, category, domainset) -> None:
                 asn, prefix = route
                 tech_data.append(
                     gen_tech_data(
-                        domain.domain if domain.domain != prev_domain else "...",
+                        host.host if host.host != prev_host else "...",
                         asn,
                         prefix,
                         validity,
@@ -363,7 +363,7 @@ def generate_validity_report(subtestname, category, domainset) -> None:
                 elif validity["state"] != "valid":
                     not_valid_count += 1
 
-                prev_domain = domain.domain
+                prev_host = host.host
 
     if count == 0:
         category.subtests[subtestname].result_no_addresses()
@@ -380,8 +380,8 @@ def generate_validity_report(subtestname, category, domainset) -> None:
 def build_summary_report(parent, parent_name, category) -> None:
     """Build the summary report for all the IP addresses."""
     if parent_name == "webtestrpki":
-        webset = parent.webdomains.all().order_by("domain")
-        nsset = parent.nsdomains.all().order_by("domain")
+        webset = parent.webdomains.all().order_by("host")
+        nsset = parent.nsdomains.all().order_by("host")
 
         generate_roa_existence_report("web_rpki_exists", category, webset)
         generate_validity_report("web_rpki_valid", category, webset)
@@ -389,9 +389,9 @@ def build_summary_report(parent, parent_name, category) -> None:
         generate_validity_report("ns_rpki_valid", category, nsset)
 
     elif parent_name == "mailtestrpki":
-        mxset = parent.mxdomains.all().order_by("domain")
-        nsset = parent.nsdomains.all().order_by("domain")
-        mxnsset = parent.mxnsdomains.all().order_by("domain")
+        mxset = parent.mxdomains.all().order_by("host")
+        nsset = parent.nsdomains.all().order_by("host")
+        mxnsset = parent.mxnsdomains.all().order_by("host")
 
         generate_roa_existence_report("mail_rpki_exists", category, mxset)
         generate_validity_report("mail_rpki_valid", category, mxset)

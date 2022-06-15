@@ -775,24 +775,24 @@ class MailTestRpki(BaseTestModel):
         return ["timestamp", "domain", "report", "mail_score", "ns_score", "score", "max_score"]
 
 
-class RpkiTestDomain(models.Model):
-    domain = models.CharField(max_length=255)
+class RpkiTestHost(models.Model):
+    host = models.CharField(max_length=255)
     score = models.IntegerField(null=True)
     routing = ListField(default={})
 
     def __dir__(self):
-        return ["domain", "score", "routing"]
+        return ["host", "score", "routing"]
 
     class Meta:
         abstract = True
 
 
-class RpkiMxDomain(RpkiTestDomain):
+class RpkiMxHost(RpkiTestHost):
     mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (
-            super(RpkiMxDomain, self)
+            super(RpkiMxHost, self)
             .__dir__()
             .extend(
                 [
@@ -802,13 +802,13 @@ class RpkiMxDomain(RpkiTestDomain):
         )
 
 
-class RpkiNsDomain(RpkiTestDomain):
+class RpkiNsHost(RpkiTestHost):
     webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="nsdomains", on_delete=models.CASCADE)
     mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="nsdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (
-            super(RpkiNsDomain, self)
+            super(RpkiNsHost, self)
             .__dir__()
             .extend(
                 [
@@ -819,7 +819,7 @@ class RpkiNsDomain(RpkiTestDomain):
         )
 
 
-class RpkiMxNsDomain(RpkiTestDomain):
+class RpkiMxNsHost(RpkiTestHost):
     mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxnsdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
@@ -834,12 +834,12 @@ class RpkiMxNsDomain(RpkiTestDomain):
         )
 
 
-class RpkiWebDomain(RpkiTestDomain):
+class RpkiWebHost(RpkiTestHost):
     webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="webdomains", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (
-            super(RpkiWebDomain, self)
+            super(RpkiWebHost, self)
             .__dir__()
             .extend(
                 [
