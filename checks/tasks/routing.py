@@ -146,6 +146,8 @@ class TeamCymruIPtoASN(RouteView):
             InvalidIPError: for invalid ip_in
             BGPSourceUnavailableError: when DNS resolving returns SERVFAIL
         """
+        if task is None:
+            task = SetupUnboundContext()
         ip2asn_query = TeamCymruIPtoASN.ip_to_dns_query(ip_in)
 
         result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)

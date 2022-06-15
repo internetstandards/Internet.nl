@@ -354,7 +354,7 @@ def find_AS_by_IP(ip):
 
     """
     try:
-        asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(ub_ctx, ip)
+        asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(None, ip)
         (asn, _) = asns_prefixes[0]
     except (BGPSourceUnavailableError, IndexError):
         return None
