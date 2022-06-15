@@ -95,10 +95,16 @@ def run_probe(probe: str, domain: str):
         log.debug(f"af_ip_pairs retrieved: {af_ip_pairs}")
         return_value = PROBES[probe](af_ip_pairs, domain)
 
-    elif probe in ["tls_mail_smtp_starttls", "dnssec_mail_is_secure", "mail_rpki"]:
+    elif probe in ["tls_mail_smtp_starttls", "dnssec_mail_is_secure"]:
         log.debug("First retrieving mailservers")
         mailservers = shared.mail_get_servers(domain)
         log.debug(f"Mailservers retrieved: {mailservers}")
+        return_value = PROBES[probe](mailservers, domain)
+
+    elif probe in ["mail_rpki"]:
+        log.debug("First retrieving mailserver IPs")
+        mailservers = shared.resolve_mx(domain)
+        log.debug(f"Mailserver IPs retrieved: {mailservers}")
         return_value = PROBES[probe](mailservers, domain)
 
     else:
