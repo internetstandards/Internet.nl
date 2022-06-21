@@ -556,7 +556,7 @@ class DomainTechnicalResults:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
         for nsdomain in report_table.rpki.nsdomains.all():
-            nameservers[nsdomain.domain] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.domain, None))
+            nameservers[nsdomain.host] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.host, None))
 
         return nameservers
 
@@ -568,7 +568,7 @@ class DomainTechnicalResults:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
         for nsdomain in report_table.rpki.nsdomains.all():
-            nameservers[nsdomain.domain] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.domain, None))
+            nameservers[nsdomain.host] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.host, None))
 
         return nameservers
 
@@ -576,7 +576,7 @@ class DomainTechnicalResults:
     def _get_mail_mx_nameservers(cls, report_table):
         nameservers = {}
         for mxnsdomain in report_table.rpki.mxnsdomains.all():
-            nameservers[mxnsdomain.domain] = cls._get_routing_info(mxnsdomain)
+            nameservers[mxnsdomain.host] = cls._get_routing_info(mxnsdomain)
 
         return nameservers
 
@@ -628,8 +628,8 @@ class DomainTechnicalResults:
                     continue
 
         for mxdomain in report_table.rpki.mxdomains.all():
-            addr = mailservers.get(mxdomain.domain, {}).get("addresses")
-            mailservers[mxdomain.domain] = cls._add_routing_info(mxdomain, addr)
+            addr = mailservers.get(mxdomain.host, {}).get("addresses")
+            mailservers[mxdomain.host] = cls._add_routing_info(mxdomain, addr)
 
         for dtdnssec in report_table.dnssec.testset.all():
             # Cheap way to see if the result is for the domain
