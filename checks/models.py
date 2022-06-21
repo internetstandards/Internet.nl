@@ -788,7 +788,7 @@ class RpkiTestHost(models.Model):
 
 
 class RpkiMxHost(RpkiTestHost):
-    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxdomains", on_delete=models.CASCADE)
+    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxhosts", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (
@@ -803,8 +803,8 @@ class RpkiMxHost(RpkiTestHost):
 
 
 class RpkiNsHost(RpkiTestHost):
-    webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="nsdomains", on_delete=models.CASCADE)
-    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="nsdomains", on_delete=models.CASCADE)
+    webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="nshosts", on_delete=models.CASCADE)
+    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="nshosts", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (
@@ -820,7 +820,7 @@ class RpkiNsHost(RpkiTestHost):
 
 
 class RpkiMxNsHost(RpkiTestHost):
-    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxnsdomains", on_delete=models.CASCADE)
+    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxnshosts", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (
@@ -835,7 +835,7 @@ class RpkiMxNsHost(RpkiTestHost):
 
 
 class RpkiWebHost(RpkiTestHost):
-    webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="webdomains", on_delete=models.CASCADE)
+    webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="webhosts", on_delete=models.CASCADE)
 
     def __dir__(self):
         return (

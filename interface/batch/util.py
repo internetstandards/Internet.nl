@@ -387,8 +387,8 @@ def get_batch_request_info(batch_request, prefetch_related, custom_instances):
                 elif probe.name == "appsecpriv":
                     prefetch_fields.add(f"{inter_table_relation}__webtestset")
                 elif probe.name == "rpki":
-                    prefetch_fields.add(f"{inter_table_relation}__nsdomains")
-                    prefetch_fields.add(f"{inter_table_relation}__webdomains")
+                    prefetch_fields.add(f"{inter_table_relation}__nshosts")
+                    prefetch_fields.add(f"{inter_table_relation}__webhosts")
             else:
                 if probe.name == "tls":
                     prefetch_fields.add(f"{inter_table_relation}__testset")
@@ -398,8 +398,8 @@ def get_batch_request_info(batch_request, prefetch_related, custom_instances):
                 elif probe.name == "dnssec":
                     prefetch_fields.add(f"{inter_table_relation}__testset")
                 elif probe.name == "rpki":
-                    prefetch_fields.add(f"{inter_table_relation}__nsdomains")
-                    prefetch_fields.add(f"{inter_table_relation}__mxdomains")
+                    prefetch_fields.add(f"{inter_table_relation}__nshosts")
+                    prefetch_fields.add(f"{inter_table_relation}__mxhosts")
 
     for custom_instance in custom_instances:
         custom_prefetch = custom_instance.related_db_tables(batch_request.type)
@@ -555,8 +555,8 @@ class DomainTechnicalResults:
         for nsdomain in nsdomains:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
-        for nsdomain in report_table.rpki.nsdomains.all():
-            nameservers[nsdomain.host] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.host, None))
+        for nshost in report_table.rpki.nshosts.all():
+            nameservers[nshost.host] = cls._add_routing_info(nshost, nameservers.get(nshost.host, None))
 
         return nameservers
 
@@ -567,16 +567,16 @@ class DomainTechnicalResults:
         for nsdomain in nsdomains:
             nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
-        for nsdomain in report_table.rpki.nsdomains.all():
-            nameservers[nsdomain.host] = cls._add_routing_info(nsdomain, nameservers.get(nsdomain.host, None))
+        for nshost in report_table.rpki.nshosts.all():
+            nameservers[nshost.host] = cls._add_routing_info(nshost, nameservers.get(nshost.host, None))
 
         return nameservers
 
     @classmethod
     def _get_mail_mx_nameservers(cls, report_table):
         nameservers = {}
-        for mxnsdomain in report_table.rpki.mxnsdomains.all():
-            nameservers[mxnsdomain.host] = cls._get_routing_info(mxnsdomain)
+        for mxnshost in report_table.rpki.mxnshosts.all():
+            nameservers[mxnshost.host] = cls._get_routing_info(mxnshost)
 
         return nameservers
 
@@ -598,8 +598,8 @@ class DomainTechnicalResults:
             return webservers
 
         # only loops when there's actual A/AAAA records (and routing info)
-        for webdomain in report_table.rpki.webdomains.all():
-            webservers = cls._add_routing_info(webdomain, webservers)
+        for webhost in report_table.rpki.webhosts.all():
+            webservers = cls._add_routing_info(webhost, webservers)
 
         for dttls in report_table.tls.webtestset.all():
             info = cls._get_web_tls_info(dttls, report_table)
@@ -627,9 +627,9 @@ class DomainTechnicalResults:
                 if not dtdnssec.domain.endswith("."):
                     continue
 
-        for mxdomain in report_table.rpki.mxdomains.all():
-            addr = mailservers.get(mxdomain.host, {}).get("addresses")
-            mailservers[mxdomain.host] = cls._add_routing_info(mxdomain, addr)
+        for mxhost in report_table.rpki.mxhosts.all():
+            addr = mailservers.get(mxhost.host, {}).get("addresses")
+            mailservers[mxhost.host] = cls._add_routing_info(mxhost, addr)
 
         for dtdnssec in report_table.dnssec.testset.all():
             # Cheap way to see if the result is for the domain

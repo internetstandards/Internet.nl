@@ -380,8 +380,8 @@ def generate_validity_report(subtestname, category, hostset) -> None:
 def build_summary_report(parent, parent_name, category) -> None:
     """Build the summary report for all the IP addresses."""
     if parent_name == "webtestrpki":
-        webset = parent.webdomains.all().order_by("host")
-        nsset = parent.nsdomains.all().order_by("host")
+        webset = parent.webhosts.all().order_by("host")
+        nsset = parent.nshosts.all().order_by("host")
 
         generate_roa_existence_report("web_rpki_exists", category, webset)
         generate_validity_report("web_rpki_valid", category, webset)
@@ -389,9 +389,9 @@ def build_summary_report(parent, parent_name, category) -> None:
         generate_validity_report("ns_rpki_valid", category, nsset)
 
     elif parent_name == "mailtestrpki":
-        mxset = parent.mxdomains.all().order_by("host")
-        nsset = parent.nsdomains.all().order_by("host")
-        mxnsset = parent.mxnsdomains.all().order_by("host")
+        mxset = parent.mxhosts.all().order_by("host")
+        nsset = parent.nshosts.all().order_by("host")
+        mxnsset = parent.mxnshosts.all().order_by("host")
 
         generate_roa_existence_report("mail_rpki_exists", category, mxset)
         generate_validity_report("mail_rpki_valid", category, mxset)
