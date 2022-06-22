@@ -47,68 +47,10 @@ scope for Internet.nl. Please keep in mind that Internet.nl is foremost
 intended as an internet standards compliance test and not as a security test.
 
 
-## Getting started
+## Documentation
 
-Note: the docker image will not build at the moment, this is a work in progress and will be in 1.4.1.
-
-Internet.nl is a [Django](https://www.djangoproject.com/)
-based application.
-
-Current install base is Django 3.2 with Python 3.7.
-
-
-### Quick start
-
-Although the first open source release of the project is aimed to provide
-transparency on the tool and the way the tests are run, there is (currently) no
-trivial way to install the software. Nonetheless, you could easily spin up a
-ready to use local dockerized environment for local development and testing
-purposes by following the [docker instructions](https://github.com/internetstandards/Internet.nl/blob/master/docker/README.md).
-
-
-### Dev start
-Currently x86_64 only. So m1 mac users should `arch -x86_64 /bin/sh` before continuing (the makefile does that too).
-
-Install the required system requirements from the [installation instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md).
-
-```bash
-git clone https://github.com/internetstandards/Internet.nl/
-cd Internet.nl
-make venv
-
-# Install separate dependencies, for which no wheels are available:
-# Note that unbound comes in a variety of flavors in the makefile(!)
-make unbound
-make python-whois
-make nassl
-
-# Run the application, and the workers
-make run
-make run-worker
-make run-heartbeat
-```
-
-Running tests is not yet streamlined, it requires a test worker to be ran.
-```bash
-make run-testworker
-make test
-```
-
-
-### Slow start
-
-If you feel brave enough for a system install you can follow the
-[installation instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Installation.md).
-
-The [customize instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Customize.md) describe how you could
-customize your installation.
-
-The [deployment instructions](https://github.com/internetstandards/Internet.nl/blob/master/documentation/Deployment.md) provide information
-relevant to the deployment of your installation and steps you need to run
-before starting/updating your installation.
-
-Example configuration files for the internet.nl ecosystem can be found
-[here](https://github.com/internetstandards/Internet.nl/blob/master/documentation/example_configuration).
+To develop or run your own instance, see the
+[documentation overview](https://github.com/internetstandards/Internet.nl/blob/main/documentation/README.md).
 
 
 ## Building blocks
