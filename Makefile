@@ -334,7 +334,7 @@ nassl: venv .nassl
 .nassl:
 	# This makes a complete new checkout and build of nassl with the internet.nl code.
 	rm -rf nassl_freebsd
-	git clone https://github.com/internetstandards/nassl.git nassl_freebsd --branch internetnl
+	GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/internetstandards/nassl.git nassl_freebsd --branch internetnl
 	#  cd nassl_freebsd && git checkout internetnl
 	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
 	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
