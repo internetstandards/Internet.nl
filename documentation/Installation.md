@@ -62,7 +62,7 @@ Make sure to use the `internetnl` branch and follow the
 [README.md](https://github.com/internetstandards/unbound/blob/internetnl/README.md)
 instructions for installation.
 
-Note: beore compiling unbound you also need to edit the DNS labels for your
+Note: before compiling unbound you also need to edit the DNS labels for your
 connection test domain.
 
 If you setup a python virtual environment you should enable it for unbound's
