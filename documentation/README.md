@@ -18,7 +18,7 @@ To run the project, there are a few options:
 * A [full install on a server](Installation.md).
 
 Note that the connection test requires a lot more moving parts than the other
-tests, as it handles inbound connections. 
+tests, as it handles inbound connections.
 
 Other important resources:
 

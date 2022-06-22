@@ -88,7 +88,7 @@ connection test to report on the user's resolver. It also has code for
 an interactive email test for the future.
 
 The connection test also needs a few specific zones, documented in the README
-of that repository. 
+of that repository.
 
 
 ## Other parts
