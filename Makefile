@@ -330,37 +330,24 @@ python-whois: venv .python-whois
 	touch .python-whois
 
 
-nassl_complete: venv .nassl
+nassl: venv .nassl
 .nassl:
 	# This makes a complete new checkout and build of nassl with the internet.nl code.
-	# This is currently not the default because there are issues with the LFS of the nassl.git library
-	# the repo is over its quota and obtaining files is not possible. The build is also slower.
-	# so therefore there termporarily is a nassl_prebuilt directory with a biuld for x86-64 and osx.
-	# this might not work...
 	rm -rf nassl_freebsd
-	git clone https://github.com/internetstandards/nassl.git nassl_freebsd --branch internetnl
+	GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/internetstandards/nassl.git nassl_freebsd --branch internetnl
 	#  cd nassl_freebsd && git checkout internetnl
 	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
 	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
-	cd nassl_freebsd && wget http://zlib.net/zlib-1.2.12.tar.gz
+	cd nassl_freebsd && wget https://zlib.net/zlib-1.2.12.tar.gz
 	cd nassl_freebsd && tar xvfz  zlib-1.2.12.tar.gz
 	cd nassl_freebsd && git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
-	cd nassl_freebsd && cd openssl-1.0.2e; git checkout 1.0.2-chacha; cd ..
+	# We generally follow 1.0.2-chacha branch, which moves little, but pinned to latest commit here for reproducibility
+	cd nassl_freebsd && cd openssl-1.0.2e; git checkout 08802aaaa43a43c3bffc0d7cba8aed013bd14a55; cd ..
 	cd nassl_freebsd && git clone https://github.com/openssl/openssl.git openssl-master
 	cd nassl_freebsd && cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
 	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
 	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 setup.py install
 	touch .nassl
-
-
-nassl: venv .nassl_from_archive
-.nassl_from_archive:
-	# This is a temporary fix for the LFS issues. Since we cannot download the large files there we'll have to
-	# deal with this somehow. It also saves some compilation steps... but this is not the wisest strategy (at all)
-	# . .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
-	wget https://5717.ch/internetnl/nassl_freebsd_prebuilt.tar.gz
-	tar -zxvf nassl_freebsd_prebuilt.tar.gz
-	. .venv/bin/activate && cd nassl_freebsd_prebuilt && ${env} python3 setup.py install
 
 
 test: .make.test	## run test suite
