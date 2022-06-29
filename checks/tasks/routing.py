@@ -218,14 +218,6 @@ class TeamCymruIPtoASN(RouteView):
         return ip2asn_query
 
 
-# RouteView could also be implemented based on NLnetLabs roto-api
-# see: https://github.com/NLnetLabs/roto-api
-# Given the existing dependency on Team Cymru's DNS service in the connection
-# test the current implementation is based thereupon.
-# class RotoApi(RouteView):
-#     pass
-
-
 class RelyingPartySoftware(object):
     """Abstract base class for implementations of Relying Party Software for RPKI/ROV.
 

@@ -27,3 +27,7 @@ Other important resources:
 * [Operational Changes](Operational%20Changes.md)
 * [Historic overview on scoring](scores.md)
 * More generic [deployment instructions](/Deployment.md)
+
+Documentation for specific test areas:
+
+* [RPKI test](rpki.md)
