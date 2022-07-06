@@ -3,6 +3,82 @@
 This document describes operational/deployment changes throughout new versions. This is intended for developers and
 hosters.
 
+## Change overview for version 1.5
+
+Version 1.5 adds [RPKI validation](rpki.md) as the major new feature.
+The overall architecture has remained the same.
+
+To upgrade, first [install Routinator](Installation.md). This may take an hour to
+initialise, and can be safely done far before the rest of the upgrade.
+
+Then, based on an existing 1.4 setup:
+
+```bash
+# The next steps need a privileged user
+sudo su -
+# Stop all internet.nl services
+for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done
+
+sudo -s -u internetnl
+
+# Get the 1.5 sources
+cd /opt/internetnl/Internet.nl/
+git fetch
+git checkout v1.5.0
+
+# Backup the existing configuration, as that will be overwritten
+cp -v internetnl/settings.py ~/settings_1.4.py
+
+# Create a new settings file based on the current dist
+cp -v internetnl/settings-dist.py internetnl/settings.py
+
+# NOTE: this may be port 8323 - see the Routinator installation documentation
+# Test with a curl call to this URL, which should produce "Not Found", meaning
+# there is an HTTP API on the endpoint.
+echo 'ROUTINATOR_URL=http://localhost:9556/api/v1/validity' >> ~/internet.nl.env
+
+# The internetnl user also needs these settings. They are loaded through the EnvironmentFile instruction in the
+# systemd services. The syntax is a bit different compared to including this for a user. So what we do is:
+cp -v ~/internet.nl.env ~/internet.nl.systemd.env
+sed -i 's/\export //g'  ~/internet.nl.systemd.env
+mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
+
+# Run migrations and rebuild the frontend
+make manage migrate
+make frontend
+
+# <<<exit internetnl shell and return to root>>>
+
+# Deploy new configs (new celery queue)
+cp -v documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
+
+# Restart services, depending if this a batch or single instance server:
+systemctl daemon-reload
+service internetnl-gunicorn restart
+
+# Single:
+# todo: add --now to start now.
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i`; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i`; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`; done
+
+# Batch:
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl restart `basename $i`; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`; done
+
+# Verify services are running
+# You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
+systemctl list-units --type=service
+
+# In case services failed to start, you can start debugging using these commands:
+tail -f /opt/internetnl/log/*
+journalctl -xe
+
+# Done! :)
+```
+
+
 ## Change overview for version 1.4
 
 ### Deployment instructions
