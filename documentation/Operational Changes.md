@@ -32,9 +32,12 @@ cp -v internetnl/settings.py ~/settings_1.4.py
 # Create a new settings file based on the current dist
 cp -v internetnl/settings-dist.py internetnl/settings.py
 
-# NOTE: this may be port 8323 - see the Routinator installation documentation
+# NOTE: routinator HTTP API may run on port 9556 or on port 8323 - see our
+# Routinator installation documentation
 # Test with a curl call to this URL, which should produce "Not Found", meaning
 # there is an HTTP API on the endpoint.
+echo 'ROUTINATOR_URL=http://localhost:8323/api/v1/validity' >> ~/internet.nl.env
+# or
 echo 'ROUTINATOR_URL=http://localhost:9556/api/v1/validity' >> ~/internet.nl.env
 
 # The internetnl user also needs these settings. They are loaded through the EnvironmentFile instruction in the
@@ -50,7 +53,7 @@ make frontend
 # <<<exit internetnl shell and return to root>>>
 
 # Deploy new configs (new celery queue)
-cp -v documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
+cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
 
 # Restart services, depending if this a batch or single instance server:
 systemctl daemon-reload
