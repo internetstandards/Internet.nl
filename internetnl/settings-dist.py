@@ -85,6 +85,7 @@ INTERNET_NL_CHECK_SUPPORT_DNSSEC = get_boolean_env("INTERNET_NL_CHECK_SUPPORT_DN
 INTERNET_NL_CHECK_SUPPORT_MAIL = get_boolean_env("INTERNET_NL_CHECK_SUPPORT_MAIL", True)
 INTERNET_NL_CHECK_SUPPORT_TLS = get_boolean_env("INTERNET_NL_CHECK_SUPPORT_TLS", True)
 INTERNET_NL_CHECK_SUPPORT_APPSECPRIV = get_boolean_env("INTERNET_NL_CHECK_SUPPORT_APPSECPRIV", True)
+INTERNET_NL_CHECK_SUPPORT_RPKI = get_boolean_env("INTERNET_NL_CHECK_SUPPORT_RPKI", True)
 
 # Features
 # # User Tracking
@@ -291,6 +292,8 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.tls.mail_callback": {"queue": "db_worker"},
     "checks.tasks.tls.web_callback": {"queue": "db_worker"},
     "checks.tasks.appsecpriv.web_callback": {"queue": "db_worker"},
+    "checks.tasks.rpki.web_callback": {"queue": "db_worker"},
+    "checks.tasks.rpki.mail_callback": {"queue": "db_worker"},
     "interface.views.shared.run_stats_queries": {"queue": "slow_db_worker"},
     "interface.views.shared.update_running_status": {"queue": "slow_db_worker"},
     "checks.tasks.update.update_hof": {"queue": "slow_db_worker"},
@@ -307,6 +310,11 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.mail.spf": {"queue": "mail_worker"},
     "checks.tasks.tls.web_http": {"queue": "web_worker"},
     "checks.tasks.appsecpriv.web_appsecpriv": {"queue": "web_worker"},
+    "checks.tasks.rpki.mail_ns_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.mail_mx_ns_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.mail_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.ns_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.web_rpki": {"queue": "rpki_worker"},
     "checks.tasks.shared.mail_get_servers": {"queue": "resolv_worker"},
     "checks.tasks.shared.resolve_a_aaaa": {"queue": "resolv_worker"},
     "checks.tasks.dnssec.mail_is_secure": {"queue": "dnssec_worker"},
@@ -338,6 +346,13 @@ CELERY_BATCH_TASK_ROUTES = {
     "checks.tasks.tls.batch_web_http": {"queue": "batch_main"},
     "checks.tasks.appsecpriv.batch_web_appsecpriv": {"queue": "batch_main"},
     "checks.tasks.appsecpriv.batch_web_callback": {"queue": "batch_callback"},
+    "checks.tasks.rpki.batch_mail_callback": {"queue": "batch_callback"},
+    "checks.tasks.rpki.batch_mail_ns_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.batch_mail_mx_ns_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.batch_mail_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.batch_ns_rpki": {"queue": "rpki_worker"},
+    "checks.tasks.rpki.batch_web_callback": {"queue": "batch_callback"},
+    "checks.tasks.rpki.batch_web_rpki": {"queue": "rpki_worker"},
     "interface.batch.util.batch_async_generate_results": {"queue": "batch_slow"},
     "interface.batch.util.batch_async_register": {"queue": "batch_slow"},
     "interface.batch.scheduler.run": {"queue": "batch_scheduler"},
@@ -565,3 +580,7 @@ if DJANGO_IS_PROXIED:
 # Limit the number of tests a client can perform in a while. The exact implementation is to be documented.
 # raise the roof of this number to remove this cap. 30 was a limit inherited that comes across as sane.
 CLIENT_RATE_LIMIT = 30
+
+# --- Routinator settings
+#
+ROUTINATOR_URL = getenv("ROUTINATOR_URL", "http://localhost:9556/api/v1/validity")

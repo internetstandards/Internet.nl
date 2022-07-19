@@ -748,6 +748,107 @@ class DomainTestAppsecpriv(BaseTestModel):
         app_label = "checks"
 
 
+# RPKI
+class WebTestRpki(BaseTestModel):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    domain = models.CharField(max_length=255, default="")
+    report = ListField(default="")
+    web_score = models.IntegerField(null=True)
+    ns_score = models.IntegerField(null=True)
+    score = models.IntegerField(null=True)
+    max_score = models.IntegerField(null=True)
+
+    def __dir__(self):
+        return ["timestamp", "domain", "report", "web_score", "ns_score", "score", "max_score"]
+
+
+class MailTestRpki(BaseTestModel):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    domain = models.CharField(max_length=255, default="")
+    report = ListField(default="")
+    mail_score = models.IntegerField(null=True)
+    ns_score = models.IntegerField(null=True)
+    score = models.IntegerField(null=True)
+    max_score = models.IntegerField(null=True)
+
+    def __dir__(self):
+        return ["timestamp", "domain", "report", "mail_score", "ns_score", "score", "max_score"]
+
+
+class RpkiTestHost(models.Model):
+    host = models.CharField(max_length=255)
+    score = models.IntegerField(null=True)
+    routing = ListField(default={})
+
+    def __dir__(self):
+        return ["host", "score", "routing"]
+
+    class Meta:
+        abstract = True
+
+
+class RpkiMxHost(RpkiTestHost):
+    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxhosts", on_delete=models.CASCADE)
+
+    def __dir__(self):
+        return (
+            super(RpkiMxHost, self)
+            .__dir__()
+            .extend(
+                [
+                    "mailtestrpki",
+                ]
+            )
+        )
+
+
+class RpkiNsHost(RpkiTestHost):
+    webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="nshosts", on_delete=models.CASCADE)
+    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="nshosts", on_delete=models.CASCADE)
+
+    def __dir__(self):
+        return (
+            super(RpkiNsHost, self)
+            .__dir__()
+            .extend(
+                [
+                    "webtestrpki",
+                    "mailtestrpki",
+                ]
+            )
+        )
+
+
+class RpkiMxNsHost(RpkiTestHost):
+    mailtestrpki = models.ForeignKey(MailTestRpki, null=True, related_name="mxnshosts", on_delete=models.CASCADE)
+
+    def __dir__(self):
+        return (
+            super()
+            .__dir__()
+            .extend(
+                [
+                    "mailtestrpki",
+                ]
+            )
+        )
+
+
+class RpkiWebHost(RpkiTestHost):
+    webtestrpki = models.ForeignKey(WebTestRpki, null=True, related_name="webhosts", on_delete=models.CASCADE)
+
+    def __dir__(self):
+        return (
+            super(RpkiWebHost, self)
+            .__dir__()
+            .extend(
+                [
+                    "webtestrpki",
+                ]
+            )
+        )
+
+
 class DomainTestReport(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     domain = models.CharField(max_length=255, default="")
@@ -757,6 +858,7 @@ class DomainTestReport(models.Model):
     dnssec = models.ForeignKey(DomainTestDnssec, null=True, on_delete=models.CASCADE)
     tls = models.ForeignKey(WebTestTls, null=True, on_delete=models.CASCADE)
     appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True, on_delete=models.CASCADE)
+    rpki = models.ForeignKey(WebTestRpki, null=True, on_delete=models.CASCADE)
 
     def __dir__(self):
         return [
@@ -768,6 +870,7 @@ class DomainTestReport(models.Model):
             "dnssec",
             "tls",
             "appsecpriv",
+            "rpki",
         ]
 
     class Meta:
@@ -909,6 +1012,7 @@ class MailTestReport(models.Model):
     dnssec = models.ForeignKey(MailTestDnssec, null=True, on_delete=models.CASCADE)
     auth = models.ForeignKey(MailTestAuth, null=True, on_delete=models.CASCADE)
     tls = models.ForeignKey(MailTestTls, null=True, on_delete=models.CASCADE)
+    rpki = models.ForeignKey(MailTestRpki, null=True, on_delete=models.CASCADE)
 
     def __dir__(self):
         return ["timestamp", "domain", "registrar", "score", "ipv6", "dnssec", "auth", "tls"]
@@ -1141,6 +1245,9 @@ class BatchWebTest(models.Model):
     appsecpriv = models.ForeignKey(WebTestAppsecpriv, null=True, on_delete=models.CASCADE)
     appsecpriv_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     appsecpriv_errors = models.PositiveSmallIntegerField(default=0)
+    rpki = models.ForeignKey(WebTestRpki, null=True, on_delete=models.CASCADE)
+    rpki_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
+    rpki_errors = models.PositiveSmallIntegerField(default=0)
 
     def __dir__(self):
         return [
@@ -1157,6 +1264,9 @@ class BatchWebTest(models.Model):
             "appsecpriv",
             "appsecpriv_status",
             "appsecpriv_errors",
+            "rpki",
+            "rpki_status",
+            "rpki_errors",
         ]
 
     class Meta:
@@ -1183,6 +1293,9 @@ class BatchMailTest(models.Model):
     tls = models.ForeignKey(MailTestTls, null=True, on_delete=models.CASCADE)
     tls_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
     tls_errors = models.PositiveSmallIntegerField(default=0)
+    rpki = models.ForeignKey(MailTestRpki, null=True, on_delete=models.CASCADE)
+    rpki_status = EnumIntegerField(BatchTestStatus, default=BatchTestStatus.waiting)
+    rpki_errors = models.PositiveSmallIntegerField(default=0)
 
     def __dir__(self):
         return [
@@ -1199,6 +1312,9 @@ class BatchMailTest(models.Model):
             "tls",
             "tls_status",
             "tls_errors",
+            "rpki",
+            "rpki_status",
+            "rpki_errors",
         ]
 
     class Meta:

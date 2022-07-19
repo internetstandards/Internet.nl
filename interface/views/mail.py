@@ -8,7 +8,15 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from checks.models import AutoConfOption, MailTestAuth, MailTestDnssec, MailTestIpv6, MailTestReport, MailTestTls
+from checks.models import (
+    AutoConfOption,
+    MailTestAuth,
+    MailTestDnssec,
+    MailTestIpv6,
+    MailTestReport,
+    MailTestTls,
+    MailTestRpki,
+)
 from checks.probes import mailprobes
 from interface import redis_id
 from interface.views.shared import (
@@ -55,8 +63,8 @@ def mailprocess(request, mailaddr):
     return process(request, mailaddr, "mail.html", mailprobes, "test-in-progress", "mail pagetitle")
 
 
-def create_report(domain, ipv6, dnssec, auth, tls):
-    report = MailTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, auth=auth, tls=tls)
+def create_report(domain, ipv6, dnssec, auth, tls, rpki):
+    report = MailTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, auth=auth, tls=tls, rpki=rpki)
     report.save()
     update_report_with_registrar_and_score(report, mailprobes)
     return report
@@ -126,6 +134,8 @@ def resultscurrent(request, mailaddr):
         dnssec = MailTestDnssec.objects.filter(domain=addr).order_by("-id")[0]
         auth = MailTestAuth.objects.filter(domain=addr).order_by("-id")[0]
         tls = MailTestTls.objects.filter(domain=addr).order_by("-id")[0]
+        rpki = MailTestRpki.objects.filter(domain=addr).order_by("-id")[0]
+
     except IndexError:
         return HttpResponseRedirect("/mail/{}/".format(addr))
 
@@ -138,12 +148,13 @@ def resultscurrent(request, mailaddr):
             == dnssec.mailtestreport_set.order_by("-id")[0].id
             == auth.mailtestreport_set.order_by("-id")[0].id
             == tls.mailtestreport_set.order_by("-id")[0].id
+            == rpki.mailtestreport_set.order_by("-id")[0].id
         ):
             report = create_report(addr, ipv6, dnssec, auth, tls)
     except IndexError:
         # one of the test results is not yet related to a report,
         # create one
-        report = create_report(addr, ipv6, dnssec, auth, tls)
+        report = create_report(addr, ipv6, dnssec, auth, tls, rpki)
 
     return HttpResponseRedirect("/mail/{}/{}/".format(addr, report.id))
 

@@ -3,9 +3,16 @@
 # todo: could add env to the path, activate doesn't seem to function? Also add unbound to the path.
 set -exvu
 
-APP_PATH=/app
-
-# Some env stuff needed in this script...
+ADMIN_EMAIL=${ADMIN_EMAIL:-admin@i.dont.exist}
+CACHE_TTL=${CACHE_TTL:-200}
+ENABLE_BATCH=${ENABLE_BATCH:-False}
+POSTGRES_HOST=${POSTGRES_HOST:-localhost}
+POSTGRES_USER=${POSTGRES_USER:-internetnl}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+POSTGRES_DB=${POSTGRES_DB:-internetnl_db1}
+RABBITMQ_HOST=${RABBITMQ_HOST:-localhost}
+REDIS_HOST=${REDIS_HOST:-localhost}
+ROUTINATOR_HOST=${ROUTINATOR_URL:-localhost:9556}
 RUN_SERVER_CMD=${RUN_SERVER_CMD:-runserver}
 LDNS_DANE_VALIDATION_DOMAIN=${LDNS_DANE_VALIDATION_DOMAIN:-internet.nl}
 
@@ -18,7 +25,47 @@ sudo /opt/unbound2/sbin/unbound-control status
 # to LDNS-DANE so this needs to work for Internet.NL tests to work properly.
 ldns-dane -n -T verify ${LDNS_DANE_VALIDATION_DOMAIN} 443 || echo >&2 "ERROR: Please run this container with --dns 127.0.0.1"
 
-# configure Django logging, which has been moved to the standard app because logging should be at the core of the app.
+# Configure the Internet.nl Django app, e.g. to know how to connect to RabbitMQ, Redis and PostgreSQL.
+# Default values for the environment variables referred to below are provided by the Docker image but can be
+# overridden at container creation time.
+sed \
+    -e "s|DEBUG = False|DEBUG = True|g" \
+    -e "s|ENABLE_BATCH = False|ENABLE_BATCH = ${ENABLE_BATCH}|g" \
+    -e "s|localhost:15672|${RABBITMQ_HOST}:15672|g" \
+    -e "s|localhost:6379|${REDIS_HOST}:6379|g" \
+    -e "s|BROKER_URL = 'amqp://guest@localhost//'|BROKER_URL = 'amqp://guest@${RABBITMQ_HOST}//'|g" \
+    -e "s|ALLOWED_HOSTS = .*|ALLOWED_HOSTS = [\"*\"]|g" \
+    -e "s|django@internet.nl|"${ADMIN_EMAIL}"|g" \
+    -e "s|'HOST': '127.0.0.1'|'HOST': '${POSTGRES_HOST}'|g" \
+    -e "s|'NAME': '<db_name>'|'NAME': '${POSTGRES_DB}'|g" \
+    -e "s|'USER': '<db_user>'|'USER': '${POSTGRES_USER}'|g" \
+    -e "s|'PASSWORD': 'password'|'PASSWORD': '${POSTGRES_PASSWORD}'|g" \
+    -e "s|CACHE_TTL = .*|CACHE_TTL = ${CACHE_TTL}|g" \
+    -e "s|ROUTINATOR_URL = 'http://localhost:9556/api/v1/validity'|ROUTINATOR_URL = 'http://${ROUTINATOR_HOST}/api/v1/validity'|g" \
+    ${APP_PATH}/internetnl/settings.py-dist > ${APP_PATH}/internetnl/settings.py
+
+# configure Django logging
+cat << EOF >> ${APP_PATH}/internetnl/settings.py
+if DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': 'django.log',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }
+EOF
 
 # Prepare translations for use
 cd ${APP_PATH}/checks

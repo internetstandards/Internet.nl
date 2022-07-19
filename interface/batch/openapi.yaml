@@ -439,11 +439,12 @@ components:
         results:
           $ref: '#/components/schemas/DomainResults'
 
-    TechnicalIpv4:
+    TechnicalIpv4Base:
       type: object
       required:
         - address
         - reachable
+        - routing
       properties:
         address:
           type: string
@@ -453,12 +454,25 @@ components:
           type: boolean
           description: >
             If connectivity to this address was possible.
+        routing:
+          $ref: '#/components/schemas/TechnicalRouting'
 
-    TechnicalIpv6:
+    TechnicalIpv4:
+     allOf:
+      - $ref: '#/components/schemas/TechnicalIpv4Base'
+      - required:
+        - reachable
+
+    TechnicalIpv4WithoutReachability:
+      allOf:
+      - $ref: '#/components/schemas/TechnicalIpv4'
+
+    TechnicalIpv6Base:
       type: object
       required:
         - address
         - reachable
+        - routing
       properties:
         address:
           type: string
@@ -468,6 +482,18 @@ components:
           type: boolean
           description: >
             If connectivity to this address was possible.
+        routing:
+          $ref: '#/components/schemas/TechnicalRouting'
+
+    TechnicalIpv6:
+     allOf:
+      - $ref: '#/components/schemas/TechnicalIpv6Base'
+      - required:
+        - reachable
+
+    TechnicalIpv6WithoutReachability:
+      allOf:
+      - $ref: '#/components/schemas/TechnicalIpv6'
 
     TechnicalNameServer:
       type: object
@@ -498,6 +524,35 @@ components:
               items:
                 $ref: '#/components/schemas/TechnicalIpv6'
 
+    TechnicalNameServerWithoutReachability:
+      type: object
+      required:
+        - ipv4
+        - ipv6
+      properties:
+        ipv4:
+          type: object
+          description: Details for the IPv4 side.
+          required:
+            - addresses
+          properties:
+            addresses:
+              type: array
+              description: The available IPv4 addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv4WithoutReachability'
+        ipv6:
+          type: object
+          description: Details for the IPv6 side.
+          required:
+            - addresses
+          properties:
+            addresses:
+              type: array
+              description: The available IPv6 addresses.
+              items:
+                $ref: '#/components/schemas/TechnicalIpv6WithoutReachability'
+
     TechnicalDnssec:
       description: DNSSEC results for the tested domain.
       type: object
@@ -521,6 +576,27 @@ components:
               record is not supported by the resolver, this is treated
               the same as insecure.
             * `error` - Resolver error.
+
+    TechnicalRouting:
+      type: object
+      required:
+        - origin
+        - route
+        - rov_state
+      properties:
+        origin:
+          type: string
+          description: The origin AS number as seen in a route announcement in BGP.
+        route:
+          type: string
+          description: The announced prefix as seen in a route announcement in BGP.
+        rov_state:
+          type: string
+          enum:
+            - "valid"
+            - "invalid"
+            - "not-found"
+          description: The outcome of Route Origin Validation for this route announcement.
 
     TechnicalSharedDetails:
       type: object
@@ -973,6 +1049,14 @@ components:
           additionalProperties:
             x-additionalPropertiesName: <nameserver.name>
             $ref: '#/components/schemas/TechnicalNameServer'
+        mx_nameservers:
+          type: object
+          description: >
+            Results per nameserver authoritative for the zone
+            referred to in the MX records.
+          additionalProperties:
+            x-additionalPropertiesName: <mx_nameserver.name>
+            $ref: '#/components/schemas/TechnicalNameServerWithoutReachability'
         receiving_mailservers:
           description: Results per receiving mailserver.
           type: object
@@ -1130,6 +1214,7 @@ components:
         - web_dnssec
         - web_https
         - web_appsecpriv
+        - web_rpki
       properties:
         web_ipv6:
           $ref: '#/components/schemas/Category'
@@ -1138,6 +1223,8 @@ components:
         web_https:
           $ref: '#/components/schemas/Category'
         web_appsecpriv:
+          $ref: '#/components/schemas/Category'
+        web_rpki:
           $ref: '#/components/schemas/Category'
 
     MailCategories:
@@ -1148,6 +1235,7 @@ components:
         - mail_dnssec
         - mail_auth
         - mail_starttls
+        - mail_rpki
       properties:
         mail_ipv6:
           $ref: '#/components/schemas/Category'
@@ -1156,6 +1244,8 @@ components:
         mail_auth:
           $ref: '#/components/schemas/Category'
         mail_starttls:
+          $ref: '#/components/schemas/Category'
+        mail_rpki:
           $ref: '#/components/schemas/Category'
 
     Categories:
@@ -1450,7 +1540,8 @@ components:
       $ref: '#/components/schemas/ResultsReply'
 
     ResultsTechnicalResponse:
-      $ref: '#/components/schemas/ResultsTechnicalReply'
+      allOf:
+        - $ref: '#/components/schemas/ResultsTechnicalReply'
 
     ResultsCategoriesResponse:
       oneOf:

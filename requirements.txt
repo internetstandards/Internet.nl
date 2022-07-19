@@ -106,6 +106,8 @@ importlib-metadata==4.10.1
     # via markdown
 iniconfig==1.1.1
     # via pytest
+ip-address==1.4.2
+    # via -r requirements.in
 kombu==5.2.3
     # via
     #   -r requirements.in
@@ -158,6 +160,7 @@ redis==4.1.2
 requests==2.27.1
     # via
     #   -r requirements.in
+    #   ip-address
     #   pyrabbit2
 rjsmin==1.2.0
     # via -r requirements.in

@@ -61,9 +61,9 @@ jobs:
             ./_unbound/
             ./nassl_freebsd/
             ./python-whois/
-          key: ${{ runner.os }}-${{ matrix.python-version }}-v3-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile') }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-v3-venv-
+            ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
       - name: Setup Application Configuration
         run: |

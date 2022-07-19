@@ -15,6 +15,7 @@ from checks.models import (
     DomainTestReport,
     WebTestAppsecpriv,
     WebTestTls,
+    WebTestRpki,
 )
 from checks.probes import webprobes
 from interface import redis_id, simple_cache_page
@@ -61,8 +62,8 @@ def siteprocess(request, dname):
     return process(request, dname, "domain.html", webprobes, "test-in-progress", "domain pagetitle")
 
 
-def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None):
-    report = DomainTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, tls=tls, appsecpriv=appsecpriv)
+def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
+    report = DomainTestReport(domain=domain, ipv6=ipv6, dnssec=dnssec, tls=tls, appsecpriv=appsecpriv, rpki=rpki)
     report.save()
     update_report_with_registrar_and_score(report, webprobes)
     return report
@@ -132,6 +133,8 @@ def resultscurrent(request, dname):
         dnssec = DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None).order_by("-id")[0]
         tls = WebTestTls.objects.filter(domain=addr).order_by("-id")[0]
         appsecpriv = WebTestAppsecpriv.objects.filter(domain=addr).order_by("-id")[0]
+        rpki = WebTestRpki.objects.filter(domain=addr).order_by("-id")[0]
+
     except IndexError:
         # Domain not tested, go back to start test
         return HttpResponseRedirect("/site/{}/".format(addr))
@@ -145,12 +148,13 @@ def resultscurrent(request, dname):
             == dnssec.domaintestreport_set.order_by("-id")[0].id
             == tls.domaintestreport_set.order_by("-id")[0].id
             == appsecpriv.domaintestreport_set.order_by("-id")[0].id
+            == rpki.domaintestreport_set.order_by("-id")[0].id
         ):
-            report = create_report(addr, ipv6, dnssec, tls, appsecpriv)
+            report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
     except IndexError:
         # one of the test results is not yet related to a report,
         # create one
-        report = create_report(addr, ipv6, dnssec, tls, appsecpriv)
+        report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
     return HttpResponseRedirect("/site/{}/{}/".format(addr, report.id))
 
 

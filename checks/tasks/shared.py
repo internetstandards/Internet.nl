@@ -62,6 +62,46 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_a_aaaa(self, qname, *args, **kwargs)
 
 
+@shared_task(
+    bind=True,
+    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    base=SetupUnboundContext,
+)
+def resolve_mx(self, qname, *args, **kwargs):
+    return do_resolve_mx_ips(self, qname, *args, **kwargs)
+
+
+@batch_shared_task(
+    bind=True,
+    soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    base=SetupUnboundContext,
+)
+def batch_resolve_mx(self, qname, *args, **kwargs):
+    return do_resolve_mx_ips(self, qname, *args, **kwargs)
+
+
+@shared_task(
+    bind=True,
+    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    base=SetupUnboundContext,
+)
+def resolve_ns(self, qname, *args, **kwargs):
+    return do_resolve_ns_ips(self, qname, *args, **kwargs)
+
+
+@batch_shared_task(
+    bind=True,
+    soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
+    time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    base=SetupUnboundContext,
+)
+def batch_resolve_ns(self, qname, *args, **kwargs):
+    return do_resolve_ns_ips(self, qname, *args, **kwargs)
+
+
 def do_mail_get_servers(self, url, *args, **kwargs):
     """
     Resolve the domain's mailservers and TLSA records.
@@ -103,6 +143,7 @@ def get_mail_servers_mxstatus(mailservers):
 
 
 def do_resolve_a_aaaa(self, qname, *args, **kwargs):
+    """Resolve A and AAAA records and return a single result for each type."""
     af_ip_pairs = []
     ip4 = self.resolve(qname, unbound.RR_TYPE_A)
     if len(ip4) > 0:
@@ -111,6 +152,42 @@ def do_resolve_a_aaaa(self, qname, *args, **kwargs):
     if len(ip6) > 0:
         af_ip_pairs.append((socket.AF_INET6, ip6[0]))
     return af_ip_pairs
+
+
+def do_resolve_mx_ips(self, url, *args, **kwargs):
+    """Resolve the domain's mailservers
+    returns [(mailserver, af_ip_pairs)]
+    """
+    mx_ips_pairs = []
+
+    for qname, _, status in do_mail_get_servers(self, url, *args, **kwargs):
+        if status is not MxStatus.has_mx:
+            continue
+
+        af_ip_pairs = []
+        ip4 = self.resolve(qname, unbound.RR_TYPE_A)
+        for ip in ip4:
+            af_ip_pairs.append((socket.AF_INET, ip))
+        ip6 = self.resolve(qname, unbound.RR_TYPE_AAAA)
+        for ip in ip6:
+            af_ip_pairs.append((socket.AF_INET6, ip))
+        mx_ips_pairs.append((qname, af_ip_pairs))
+
+    return mx_ips_pairs
+
+
+def do_resolve_ns_ips(self, url, *args, **kwargs):
+    """Resolve the domain's nameservers
+    Returns [(nameserver, af_ip_pairs)]
+    """
+    rrset = self.resolve(url, unbound.RR_TYPE_NS)
+    next_label = url
+    while not rrset and "." in next_label:
+        rrset = self.resolve(next_label, unbound.RR_TYPE_NS)
+        next_label = next_label[next_label.find(".") + 1 :]
+
+    for rr in rrset:
+        yield (rr, do_resolve_a_aaaa(self, rr))
 
 
 def resolve_dane(task, port, dname, check_nxdomain=False):

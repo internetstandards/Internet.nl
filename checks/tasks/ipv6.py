@@ -302,6 +302,8 @@ def test_ns_connectivity(ip, port, domain):
     # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
     ctx.set_async(True)
     ctx.set_fwd(ip)
+    # Some (unknown) tests probably depend on consistent ordering in unbound responses
+    ctx.set_option("rrset-roundrobin:", "no")
     cb_data = dict(done=False)
     try:
         retval, async_id = ctx.resolve_async(domain, cb_data, ub_callback, RR_TYPE_NS, RR_CLASS_IN)

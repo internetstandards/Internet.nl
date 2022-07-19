@@ -155,7 +155,7 @@ run-worker: venv
 	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
 	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
 	# Todo: Eventlet results in a database deadlock, gevent does not.
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker --pool eventlet -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler,worker_nassl,ipv6_worker,resolv_worker,dnssec_worker,nassl_worker,web_worker,mail_worker --time-limit=300 --concurrency=20 -n generic_worker
+	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker --pool eventlet -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler,worker_nassl,ipv6_worker,resolv_worker,dnssec_worker,nassl_worker,rpki_worker,web_worker,mail_worker --time-limit=300 --concurrency=20 -n generic_worker
 
 run-worker-batch-main: venv
 	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300 --concurrency=20 -n batch_main
@@ -217,7 +217,7 @@ run-test-worker: venv
 	# Know that the worker will complain that the database is plainly been dropped, this is exactly what happens during
 	# tests. It will keep on running, and the tests will run well.
 	# DJANGO_DATABASE=testworker
-	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
+	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,nassl_worker,rpki_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
 
 # compiling unbound for an x86_64 system:
 ifeq ($(shell uname -m),arm64)

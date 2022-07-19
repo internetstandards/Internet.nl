@@ -13,6 +13,8 @@ from checks.models import (
     MailTestDnssec,
     MailTestIpv6,
     MailTestTls,
+    MailTestRpki,
+    WebTestRpki,
     WebTestAppsecpriv,
     WebTestTls,
 )
@@ -42,6 +44,9 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     from checks.tasks import appsecpriv
+
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    from checks.tasks import rpki
 
 
 class ProbeSet(object):
@@ -416,6 +421,15 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
         taskset=appsecpriv.web_registered,
     )
 
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    web_probe_rpki = Probe(
+        "rpki",
+        "site",
+        model=WebTestRpki,
+        category=categories.WebRpki,
+        taskset=rpki.web_registered,
+    )
+
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     batch_web_probe_ipv6 = Probe(
         "ipv6", "site", model=DomainTestIpv6, category=categories.WebIpv6, taskset=ipv6.batch_web_registered
@@ -440,6 +454,15 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
         taskset=appsecpriv.batch_web_registered,
     )
 
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    batch_web_probe_rpki = Probe(
+        "rpki",
+        "site",
+        model=WebTestRpki,
+        category=categories.WebRpki,
+        taskset=rpki.batch_web_registered,
+    )
+
 webprobes = ProbeSet()
 counter = -1
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
@@ -454,6 +477,9 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     counter += 1
     webprobes.add(web_probe_appsecpriv, counter)
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    counter += 1
+    webprobes.add(web_probe_rpki, counter)
 
 counter = -1
 batch_webprobes = ProbeSet()
@@ -469,6 +495,9 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     counter += 1
     batch_webprobes.add(batch_web_probe_appsecpriv, counter)
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    counter += 1
+    batch_webprobes.add(batch_web_probe_rpki, counter)
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     mail_probe_ipv6 = Probe(
@@ -487,6 +516,11 @@ if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     mail_probe_tls = Probe("tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls.mail_registered)
+
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    mail_probe_rpki = Probe(
+        "rpki", "mail", model=MailTestRpki, category=categories.MailRpki, taskset=rpki.mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     batch_mail_probe_ipv6 = Probe(
@@ -508,6 +542,11 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
         "tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls.batch_mail_registered
     )
 
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    batch_mail_probe_rpki = Probe(
+        "rpki", "mail", model=MailTestRpki, category=categories.MailRpki, taskset=rpki.batch_mail_registered
+    )
+
 
 mailprobes = ProbeSet()
 counter = -1
@@ -523,6 +562,9 @@ if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     counter += 1
     mailprobes.add(mail_probe_tls, counter)
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    counter += 1
+    mailprobes.add(mail_probe_rpki, counter)
 
 batch_mailprobes = ProbeSet()
 counter = -1
@@ -538,3 +580,6 @@ if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     counter += 1
     batch_mailprobes.add(batch_mail_probe_tls, counter)
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    counter += 1
+    batch_mailprobes.add(batch_mail_probe_rpki, counter)

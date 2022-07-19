@@ -14,6 +14,7 @@ services:
       - redis
       - rabbitmq
       - postgres
+      - routinator
     environment:
       - ENABLE_BATCH=${ENABLE_BATCH:-False}
 
@@ -32,3 +33,11 @@ services:
       - POSTGRES_USER=internetnl
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=internetnl_db1
+
+  routinator:
+    network_mode: host
+    image: nlnetlabs/routinator
+    volumes:
+            - routinator-tals:/home/routinator/.rpki-cache/tals
+volumes:
+  routinator-tals: {}

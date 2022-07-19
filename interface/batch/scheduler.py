@@ -61,6 +61,14 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
 
     BATCH_MAILTEST["subtests"]["tls"] = tls_mail_taskset
 
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    from checks.tasks.rpki import batch_web_registered as rpki_web_taskset
+
+    BATCH_WEBTEST["subtests"]["rpki"] = rpki_web_taskset
+    from checks.tasks.rpki import batch_mail_registered as rpki_mail_taskset
+
+    BATCH_MAILTEST["subtests"]["rpki"] = rpki_mail_taskset
+
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     from checks.tasks.appsecpriv import batch_web_registered as appsecpriv_web_taskset
 
@@ -330,13 +338,19 @@ def create_report(batch_domain):
             dnssec=batch_test.dnssec,
             tls=batch_test.tls,
             appsecpriv=batch_test.appsecpriv,
+            rpki=batch_test.rpki,
         )
         probe_reports = batch_webprobes.get_probe_reports(report)
         score = batch_webprobes.count_probe_reports_score(probe_reports)
     else:
         batch_test = batch_domain.mailtest
         report = MailTestReport(
-            domain=domain, ipv6=batch_test.ipv6, dnssec=batch_test.dnssec, auth=batch_test.auth, tls=batch_test.tls
+            domain=domain,
+            ipv6=batch_test.ipv6,
+            dnssec=batch_test.dnssec,
+            auth=batch_test.auth,
+            tls=batch_test.tls,
+            rpki=batch_test.rpki,
         )
         probe_reports = batch_mailprobes.get_probe_reports(report)
         score = batch_mailprobes.count_probe_reports_score(probe_reports)

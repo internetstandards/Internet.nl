@@ -32,6 +32,7 @@ if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_
 ub_ctx.set_async(True)
 if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
     ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
+ub_ctx.set_option("rrset-roundrobin:", "no")
 
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
 # RFCs and other rulings that combine to define what is a valid domain name.

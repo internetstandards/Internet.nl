@@ -3,7 +3,7 @@ from typing import Dict, Callable, Optional
 
 from django.core.management.base import BaseCommand
 
-from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, tls
+from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, tls, rpki
 
 
 def force_debug_logging():
@@ -47,6 +47,8 @@ PROBES: Dict[str, Optional[Callable]] = {
     "tls_web_conn": tls.web_conn,
     "tls_web_http": tls.web_http,
     "tls_mail_smtp_starttls": tls.mail_smtp_starttls,
+    "mail_rpki": rpki.mail_rpki,
+    "web_rpki": rpki.web_rpki,
     "all": None,
 }
 
@@ -87,7 +89,7 @@ def run_all_probes(domain):
 def run_probe(probe: str, domain: str):
     log.info(f"Performing {probe} on {domain}.")
 
-    if probe in ["tls_web_cert", "tls_web_conn", "tls_web_http", "appsecpriv_web_appsecpriv"]:
+    if probe in ["tls_web_cert", "tls_web_conn", "tls_web_http", "appsecpriv_web_appsecpriv", "web_rpki"]:
         log.debug("First retrieving af_ip_pairs")
         af_ip_pairs = shared.resolve_a_aaaa(domain)
         log.debug(f"af_ip_pairs retrieved: {af_ip_pairs}")
@@ -97,6 +99,12 @@ def run_probe(probe: str, domain: str):
         log.debug("First retrieving mailservers")
         mailservers = shared.mail_get_servers(domain)
         log.debug(f"Mailservers retrieved: {mailservers}")
+        return_value = PROBES[probe](mailservers, domain)
+
+    elif probe in ["mail_rpki"]:
+        log.debug("First retrieving mailserver IPs")
+        mailservers = shared.resolve_mx(domain)
+        log.debug(f"Mailserver IPs retrieved: {mailservers}")
         return_value = PROBES[probe](mailservers, domain)
 
     else:

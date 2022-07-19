@@ -3,8 +3,8 @@
 from django.conf import settings
 
 BATCH_API_MAJOR_VERSION = "2"
-BATCH_API_MINOR_VERSION = "0"
-BATCH_API_PATCH_VERSION = "1"
+BATCH_API_MINOR_VERSION = "1"
+BATCH_API_PATCH_VERSION = "0"
 BATCH_API_FULL_VERSION = f"{BATCH_API_MAJOR_VERSION}" f".{BATCH_API_MINOR_VERSION}" f".{BATCH_API_PATCH_VERSION}"
 
 BATCH_INDEXES = [
@@ -15,7 +15,9 @@ BATCH_INDEXES = [
     ("checks_mailtestdnssec", "domain", "checks_mailtestdnssec_domain"),
     ("checks_mailtestipv6", "domain", "checks_mailtestipv6_domain"),
     ("checks_mailtesttls", "domain", "checks_mailtesttls_domain"),
+    ("checks_mailtestrpki", "domain", "checks_mailtestrpki_domain"),
     ("checks_webtesttls", "domain", "checks_webtesttls_domain"),
+    ("checks_webtestrpki", "domain", "checks_webtestrpki_domain"),
     ("checks_webtestappsecpriv", "domain", "checks_webtestappsecpriv_domain"),
 ]
 
@@ -24,20 +26,24 @@ BATCH_PROBE_NAME_TO_API_CATEGORY = {
     "sitednssec": "web_dnssec",
     "sitetls": "web_https",
     "siteappsecpriv": "web_appsecpriv",
+    "siterpki": "web_rpki",
     "mailipv6": "mail_ipv6",
     "maildnssec": "mail_dnssec",
     "mailauth": "mail_auth",
     "mailtls": "mail_starttls",
+    "mailrpki": "mail_rpki",
 }
 BATCH_API_CATEGORY_TO_PROBE_NAME = {
     "web_ipv6": "ipv6",
     "web_dnssec": "dnssec",
     "web_https": "tls",
     "web_appsecpriv": "appsecpriv",
+    "web_rpki": "rpki",
     "mail_ipv6": "ipv6",
     "mail_dnssec": "dnssec",
     "mail_auth": "auth",
     "mail_starttls": "tls",
+    "mail_rpki": "rpki",
 }
 
 REPORT_METADATA_WEB_MAP = []
@@ -327,6 +333,55 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
                 }
             ],
         }
+    )
+
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    REPORT_METADATA_WEB_MAP.append(
+        {
+            "name": "web_rpki",
+            "type": "category",
+            "translation_key": "siterpki",
+            "children": [
+                {
+                    "name": "web_rpki",
+                    "type": "section",
+                    "translation_key": "domain rpki web-server",
+                    "children": [
+                        {
+                            "name": "web_rpki_exists",
+                            "name_on_report": "web_rpki_exists",
+                            "type": "test",
+                            "translation_key": "web rpki exists",
+                        },
+                        {
+                            "name": "web_rpki_valid",
+                            "name_on_report": "web_rpki_valid",
+                            "type": "test",
+                            "translation_key": "web rpki valid",
+                        },
+                    ],
+                },
+                {
+                    "name": "web_ns_rpki",
+                    "type": "section",
+                    "translation_key": "domain-mail rpki name-servers",
+                    "children": [
+                        {
+                            "name": "web_ns_rpki_exists",
+                            "name_on_report": "ns_rpki_exists",
+                            "type": "test",
+                            "translation_key": "web-mail rpki ns-exists",
+                        },
+                        {
+                            "name": "web_ns_rpki_valid",
+                            "name_on_report": "ns_rpki_valid",
+                            "type": "test",
+                            "translation_key": "web-mail rpki ns-valid",
+                        },
+                    ],
+                },
+            ],
+        },
     )
 
 
@@ -625,4 +680,72 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
                 },
             ],
         }
+    )
+
+if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+    REPORT_METADATA_MAIL_MAP.append(
+        {
+            "name": "mail_rpki",
+            "type": "category",
+            "translation_key": "mailrpki",
+            "children": [
+                {
+                    "name": "mail_rpki",
+                    "type": "section",
+                    "translation_key": "mail rpki mail-servers",
+                    "children": [
+                        {
+                            "name": "mail_rpki_exists",
+                            "name_on_report": "mail_rpki_exists",
+                            "type": "test",
+                            "translation_key": "mail rpki exists",
+                        },
+                        {
+                            "name": "mail_rpki_valid",
+                            "name_on_report": "mail_rpki_valid",
+                            "type": "test",
+                            "translation_key": "mail rpki valid",
+                        },
+                    ],
+                },
+                {
+                    "name": "mail_ns_rpki",
+                    "type": "section",
+                    "translation_key": "domain-mail rpki name-servers",
+                    "children": [
+                        {
+                            "name": "mail_ns_rpki_exists",
+                            "name_on_report": "ns_rpki_exists",
+                            "type": "test",
+                            "translation_key": "web-mail rpki ns-exists",
+                        },
+                        {
+                            "name": "mail_ns_rpki_valid",
+                            "name_on_report": "ns_rpki_valid",
+                            "type": "test",
+                            "translation_key": "web-mail rpki ns-valid",
+                        },
+                    ],
+                },
+                {
+                    "name": "mail_mx_ns_rpki",
+                    "type": "section",
+                    "translation_key": "domain-mail rpki mx-name-servers",
+                    "children": [
+                        {
+                            "name": "mail_mx_ns_rpki_exists",
+                            "name_on_report": "mail_mx_ns_rpki_exists",
+                            "type": "test",
+                            "translation_key": "mail rpki mx-ns-exists",
+                        },
+                        {
+                            "name": "mail_mx_ns_rpki_valid",
+                            "name_on_report": "mail_mx_ns_rpki_valid",
+                            "type": "test",
+                            "translation_key": "mail rpki mx-ns-valid",
+                        },
+                    ],
+                },
+            ],
+        },
     )

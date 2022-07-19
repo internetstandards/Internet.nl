@@ -16,6 +16,7 @@ import unbound
 from checks.models import ASRecord, ConnectionTest, Resolver
 from checks.probes import Probe, ProbeSet
 from checks.scoring import STATUS_FAIL, STATUS_INFO, STATUS_NOT_TESTED, STATUS_NOTICE, STATUS_SUCCESS
+from checks.tasks.routing import TeamCymruIPtoASN, BGPSourceUnavailableError
 from interface import redis_id
 from interface.views.shared import get_client_ip, get_javascript_retries, ub_ctx
 
@@ -353,36 +354,9 @@ def find_AS_by_IP(ip):
 
     """
     try:
-        ip = ipaddress.ip_address(ip)
-
-        # Reverse the IP. In case of IPv6 we need the exploded address.
-        if ip.version == 4:
-            split_ip = str(ip).split(".")
-            split_ip.reverse()
-            reversed_ip = ".".join(split_ip)
-            ip2asn_query = "{}.origin.asn.cymru.com.".format(reversed_ip)
-        else:
-            exploded_ip = str(ip.exploded)
-            reversed_ip = exploded_ip.replace(":", "")[::-1]
-            reversed_ip = ".".join(reversed_ip)
-            ip2asn_query = "{}.origin6.asn.cymru.com.".format(reversed_ip)
-    except ValueError:
-        return None
-
-    status, result = ub_ctx.resolve(ip2asn_query, unbound.RR_TYPE_TXT, unbound.RR_CLASS_IN)
-    if status != 0 or result.nxdomain or not result.havedata:
-        return None
-
-    # The values in the TXT record are separated by '|' and the ASN is the
-    # first value.
-    # Because of multihoming (most probably), we may get more than one ASN
-    # back. In this case accept the first ASN which is also the lowest ASN.
-    txt = result.data.data[0][1:].decode("ascii")
-    asn = txt.split("|")[0].strip().split()[0].strip()
-    try:
-        # Check that we didn't get any gibberish back.
-        int(asn)
-    except ValueError:
+        asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(None, ip)
+        (asn, _) = asns_prefixes[0]
+    except (BGPSourceUnavailableError, IndexError):
         return None
 
     as_record = cache.get(redis_id.conn_test_as.id.format(asn))

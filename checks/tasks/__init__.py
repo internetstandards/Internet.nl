@@ -1,6 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import os
+import requests
 import socket
 import time
 
@@ -31,6 +32,10 @@ class SetupUnboundContext(Task):
                 self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
             else:
                 self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
+            self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
+            # Some (unknown) tests probably depend on consistent ordering in unbound responses
+            # https://github.com/internetstandards/Internet.nl/pull/613#discussion_r892196819
+            self._ub_ctx.set_option("rrset-roundrobin:", "no")
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # XXX: Remove for now; inconsistency with applying settings on celery.
             # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
@@ -108,3 +113,12 @@ class SetupUnboundContext(Task):
                 data["data"] = result.data
                 data["rcode"] = result.rcode
         data["done"] = True
+
+    def get(self, *args, **kwargs):
+        """
+        Perform a HTTP GET request using the stored session
+        """
+        if not hasattr(self, "_requests_session"):
+            self._requests_session = requests.session()
+
+        return self._requests_session.get(*args, **kwargs)

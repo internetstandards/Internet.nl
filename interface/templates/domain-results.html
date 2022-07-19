@@ -75,6 +75,18 @@
     {% include "details-test-item.html" with testitem=details.http_csp %}
     {% include "details-test-item.html" with testitem=details.http_referrer_policy %}
 
+  {% elif probe.name == 'siterpki' %}
+    <div class="test-subsection">
+     {% include "string.html" with name="results domain-mail rpki name-servers label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.ns_rpki_exists %}
+    {% include "details-test-item.html" with testitem=details.ns_rpki_valid %}
+    <div class="test-subsection">
+     {% include "string.html" with name="results domain rpki web-server label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.web_rpki_exists %}
+    {% include "details-test-item.html" with testitem=details.web_rpki_valid %}
+
   {% endif %}
 {% endblock %}
 

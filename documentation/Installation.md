@@ -103,9 +103,6 @@ internet.nl.		3054	IN	A	62.204.66.10
 ;; MSG SIZE  rcvd: 56
 ```
 
-
-
-
 ### ldns-dane
 
 ldns-dane is an example application from the ldns library that validates a
@@ -161,6 +158,26 @@ PostgreSQL is used as the database.
 If you expect high DB traffic the use of
 [PgBouncer](https://pgbouncer.github.io/) is recommended as a connection pooler
 for PostgreSQL.
+
+
+### Routinator
+
+[Routinator](https://www.nlnetlabs.nl/projects/rpki/routinator/) is used for
+[RPKI validation](rpki.md).
+There are some publicly available instances that can be used for local
+testing, like `https://rpki-validator.ripe.net/api/v1/validity`, but large
+scale or production setups, you should run your own instance.
+
+* For installation you can follow [the manual](https://routinator.docs.nlnetlabs.nl/en/stable/installation.html).
+* Note that Internet.nl uses the local HTTP API, by default on port 9956,
+  not the RTR(TR) protocol. For at least docker, port 9556 is not available
+  by default with the commands in the manual - you need to add `-p 9556:9556`
+  to the Docker command. In some packages, this same interface is hosted
+  on port 8323 instead. You can verify with just a basic HTTP request.
+* The `ROUTINATOR_URL` setting must have the full path to the validity API,
+  which usually is the same, e.g. `"http://localhost:9556/api/v1/validity"`.
+* Routinator will take some time to initialise. The same HTTP interface as
+  the API will show the current status.
 
 
 ## Django setup
