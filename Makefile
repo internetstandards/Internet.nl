@@ -124,28 +124,28 @@ clean_venv:  # Remove venv
 	@rm -f .python-whois
 
 
-pip-compile:  ## synchronizes the .venv with the state of requirements.txt
+pip-compile:  ## compile an updated requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
 
-pip-compile-dev:  ## synchronizes the .venv with the state of requirements.txt
+pip-compile-dev:  ## compile an updated requirements{-dev}.txt
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
 	. .venv/bin/activate && ${env} python3 -m piptools compile requirements-dev.in
 
-pip-upgrade: ## synchronizes the .venv with the state of requirements.txt
+pip-upgrade: ## upgrades all packages in requirements.txt to latest permitted version
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
 
-pip-upgrade-dev: ## synchronizes the .venv with the state of requirements.txt
+pip-upgrade-dev: ## upgrades all packages in requirements{-dev}.txt to latest permitted version
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements-dev.in
 
-pip-upgrade-package: ## Upgrades a package in the requirements.txt
+pip-upgrade-package: ## Upgrades a specific package in the requirements.txt
 	# example: make pip-upgrade-package package=django
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade-package ${package}
 
 pip-sync:  ## synchronizes the .venv with the state of requirements.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
 
-pip-sync-dev:  ## synchronizes the .venv with the state of requirements.txt
+pip-sync-dev:  ## synchronizes the .venv with the state of requirements{-dev}.txt
 	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt requirements-dev.txt
 
 run: venv
