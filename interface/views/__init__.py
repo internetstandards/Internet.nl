@@ -73,8 +73,8 @@ def clear(request, dname):
             "mail_rpki",
         ]:
             cache.delete(redis_id.dom_task.id.format(url, test))
-        return HttpResponse("ok")
-    return HttpResponse("nope")
+        return HttpResponse("Domain name cleared from cache.")
+    return HttpResponse("Permission denied to clear domain name from cache.")
 
 
 def testconnectionpage(request):
