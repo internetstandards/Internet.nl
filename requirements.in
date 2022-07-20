@@ -14,7 +14,8 @@ kombu<5.3
 
 setuptools-rust
 beautifulsoup4
-django-bleach
+cryptography
+django-bleach<3  # 3 and up has no Python 3.7 support
 django-csp
 django-enumfields
 django-hosts
@@ -32,8 +33,8 @@ rjsmin
 argparse
 GitPython
 pathlib2
-pytest
-selenium
+pytest<7
+selenium<4
 chardet
 requests
 hiredis
