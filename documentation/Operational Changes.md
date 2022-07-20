@@ -60,7 +60,7 @@ systemctl daemon-reload
 service internetnl-gunicorn restart
 
 # Single:
-for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl restart `basename $i` --now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i` --now; done
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`--now; done
 
 # Batch:
