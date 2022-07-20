@@ -232,7 +232,8 @@ CACHES = {
 
 CACHE_TTL = 200
 CACHE_WHOIS_TTL = 60 * 60 * 24
-CACHE_RESET_WHITELIST = ["domain.name.com"]
+# Specify domain names for which the cache may be reset through /clear/<dname>
+CACHE_RESET_WHITELIST = []
 
 # --- Language settings
 #
