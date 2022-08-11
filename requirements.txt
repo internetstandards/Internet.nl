@@ -50,7 +50,7 @@ cryptography==37.0.4
     # via -r requirements.in
 deprecated==1.2.13
     # via redis
-django==3.2.14
+django==3.2.15
     # via
     #   -r requirements.in
     #   django-bleach
@@ -88,8 +88,6 @@ hiredis==2.0.0
     # via -r requirements.in
 idna==3.3
     # via requests
-importlib-metadata==4.12.0
-    # via markdown
 iniconfig==1.1.1
     # via pytest
 ip-address==1.4.2
@@ -186,8 +184,6 @@ wheel==0.37.1
     # via -r requirements.in
 wrapt==1.14.1
     # via deprecated
-zipp==3.8.1
-    # via importlib-metadata
 zope-event==4.5.0
     # via gevent
 zope-interface==5.4.0
