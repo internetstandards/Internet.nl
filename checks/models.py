@@ -704,6 +704,12 @@ class DomainTestAppsecpriv(BaseTestModel):
     x_content_type_options_values = ListField(default=[])
     x_content_type_options_score = models.IntegerField(null=True)
 
+    securitytxt_enabled = models.BooleanField(null=True, default=False)
+    securitytxt_errors = ListField(default=[])
+    securitytxt_recommendations = ListField(default=[])
+    securitytxt_score = models.IntegerField(null=True)
+    securitytxt_found_host = models.CharField(null=True, max_length=255)
+
     def __dir__(self):
         return [
             "timestamp",
@@ -727,6 +733,11 @@ class DomainTestAppsecpriv(BaseTestModel):
             "x_content_type_options_enabled",
             "x_content_type_options_values",
             "x_content_type_options_score",
+            "securitytxt_enabled",
+            "securitytxt_errors",
+            "securitytxt_recommendations",
+            "securitytxt_score",
+            "securitytxt_found_host",
         ]
 
     def get_web_api_details(self):
@@ -739,6 +750,10 @@ class DomainTestAppsecpriv(BaseTestModel):
             "x_content_type_options_values": self.x_content_type_options_values,
             "x_frame_options_enabled": self.x_frame_options_enabled,
             "x_frame_options_values": self.x_frame_options_values,
+            "securitytxt_enabled": self.securitytxt_enabled,
+            "securitytxt_errors": self.securitytxt_errors,
+            "securitytxt_recommendations": self.securitytxt_recommendations,
+            "securitytxt_found_host": self.securitytxt_found_host,
             # TODO: to be removed in the future.
             # 'x_xss_protection_enabled': self.x_xss_protection_enabled,
             # 'x_xss_protection_values': self.x_xss_protection_values,

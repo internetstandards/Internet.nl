@@ -329,6 +329,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
                             "type": "test",
                             "translation_key": "web appsecpriv http-referrer-policy",
                         },
+                        {
+                            "name": "web_appsecpriv_securitytxt",
+                            "name_on_report": "securitytxt",
+                            "type": "test",
+                            "translation_key": "web appsecpriv http-securitytxt",
+                        },
                     ],
                 }
             ],

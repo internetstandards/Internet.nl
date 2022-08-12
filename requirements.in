@@ -39,6 +39,7 @@ chardet
 requests
 hiredis
 ip_address
+sectxt
 
 colorlog
 

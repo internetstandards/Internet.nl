@@ -131,6 +131,8 @@ pyrabbit2==1.0.7
     # via -r requirements.in
 pytest==6.2.5
     # via -r requirements.in
+python-dateutil==2.8.2
+    # via sectxt
 pytz==2022.2.1
     # via
     #   celery
@@ -144,7 +146,10 @@ requests==2.28.1
     #   -r requirements.in
     #   ip-address
     #   pyrabbit2
+    #   sectxt
 rjsmin==1.2.1
+    # via -r requirements.in
+sectxt==0.4
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
@@ -159,6 +164,7 @@ six==1.16.0
     #   eventlet
     #   libsass
     #   pathlib2
+    #   python-dateutil
 smmap==5.0.0
     # via gitdb
 soupsieve==2.3.2.post1

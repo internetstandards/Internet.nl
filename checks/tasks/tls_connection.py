@@ -497,8 +497,10 @@ class HTTPSConnection(SSLConnectionWrapper):
         task=None,
         ip_address=None,
         conn=None,
+        max_response_length=8192,
         **kwargs,
     ):
+        self.max_response_length = max_response_length
         if conn:
             super().__init__(conn=conn)
         else:
@@ -549,8 +551,9 @@ class HTTPSConnection(SSLConnectionWrapper):
                 return self.handle
 
         class AutoUpdatingHTTPResponse(http.client.HTTPResponse):
-            def __init__(self, conn):
+            def __init__(self, conn, max_response_length):
                 self.conn = conn
+                self.max_response_length = max_response_length
                 self.bytesio = BytesIOSocket(self._fetch_headers())
                 super().__init__(self.bytesio)
 
@@ -573,7 +576,7 @@ class HTTPSConnection(SSLConnectionWrapper):
 
                 # read and decrypt upto the number of requested bytes from the
                 # network and write them to the underlying buffer.
-                chunk_size = amt if amt and amt < 8192 else 8192
+                chunk_size = amt if amt and amt < self.max_response_length else self.max_response_length
                 try:
                     while not amt or (self.bytesio.handle.tell() - pos) < amt:
                         self.bytesio.handle.write(self.conn.read(chunk_size))
@@ -591,7 +594,7 @@ class HTTPSConnection(SSLConnectionWrapper):
                 return super().read(amt)
 
         def response_from_bytes(data):
-            response = AutoUpdatingHTTPResponse(self.conn)
+            response = AutoUpdatingHTTPResponse(self.conn, self.max_response_length)
             response.begin()
             return response
 
@@ -644,6 +647,7 @@ def http_fetch(
     needed_headers=[],
     ret_visited_hosts=None,
     keep_conn_open=False,
+    max_response_length=8192,
 ):
     if path == "":
         path = "/"
@@ -655,7 +659,13 @@ def http_fetch(
             conn = None
             if port == 443:
                 conn = HTTPSConnection(
-                    host=host, ip_address=ip_address, port=port, socket_af=af, task=task, timeout=timeout
+                    host=host,
+                    ip_address=ip_address,
+                    port=port,
+                    socket_af=af,
+                    task=task,
+                    timeout=timeout,
+                    max_response_length=max_response_length,
                 )
             else:
                 conn = HTTPConnection(

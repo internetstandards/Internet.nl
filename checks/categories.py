@@ -176,6 +176,7 @@ class WebAppsecpriv(Category):
             WebAppsecprivHttpReferrerPolicy,
             WebAppsecprivHttpCsp,
             WebAppsecprivHttpXContentType,
+            WebAppsecprivSecuritytxt,
             # TODO: To be removed in the future.
             # WebAppsecprivHttpXXss,
         ]
@@ -2324,4 +2325,32 @@ class WebAppsecprivHttpReferrerPolicy(Subtest):
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web appsecpriv http-referrer-policy verdict bad"
+        self.tech_data = tech_data or ""
+
+
+class WebAppsecprivSecuritytxt(Subtest):
+    def __init__(self):
+        super(WebAppsecprivSecuritytxt, self).__init__(
+            name="http_securitytxt",
+            label="detail web appsecpriv http-securitytxt label",
+            explanation="detail web appsecpriv http-securitytxt exp",
+            tech_string=("detail web appsecpriv http-securitytxt tech table"),
+            worst_status=scoring.WEB_APPSECPRIV_SECURITYTXT_WORST_STATUS,
+            full_score=scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD,
+            model_score_field="securitytxt_score",
+        )
+
+    def result_good(self, tech_data):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web appsecpriv http-securitytxt verdict good"
+        self.tech_data = tech_data
+
+    def result_bad(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web appsecpriv http-securitytxt verdict bad"
+        self.tech_data = tech_data or ""
+
+    def result_recommendations(self, tech_data):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web appsecpriv http-securitytxt verdict recommendations"
         self.tech_data = tech_data or ""
