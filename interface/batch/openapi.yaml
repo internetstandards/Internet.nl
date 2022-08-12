@@ -827,6 +827,24 @@ components:
             behavior.
           items:
             type: string
+        securitytxt_enabled:
+          type: boolean
+          description: If an RFC9116 security.txt file was found
+        securitytxt_errors:
+          type: array
+          description: >
+            Errors found while parsing an RFC9116 security.txt file
+          items:
+            type: string
+        securitytxt_recommendations:
+          type: array
+          description: >
+            Recommendations found while parsing an RFC9116 security.txt file
+          items:
+            type: string
+        securitytxt_found_host:
+          type: string
+          description: The host from which the security.txt was retrieved, after potential redirects
         content_security_policy_enabled:
           type: boolean
           description: >

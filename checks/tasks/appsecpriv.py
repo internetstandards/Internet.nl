@@ -7,6 +7,7 @@ from django.db import transaction
 
 from checks import categories
 from checks.models import DomainTestAppsecpriv, WebTestAppsecpriv
+from checks.securitytxt import securitytxt_check
 from checks.tasks import SetupUnboundContext, shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
@@ -121,6 +122,11 @@ def save_results(model, results, addr, domain):
                 model.referrer_policy_enabled = result.get("referrer_policy_enabled")
                 model.referrer_policy_score = result.get("referrer_policy_score")
                 model.referrer_policy_values = result.get("referrer_policy_values")
+                model.securitytxt_enabled = result.get("securitytxt_enabled")
+                model.securitytxt_score = result.get("securitytxt_score")
+                model.securitytxt_errors = result.get("securitytxt_errors")
+                model.securitytxt_recommendations = result.get("securitytxt_recommendations")
+                model.securitytxt_found_host = result.get("securitytxt_found_host")
                 model.content_security_policy_enabled = result.get("content_security_policy_enabled")
                 model.content_security_policy_score = result.get("content_security_policy_score")
                 model.content_security_policy_values = result.get("content_security_policy_values")
@@ -164,6 +170,19 @@ def build_report(model, category):
         else:
             category.subtests["http_x_content_type"].result_bad(model.x_content_type_options_values)
 
+        default_message = [f"Retrieved security.txt from {model.securitytxt_found_host}"]
+        if model.securitytxt_errors or not model.securitytxt_enabled:
+            category.subtests["http_securitytxt"].result_bad(
+                default_message + model.securitytxt_errors + model.securitytxt_recommendations
+            )
+        elif model.securitytxt_recommendations:
+            category.subtests["http_securitytxt"].result_recommendations(
+                default_message + model.securitytxt_recommendations
+            )
+        else:
+            valid_message = [f"Retrieved valid security.txt from {model.securitytxt_found_host}"]
+            category.subtests["http_securitytxt"].result_good(valid_message)
+
     model.report = category.gen_report()
 
 
@@ -195,6 +214,7 @@ def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
         ]
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = http_headers_check(af_ip_pair, url, header_checkers, task)
+            results[af_ip_pair[1]].update(securitytxt_check(af_ip_pair, url, task))
 
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded.")

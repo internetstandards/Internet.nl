@@ -3,6 +3,65 @@
 This document describes operational/deployment changes throughout new versions. This is intended for developers and
 hosters.
 
+## Change overview for version 1.6
+
+Based on an existing 1.5.x setup:
+
+```bash
+# The next steps need a privileged user
+sudo su -
+
+# Enable maintenance mode:
+# - edit /etc/apache2/sites-available/internet_nl_shared_config.conf
+# - uncomment the 503 maintenance errordocument+rewrite at the end
+# - reload apache
+
+# Stop all internet.nl services
+for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done
+
+su - internetnl
+
+# Get the 1.6 sources
+cd /opt/internetnl/Internet.nl/
+git fetch
+git checkout v1.6
+
+# Upgrade dependencies, run migrations and rebuild the frontend
+source ~internetnl/internet.nl.env
+.venv/bin/pip install -Ur requirements.txt
+make manage migrate
+make frontend
+
+# (exit back to root shell)
+
+# Restart services, depending if this a batch or single instance server:
+service internetnl-gunicorn restart
+service internetnl-unbound restart
+
+# Single:
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i` --now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
+
+# Batch:
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
+
+# Verify services are running
+# You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
+systemctl list-units --type=service
+
+# Disable maintenance mode:
+# - edit /etc/apache2/sites-available/internet_nl_shared_config.conf
+# - comment out the 503 maintenance errordocument+rewrite at the end
+# - reload apache
+
+# In case services failed to start, you can start debugging using these commands:
+tail -f /opt/internetnl/log/*
+journalctl -xe
+
+# Done! :)
+```
+
 ## Change overview for version 1.5.1
 
 These steps are only needed when upgrading from 1.5.0 to 1.5.1 - if you upgrade

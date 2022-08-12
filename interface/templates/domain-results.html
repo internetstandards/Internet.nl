@@ -74,6 +74,10 @@
     {% include "details-test-item.html" with testitem=details.http_x_xss %}
     {% include "details-test-item.html" with testitem=details.http_csp %}
     {% include "details-test-item.html" with testitem=details.http_referrer_policy %}
+    <div class="test-subsection">
+      {% include "string.html" with name="results domain appsecpriv other-options label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.http_securitytxt %}
 
   {% elif probe.name == 'siterpki' %}
     <div class="test-subsection">
