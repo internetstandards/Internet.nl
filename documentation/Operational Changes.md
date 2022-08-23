@@ -46,7 +46,8 @@ cp -v ~/internet.nl.env ~/internet.nl.systemd.env
 sed -i 's/\export //g'  ~/internet.nl.systemd.env
 mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
 
-# Run migrations and rebuild the frontend
+# Upgrade dependencies, run migrations and rebuild the frontend
+.venv/bin/pip install -Ur requirements.txt
 make manage migrate
 make frontend
 
