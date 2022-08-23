@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.5.0
+
+#### New
+
+- RPKI support [(#613)]. For all IPs of all name servers, mail servers and web server, this check looks for the existence of an RPKI ROA, and whether all BGP routes covering these IPs are valid. As this is a new check, the total score does not yet include RPKI results.
+
+#### Other changes
+
+- Fixed issues with the IPv4/IPv6 consistency test for large pages [(#665)]
+- Various dependencies updated [(#721)] [(#725)] [(#695)] [(#688)] [(#712)]
+- Internal documentation improvements [(#717)]
+- Small improvements in cache reset requests [(#724)]
+- Small improvements in various test explanations.
 
 ## 1.4.0
 Software update and development & documentation release.
