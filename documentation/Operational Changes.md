@@ -62,11 +62,11 @@ service internetnl-gunicorn restart
 
 # Single:
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i` --now; done
-for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
 
 # Batch:
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`--now; done
-for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
 
 # Verify services are running
 # You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
