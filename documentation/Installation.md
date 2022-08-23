@@ -176,6 +176,7 @@ scale or production setups, you should run your own instance.
   on port 8323 instead. You can verify with just a basic HTTP request.
 * The `ROUTINATOR_URL` setting must have the full path to the validity API,
   which usually is the same, e.g. `"http://localhost:9556/api/v1/validity"`.
+  (Note that the normal response on this URL is "Not found".)
 * Routinator will take some time to initialise. The same HTTP interface as
   the API will show the current status.
 
