@@ -1,6 +1,6 @@
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
-Creator: Organization: NLnet Labs
+Creator: Organization: ECP
 Created: 2018-06-19T00:00:00Z
 PackageName: Internet.nl
 SPDXID: SPDXRef-Package
@@ -17,25 +17,25 @@ SPDXID: SPDXRef-FileEnMain
 FileType: TEXT
 LicenseConcluded: CC-BY-4.0
 LicenseInfoInFile: LICENSE-CC-BY-4.0.txt
-FileCopyrightText: <text>2019, NLnet Labs and the Internet.nl contributors</text>
+FileCopyrightText: <text>2022, ECP, NLnet Labs and the Internet.nl contributors</text>
 
 FileName: ./translations/en/news.po
 SPDXID: SPDXRef-FileEnNews
 FileType: TEXT
 LicenseConcluded: CC-BY-4.0
 LicenseInfoInFile: LICENSE-CC-BY-4.0.txt
-FileCopyrightText: <text>2019, NLnet Labs and the Internet.nl contributors</text>
+FileCopyrightText: <text>2022, ECP, NLnet Labs and the Internet.nl contributors</text>
 
 FileName: ./translations/nl/main.po
 SPDXID: SPDXRef-FileNlMain
 FileType: TEXT
 LicenseConcluded: CC-BY-4.0
 LicenseInfoInFile: LICENSE-CC-BY-4.0.txt
-FileCopyrightText: <text>2019, NLnet Labs and the Internet.nl contributors</text>
+FileCopyrightText: <text>2022, ECP, NLnet Labs and the Internet.nl contributors</text>
 
 FileName: ./translations/nl/news.po
 SPDXID: SPDXRef-FileNlNews
 FileType: TEXT
 LicenseConcluded: CC-BY-4.0
 LicenseInfoInFile: LICENSE-CC-BY-4.0.txt
-FileCopyrightText: <text>2019, NLnet Labs and the Internet.nl contributors</text>
+FileCopyrightText: <text>2022, ECP, NLnet Labs and the Internet.nl contributors</text>

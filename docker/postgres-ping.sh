@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright: 2021, NLnet Labs and the Internet.nl contributors
+# Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 
 set -eu
