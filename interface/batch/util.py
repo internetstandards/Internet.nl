@@ -639,17 +639,18 @@ class DomainTechnicalResults:
                 addr = mailservers.get(mxhost.host, {}).get("addresses")
                 mailservers[mxhost.host] = cls._add_routing_info(mxhost, addr)
 
-        for dtdnssec in report_table.dnssec.testset.all():
-            # Cheap way to see if the result is for the domain
-            # or one of the mailservers.
-            if not dtdnssec.domain.endswith("."):
-                continue
+        if report_table.dnssec:
+            for dtdnssec in report_table.dnssec.testset.all():
+                # Cheap way to see if the result is for the domain
+                # or one of the mailservers.
+                if not dtdnssec.domain.endswith("."):
+                    continue
 
-                # Old results where not sharing the same MXs on all tests.
-                # This will result in partial details between the tests here.
-                if dtdnssec.domain not in mailservers:
-                    mailservers[dtdnssec.domain] = {}
-                mailservers[dtdnssec.domain]["dnssec"] = {"status": dtdnssec.status.name}
+                    # Old results where not sharing the same MXs on all tests.
+                    # This will result in partial details between the tests here.
+                    if dtdnssec.domain not in mailservers:
+                        mailservers[dtdnssec.domain] = {}
+                    mailservers[dtdnssec.domain]["dnssec"] = {"status": dtdnssec.status.name}
 
         if report_table.tls:
             for dttls in report_table.tls.testset.all():
