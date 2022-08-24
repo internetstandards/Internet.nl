@@ -59,6 +59,7 @@ cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_intern
 # Restart services, depending if this a batch or single instance server:
 systemctl daemon-reload
 service internetnl-gunicorn restart
+service internetnl-unbound restart
 
 # Single:
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i` --now; done
