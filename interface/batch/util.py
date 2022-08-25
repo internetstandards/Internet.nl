@@ -551,32 +551,38 @@ class DomainTechnicalResults:
     @classmethod
     def _get_web_nameservers(cls, report_table):
         nameservers = {}
-        nsdomains = report_table.ipv6.nsdomains.all()
-        for nsdomain in nsdomains:
-            nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
-        for nshost in report_table.rpki.nshosts.all():
-            nameservers[nshost.host] = cls._add_routing_info(nshost, nameservers.get(nshost.host, None))
+        if report_table.ipv6:
+            for nsdomain in report_table.ipv6.nsdomains.all():
+                nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
+
+        if report_table.rpki:
+            for nshost in report_table.rpki.nshosts.all():
+                nameservers[nshost.host] = cls._add_routing_info(nshost, nameservers.get(nshost.host, None))
 
         return nameservers
 
     @classmethod
     def _get_mail_nameservers(cls, report_table):
         nameservers = {}
-        nsdomains = report_table.ipv6.nsdomains.all()
-        for nsdomain in nsdomains:
-            nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
 
-        for nshost in report_table.rpki.nshosts.all():
-            nameservers[nshost.host] = cls._add_routing_info(nshost, nameservers.get(nshost.host, None))
+        if report_table.ipv6:
+            for nsdomain in report_table.ipv6.nsdomains.all():
+                nameservers[nsdomain.domain] = cls._get_addresses_info(nsdomain)
+
+        if report_table.rpki:
+            for nshost in report_table.rpki.nshosts.all():
+                nameservers[nshost.host] = cls._add_routing_info(nshost, nameservers.get(nshost.host, None))
 
         return nameservers
 
     @classmethod
     def _get_mail_mx_nameservers(cls, report_table):
         nameservers = {}
-        for mxnshost in report_table.rpki.mxnshosts.all():
-            nameservers[mxnshost.host] = cls._get_routing_info(mxnshost)
+
+        if report_table.rpki:
+            for mxnshost in report_table.rpki.mxnshosts.all():
+                nameservers[mxnshost.host] = cls._get_routing_info(mxnshost)
 
         return nameservers
 
@@ -598,8 +604,9 @@ class DomainTechnicalResults:
             return webservers
 
         # only loops when there's actual A/AAAA records (and routing info)
-        for webhost in report_table.rpki.webhosts.all():
-            webservers = cls._add_routing_info(webhost, webservers)
+        if report_table.rpki:
+            for webhost in report_table.rpki.webhosts.all():
+                webservers = cls._add_routing_info(webhost, webservers)
 
         for dttls in report_table.tls.webtestset.all():
             info = cls._get_web_tls_info(dttls, report_table)
@@ -627,21 +634,23 @@ class DomainTechnicalResults:
                 if not dtdnssec.domain.endswith("."):
                     continue
 
-        for mxhost in report_table.rpki.mxhosts.all():
-            addr = mailservers.get(mxhost.host, {}).get("addresses")
-            mailservers[mxhost.host] = cls._add_routing_info(mxhost, addr)
+        if report_table.rpki:
+            for mxhost in report_table.rpki.mxhosts.all():
+                addr = mailservers.get(mxhost.host, {}).get("addresses")
+                mailservers[mxhost.host] = cls._add_routing_info(mxhost, addr)
 
-        for dtdnssec in report_table.dnssec.testset.all():
-            # Cheap way to see if the result is for the domain
-            # or one of the mailservers.
-            if not dtdnssec.domain.endswith("."):
-                continue
+        if report_table.dnssec:
+            for dtdnssec in report_table.dnssec.testset.all():
+                # Cheap way to see if the result is for the domain
+                # or one of the mailservers.
+                if not dtdnssec.domain.endswith("."):
+                    continue
 
-                # Old results where not sharing the same MXs on all tests.
-                # This will result in partial details between the tests here.
-                if dtdnssec.domain not in mailservers:
-                    mailservers[dtdnssec.domain] = {}
-                mailservers[dtdnssec.domain]["dnssec"] = {"status": dtdnssec.status.name}
+                    # Old results where not sharing the same MXs on all tests.
+                    # This will result in partial details between the tests here.
+                    if dtdnssec.domain not in mailservers:
+                        mailservers[dtdnssec.domain] = {}
+                    mailservers[dtdnssec.domain]["dnssec"] = {"status": dtdnssec.status.name}
 
         if report_table.tls:
             for dttls in report_table.tls.testset.all():
