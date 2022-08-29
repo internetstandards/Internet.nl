@@ -648,6 +648,7 @@ def http_fetch(
     ret_visited_hosts=None,
     keep_conn_open=False,
     max_response_length=8192,
+    needed_headers_follow_redirect=False,
 ):
     if path == "":
         path = "/"
@@ -748,6 +749,12 @@ def http_fetch(
             ret_headers=ret_headers,
             ret_visited_hosts=ret_visited_hosts,
             keep_conn_open=keep_conn_open,
+            # By default, needed_headers are returned based on the first response -
+            # this follow_redirect flag returns them from the last response instead
+            # for security.txt. Also see #378
+            needed_headers=needed_headers if needed_headers_follow_redirect else [],
+            needed_headers_follow_redirect=needed_headers_follow_redirect,
+            max_response_length=max_response_length,
         )
 
     return conn, res, ret_headers, ret_visited_hosts

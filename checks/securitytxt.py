@@ -44,6 +44,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
                 ip_address=af_ip_pair[1],
                 keep_conn_open=True,
                 max_response_length=SECURITYTXT_MAX_LENGTH,
+                needed_headers_follow_redirect=True,
             )
             response_content = res.read().decode("utf-8")
             conn.close()
