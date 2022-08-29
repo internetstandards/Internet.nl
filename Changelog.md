@@ -13,6 +13,7 @@
 - Internal documentation improvements [(#717)]
 - Small improvements in cache reset requests [(#724)]
 - Small improvements in various test explanations.
+- The privacy statement was updated to clarify the use of third party services.
 
 ## 1.4.0
 Software update and development & documentation release.
