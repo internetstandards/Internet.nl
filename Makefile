@@ -63,7 +63,7 @@ frontend:
 	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) css
 	${MAKE} translations
 	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
-	. .venv/bin/activate && ${env} python3 manage.py collectstatic
+	. .venv/bin/activate && ${env} python3 manage.py collectstatic --no-input
 
 
 translate_content_to_main:
