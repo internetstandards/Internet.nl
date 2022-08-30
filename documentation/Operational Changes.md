@@ -16,6 +16,12 @@ Then, based on an existing 1.4 setup:
 ```bash
 # The next steps need a privileged user
 sudo su -
+
+# Enable maintenance mode:
+# - edit /etc/apache2/sites-available/internet_nl_shared_config.conf
+# - uncomment the 503 maintenance errordocument+rewrite at the end
+# - reload apache
+
 # Stop all internet.nl services
 for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done
 
@@ -72,6 +78,11 @@ for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl d
 # Verify services are running
 # You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
 systemctl list-units --type=service
+
+# Disable maintenance mode:
+# - edit /etc/apache2/sites-available/internet_nl_shared_config.conf
+# - comment out the 503 maintenance errordocument+rewrite at the end
+# - reload apache
 
 # In case services failed to start, you can start debugging using these commands:
 tail -f /opt/internetnl/log/*
