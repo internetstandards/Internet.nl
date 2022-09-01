@@ -3,6 +3,43 @@
 This document describes operational/deployment changes throughout new versions. This is intended for developers and
 hosters.
 
+## Change overview for version 1.5.1
+
+These steps are only needed when upgrading from 1.5.0 to 1.5.1 - if you upgrade
+from 1.4.x to 1.5.1 or later, these steps are already included.
+
+Then, based on an existing 1.5.0 setup:
+
+```bash
+# The next steps need a privileged user
+sudo su -
+
+su - internetnl
+
+# Get the 1.5.1 sources
+cd /opt/internetnl/Internet.nl/
+git fetch
+git checkout v1.5.1
+
+# Regenerate the content files
+source ~internetnl/internet.nl.env
+make frontend
+
+# (exit back to root shell)
+
+# Restart
+service internetnl-gunicorn restart
+
+# Verify gunicorn is running
+systemctl status internetnl-gunicorn
+
+# In case services failed to start, you can start debugging using these commands:
+tail -f /opt/internetnl/log/*
+journalctl -xe
+
+# Done! :)
+```
+
 ## Change overview for version 1.5
 
 Version 1.5 adds [RPKI validation](rpki.md) as the major new feature.
