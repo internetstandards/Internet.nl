@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.1
+
+- Fixes a tiny typo in the RPKI news content.
+
 ## 1.5.0
 
 #### New
