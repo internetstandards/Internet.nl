@@ -64,6 +64,7 @@ frontend:
 	${MAKE} translations
 	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
 	. .venv/bin/activate && ${env} python3 manage.py collectstatic --no-input
+	. .venv/bin/activate && ${env} python3 manage.py api_generate_doc
 
 
 translate_content_to_main:
