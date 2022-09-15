@@ -35,6 +35,7 @@ make frontend
 # (exit back to root shell)
 
 # Restart services, depending if this a batch or single instance server:
+systemctl daemon-reload
 service internetnl-gunicorn restart
 service internetnl-unbound restart
 
