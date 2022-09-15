@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6
+
+- Add [security.txt support](https://github.com/internetstandards/Internet.nl/pull/730).
+  For all IPs of web servers, this looks for the existence and validity of a
+  [RFC9116](https://www.rfc-editor.org/rfc/rfc9116.html) security.txt file.
+
 ## 1.5.1
 
 - Fixes a tiny typo in the RPKI news content.
