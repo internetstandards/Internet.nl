@@ -1058,9 +1058,6 @@ table th {
 table td {
   padding-top: .4em;
 }
-.testresult td {
-  word-break: break-all;
-}
 
 /* ===================================================================================== */
 /* styling for test results */
