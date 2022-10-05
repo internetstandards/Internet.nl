@@ -33,19 +33,23 @@ The errors detected in our code during retrieval, i.e. in addition to
 errors and recommendations based on the content as detected by the
 sectxt library, are:
 
-* `can not locate security.txt` in case of a HTTP 404
-* `unexpected HTTP response code {code}` in case of an HTTP response code
-  that is neither 200 nor 404
-* `content is not utf-8 encoded` if the response could not be decoded
+* `Security.txt could not be located.` in case of a HTTP 404
+* `Security.txt could not be located: unexpected HTTP response code {code}.`
+  in case of an HTTP response code that is neither 200 nor 404
+* `Content must be utf-8 encoded.` if the response could not be decoded
   as utf-8
-* `missing HTTP content-type header` if the Content-Type header is missing
+* `HTTP Content-Type header must be sent.` if the Content-Type header is missing
   (in case of redirects: missing in the last request)
-* `media type in content-type header must be 'text/plain'` or
-  `charset parameter in content-type header must be 'utf-8' if present`
+* `Media type in Content-Type header must be 'text/plain'.` or
+  `Charset parameter in Content-Type header must be 'utf-8' if present.`
   in case if invalid values in the Content-Type header
-* `security.txt only found in legacy path '/security.txt', expected in '/.well-known/security.txt'`
+* `Security.txt was located on the top-level path (legacy place), but must be placed under the '/.well-known/' path.`
   in case there was a 404 on the well-known path, but a file was found
   and evaluated in the root.
+
+While we do not use the networking/HTTP code of the 
+[sectxt](https://github.com/DigitalTrustCenter/sectxt) library, we do aim
+to keep our error messages identical where reasonable.
 
 Also note:
 
@@ -64,6 +68,7 @@ Also note:
   than text/plain, the response is not passed to the parser. It is likely
   to be an HTML page, which would flood the user with useless errors
   about syntax errors.
+* We only read the first 100KB of the file.
 * Errors and recommendations are, at this time, directly passed from
   the sectxt library into the tech table.
 * Due to the level of confusion around its meaning, we do not check the

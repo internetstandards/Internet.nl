@@ -79,7 +79,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
             content=None,
             url=f"https://{domain}{path}",
             found_host=found_host,
-            errors=["Error: content is not utf-8 encoded."],
+            errors=["Error: Content must be utf-8 encoded."],
         )
     return _evaluate_response(status, content_type, domain, path, content, found_host)
 
@@ -92,26 +92,26 @@ def _evaluate_response(
     charset = params.get("charset", "utf-8").lower()
 
     if not status or status == 404:
-        errors.append("Error: can not locate security.txt.")
+        errors.append("Error: Security.txt could not be located.")
     elif status != 200:
-        errors.append(f"Error: unexpected HTTP response code {status}.")
+        errors.append(f"Error: Security.txt could not be located: unexpected HTTP response code {status}.")
     elif not content_type:
-        errors.append("Error: missing HTTP content-type header.")
+        errors.append("Error: HTTP Content-Type header must be sent.")
         # In case of missing or not text/plain type, there is a fair chance this
         # is an HTML page, for which there is no point to try to parse the content
         # as it will flood the user with useless errors. Therefore, we ignore content
         # in this scenario.
         content = None
     elif media_type.lower() != "text/plain":
-        errors.append("Error: media type in content-type header must be 'text/plain'.")
+        errors.append("Error: Media type in Content-Type header must be 'text/plain'.")
         content = None
     elif charset != "utf-8" and charset != "csutf8":
-        errors.append("Error: charset parameter in content-type header must be 'utf-8' if present.")
+        errors.append("Error: Charset parameter in Content-Type header must be 'utf-8' if present.")
 
     if status == 200 and path != SECURITYTXT_EXPECTED_PATH:
         errors.append(
-            f"Error: security.txt only found in legacy path {SECURITYTXT_LEGACY_PATH}, "
-            f"expected in {SECURITYTXT_EXPECTED_PATH}"
+            "Error: Security.txt was located on the top-level path (legacy place), "
+            "but must be placed under the '/.well-known/' path."
         )
 
     return SecuritytxtRetrieveResult(

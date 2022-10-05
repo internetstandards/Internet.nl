@@ -44,7 +44,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: can not locate security.txt."],
+        errors=["Error: Security.txt could not be located."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -55,7 +55,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: unexpected HTTP response code 500."],
+        errors=["Error: Security.txt could not be located: unexpected HTTP response code 500."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -66,7 +66,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: media type in content-type header must be 'text/plain'."],
+        errors=["Error: Media type in Content-Type header must be 'text/plain'."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -77,7 +77,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: media type in content-type header must be 'text/plain'."],
+        errors=["Error: Media type in Content-Type header must be 'text/plain'."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -88,7 +88,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: charset parameter in content-type header must be 'utf-8' if present."],
+        errors=["Error: Charset parameter in Content-Type header must be 'utf-8' if present."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -99,7 +99,10 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/security.txt",
         found_host="example.nl",
-        errors=["Error: security.txt only found in legacy path /security.txt, expected in /.well-known/security.txt"],
+        errors=[
+            "Error: Security.txt was located on the top-level path (legacy place), "
+            "but must be placed under the '/.well-known/' path."
+        ],
     )
 
 
@@ -131,11 +134,11 @@ def test_evaluate_securitytxt():
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
         "securitytxt_errors": [
-            "Error: No key and value found (line 1)",
-            "Error: Expires field is missing.",
-            "Error: Contact field must appear at least once.",
+            "Error: Line must contain a field name and value, unless the line is blank or contains a comment. (line 1)",
+            "Error: 'Expires' field must be present.",
+            "Error: 'Contact' field must appear at least once.",
         ],
-        "securitytxt_recommendations": ["Recommendation: The contents should be digitally signed."],
+        "securitytxt_recommendations": ["Recommendation: File should be digitally signed."],
     }
 
     result = SecuritytxtRetrieveResult(
@@ -151,9 +154,9 @@ def test_evaluate_securitytxt():
         "securitytxt_found_host": "host",
         "securitytxt_errors": ["Error: content-type error"],
         "securitytxt_recommendations": [
-            "Recommendation: Expiry date is more than one year in the future. (line 1)",
-            "Recommendation: Contact missing encryption key for email communication.",
-            "Recommendation: The contents should be digitally signed.",
+            "Recommendation: Date and time in 'Expires' field should be less than a year into the future. (line 1)",
+            "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address.",
+            "Recommendation: File should be digitally signed.",
         ],
     }
 
@@ -170,8 +173,8 @@ def test_evaluate_securitytxt():
         "securitytxt_found_host": "host",
         "securitytxt_errors": [],
         "securitytxt_recommendations": [
-            "Recommendation: Expiry date is more than one year in the future. (line 1)",
-            "Recommendation: Contact missing encryption key for email communication.",
-            "Recommendation: The contents should be digitally signed.",
+            "Recommendation: Date and time in 'Expires' field should be less than a year into the future. (line 1)",
+            "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address.",
+            "Recommendation: File should be digitally signed.",
         ],
     }
