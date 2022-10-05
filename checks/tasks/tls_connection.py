@@ -24,6 +24,7 @@ from internetnl import celery_app
 logger = logging.getLogger(__name__)
 sslConnectLogger = logging.getLogger("internetnl.ssl.connect")
 
+HTTPS_READ_CHUNK_SIZE = 8192
 
 SSLV23 = OpenSslVersionEnum.SSLV23
 SSLV2 = OpenSslVersionEnum.SSLV2
@@ -483,8 +484,7 @@ class HTTPSConnection(SSLConnectionWrapper):
     interface.
 
     HTTP requests are simple HTTP/1.1 one-shot (connection: close) requests.
-    HTTP responses are truncated at a maximum of 8192 bytes. This class is NOT
-    intended to be a general purpose rich HTTP client.
+    This class is NOT intended to be a general purpose rich HTTP client.
 
     """
 
@@ -497,10 +497,8 @@ class HTTPSConnection(SSLConnectionWrapper):
         task=None,
         ip_address=None,
         conn=None,
-        max_response_length=8192,
         **kwargs,
     ):
-        self.max_response_length = max_response_length
         if conn:
             super().__init__(conn=conn)
         else:
@@ -551,9 +549,8 @@ class HTTPSConnection(SSLConnectionWrapper):
                 return self.handle
 
         class AutoUpdatingHTTPResponse(http.client.HTTPResponse):
-            def __init__(self, conn, max_response_length):
+            def __init__(self, conn):
                 self.conn = conn
-                self.max_response_length = max_response_length
                 self.bytesio = BytesIOSocket(self._fetch_headers())
                 super().__init__(self.bytesio)
 
@@ -576,7 +573,7 @@ class HTTPSConnection(SSLConnectionWrapper):
 
                 # read and decrypt upto the number of requested bytes from the
                 # network and write them to the underlying buffer.
-                chunk_size = amt if amt and amt < self.max_response_length else self.max_response_length
+                chunk_size = amt if amt and amt < HTTPS_READ_CHUNK_SIZE else HTTPS_READ_CHUNK_SIZE
                 try:
                     while not amt or (self.bytesio.handle.tell() - pos) < amt:
                         self.bytesio.handle.write(self.conn.read(chunk_size))
@@ -594,7 +591,7 @@ class HTTPSConnection(SSLConnectionWrapper):
                 return super().read(amt)
 
         def response_from_bytes(data):
-            response = AutoUpdatingHTTPResponse(self.conn, self.max_response_length)
+            response = AutoUpdatingHTTPResponse(self.conn)
             response.begin()
             return response
 
@@ -647,7 +644,6 @@ def http_fetch(
     needed_headers=[],
     ret_visited_hosts=None,
     keep_conn_open=False,
-    max_response_length=8192,
     needed_headers_follow_redirect=False,
 ):
     if path == "":
@@ -666,7 +662,6 @@ def http_fetch(
                     socket_af=af,
                     task=task,
                     timeout=timeout,
-                    max_response_length=max_response_length,
                 )
             else:
                 conn = HTTPConnection(
@@ -754,7 +749,6 @@ def http_fetch(
             # for security.txt. Also see #378
             needed_headers=needed_headers if needed_headers_follow_redirect else [],
             needed_headers_follow_redirect=needed_headers_follow_redirect,
-            max_response_length=max_response_length,
         )
 
     return conn, res, ret_headers, ret_visited_hosts
