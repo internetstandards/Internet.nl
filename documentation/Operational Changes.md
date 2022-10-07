@@ -23,6 +23,7 @@ su - internetnl
 
 # Get the 1.6 sources
 cd /opt/internetnl/Internet.nl/
+git reset --hard
 git fetch
 git checkout v1.6
 
