@@ -170,7 +170,11 @@ def build_report(model, category):
         else:
             category.subtests["http_x_content_type"].result_bad(model.x_content_type_options_values)
 
-        default_message = [f"Retrieved security.txt from {model.securitytxt_found_host}"]
+        if model.securitytxt_enabled:
+            default_message = [f"Retrieved security.txt from {model.securitytxt_found_host}"]
+        else:
+            default_message = [f"Requested security.txt from {model.securitytxt_found_host}"]
+
         if model.securitytxt_errors or not model.securitytxt_enabled:
             category.subtests["http_securitytxt"].result_bad(
                 default_message + model.securitytxt_errors + model.securitytxt_recommendations
