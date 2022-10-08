@@ -33,8 +33,8 @@ The errors detected in our code during retrieval, i.e. in addition to
 errors and recommendations based on the content as detected by the
 sectxt library, are:
 
-* `Security.txt could not be located.` in case of a HTTP 404
-* `Security.txt could not be located: unexpected HTTP response code {code}.`
+* `security.txt could not be located.` in case of a HTTP 404
+* `security.txt could not be located (unexpected HTTP response code {code}).`
   in case of an HTTP response code that is neither 200 nor 404
 * `Content must be utf-8 encoded.` if the response could not be decoded
   as utf-8
@@ -43,7 +43,7 @@ sectxt library, are:
 * `Media type in Content-Type header must be 'text/plain'.` or
   `Charset parameter in Content-Type header must be 'utf-8' if present.`
   in case if invalid values in the Content-Type header
-* `Security.txt was located on the top-level path (legacy place), but must be placed under the '/.well-known/' path.`
+* `security.txt was located on the top-level path (legacy place), but must be placed under the '/.well-known/' path.`
   in case there was a 404 on the well-known path, but a file was found
   and evaluated in the root.
 
