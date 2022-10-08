@@ -91,9 +91,9 @@ def _evaluate_response(
     charset = params.get("charset", "utf-8").lower()
 
     if not status or status == 404:
-        errors.append("Error: Security.txt could not be located.")
+        errors.append("Error: security.txt could not be located.")
     elif status != 200:
-        errors.append(f"Error: Security.txt could not be located: unexpected HTTP response code {status}.")
+        errors.append(f"Error: security.txt could not be located (unexpected HTTP response code {status}).")
     elif not content_type:
         errors.append("Error: HTTP Content-Type header must be sent.")
         # In case of missing or not text/plain type, there is a fair chance this
@@ -109,7 +109,7 @@ def _evaluate_response(
 
     if status == 200 and path != SECURITYTXT_EXPECTED_PATH:
         errors.append(
-            "Error: Security.txt was located on the top-level path (legacy place), "
+            "Error: security.txt was located on the top-level path (legacy place), "
             "but must be placed under the '/.well-known/' path."
         )
 

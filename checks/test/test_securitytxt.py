@@ -44,7 +44,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: Security.txt could not be located."],
+        errors=["Error: security.txt could not be located."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -55,7 +55,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: Security.txt could not be located: unexpected HTTP response code 500."],
+        errors=["Error: security.txt could not be located (unexpected HTTP response code 500)."],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -100,7 +100,7 @@ def test_evaluate_response():
         url="https://example.com/security.txt",
         found_host="example.nl",
         errors=[
-            "Error: Security.txt was located on the top-level path (legacy place), "
+            "Error: security.txt was located on the top-level path (legacy place), "
             "but must be placed under the '/.well-known/' path."
         ],
     )
