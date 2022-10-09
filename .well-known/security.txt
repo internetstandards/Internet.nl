@@ -1,8 +1,15 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA256
 
-# Canonical URL
+# Canonical URLs
 Canonical: https://internet.nl/.well-known/security.txt
+Canonical: https://www.internet.nl/.well-known/security.txt
+Canonical: https://nl.internet.nl/.well-known/security.txt
+Canonical: https://en.internet.nl/.well-known/security.txt
+Canonical: https://ipv6.internet.nl/.well-known/security.txt
+Canonical: https://batch.internet.nl/.well-known/security.txt
+Canonical: https://en.batch.internet.nl/.well-known/security.txt
+Canonical: https://nl.batch.internet.nl/.well-known/security.txt
 
 # Our security address
 Contact: https://internet.nl/disclosure/
