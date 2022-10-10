@@ -138,7 +138,7 @@ def test_evaluate_securitytxt():
             "Error: 'Expires' field must be present.",
             "Error: 'Contact' field must appear at least once.",
         ],
-        "securitytxt_recommendations": ["Recommendation: File should be digitally signed."],
+        "securitytxt_recommendations": ["Recommendation: security.txt should be digitally signed."],
     }
 
     result = SecuritytxtRetrieveResult(
@@ -156,7 +156,7 @@ def test_evaluate_securitytxt():
         "securitytxt_recommendations": [
             "Recommendation: Date and time in 'Expires' field should be less than a year into the future. (line 1)",
             "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address.",
-            "Recommendation: File should be digitally signed.",
+            "Recommendation: security.txt should be digitally signed.",
         ],
     }
 
@@ -175,6 +175,6 @@ def test_evaluate_securitytxt():
         "securitytxt_recommendations": [
             "Recommendation: Date and time in 'Expires' field should be less than a year into the future. (line 1)",
             "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address.",
-            "Recommendation: File should be digitally signed.",
+            "Recommendation: security.txt should be digitally signed.",
         ],
     }
