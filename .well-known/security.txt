@@ -10,6 +10,11 @@ Canonical: https://ipv6.internet.nl/.well-known/security.txt
 Canonical: https://batch.internet.nl/.well-known/security.txt
 Canonical: https://en.batch.internet.nl/.well-known/security.txt
 Canonical: https://nl.batch.internet.nl/.well-known/security.txt
+Canonical: https://dashboard.internet.nl/.well-known/security.txt
+Canonical: https://toolbox.internet.nl/.well-known/security.txt
+Canonical: https://emailveilig.internet.nl/.well-known/security.txt
+Canonical: https://ipv6kaart.internet.nl/.well-known/security.txt
+Canonical: https://matomo.internet.nl/.well-known/security.txt
 
 # Our security address
 Contact: https://internet.nl/disclosure/
@@ -20,7 +25,7 @@ Encryption: https://internet.nl/disclosure/
 # Our security policy
 Policy: https://internet.nl/disclosure/
 
-Expires: 2023-05-09T15:00:00z
+Expires: 2023-10-10T00:00:00z
 -----BEGIN PGP SIGNATURE-----
 
 iQIzBAEBCAAdFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmJ5EGoACgkQ2JThX0UC
