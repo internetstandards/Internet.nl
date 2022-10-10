@@ -11,6 +11,7 @@ Canonical: https://batch.internet.nl/.well-known/security.txt
 Canonical: https://en.batch.internet.nl/.well-known/security.txt
 Canonical: https://nl.batch.internet.nl/.well-known/security.txt
 Canonical: https://dashboard.internet.nl/.well-known/security.txt
+Canonical: https://ipv6.dashboard.internet.nl/.well-known/security.txt
 Canonical: https://toolbox.internet.nl/.well-known/security.txt
 Canonical: https://emailveilig.internet.nl/.well-known/security.txt
 Canonical: https://ipv6kaart.internet.nl/.well-known/security.txt
