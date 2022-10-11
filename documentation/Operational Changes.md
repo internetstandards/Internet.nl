@@ -25,7 +25,7 @@ su - internetnl
 cd /opt/internetnl/Internet.nl/
 git reset --hard
 git fetch
-git checkout v1.6
+git checkout v1.6.0
 
 # Upgrade dependencies, run migrations and rebuild the frontend
 source ~internetnl/internet.nl.env
