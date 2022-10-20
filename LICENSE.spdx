@@ -1,13 +1,14 @@
 SPDXVersion: SPDX-2.1
+DocumentNamespace: http://spdx.org/spdxdocs/internet.nl-f6a7fb98-1924-496a-be47-8038f3553259
 DataLicense: CC0-1.0
 Creator: Organization: ECP
 Created: 2018-06-19T00:00:00Z
 PackageName: Internet.nl
 SPDXID: SPDXRef-Package
-PackageOriginator: Organization: NLnet Labs
+PackageOriginator: Organization: ECP, NLnet Labs and the Internet.nl contributors
 PackageLicenseConcluded: Apache-2.0
-PackageLicenseInfoFromFiles: LICENSE-Apache-2.0.txt
-PackageCopyrightText: <text>2019, NLnet Labs and the Internet.nl contributors</text>
+PackageLicenseInfoFromFiles: LicenseRef-LICENSE-Apache-2.0.txt
+PackageCopyrightText: <text>2019, ECP, NLnet Labs and the Internet.nl contributors</text>
 PackageDownloadLocation: git://github.com/internetstandards/Internet.nl
 PackageDownloadLocation: git+https://github.com/internetstandards/Internet.nl.git
 PackageDownloadLocation: git+ssh://github.com/internetstandards/Internet.nl.git
