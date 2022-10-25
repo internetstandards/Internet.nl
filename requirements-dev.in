@@ -14,7 +14,7 @@ pytest-mock
 requests_mock
 freezegun
 pytest-html
-pytest-selenium
+pytest-selenium<4
 
 # linting
 autoflake
