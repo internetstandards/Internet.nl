@@ -602,6 +602,7 @@ class DomainTestTls(BaseTestModel):
             "cert_hostmatch_score",
             "score",
             "protocols_good",
+            "protocols_good",
         ]
 
     def get_web_api_details(self):
