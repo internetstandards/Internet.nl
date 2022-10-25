@@ -42,6 +42,9 @@ ip_address
 sectxt
 colorlog
 
+# https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
+importlib-metadata<5
+
 # Webserver
 gunicorn
 
