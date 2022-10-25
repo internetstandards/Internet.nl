@@ -36,7 +36,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 env = env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-sync run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github python-whois nassl test check autofix
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github python-whois nassl test check autofix
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -143,11 +143,13 @@ pip-upgrade-package: ## Upgrades a specific package in the requirements.txt
 	# example: make pip-upgrade-package package=django
 	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade-package ${package}
 
-pip-sync:  ## synchronizes the .venv with the state of requirements.txt
-	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt
+pip-install:  ## install all packages from requirements.txt
+	# We use pip install rather than pip-sync here, because we have external dependencies (#695)
+	. .venv/bin/activate && ${env} python3 -m pip install -U -r requirements.txt
 
-pip-sync-dev:  ## synchronizes the .venv with the state of requirements{-dev}.txt
-	. .venv/bin/activate && ${env} python3 -m piptools sync requirements.txt requirements-dev.txt
+pip-install-dev:  ## install all packages requirements{-dev}.txt
+	# We use pip install rather than pip-sync here, because we have external dependencies (#695)
+	. .venv/bin/activate && ${env} python3 -m pip install -U -r requirements.txt -r requirements-dev.txt
 
 run: venv
 	. .venv/bin/activate && ${env} python3 manage.py runserver [::1]:8000
@@ -233,15 +235,6 @@ endif
 version:
 	. .venv/bin/activate && ${env} python3 --version
 	. .venv/bin/activate && ${env} python3 manage.py version
-
-reinstall-production-dependencies:
-	# You need to do this after pip-sync, since pip-sync does not recognize these dependencies.
-	rm -rf .unbound
-	${MAKE} unbound-37
-	rm -rf .python-whois
-	${MAKE} python-whois
-	rm -rf .nassl
-	${MAKE} nassl
 
 
 unbound-3.9: venv .unbound-3.9
@@ -391,33 +384,6 @@ autofix fix: .make.fix  ## automatic fix of trivial code quality issues
 	# replaced by black: ${env} isort -rc ${pysrcdirs}
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
-
-
-PYTHON_VERSION=3.7
-backup-custom-dependencies:
-	# this saves building a ton of dependencies every sync.
-	# Used in the Vulnerability patching process, unless of course unbound, pythonwhois or nassl are vulnerable.
-	mkdir -p .custom-dependency-backup
-	cp .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.la .custom-dependency-backup
-	cp .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.so .custom-dependency-backup
-	cp .venv/lib/python${PYTHON_VERSION}/site-packages/unbound.py .custom-dependency-backup
-	cp .venv/lib/python${PYTHON_VERSION}/site-packages/pythonwhois-* .custom-dependency-backup
-	cp -r .venv/lib/python${PYTHON_VERSION}/site-packages/nassl* .custom-dependency-backup
-	cp -r .venv/lib/python${PYTHON_VERSION}/site-packages/OpenSSL .custom-dependency-backup
-	cp .venv/lib/python${PYTHON_VERSION}/site-packages/easy-install.pth .custom-dependency-backup
-
-remove-custom-dependencies:
-	rm .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.la
-	rm .venv/lib/python${PYTHON_VERSION}/site-packages/_unbound.so
-	rm .venv/lib/python${PYTHON_VERSION}/site-packages/unbound.py
-	rm .venv/lib/python${PYTHON_VERSION}/site-packages/pythonwhois-*
-	rm -rf .venv/lib/python${PYTHON_VERSION}/site-packages/nassl*
-	rm -r .venv/lib/python${PYTHON_VERSION}/site-packages/OpenSSL
-	rm .venv/lib/python${PYTHON_VERSION}/site-packages/easy-install.pth
-
-
-restore-custom-dependencies:
-	cp -r .custom-dependency-backup/* .venv/lib/python${PYTHON_VERSION}/site-packages/
 
 
 run-gunicorn:
