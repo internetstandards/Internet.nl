@@ -60,7 +60,7 @@ jobs:
             ./_unbound/
             ./nassl_freebsd/
             ./python-whois/
-          key: ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile') }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile', '.github/workflows/*) }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
@@ -75,31 +75,32 @@ jobs:
           sudo apt update
           sudo apt-get update
           sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev
-#      - name: Make nassl
-#        run: make nassl
-#        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
-#      - name: Make unbound
-#        run: make unbound-${{ matrix.python-version }}-github
-#        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
-#      - name: Make python-whois
-#        run: make python-whois
-#        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - name: Make nassl
+        run: make nassl
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - name: Make unbound
+        run: make unbound-${{ matrix.python-version }}-github
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - name: Make python-whois
+        run: make python-whois
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
       # Perform QA
       - name: Check linting
         run: make check
         env:
           GITHUB_ACTIONS: True
-#      - name: Test
-#        run: make test
-#        env:
-#          GITHUB_ACTIONS: True
-#          ENABLE_BATCH: True
-#          SECRET_KEY: Github
-#          DEBUG: True
-#          DB_NAME: internetnl
-#          DB_USER: internetnluser
-#          DB_PASSWORD: internetnluser
-#      - name: Verify if Build API documentation command works (needs /static/ dir to exist)
-#        run: |
-#          mkdir -p static
-#          make manage api_generate_doc
+      - name: Test
+        run: make test
+        env:
+          GITHUB_ACTIONS: True
+          ENABLE_BATCH: True
+          SECRET_KEY: Github
+          DEBUG: True
+          DB_NAME: internetnl
+          DB_USER: internetnluser
+          DB_PASSWORD: internetnluser
+      - name: Verify if Build API documentation command works (needs /static/ dir to exist)
+        run: |
+          mkdir -p static
+          make manage api_generate_doc
