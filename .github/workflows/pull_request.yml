@@ -41,7 +41,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 2
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -50,47 +50,44 @@ jobs:
         uses: supercharge/redis-github-action@1.4.0
         with:
           redis-version: 6
-      - uses: actions/cache@v2
+      - name: Install needed packages for build and run
+        run: |
+          sudo apt update
+          sudo apt-get update
+          sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev
+      - name: Check out cache (only if match on OS, Python version, requirements, Makefile and workflow file)
+        uses: actions/cache@v3
         id: cache-venv
         with:
           # Prevent re-building the venv when all requirements.txts stays the same.
-          # rebuild venv to make sure everything still builds ./.venv/
           path: |
             ./.venv/
             ./unbound/
             ./_unbound/
             ./nassl_freebsd/
             ./python-whois/
-          key: ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-
+          key: ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile', '.github/workflows/*') }}
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
       - name: Setup Application Configuration
         run: |
           cp ./internetnl/settings-dist.py ./internetnl/settings.py
-      - name: Make venv
+      - name: Make venv (if not from cache)
         run: make venv
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-      - name: Install system dependencies for unbound/nassl
-        run: |
-          sudo apt update
-          sudo apt-get update
-          sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev
-      - name: Make nassl
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - name: Make nassl (if not from cache)
         run: make nassl
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-      - name: Make unbound
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - name: Make unbound (if not from cache)
         run: make unbound-${{ matrix.python-version }}-github
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-      - name: Make python-whois
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - name: Make python-whois (if not from cache)
         run: make python-whois
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-      # Perform QA
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
       - name: Check linting
         run: make check
         env:
           GITHUB_ACTIONS: True
-      - name: Test
+      - name: Run tests
         run: make test
         env:
           GITHUB_ACTIONS: True
