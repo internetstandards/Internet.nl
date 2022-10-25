@@ -49,7 +49,7 @@ for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl e
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
 
 # Batch:
-for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i` --now; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
 
 # Verify services are running
@@ -140,6 +140,9 @@ cp -v internetnl/settings.py ~/settings_1.4.py
 # Create a new settings file based on the current dist
 cp -v internetnl/settings-dist.py internetnl/settings.py
 
+# Update batch API conf from defaults
+cp -v internetnl/batch_api_doc_conf_dist.py internetnl/batch_api_doc_conf.py
+
 # NOTE: routinator HTTP API may run on port 9556 or on port 8323 - see our
 # Routinator installation documentation
 # Test with a curl call to this URL, which should produce "Not Found", meaning
@@ -162,7 +165,7 @@ make frontend
 # <<<exit internetnl shell and return to root>>>
 
 # Deploy new configs (new celery queue)
-cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
+cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
 
 # Restart services, depending if this a batch or single instance server:
 systemctl daemon-reload
@@ -174,7 +177,7 @@ for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl e
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
 
 # Batch:
-for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i` --now; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
 
 # Verify services are running

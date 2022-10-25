@@ -324,7 +324,7 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
                         },
                         {
                             "name": "web_appsecpriv_securitytxt",
-                            "name_on_report": "securitytxt",
+                            "name_on_report": "http_securitytxt",
                             "type": "test",
                             "translation_key": "web appsecpriv http-securitytxt",
                         },
