@@ -807,16 +807,6 @@ components:
             behavior.
           items:
             type: string
-        x_xss_protection_enabled:
-          type: boolean
-          description: If the X-Xss-Protection header is set by the server.
-        x_xss_protection_values:
-          type: array
-          description: >
-            List of headers. Only the first one is evaluated as per browser
-            behavior.
-          items:
-            type: string
         referrer_policy_enabled:
           type: boolean
           description: If the Referrer-Policy header is set by the server.

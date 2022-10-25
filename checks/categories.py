@@ -177,8 +177,6 @@ class WebAppsecpriv(Category):
             WebAppsecprivHttpCsp,
             WebAppsecprivHttpXContentType,
             WebAppsecprivSecuritytxt,
-            # TODO: To be removed in the future.
-            # WebAppsecprivHttpXXss,
         ]
         super(WebAppsecpriv, self).__init__(name, subtests)
 
@@ -2233,29 +2231,6 @@ class WebAppsecprivHttpXFrame(Subtest):
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web appsecpriv http-x-frame verdict bad"
-        self.tech_data = tech_data or ""
-
-
-class WebAppsecprivHttpXXss(Subtest):
-    def __init__(self):
-        super(WebAppsecprivHttpXXss, self).__init__(
-            name="http_x_xss",
-            label="detail web appsecpriv http-x-xss label",
-            explanation="detail web appsecpriv http-x-xss exp",
-            tech_string="detail web appsecpriv http-x-xss tech table",
-            worst_status=scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_WORST_STATUS,
-            full_score=scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_GOOD,
-            model_score_field="x_xss_protection_score",
-        )
-
-    def result_good(self, tech_data):
-        self._status(STATUS_SUCCESS)
-        self.verdict = "detail web appsecpriv http-x-xss verdict good"
-        self.tech_data = tech_data
-
-    def result_bad(self, tech_data):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web appsecpriv http-x-xss verdict bad"
         self.tech_data = tech_data or ""
 
 

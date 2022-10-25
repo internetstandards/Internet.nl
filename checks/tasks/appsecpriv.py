@@ -15,7 +15,6 @@ from checks.tasks.http_headers import (
     HeaderCheckerReferrerPolicy,
     HeaderCheckerXContentTypeOptions,
     HeaderCheckerXFrameOptions,
-    HeaderCheckerXXssProtection,
     http_headers_check,
 )
 from checks.tasks.shared import aggregate_subreports, results_per_domain
@@ -116,9 +115,6 @@ def save_results(model, results, addr, domain):
                 model.x_content_type_options_enabled = result.get("x_content_type_options_enabled")
                 model.x_content_type_options_score = result.get("x_content_type_options_score")
                 model.x_content_type_options_values = result.get("x_content_type_options_values")
-                model.x_xss_protection_enabled = result.get("x_xss_protection_enabled")
-                model.x_xss_protection_score = result.get("x_xss_protection_score")
-                model.x_xss_protection_values = result.get("x_xss_protection_values")
                 model.referrer_policy_enabled = result.get("referrer_policy_enabled")
                 model.referrer_policy_score = result.get("referrer_policy_score")
                 model.referrer_policy_values = result.get("referrer_policy_values")
@@ -145,15 +141,6 @@ def build_report(model, category):
             category.subtests["http_x_frame"].result_good(model.x_frame_options_values)
         else:
             category.subtests["http_x_frame"].result_bad(model.x_frame_options_values)
-
-        # Do not include XSS in the report.
-        # TODO: Will be removed altogether in the future.
-        # if model.x_xss_protection_enabled:
-        #    category.subtests['http_x_xss'].result_good(
-        #        model.x_xss_protection_values)
-        # else:
-        #    category.subtests['http_x_xss'].result_bad(
-        #        model.x_xss_protection_values)
 
         if model.referrer_policy_enabled:
             category.subtests["http_referrer_policy"].result_good(model.referrer_policy_values)
@@ -212,7 +199,6 @@ def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
             HeaderCheckerContentSecurityPolicy(),
             HeaderCheckerXFrameOptions(),
             HeaderCheckerReferrerPolicy(),
-            HeaderCheckerXXssProtection(),
             HeaderCheckerXContentTypeOptions(),
         ]
         for af_ip_pair in af_ip_pairs:

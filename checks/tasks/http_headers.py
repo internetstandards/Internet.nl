@@ -602,50 +602,6 @@ class HeaderCheckerXContentTypeOptions(object):
         }
 
 
-class HeaderCheckerXXssProtection(object):
-    """
-    Class for checking the X-Xss-Protection HTTP header.
-
-    """
-
-    def __init__(self):
-        self.name = "X-Xss-Protection"
-
-    def check(self, value, results, domain):
-        """
-        Check if XSS protection is enabled.
-
-        """
-        if not value:
-            score = scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_BAD
-            results["x_xss_protection_score"] = score
-            results["x_xss_protection_enabled"] = False
-        else:
-            values = get_multiple_values_from_header(value)
-            enabled = values[0].split(";")[0]
-            if enabled == "0":
-                score = scoring.WEB_APPSECPRIV_X_XSS_PROTECTION_BAD
-                results["x_xss_protection_score"] = score
-                results["x_xss_protection_enabled"] = False
-            results["x_xss_protection_values"].extend(values)
-
-    def get_positive_values(self):
-        score = scoring.WEB_APPSECPRIV_X_CONTENT_TYPE_OPTIONS_GOOD
-        return {
-            "x_xss_protection_enabled": True,
-            "x_xss_protection_score": score,
-            "x_xss_protection_values": [],
-        }
-
-    def get_negative_values(self):
-        score = scoring.WEB_APPSECPRIV_X_CONTENT_TYPE_OPTIONS_BAD
-        return {
-            "x_xss_protection_enabled": False,
-            "x_xss_protection_score": score,
-            "x_xss_protection_values": [],
-        }
-
-
 class HeaderCheckerReferrerPolicy(object):
     """
     Class for checking the Referrer-Policy HTTP header.

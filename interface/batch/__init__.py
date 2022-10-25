@@ -310,13 +310,6 @@ if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
                             "type": "test",
                             "translation_key": "web appsecpriv http-x-content",
                         },
-                        # TODO: To be removed in the future.
-                        # {
-                        #    'name': 'web_appsecpriv_x_xss_protection',
-                        #    'name_on_report': 'http_x_xss',
-                        #    'type': 'test',
-                        #    'translation_key': 'web appsecpriv http-x-xss'
-                        # },
                         {
                             "name": "web_appsecpriv_csp",
                             "name_on_report": "http_csp",

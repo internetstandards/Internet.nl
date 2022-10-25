@@ -71,6 +71,7 @@
     </div>
     {% include "details-test-item.html" with testitem=details.http_x_frame %}
     {% include "details-test-item.html" with testitem=details.http_x_content_type %}
+    {# x-XSS shown for historical results only #}
     {% include "details-test-item.html" with testitem=details.http_x_xss %}
     {% include "details-test-item.html" with testitem=details.http_csp %}
     {% include "details-test-item.html" with testitem=details.http_referrer_policy %}
