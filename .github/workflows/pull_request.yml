@@ -41,7 +41,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 2
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -50,11 +50,10 @@ jobs:
         uses: supercharge/redis-github-action@1.4.0
         with:
           redis-version: 6
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: cache-venv
         with:
           # Prevent re-building the venv when all requirements.txts stays the same.
-          # rebuild venv to make sure everything still builds ./.venv/
           path: |
             ./.venv/
             ./unbound/
@@ -70,7 +69,7 @@ jobs:
           cp ./internetnl/settings-dist.py ./internetnl/settings.py
       - name: Make venv
         run: make venv
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
       - name: Install system dependencies for unbound/nassl
         run: |
           sudo apt update
@@ -78,13 +77,13 @@ jobs:
           sudo apt-get -y install libevent-dev libssl-dev libffi-dev python-dev swig libhiredis-dev
 #      - name: Make nassl
 #        run: make nassl
-#        if: steps.cache-venv.outputs.cache-hit != 'true'
+#        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
 #      - name: Make unbound
 #        run: make unbound-${{ matrix.python-version }}-github
-#        if: steps.cache-venv.outputs.cache-hit != 'true'
+#        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
 #      - name: Make python-whois
 #        run: make python-whois
-#        if: steps.cache-venv.outputs.cache-hit != 'true'
+#        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
       # Perform QA
       - name: Check linting
         run: make check
