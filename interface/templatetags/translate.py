@@ -108,6 +108,7 @@ def render_details_table(headers, arguments):
                     elif value in [
                         "detail tech data yes",
                         "detail tech data no",
+                        "detail tech data good",
                         "detail tech data secure",
                         "detail tech data insecure",
                         "detail tech data bogus",

@@ -743,7 +743,7 @@ def build_report(dttls, category):
     def annotate_and_combine_all(good_items, sufficient_items, bad_items, phaseout_items):
         return [
             good_items + sufficient_items + bad_items + phaseout_items,
-            ["detail tech data secure"] * len(good_items)
+            ["detail tech data good"] * len(good_items)
             + ["detail tech data sufficient"] * len(sufficient_items)
             + ["detail tech data insufficient"] * len(bad_items)
             + ["detail tech data phase-out"] * len(phaseout_items),
