@@ -24,10 +24,6 @@ Install the following system requirements:
 Create a virtual environment with: 
 `make venv`
 
-Add the custom python-whois with:
-`make pythonwhois`
-
-
 ### nassl
 
 Install with:

@@ -7,7 +7,9 @@
 amqp==5.1.1
     # via kombu
 argparse==1.4.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   pythonwhois-internet-nl
 asgiref==3.5.2
     # via django
 async-timeout==4.0.2
@@ -137,6 +139,8 @@ pytest==6.2.5
     # via -r requirements.in
 python-dateutil==2.8.2
     # via sectxt
+pythonwhois-internet.nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+    # via -r requirements.in
 pytz==2022.5
     # via
     #   celery

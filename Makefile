@@ -36,7 +36,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 env = env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github python-whois nassl test check autofix
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -109,9 +109,7 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
 	# After this you also need to make an unbound, see below for a list of commands and flavors.
 	# Example: make unbound
-	# You also need to make python-whois
-	# example: make python-whois
-	# And of course nassl
+	# You also need to make nassl
 	# example: make nassl
 	touch .venv/make_venv_complete
 
@@ -122,7 +120,6 @@ clean_venv:  # Remove venv
 	@echo "Cleaning venv"
 	@rm -rf .venv
 	@rm -f .unbound
-	@rm -f .python-whois
 
 
 pip-compile:  ## compile an updated requirements.txt
@@ -313,15 +310,6 @@ unbound-x86-3.8: .unbound-x86-3.8
 
 	# To use it, and not the one that comes with brew:
 	# sudo /usr/local/sbin/unbound
-
-
-python-whois: venv .python-whois
-.python-whois:
-	rm -rf python-whois
-	git clone https://github.com/internetstandards/python-whois.git
-	cd python-whois && git checkout internetnl
-	. .venv/bin/activate && cd python-whois && ${env} python3 setup.py install
-	touch .python-whois
 
 
 nassl: venv .nassl
