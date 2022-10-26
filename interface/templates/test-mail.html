@@ -7,7 +7,9 @@
     </div>
     <form action="/mail/" method="POST">
       <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
-        <span class="emailfield before"><input id="mail-url" class="email" type="text" name="url" placeholder="example.nl"></span>
+        <span class="emailfield before">
+          <input id="mail-url" class="email" type="text" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+        </span>
       </label>
       {% if request.GET.invalid != None %}
       <div class="invalid-domain">
