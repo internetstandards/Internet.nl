@@ -135,7 +135,7 @@
        <form action="/site/" method="POST">
          <label class="text-input" for="web-url">
            {% include "string.html" with name="base test website input" %}
-           <input id="web-url" type="text" name="url" placeholder="www.example.nl">
+           <input id="web-url" type="text" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
          </label>
          <div class="contains-button">
            <button>
@@ -167,7 +167,9 @@
        <form action="/mail/" method="POST">
          <label class="text-input" for="mail-url">
            {% include "string.html" with name="base test mail input" %}
-           <span class="emailfield before"><input id="mail-url" class="email" type="text" name="url" placeholder="example.nl"></span>
+           <span class="emailfield before">
+             <input id="mail-url" class="email" type="text" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+           </span>
          </label>
          <div class="contains-button">
            <button>
