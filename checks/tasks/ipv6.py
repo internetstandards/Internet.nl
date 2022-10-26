@@ -1,9 +1,11 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import http.client
+import ipaddress
 import socket
 import time
 from difflib import SequenceMatcher
+from typing import List
 
 from bs4 import BeautifulSoup
 from celery import shared_task
@@ -320,6 +322,22 @@ def test_ns_connectivity(ip, port, domain):
     return cb_data["result"]
 
 
+def remove_ipv4_mapped_v6(addresses: List[str]) -> List[str]:
+    """
+    Filter a list of IPv6 addresses to ignore IPv4-mapped addresses.
+    Logs and drops invalid addresses - they come from DNS and are expected to be valid.
+    See #146 and #655 for reasoning.
+    """
+    valid = []
+    for address in addresses:
+        try:
+            if not ipaddress.IPv6Address(address).ipv4_mapped:
+                valid.append(address)
+        except ipaddress.AddressValueError as exc:
+            log.info(f"Discarding invalid IPv6 address '{address}' from DNS: {exc}")
+    return valid
+
+
 def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
     log.debug("Testing connectivity on %s, on port %s, is_ns: %s, test_domain: %s" % (ips, ports, is_ns, test_domain))
     good = set()
@@ -369,6 +387,7 @@ def get_domain_results(
 
     """
     v6 = task.resolve(domain, RR_TYPE_AAAA)
+    v6 = remove_ipv4_mapped_v6(v6)
     log.debug("V6 resolve: %s" % v6)
     v6_good, v6_bad, v6_ports = test_connectivity(v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
     v4 = task.resolve(domain, RR_TYPE_A)
