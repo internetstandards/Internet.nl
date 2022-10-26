@@ -65,7 +65,6 @@ jobs:
             ./unbound/
             ./_unbound/
             ./nassl_freebsd/
-            ./python-whois/
           key: ${{ runner.os }}-${{ matrix.python-version }}-v4-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile', '.github/workflows/*') }}
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
       - name: Setup Application Configuration
@@ -79,9 +78,6 @@ jobs:
         if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
       - name: Make unbound (if not from cache)
         run: make unbound-${{ matrix.python-version }}-github
-        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
-      - name: Make python-whois (if not from cache)
-        run: make python-whois
         if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
       - name: Check linting
         run: make check

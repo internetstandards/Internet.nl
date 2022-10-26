@@ -3,6 +3,10 @@
 This document describes operational/deployment changes throughout new versions. This is intended for developers and
 hosters.
 
+## Change overview for version 1.7
+
+* The package python-whois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
+
 ## Change overview for version 1.6
 
 Based on an existing 1.5.x setup:
