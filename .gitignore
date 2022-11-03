@@ -7,6 +7,8 @@
 /internetnl/internet.nl.settings.single.live.py
 /internetnl/internet.nl.single.settings.live.py
 /internetnl/internet.nl.batch.settings.live.py
+/interface/static/js/
+/interface/static/css/
 __pycache__
 *.mo
 *.pyc
