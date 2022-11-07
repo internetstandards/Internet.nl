@@ -84,11 +84,13 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
 
 
 def _evaluate_response(
-    status: int, content_type: str, domain: str, path: str, content: str, found_host: str
+    status: int, content_type: Optional[str], domain: str, path: str, content: str, found_host: str
 ) -> SecuritytxtRetrieveResult:
     errors = []
-    media_type, params = parse_header(content_type)
-    charset = params.get("charset", "utf-8").lower()
+    media_type, charset = None, None
+    if content_type:
+        media_type, params = parse_header(content_type)
+        charset = params.get("charset", "utf-8").lower()
 
     if not status or status == 404:
         errors.append("Error: security.txt could not be located.")
