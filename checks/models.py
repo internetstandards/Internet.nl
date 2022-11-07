@@ -688,6 +688,7 @@ class DomainTestAppsecpriv(BaseTestModel):
     x_frame_options_values = ListField(default=[])
     x_frame_options_score = models.IntegerField(null=True)
 
+    # This check was removed, but we keep the data for legacy records
     x_xss_protection_enabled = models.BooleanField(null=True, default=False)
     x_xss_protection_values = ListField(default=[])
     x_xss_protection_score = models.IntegerField(null=True)
@@ -754,9 +755,6 @@ class DomainTestAppsecpriv(BaseTestModel):
             "securitytxt_errors": self.securitytxt_errors,
             "securitytxt_recommendations": self.securitytxt_recommendations,
             "securitytxt_found_host": self.securitytxt_found_host,
-            # TODO: to be removed in the future.
-            # 'x_xss_protection_enabled': self.x_xss_protection_enabled,
-            # 'x_xss_protection_values': self.x_xss_protection_values,
         }
 
     class Meta:
