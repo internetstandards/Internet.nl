@@ -1,5 +1,7 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from typing import Optional
+
 from checks import scoring
 from checks.securitytxt import (
     SecuritytxtRetrieveResult,
@@ -19,7 +21,7 @@ def test_evaluate_response():
 
     def _evaluate_with_valid_defaults(
         status=200,
-        content_type="text/plain; charset=csutf8",
+        content_type: Optional[str] = "text/plain; charset=csutf8",
         domain="example.com",
         path=SECURITYTXT_EXPECTED_PATH,
         content=sectxt_content,
@@ -56,6 +58,17 @@ def test_evaluate_response():
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
         errors=["Error: security.txt could not be located (unexpected HTTP response code 500)."],
+    )
+
+    result = _evaluate_with_valid_defaults(
+        content_type=None,
+    )
+    assert result == SecuritytxtRetrieveResult(
+        found=True,
+        content=None,
+        url="https://example.com/.well-known/security.txt",
+        found_host="example.nl",
+        errors=["Error: HTTP Content-Type header must be sent."],
     )
 
     result = _evaluate_with_valid_defaults(
