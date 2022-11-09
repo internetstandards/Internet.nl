@@ -1140,7 +1140,7 @@ table td {
   overflow-x: auto;
 }
 .tech-details-table table tbody td:first-child {
-  word-break: normal;
+  word-break: break-all;
 }
 
 .test-direct {
