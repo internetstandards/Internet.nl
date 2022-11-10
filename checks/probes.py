@@ -29,6 +29,7 @@ from checks.scoring import (
     STATUSES_HTML_CSS_TEXT_MAP,
 )
 from checks.tasks import dispatcher
+from checks.tasks.dispatcher import ProbeTaskResult
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     from checks.tasks import ipv6
@@ -235,25 +236,19 @@ class Probe(object):
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_FAIL]
         return verdict
 
-    def raw_results(self, dname, remote_addr):
+    def raw_results(self, dname, remote_addr) -> ProbeTaskResult:
         """
         Get results from the taskset.
         Start the taskset if not running or cached.
-        Return (done, results)-tuple where:
-            - done=bool
-            - results=Celery JSON output
-
         """
         return dispatcher.check_results(dname, self.taskset, remote_addr, get_results=True)
 
-    def check_results(self, dname, remote_addr):
+    def check_results(self, dname, remote_addr) -> ProbeTaskResult:
         """
         Get just the status of the taskset.
         Start the taskset if not running or cached.
-
         """
-        status, _ = dispatcher.check_results(dname, self.taskset, remote_addr)
-        return status
+        return dispatcher.check_results(dname, self.taskset, remote_addr, get_results=False)
 
     def rated_results(self, dname):
         """
