@@ -25,7 +25,7 @@ def user_limit_exceeded(req_limit_id):
     return current_usage > settings.CLIENT_RATE_LIMIT
 
 
-@dataclass
+@dataclass(frozen=True)
 class ProbeTaskResult:
     done: bool
     success: Optional[bool] = None
@@ -78,11 +78,10 @@ def check_results(url, checks_registry, remote_addr, get_results=False) -> Probe
     log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
     results = {}
     callback = AsyncResult(task_id)
-    if callback.task_id and callback.ready():
-        if get_results:
-            gets = callback.get()
-            for res in gets:
-                results[res[0]] = res[1]
+    if callback.task_id and callback.ready() and get_results:
+        gets = callback.get()
+        for res in gets:
+            results[res[0]] = res[1]
     else:
         log.debug("Task is not yet ready.")
     return ProbeTaskResult(

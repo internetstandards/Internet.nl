@@ -38,10 +38,9 @@ function parseStatuses(json) {
     var retry = false;
     for (var i=0; i<json.length; i++) {
         var obj = json[i];
-        if (obj.done === true && obj.success === true) {
-            showResults(obj.name, obj);
-        } else if (obj.done === true && obj.success === false) {
-            showError(obj.name);
+        if (obj.done === true) {
+            if (obj.success === true) { showResults(obj.name, obj); }
+            else { showError(obj.name); }
         } else {
             retry = true;
         }
