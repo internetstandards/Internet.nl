@@ -19,6 +19,8 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 
 import unbound
+
+from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
 
@@ -92,18 +94,16 @@ def proberesults(request, probe, dname):
 
     """
     url = dname.lower()
-    done, _ = probe.raw_results(url, get_client_ip(request))
-    if done:
-        results = probe.rated_results(url)
+    task_result = probe.raw_results(url, get_client_ip(request))
+    if task_result.done:
+        return probe.rated_results(url)
     else:
-        results = dict(done=False)
-    return results
+        return dict(done=False)
 
 
-def probestatus(request, probe, dname):
+def probestatus(request, probe, dname) -> ProbeTaskResult:
     """
     Check if a probe has finished.
-
     """
     url = dname.lower()
     return probe.check_results(url, get_client_ip(request))
@@ -116,9 +116,14 @@ def probestatuses(request, dname, probes):
     """
     statuses = []
     for probe in probes:
-        results = dict(name=probe.name)
-        results["done"] = probestatus(request, probe, dname)
-        statuses.append(results)
+        task_result = probestatus(request, probe, dname)
+        statuses.append(
+            {
+                "name": probe.name,
+                "done": task_result.done,
+                "success": task_result.success,
+            }
+        )
     return statuses
 
 
@@ -162,8 +167,8 @@ def process(request, dname, template, probes, pageclass, pagetitle):
     # Also check if every test is done. In case of no-javascript we redirect
     # either to results or the same page.
     for probe in sorted_probes:
-        done, results = probe.raw_results(addr, get_client_ip(request))
-        if done:
+        task_result = probe.raw_results(addr, get_client_ip(request))
+        if task_result.done:
             done_count += 1
     if done_count >= len(sorted_probes):
         no_javascript_redirect = "results"
