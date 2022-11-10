@@ -151,7 +151,7 @@ requests==2.28.1
     #   sectxt
 rjsmin==1.2.1
     # via -r requirements.in
-sectxt==0.6
+sectxt==0.7
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
