@@ -7,7 +7,7 @@ from django.db import transaction
 
 from checks import categories
 from checks.models import DomainTestAppsecpriv, WebTestAppsecpriv
-from checks.securitytxt import securitytxt_check
+from checks.tasks.securitytxt import securitytxt_check
 from checks.tasks import SetupUnboundContext, shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (

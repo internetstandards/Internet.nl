@@ -3,7 +3,7 @@
 from typing import Optional
 
 from checks import scoring
-from checks.securitytxt import (
+from checks.tasks.securitytxt import (
     SecuritytxtRetrieveResult,
     _evaluate_securitytxt,
     _evaluate_response,
