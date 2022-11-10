@@ -19,6 +19,8 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 
 import unbound
+
+from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
 
@@ -92,18 +94,17 @@ def proberesults(request, probe, dname):
 
     """
     url = dname.lower()
-    done, _ = probe.raw_results(url, get_client_ip(request))
-    if done:
+    task_result = probe.raw_results(url, get_client_ip(request))
+    if task_result.done:
         results = probe.rated_results(url)
     else:
         results = dict(done=False)
     return results
 
 
-def probestatus(request, probe, dname):
+def probestatus(request, probe, dname) -> ProbeTaskResult:
     """
     Check if a probe has finished.
-
     """
     url = dname.lower()
     return probe.check_results(url, get_client_ip(request))
@@ -116,9 +117,13 @@ def probestatuses(request, dname, probes):
     """
     statuses = []
     for probe in probes:
-        results = dict(name=probe.name)
-        results["done"] = probestatus(request, probe, dname)
-        statuses.append(results)
+        task_result = probestatus(request, probe, dname)
+        status = {
+            "name": probe.name,
+            "done": task_result.done,
+            "success": task_result.success,
+        }
+        statuses.append(status)
     return statuses
 
 
@@ -162,8 +167,8 @@ def process(request, dname, template, probes, pageclass, pagetitle):
     # Also check if every test is done. In case of no-javascript we redirect
     # either to results or the same page.
     for probe in sorted_probes:
-        done, results = probe.raw_results(addr, get_client_ip(request))
-        if done:
+        task_result = probe.raw_results(addr, get_client_ip(request))
+        if task_result.done:
             done_count += 1
     if done_count >= len(sorted_probes):
         no_javascript_redirect = "results"
@@ -264,7 +269,7 @@ def get_hof_manual(manual):
 
 def get_retest_time(report):
     time_delta = timezone.make_aware(datetime.now()) - report.timestamp
-    return int(max(0, settings.CACHE_TTL - time_delta.total_seconds()))
+    return int(max(0, 1 - time_delta.total_seconds()))
 
 
 def ub_resolve_with_timeout(qname, qtype, rr_class, timeout):

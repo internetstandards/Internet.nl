@@ -1,6 +1,9 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import time
+from dataclasses import dataclass, field
+from typing import Optional, Any, Dict
+
 from celery import group
 from celery.result import AsyncResult
 from django.core.cache import cache
@@ -22,14 +25,24 @@ def user_limit_exceeded(req_limit_id):
     return current_usage > settings.CLIENT_RATE_LIMIT
 
 
-def check_results(url, checks_registry, remote_addr, get_results=False):
+@dataclass
+class ProbeTaskResult:
+    done: bool
+    success: Optional[bool] = None
+    results: Dict[Any, Any] = field(default_factory=dict)
+
+
+def check_results(url, checks_registry, remote_addr, get_results=False) -> ProbeTaskResult:
     """
-    Check if results are ready for a task and return the status (True, False).
-    If there are results return them also.
+    Check if results are ready for a task and return the status.
+
+    If get_results is set, fills the results attribute.
+    If the task raised an exception and get_results is set, this call will
+    re-raise the exception. If get_results is not set, this is ignored except
+    that success will be set to False.
 
     If the task is not registered and the user has not passed the task limit,
     start the task.
-
     """
     url = url.lower()
     cache_id = redis_id.dom_task.id.format(url, checks_registry.name)
@@ -44,7 +57,8 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
         req_limit_ttl = redis_id.req_limit.ttl
         if user_limit_exceeded(req_limit_id):
             log.debug("User limit exceeded. Too many requests from this IP. Blocked.")
-            return (False, dict(status="User limit exceeded, try again later"))
+            # TODO: This doesn't seem to have any handling - the task will just time out, no useful error
+            return ProbeTaskResult(done=False, results=dict(status="User limit exceeded, try again later"))
         # Try to aquire lock and start tasks
         elif cache.add(cache_id, False, cache_ttl):
             # Submit test
@@ -62,17 +76,20 @@ def check_results(url, checks_registry, remote_addr, get_results=False):
             task_id = cache.get(cache_id)
 
     log.debug("Trying to retrieve asyncresult from task_id: %s.", task_id)
+    results = {}
     callback = AsyncResult(task_id)
     if callback.task_id and callback.ready():
-        results = {}
         if get_results:
             gets = callback.get()
             for res in gets:
                 results[res[0]] = res[1]
-        return True, results
     else:
         log.debug("Task is not yet ready.")
-    return False, {}
+    return ProbeTaskResult(
+        done=callback.ready(),
+        success=callback.successful() if callback.ready() else None,
+        results=results,
+    )
 
 
 def submit_task_set(url, checks_registry, req_limit_id=None, error_cb=None):
