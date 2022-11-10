@@ -50,7 +50,7 @@ packaging==21.3
     #   pytest
 pathspec==0.10.1
     # via black
-platformdirs==2.5.2
+platformdirs==2.5.3
     # via black
 pluggy==1.0.0
     # via
@@ -101,7 +101,7 @@ pytest-html==3.2.0
     #   pytest-selenium
 pytest-logging==2015.11.4
     # via -r requirements-dev.in
-pytest-metadata==2.0.2
+pytest-metadata==2.0.4
     # via pytest-html
 pytest-mock==3.10.0
     # via -r requirements-dev.in
