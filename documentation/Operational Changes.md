@@ -3,13 +3,14 @@
 This document describes operational/deployment changes throughout new versions. This is intended for developers and
 hosters.
 
+<<<<<<< HEAD
 ## Change overview for version 1.7
 
 * The package python-whois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
 
-## Change overview for version 1.6
+## Change overview for version 1.6(.1)
 
-Based on an existing 1.5.x setup:
+Based on an existing 1.5.x setup or 1.6 setup that you are upgrading to 1.6.1:
 
 ```bash
 # The next steps need a privileged user
@@ -25,11 +26,11 @@ for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `b
 
 su - internetnl
 
-# Get the 1.6 sources
+# Get the 1.6.1 sources
 cd /opt/internetnl/Internet.nl/
 git reset --hard
 git fetch
-git checkout v1.6.0
+git checkout v1.6.1
 
 # Upgrade dependencies, run migrations and rebuild the frontend
 source ~internetnl/internet.nl.env
@@ -131,6 +132,7 @@ sudo -s -u internetnl
 
 # Get the 1.5 sources
 cd /opt/internetnl/Internet.nl/
+git reset --hard
 git fetch
 git checkout v1.5.0
 

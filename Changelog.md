@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.6.1
+
+- [Fixed an issue in the API and update the version](https://github.com/internetstandards/Internet.nl/pull/776)
+- [Updated social media links](https://github.com/internetstandards/Internet.nl/issues/804)
+
 ## 1.6
 
 - Add [security.txt support](https://github.com/internetstandards/Internet.nl/pull/730).
