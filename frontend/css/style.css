@@ -1391,6 +1391,16 @@ footer ul li:last-child {
 .tweet:hover {
   background-color: #ffffff
 }
+
+.mastodonfollow {
+  background: url('/static/uxwing/icon-mastodonfollow.png');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 5px center;
+  background-size: 1.25em 1.25em;
+  padding-left: 2em;
+}
+
 .twitterfollow {
   background: url('/static/icon-twitterfollow.svg');
   background: url('/static/icon-twitterfollow.png');
@@ -1409,6 +1419,10 @@ footer ul li:last-child {
   background-position: 5px center;
   background-size: 1.25em 1.25em;
   padding-left: 2em;
+}
+
+footer ul li.follow-us {
+  padding-right: 0.5em;
 }
 
 
