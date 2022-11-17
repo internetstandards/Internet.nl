@@ -66,6 +66,7 @@ class HeaderCheckerContentSecurityPolicy:
             self.has_http = False
             self.has_data = False
             self.has_base_uri = False
+            self.has_form_action = False
             self.has_default_src = False
             self.has_frame_src = False
             self.has_frame_ancestors = False
@@ -92,6 +93,8 @@ class HeaderCheckerContentSecurityPolicy:
                 failures.append("missing-invalid-frame-ancestors")
             if not self.has_base_uri:
                 failures.append("missing-invalid-base-uri")
+            if not self.has_form_action:
+                failures.append("missing-invalid-form-action")
             return failures
 
         def failed(self):
@@ -109,6 +112,7 @@ class HeaderCheckerContentSecurityPolicy:
                 f"has_http: {self.has_http}\n"
                 f"has_data: {self.has_data}\n"
                 f"has_base_uri: {self.has_base_uri}\n"
+                f"has_form_action: {self.has_form_action}\n"
                 f"has_default_src: {self.has_default_src}\n"
                 f"has_frame_src: {self.has_frame_src}\n"
                 f"has_frame_ancestors: {self.has_frame_ancestors}\n"
@@ -395,6 +399,9 @@ class HeaderCheckerContentSecurityPolicy:
         self.result.has_unsafe_hashes = self._check_matched_for_groups(dict(unsafe_hashes=[]))
         self.result.has_base_uri = self._check_matched_for_groups(
             dict(self=[], none=[], host=[]), directives=["base-uri"]
+        )
+        self.result.has_form_action = self._check_matched_for_groups(
+            dict(self=[], none=[], host=[]), directives=["form-action"]
         )
         self.result.has_default_src = self._check_default_src(domain)
         self.result.has_frame_src = self._check_matched_for_groups(dict(self=[], none=[]), directives=["frame-src"])
