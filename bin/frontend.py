@@ -27,6 +27,10 @@ def build_js(args=None):
     print("-"*20)
     print("Building JS files.")
     unique = uuid().hex
+    try:
+        os.mkdir(DJANGO_STATIC_JS_FOLDER)
+    except FileExistsError:
+        pass
     for root, dirs, files in os.walk(FRONTEND_JS_FOLDER):
         for filename in files:
             if filename.endswith(".js"):
@@ -56,6 +60,10 @@ def build_css(args=None):
     """
     print("-"*20)
     print("Building CSS files.")
+    try:
+        os.mkdir(DJANGO_STATIC_CSS_FOLDER)
+    except FileExistsError:
+        pass
     for root, dirs, files in os.walk(FRONTEND_CSS_FOLDER):
         for filename in files:
             if filename.endswith(".css"):
