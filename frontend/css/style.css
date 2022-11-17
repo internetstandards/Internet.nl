@@ -1393,7 +1393,7 @@ footer ul li:last-child {
 }
 
 .mastodonfollow {
-  background: url('/static/uxwing/icon-mastodonfollow.png');
+  background: url('/static/uxwing/icon-mastodonfollow-small.png');
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: 5px center;
