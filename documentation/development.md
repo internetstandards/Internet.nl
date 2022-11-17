@@ -14,7 +14,6 @@ make venv
 # Install separate dependencies, for which no wheels are available:
 # Note that unbound comes in a variety of flavors in the makefile(!)
 make unbound
-make python-whois
 make nassl
 
 # Run the application, and the workers

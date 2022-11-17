@@ -48,7 +48,7 @@ See: https://www.rabbitmq.com/management.html
 ### Unbound
 
 Install for python 3.7 with:
-`make unbound-37`
+`make unbound-3.7`
 
 Unbound (and pylibunbound) is used as a DNS resolver/nameserver for the various
 tests performed.
