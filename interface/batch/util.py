@@ -535,7 +535,7 @@ class DomainTechnicalResults:
         res["dkim"] = {"discovered": auth.dkim_available}
 
         # dmarc
-        dmarc = {"records": auth.dmarc_record}
+        dmarc = {"records": auth.dmarc_record, "record_org_domain": auth.dmarc_record_org_domain}
         if auth.dmarc_available:
             dmarc["policy_status"] = auth.dmarc_policy_status.name
         res["dmarc"] = dmarc

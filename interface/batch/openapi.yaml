@@ -980,6 +980,13 @@ components:
                   items:
                     type: string
                     format: DMARC TXT record
+                record_org_domain:
+                  type: string
+                  description: |
+                    The organizational domain on which the DMARC TXT record(s)
+                    were found, if different from the domain being tested.
+
+                    Only available when there is a DMARC record.
                 policy_status:
                   type: string
                   enumClass: DmarcPolicyStatus
