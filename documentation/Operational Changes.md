@@ -3,9 +3,13 @@
 This document describes operational/deployment changes throughout new versions. This is intended for developers and
 hosters.
 
-## Change overview for version 1.6
+## Change overview for version 1.7
 
-Based on an existing 1.5.x setup:
+* The package python-whois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
+
+## Change overview for version 1.6(.1)
+
+Based on an existing 1.5.x setup or 1.6 setup that you are upgrading to 1.6.1:
 
 ```bash
 # The next steps need a privileged user
@@ -21,11 +25,11 @@ for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `b
 
 su - internetnl
 
-# Get the 1.6 sources
+# Get the 1.6.1 sources
 cd /opt/internetnl/Internet.nl/
 git reset --hard
 git fetch
-git checkout v1.6.0
+git checkout v1.6.1
 
 # Upgrade dependencies, run migrations and rebuild the frontend
 source ~internetnl/internet.nl.env
@@ -45,7 +49,7 @@ for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl e
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
 
 # Batch:
-for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i` --now; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
 
 # Verify services are running
@@ -127,6 +131,7 @@ sudo -s -u internetnl
 
 # Get the 1.5 sources
 cd /opt/internetnl/Internet.nl/
+git reset --hard
 git fetch
 git checkout v1.5.0
 
@@ -135,6 +140,9 @@ cp -v internetnl/settings.py ~/settings_1.4.py
 
 # Create a new settings file based on the current dist
 cp -v internetnl/settings-dist.py internetnl/settings.py
+
+# Update batch API conf from defaults
+cp -v internetnl/batch_api_doc_conf_dist.py internetnl/batch_api_doc_conf.py
 
 # NOTE: routinator HTTP API may run on port 9556 or on port 8323 - see our
 # Routinator installation documentation
@@ -158,7 +166,7 @@ make frontend
 # <<<exit internetnl shell and return to root>>>
 
 # Deploy new configs (new celery queue)
-cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/single-* /opt/internetnl/etc/
+cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
 
 # Restart services, depending if this a batch or single instance server:
 systemctl daemon-reload
@@ -170,7 +178,7 @@ for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl e
 for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
 
 # Batch:
-for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i`--now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i` --now; done
 for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
 
 # Verify services are running
