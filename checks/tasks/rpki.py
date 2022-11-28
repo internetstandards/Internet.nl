@@ -451,6 +451,7 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                         multiple MX or NS records)
     """
     start_time = timer()
+    logger.info(f"{task} started RPKI")
     try:
         results = defaultdict(list)
         for fqdn, af_ip_pairs in fqdn_ips_pairs:
@@ -498,6 +499,6 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                 d = {"ip": ip, "routes": [], "validity": {}, "errors": ["timeout"]}
                 results[fqdn].append(d)
 
-    logger.info(f"{task} finished RPKI for {fqdn_ips_pairs} in {timer()-start_time}: {results}")
+    logger.info(f"{task} finished RPKI in {timer()-start_time}: {results}")
 
     return results
