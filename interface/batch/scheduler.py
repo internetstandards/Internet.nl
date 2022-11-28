@@ -573,9 +573,9 @@ def _run_scheduler():
             else:
                 found_domains += 1
             update_domain_status(batch_domain)
-        logger.info(f"Submitted {submitted_domains} domains in {format(timer() - start_time)}s, {len(live_requests)-submitted_domains} domains queued")
+        logger.info(f"Submitted {submitted_domains} domains in {format(timer() - start_time)}s, {len(live_requests)} domains remaining in queue")
     else:
-        logger.info(f"No domains submitted, queue is currently too loaded, {len(live_requests)} domains queued")
+        logger.info(f"No domains submitted, queue is currently too loaded, {len(live_requests)} domains remaining in queue")
     logger.info("Found {} domains".format(found_domains))
 
 
