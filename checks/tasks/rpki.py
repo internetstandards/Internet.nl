@@ -498,6 +498,6 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                 d = {"ip": ip, "routes": [], "validity": {}, "errors": ["timeout"]}
                 results[fqdn].append(d)
 
-    logger.info(f"{task.id} finished RPKI for {fqdn_ips_pairs} in {timer()-start_time}: {results}")
+    logger.info(f"{task} finished RPKI for {fqdn_ips_pairs} in {timer()-start_time}: {results}")
 
     return results
