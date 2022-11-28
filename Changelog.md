@@ -2,8 +2,9 @@
 
 ## 1.6.1
 
-- [Fixed an issue in the API and updated the version](https://github.com/internetstandards/Internet.nl/pull/776)
+- Fixed issues in the security.txt check for [invalid time formats](https://github.com/internetstandards/Internet.nl/pull/800) and [empty responses](https://github.com/internetstandards/Internet.nl/issues/790)
 - [Updated social media links](https://github.com/internetstandards/Internet.nl/issues/804)
+- [Fixed an issue in the API and updated the version](https://github.com/internetstandards/Internet.nl/pull/776)
 
 ## 1.6
 
