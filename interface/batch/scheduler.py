@@ -27,7 +27,8 @@ from checks.models import (
     WebTestAppsecpriv,
     WebTestTls,
     BatchUser,
-    BaseTestModel, BatchMailTest,
+    BaseTestModel,
+    BatchMailTest,
 )
 from checks.probes import batch_mailprobes, batch_webprobes
 from checks.tasks import dispatcher
@@ -169,7 +170,9 @@ def pick_domain(batch_request) -> Optional[BatchDomain]:
     return BatchDomain.objects.filter(status=BatchDomainStatus.waiting, batch_request=batch_request).first()
 
 
-def check_for_result_or_start_test(batch_domain: BatchDomain, batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, taskset: Callable):
+def check_for_result_or_start_test(
+    batch_domain: BatchDomain, batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, taskset: Callable
+):
     """
     Link the result if already available or start a test.
 
@@ -226,7 +229,9 @@ def save_result(batch_test, subtest, result):
     batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
 
 
-def start_test(batch_domain: BatchDomain, batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, taskset: Callable):
+def start_test(
+    batch_domain: BatchDomain, batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, taskset: Callable
+):
     """
     Submit test and change status to running.
 
@@ -573,9 +578,14 @@ def _run_scheduler():
             else:
                 found_domains += 1
             update_domain_status(batch_domain)
-        logger.info(f"Submitted {submitted_domains} domains in {format(timer() - start_time)}s, {len(live_requests)} domains remaining in queue")
+        logger.info(
+            f"Submitted {submitted_domains} domains in {format(timer() - start_time)}s, "
+            f"{len(live_requests)} users remaining in queue"
+        )
     else:
-        logger.info(f"No domains submitted, queue is currently too loaded, {len(live_requests)} domains remaining in queue")
+        logger.info(
+            f"No domains submitted, queue is currently too loaded, {len(live_requests)} users remaining in queue"
+        )
     logger.info("Found {} domains".format(found_domains))
 
 

@@ -8,6 +8,7 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
 import logging
+from timeit import default_timer as timer
 
 from interface import batch, batch_shared_task
 from . import SetupUnboundContext
@@ -449,6 +450,7 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
         fqdn_ips_pairs: list of fqdn, af_ip_pairs pairs (to iterate over
                         multiple MX or NS records)
     """
+    start_time = timer()
     try:
         results = defaultdict(list)
         for fqdn, af_ip_pairs in fqdn_ips_pairs:
@@ -458,7 +460,9 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
 
                 try:
                     # fetch ASN, prefixes from BGP
+                    start_time2 = timer()
                     routeview = TeamCymruIPtoASN.from_bgp(task, ip)
+                    logger.info(f"resolved {ip} to {routeview.routes} in {timer()-start_time2}")
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
                     routeview = None
                     logger.error(repr(e))
@@ -468,7 +472,9 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                     if routeview:
                         # if the ip is covered by a BGP announcement
                         # try to validate corresponding Roas
+                        start_time2 = timer()
                         routeview.validate(task, Routinator)
+                        logger.info(f"evaluated {ip} validity to {routeview.validity} in {timer() - start_time2}")
                     else:
                         # if the ip is not covered by a BGP announcement
                         # we can still show the existence of Roas,
@@ -491,5 +497,7 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                 ip = af_ip_pair[1]
                 d = {"ip": ip, "routes": [], "validity": {}, "errors": ["timeout"]}
                 results[fqdn].append(d)
+
+    logger.info(f"{task.id} finished RPKI for {fqdn_ips_pairs} in {timer()-start_time}: {results}")
 
     return results
