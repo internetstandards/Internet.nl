@@ -407,7 +407,7 @@ def build_summary_report(parent, parent_name, category) -> None:
 
 def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check webservers."""
-    web = do_rpki(task, [(url, af_ip_pairs)], *args, **kwargs)
+    web = do_rpki(task, [], *args, **kwargs)
 
     return (TestName("rpki_web"), web)
 
@@ -415,7 +415,7 @@ def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, Test
 def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers."""
     ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
-    ns = do_rpki(task, ns_ips_pairs, *args, **kwargs)
+    ns = do_rpki(task, [], *args, **kwargs)
 
     return (TestName("rpki_ns"), ns)
 
@@ -430,7 +430,7 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, T
         for ns, ips in shared.do_resolve_ns_ips(task, mx):
             mx_ns_ips_pairs.add((ns, tuple(ips)))
 
-    mxns = do_rpki(task, mx_ns_ips_pairs, *args, **kwargs)
+    mxns = do_rpki(task, [], *args, **kwargs)
 
     return (TestName("rpki_mx_ns"), mxns)
 
