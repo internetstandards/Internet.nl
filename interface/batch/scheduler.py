@@ -227,7 +227,7 @@ def save_result(batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, re
     setattr(batch_test, subtest, result)
     setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.done)
     batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
-    logger.info(f"domain {getattr(result, 'domain', None)}: finished task for subtest {subtest}")
+    logger.info(f"domain {getattr(result, 'domain', None)}: {batch_test.__class__.__name__} finished task for subtest {subtest}")
 
 
 def start_test(

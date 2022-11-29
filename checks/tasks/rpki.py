@@ -458,37 +458,37 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
             for af_ip_pair in af_ip_pairs:
                 ip = af_ip_pair[1]
                 result = {"ip": ip, "routes": [], "validity": {}, "errors": []}
-
-                try:
-                    # fetch ASN, prefixes from BGP
-                    start_time2 = timer()
-                    routeview = TeamCymruIPtoASN.from_bgp(task, ip)
-                    logger.info(f"resolved {ip} to {routeview.routes} in {timer()-start_time2}")
-                except (InvalidIPError, BGPSourceUnavailableError) as e:
-                    routeview = None
-                    logger.error(repr(e))
-                    result["errors"].append(e.__class__.__name__)
-
-                try:
-                    if routeview:
-                        # if the ip is covered by a BGP announcement
-                        # try to validate corresponding Roas
-                        start_time2 = timer()
-                        routeview.validate(task, Routinator)
-                        logger.info(f"evaluated {ip} validity to {routeview.validity} in {timer() - start_time2}")
-                    else:
-                        # if the ip is not covered by a BGP announcement
-                        # we can still show the existence of Roas,
-                        # but validation is meaningless
-                        result["errors"].append(NoRoutesError.__name__)
-
-                        routeview = TeamCymruIPtoASN.from_rpki(task, Routinator, ip)
-                except RelyingPartyUnvailableError as e:
-                    logger.error(repr(e))
-                    result["errors"].append(e.__class__.__name__)
-                else:
-                    result["routes"] = routeview.routes
-                    result["validity"] = routeview.validity
+                #
+                # try:
+                #     # fetch ASN, prefixes from BGP
+                #     start_time2 = timer()
+                #     routeview = TeamCymruIPtoASN.from_bgp(task, ip)
+                #     logger.info(f"resolved {ip} to {routeview.routes} in {timer()-start_time2}")
+                # except (InvalidIPError, BGPSourceUnavailableError) as e:
+                #     routeview = None
+                #     logger.error(repr(e))
+                #     result["errors"].append(e.__class__.__name__)
+                #
+                # try:
+                #     if routeview:
+                #         # if the ip is covered by a BGP announcement
+                #         # try to validate corresponding Roas
+                #         start_time2 = timer()
+                #         routeview.validate(task, Routinator)
+                #         logger.info(f"evaluated {ip} validity to {routeview.validity} in {timer() - start_time2}")
+                #     else:
+                #         # if the ip is not covered by a BGP announcement
+                #         # we can still show the existence of Roas,
+                #         # but validation is meaningless
+                #         result["errors"].append(NoRoutesError.__name__)
+                #
+                #         routeview = TeamCymruIPtoASN.from_rpki(task, Routinator, ip)
+                # except RelyingPartyUnvailableError as e:
+                #     logger.error(repr(e))
+                #     result["errors"].append(e.__class__.__name__)
+                # else:
+                #     result["routes"] = routeview.routes
+                #     result["validity"] = routeview.validity
 
                 results[fqdn].append(result)
 
