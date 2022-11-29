@@ -414,7 +414,7 @@ def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, Test
 
 def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers."""
-    ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
+    # ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
     ns = do_rpki(task, [], *args, **kwargs)
 
     return (TestName("rpki_ns"), ns)
@@ -425,10 +425,10 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, T
 
     These may or may not be the same as the nameservers for the domain itself.
     """
-    mx_ns_ips_pairs = set()
-    for mx, _ in mx_ips_pairs:
-        for ns, ips in shared.do_resolve_ns_ips(task, mx):
-            mx_ns_ips_pairs.add((ns, tuple(ips)))
+    # mx_ns_ips_pairs = set()
+    # for mx, _ in mx_ips_pairs:
+    #     for ns, ips in shared.do_resolve_ns_ips(task, mx):
+    #         mx_ns_ips_pairs.add((ns, tuple(ips)))
 
     mxns = do_rpki(task, [], *args, **kwargs)
 
