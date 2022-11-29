@@ -219,7 +219,7 @@ def find_result(batch_domain, model):
     return result
 
 
-def save_result(batch_test, subtest, result):
+def save_result(batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, result):
     """
     Link results and save model.
 
@@ -227,6 +227,7 @@ def save_result(batch_test, subtest, result):
     setattr(batch_test, subtest, result)
     setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.done)
     batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
+    logger.info(f"domain {getattr(result, 'domain', None)}: finished task for subtest {subtest}")
 
 
 def start_test(
@@ -484,7 +485,7 @@ def record_subtest_error(batch_test, subtest):
     status = getattr(batch_test, "{}_status".format(subtest))
     error_count += 1
     if status != BatchTestStatus.cancelled:
-        if error_count > 2:
+        if error_count > 0:
             status = BatchTestStatus.error
         else:
             status = BatchTestStatus.waiting
