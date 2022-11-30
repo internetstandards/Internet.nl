@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import random
 from timeit import default_timer as timer
+from typing import Optional, Dict, Tuple, Union, Callable
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -25,7 +26,11 @@ from checks.models import (
     MailTestTls,
     WebTestAppsecpriv,
     WebTestTls,
+    BatchUser,
+    BaseTestModel,
+    BatchMailTest,
 )
+
 from checks.probes import batch_mailprobes, batch_webprobes
 from checks.tasks import dispatcher
 from interface import batch_shared_task, redis_id
@@ -33,9 +38,10 @@ from interface.batch import util
 
 logger = get_task_logger(__name__)
 
+BatchTests = Union[BatchWebTest, BatchMailTest]
 BATCH_WEBTEST = {"subtests": {}, "report": {"name": "domaintestreport"}}
-
 BATCH_MAILTEST = {"subtests": {}, "report": {"name": "mailtestreport"}}
+MAX_SUBTEST_ATTEMPTS = 3
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
@@ -130,7 +136,7 @@ def is_queue_loaded(client):
     return False
 
 
-def get_live_requests():
+def get_live_requests() -> Dict[BatchUser, BatchRequest]:
     """
     Return a dictionary with active users as keys and their earliest
     live batch request as value.
@@ -144,7 +150,7 @@ def get_live_requests():
     return live_requests
 
 
-def get_user_and_request(live_requests):
+def get_user_and_request(live_requests) -> Tuple[Optional[BatchUser], Optional[BatchRequest]]:
     """
     Pick a user and his request from the available live_requests.
     Users are fairly chosen regardless of the number of submitted tests.
@@ -158,21 +164,15 @@ def get_user_and_request(live_requests):
     return user, batch_request
 
 
-def pick_domain(batch_request):
+def pick_domain(batch_request) -> Optional[BatchDomain]:
     """
     Pick a domain to test.
     Selects the first available domain.
-
     """
-    try:
-        return BatchDomain.objects.filter(status=BatchDomainStatus.waiting, batch_request=batch_request)[
-            :1
-        ].get()  # .first()
-    except BatchDomain.DoesNotExist:
-        return None
+    return BatchDomain.objects.filter(status=BatchDomainStatus.waiting, batch_request=batch_request).first()
 
 
-def check_for_result_or_start_test(batch_domain, batch_test, subtest, taskset):
+def check_for_result_or_start_test(batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable):
     """
     Link the result if already available or start a test.
 
@@ -219,7 +219,7 @@ def find_result(batch_domain, model):
     return result
 
 
-def save_result(batch_test, subtest, result):
+def save_result(batch_test: BatchTests, subtest: str, result):
     """
     Link results and save model.
 
@@ -227,9 +227,12 @@ def save_result(batch_test, subtest, result):
     setattr(batch_test, subtest, result)
     setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.done)
     batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
+    logger.info(
+        f"domain {getattr(result, 'domain', None)}: {batch_test.__class__.__name__} finished task for subtest {subtest}"
+    )
 
 
-def start_test(batch_domain, batch_test, subtest, taskset):
+def start_test(batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable):
     """
     Submit test and change status to running.
 
@@ -239,7 +242,7 @@ def start_test(batch_domain, batch_test, subtest, taskset):
     batch_test.save(update_fields=["{}_status".format(subtest)])
 
 
-def submit_test(batch_domain, test, checks_registry):
+def submit_test(batch_domain: BatchDomain, test: str, checks_registry: Callable):
     """
     Submit the test in celery.
 
@@ -251,6 +254,7 @@ def submit_test(batch_domain, test, checks_registry):
     cache_id = redis_id.running_batch_test.id.format(task_set.id)
     cache_ttl = redis_id.running_batch_test.ttl
     cache.set(cache_id, (batch_domain.id, test), cache_ttl)
+    logger.info(f"domain {batch_domain.domain}: started task {task_set.id} for subtest {test}")
 
     return task_set
 
@@ -362,7 +366,7 @@ def create_report(batch_domain):
     batch_test.save()
 
 
-def update_domain_status(batch_domain):
+def update_domain_status(batch_domain: BatchDomain):
     """
     Check the status of the individual tests and update the domain's
     entry status.
@@ -386,7 +390,7 @@ def update_domain_status(batch_domain):
     batch_domain.save(update_fields=["status_changed", "status"])
 
 
-def update_batch_status(batch_request):
+def update_batch_status(batch_request: BatchRequest):
     """
     Check the status of the submitted domains and update the batch
     request's status if necessary.
@@ -413,19 +417,20 @@ def update_batch_status(batch_request):
     batch_request.save(update_fields=["status", "finished_date"])
 
 
-def batch_callback_hook(result, task_id):
+def batch_callback_hook(result: Optional[BaseTestModel], task_id: str):
     """
     Link the result and change the status of the running test.
 
     """
     if not result:
-        logger.error("Post callback, no result!")
+        logger.error(f"batch callback for task {task_id} called without result")
         return
 
     cache_id = redis_id.running_batch_test.id.format(task_id)
     cached = cache.get(cache_id)
     if not cached:
-        logger.error("Post callback, could not find task id '{}'" "".format(task_id))
+        domain = getattr(result, "domain", None)
+        logger.error(f"batch callback could not find task {task_id} in cache (cache ID {cache_id}, domain {domain})")
         return
 
     batch_domain_id, subtest = cached
@@ -480,7 +485,7 @@ def record_subtest_error(batch_test, subtest):
     status = getattr(batch_test, "{}_status".format(subtest))
     error_count += 1
     if status != BatchTestStatus.cancelled:
-        if error_count > 2:
+        if error_count >= MAX_SUBTEST_ATTEMPTS:
             status = BatchTestStatus.error
         else:
             status = BatchTestStatus.waiting
@@ -512,7 +517,9 @@ def find_stalled_tests_and_update_db():
                 status = getattr(batch_test, "{}_status".format(subtest))
                 if status == BatchTestStatus.running:
                     errors = record_subtest_error(batch_test, subtest)
-                    logger.info("{} errors for {}({})" "".format(errors, batch_domain.domain, subtest))
+                    logger.info(
+                        f"domain {batch_domain.domain}: subtest {subtest} failed to complete in time (attempt {errors})"
+                    )
             update_domain_status(batch_domain)
 
 
@@ -533,20 +540,20 @@ def _run_scheduler():
 
     start_time = timer()
     find_stalled_tests_and_update_db()
-    logger.info("Find stalled duration: {}".format(timer() - start_time))
+    logger.info("Found stalled tests in {}s".format(timer() - start_time))
 
     start_time = timer()
     update_batch_request_status()
-    logger.info("Update status duration: {}".format(timer() - start_time))
+    logger.info("Updated batch request status in {}s".format(timer() - start_time))
 
-    submitted = 0
-    found = 0
+    submitted_domains = 0
+    found_domains = 0
+    start_time = timer()
+    live_requests = get_live_requests()
     if not is_queue_loaded(client):
-        start_time = timer()
-        live_requests = get_live_requests()
         while domains_to_test > 0:
             user, batch_request = get_user_and_request(live_requests)
-            if not (user or batch_request):
+            if not user or not batch_request:
                 break
 
             batch_domain = pick_domain(batch_request)
@@ -561,23 +568,25 @@ def _run_scheduler():
                 subtests = BATCH_MAILTEST["subtests"]
 
             for subtest in subtests:
-                if getattr(batch_test, "{}_status".format(subtest)) == BatchTestStatus.waiting:
+                if getattr(batch_test, f"{subtest}_status") == BatchTestStatus.waiting:
                     started_test = check_for_result_or_start_test(batch_domain, batch_test, subtest, subtests[subtest])
                     if started_test:
                         subtests_started += 1
 
             if subtests_started > 0:
-                submitted += 1
+                submitted_domains += 1
                 domains_to_test -= 1
             else:
-                found += 1
+                found_domains += 1
             update_domain_status(batch_domain)
-        logger.info("Submission duration: {}".format(timer() - start_time))
-
-    submitted_domains = settings.BATCH_SCHEDULER_DOMAINS - domains_to_test
-    submitted_domains = submitted
-    found_domains = found
-    logger.info("Submitted {} domains".format(submitted_domains))
+        logger.info(
+            f"Submitted {submitted_domains} domains in {format(timer() - start_time)}s, "
+            f"{len(live_requests)} users remaining in queue"
+        )
+    else:
+        logger.info(
+            f"No domains submitted, queue is currently too loaded, {len(live_requests)} users remaining in queue"
+        )
     logger.info("Found {} domains".format(found_domains))
 
 
