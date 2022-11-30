@@ -30,14 +30,15 @@ from checks.models import (
     BaseTestModel,
     BatchMailTest,
 )
+
 from checks.probes import batch_mailprobes, batch_webprobes
 from checks.tasks import dispatcher
 from interface import batch_shared_task, redis_id
 from interface.batch import util
 
-
 logger = get_task_logger(__name__)
 
+BatchTests = Union[BatchWebTest, BatchMailTest]
 BATCH_WEBTEST = {"subtests": {}, "report": {"name": "domaintestreport"}}
 BATCH_MAILTEST = {"subtests": {}, "report": {"name": "mailtestreport"}}
 MAX_SUBTEST_ATTEMPTS = 3
@@ -172,7 +173,7 @@ def pick_domain(batch_request) -> Optional[BatchDomain]:
 
 
 def check_for_result_or_start_test(
-    batch_domain: BatchDomain, batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, taskset: Callable
+    batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable
 ):
     """
     Link the result if already available or start a test.
@@ -220,7 +221,7 @@ def find_result(batch_domain, model):
     return result
 
 
-def save_result(batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, result):
+def save_result(batch_test: BatchTests, subtest: str, result):
     """
     Link results and save model.
 
@@ -234,7 +235,7 @@ def save_result(batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, re
 
 
 def start_test(
-    batch_domain: BatchDomain, batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, taskset: Callable
+    batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable
 ):
     """
     Submit test and change status to running.
