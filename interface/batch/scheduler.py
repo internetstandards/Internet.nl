@@ -172,9 +172,7 @@ def pick_domain(batch_request) -> Optional[BatchDomain]:
     return BatchDomain.objects.filter(status=BatchDomainStatus.waiting, batch_request=batch_request).first()
 
 
-def check_for_result_or_start_test(
-    batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable
-):
+def check_for_result_or_start_test(batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable):
     """
     Link the result if already available or start a test.
 
@@ -234,9 +232,7 @@ def save_result(batch_test: BatchTests, subtest: str, result):
     )
 
 
-def start_test(
-    batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable
-):
+def start_test(batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, taskset: Callable):
     """
     Submit test and change status to running.
 
