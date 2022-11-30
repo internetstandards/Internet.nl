@@ -35,11 +35,12 @@ from checks.tasks import dispatcher
 from interface import batch_shared_task, redis_id
 from interface.batch import util
 
+
 logger = get_task_logger(__name__)
 
 BATCH_WEBTEST = {"subtests": {}, "report": {"name": "domaintestreport"}}
-
 BATCH_MAILTEST = {"subtests": {}, "report": {"name": "mailtestreport"}}
+MAX_SUBTEST_ATTEMPTS = 3
 
 if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
     from checks.tasks.ipv6 import batch_web_registered as ipv6_web_taskset
@@ -227,7 +228,9 @@ def save_result(batch_test: Union[BatchWebTest, BatchMailTest], subtest: str, re
     setattr(batch_test, subtest, result)
     setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.done)
     batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
-    logger.info(f"domain {getattr(result, 'domain', None)}: {batch_test.__class__.__name__} finished task for subtest {subtest}")
+    logger.info(
+        f"domain {getattr(result, 'domain', None)}: {batch_test.__class__.__name__} finished task for subtest {subtest}"
+    )
 
 
 def start_test(
@@ -485,7 +488,7 @@ def record_subtest_error(batch_test, subtest):
     status = getattr(batch_test, "{}_status".format(subtest))
     error_count += 1
     if status != BatchTestStatus.cancelled:
-        if error_count > 0:
+        if error_count >= MAX_SUBTEST_ATTEMPTS:
             status = BatchTestStatus.error
         else:
             status = BatchTestStatus.waiting
