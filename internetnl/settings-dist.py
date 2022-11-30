@@ -114,7 +114,7 @@ if ENABLE_BATCH:
 else:
     print("Single domain scan enabled, batch scanning and API not available.")
 
-ALLOWED_HOSTS = ALLOWED_HOSTS + [IPV6_TEST_ADDR, "[{}]".format(IPV6_TEST_ADDR)]
+ALLOWED_HOSTS = ALLOWED_HOSTS + [IPV6_TEST_ADDR, f"[{IPV6_TEST_ADDR}]"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",

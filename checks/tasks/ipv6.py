@@ -339,7 +339,7 @@ def remove_ipv4_mapped_v6(addresses: List[str]) -> List[str]:
 
 
 def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
-    log.debug("Testing connectivity on %s, on port %s, is_ns: %s, test_domain: %s" % (ips, ports, is_ns, test_domain))
+    log.debug(f"Testing connectivity on {ips}, on port {ports}, is_ns: {is_ns}, test_domain: {test_domain}")
     good = set()
     bad = set()
     reachable_ports = set()
@@ -361,7 +361,7 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
                 good.add(ip)
                 reachable_ports.add(port)
                 continue
-            except socket.error:
+            except OSError:
                 pass
             finally:
                 if sock:
@@ -375,7 +375,7 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
                 reachable_ports.add(port)
 
     bad = set(ips) - set(good)
-    log.debug("Conclusion on %s:%s: good: %s, bad: %s, ports: %s" % (ips, ports, good, bad, reachable_ports))
+    log.debug(f"Conclusion on {ips}:{ports}: good: {good}, bad: {bad}, ports: {reachable_ports}")
     return list(good), list(bad), reachable_ports
 
 
@@ -562,13 +562,7 @@ def simhash(url, task=None):
             v4_conn, v4_res, _, _ = http_fetch(url, socket.AF_INET, port=port, task=task, keep_conn_open=True)
             v6_conn, v6_res, _, _ = http_fetch(url, socket.AF_INET6, port=port, task=task, keep_conn_open=True)
             break
-        except (
-            socket.error,
-            NoIpError,
-            http.client.BadStatusLine,
-            ConnectionHandshakeException,
-            ConnectionSocketException,
-        ):
+        except (OSError, NoIpError, http.client.BadStatusLine, ConnectionHandshakeException, ConnectionSocketException):
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
             if v4_conn:
@@ -595,7 +589,7 @@ def simhash(url, task=None):
             "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
             "need to enlarge it, logging for statistical purposes"
         )
-    except (socket.error):
+    except (OSError):
         if v4_conn:
             v4_conn.close()
         if v6_conn:

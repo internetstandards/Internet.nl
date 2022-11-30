@@ -14,7 +14,7 @@ from checks.tasks import SetupUnboundContext
 from interface import batch_shared_task
 
 MAX_MAILSERVERS = 10
-MX_LOCALHOST_RE = re.compile("^localhost\.?$")
+MX_LOCALHOST_RE = re.compile(r"^localhost\.?$")
 
 
 root_fingerprints = None
@@ -191,7 +191,7 @@ def do_resolve_ns_ips(self, url, *args, **kwargs):
 
 
 def resolve_dane(task, port, dname, check_nxdomain=False):
-    qname = "_{}._tcp.{}".format(port, dname)
+    qname = f"_{port}._tcp.{dname}"
     if check_nxdomain:
         qtype = unbound.RR_TYPE_A
         cb_data = task.async_resolv(qname, qtype)

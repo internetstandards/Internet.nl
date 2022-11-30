@@ -14,7 +14,7 @@ from enumfields import EnumField, EnumIntegerField
 
 class ListField(models.TextField):
     def __init__(self, *args, **kwargs):
-        super(ListField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def from_db_value(self, value, expression, connection, context="Null"):
         if value is None:
@@ -345,7 +345,7 @@ class WebDomain(IPv6TestDomain):
 
     def __dir__(self):
         return (
-            super(WebDomain, self)
+            super()
             .__dir__()
             .extend(
                 [
@@ -400,13 +400,13 @@ class MailTestTls(DomainServersModel):
 
     def totalscore(self, score_fields):
         tests_subset = self.testset.all()
-        return super(MailTestTls, self).totalscore(score_fields, tests_subset, mailtest=True)
+        return super().totalscore(score_fields, tests_subset, mailtest=True)
 
     def details_set(self, probe):
-        return super(MailTestTls, self).details_set(probe, self.testset)
+        return super().details_set(probe, self.testset)
 
     def __dir__(self):
-        return ["mx_status"] + super(MailTestTls, self).__dir__()
+        return ["mx_status"] + super().__dir__()
 
     class Meta:
         app_label = "checks"
@@ -416,13 +416,13 @@ class MailTestDnssec(DomainServersModel):
     mx_status = EnumIntegerField(MxStatus, null=True, default=False)
 
     def totalscore(self, score_fields):
-        return super(MailTestDnssec, self).totalscore(score_fields, self.testset.all(), mailtest=True)
+        return super().totalscore(score_fields, self.testset.all(), mailtest=True)
 
     def details_set(self, probe):
-        return super(MailTestDnssec, self).details_set(probe, self.testset)
+        return super().details_set(probe, self.testset)
 
     def __dir__(self):
-        return ["mx_status"] + super(MailTestDnssec, self).__dir__()
+        return ["mx_status"] + super().__dir__()
 
     class Meta:
         app_label = "checks"
@@ -449,10 +449,10 @@ class DomainTestDnssec(BaseTestModel):
 class WebTestTls(DomainServersModel):
     def totalscore(self, score_fields):
         tests_subset = self.webtestset.all()
-        return super(WebTestTls, self).totalscore(score_fields, tests_subset)
+        return super().totalscore(score_fields, tests_subset)
 
     def details_set(self, probe):
-        return super(WebTestTls, self).details_set(probe, self.webtestset)
+        return super().details_set(probe, self.webtestset)
 
     class Meta:
         app_label = "checks"
@@ -667,10 +667,10 @@ class DomainTestTls(BaseTestModel):
 class WebTestAppsecpriv(DomainServersModel):
     def totalscore(self, score_fields):
         tests_subset = self.webtestset.all()
-        return super(WebTestAppsecpriv, self).totalscore(score_fields, tests_subset)
+        return super().totalscore(score_fields, tests_subset)
 
     def details_set(self, probe):
-        return super(WebTestAppsecpriv, self).details_set(probe, self.webtestset)
+        return super().details_set(probe, self.webtestset)
 
     class Meta:
         app_label = "checks"
@@ -805,7 +805,7 @@ class RpkiMxHost(RpkiTestHost):
 
     def __dir__(self):
         return (
-            super(RpkiMxHost, self)
+            super()
             .__dir__()
             .extend(
                 [
@@ -821,7 +821,7 @@ class RpkiNsHost(RpkiTestHost):
 
     def __dir__(self):
         return (
-            super(RpkiNsHost, self)
+            super()
             .__dir__()
             .extend(
                 [
@@ -852,7 +852,7 @@ class RpkiWebHost(RpkiTestHost):
 
     def __dir__(self):
         return (
-            super(RpkiWebHost, self)
+            super()
             .__dir__()
             .extend(
                 [
@@ -919,7 +919,7 @@ class NsDomain(IPv6TestDomain):
 
     def __dir__(self):
         return (
-            super(NsDomain, self)
+            super()
             .__dir__()
             .extend(
                 [
@@ -938,7 +938,7 @@ class MxDomain(IPv6TestDomain):
 
     def __dir__(self):
         return (
-            super(MxDomain, self)
+            super()
             .__dir__()
             .extend(
                 [
@@ -1161,7 +1161,7 @@ class BatchRequest(models.Model):
         try:
             self.report_file.delete()
             self.report_technical_file.delete()
-        except (IOError, SuspiciousFileOperation):
+        except (OSError, SuspiciousFileOperation):
             pass
 
         # Remove the related BatchWebTest and BatchMailTest entries.

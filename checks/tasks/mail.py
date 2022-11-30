@@ -258,7 +258,7 @@ def dkim_callback(data, status, r):
 
 def do_dkim(self, url, *args, **kwargs):
     try:
-        cb_data = self.async_resolv("_domainkey.{}".format(url), unbound.RR_TYPE_TXT, dkim_callback)
+        cb_data = self.async_resolv(f"_domainkey.{url}", unbound.RR_TYPE_TXT, dkim_callback)
         result = dict(available="available" in cb_data and cb_data["available"], score=cb_data["score"])
 
     # KeyError is due to score missing, happens in case of timeout on non resolving domain
@@ -546,10 +546,10 @@ def do_dmarc(self, url, *args, **kwargs):
             # Raise SoftTimeLimitExceeded to easily fail the test.
             raise SoftTimeLimitExceeded
 
-        cb_data = self.async_resolv("_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
+        cb_data = self.async_resolv(f"_dmarc.{url}", unbound.RR_TYPE_TXT, dmarc_callback)
         if cb_data.get("cont"):
             url = dmarc_find_organizational_domain(url, public_suffix_list)
-            cb_data = self.async_resolv("_dmarc.{}".format(url), unbound.RR_TYPE_TXT, dmarc_callback)
+            cb_data = self.async_resolv(f"_dmarc.{url}", unbound.RR_TYPE_TXT, dmarc_callback)
             is_org_domain = True
 
         available = "available" in cb_data and cb_data["available"]
@@ -675,7 +675,7 @@ def dmarc_verify_external_destinations(domain, parsed, task, public_suffix_list)
     for host in _dmarc_get_ru_host(parsed):
         host_org = dmarc_find_organizational_domain(host, public_suffix_list)
         if domain_org != host_org:
-            ext_qname = "{}._report._dmarc.{}".format(domain, host)
+            ext_qname = f"{domain}._report._dmarc.{host}"
             txt_records = task.resolve(ext_qname, unbound.RR_TYPE_TXT)
             is_dmarc = False
             for txt in txt_records:

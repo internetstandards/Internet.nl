@@ -12,7 +12,7 @@ from interface.batch import util
 logger = get_task_logger(__name__)
 
 
-class HOFEntry(object):
+class HOFEntry:
     def __init__(self, domain):
         self.domain = domain
         self.web_timestamp = None

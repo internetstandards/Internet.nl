@@ -1,7 +1,6 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import http.client
-import socket
 from cgi import parse_header
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
@@ -54,13 +53,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
                     content_type = value.lower() if value else None
 
             return res.status, content_type, response_content, visited_hosts[443]
-        except (
-            socket.error,
-            http.client.BadStatusLine,
-            NoIpError,
-            ConnectionHandshakeException,
-            ConnectionSocketException,
-        ):
+        except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
             return None, "", None, []
 
     path = SECURITYTXT_EXPECTED_PATH

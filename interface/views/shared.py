@@ -33,7 +33,7 @@ if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_
 # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
 ub_ctx.set_async(True)
 if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
-    ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
+    ub_ctx.set_fwd(f"{settings.CENTRAL_UNBOUND}")
 ub_ctx.set_option("rrset-roundrobin:", "no")
 
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
@@ -182,7 +182,7 @@ def process(request, dname, template, probes, pageclass, pagetitle):
             addr=addr,
             prettyaddr=prettyaddr,
             pageclass=pageclass,
-            pagetitle="{} {}".format(_(pagetitle), prettyaddr),
+            pagetitle=f"{_(pagetitle)} {prettyaddr}",
             probes=sorted_probes,
             no_javascript_redirect=no_javascript_redirect,
             javascript_retries=get_javascript_retries(),
@@ -259,7 +259,7 @@ def get_hof_mail(count=100000):
 def get_hof_manual(manual):
     hof_entries = []
     try:
-        with open(settings.MANUAL_HOF[manual]["entries_file"], "r") as f:
+        with open(settings.MANUAL_HOF[manual]["entries_file"]) as f:
             hof_entries = yaml.load(f, Loader=yaml.Loader)
     except Exception:
         pass

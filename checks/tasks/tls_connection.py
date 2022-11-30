@@ -116,7 +116,7 @@ def plain_sock_setup(conn):
         try:
             conn.sock_connect()
             break
-        except (socket.gaierror, socket.error, IOError, ConnectionRefusedError):
+        except (socket.gaierror, OSError, ConnectionRefusedError):
             conn.safe_shutdown()
             tries_left -= 1
             if tries_left <= 0:
@@ -265,14 +265,7 @@ class ConnectionCommon:
 
             if do_handshake_on_connect:
                 self.do_handshake()
-        except (
-            socket.gaierror,
-            socket.error,
-            IOError,
-            _nassl.OpenSSLError,
-            ClientCertificateRequested,
-            NotImplementedError,
-        ):
+        except (socket.gaierror, OSError, _nassl.OpenSSLError, ClientCertificateRequested, NotImplementedError):
             # Not able to connect to port 443
             self.safe_shutdown()
             raise ConnectionHandshakeException()
@@ -290,7 +283,7 @@ class ConnectionCommon:
                 self.shutdown()
             if self.sock:
                 self.sock.shutdown(2)
-        except (IOError, _nassl.OpenSSLError, AttributeError):
+        except (OSError, _nassl.OpenSSLError, AttributeError):
             pass
         finally:
             if self.sock:
@@ -529,12 +522,12 @@ class HTTPSConnection(SSLConnectionWrapper):
         self.write(str.encode(encoding))
 
     def putrequest(self, method, path, skip_accept_encoding=True):
-        self.writestr("{} {} HTTP/1.1\r\n".format(method, path))
+        self.writestr(f"{method} {path} HTTP/1.1\r\n")
         self.putheader("Host", self.host)
         self.putheader("Connection", "close")
 
     def putheader(self, name, value):
-        self.writestr("{}: {}\r\n".format(name, value))
+        self.writestr(f"{name}: {value}\r\n")
 
     def endheaders(self):
         self.writestr("\r\n")
@@ -577,7 +570,7 @@ class HTTPSConnection(SSLConnectionWrapper):
                 try:
                     while not amt or (self.bytesio.handle.tell() - pos) < amt:
                         self.bytesio.handle.write(self.conn.read(chunk_size))
-                except IOError:
+                except OSError:
                     pass
 
                 # reset the read/write cursor to the original position
@@ -679,11 +672,11 @@ def http_fetch(
                 conn.close()
             break
         # If we could not connect we can try again.
-        except (socket.error, ConnectionSocketException):
+        except (OSError, ConnectionSocketException):
             try:
                 if conn:
                     conn.close()
-            except (socket.error, http.client.HTTPException):
+            except (OSError, http.client.HTTPException):
                 pass
             tries_left -= 1
             if tries_left <= 0:
@@ -694,14 +687,14 @@ def http_fetch(
             try:
                 if conn:
                     conn.close()
-            except (socket.error, http.client.HTTPException):
+            except (OSError, http.client.HTTPException):
                 pass
             raise
         except _nassl.OpenSSLError:
             try:
                 if conn:
                     conn.close()
-            except (socket.error, http.client.HTTPException):
+            except (OSError, http.client.HTTPException):
                 pass
             raise ConnectionHandshakeException
 
@@ -786,12 +779,11 @@ def http_get(url):
         result = rr
     except (
         ValueError,
-        socket.error,
+        OSError,
         ConnectionSocketException,
         http.client.HTTPException,
         ConnectionHandshakeException,
         NoIpError,
-        OSError,
     ):
         pass
     return result

@@ -895,7 +895,7 @@ def iana_cipher_to_target_server_fqdn(group, iana_cipher):
 
 def iana_cipher_id_generator(val):
     if isinstance(val, tuple):
-        return "{}-{}-{}".format(val[0], val[1], val[2])
+        return f"{val[0]}-{val[1]}-{val[2]}"
 
 
 @pytest.mark.parametrize("domain_config", ncsc_20_tests, ids=domainconfig_id_generator)

@@ -329,12 +329,12 @@ def anonymize_IP(ip):
     """
     anonymized_ip = ""
     try:
-        ip = ipaddress.ip_address("{}".format(ip.strip()))
+        ip = ipaddress.ip_address(f"{ip.strip()}")
         if ip.version == 4:
             mask = "/16"
         else:
             mask = "/32"
-        anonymized_ip = str(ipaddress.ip_network("{}{}".format(ip, mask), strict=False).network_address)
+        anonymized_ip = str(ipaddress.ip_network(f"{ip}{mask}", strict=False).network_address)
     except ValueError:
         pass
     return anonymized_ip
@@ -361,7 +361,7 @@ def find_AS_by_IP(ip):
 
     as_record = cache.get(redis_id.conn_test_as.id.format(asn))
     if not as_record:
-        as_details_query = "AS{}.asn.cymru.com.".format(asn)
+        as_details_query = f"AS{asn}.asn.cymru.com."
         status, result = ub_ctx.resolve(as_details_query, unbound.RR_TYPE_TXT, unbound.RR_CLASS_IN)
         if status != 0 or result.nxdomain or not result.havedata:
             return None
@@ -416,7 +416,7 @@ def unbound_ptr(qname):
 def resolv_list(host, test_id):
     red = get_redis_connection("default")
     # The ns_* redis id comes from the perl nameserver.
-    resolvers = red.smembers("ns_{}.".format(host))
+    resolvers = red.smembers(f"ns_{host}.")
 
     resolver_owner = {}
     for resolver in resolvers:
@@ -453,7 +453,7 @@ def jsonp(func):
         if not cb:
             cb = ""
         resp["Content-Type"] = "application/javascript"
-        resp.content = "{}({})".format(cb, resp.content)
+        resp.content = f"{cb}({resp.content})"
         return resp
 
     return dec

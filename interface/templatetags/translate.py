@@ -190,7 +190,7 @@ def addstr(str1, str2):
     Concatenate two strings.
 
     """
-    return "{}{}".format(str1, str2)
+    return f"{str1}{str2}"
 
 
 @register.filter()

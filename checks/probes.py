@@ -50,7 +50,7 @@ if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
     from checks.tasks import rpki
 
 
-class ProbeSet(object):
+class ProbeSet:
     def __init__(self):
         """
         A set that contains all the necessary probes for a test.
@@ -115,7 +115,7 @@ class ProbeSet(object):
         return max(min(int(sum(scores) / len(scores)), 100), 0)
 
 
-class Probe(object):
+class Probe:
     def __init__(
         self,
         name,
@@ -137,11 +137,11 @@ class Probe(object):
         self.name = name
         self.prefix = prefix
         self.scorename = scorename
-        self.title = "test {}{} title".format(prefix, name)
+        self.title = f"test {prefix}{name} title"
         self.description = ""
         if not nourl:
-            self.probesurl = "/{}/probes/".format(prefix)
-            self.testurl = "/{}/{}/".format(prefix, name)
+            self.probesurl = f"/{prefix}/probes/"
+            self.testurl = f"/{prefix}/{name}/"
 
         self.taskset = taskset
         self.model = model
@@ -266,12 +266,12 @@ class Probe(object):
             return None
 
         max_score, total_score, verdict, text_verdict = self.get_scores_and_verdict(modelobj)
-        summary = _("test {}{} {} summary".format(self.prefix, self.name, text_verdict))
-        description = _("test {}{} {} description".format(self.prefix, self.name, text_verdict))
+        summary = _(f"test {self.prefix}{self.name} {text_verdict} summary")
+        description = _(f"test {self.prefix}{self.name} {text_verdict} description")
 
         return dict(
             done=True,
-            name="{}{}".format(self.prefix, self.name),
+            name=f"{self.prefix}{self.name}",
             title=self.title,
             details_set=modelobj.details_set(self),
             totalscore=total_score,

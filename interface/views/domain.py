@@ -55,7 +55,7 @@ def validate_domain(request, dname):
     if valid_domain is None:
         return redirect_invalid_domain(request, "domain")
 
-    return HttpResponseRedirect("/site/{}/".format(valid_domain))
+    return HttpResponseRedirect(f"/site/{valid_domain}/")
 
 
 def siteprocess(request, dname):
@@ -110,10 +110,10 @@ def resultsrender(addr, report, request):
             pagetitle="{} {}".format(_("domain pagetitle"), prettyaddr),
             addr=addr,
             prettyaddr=prettyaddr,
-            permalink=request.build_absolute_uri("/site/{}/{}/".format(addr, str(report.id))),
+            permalink=request.build_absolute_uri(f"/site/{addr}/{str(report.id)}/"),
             permadate=report.timestamp,
             retest_time=retest_time,
-            retest_link=request.build_absolute_uri("/site/{}/".format(addr)),
+            retest_link=request.build_absolute_uri(f"/site/{addr}/"),
             webtest_direct=webtest_direct,
             mailtest_direct=mailtest_direct,
             probes=probe_reports,
@@ -137,7 +137,7 @@ def resultscurrent(request, dname):
 
     except IndexError:
         # Domain not tested, go back to start test
-        return HttpResponseRedirect("/site/{}/".format(addr))
+        return HttpResponseRedirect(f"/site/{addr}/")
 
     # Do we already have a testreport for the latest results (needed
     # for persisent url-thingy)?
@@ -155,7 +155,7 @@ def resultscurrent(request, dname):
         # one of the test results is not yet related to a report,
         # create one
         report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
-    return HttpResponseRedirect("/site/{}/{}/".format(addr, report.id))
+    return HttpResponseRedirect(f"/site/{addr}/{report.id}/")
 
 
 # URL: /(site|domain)/<dname>/<reportid>/
@@ -171,7 +171,7 @@ def resultsstored(request, dname, id):
     cache_id = redis_id.autoconf.id.format(option.value)
     id_threshold = cache.get(cache_id)
     if id_threshold and int(id) <= id_threshold:
-        return HttpResponseRedirect("/site/{}/".format(dname))
+        return HttpResponseRedirect(f"/site/{dname}/")
 
     try:
         report = DomainTestReport.objects.get(id=id)

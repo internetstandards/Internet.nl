@@ -167,7 +167,7 @@ def get_site_url(request):
     Compose the url that the user used to connect to the API.
 
     """
-    return "{}://{}".format(request.scheme, request.get_host())
+    return f"{request.scheme}://{request.get_host()}"
 
 
 def check_valid_user(function):
@@ -309,7 +309,7 @@ def gather_batch_results(user, batch_request, site_url):
         score = report_table.score
 
         args = url_arg + [batch_domain.domain, report_table.id]
-        result["report"] = {"url": "{}{}".format(site_url, reverse(url_name, args=args))}
+        result["report"] = {"url": f"{site_url}{reverse(url_name, args=args)}"}
         result["scoring"] = {"percentage": score}
 
         tests = {}
@@ -735,7 +735,7 @@ def save_batch_results_to_file(user, batch_request, results, technical=False):
 
     """
     technical_text = "-technical" if technical else ""
-    filename = "{}-{}-{}{}.json".format(user.username, batch_request.type.label, batch_request.id, technical_text)
+    filename = f"{user.username}-{batch_request.type.label}-{batch_request.id}{technical_text}.json"
     batch_request.get_report_file(technical).save(filename, ContentFile(json.dumps(results)))
 
 

@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import http.client
 import re
-import socket
 from collections import defaultdict, namedtuple
 
 from checks import scoring
@@ -21,7 +20,7 @@ def get_multiple_values_from_header(header):
     return [value.strip() for value in header.split(",")]
 
 
-class HeaderCheckerContentEncoding(object):
+class HeaderCheckerContentEncoding:
     """
     Class for checking the Content-Encoding HTTP header.
 
@@ -53,7 +52,7 @@ class HeaderCheckerContentEncoding(object):
         }
 
 
-class HeaderCheckerContentSecurityPolicy(object):
+class HeaderCheckerContentSecurityPolicy:
     """
     Class for checking the Content-Security-Policy HTTP header.
 
@@ -466,7 +465,7 @@ class HeaderCheckerContentSecurityPolicy(object):
         }
 
 
-class HeaderCheckerStrictTransportSecurity(object):
+class HeaderCheckerStrictTransportSecurity:
     """
     Class for checking the Strict-Transport-Security HTTP header.
 
@@ -515,7 +514,7 @@ class HeaderCheckerStrictTransportSecurity(object):
         }
 
 
-class HeaderCheckerXFrameOptions(object):
+class HeaderCheckerXFrameOptions:
     """
     Class for checking the X-Frame-Options HTTP header.
 
@@ -559,7 +558,7 @@ class HeaderCheckerXFrameOptions(object):
         }
 
 
-class HeaderCheckerXContentTypeOptions(object):
+class HeaderCheckerXContentTypeOptions:
     """
     Class for checking the X-Content-Type-Options HTTP header.
 
@@ -602,7 +601,7 @@ class HeaderCheckerXContentTypeOptions(object):
         }
 
 
-class HeaderCheckerReferrerPolicy(object):
+class HeaderCheckerReferrerPolicy:
     """
     Class for checking the Referrer-Policy HTTP header.
 
@@ -681,13 +680,7 @@ def http_headers_check(af_ip_pair, domain, header_checkers, task):
             depth=MAX_REDIRECT_DEPTH,
             needed_headers=get_headers,
         )
-    except (
-        socket.error,
-        http.client.BadStatusLine,
-        NoIpError,
-        ConnectionHandshakeException,
-        ConnectionSocketException,
-    ):
+    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
         # Not able to connect, return negative values
         for h in header_checkers:
             results.update(h.get_negative_values())
