@@ -8,7 +8,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
 import logging
-from timeit import default_timer as timer
 
 from interface import batch, batch_shared_task
 from . import SetupUnboundContext
@@ -407,15 +406,15 @@ def build_summary_report(parent, parent_name, category) -> None:
 
 def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check webservers."""
-    web = do_rpki(task, [], *args, **kwargs)
+    web = do_rpki(task, [(url, af_ip_pairs)], *args, **kwargs)
 
     return (TestName("rpki_web"), web)
 
 
 def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers."""
-    # ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
-    ns = do_rpki(task, [], *args, **kwargs)
+    ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
+    ns = do_rpki(task, ns_ips_pairs, *args, **kwargs)
 
     return (TestName("rpki_ns"), ns)
 
@@ -425,12 +424,12 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, T
 
     These may or may not be the same as the nameservers for the domain itself.
     """
-    # mx_ns_ips_pairs = set()
-    # for mx, _ in mx_ips_pairs:
-    #     for ns, ips in shared.do_resolve_ns_ips(task, mx):
-    #         mx_ns_ips_pairs.add((ns, tuple(ips)))
+    mx_ns_ips_pairs = set()
+    for mx, _ in mx_ips_pairs:
+        for ns, ips in shared.do_resolve_ns_ips(task, mx):
+            mx_ns_ips_pairs.add((ns, tuple(ips)))
 
-    mxns = do_rpki(task, [], *args, **kwargs)
+    mxns = do_rpki(task, mx_ns_ips_pairs, *args, **kwargs)
 
     return (TestName("rpki_mx_ns"), mxns)
 
@@ -450,45 +449,39 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
         fqdn_ips_pairs: list of fqdn, af_ip_pairs pairs (to iterate over
                         multiple MX or NS records)
     """
-    start_time = timer()
-    logger.info(f"{task} started RPKI")
     try:
         results = defaultdict(list)
         for fqdn, af_ip_pairs in fqdn_ips_pairs:
             for af_ip_pair in af_ip_pairs:
                 ip = af_ip_pair[1]
                 result = {"ip": ip, "routes": [], "validity": {}, "errors": []}
-                #
-                # try:
-                #     # fetch ASN, prefixes from BGP
-                #     start_time2 = timer()
-                #     routeview = TeamCymruIPtoASN.from_bgp(task, ip)
-                #     logger.info(f"resolved {ip} to {routeview.routes} in {timer()-start_time2}")
-                # except (InvalidIPError, BGPSourceUnavailableError) as e:
-                #     routeview = None
-                #     logger.error(repr(e))
-                #     result["errors"].append(e.__class__.__name__)
-                #
-                # try:
-                #     if routeview:
-                #         # if the ip is covered by a BGP announcement
-                #         # try to validate corresponding Roas
-                #         start_time2 = timer()
-                #         routeview.validate(task, Routinator)
-                #         logger.info(f"evaluated {ip} validity to {routeview.validity} in {timer() - start_time2}")
-                #     else:
-                #         # if the ip is not covered by a BGP announcement
-                #         # we can still show the existence of Roas,
-                #         # but validation is meaningless
-                #         result["errors"].append(NoRoutesError.__name__)
-                #
-                #         routeview = TeamCymruIPtoASN.from_rpki(task, Routinator, ip)
-                # except RelyingPartyUnvailableError as e:
-                #     logger.error(repr(e))
-                #     result["errors"].append(e.__class__.__name__)
-                # else:
-                #     result["routes"] = routeview.routes
-                #     result["validity"] = routeview.validity
+
+                try:
+                    # fetch ASN, prefixes from BGP
+                    routeview = TeamCymruIPtoASN.from_bgp(task, ip)
+                except (InvalidIPError, BGPSourceUnavailableError) as e:
+                    routeview = None
+                    logger.error(repr(e))
+                    result["errors"].append(e.__class__.__name__)
+
+                try:
+                    if routeview:
+                        # if the ip is covered by a BGP announcement
+                        # try to validate corresponding Roas
+                        routeview.validate(task, Routinator)
+                    else:
+                        # if the ip is not covered by a BGP announcement
+                        # we can still show the existence of Roas,
+                        # but validation is meaningless
+                        result["errors"].append(NoRoutesError.__name__)
+
+                        routeview = TeamCymruIPtoASN.from_rpki(task, Routinator, ip)
+                except RelyingPartyUnvailableError as e:
+                    logger.error(repr(e))
+                    result["errors"].append(e.__class__.__name__)
+                else:
+                    result["routes"] = routeview.routes
+                    result["validity"] = routeview.validity
 
                 results[fqdn].append(result)
 
@@ -498,7 +491,5 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                 ip = af_ip_pair[1]
                 d = {"ip": ip, "routes": [], "validity": {}, "errors": ["timeout"]}
                 results[fqdn].append(d)
-
-    logger.info(f"{task} finished RPKI in {timer()-start_time}: {results}")
 
     return results
