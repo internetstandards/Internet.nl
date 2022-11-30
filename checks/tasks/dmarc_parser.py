@@ -131,6 +131,6 @@ def parse(dmarc_record):
     except ParseException:
         parsed = None
     except Exception as e:
-        print("{}: {}".format(e.__class__.__name__, e))
+        print(f"{e.__class__.__name__}: {e}")
         parsed = None
     return parsed

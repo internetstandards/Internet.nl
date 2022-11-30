@@ -45,15 +45,15 @@ urlpatterns = [
     url(r"^test-connection/$", views.testconnectionpage),
     url(r"^connection/$", connection.index),
     url(r"^(connection|conn)/gettestid/$", connection.gettestid),
-    url(r"^(connection|conn)/finished/{}$".format(regex_testid), connection.finished),
-    url(r"^(connection|conn)/addr-test/{}/$".format(regex_testid), connection.addr_ipv6),
-    url(r"^(connection|conn)/{}/results$".format(regex_testid), connection.results),
+    url(rf"^(connection|conn)/finished/{regex_testid}$", connection.finished),
+    url(rf"^(connection|conn)/addr-test/{regex_testid}/$", connection.addr_ipv6),
+    url(rf"^(connection|conn)/{regex_testid}/results$", connection.results),
     url(r"^test-site/$", views.testsitepage),
     url(r"^(domain|site)/$", domain.index),
-    url(r"^(domain|site)/{}/$".format(regex_dname), domain.siteprocess),
-    url(r"^(domain|site)/probes/{}/$".format(regex_dname), domain.siteprobesstatus),
-    url(r"^(domain|site)/(?P<probename>(ipv6|tls|dnssec|appsecpriv))/{}/$".format(regex_dname), domain.siteprobeview),
-    url(r"^(domain|site)/{}/results$".format(regex_dname), domain.resultscurrent),
+    url(rf"^(domain|site)/{regex_dname}/$", domain.siteprocess),
+    url(rf"^(domain|site)/probes/{regex_dname}/$", domain.siteprobesstatus),
+    url(rf"^(domain|site)/(?P<probename>(ipv6|tls|dnssec|appsecpriv))/{regex_dname}/$", domain.siteprobeview),
+    url(rf"^(domain|site)/{regex_dname}/results$", domain.resultscurrent),
     url(r"^(domain|site)/(?P<dname>.*)/(?P<id>[0-9]+)/$", domain.resultsstored, name="webtest_results"),
     # Non valid domain, convert to punycode and try again
     # these url()s should always be the last in the ^domain/ group
@@ -61,16 +61,16 @@ urlpatterns = [
     url(r"^(domain|site)/(?P<dname>.*)/results$", domain.validate_domain),
     url(r"^test-mail/$", views.testmailpage),
     url(r"^mail/$", mail.index),
-    url(r"^mail/{}/$".format(regex_mailaddr), mail.mailprocess),
-    url(r"^mail/probes/{}/$".format(regex_dname), mail.siteprobesstatus),
-    url(r"^mail/(?P<probename>(ipv6|auth|dnssec|tls))/{}/$".format(regex_mailaddr), mail.mailprobeview),
-    url(r"^mail/{}/results$".format(regex_mailaddr), mail.resultscurrent),
+    url(rf"^mail/{regex_mailaddr}/$", mail.mailprocess),
+    url(rf"^mail/probes/{regex_dname}/$", mail.siteprobesstatus),
+    url(rf"^mail/(?P<probename>(ipv6|auth|dnssec|tls))/{regex_mailaddr}/$", mail.mailprobeview),
+    url(rf"^mail/{regex_mailaddr}/results$", mail.resultscurrent),
     url(r"^mail/(?P<dname>.*)/(?P<id>[0-9]+)/$", mail.resultsstored, name="mailtest_results"),
     # Non valid mail, convert to punycode and try again
     # these url()s should always be the last in the ^mail/ group
     url(r"^mail/(?P<mailaddr>.*)/$", mail.validate_domain),
     url(r"^mail/(?P<mailaddr>.*)/results$", mail.validate_domain),
-    url(r"^clear/{}/$".format(regex_dname), views.clear),
+    url(rf"^clear/{regex_dname}/$", views.clear),
     url(r"^change_language/$", views.change_language, name="change_language"),
 ]
 
@@ -87,7 +87,7 @@ if settings.DEBUG:
 if hasattr(settings, "MANUAL_HOF") and settings.MANUAL_HOF:
     for key in settings.MANUAL_HOF:
         urlpatterns += [
-            url(r"^halloffame/(?P<manual_url>{})/$".format(key), views.hofmanualpage),
+            url(rf"^halloffame/(?P<manual_url>{key})/$", views.hofmanualpage),
         ]
 
 if hasattr(settings, "HAS_ACCESSIBILITY_PAGE") and settings.HAS_ACCESSIBILITY_PAGE:
@@ -98,27 +98,27 @@ if hasattr(settings, "HAS_ACCESSIBILITY_PAGE") and settings.HAS_ACCESSIBILITY_PA
 if settings.ENABLE_BATCH is True:
     urlpatterns += [
         url(
-            r"^api/batch/v{}/requests$".format(BATCH_API_MAJOR_VERSION),
+            rf"^api/batch/v{BATCH_API_MAJOR_VERSION}/requests$",
             batch.endpoint_requests,
             name="batch_endpoint_requests",
         ),
         url(
-            r"^api/batch/v{}/requests/{}$".format(BATCH_API_MAJOR_VERSION, regex_testid),
+            rf"^api/batch/v{BATCH_API_MAJOR_VERSION}/requests/{regex_testid}$",
             batch.endpoint_request,
             name="batch_endpoint_request",
         ),
         url(
-            r"^api/batch/v{}/requests/{}/results$".format(BATCH_API_MAJOR_VERSION, regex_testid),
+            rf"^api/batch/v{BATCH_API_MAJOR_VERSION}/requests/{regex_testid}/results$",
             batch.endpoint_results,
             name="batch_endpoint_results",
         ),
         url(
-            r"^api/batch/v{}/requests/{}/results_technical$".format(BATCH_API_MAJOR_VERSION, regex_testid),
+            rf"^api/batch/v{BATCH_API_MAJOR_VERSION}/requests/{regex_testid}/results_technical$",
             batch.endpoint_results_technical,
             name="batch_endpoint_results_technical",
         ),
         url(
-            r"^api/batch/v{}/metadata/report$".format(BATCH_API_MAJOR_VERSION),
+            rf"^api/batch/v{BATCH_API_MAJOR_VERSION}/metadata/report$",
             batch.endpoint_metadata_report,
             name="batch_endpoint_metadata_report",
         ),

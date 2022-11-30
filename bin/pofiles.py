@@ -39,7 +39,7 @@ TAR_DEST_PATH = TAR_DEST_DIR + "/" + TAR_NAME
 
 def get_locales():
     locales = next(os.walk(PO_FILES_DIR))[1]
-    print('Found locales: {}'.format(locales))
+    print(f'Found locales: {locales}')
     return locales
 
 
@@ -62,7 +62,7 @@ def merge(this_po, that_po, replace_duplicates=False):
         except ValueError:
             if not replace_duplicates:
                 raise ValueError(
-                    "Found duplicate entry: '{}'".format(entry.msgid))
+                    f"Found duplicate entry: '{entry.msgid}'")
             this_entry = merged.find(
                 entry.msgid, include_obsolete_entries=True)
             this_entry.msgstr = entry.msgstr
@@ -74,8 +74,8 @@ def print_status(filename, po_file):
     Print the status of the po_file.
 
     """
-    print("{}".format(filename))
-    print('translated entries: {}'.format(len(po_file.translated_entries())))
+    print(f"{filename}")
+    print(f'translated entries: {len(po_file.translated_entries())}')
     print('non translated entries: {}'.format(
         len(po_file.untranslated_entries())))
     print("")
@@ -105,7 +105,7 @@ def read_translations():
 
     for locale in locales:
         print("-"*20)
-        print("Locale: {}\n".format(locale))
+        print(f"Locale: {locale}\n")
         available_files = get_translation_filenames()
 
         try:
@@ -154,10 +154,10 @@ def build_django_files(args=None):
             try:
                 merged_po = merge(merged_po, po_file)
             except ValueError as e:
-                print("{} in {}/{}. Aborting...".format(e, locale, filename))
+                print(f"{e} in {locale}/{filename}. Aborting...")
                 return
         merged_po.sort()
-        print("Converting '{}' locale to markdown...".format(locale))
+        print(f"Converting '{locale}' locale to markdown...")
         for entry in merged_po:
             if entry.msgstr in ["", " "]:
                 entry.msgstr = " "
@@ -172,7 +172,7 @@ def build_django_files(args=None):
                 md = md.split("<p>", 1)[1].rsplit("</p>", 1)[0]
             entry.msgstr = md
 
-        print("Writing '{}' locale...".format(locale))
+        print(f"Writing '{locale}' locale...")
         filename = DJANGO_PO_FILE.format(locale)
         os.makedirs(filename.rsplit('/', 1)[0], exist_ok=True)
         merged_po.save(filename)
@@ -206,7 +206,7 @@ def build_tar(args=None):
                 folder = TAR_UNPACK_DIR + "/" + folder
                 pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
                 filepath = folder + "/" + filename
-                with io.open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(entry.msgstr)
                     f.write("\n")
 
@@ -216,7 +216,7 @@ def build_tar(args=None):
     print("Creating and compressing the tar...")
     run(["tar", "-zcf", TAR_DEST_PATH, TAR_UNPACK_DIR])
 
-    print("Done!\nThe tar is available at '{}'.".format(TAR_DEST_PATH))
+    print(f"Done!\nThe tar is available at '{TAR_DEST_PATH}'.")
 
 
 def read_tar(args):
@@ -224,9 +224,9 @@ def read_tar(args):
     Read the (compressed) tar and update the translation files.
 
     """
-    print("Reading {} into translations...".format(args.tar_file))
+    print(f"Reading {args.tar_file} into translations...")
     if not os.path.isfile(args.tar_file):
-        print("{} is not a file! Aborting...".format(args.tar_file))
+        print(f"{args.tar_file} is not a file! Aborting...")
         return
 
     print("Removing previous directory structure...")
@@ -247,7 +247,7 @@ def read_tar(args):
     #   - filename is main.po, news.po, etc
     read_po_files = defaultdict(lambda: defaultdict(polib.POFile))
 
-    locales = set(locale for locale in translations)
+    locales = {locale for locale in translations}
     assets = []
     print(f"Going to walk over files in {TAR_UNPACK_DIR}.")
     for root, _, files in os.walk(TAR_UNPACK_DIR):
@@ -258,8 +258,8 @@ def read_tar(args):
             if filename.endswith(".md"):
                 filename, _ = filename.rsplit(".", 1)
                 msgid, locale = filename.rsplit("_", 1)
-                msgid = "{} {}".format(msgid_start, msgid)
-                with io.open(filepath, 'r', encoding='utf-8') as f:
+                msgid = f"{msgid_start} {msgid}"
+                with open(filepath, encoding='utf-8') as f:
                     content = f.read().strip("\n")
                 po_entry = polib.POEntry(msgid=msgid, msgstr=content)
 
@@ -289,7 +289,7 @@ def read_tar(args):
 
     # New locales from tar
     for locale in locales:
-        print("New locale: '{}'".format(locale))
+        print(f"New locale: '{locale}'")
         translations[locale] = {}
         for filename, po_file in read_po_files[locale].items():
             translations[locale][filename] = polib.POFile()
@@ -302,7 +302,7 @@ def read_tar(args):
             po_file.sort()
             directory = PO_FILES_LOCALES.format(locale)
             filepath = directory + "/" + filename
-            print("Writing {}".format(filepath))
+            print(f"Writing {filepath}")
             pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
             po_file.save(filepath)
 

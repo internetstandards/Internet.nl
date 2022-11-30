@@ -384,7 +384,7 @@ def load_cipher_info():
                     # Record the connection class so that we can later use
                     # only supported ciphers with a particular connection
                     # class.
-                    ci.supported_conns = set([conn_class])
+                    ci.supported_conns = {conn_class}
 
                     result[cipher_name] = ci
                 else:

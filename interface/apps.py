@@ -53,7 +53,7 @@ def _clear_cached_pages():
 
     """
     pattern = redis_id.simple_cache_page.id.split(":", 1)[0]
-    cache.delete_pattern("{}*".format(pattern))
+    cache.delete_pattern(f"{pattern}*")
 
 
 def _batch_startup_checks():

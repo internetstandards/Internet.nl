@@ -42,7 +42,7 @@ class SetupUnboundContext(Task):
             # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
             self._ub_ctx.set_async(True)
             if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
-                self._ub_ctx.set_fwd("{}".format(settings.CENTRAL_UNBOUND))
+                self._ub_ctx.set_fwd(f"{settings.CENTRAL_UNBOUND}")
 
         return self._ub_ctx
 

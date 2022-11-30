@@ -1,6 +1,5 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import socket
 import sys
 import time
 from collections import OrderedDict
@@ -138,7 +137,7 @@ def registrar_lookup(addr):
                 whois = pythonwhois.get_whois(".".join(addr.split(".")[-2:]))
                 if whois and isinstance(whois, dict) and whois.get("registrar"):
                     res = ", ".join(whois["registrar"])[:250]
-            except (socket.error, pythonwhois.shared.WhoisException, UnicodeDecodeError, IndexError):
+            except (OSError, pythonwhois.shared.WhoisException, UnicodeDecodeError, IndexError):
                 pass
 
             cache.set(cache_id, res, cache_ttl)

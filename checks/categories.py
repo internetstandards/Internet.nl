@@ -14,7 +14,7 @@ from checks.scoring import (
 
 # --- Base classes
 #
-class Category(object):
+class Category:
     def __init__(self, name, subtests):
         self.name = name
         self.subtests = {}
@@ -59,7 +59,7 @@ class Category(object):
         return score_fields, max_score
 
 
-class Subtest(object):
+class Subtest:
     def __init__(
         self,
         name="",
@@ -129,7 +129,7 @@ class WebIpv6(Category):
             WebIpv6WsReach,
             WebIpv6WsIpv46,
         ]
-        super(WebIpv6, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class WebDnssec(Category):
@@ -138,7 +138,7 @@ class WebDnssec(Category):
             WebDnssecExists,
             WebDnssecValid,
         ]
-        super(WebDnssec, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class WebTls(Category):
@@ -166,7 +166,7 @@ class WebTls(Category):
             WebTlsKexHashFunc,
             # WebTlsDaneRollover,
         ]
-        super(WebTls, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class WebAppsecpriv(Category):
@@ -178,7 +178,7 @@ class WebAppsecpriv(Category):
             WebAppsecprivHttpXContentType,
             WebAppsecprivSecuritytxt,
         ]
-        super(WebAppsecpriv, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class MailIpv6(Category):
@@ -189,7 +189,7 @@ class MailIpv6(Category):
             MailIpv6MxAaaa,
             MailIpv6MxReach,
         ]
-        super(MailIpv6, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class MailDnssec(Category):
@@ -200,7 +200,7 @@ class MailDnssec(Category):
             MailDnssecMxExists,
             MailDnssecMxValid,
         ]
-        super(MailDnssec, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class MailAuth(Category):
@@ -212,7 +212,7 @@ class MailAuth(Category):
             MailAuthSpf,
             MailAuthSpfPolicy,
         ]
-        super(MailAuth, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 class MailTls(Category):
@@ -237,7 +237,7 @@ class MailTls(Category):
             MailTlsKexHashFunc,
             # MailTlsOCSPStapling,  # Disabled for mail.
         ]
-        super(MailTls, self).__init__(name, subtests)
+        super().__init__(name, subtests)
 
 
 # --- Subtests
@@ -418,7 +418,7 @@ class MailRpki(Category):
 # --- IPV6
 class Ipv6NsAaaa(Subtest):
     def __init__(self):
-        super(Ipv6NsAaaa, self).__init__(
+        super().__init__(
             name="ns_aaaa",
             label="detail web-mail ipv6 ns-AAAA label",
             explanation="detail web-mail ipv6 ns-AAAA exp",
@@ -444,7 +444,7 @@ class Ipv6NsAaaa(Subtest):
 
 class Ipv6NsReach(Subtest):
     def __init__(self):
-        super(Ipv6NsReach, self).__init__(
+        super().__init__(
             name="ns_reach",
             label="detail web-mail ipv6 ns-reach label",
             explanation="detail web-mail ipv6 ns-reach exp",
@@ -468,7 +468,7 @@ class Ipv6NsReach(Subtest):
 
 class WebIpv6WsAaaa(Subtest):
     def __init__(self):
-        super(WebIpv6WsAaaa, self).__init__(
+        super().__init__(
             name="web_aaaa",
             label="detail web ipv6 web-AAAA label",
             explanation="detail web ipv6 web-AAAA exp",
@@ -489,7 +489,7 @@ class WebIpv6WsAaaa(Subtest):
 
 class WebIpv6WsReach(Subtest):
     def __init__(self):
-        super(WebIpv6WsReach, self).__init__(
+        super().__init__(
             name="web_reach",
             label="detail web ipv6 web-reach label",
             explanation="detail web ipv6 web-reach exp",
@@ -513,7 +513,7 @@ class WebIpv6WsReach(Subtest):
 
 class WebIpv6WsIpv46(Subtest):
     def __init__(self):
-        super(WebIpv6WsIpv46, self).__init__(
+        super().__init__(
             name="web_ipv46",
             label="detail web ipv6 web-ipv46 label",
             explanation="detail web ipv6 web-ipv46 exp",
@@ -537,7 +537,7 @@ class WebIpv6WsIpv46(Subtest):
 
 class MailIpv6MxAaaa(Subtest):
     def __init__(self):
-        super(MailIpv6MxAaaa, self).__init__(
+        super().__init__(
             name="mx_aaaa",
             label="detail mail ipv6 mx-AAAA label",
             explanation="detail mail ipv6 mx-AAAA exp",
@@ -583,7 +583,7 @@ class MailIpv6MxAaaa(Subtest):
 
 class MailIpv6MxReach(Subtest):
     def __init__(self):
-        super(MailIpv6MxReach, self).__init__(
+        super().__init__(
             name="mx_reach",
             label="detail mail ipv6 mx-reach label",
             explanation="detail mail ipv6 mx-reach exp",
@@ -616,7 +616,7 @@ class MailIpv6MxReach(Subtest):
 # --- DNSSEC
 class WebDnssecExists(Subtest):
     def __init__(self):
-        super(WebDnssecExists, self).__init__(
+        super().__init__(
             name="dnssec_exists",
             label="detail web dnssec exists label",
             explanation="detail web dnssec exists exp",
@@ -647,7 +647,7 @@ class WebDnssecExists(Subtest):
 
 class WebDnssecValid(Subtest):
     def __init__(self):
-        super(WebDnssecValid, self).__init__(
+        super().__init__(
             name="dnssec_valid",
             label="detail web dnssec valid label",
             explanation="detail web dnssec valid exp",
@@ -684,7 +684,7 @@ class WebDnssecValid(Subtest):
 
 class MailDnssecExists(Subtest):
     def __init__(self):
-        super(MailDnssecExists, self).__init__(
+        super().__init__(
             name="dnssec_exists",
             label="detail mail dnssec exists label",
             explanation="detail mail dnssec exists exp",
@@ -715,7 +715,7 @@ class MailDnssecExists(Subtest):
 
 class MailDnssecValid(Subtest):
     def __init__(self):
-        super(MailDnssecValid, self).__init__(
+        super().__init__(
             name="dnssec_valid",
             label="detail mail dnssec valid label",
             explanation="detail mail dnssec valid exp",
@@ -752,7 +752,7 @@ class MailDnssecValid(Subtest):
 
 class MailDnssecMxExists(Subtest):
     def __init__(self):
-        super(MailDnssecMxExists, self).__init__(
+        super().__init__(
             name="dnssec_mx_exists",
             label="detail mail dnssec mx-exists label",
             explanation="detail mail dnssec mx-exists exp",
@@ -804,7 +804,7 @@ class MailDnssecMxExists(Subtest):
 
 class MailDnssecMxValid(Subtest):
     def __init__(self):
-        super(MailDnssecMxValid, self).__init__(
+        super().__init__(
             name="dnssec_mx_valid",
             label="detail mail dnssec mx-valid label",
             explanation="detail mail dnssec mx-valid exp",
@@ -841,7 +841,7 @@ class MailDnssecMxValid(Subtest):
 # --- TLS
 class WebTlsHttpsExists(Subtest):
     def __init__(self):
-        super(WebTlsHttpsExists, self).__init__(
+        super().__init__(
             name="https_exists",
             label="detail web tls https-exists label",
             explanation="detail web tls https-exists exp",
@@ -867,7 +867,7 @@ class WebTlsHttpsExists(Subtest):
 
 class WebTlsHttpsForced(Subtest):
     def __init__(self):
-        super(WebTlsHttpsForced, self).__init__(
+        super().__init__(
             name="https_forced",
             label="detail web tls https-forced label",
             explanation="detail web tls https-forced exp",
@@ -895,7 +895,7 @@ class WebTlsHttpsForced(Subtest):
 
 class WebTlsHttpsHsts(Subtest):
     def __init__(self):
-        super(WebTlsHttpsHsts, self).__init__(
+        super().__init__(
             name="https_hsts",
             label="detail web tls https-hsts label",
             explanation="detail web tls https-hsts exp",
@@ -923,7 +923,7 @@ class WebTlsHttpsHsts(Subtest):
 
 class WebTlsHttpCompression(Subtest):
     def __init__(self):
-        super(WebTlsHttpCompression, self).__init__(
+        super().__init__(
             name="http_compression",
             label="detail web tls http-compression label",
             explanation="detail web tls http-compression exp",
@@ -946,7 +946,7 @@ class WebTlsHttpCompression(Subtest):
 
 class WebTlsFsParams(Subtest):
     def __init__(self):
-        super(WebTlsFsParams, self).__init__(
+        super().__init__(
             name="fs_params",
             label="detail web tls fs-params label",
             explanation="detail web tls fs-params exp",
@@ -980,7 +980,7 @@ class WebTlsFsParams(Subtest):
 
 class WebTlsCiphers(Subtest):
     def __init__(self):
-        super(WebTlsCiphers, self).__init__(
+        super().__init__(
             name="tls_ciphers",
             label="detail web tls ciphers label",
             explanation="detail web tls ciphers exp",
@@ -1009,7 +1009,7 @@ class WebTlsCiphers(Subtest):
 
 class WebTlsCipherOrder(Subtest):
     def __init__(self):
-        super(WebTlsCipherOrder, self).__init__(
+        super().__init__(
             name="tls_cipher_order",
             label="detail web tls cipher-order label",
             explanation="detail web tls cipher-order exp",
@@ -1053,7 +1053,7 @@ class WebTlsCipherOrder(Subtest):
 
 class WebTlsVersion(Subtest):
     def __init__(self):
-        super(WebTlsVersion, self).__init__(
+        super().__init__(
             name="tls_version",
             label="detail web tls version label",
             explanation="detail web tls version exp",
@@ -1082,7 +1082,7 @@ class WebTlsVersion(Subtest):
 
 class WebTlsCompression(Subtest):
     def __init__(self):
-        super(WebTlsCompression, self).__init__(
+        super().__init__(
             name="tls_compression",
             label="detail web tls compression label",
             explanation="detail web tls compression exp",
@@ -1105,7 +1105,7 @@ class WebTlsCompression(Subtest):
 
 class WebTlsRenegotiationSecure(Subtest):
     def __init__(self):
-        super(WebTlsRenegotiationSecure, self).__init__(
+        super().__init__(
             name="renegotiation_secure",
             label="detail web tls renegotiation-secure label",
             explanation="detail web tls renegotiation-secure exp",
@@ -1128,7 +1128,7 @@ class WebTlsRenegotiationSecure(Subtest):
 
 class WebTlsRenegotiationClient(Subtest):
     def __init__(self):
-        super(WebTlsRenegotiationClient, self).__init__(
+        super().__init__(
             name="renegotiation_client",
             label="detail web tls renegotiation-client label",
             explanation="detail web tls renegotiation-client exp",
@@ -1151,7 +1151,7 @@ class WebTlsRenegotiationClient(Subtest):
 
 class WebTlsCertTrust(Subtest):
     def __init__(self):
-        super(WebTlsCertTrust, self).__init__(
+        super().__init__(
             name="cert_trust",
             label="detail web tls cert-trust label",
             explanation="detail web tls cert-trust exp",
@@ -1177,7 +1177,7 @@ class WebTlsCertTrust(Subtest):
 
 class WebTlsCertPubkey(Subtest):
     def __init__(self):
-        super(WebTlsCertPubkey, self).__init__(
+        super().__init__(
             name="cert_pubkey",
             label="detail web tls cert-pubkey label",
             explanation="detail web tls cert-pubkey exp",
@@ -1205,7 +1205,7 @@ class WebTlsCertPubkey(Subtest):
 
 class WebTlsCertSignature(Subtest):
     def __init__(self):
-        super(WebTlsCertSignature, self).__init__(
+        super().__init__(
             name="cert_signature",
             label="detail web tls cert-signature label",
             explanation="detail web tls cert-signature exp",
@@ -1229,7 +1229,7 @@ class WebTlsCertSignature(Subtest):
 
 class WebTlsCertHostmatch(Subtest):
     def __init__(self):
-        super(WebTlsCertHostmatch, self).__init__(
+        super().__init__(
             name="cert_hostmatch",
             label="detail web tls cert-hostmatch label",
             explanation="detail web tls cert-hostmatch exp",
@@ -1252,7 +1252,7 @@ class WebTlsCertHostmatch(Subtest):
 
 class WebTlsDaneExists(Subtest):
     def __init__(self):
-        super(WebTlsDaneExists, self).__init__(
+        super().__init__(
             name="dane_exists",
             label="detail web tls dane-exists label",
             explanation="detail web tls dane-exists exp",
@@ -1278,7 +1278,7 @@ class WebTlsDaneExists(Subtest):
 
 class WebTlsDaneValid(Subtest):
     def __init__(self):
-        super(WebTlsDaneValid, self).__init__(
+        super().__init__(
             name="dane_valid",
             label="detail web tls dane-valid label",
             explanation="detail web tls dane-valid exp",
@@ -1306,7 +1306,7 @@ class WebTlsDaneRollover(Subtest):
     """
 
     def __init__(self):
-        super(WebTlsDaneRollover, self).__init__(
+        super().__init__(
             name="dane_rollover",
             label="detail web tls dane-rollover label",
             explanation="detail web tls dane-rollover exp",
@@ -1327,7 +1327,7 @@ class WebTlsDaneRollover(Subtest):
 
 class WebTlsZeroRTT(Subtest):
     def __init__(self):
-        super(WebTlsZeroRTT, self).__init__(
+        super().__init__(
             name="zero_rtt",
             label="detail web tls zero-rtt label",
             explanation="detail web tls zero-rtt exp",
@@ -1355,7 +1355,7 @@ class WebTlsZeroRTT(Subtest):
 
 class WebTlsOCSPStapling(Subtest):
     def __init__(self):
-        super(WebTlsOCSPStapling, self).__init__(
+        super().__init__(
             name="ocsp_stapling",
             label="detail web tls ocsp-stapling label",
             explanation="detail web tls ocsp-stapling exp",
@@ -1383,7 +1383,7 @@ class WebTlsOCSPStapling(Subtest):
 
 class WebTlsKexHashFunc(Subtest):
     def __init__(self):
-        super(WebTlsKexHashFunc, self).__init__(
+        super().__init__(
             name="kex_hash_func",
             label="detail web tls kex-hash-func label",
             explanation="detail web tls kex-hash-func exp",
@@ -1411,7 +1411,7 @@ class WebTlsKexHashFunc(Subtest):
 
 class MailTlsStarttlsExists(Subtest):
     def __init__(self):
-        super(MailTlsStarttlsExists, self).__init__(
+        super().__init__(
             name="starttls_exists",
             label="detail mail tls starttls-exists label",
             explanation="detail mail tls starttls-exists exp",
@@ -1471,7 +1471,7 @@ class MailTlsStarttlsExists(Subtest):
 
 class MailTlsFsParams(Subtest):
     def __init__(self):
-        super(MailTlsFsParams, self).__init__(
+        super().__init__(
             name="fs_params",
             label="detail mail tls fs-params label",
             explanation="detail mail tls fs-params exp",
@@ -1512,7 +1512,7 @@ class MailTlsFsParams(Subtest):
 
 class MailTlsCiphers(Subtest):
     def __init__(self):
-        super(MailTlsCiphers, self).__init__(
+        super().__init__(
             name="tls_ciphers",
             label="detail mail tls ciphers label",
             explanation="detail mail tls ciphers exp",
@@ -1547,7 +1547,7 @@ class MailTlsCiphers(Subtest):
 
 class MailTlsCipherOrder(Subtest):
     def __init__(self):
-        super(MailTlsCipherOrder, self).__init__(
+        super().__init__(
             name="tls_cipher_order",
             label="detail mail tls cipher-order label",
             explanation="detail mail tls cipher-order exp",
@@ -1600,7 +1600,7 @@ class MailTlsCipherOrder(Subtest):
 
 class MailTlsVersion(Subtest):
     def __init__(self):
-        super(MailTlsVersion, self).__init__(
+        super().__init__(
             name="tls_version",
             label="detail mail tls version label",
             explanation="detail mail tls version exp",
@@ -1635,7 +1635,7 @@ class MailTlsVersion(Subtest):
 
 class MailTlsCompression(Subtest):
     def __init__(self):
-        super(MailTlsCompression, self).__init__(
+        super().__init__(
             name="tls_compression",
             label="detail mail tls compression label",
             explanation="detail mail tls compression exp",
@@ -1663,7 +1663,7 @@ class MailTlsCompression(Subtest):
 
 class MailTlsRenegotiationSecure(Subtest):
     def __init__(self):
-        super(MailTlsRenegotiationSecure, self).__init__(
+        super().__init__(
             name="renegotiation_secure",
             label="detail mail tls renegotiation-secure label",
             explanation="detail mail tls renegotiation-secure exp",
@@ -1691,7 +1691,7 @@ class MailTlsRenegotiationSecure(Subtest):
 
 class MailTlsRenegotiationClient(Subtest):
     def __init__(self):
-        super(MailTlsRenegotiationClient, self).__init__(
+        super().__init__(
             name="renegotiation_client",
             label="detail mail tls renegotiation-client label",
             explanation="detail mail tls renegotiation-client exp",
@@ -1719,7 +1719,7 @@ class MailTlsRenegotiationClient(Subtest):
 
 class MailTlsCertTrust(Subtest):
     def __init__(self):
-        super(MailTlsCertTrust, self).__init__(
+        super().__init__(
             name="cert_trust",
             label="detail mail tls cert-trust label",
             explanation="detail mail tls cert-trust exp",
@@ -1750,7 +1750,7 @@ class MailTlsCertTrust(Subtest):
 
 class MailTlsCertPubkey(Subtest):
     def __init__(self):
-        super(MailTlsCertPubkey, self).__init__(
+        super().__init__(
             name="cert_pubkey",
             label="detail mail tls cert-pubkey label",
             explanation="detail mail tls cert-pubkey exp",
@@ -1784,7 +1784,7 @@ class MailTlsCertPubkey(Subtest):
 
 class MailTlsCertSignature(Subtest):
     def __init__(self):
-        super(MailTlsCertSignature, self).__init__(
+        super().__init__(
             name="cert_signature",
             label="detail mail tls cert-signature label",
             explanation="detail mail tls cert-signature exp",
@@ -1813,7 +1813,7 @@ class MailTlsCertSignature(Subtest):
 
 class MailTlsCertHostmatch(Subtest):
     def __init__(self):
-        super(MailTlsCertHostmatch, self).__init__(
+        super().__init__(
             name="cert_hostmatch",
             label="detail mail tls cert-hostmatch label",
             explanation="detail mail tls cert-hostmatch exp",
@@ -1849,7 +1849,7 @@ class MailTlsCertHostmatch(Subtest):
 
 class MailTlsZeroRTT(Subtest):
     def __init__(self):
-        super(MailTlsZeroRTT, self).__init__(
+        super().__init__(
             name="zero_rtt",
             label="detail mail tls zero-rtt label",
             explanation="detail mail tls zero-rtt exp",
@@ -1888,7 +1888,7 @@ class MailTlsOCSPStapling(Subtest):
     """
 
     def __init__(self):
-        super(MailTlsOCSPStapling, self).__init__(
+        super().__init__(
             name="ocsp_stapling",
             label="detail mail tls ocsp-stapling label",
             explanation="detail mail tls ocsp-stapling exp",
@@ -1922,7 +1922,7 @@ class MailTlsOCSPStapling(Subtest):
 
 class MailTlsKexHashFunc(Subtest):
     def __init__(self):
-        super(MailTlsKexHashFunc, self).__init__(
+        super().__init__(
             name="kex_hash_func",
             label="detail mail tls kex-hash-func label",
             explanation="detail mail tls kex-hash-func exp",
@@ -1956,7 +1956,7 @@ class MailTlsKexHashFunc(Subtest):
 
 class MailTlsDaneExists(Subtest):
     def __init__(self):
-        super(MailTlsDaneExists, self).__init__(
+        super().__init__(
             name="dane_exists",
             label="detail mail tls dane-exists label",
             explanation="detail mail tls dane-exists exp",
@@ -1990,7 +1990,7 @@ class MailTlsDaneExists(Subtest):
 
 class MailTlsDaneValid(Subtest):
     def __init__(self):
-        super(MailTlsDaneValid, self).__init__(
+        super().__init__(
             name="dane_valid",
             label="detail mail tls dane-valid label",
             explanation="detail mail tls dane-valid exp",
@@ -2018,7 +2018,7 @@ class MailTlsDaneValid(Subtest):
 
 class MailTlsDaneRollover(Subtest):
     def __init__(self):
-        super(MailTlsDaneRollover, self).__init__(
+        super().__init__(
             name="dane_rollover",
             label="detail mail tls dane-rollover label",
             explanation="detail mail tls dane-rollover exp",
@@ -2045,7 +2045,7 @@ class MailTlsDaneRollover(Subtest):
 # --- AUTH
 class MailAuthDkim(Subtest):
     def __init__(self):
-        super(MailAuthDkim, self).__init__(
+        super().__init__(
             name="dkim",
             label="detail mail auth dkim label",
             explanation="detail mail auth dkim exp",
@@ -2072,7 +2072,7 @@ class MailAuthDkim(Subtest):
 
 class MailAuthDmarc(Subtest):
     def __init__(self):
-        super(MailAuthDmarc, self).__init__(
+        super().__init__(
             name="dmarc",
             label="detail mail auth dmarc label",
             explanation="detail mail auth dmarc exp",
@@ -2102,7 +2102,7 @@ class MailAuthDmarc(Subtest):
 
 class MailAuthDmarcPolicy(Subtest):
     def __init__(self):
-        super(MailAuthDmarcPolicy, self).__init__(
+        super().__init__(
             name="dmarc_policy",
             label="detail mail auth dmarc-policy label",
             explanation="detail mail auth dmarc-policy exp",
@@ -2137,7 +2137,7 @@ class MailAuthDmarcPolicy(Subtest):
 
 class MailAuthSpf(Subtest):
     def __init__(self):
-        super(MailAuthSpf, self).__init__(
+        super().__init__(
             name="spf",
             label="detail mail auth spf label",
             explanation="detail mail auth spf exp",
@@ -2167,7 +2167,7 @@ class MailAuthSpf(Subtest):
 
 class MailAuthSpfPolicy(Subtest):
     def __init__(self):
-        super(MailAuthSpfPolicy, self).__init__(
+        super().__init__(
             name="spf_policy",
             label="detail mail auth spf-policy label",
             explanation="detail mail auth spf-policy exp",
@@ -2213,7 +2213,7 @@ class MailAuthSpfPolicy(Subtest):
 # --- APPSECPRIV
 class WebAppsecprivHttpXFrame(Subtest):
     def __init__(self):
-        super(WebAppsecprivHttpXFrame, self).__init__(
+        super().__init__(
             name="http_x_frame",
             label="detail web appsecpriv http-x-frame label",
             explanation="detail web appsecpriv http-x-frame exp",
@@ -2236,7 +2236,7 @@ class WebAppsecprivHttpXFrame(Subtest):
 
 class WebAppsecprivHttpXContentType(Subtest):
     def __init__(self):
-        super(WebAppsecprivHttpXContentType, self).__init__(
+        super().__init__(
             name="http_x_content_type",
             label="detail web appsecpriv http-x-content-type label",
             explanation="detail web appsecpriv http-x-content-type exp",
@@ -2259,7 +2259,7 @@ class WebAppsecprivHttpXContentType(Subtest):
 
 class WebAppsecprivHttpCsp(Subtest):
     def __init__(self):
-        super(WebAppsecprivHttpCsp, self).__init__(
+        super().__init__(
             name="http_csp",
             label="detail web appsecpriv http-csp label",
             explanation="detail web appsecpriv http-csp exp",
@@ -2282,7 +2282,7 @@ class WebAppsecprivHttpCsp(Subtest):
 
 class WebAppsecprivHttpReferrerPolicy(Subtest):
     def __init__(self):
-        super(WebAppsecprivHttpReferrerPolicy, self).__init__(
+        super().__init__(
             name="http_referrer_policy",
             label="detail web appsecpriv http-referrer-policy label",
             explanation="detail web appsecpriv http-referrer-policy exp",
@@ -2305,7 +2305,7 @@ class WebAppsecprivHttpReferrerPolicy(Subtest):
 
 class WebAppsecprivSecuritytxt(Subtest):
     def __init__(self):
-        super(WebAppsecprivSecuritytxt, self).__init__(
+        super().__init__(
             name="http_securitytxt",
             label="detail web appsecpriv http-securitytxt label",
             explanation="detail web appsecpriv http-securitytxt exp",

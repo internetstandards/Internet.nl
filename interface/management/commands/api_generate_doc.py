@@ -138,7 +138,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.v_level = options["verbosity"]
         self.info(f"Reading template file at {OPENAPIFILE}\n")
-        with open(OPENAPIFILE, "r") as f:
+        with open(OPENAPIFILE) as f:
             api_doc = load(f, Loader=Loader)
 
         self.update_values(api_doc)

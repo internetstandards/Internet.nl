@@ -55,7 +55,7 @@ def validate_domain(request, mailaddr):
     if valid_domain is None:
         return redirect_invalid_domain(request, "mail")
 
-    return HttpResponseRedirect("/mail/{}/".format(valid_domain))
+    return HttpResponseRedirect(f"/mail/{valid_domain}/")
 
 
 def mailprocess(request, mailaddr):
@@ -111,10 +111,10 @@ def resultsrender(addr, report, request):
             pagetitle="{} {}".format(_("mail pagetitle"), prettyaddr),
             addr=addr,
             prettyaddr=prettyaddr,
-            permalink=request.build_absolute_uri("/mail/{}/{}/".format(addr, str(report.id))),
+            permalink=request.build_absolute_uri(f"/mail/{addr}/{str(report.id)}/"),
             permadate=report.timestamp,
             retest_time=retest_time,
-            retest_link=request.build_absolute_uri("/mail/{}/".format(addr)),
+            retest_link=request.build_absolute_uri(f"/mail/{addr}/"),
             webtest_direct=webtest_direct,
             mailtest_direct=mailtest_direct,
             probes=probe_reports,
@@ -137,7 +137,7 @@ def resultscurrent(request, mailaddr):
         rpki = MailTestRpki.objects.filter(domain=addr).order_by("-id")[0]
 
     except IndexError:
-        return HttpResponseRedirect("/mail/{}/".format(addr))
+        return HttpResponseRedirect(f"/mail/{addr}/")
 
     # Do we already have a testreport for the latest results
     # (needed for persisent url-thingy)?
@@ -156,7 +156,7 @@ def resultscurrent(request, mailaddr):
         # create one
         report = create_report(addr, ipv6, dnssec, auth, tls, rpki)
 
-    return HttpResponseRedirect("/mail/{}/{}/".format(addr, report.id))
+    return HttpResponseRedirect(f"/mail/{addr}/{report.id}/")
 
 
 # URL: /mail/<dname>/<reportid>/
@@ -171,7 +171,7 @@ def resultsstored(request, dname, id):
     cache_id = redis_id.autoconf.id.format(option.value)
     id_threshold = cache.get(cache_id)
     if id_threshold and int(id) <= id_threshold:
-        return HttpResponseRedirect("/mail/{}/".format(dname))
+        return HttpResponseRedirect(f"/mail/{dname}/")
 
     try:
         report = MailTestReport.objects.get(id=id)

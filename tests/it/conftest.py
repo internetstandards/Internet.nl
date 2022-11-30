@@ -14,8 +14,8 @@ DEFAULT_BROWSER_HEIGHT = 1024
 def firefox_options(firefox_options):
     width = os.getenv("IT_BROWSER_WIDTH", DEFAULT_BROWSER_WIDTH)
     height = os.getenv("IT_BROWSER_HEIGHT", DEFAULT_BROWSER_HEIGHT)
-    firefox_options.add_argument("--width={}".format(width))
-    firefox_options.add_argument("--height={}".format(height))
+    firefox_options.add_argument(f"--width={width}")
+    firefox_options.add_argument(f"--height={height}")
     return firefox_options
 
 

@@ -201,7 +201,7 @@ class TeamCymruIPtoASN(RouteView):
                 split_ip = str(ip).split(".")[0:3]
                 split_ip.reverse()
                 reversed_ip = ".".join(split_ip)
-                ip2asn_query = "{}.origin.asn.cymru.com.".format(reversed_ip)
+                ip2asn_query = f"{reversed_ip}.origin.asn.cymru.com."
             elif ip.version == 6:
                 exploded_ip = str(ip.exploded)
                 # note we query for the /48 on the assumption that more
@@ -210,7 +210,7 @@ class TeamCymruIPtoASN(RouteView):
                 # our resolver cache.
                 reversed_ip = exploded_ip.replace(":", "")[11::-1]
                 reversed_ip = ".".join(reversed_ip)
-                ip2asn_query = "{}.origin6.asn.cymru.com.".format(reversed_ip)
+                ip2asn_query = f"{reversed_ip}.origin6.asn.cymru.com."
             else:
                 raise InvalidIPError(f"Unknown IP version for address {ip_in}.")
         except ValueError:
@@ -218,7 +218,7 @@ class TeamCymruIPtoASN(RouteView):
         return ip2asn_query
 
 
-class RelyingPartySoftware(object):
+class RelyingPartySoftware:
     """Abstract base class for implementations of Relying Party Software for RPKI/ROV.
 
     An implementation should provide:

@@ -48,12 +48,12 @@ class RpkiTestCase(SimpleTestCase):
                 for ip in result[domain]:
                     for route in ip["routes"]:
                         self.assertIn(route, expected_result["routes"])
-                        self.assertEquals(ip["validity"][route]["state"], expected_result["state"])
+                        self.assertEqual(ip["validity"][route]["state"], expected_result["state"])
 
                         if expected_result["state"] != "not-found":
                             asn, prefix = route
                             expected_vrps = [{"asn": asn, "prefix": prefix, "max_length": 32}]
-                            self.assertEquals(ip["validity"][route]["vrps"], expected_vrps)
+                            self.assertEqual(ip["validity"][route]["vrps"], expected_vrps)
 
     def _generate_routinator_response(self, prefix, state):
         # These responses are not entirely complete - only far enough as needed for this test

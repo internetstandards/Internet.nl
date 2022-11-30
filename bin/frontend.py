@@ -34,10 +34,10 @@ def build_js(args=None):
     for root, dirs, files in os.walk(FRONTEND_JS_FOLDER):
         for filename in files:
             if filename.endswith(".js"):
-                print("Found {}...".format(filename))
+                print(f"Found {filename}...")
                 content = ""
                 filepath = os.path.join(root, filename)
-                with io.open(filepath, "r", encoding="utf-8") as jsfile:
+                with open(filepath, encoding="utf-8") as jsfile:
                     content = jsfile.read()
 
                 content = content.replace("@@unique@@", unique)
@@ -46,8 +46,8 @@ def build_js(args=None):
                 filepath = os.path.join(
                     DJANGO_STATIC_JS_FOLDER, filename + "-min.js")
 
-                print("... minifying to {}".format(filepath))
-                with io.open(filepath, 'w', encoding="utf-8") as f:
+                print(f"... minifying to {filepath}")
+                with open(filepath, 'w', encoding="utf-8") as f:
                     f.write(content_min)
         break
     print("Done!")
@@ -69,15 +69,15 @@ def build_css(args=None):
             if filename.endswith(".css"):
                 if filename == "style.css-notyet-scss":
                     continue
-                print("Found {}...".format(filename))
+                print(f"Found {filename}...")
                 filepath = os.path.join(root, filename)
                 content_min = sass.compile(
                     filename=filepath, output_style="compressed")
                 filename, _ = filename.rsplit(".", 1)
                 filepath = os.path.join(
                     DJANGO_STATIC_CSS_FOLDER, filename + "-min.css")
-                print("... minifying to {}".format(filepath))
-                with io.open(filepath, 'w', encoding="utf-8") as f:
+                print(f"... minifying to {filepath}")
+                with open(filepath, 'w', encoding="utf-8") as f:
                     f.write(content_min)
         break
     print("Done!")

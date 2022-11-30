@@ -225,8 +225,8 @@ def save_result(batch_test: BatchTests, subtest: str, result):
 
     """
     setattr(batch_test, subtest, result)
-    setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.done)
-    batch_test.save(update_fields=["{}_id".format(subtest), "{}_status".format(subtest)])
+    setattr(batch_test, f"{subtest}_status", BatchTestStatus.done)
+    batch_test.save(update_fields=[f"{subtest}_id", f"{subtest}_status"])
     logger.info(
         f"domain {getattr(result, 'domain', None)}: {batch_test.__class__.__name__} finished task for subtest {subtest}"
     )
@@ -238,8 +238,8 @@ def start_test(batch_domain: BatchDomain, batch_test: BatchTests, subtest: str, 
 
     """
     submit_test(batch_domain, subtest, taskset)
-    setattr(batch_test, "{}_status".format(subtest), BatchTestStatus.running)
-    batch_test.save(update_fields=["{}_status".format(subtest)])
+    setattr(batch_test, f"{subtest}_status", BatchTestStatus.running)
+    batch_test.save(update_fields=[f"{subtest}_status"])
 
 
 def submit_test(batch_domain: BatchDomain, test: str, checks_registry: Callable):
@@ -270,7 +270,7 @@ def check_any_subtest_for_status(batch_test, status):
         subtests = BATCH_MAILTEST["subtests"]
 
     for subtest in subtests:
-        if getattr(batch_test, "{}_status".format(subtest)) == status:
+        if getattr(batch_test, f"{subtest}_status") == status:
             return True
 
     return False
@@ -457,7 +457,7 @@ def error_callback(request, exc, traceback):
               find_stalled_tests_and_update_db().
 
     """
-    logger.error("Task {0!r} raised error: {1!r}".format(request.id, exc))
+    logger.error(f"Task {request.id!r} raised error: {exc!r}")
     cache_id = redis_id.running_batch_test.id.format(request.id)
     cached = cache.get(cache_id)
     if not cached:
@@ -481,17 +481,17 @@ def record_subtest_error(batch_test, subtest):
     the status if appropriate.
 
     """
-    error_count = getattr(batch_test, "{}_errors".format(subtest))
-    status = getattr(batch_test, "{}_status".format(subtest))
+    error_count = getattr(batch_test, f"{subtest}_errors")
+    status = getattr(batch_test, f"{subtest}_status")
     error_count += 1
     if status != BatchTestStatus.cancelled:
         if error_count >= MAX_SUBTEST_ATTEMPTS:
             status = BatchTestStatus.error
         else:
             status = BatchTestStatus.waiting
-        setattr(batch_test, "{}_status".format(subtest), status)
-    setattr(batch_test, "{}_errors".format(subtest), error_count)
-    batch_test.save(update_fields=["{}_status".format(subtest), "{}_errors".format(subtest)])
+        setattr(batch_test, f"{subtest}_status", status)
+    setattr(batch_test, f"{subtest}_errors", error_count)
+    batch_test.save(update_fields=[f"{subtest}_status", f"{subtest}_errors"])
     return error_count
 
 
@@ -514,7 +514,7 @@ def find_stalled_tests_and_update_db():
                 subtests = BATCH_MAILTEST["subtests"]
 
             for subtest in subtests:
-                status = getattr(batch_test, "{}_status".format(subtest))
+                status = getattr(batch_test, f"{subtest}_status")
                 if status == BatchTestStatus.running:
                     errors = record_subtest_error(batch_test, subtest)
                     logger.info(
@@ -540,11 +540,11 @@ def _run_scheduler():
 
     start_time = timer()
     find_stalled_tests_and_update_db()
-    logger.info("Found stalled tests in {}s".format(timer() - start_time))
+    logger.info(f"Found stalled tests in {timer() - start_time}s")
 
     start_time = timer()
     update_batch_request_status()
-    logger.info("Updated batch request status in {}s".format(timer() - start_time))
+    logger.info(f"Updated batch request status in {timer() - start_time}s")
 
     submitted_domains = 0
     found_domains = 0
@@ -587,7 +587,7 @@ def _run_scheduler():
         logger.info(
             f"No domains submitted, queue is currently too loaded, {len(live_requests)} users remaining in queue"
         )
-    logger.info("Found {} domains".format(found_domains))
+    logger.info(f"Found {found_domains} domains")
 
 
 @batch_shared_task

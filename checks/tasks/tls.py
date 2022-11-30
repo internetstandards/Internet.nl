@@ -1162,7 +1162,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
             # Ignore PKIX TLSA records for mail.
             continue
 
-        records.append("{} {} {} {}".format(cert_usage, selector, match, data))
+        records.append(f"{cert_usage} {selector} {match} {data}")
         if cert_usage == 2:
             two_x_x += 1
         elif cert_usage == 3:
@@ -1268,7 +1268,7 @@ def get_common_name(cert):
     return value
 
 
-class DebugCertChain(object):
+class DebugCertChain:
     """
     Class performing X509 cert checks NCSC Guidelines B3-*
 
@@ -1283,7 +1283,7 @@ class DebugCertChain(object):
         """
         if chain is None:
             return None
-        return super(DebugCertChain, cls).__new__(cls)
+        return super().__new__(cls)
 
     def __init__(self, chain):
         self.unparsed_chain = chain
@@ -1376,9 +1376,9 @@ class DebugCertChain(object):
                 ):
                     failed_key_type = "EllipticCurvePublicKey"
             if failed_key_type:
-                message = "{}: {}-{} bits".format(common_name, failed_key_type, bits)
+                message = f"{common_name}: {failed_key_type}-{bits} bits"
                 if curve:
-                    message += ", curve: {}".format(curve)
+                    message += f", curve: {curve}"
                 if curve == "secp224r1":
                     phase_out_pubkey.append(message)
                 else:
@@ -1446,7 +1446,7 @@ class DebugCertChainMail(DebugCertChain):
     """
 
     def __init__(self, chain):
-        super(DebugCertChainMail, self).__init__(chain)
+        super().__init__(chain)
         self.score_hostmatch_good = scoring.MAIL_TLS_HOSTMATCH_GOOD
         self.score_hostmatch_bad = scoring.MAIL_TLS_HOSTMATCH_BAD
         self.score_pubkey_good = scoring.MAIL_TLS_PUBKEY_GOOD
@@ -1568,14 +1568,14 @@ def starttls_sock_setup(conn):
                 fd.close()
                 raise ConnectionHandshakeException()
 
-        except (socket.error, socket.timeout, socket.gaierror):
+        except (OSError, socket.timeout, socket.gaierror):
             # We didn't get a reply back, this means our packets
             # are dropped. This happened in cases where a rate
             # limiting mechanism was in place. Skip the test.
             if conn.sock:
                 conn.safe_shutdown()
             raise ConnectionSocketException()
-        except IOError as e:
+        except OSError as e:
             # We can't reach the server.
             if conn.sock:
                 conn.safe_shutdown()
@@ -1681,13 +1681,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
             verify_score, verify_result = starttls_details.trusted_score
             debug_chain = starttls_details.debug_chain
             conn_port = starttls_details.conn_port
-    except (
-        socket.error,
-        http.client.BadStatusLine,
-        NoIpError,
-        ConnectionHandshakeException,
-        ConnectionSocketException,
-    ):
+    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
         return dict(tls_cert=False)
 
     if debug_chain is None:
@@ -2074,7 +2068,7 @@ class ConnectionChecker:
 
     def _debug_info(self, info):
         if hasattr(settings, "ENABLE_VERBOSE_TECHNICAL_DETAILS") and settings.ENABLE_VERBOSE_TECHNICAL_DETAILS:
-            return " [reason: {}] ".format(info)
+            return f" [reason: {info}] "
         else:
             return ""
 
@@ -2183,7 +2177,7 @@ class ConnectionChecker:
                 # If we are still here, client reneg is supported
                 client_reneg_score = self._score_client_reneg_bad
                 client_reneg = True
-        except (ConnectionSocketException, ConnectionHandshakeException, socket.error, _nassl.OpenSSLError, IOError):
+        except (ConnectionSocketException, ConnectionHandshakeException, OSError, _nassl.OpenSSLError):
             # TODO: extend to support indicating that we were unable to
             # test in the case of ConnectionSocketException?
             client_reneg_score = self._score_client_reneg_good
@@ -2264,7 +2258,7 @@ class ConnectionChecker:
                                 return self._score_zero_rtt_good, ZeroRttStatus.good
                             else:
                                 return self._score_zero_rtt_bad, ZeroRttStatus.bad
-        except (ConnectionHandshakeException, ConnectionSocketException, IOError):
+        except (ConnectionHandshakeException, ConnectionSocketException, OSError):
             pass
 
         # TODO: ensure the handshake is completed ready for the next check that
@@ -2923,7 +2917,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             kex_hash_func=kex_hash_func,
             kex_hash_func_score=kex_hash_func_score,
         )
-    except (socket.error, NoIpError, ConnectionSocketException):
+    except (OSError, NoIpError, ConnectionSocketException):
         return dict(server_reachable=False, tls_enabled=False)
     except (http.client.BadStatusLine, ConnectionHandshakeException):
         return dict(tls_enabled=False)
@@ -2991,13 +2985,7 @@ def forced_http_check(af_ip_pair, url, task):
         conn, res, headers, visited_hosts = http_fetch(
             url, af=af_ip_pair[0], path="", port=80, task=task, ip_address=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH - 1
         )
-    except (
-        socket.error,
-        http.client.BadStatusLine,
-        NoIpError,
-        ConnectionHandshakeException,
-        ConnectionSocketException,
-    ):
+    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
         if has_443:
             # If we got refused on port 80 the first time
             # return the FORCED_HTTPS_NO_HTTP status and score
