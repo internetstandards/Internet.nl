@@ -540,11 +540,11 @@ def _run_scheduler():
 
     start_time = timer()
     find_stalled_tests_and_update_db()
-    logger.info("Found stalled tests in {:.06f}s".format(timer() - start_time))
+    logger.info("Found stalled tests in {}s".format(timer() - start_time))
 
     start_time = timer()
     update_batch_request_status()
-    logger.info("Updated batch request status in {:.06f}s".format(timer() - start_time))
+    logger.info("Updated batch request status in {}s".format(timer() - start_time))
 
     submitted_domains = 0
     found_domains = 0
@@ -580,7 +580,7 @@ def _run_scheduler():
                 found_domains += 1
             update_domain_status(batch_domain)
         logger.info(
-            f"Submitted {submitted_domains} domains in {format(timer() - start_time):.06f}s, "
+            f"Submitted {submitted_domains} domains in {format(timer() - start_time)}s, "
             f"{len(live_requests)} users remaining in queue"
         )
     else:
