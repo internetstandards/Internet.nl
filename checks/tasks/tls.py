@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import errno
 import http.client
-import logging
 import socket
 import ssl
 import time
@@ -14,6 +13,7 @@ from timeit import default_timer as timer
 import eventlet
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
+from celery.utils.log import get_task_logger
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.backends.openssl.dh import _DHPublicKey
 from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
@@ -105,7 +105,7 @@ except ImportError as e:
     else:
         raise e
 
-logger = logging.getLogger("internetnl")
+logger = get_task_logger(__name__)
 
 # Based on:
 # hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"

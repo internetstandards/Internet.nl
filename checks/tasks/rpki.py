@@ -7,7 +7,7 @@ from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db import transaction
-import logging
+from celery.utils.log import get_task_logger
 
 from interface import batch, batch_shared_task
 from . import SetupUnboundContext
@@ -36,7 +36,7 @@ from typing import Dict, List, Mapping, NewType, Tuple, Union
 TestName = NewType("TestName", str)
 TestResult = Dict[TestName, List[Dict[str, Union[Dict, List, str]]]]
 
-logger = logging.getLogger("internetnl")
+logger = get_task_logger(__name__)
 
 # mapping services to models
 model_map = dict(
