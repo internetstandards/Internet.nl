@@ -33,6 +33,9 @@ git checkout v1.6.2
 
 # Upgrade dependencies, run migrations and rebuild the frontend
 source ~internetnl/internet.nl.env
+# Use a direct PostgreSQL connection instead of bouncer to prevent migration timeouts
+export DB_PORT=5432
+
 .venv/bin/pip install -Ur requirements.txt
 make manage migrate
 make frontend

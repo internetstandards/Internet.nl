@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.2
+
+- Fixed issues in the example configs regarding [celery concurrency](https://github.com/internetstandards/Internet.nl/issues/817)
+- Added celery task info to log messages to help debugging/tracing (d59ae723c095c2f1ef98b9c16e28bba02a9e49ff)
+- Small fixes to test explanation content
+
 ## 1.6.1
 
 - Fixed issues in the security.txt check for [invalid time formats](https://github.com/internetstandards/Internet.nl/pull/800) and [empty responses](https://github.com/internetstandards/Internet.nl/issues/790)
