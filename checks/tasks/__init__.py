@@ -11,6 +11,7 @@ from django.conf import settings
 
 import unbound
 from internetnl import log
+from timeit import default_timer as timer
 
 
 class SetupUnboundContext(Task):
@@ -114,11 +115,14 @@ class SetupUnboundContext(Task):
                 data["rcode"] = result.rcode
         data["done"] = True
 
-    def get(self, *args, **kwargs):
+    def get(self, url, *args, **kwargs):
         """
         Perform a HTTP GET request using the stored session
         """
+        start_time = timer()
         if not hasattr(self, "_requests_session"):
             self._requests_session = requests.session()
 
-        return self._requests_session.get(*args, **kwargs)
+        response = self._requests_session.get(url, *args, **kwargs)
+        log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url}")
+        return response
