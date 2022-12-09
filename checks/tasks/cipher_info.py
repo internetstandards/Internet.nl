@@ -1,15 +1,15 @@
-import logging
 import re
 from collections import OrderedDict
 from enum import Enum
 from math import log, pow
 
+from celery.utils.log import get_task_logger
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import SslClient
 
 from checks.tasks.tls_connection import DebugConnection, ModernConnection
 
-logger = logging.getLogger("internetnl")
+logger = get_task_logger(__name__)
 
 
 class SecLevel(Enum):

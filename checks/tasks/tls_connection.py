@@ -10,6 +10,7 @@ from enum import Enum
 from io import BytesIO
 from urllib.parse import urlparse
 
+from celery.utils.log import get_task_logger
 from django.conf import settings
 from nassl import _nassl
 from nassl.legacy_ssl_client import LegacySslClient
@@ -21,8 +22,7 @@ from interface.views.shared import ub_resolve_with_timeout
 from internetnl import celery_app
 
 # Use a dedicated logger as this logging can be very verbose
-logger = logging.getLogger(__name__)
-sslConnectLogger = logging.getLogger("internetnl.ssl.connect")
+sslConnectLogger = get_task_logger("internetnl.ssl.connect")
 
 HTTPS_READ_CHUNK_SIZE = 8192
 
