@@ -7,9 +7,9 @@ hosters.
 
 * The package python-whois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
 
-## Change overview for version 1.6(.1)
+## Change overview for version 1.6(.2)
 
-Based on an existing 1.5.x setup or 1.6 setup that you are upgrading to 1.6.1:
+Based on an existing 1.5.x setup or 1.6 setup that you are upgrading to 1.6.2:
 
 ```bash
 # The next steps need a privileged user
@@ -29,7 +29,7 @@ su - internetnl
 cd /opt/internetnl/Internet.nl/
 git reset --hard
 git fetch
-git checkout v1.6.1
+git checkout v1.6.2
 
 # Upgrade dependencies, run migrations and rebuild the frontend
 source ~internetnl/internet.nl.env
@@ -38,6 +38,9 @@ make manage migrate
 make frontend
 
 # (exit back to root shell)
+
+# Deploy new configs (changed celery queue conigs)
+cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
 
 # Restart services, depending if this a batch or single instance server:
 systemctl daemon-reload
