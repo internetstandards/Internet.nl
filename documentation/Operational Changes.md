@@ -165,6 +165,10 @@ sed -i 's/\export //g'  ~/internet.nl.systemd.env
 mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
 
 # Upgrade dependencies, run migrations and rebuild the frontend
+source ~internetnl/internet.nl.env
+# Use a direct PostgreSQL connection instead of bouncer to prevent migration timeouts
+export DB_PORT=5432
+
 .venv/bin/pip install -Ur requirements.txt
 make manage migrate
 make frontend
