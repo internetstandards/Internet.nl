@@ -3,8 +3,11 @@
 ## 1.6.2
 
 - Fixed issues in the example configs regarding [celery concurrency](https://github.com/internetstandards/Internet.nl/issues/817)
-- Added celery task info to log messages to help debugging/tracing (d59ae723c095c2f1ef98b9c16e28bba02a9e49ff)
+- Fixed an issue where test failures could cause [old test results to be displayed instead](https://github.com/internetstandards/Internet.nl/pull/802)
+- Added [celery task info to log messages](https://github.com/internetstandards/Internet.nl/commit/d59ae723c095c2f1ef98b9c16e28bba02a9e49ff) to help debugging/tracing
 - Small fixes to test explanation content
+
+This release has API version 2.2.0, as there are no API changes.
 
 ## 1.6.1
 
@@ -12,15 +15,21 @@
 - [Updated social media links](https://github.com/internetstandards/Internet.nl/issues/804)
 - [Fixed an issue in the API and updated the version](https://github.com/internetstandards/Internet.nl/pull/776)
 
+This release has API version 2.2.0, a late update due to new fields added in 1.6.0.
+
 ## 1.6
 
 - Add [security.txt support](https://github.com/internetstandards/Internet.nl/pull/730).
   For all IPs of web servers, this looks for the existence and validity of a
   [RFC9116](https://www.rfc-editor.org/rfc/rfc9116.html) security.txt file.
 
+This release has API version 2.1.0, which is incorrect as it does include new fields for security.txt. This was fixed in 1.6.1.
+
 ## 1.5.1
 
 - Fixes a tiny typo in the RPKI news content.
+
+This release has API version 2.1.0, as there are no API changes.
 
 ## 1.5.0
 
@@ -36,6 +45,8 @@
 - Small improvements in cache reset requests [(#724)]
 - Small improvements in various test explanations.
 - The privacy statement was updated to clarify the use of third party services.
+
+This release has API version 2.1.0, as it includes new fields for RPKI.
 
 ## 1.4.0
 Software update and development & documentation release.
@@ -94,7 +105,7 @@ Development & documentation
 - Added caching of static files in the apache config
 - Simplified and deduplicated the apache config
 
-
+This release has API version 2.0.1.
 
 ## 1.3.2
 
