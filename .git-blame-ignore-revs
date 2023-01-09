@@ -6,3 +6,5 @@
 a82ad1a75f637fa84b0741fd12ab491e683402ed
 # Linting applied to all files
 29613122a0a0f08bbd47db26c89a9e1a8d62199b
+# pyupgrade for 3.7 (#822)
+9ee950965628e4fdffdfa662886794ab1a759353
