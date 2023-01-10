@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7
+
+This release has API version 2.3.0, The `securitytxt_errors` and
+`securitytxt_recommendations` types were changed, and the
+`record_org_domain` was added for DMARC.
+
 ## 1.6.3
 
 - Fixed an issue in the HTTPS client code that caused DMARC records to not be detected, due to a missing

@@ -2320,6 +2320,8 @@ class WebAppsecprivHttpReferrerPolicy(Subtest):
 
 
 class WebAppsecprivSecuritytxt(Subtest):
+    table_translation_root = "detail tech data http-securitytxt"
+
     def __init__(self):
         super().__init__(
             name="http_securitytxt",
@@ -2329,19 +2331,28 @@ class WebAppsecprivSecuritytxt(Subtest):
             worst_status=scoring.WEB_APPSECPRIV_SECURITYTXT_WORST_STATUS,
             full_score=scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD,
             model_score_field="securitytxt_score",
+            init_tech_type="table_translatable",
         )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web appsecpriv http-securitytxt verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self._add_table_translation_root(tech_data)
 
     def result_bad(self, tech_data):
         self._status(STATUS_NOTICE)
         self.verdict = "detail web appsecpriv http-securitytxt verdict bad"
-        self.tech_data = tech_data or ""
+        self.tech_data = self._add_table_translation_root(tech_data) or ""
 
     def result_recommendations(self, tech_data):
         self._status(STATUS_INFO)
         self.verdict = "detail web appsecpriv http-securitytxt verdict recommendations"
-        self.tech_data = tech_data or ""
+        self.tech_data = self._add_table_translation_root(tech_data) or ""
+
+    def _add_table_translation_root(self, tech_data):
+        rooted_tech_data = []
+        for data in tech_data:
+            rooted_tech_data.append(
+                {"message": f"{self.table_translation_root} {data['message']}", "context": data.get("context", {})}
+            )
+        return rooted_tech_data

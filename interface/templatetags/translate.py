@@ -72,22 +72,22 @@ def maxlength(adjustment, *args):
 
 
 @register.inclusion_tag("details-table.html")
-def render_details_table(headers, arguments):
+def render_details_table(tech_type, table_headers, table_content):
     """
     Figure out the table's header and content and render them based on the
     given template.
 
     """
-    headers = _(headers)
+    headers = _(table_headers)
     headers = headers.split("|")
 
     table_length = len(headers)
     final_rows = []
     max_columns = 0
-    for row_argument in arguments:
+    for table_row in table_content:
         row_generator = []
         # Create the row_generator for this row(s).
-        for i, row_attribute in enumerate(row_argument):
+        for i, row_attribute in enumerate(table_row):
             if i >= table_length:
                 break
 
@@ -105,6 +105,10 @@ def render_details_table(headers, arguments):
                     value = cell_deque.popleft()
                     if not value:
                         value = _("results empty-argument-alt-text")
+                    elif tech_type == "table_translatable":
+                        if type(value) == dict:
+                            # TODO: we need to be sure about the naming of message/context
+                            value = _(value["message"]).format(**value.get("context", {}))
                     elif value in [
                         "detail tech data yes",
                         "detail tech data no",

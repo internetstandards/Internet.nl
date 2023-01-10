@@ -825,13 +825,29 @@ components:
           description: >
             Errors found while parsing an RFC9116 security.txt file
           items:
-            type: string
+            type: object
+            properties:
+              message:
+                type: string
+                description: message code (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
+              context:
+                type: object
+                additionalProperties: true
+                description: additional context for the message, e.g. line number
         securitytxt_recommendations:
           type: array
           description: >
             Recommendations found while parsing an RFC9116 security.txt file
           items:
-            type: string
+            type: object
+            properties:
+              message:
+                type: string
+                description: message code (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
+              context:
+                type: object
+                additionalProperties: true
+                description: additional context for the message, e.g. line number
         securitytxt_found_host:
           type: string
           description: The host from which the security.txt was retrieved, after potential redirects

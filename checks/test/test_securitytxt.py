@@ -46,7 +46,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: security.txt could not be located."],
+        errors=[{"message": "no_security_txt_404"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -57,7 +57,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: security.txt could not be located (unexpected HTTP response code 500)."],
+        errors=[{"message": "no_security_txt_other", "context": {"status_code": 500}}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -68,7 +68,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: HTTP Content-Type header must be sent."],
+        errors=[{"message": "no_content_type"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -79,7 +79,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: Media type in Content-Type header must be 'text/plain'."],
+        errors=[{"message": "invalid_media"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -90,7 +90,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: Media type in Content-Type header must be 'text/plain'."],
+        errors=[{"message": "invalid_media"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -101,7 +101,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=["Error: Charset parameter in Content-Type header must be 'utf-8' if present."],
+        errors=[{"message": "invalid_charset"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -112,10 +112,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/security.txt",
         found_host="example.nl",
-        errors=[
-            "Error: security.txt was located on the top-level path (legacy place), "
-            "but must be placed under the '/.well-known/' path."
-        ],
+        errors=[{"message": "location"}],
     )
 
 
@@ -125,13 +122,13 @@ def test_evaluate_securitytxt():
         content="",
         url="https://example.com/security.txt",
         found_host="host",
-        errors=["Error: network error"],
+        errors=[{"message": "example"}],
     )
     assert _evaluate_securitytxt(result) == {
         "securitytxt_enabled": False,
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
-        "securitytxt_errors": ["Error: network error"],
+        "securitytxt_errors": [{"message": "example"}],
         "securitytxt_recommendations": [],
     }
 
@@ -147,11 +144,11 @@ def test_evaluate_securitytxt():
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
         "securitytxt_errors": [
-            "Error: Line must contain a field name and value, unless the line is blank or contains a comment. (line 1)",
-            "Error: 'Expires' field must be present.",
-            "Error: 'Contact' field must appear at least once.",
+            {"message": "invalid_line", "context": {"line_no": 1}},
+            {"message": "no_expire", "context": {"line_no": None}},
+            {"message": "no_contact", "context": {"line_no": None}},
         ],
-        "securitytxt_recommendations": ["Recommendation: security.txt should be digitally signed."],
+        "securitytxt_recommendations": [{"message": "not_signed", "context": {"line_no": None}}],
     }
 
     result = SecuritytxtRetrieveResult(
@@ -159,17 +156,17 @@ def test_evaluate_securitytxt():
         content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com",
         url="https://example.com/security.txt",
         found_host="host",
-        errors=["Error: content-type error"],
+        errors=[{"message": "example"}],
     )
     assert _evaluate_securitytxt(result) == {
         "securitytxt_enabled": True,
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
-        "securitytxt_errors": ["Error: content-type error"],
+        "securitytxt_errors": [{"message": "example"}],
         "securitytxt_recommendations": [
-            "Recommendation: Date and time in 'Expires' field should be less than a year into the future. (line 1)",
-            "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address.",
-            "Recommendation: security.txt should be digitally signed.",
+            {"message": "long_expiry", "context": {"line_no": 1}},
+            {"message": "no_encryption", "context": {"line_no": None}},
+            {"message": "not_signed", "context": {"line_no": None}},
         ],
     }
 
@@ -186,8 +183,8 @@ def test_evaluate_securitytxt():
         "securitytxt_found_host": "host",
         "securitytxt_errors": [],
         "securitytxt_recommendations": [
-            "Recommendation: Date and time in 'Expires' field should be less than a year into the future. (line 1)",
-            "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address.",
-            "Recommendation: security.txt should be digitally signed.",
+            {"message": "long_expiry", "context": {"line_no": 1}},
+            {"message": "no_encryption", "context": {"line_no": None}},
+            {"message": "not_signed", "context": {"line_no": None}},
         ],
     }
