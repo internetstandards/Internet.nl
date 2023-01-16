@@ -63,14 +63,16 @@ def clear(request, dname):
     url = dname.lower()
     if url in settings.CACHE_RESET_WHITELIST:
         for test in [
-            "mail_auth",
             "dnssec",
-            "web_ipv6",
+            "mail_auth",
+            "mail_dnssec",
             "mail_ipv6",
-            "web_tls",
-            "web_appsecpriv",
-            "web_rpki",
             "mail_rpki",
+            "mail_tls",
+            "web_appsecpriv",
+            "web_ipv6",
+            "web_rpki",
+            "web_tls",
         ]:
             cache.delete(redis_id.dom_task.id.format(url, test))
         return HttpResponse("Domain name cleared from cache.")
