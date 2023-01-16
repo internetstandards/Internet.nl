@@ -6,4 +6,4 @@ Only the lastest release will be actively supported. In case of serious regressi
 
 ## Reporting a Vulnerability
 
-Our Coordinated Vulnerability Disclosure policy is located at [https://en.internet.nl/disclosure/](https://en.internet.nl/disclosure/).
+Our Coordinated Vulnerability Disclosure policy is located at [https://en.internet.nl/disclosure/](https://en.internet.nl/disclosure/). Alternatively, you can [report the issue through GitHub](https://github.com/internetstandards/Internet.nl/security/advisories/new)
