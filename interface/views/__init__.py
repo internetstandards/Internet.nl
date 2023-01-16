@@ -10,7 +10,14 @@ from django.utils import translation
 from django.utils.translation import ugettext as _
 
 from interface import redis_id, simple_cache_page
-from interface.views.shared import get_hof_champions, get_hof_mail, get_hof_manual, get_hof_web, update_base_stats
+from interface.views.shared import (
+    get_hof_champions,
+    get_hof_mail,
+    get_hof_manual,
+    get_hof_web,
+    update_base_stats,
+    SafeHttpResponseRedirect,
+)
 
 
 def page404(request, exception):
@@ -361,9 +368,9 @@ def change_language(request):
                 no_language_host = request.get_host()
 
             language_prefix = new_language + "."
-            response = HttpResponseRedirect(protocol + language_prefix + no_language_host + previous_page)
+            response = SafeHttpResponseRedirect(protocol + language_prefix + no_language_host + previous_page)
         else:
-            response = HttpResponseRedirect(previous_page)
+            response = SafeHttpResponseRedirect(previous_page)
 
         return response
     return HttpResponseRedirect("/")

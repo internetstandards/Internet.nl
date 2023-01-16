@@ -12,10 +12,12 @@ import yaml
 from celery import shared_task
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import DisallowedRedirect
 from django.db import connection
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import ugettext as _
 
 import unbound
@@ -486,3 +488,16 @@ def update_base_stats():
         cache.set(cache_id, True, cache_ttl)
         task_set = run_stats_queries.s() | update_running_status.s()
         task_set()
+
+
+class SafeHttpResponseRedirect(HttpResponseRedirect):
+    """
+    This light wrapper around HttpResponseRedirect refuses redirects to
+    other hosts or schemes. It should be used for any case where part
+    of the URL may be based on user input.
+    """
+
+    def __init__(self, redirect_to, *args, **kwargs):
+        super().__init__(redirect_to, *args, **kwargs)
+        if not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=None, require_https=True):
+            raise DisallowedRedirect("Unsafe redirect to URL: " % redirect_to)
