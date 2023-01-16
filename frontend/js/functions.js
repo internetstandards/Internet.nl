@@ -19,9 +19,9 @@ $(document).ready(function(){
 
     /**
      * headroom.js used under The MIT License (MIT)
-     * https://github.com/WickyNilliams/headroom.js
+     * https://wicky.nillia.ms/headroom.js/
      */
-    if(document.addEventListener){
+    if(Headroom.cutsTheMustard && document.addEventListener){
     /* for IE 9 or greater */
         /* select the header element */
         var theHeader = document.querySelector("header");
