@@ -53,7 +53,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
                     content_type = value.lower() if value else None
 
             return res.status, content_type, response_content, visited_hosts[443]
-        except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
+        except (OSError, http.client.HTTPException, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
             return None, "", None, []
 
     path = SECURITYTXT_EXPECTED_PATH
