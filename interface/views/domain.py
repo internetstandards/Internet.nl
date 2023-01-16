@@ -31,6 +31,7 @@ from interface.views.shared import (
     process,
     redirect_invalid_domain,
     update_report_with_registrar_and_score,
+    SafeHttpResponseRedirect,
 )
 
 # Entrance after form submission.
@@ -55,7 +56,7 @@ def validate_domain(request, dname):
     if valid_domain is None:
         return redirect_invalid_domain(request, "domain")
 
-    return HttpResponseRedirect(f"/site/{valid_domain}/")
+    return SafeHttpResponseRedirect(f"/site/{valid_domain}/")
 
 
 def siteprocess(request, dname):
