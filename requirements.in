@@ -41,6 +41,7 @@ hiredis
 ip_address
 sectxt
 colorlog
+setuptools_scm
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
