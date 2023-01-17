@@ -78,7 +78,7 @@ gevent==22.10.2
     # via -r requirements.in
 gitdb==4.0.9
     # via gitpython
-gitpython==3.1.29
+gitpython==3.1.30
     # via -r requirements.in
 greenlet==2.0.1
     # via
@@ -91,9 +91,7 @@ hiredis==2.0.0
 idna==3.4
     # via requests
 importlib-metadata==4.13.0
-    # via
-    #   -r requirements.in
-    #   markdown
+    # via -r requirements.in
 iniconfig==1.1.1
     # via pytest
 ip-address==1.4.2
@@ -184,8 +182,6 @@ sqlparse==0.4.3
     # via django
 toml==0.10.2
     # via pytest
-tomli==2.0.1
-    # via setuptools-scm
 typing-extensions==4.4.0
     # via
     #   setuptools-rust
