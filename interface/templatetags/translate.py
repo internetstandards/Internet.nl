@@ -7,6 +7,7 @@ from django import template
 from django.conf import settings
 from django.template import Template
 from django.utils.translation import ugettext as _
+from interface import __version__
 
 from checks.scoring import (
     STATUS_ERROR,
@@ -20,6 +21,11 @@ from checks.scoring import (
 )
 
 register = template.Library()
+
+
+@register.simple_tag()
+def internetnl_version():
+    return __version__
 
 
 @register.simple_tag(takes_context=True)

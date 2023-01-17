@@ -115,6 +115,7 @@ packaging==21.3
     #   bleach
     #   pytest
     #   redis
+    #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
 pluggy==1.0.0
@@ -165,6 +166,8 @@ semantic-version==2.10.0
     # via setuptools-rust
 setuptools-rust==1.5.2
     # via -r requirements.in
+setuptools-scm==7.1.0
+    # via -r requirements.in
 six==1.16.0
     # via
     #   bleach
@@ -181,8 +184,12 @@ sqlparse==0.4.3
     # via django
 toml==0.10.2
     # via pytest
+tomli==2.0.1
+    # via setuptools-scm
 typing-extensions==4.4.0
-    # via setuptools-rust
+    # via
+    #   setuptools-rust
+    #   setuptools-scm
 urllib3==1.26.12
     # via
     #   requests
