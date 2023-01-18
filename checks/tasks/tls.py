@@ -2289,11 +2289,9 @@ class ConnectionChecker:
                 # connected with it.
                 connected = True
             else:
-                # We already tested TLS 1.3 at the beginning when calling
-                # http_fetch(), so we only need to use DebugConnection as it
-                # can handle the older protocol versions.
                 try:
-                    with DebugConnection.from_conn(self._conn, version=version) as new_conn:
+                    connection_class = DebugConnection if version < TLSV1_3 else ModernConnection
+                    with connection_class.from_conn(self._conn, version=version) as new_conn:
                         connected = True
                         self._note_conn_details(new_conn)
                 except (ConnectionSocketException, ConnectionHandshakeException):
