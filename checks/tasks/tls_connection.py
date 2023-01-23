@@ -777,10 +777,12 @@ def http_get(url):
         rr.status_code = r.status
         if r.status == 200:
             ct_header = r.getheader("Content-Type", None)
+            encoding = "utf-8"
             if ct_header:
-                encoding = parse_header(ct_header)[1]["charset"]
-            else:
-                encoding = "utf-8"
+                try:
+                    encoding = parse_header(ct_header)[1]["charset"]
+                except (IndexError, KeyError):
+                    pass
             rr.text = r.read().decode(encoding)
         conn.close()
         result = rr
