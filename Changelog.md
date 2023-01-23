@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.6.3
+
+- Fixed an issue in the HTTPS client code that caused DMARC records to not be detected, due to a missing
+  public suffix list.
+
 ## 1.6.2
 
 - Fixed issues in the example configs regarding [celery concurrency](https://github.com/internetstandards/Internet.nl/issues/817)
