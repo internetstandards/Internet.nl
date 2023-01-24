@@ -189,7 +189,7 @@ def articlepage(request, article):
     title = "article " + article + " title"
     # If there is no such translated article give a 404.
     if _(title) == title:
-        return page404(request)
+        return page404(request, None)
 
     articles = _("article .index").split()
     articles = articles[0:6]
@@ -333,6 +333,7 @@ def change_language(request):
     if request.method == "POST":
         hostname = request.get_host().split(":")[0]
         previous_page = request.POST.get("previous-page", "/")
+        new_language = request.POST.get("language")
 
         # The News category may have articles available only for certain
         # languages, so we redirect to the News index instead.
@@ -347,11 +348,18 @@ def change_language(request):
         news_url = re.match(r"^/blogarticle/.*$", previous_page)
         if news_url:
             previous_page = "/blogarticle/"
-        news_url = re.match(r"^/article/.*$", previous_page)
+        news_url = re.match(r"^/article/(.*)$", previous_page)
+        # print(f"{previous_page=} {new_language=} {news_url=}")
         if news_url:
-            previous_page = "/article/"
+            article_name = news_url.group(1)
+            with translation.override(new_language):
+                translation_key = f"article {article_name.replace('/', '')} body"
+                has_translation = translation.gettext(translation_key) != translation_key
+                # print(f"{translation_key=} {article_name=} {translation.gettext(translation_key)=} {has_translation}")
+                if not has_translation:
+                    previous_page = "/article/"
+        # print(f"final: {previous_page=}")
 
-        new_language = request.POST.get("language")
         if new_language and translation.check_for_language(new_language):
             url_regex = re.compile("^(?P<protocol>http[s]?://).*$")
             uri = request.build_absolute_uri()
