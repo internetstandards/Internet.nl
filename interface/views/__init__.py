@@ -357,7 +357,7 @@ def change_language(request):
                 has_translation = translation.gettext(translation_key) != translation_key
                 # print(f"{translation_key=} {article_name=} {translation.gettext(translation_key)=} {has_translation}")
                 if not has_translation:
-                    previous_page = "/article/"
+                    previous_page = "/articles/"
         # print(f"final: {previous_page=}")
 
         if new_language and translation.check_for_language(new_language):

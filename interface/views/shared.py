@@ -496,10 +496,15 @@ class SafeHttpResponseRedirect(HttpResponseRedirect):
     other hosts or schemes. It should be used for any case where part
     of the URL may be based on user input.
     """
-
     def __init__(self, redirect_to, *args, **kwargs):
         super().__init__(redirect_to, *args, **kwargs)
+        allowed_hosts = []
+        for host in settings.ALLOWED_HOSTS:
+            allowed_hosts.append(host)
+            for language_code, language_name in settings.LANGUAGES:
+                allowed_hosts.append(language_code + host)
+
         if not settings.DEBUG and not url_has_allowed_host_and_scheme(
-            redirect_to, allowed_hosts=settings.ALLOWED_HOSTS, require_https=True
+            redirect_to, allowed_hosts=allowed_hosts, require_https=True
         ):
             raise DisallowedRedirect("Unsafe redirect to URL: %s" % redirect_to)
