@@ -496,6 +496,7 @@ class SafeHttpResponseRedirect(HttpResponseRedirect):
     other hosts or schemes. It should be used for any case where part
     of the URL may be based on user input.
     """
+
     def __init__(self, redirect_to, *args, **kwargs):
         super().__init__(redirect_to, *args, **kwargs)
         allowed_hosts = []
