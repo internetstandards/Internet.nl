@@ -349,16 +349,13 @@ def change_language(request):
         if news_url:
             previous_page = "/blogarticle/"
         news_url = re.match(r"^/article/(.*)$", previous_page)
-        # print(f"{previous_page=} {new_language=} {news_url=}")
         if news_url:
             article_name = news_url.group(1)
             with translation.override(new_language):
                 translation_key = f"article {article_name.replace('/', '')} body"
                 has_translation = translation.gettext(translation_key) != translation_key
-                # print(f"{translation_key=} {article_name=} {translation.gettext(translation_key)=} {has_translation}")
                 if not has_translation:
                     previous_page = "/articles/"
-        # print(f"final: {previous_page=}")
 
         if new_language and translation.check_for_language(new_language):
             url_regex = re.compile("^(?P<protocol>http[s]?://).*$")
