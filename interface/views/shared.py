@@ -499,5 +499,13 @@ class SafeHttpResponseRedirect(HttpResponseRedirect):
 
     def __init__(self, redirect_to, *args, **kwargs):
         super().__init__(redirect_to, *args, **kwargs)
-        if not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=None, require_https=True):
-            raise DisallowedRedirect("Unsafe redirect to URL: " % redirect_to)
+        allowed_hosts = []
+        for host in settings.ALLOWED_HOSTS:
+            allowed_hosts.append(host)
+            for language_code, language_name in settings.LANGUAGES:
+                allowed_hosts.append(language_code + host)
+
+        if not settings.DEBUG and not url_has_allowed_host_and_scheme(
+            redirect_to, allowed_hosts=allowed_hosts, require_https=True
+        ):
+            raise DisallowedRedirect("Unsafe redirect to URL: %s" % redirect_to)
