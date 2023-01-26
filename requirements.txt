@@ -27,7 +27,9 @@ cached-property==1.5.2
 celery==5.2.7
     # via -r requirements.in
 certifi==2022.12.7
-    # via requests
+    # via
+    #   requests
+    #   sentry-sdk
 cffi==1.15.1
     # via cryptography
 chardet==5.1.0
@@ -159,6 +161,8 @@ selenium==3.141.0
     # via -r requirements.in
 semantic-version==2.10.0
     # via setuptools-rust
+sentry-sdk==1.15.0
+    # via -r requirements.in
 setuptools-rust==1.5.2
     # via -r requirements.in
 setuptools-scm==7.1.0
@@ -188,6 +192,7 @@ urllib3==1.26.14
     # via
     #   requests
     #   selenium
+    #   sentry-sdk
 vine==5.0.0
     # via
     #   amqp

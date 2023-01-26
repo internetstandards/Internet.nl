@@ -13,7 +13,16 @@ For an example, see internet.nl.dist.env.
 
 import os
 from os import getenv
-from internetnl.settings_utils import split_csv_trim, BASE_DIR, get_boolean_env, check_if_environment_present
+
+import sentry_sdk
+
+from internetnl.settings_utils import (
+    split_csv_trim,
+    BASE_DIR,
+    get_boolean_env,
+    check_if_environment_present,
+    remove_sentry_pii,
+)
 
 check_if_environment_present()
 
@@ -585,3 +594,15 @@ CLIENT_RATE_LIMIT = 30
 # --- Routinator settings
 #
 ROUTINATOR_URL = getenv("ROUTINATOR_URL", "http://localhost:9556/api/v1/validity")
+
+
+# Sentry reads SENTRY_DSN directly from environment
+# DSN is on https://sentry.io/settings/dutch-internet-standards-platform/projects/internetnl/keys/
+if getenv("SENTRY_DSN"):
+    sentry_sdk.init(
+        environment=getenv("SENTRY_ENVIRONMENT", "unknown"),
+        traces_sample_rate=0,
+        send_default_pii=False,
+        before_send=remove_sentry_pii,
+        before_breadcrumb=remove_sentry_pii,
+    )
