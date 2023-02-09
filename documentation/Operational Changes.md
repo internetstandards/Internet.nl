@@ -7,6 +7,84 @@ hosters.
 
 * The package python-whois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
 
+Based on an existing 1.6 setup:
+
+```bash
+# The next steps need a privileged user
+sudo su -
+
+# Enable maintenance mode:
+# - edit /etc/apache2/sites-available/internet_nl_shared_config.conf
+# - uncomment the 503 maintenance errordocument+rewrite at the end
+# - reload apache
+
+# Stop all internet.nl services
+for i in $(ls -1 /etc/systemd/system/internetnl-*.service); do systemctl stop `basename $i`; done
+
+su - internetnl
+
+# Get the 1.7 sources
+cd /opt/internetnl/Internet.nl/
+git reset --hard
+git fetch
+git checkout v1.7
+
+# Update the settings file based on the current dist
+cp -v internetnl/settings-dist.py internetnl/settings.py
+
+# Add SENTRY_DSN and SENTRY_ENVIRONMENT to env file
+# SENTRY_DSN is secret
+echo 'SENTRY_DSN=....' >> ~/internet.nl.env
+echo 'SENTRY_ENVIRONMENT=production' >> ~/internet.nl.env
+
+# Update the systemd file for the new settings
+cp -v ~/internet.nl.env ~/internet.nl.systemd.env
+sed -i 's/\export //g'  ~/internet.nl.systemd.env
+mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
+
+# Upgrade dependencies, run migrations and rebuild the frontend
+source ~internetnl/internet.nl.env
+# Use a direct PostgreSQL connection instead of bouncer to prevent migration timeouts
+export DB_PORT=5432
+.venv/bin/pip uninstall python-whois
+.venv/bin/pip install -Ur requirements.txt
+make manage migrate
+make frontend
+
+# (exit back to root shell)
+
+# Deploy new configs (changed celery queue conigs)
+cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
+
+# Restart services, depending if this a batch or single instance server:
+systemctl daemon-reload
+service internetnl-gunicorn restart
+service internetnl-unbound restart
+
+# Single:
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl enable `basename $i` --now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl disable `basename $i` --now; done
+
+# Batch:
+for i in $(ls -1 /etc/systemd/system/internetnl-batch*.service); do systemctl enable `basename $i` --now; done
+for i in $(ls -1 /etc/systemd/system/internetnl-single*.service); do systemctl disable `basename $i` --now; done
+
+# Verify services are running
+# You should see postgresql, redis-server, rabbitmq-server and various internetnl services, next to standard stuff.
+systemctl list-units --type=service
+
+# Disable maintenance mode:
+# - edit /etc/apache2/sites-available/internet_nl_shared_config.conf
+# - comment out the 503 maintenance errordocument+rewrite at the end
+# - reload apache
+
+# In case services failed to start, you can start debugging using these commands:
+tail -f /opt/internetnl/log/*
+journalctl -xe
+
+# Done! :)
+```
+
 ## Change overview for version 1.6(.2)
 
 Based on an existing 1.5.x setup or 1.6 setup that you are upgrading to 1.6.2:
