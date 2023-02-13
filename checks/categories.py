@@ -575,9 +575,14 @@ class MailIpv6MxAaaa(Subtest):
         self.verdict = "detail mail ipv6 mx-AAAA verdict no-null-mx"
         self.tech_type = ""
 
-    def result_invalid_null_mx(self):
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail mail ipv6 mx-AAAA verdict invalid-null-mx"
+    def result_null_mx_with_other_mx(self):
+        self._status(STATUS_NOTICE, override=True)
+        self.verdict = "detail mail ipv6 mx-AAAAA verdict null-mx-with-other-mx"
+        self.tech_type = ""
+
+    def result_null_mx_without_a_aaaa(self):
+        self._status(STATUS_INFO, override=True)
+        self.verdict = "detail mail ipv6 mx-AAAA verdict null-mx-without-a-aaaa"
         self.tech_type = ""
 
 
@@ -775,9 +780,15 @@ class MailDnssecMxExists(Subtest):
         self._status(STATUS_INFO)
         self.verdict = "detail mail dnssec mx-exists verdict no-null-mx"
 
-    def result_invalid_null_mx(self):
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail mail dnssec mx-exists verdict invalid-null-mx"
+    def result_null_mx_with_other_mx(self):
+        self._status(STATUS_NOTICE, override=True)
+        self.verdict = "detail mail dnssec mx-exists verdict null-mx-with-other-mx"
+        self.tech_type = ""
+
+    def result_null_mx_without_a_aaaa(self):
+        self._status(STATUS_INFO, override=True)
+        self.verdict = "detail mail dnssec mx-exists verdict null-mx-without-a-aaaa"
+        self.tech_type = ""
 
     def result_good(self):
         self.was_tested()

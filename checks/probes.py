@@ -359,9 +359,13 @@ class Probe:
                 return "no-null-mx"
             test_instance.result_null_mx_with_other_mx()
             if report[test_instance.name]["verdict"] == test_instance.verdict:
+                # test mailtls null-mx-with-other-mx description
+                # test mailtls null-mx-with-other-mx summary
                 return "null-mx-with-other-mx"
             test_instance.result_null_mx_without_a_aaaa()
             if report[test_instance.name]["verdict"] == test_instance.verdict:
+                # test mailtls null-mx-without-a-aaaa description
+                # test mailtls null-mx-without-a-aaaa summary
                 return "null-mx-without-a-aaaa"
         return verdict
 
