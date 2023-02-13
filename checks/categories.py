@@ -1463,9 +1463,14 @@ class MailTlsStarttlsExists(Subtest):
         self.verdict = "detail mail tls starttls-exists verdict no-null-mx"
         self.tech_type = ""
 
-    def result_invalid_null_mx(self):
+    def result_null_mx_with_other_mx(self):
         self._status(STATUS_NOTICE, override=True)
-        self.verdict = "detail mail tls starttls-exists verdict invalid-null-mx"
+        self.verdict = "detail mail tls starttls-exists verdict null-mx-with-other-mx"
+        self.tech_type = ""
+
+    def result_null_mx_without_a_aaaa(self):
+        self._status(STATUS_INFO, override=True)
+        self.verdict = "detail mail tls starttls-exists verdict null-mx-without-a-aaaa"
         self.tech_type = ""
 
 

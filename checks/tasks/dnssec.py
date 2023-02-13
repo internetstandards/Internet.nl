@@ -186,7 +186,9 @@ def save_results_mail(addr, results, category):
     elif mailtdnssec.mx_status == MxStatus.no_null_mx:
         category.subtests["dnssec_mx_exists"].result_no_null_mx()
     elif mailtdnssec.mx_status == MxStatus.invalid_null_mx:
-        category.subtests["dnssec_mx_exists"].result_invalid_null_mx()
+        category.subtests["dnssec_mx_exists"].result_null_mx_with_other_mx()
+    elif mailtdnssec.mx_status == MxStatus.null_mx_without_a_aaaa:
+        category.subtests["dnssec_mx_exists"].result_null_mx_without_a_aaaa()
     elif mailtdnssec.mx_status == MxStatus.null_mx:
         category.subtests["dnssec_mx_exists"].result_null_mx()
 

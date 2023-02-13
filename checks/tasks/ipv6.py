@@ -233,8 +233,10 @@ def callback(results, addr, parent, parent_name, category):
                 if len(result.get("domains")) == 0:
                     if parent.mx_status == MxStatus.no_null_mx:
                         category.subtests["mx_aaaa"].result_no_null_mx()
-                    elif parent.mx_status == MxStatus.invalid_null_mx:
-                        category.subtests["mx_aaaa"].result_invalid_null_mx()
+                    elif parent.mx_status == MxStatus.null_mx_with_other_mx:
+                        category.subtests["mx_aaaa"].result_null_mx_with_other_mx()
+                    elif parent.mx_status == MxStatus.null_mx_without_a_aaaa:
+                        category.subtests["mx_aaaa"].result_null_mx_without_a_aaaa()
                     elif parent.mx_status == MxStatus.null_mx:
                         category.subtests["mx_aaaa"].result_null_mx()
                     else:

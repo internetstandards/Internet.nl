@@ -49,8 +49,9 @@ class MxStatus(LabelEnum):
     has_mx = 0
     no_mx = 1
     no_null_mx = 2
-    invalid_null_mx = 3
+    null_mx_with_other_mx = 3
     null_mx = 4
+    null_mx_without_a_aaaa = 5
 
 
 class DnssecStatus(Enum):
