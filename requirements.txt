@@ -50,7 +50,7 @@ click-repl==0.2.0
     # via celery
 colorlog==6.7.0
     # via -r requirements.in
-cryptography==39.0.1
+cryptography==38.0.4
     # via -r requirements.in
 django==3.2.18
     # via
