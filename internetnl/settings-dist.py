@@ -15,6 +15,7 @@ import os
 from os import getenv
 
 import sentry_sdk
+from setuptools_scm import get_version
 
 from internetnl.settings_utils import (
     split_csv_trim,
@@ -606,3 +607,6 @@ if getenv("SENTRY_DSN"):
         before_send=remove_sentry_pii,
         before_breadcrumb=remove_sentry_pii,
     )
+
+
+VERSION = get_version(version_scheme="release-branch-semver")
