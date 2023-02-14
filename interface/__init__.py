@@ -5,13 +5,10 @@ from functools import wraps
 
 from celery import shared_task
 from django.core.cache import cache
-from setuptools_scm import get_version
 
 from interface import redis_id
 
 mimetypes.add_type("text/x-component", ".htc")
-
-__version__ = get_version(version_scheme="release-branch-semver")
 
 
 def dummy_wrapper(*args, **kwargs):
