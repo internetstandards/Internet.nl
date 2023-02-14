@@ -1090,8 +1090,10 @@ def build_summary_report(testtls, category):
             category.subtests["starttls_exists"].result_null_mx()
         elif testtls.mx_status == MxStatus.no_null_mx:
             category.subtests["starttls_exists"].result_no_null_mx()
-        elif testtls.mx_status == MxStatus.invalid_null_mx:
-            category.subtests["starttls_exists"].result_invalid_null_mx()
+        elif testtls.mx_status == MxStatus.null_mx_with_other_mx:
+            category.subtests["starttls_exists"].result_null_mx_with_other_mx()
+        elif testtls.mx_status == MxStatus.null_mx_without_a_aaaa:
+            category.subtests["starttls_exists"].result_null_mx_without_a_aaaa()
         else:
             category.subtests["starttls_exists"].result_no_mailservers()
         server_set = testtls.testset

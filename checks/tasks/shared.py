@@ -113,9 +113,11 @@ def do_mail_get_servers(self, url, *args, **kwargs):
     for prio, rdata in mxlist:
         is_null_mx = prio == 0 and rdata == ""
         if is_null_mx:
-            if len(mxlist) > 1 or not do_resolve_a_aaaa(self, url):
-                # Invalid NULL MX next to other MX or no A/AAAA.
-                return [(None, None, MxStatus.invalid_null_mx)]
+            if len(mxlist) > 1:
+                # Invalid NULL MX next to other MX.
+                return [(None, None, MxStatus.null_mx_with_other_mx)]
+            elif not do_resolve_a_aaaa(self, url):
+                return [(None, None, MxStatus.null_mx_without_a_aaaa)]
             return [(None, None, MxStatus.null_mx)]
 
         rdata = rdata.lower().strip()

@@ -357,11 +357,16 @@ class Probe:
                 # test mailtls no-null-mx description
                 # test mailtls no-null-mx summary
                 return "no-null-mx"
-            test_instance.result_invalid_null_mx()
+            test_instance.result_null_mx_with_other_mx()
             if report[test_instance.name]["verdict"] == test_instance.verdict:
-                # test mailtls invalid-null-mx description
-                # test mailtls invalid-null-mx summary
-                return "invalid-null-mx"
+                # test mailtls null-mx-with-other-mx description
+                # test mailtls null-mx-with-other-mx summary
+                return "null-mx-with-other-mx"
+            test_instance.result_null_mx_without_a_aaaa()
+            if report[test_instance.name]["verdict"] == test_instance.verdict:
+                # test mailtls null-mx-without-a-aaaa description
+                # test mailtls null-mx-without-a-aaaa summary
+                return "null-mx-without-a-aaaa"
         return verdict
 
     def get_max_score(self, modelobj, maxscore):
