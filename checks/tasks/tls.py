@@ -1206,7 +1206,6 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
         stdin=subprocess.PIPE,
         universal_newlines=True,
     ) as proc:
-
         try:
             res = proc.communicate(input=chain_txt, timeout=10)
         except subprocess.TimeoutExpired:
@@ -2573,7 +2572,6 @@ class ConnectionChecker:
             while True:
                 try:
                     with conn_type.from_conn(self._conn, ciphers=cipher_string, version=tls_version) as new_conn:
-
                         # record the cipher details and add the cipher to the
                         # insufficient or phase out sets.
                         self._note_conn_details(new_conn)

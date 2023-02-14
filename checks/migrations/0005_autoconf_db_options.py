@@ -30,7 +30,6 @@ def record_report_id_thresholds(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("checks", "0004_APIv2__add_technical_file__reverse_lookup_names__remove_custom_views"),
     ]

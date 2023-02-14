@@ -589,7 +589,7 @@ def simhash(url, task=None):
             "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
             "need to enlarge it, logging for statistical purposes"
         )
-    except (OSError):
+    except OSError:
         if v4_conn:
             v4_conn.close()
         if v6_conn:

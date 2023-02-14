@@ -16,7 +16,6 @@ def fix_unused_v4_fields(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("checks", "0003_summer"),
     ]

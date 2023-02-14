@@ -7,7 +7,6 @@ import enumfields.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("checks", "0008_django_upgrade"),
     ]

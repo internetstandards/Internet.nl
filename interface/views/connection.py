@@ -549,7 +549,6 @@ def network_ipv4(request, test_id: int = 0):
 
 @jsonp
 def network_resolver(request, test_id: int = 0):
-
     # Overwrite the test_id using data from django-hosts.
     if hasattr(request, "test_id"):
         test_id = request.test_id
