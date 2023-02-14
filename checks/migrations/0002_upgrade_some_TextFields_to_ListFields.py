@@ -6,7 +6,6 @@ import checks.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("checks", "0001_initial"),
     ]

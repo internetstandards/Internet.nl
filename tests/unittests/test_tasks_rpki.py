@@ -31,7 +31,6 @@ class RpkiTestCase(SimpleTestCase):
 
     @override_settings(ROUTINATOR_URL="https://example.net/api/v1/validity")
     def test_do_rpki(self):
-
         for domain, expected_result in BEACONS.items():
             with self.subTest(f"{domain}"):
                 for asn, prefix in expected_result["routes"]:

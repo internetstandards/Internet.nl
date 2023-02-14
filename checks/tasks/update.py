@@ -136,7 +136,6 @@ def _update_hof():
     mail = sorted(mail, key=lambda x: x["timestamp"], reverse=True)
 
     for data, red_id in ((champions, redis_id.hof_champions), (web, redis_id.hof_web), (mail, redis_id.hof_mail)):
-
         cached_data = {"date": None, "count": 0, "data": data}
         if cached_data["data"]:
             cached_data["date"] = cached_data["data"][0]["timestamp"]

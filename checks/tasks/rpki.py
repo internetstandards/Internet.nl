@@ -107,7 +107,6 @@ def callback(results: Mapping[TestName, TestResult], domain, parent, parent_name
 
     for testname, serviceresults in results:
         for host, routing in serviceresults.items():
-
             kw = {
                 parent_name: parent,
                 "host": host,

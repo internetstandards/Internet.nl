@@ -485,7 +485,6 @@ if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
-
     REPORT_METADATA_MAIL_MAP.append(
         {
             "name": "mail_auth",

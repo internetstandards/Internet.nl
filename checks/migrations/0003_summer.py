@@ -7,7 +7,6 @@ import checks.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("checks", "0002_upgrade_some_TextFields_to_ListFields"),
     ]

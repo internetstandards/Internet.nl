@@ -30,7 +30,6 @@ def test_get_boolean_env_set_false(monkeypatch):
 
 
 def test_remove_sentry_pii():
-
     mock_event_regular = {
         "exception": {
             "values": [

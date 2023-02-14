@@ -7,7 +7,6 @@ import checks.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("checks", "0006_mailtestauth_dmarc_record_org_domain"),
     ]
