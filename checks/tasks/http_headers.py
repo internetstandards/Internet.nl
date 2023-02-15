@@ -413,6 +413,7 @@ class HeaderCheckerContentSecurityPolicy:
               the restrains above).
 
         """
+        results["content_security_policy_errors"] = []
         if not value:
             results["content_security_policy_enabled"] = False
             score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
@@ -458,7 +459,9 @@ class HeaderCheckerContentSecurityPolicy:
                 results["content_security_policy_enabled"] = False
                 score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
                 results["content_security_policy_score"] = score
-                results["content_security_policy_errors"] = [{"msgid": failure} for failure in self.result.failures()]
+                results["content_security_policy_errors"] = [
+                    {"msgid": failure, "context": {}} for failure in self.result.failures()
+                ]
 
     def get_positive_values(self):
         score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD

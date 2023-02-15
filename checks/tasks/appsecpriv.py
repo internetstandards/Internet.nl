@@ -148,12 +148,17 @@ def build_report(model, category):
         else:
             category.subtests["http_referrer_policy"].result_bad(model.referrer_policy_values)
 
-        csp_tech_data = [
-            {
+        if model.content_security_policy_values:
+            csp_message = {
                 "msgid": "policy-found",
                 "context": {"policy": model.content_security_policy_values},
             }
-        ] + model.content_security_policy_errors
+        else:
+            csp_message = {
+                "msgid": "no-policy-found",
+                "context": {},
+            }
+        csp_tech_data = [csp_message] + model.content_security_policy_errors
         if model.content_security_policy_enabled:
             category.subtests["http_csp"].result_good(csp_tech_data)
         else:

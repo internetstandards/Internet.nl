@@ -1771,6 +1771,9 @@ msgstr "yes"
 msgid "detail tech data http-csp policy-found"
 msgstr "Found CSP policy: {policy}"
 
+msgid "detail tech data http-csp no-policy-found"
+msgstr "No CSP policy found"
+
 msgid "detail tech data http-csp has-unsafe-inline"
 msgstr "Error: policy uses unsafe-inline"
 
