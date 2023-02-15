@@ -127,6 +127,7 @@ class Subtest:
             )
         return rooted_tech_data
 
+
 # --- Categories
 #
 class WebIpv6(Category):

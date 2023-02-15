@@ -823,31 +823,17 @@ components:
         securitytxt_errors:
           type: array
           description: >
-            Errors found while parsing an RFC9116 security.txt file
+            Errors found while parsing an RFC9116 security.txt file.
+            Message IDs generally match https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md
           items:
-            type: object
-            properties:
-              msgid:
-                type: string
-                description: message id (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
-              context:
-                type: object
-                additionalProperties: true
-                description: additional context for the message, e.g. line number
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
         securitytxt_recommendations:
           type: array
           description: >
             Recommendations found while parsing an RFC9116 security.txt file
+            Message IDs generally match https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md
           items:
-            type: object
-            properties:
-              msgid:
-                type: string
-                description: message id (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
-              context:
-                type: object
-                additionalProperties: true
-                description: additional context for the message, e.g. line number
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
         securitytxt_found_host:
           type: string
           description: The host from which the security.txt was retrieved, after potential redirects
@@ -1151,6 +1137,17 @@ components:
           allOf:
             - $ref: '#/components/schemas/TechnicalSharedDetails'
             - $ref: '#/components/schemas/TechnicalReceivingMailServerDetails'
+
+    TechnicalMessagesWithContext:
+      type: object
+      properties:
+        msgid:
+          type: string
+          description: message id
+        context:
+          type: object
+          additionalProperties: true
+          description: additional context for the message, e.g. line numbers of errors
 
     DomainStatus:
       type: string
