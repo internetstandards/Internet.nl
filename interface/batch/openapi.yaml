@@ -827,9 +827,9 @@ components:
           items:
             type: object
             properties:
-              message:
+              msgid:
                 type: string
-                description: message code (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
+                description: message id (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
               context:
                 type: object
                 additionalProperties: true
@@ -841,9 +841,9 @@ components:
           items:
             type: object
             properties:
-              message:
+              msgid:
                 type: string
-                description: message code (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
+                description: message id (largely matches https://github.com/DigitalTrustCenter/sectxt/blob/main/README.md)
               context:
                 type: object
                 additionalProperties: true

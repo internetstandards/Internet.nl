@@ -71,7 +71,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
             content=None,
             url=f"https://{domain}{path}",
             found_host=found_host,
-            errors=[{"message": "utf8"}],
+            errors=[{"msgid": "utf8"}],
         )
     return _evaluate_response(status, content_type, domain, path, content, found_host)
 
@@ -88,31 +88,31 @@ def _evaluate_response(
     if not status or status == 404:
         errors.append(
             {
-                "message": "no_security_txt_404",
+                "msgid": "no_security_txt_404",
             }
         )
     elif status != 200:
         errors.append(
             {
-                "message": "no_security_txt_other",
+                "msgid": "no_security_txt_other",
                 "context": {"status_code": status},
             }
         )
     elif not content_type:
-        errors.append({"message": "no_content_type"})
+        errors.append({"msgid": "no_content_type"})
         # In case of missing or not text/plain type, there is a fair chance this
         # is an HTML page, for which there is no point to try to parse the content
         # as it will flood the user with useless errors. Therefore, we ignore content
         # in this scenario.
         content = None
     elif media_type.lower() != "text/plain":
-        errors.append({"message": "invalid_media"})
+        errors.append({"msgid": "invalid_media"})
         content = None
     elif charset != "utf-8" and charset != "csutf8":
-        errors.append({"message": "invalid_charset"})
+        errors.append({"msgid": "invalid_charset"})
 
     if status == 200 and path != SECURITYTXT_EXPECTED_PATH:
-        errors.append({"message": "location"})
+        errors.append({"msgid": "location"})
 
     return SecuritytxtRetrieveResult(
         found=status == 200,
@@ -125,7 +125,7 @@ def _evaluate_response(
 
 def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
     def parser_format(parser_messages):
-        return [{"message": f"{m['code']}", "context": {"line_no": m.get("line")}} for m in parser_messages]
+        return [{"msgid": f"{m['code']}", "context": {"line_no": m.get("line")}} for m in parser_messages]
 
     if not result.found or not result.content:
         return {

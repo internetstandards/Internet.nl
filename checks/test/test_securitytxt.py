@@ -46,7 +46,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=[{"message": "no_security_txt_404"}],
+        errors=[{"msgid": "no_security_txt_404"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -57,7 +57,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=[{"message": "no_security_txt_other", "context": {"status_code": 500}}],
+        errors=[{"msgid": "no_security_txt_other", "context": {"status_code": 500}}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -68,7 +68,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=[{"message": "no_content_type"}],
+        errors=[{"msgid": "no_content_type"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -79,7 +79,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=[{"message": "invalid_media"}],
+        errors=[{"msgid": "invalid_media"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -90,7 +90,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=[{"message": "invalid_media"}],
+        errors=[{"msgid": "invalid_media"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -101,7 +101,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
-        errors=[{"message": "invalid_charset"}],
+        errors=[{"msgid": "invalid_charset"}],
     )
 
     result = _evaluate_with_valid_defaults(
@@ -112,7 +112,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/security.txt",
         found_host="example.nl",
-        errors=[{"message": "location"}],
+        errors=[{"msgid": "location"}],
     )
 
 
@@ -122,13 +122,13 @@ def test_evaluate_securitytxt():
         content="",
         url="https://example.com/security.txt",
         found_host="host",
-        errors=[{"message": "example"}],
+        errors=[{"msgid": "example"}],
     )
     assert _evaluate_securitytxt(result) == {
         "securitytxt_enabled": False,
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
-        "securitytxt_errors": [{"message": "example"}],
+        "securitytxt_errors": [{"msgid": "example"}],
         "securitytxt_recommendations": [],
     }
 
@@ -144,11 +144,11 @@ def test_evaluate_securitytxt():
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
         "securitytxt_errors": [
-            {"message": "invalid_line", "context": {"line_no": 1}},
-            {"message": "no_expire", "context": {"line_no": None}},
-            {"message": "no_contact", "context": {"line_no": None}},
+            {"msgid": "invalid_line", "context": {"line_no": 1}},
+            {"msgid": "no_expire", "context": {"line_no": None}},
+            {"msgid": "no_contact", "context": {"line_no": None}},
         ],
-        "securitytxt_recommendations": [{"message": "not_signed", "context": {"line_no": None}}],
+        "securitytxt_recommendations": [{"msgid": "not_signed", "context": {"line_no": None}}],
     }
 
     result = SecuritytxtRetrieveResult(
@@ -156,17 +156,17 @@ def test_evaluate_securitytxt():
         content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com",
         url="https://example.com/security.txt",
         found_host="host",
-        errors=[{"message": "example"}],
+        errors=[{"msgid": "example"}],
     )
     assert _evaluate_securitytxt(result) == {
         "securitytxt_enabled": True,
         "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
         "securitytxt_found_host": "host",
-        "securitytxt_errors": [{"message": "example"}],
+        "securitytxt_errors": [{"msgid": "example"}],
         "securitytxt_recommendations": [
-            {"message": "long_expiry", "context": {"line_no": 1}},
-            {"message": "no_encryption", "context": {"line_no": None}},
-            {"message": "not_signed", "context": {"line_no": None}},
+            {"msgid": "long_expiry", "context": {"line_no": 1}},
+            {"msgid": "no_encryption", "context": {"line_no": None}},
+            {"msgid": "not_signed", "context": {"line_no": None}},
         ],
     }
 
@@ -183,8 +183,8 @@ def test_evaluate_securitytxt():
         "securitytxt_found_host": "host",
         "securitytxt_errors": [],
         "securitytxt_recommendations": [
-            {"message": "long_expiry", "context": {"line_no": 1}},
-            {"message": "no_encryption", "context": {"line_no": None}},
-            {"message": "not_signed", "context": {"line_no": None}},
+            {"msgid": "long_expiry", "context": {"line_no": 1}},
+            {"msgid": "no_encryption", "context": {"line_no": None}},
+            {"msgid": "not_signed", "context": {"line_no": None}},
         ],
     }

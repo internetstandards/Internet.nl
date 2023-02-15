@@ -107,8 +107,7 @@ def render_details_table(tech_type, table_headers, table_content):
                         value = _("results empty-argument-alt-text")
                     elif tech_type == "table_translatable":
                         if type(value) == dict:
-                            # TODO: we need to be sure about the naming of message/context
-                            value = _(value["message"]).format(**value.get("context", {}))
+                            value = _(value["msgid"]).format(**value.get("context", {}))
                     elif value in [
                         "detail tech data yes",
                         "detail tech data no",

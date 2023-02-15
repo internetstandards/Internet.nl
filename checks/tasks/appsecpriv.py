@@ -160,14 +160,14 @@ def build_report(model, category):
         if model.securitytxt_enabled:
             default_message = [
                 {
-                    "message": "retrieved-from",
+                    "msgid": "retrieved-from",
                     "context": {"hostname": model.securitytxt_found_host},
                 }
             ]
         else:
             default_message = [
                 {
-                    "message": "requested-from",
+                    "msgid": "requested-from",
                     "context": {"hostname": model.securitytxt_found_host},
                 }
             ]
