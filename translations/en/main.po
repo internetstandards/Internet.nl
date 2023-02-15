@@ -1767,6 +1767,96 @@ msgstr "sufficient"
 msgid "detail tech data yes"
 msgstr "yes"
 
+msgid "detail tech data http-securitytxt retrieved-from"
+msgstr "Retrieved security.txt from {hostname}."
+
+msgid "detail tech data http-securitytxt requested-from"
+msgstr "Requested security.txt from {hostname}."
+
+msgid "detail tech data http-securitytxt utf8"
+msgstr "Error: Content must be utf-8 encoded."
+
+msgid "detail tech data http-securitytxt no_security_txt_404"
+msgstr "Error: security.txt could not be located."
+
+msgid "detail tech data http-securitytxt no_security_txt_other"
+msgstr "Error: security.txt could not be located (unexpected HTTP response code {status_code})."
+
+msgid "detail tech data http-securitytxt no_content_type"
+msgstr "Error: HTTP Content-Type header must be sent."
+
+msgid "detail tech data http-securitytxt invalid_media"
+msgstr "Error: Media type in Content-Type header must be 'text/plain'."
+
+msgid "detail tech data http-securitytxt invalid_charset"
+msgstr "Error: Charset parameter in Content-Type header must be 'utf-8' if present."
+
+msgid "detail tech data http-securitytxt location"
+msgstr "Error: security.txt was located on the top-level path (legacy place), but must be placed under the '/.well-known/' path."
+
+msgid "detail tech data http-securitytxt no_expire"
+msgstr "Error: 'Expires' field must be present."
+
+msgid "detail tech data http-securitytxt multi_expire"
+msgstr "Error: 'Expires' field must not appear more than once."
+
+msgid "detail tech data http-securitytxt invalid_expiry"
+msgstr "Error: Date and time in 'Expires' field must be formatted according to ISO 8601 (line {line_no})."
+
+msgid "detail tech data http-securitytxt expired"
+msgstr "Error: Date and time in 'Expires' field must not be in the past (line {line_no})."
+
+msgid "detail tech data http-securitytxt no_contact"
+msgstr "Error: 'Contact' field must appear at least once."
+
+msgid "detail tech data http-securitytxt multi_lang"
+msgstr "Error: 'Preferred-Languages' field must not appear more than once."
+
+msgid "detail tech data http-securitytxt invalid_lang"
+msgstr "Error: Value in 'Preferred-Languages' field must match one or more language tags as defined in RFC5646, separated by commas (line {line_no})."
+
+msgid "detail tech data http-securitytxt no_uri"
+msgstr "Error: Field value must be a URI (e.g. beginning with 'mailto:') (line {line_no})."
+
+msgid "detail tech data http-securitytxt no_https"
+msgstr "Error: Web URI must begin with 'https://' (line {line_no})."
+
+msgid "detail tech data http-securitytxt prec_ws"
+msgstr "Error: There must be no whitespace before the field separator (colon) (line {line_no})."
+
+msgid "detail tech data http-securitytxt no_space"
+msgstr "Error: Field separator (colon) must be followed by a space (line {line_no})."
+
+msgid "detail tech data http-securitytxt empty_key"
+msgstr "Error: Field name must not be empty (line {line_no})."
+
+msgid "detail tech data http-securitytxt empty_value"
+msgstr "Error: Field value must not be empty (line {line_no})."
+
+msgid "detail tech data http-securitytxt invalid_line"
+msgstr "Error: Line must contain a field name and value, unless the line is blank or contains a comment (line {line_no})."
+
+msgid "detail tech data http-securitytxt no_line_separators"
+msgstr "Error: Every line must end with either a carriage return and line feed characters or just a line feed character."
+
+msgid "detail tech data http-securitytxt data_after_sig"
+msgstr "Error: Data exists after signature (line {line_no})."
+
+msgid "detail tech data http-securitytxt long_expiry"
+msgstr "Recommendation: Date and time in 'Expires' field should be less than a year into the future (line {line_no})."
+
+msgid "detail tech data http-securitytxt no_encryption"
+msgstr "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address."
+
+msgid "detail tech data http-securitytxt not_signed"
+msgstr "Recommendation: security.txt should be digitally signed."
+
+msgid "detail tech data http-securitytxt no_canonical"
+msgstr "Recommendation: 'Canonical' field should be present in a signed file."
+
+msgid "detail tech data http-securitytxt unknown_field"
+msgstr "Recommendation: security.txt contains an unknown field. Either this is a custom field which may not be widely supported, or there is a typo in a standardised field name (line {line_no})."
+
 msgid "detail verdict could-not-test"
 msgstr "Test error. Please try again later."
 

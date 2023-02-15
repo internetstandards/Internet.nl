@@ -3,7 +3,7 @@
 import http.client
 from cgi import parse_header
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 import sectxt
 
@@ -22,7 +22,7 @@ class SecuritytxtRetrieveResult:
     content: Optional[str]
     url: str
     found_host: str
-    errors: List[str]
+    errors: List[Dict[str, str]]
 
 
 def securitytxt_check(af_ip_pair, domain, task):
@@ -71,7 +71,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task) -> SecuritytxtRetrieveR
             content=None,
             url=f"https://{domain}{path}",
             found_host=found_host,
-            errors=["Error: Content must be utf-8 encoded."],
+            errors=[{"msgid": "utf8"}],
         )
     return _evaluate_response(status, content_type, domain, path, content, found_host)
 
@@ -86,27 +86,33 @@ def _evaluate_response(
         charset = params.get("charset", "utf-8").lower()
 
     if not status or status == 404:
-        errors.append("Error: security.txt could not be located.")
+        errors.append(
+            {
+                "msgid": "no_security_txt_404",
+            }
+        )
     elif status != 200:
-        errors.append(f"Error: security.txt could not be located (unexpected HTTP response code {status}).")
+        errors.append(
+            {
+                "msgid": "no_security_txt_other",
+                "context": {"status_code": status},
+            }
+        )
     elif not content_type:
-        errors.append("Error: HTTP Content-Type header must be sent.")
+        errors.append({"msgid": "no_content_type"})
         # In case of missing or not text/plain type, there is a fair chance this
         # is an HTML page, for which there is no point to try to parse the content
         # as it will flood the user with useless errors. Therefore, we ignore content
         # in this scenario.
         content = None
     elif media_type.lower() != "text/plain":
-        errors.append("Error: Media type in Content-Type header must be 'text/plain'.")
+        errors.append({"msgid": "invalid_media"})
         content = None
     elif charset != "utf-8" and charset != "csutf8":
-        errors.append("Error: Charset parameter in Content-Type header must be 'utf-8' if present.")
+        errors.append({"msgid": "invalid_charset"})
 
     if status == 200 and path != SECURITYTXT_EXPECTED_PATH:
-        errors.append(
-            "Error: security.txt was located on the top-level path (legacy place), "
-            "but must be placed under the '/.well-known/' path."
-        )
+        errors.append({"msgid": "location"})
 
     return SecuritytxtRetrieveResult(
         found=status == 200,
@@ -118,11 +124,8 @@ def _evaluate_response(
 
 
 def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
-    def parser_format(message_type, parser_messages):
-        return [
-            message_type + ": " + m["message"] + (f" (line {m['line']})" if m.get("line") else "")
-            for m in parser_messages
-        ]
+    def parser_format(parser_messages):
+        return [{"msgid": f"{m['code']}", "context": {"line_no": m.get("line")}} for m in parser_messages]
 
     if not result.found or not result.content:
         return {
@@ -136,7 +139,7 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
     # URL intentionally not passed as Canonical testing is out of scope at this time
     parser = sectxt.Parser(result.content)
 
-    errors = result.errors + parser_format("Error", parser.errors)
+    errors = result.errors + parser_format(parser.errors)
     score = scoring.WEB_APPSECPRIV_SECURITYTXT_BAD if errors else scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD
 
     return {
@@ -144,5 +147,5 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
         "securitytxt_score": score,
         "securitytxt_found_host": result.found_host,
         "securitytxt_errors": errors,
-        "securitytxt_recommendations": parser_format("Recommendation", parser.recommendations),
+        "securitytxt_recommendations": parser_format(parser.recommendations),
     }

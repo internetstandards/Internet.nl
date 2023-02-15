@@ -73,6 +73,7 @@ class Subtest:
         init_verdict="detail verdict not-tested",
         init_tech_type="table",
         init_tech_data="detail tech data not-tested",
+        tech_data_translation_root="",
     ):
         self.name = name
         self.label = label
@@ -85,6 +86,7 @@ class Subtest:
         self.verdict = init_verdict
         self.tech_type = init_tech_type
         self.tech_data = init_tech_data
+        self.tech_data_translation_root = tech_data_translation_root
 
     def _status(self, status, override=False):
         """
@@ -116,6 +118,14 @@ class Subtest:
             "tech_string": self.tech_string,
             "tech_data": self.tech_data,
         }
+
+    def add_tech_data_translation_root(self, tech_data):
+        rooted_tech_data = []
+        for data in tech_data:
+            rooted_tech_data.append(
+                {"msgid": f"{self.tech_data_translation_root} {data['msgid']}", "context": data.get("context", {})}
+            )
+        return rooted_tech_data
 
 
 # --- Categories
@@ -2329,19 +2339,21 @@ class WebAppsecprivSecuritytxt(Subtest):
             worst_status=scoring.WEB_APPSECPRIV_SECURITYTXT_WORST_STATUS,
             full_score=scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD,
             model_score_field="securitytxt_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data http-securitytxt",
         )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web appsecpriv http-securitytxt verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data)
 
     def result_bad(self, tech_data):
         self._status(STATUS_NOTICE)
         self.verdict = "detail web appsecpriv http-securitytxt verdict bad"
-        self.tech_data = tech_data or ""
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_recommendations(self, tech_data):
         self._status(STATUS_INFO)
         self.verdict = "detail web appsecpriv http-securitytxt verdict recommendations"
-        self.tech_data = tech_data or ""
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
