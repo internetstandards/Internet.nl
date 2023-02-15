@@ -2293,17 +2293,19 @@ class WebAppsecprivHttpCsp(Subtest):
             worst_status=(scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_WORST_STATUS),
             full_score=scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD,
             model_score_field="content_security_policy_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data http-csp",
         )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web appsecpriv http-csp verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web appsecpriv http-csp verdict bad"
-        self.tech_data = tech_data or ""
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
 class WebAppsecprivHttpReferrerPolicy(Subtest):
