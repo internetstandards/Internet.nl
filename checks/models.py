@@ -700,6 +700,7 @@ class DomainTestAppsecpriv(BaseTestModel):
 
     content_security_policy_enabled = models.BooleanField(null=True, default=False)
     content_security_policy_values = ListField(default=[])
+    content_security_policy_errors = ListField(default=[])
     content_security_policy_score = models.IntegerField(null=True)
 
     x_content_type_options_enabled = models.BooleanField(null=True, default=False)
@@ -732,6 +733,7 @@ class DomainTestAppsecpriv(BaseTestModel):
             "content_security_policy_enabled",
             "content_security_policy_values",
             "content_security_policy_score",
+            "content_security_policy_errors",
             "x_content_type_options_enabled",
             "x_content_type_options_values",
             "x_content_type_options_score",
@@ -746,6 +748,7 @@ class DomainTestAppsecpriv(BaseTestModel):
         return {
             "content_security_policy_enabled": self.content_security_policy_enabled,
             "content_security_policy_values": self.content_security_policy_values,
+            "content_security_policy_errors": self.content_security_policy_errors,
             "referrer_policy_enabled": self.referrer_policy_enabled,
             "referrer_policy_values": self.referrer_policy_values,
             "x_content_type_options_enabled": self.x_content_type_options_enabled,

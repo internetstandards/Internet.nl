@@ -848,6 +848,12 @@ components:
             behavior.
           items:
             type: string
+        content_security_policy_errors:
+          type: array
+          description: >
+            Errors found in the CSP policy.
+          items:
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
         x_content_type_options_enabled:
           type: boolean
           description: >

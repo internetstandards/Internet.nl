@@ -126,6 +126,7 @@ def save_results(model, results, addr, domain):
                 model.content_security_policy_enabled = result.get("content_security_policy_enabled")
                 model.content_security_policy_score = result.get("content_security_policy_score")
                 model.content_security_policy_values = result.get("content_security_policy_values")
+                model.content_security_policy_errors = result.get("content_security_policy_errors")
 
     model.save()
 
@@ -147,10 +148,21 @@ def build_report(model, category):
         else:
             category.subtests["http_referrer_policy"].result_bad(model.referrer_policy_values)
 
-        if model.content_security_policy_enabled:
-            category.subtests["http_csp"].result_good(model.content_security_policy_values)
+        if model.content_security_policy_values:
+            csp_message = {
+                "msgid": "policy-found",
+                "context": {"policy": model.content_security_policy_values},
+            }
         else:
-            category.subtests["http_csp"].result_bad(model.content_security_policy_values)
+            csp_message = {
+                "msgid": "no-policy-found",
+                "context": {},
+            }
+        csp_tech_data = [csp_message] + model.content_security_policy_errors
+        if model.content_security_policy_enabled:
+            category.subtests["http_csp"].result_good(csp_tech_data)
+        else:
+            category.subtests["http_csp"].result_bad(csp_tech_data)
 
         if model.x_content_type_options_enabled:
             category.subtests["http_x_content_type"].result_good(model.x_content_type_options_values)

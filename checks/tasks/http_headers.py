@@ -70,18 +70,29 @@ class HeaderCheckerContentSecurityPolicy:
             self.has_frame_ancestors = False
             self.has_invalid_host = False
 
+        def failures(self):
+            failures = []
+            fail_attrs = [
+                "has_unsafe_inline",
+                "has_unsafe_eval",
+                "has_http",
+                "has_data",
+                "has_invalid_host",
+                "has_unsafe_hashes",
+            ]
+            for fail_attr in fail_attrs:
+                if getattr(self, fail_attr):
+                    failures.append(fail_attr.replace("_", "-"))
+            if not self.has_default_src:
+                failures.append("missing-invalid-default-src")
+            if not self.has_default_src and not self.has_frame_src:
+                failures.append("missing-invalid-frame-src")
+            if not self.has_frame_ancestors:
+                failures.append("missing-invalid-frame-ancestors")
+            return failures
+
         def failed(self):
-            if (
-                self.has_unsafe_inline
-                or self.has_unsafe_eval
-                or self.has_http
-                or self.has_data
-                or self.has_invalid_host
-                or self.has_unsafe_hashes
-                or not (self.has_default_src and self.has_frame_src and self.has_frame_ancestors)
-            ):
-                return True
-            return False
+            return bool(self.failures())
 
         def __str__(self):
             """
@@ -402,6 +413,7 @@ class HeaderCheckerContentSecurityPolicy:
               the restrains above).
 
         """
+        results["content_security_policy_errors"] = []
         if not value:
             results["content_security_policy_enabled"] = False
             score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
@@ -447,6 +459,9 @@ class HeaderCheckerContentSecurityPolicy:
                 results["content_security_policy_enabled"] = False
                 score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
                 results["content_security_policy_score"] = score
+                results["content_security_policy_errors"] = [
+                    {"msgid": failure, "context": {}} for failure in self.result.failures()
+                ]
 
     def get_positive_values(self):
         score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_GOOD
