@@ -146,6 +146,7 @@ def test_evaluate_securitytxt():
         "securitytxt_errors": [
             {"msgid": "invalid_line", "context": {"line_no": 1}},
             {"msgid": "no_expire", "context": {"line_no": None}},
+            {"msgid": "no_line_separators", "context": {"line_no": None}},
             {"msgid": "no_contact", "context": {"line_no": None}},
         ],
         "securitytxt_recommendations": [{"msgid": "not_signed", "context": {"line_no": None}}],
@@ -153,7 +154,7 @@ def test_evaluate_securitytxt():
 
     result = SecuritytxtRetrieveResult(
         found=True,
-        content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com",
+        content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n",
         url="https://example.com/security.txt",
         found_host="host",
         errors=[{"msgid": "example"}],
@@ -172,7 +173,7 @@ def test_evaluate_securitytxt():
 
     result = SecuritytxtRetrieveResult(
         found=True,
-        content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com",
+        content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n",
         url="https://example.com/security.txt",
         found_host="host",
         errors=[],
