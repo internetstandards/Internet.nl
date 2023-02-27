@@ -677,6 +677,7 @@ class DomainTechnicalResults:
         details = {}
         details["domain"] = cls._get_mail_domain(report_table)
         details["nameservers"] = cls._get_mail_nameservers(report_table)
+        details["mx_nameservers"] = cls._get_mail_mx_nameservers(report_table)
         details["receiving_mailservers"] = cls._get_mail_mailservers(report_table)
         return details
 
