@@ -2,9 +2,10 @@
 
 ## 1.7
 
-This release has API version 2.3.0, The `securitytxt_errors` and
-`securitytxt_recommendations` types were changed, and the
-`record_org_domain` was added for DMARC.
+This release has API version 2.3.0:
+- The `record_org_domain` was added for DMARC.
+- An issue was fixed where the `mx_nameservers` field was not included in results.
+- The `securitytxt_errors` and `securitytxt_recommendations` types were changed.
 
 ## 1.6.3
 
