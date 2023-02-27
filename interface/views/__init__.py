@@ -68,7 +68,7 @@ def indexpage(request):
 # URL: /clear/<dname>
 def clear(request, dname):
     url = dname.lower()
-    if url in settings.CACHE_RESET_WHITELIST:
+    if url in settings.CACHE_RESET_ALLOWLIST:
         for test in [
             "dnssec",
             "mail_auth",
