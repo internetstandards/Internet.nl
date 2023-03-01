@@ -1,0 +1,240 @@
+version: '2.1'
+
+services:
+  webserver:
+    image: httpd:2.4
+
+  app:
+    image: $DOCKER_IMAGE
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_APP_INTERNAL
+      public-internet: {}
+    ports:
+      - 8080
+    depends_on:
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    environment:
+      - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - SECRET_KEY
+      - DB_HOST=postgres
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
+      - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
+      - DJANGO_IS_PROXIED=True
+      - ALLOWED_HOSTS
+      - DEBUG
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
+      - IPV6_TEST_ADDR
+      - CSP_DEFAULT_SRC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+
+  db-migrate:
+    image: $DOCKER_IMAGE
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    networks:
+      - internal
+    command: migrate
+    # this container runs to completion and exits with 0
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - SECRET_KEY
+      - DB_HOST=postgres
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      # disable redis cache as it is not used in db migrations
+      - CACHE_LOCATION=
+      - DEBUG
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+
+  worker:
+    image: $DOCKER_IMAGE
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    networks:
+      - internal
+      - public-internet
+    entrypoint: celery
+
+    command: --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --queues default,celery,db_worker,slow_db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker --concurrency 100
+
+    depends_on:
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      routinator:
+        # TODO: convert to service_healthy when healthcheck is added to routinator
+        condition: service_started
+    environment:
+      - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - SECRET_KEY
+      - DB_HOST=postgres
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - DEBUG
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
+
+
+  redis:
+    image: $DOCKER_IMAGE_REDIS
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+    volumes:
+      - redis:/data
+
+  rabbitmq:
+    image: $DOCKER_IMAGE_RABBITMQ
+    networks:
+      - internal
+    ports:
+      # expose admin GUI to localhost
+      - $RABBITMQ_GUI
+    healthcheck:
+      test: ["CMD", "nc", "127.0.0.1", "5672"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+
+  postgres:
+    image: $DOCKER_IMAGE_POSTGRES
+    networks:
+      - internal
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    healthcheck:
+      test: pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  routinator:
+    image: $DOCKER_IMAGE_ROUTINATOR
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
+      public-internet: {}
+    volumes:
+      - routinator:/home/routinator/.rpki-cache/
+
+  unbound:
+    image: $DOCKER_IMAGE_UNBOUND
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
+      public-internet:
+        ipv6_address: $IPV6_UNBOUND_IP_PUBLIC
+
+    ports:
+      - $UNBOUND_PORT_TCP
+      - $UNBOUND_PORT_UDP
+
+    environment:
+      - IPV4_IP_PUBLIC
+      - IPV6_IP_PUBLIC
+      - CONN_TEST_DOMAIN
+
+    healthcheck:
+      test: ["CMD", "unbound-control", "status"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+
+volumes:
+  postgres: {}
+  redis: {}
+  rabbitmq: {}
+  routinator: {}
+
+networks:
+  # disable default network
+  default:
+    driver: none
+  internal:
+    internal: true
+    driver: bridge
+    # no IPv6 required
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+      - subnet: $IPV4_SUBNET_INTERNAL
+
+  # allows connected services to access public internet
+  public-internet:
+    # required to enable IPv6 on Docker Desktop runtime
+    enable_ipv6: true
+    driver: bridge
+    driver_opts:
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+      # network for internal communication between services
+      com.docker.network.bridge.enable_icc: "true"
+    ipam:
+      driver: default
+      config:
+      - subnet: $IPV6_SUBNET_PUBLIC
+        gateway: $IPV6_GATEWAY_PUBLIC

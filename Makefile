@@ -400,3 +400,75 @@ enable:
 
 .QA: qa
 qa: fix check test
+
+ENVIRONMENT ?= develop
+DOCKER_COMPOSE_CMD=docker compose --env-file ${ENVIRONMENT}.env
+
+docker-build:
+	docker build -f docker/Dockerfile -t ${DOCKER_IMAGE} .
+
+docker-build-debug:
+	DOCKER_BUILDKIT=0 docker build -f docker/Dockerfile -t ${DOCKER_IMAGE} .
+
+docker-shell:
+	docker run -ti --rm --entrypoint /bin/bash ${DOCKER_IMAGE}
+
+docker-run:
+	docker run -ti --rm ${DOCKER_IMAGE}
+
+docker-compose-up: services=
+docker-compose-up:
+	${DOCKER_COMPOSE_CMD} up --wait ${services}
+
+docker-compose-up-build:
+	${DOCKER_COMPOSE_CMD} up --wait --build ${services}
+
+docker-compose-logs:
+	${DOCKER_COMPOSE_CMD} logs -f webserver app worker test-target
+
+docker-compose-logs-all:
+	${DOCKER_COMPOSE_CMD} logs -f
+
+docker-compose-exec: service=app
+docker-compose-exec: cmd=/bin/bash
+docker-compose-exec:
+	${DOCKER_COMPOSE_CMD} exec --user root ${service} ${cmd}
+
+docker-compose-create-superuser:
+	${DOCKER_COMPOSE_CMD} exec app ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')"
+
+docker-compose-rabbitmq-admin:
+	open "http://guest:guest@localhost:$$(${DOCKER_COMPOSE_CMD} port rabbitmq 15672)"
+
+docker-compose-postgres-shell:
+	${DOCKER_COMPOSE_CMD} exec postgres psql --username "internetnl" --dbname "internetnl_db1"
+
+docker-compose-redis-shell:
+	${DOCKER_COMPOSE_CMD} exec redis redis-cli
+
+docker-compose-reset-test-target:
+	curl http://localhost:8080/clear/test-target.internet.nl/ -s
+
+# pause all containers, but don't remove them
+docker-compose-stop:
+	${DOCKER_COMPOSE_CMD} stop
+
+# stop and remove all containers, but keep volumes (eg: routinator cache, databases)
+docker-compose-down:
+	${DOCKER_COMPOSE_CMD} down
+
+docker-compose-down-remove-volumes:
+	${DOCKER_COMPOSE_CMD} down --volumes
+
+docker-compose-pull-dependencies:
+	${DOCKER_COMPOSE_CMD} pull --ignore-buildable
+
+# Docker container runtime for MacOS
+# until nassl can be built for ARM: https://github.com/nabla-c0d3/nassl/issues/39
+# it is required to emulate x86_64 under Apple Silicon Macs
+docker-compose-runtime-start:
+	colima start --cpu 4 --memory 8 --arch x86_64
+
+docker-compose-runtime-stop:
+	colima stop
+
