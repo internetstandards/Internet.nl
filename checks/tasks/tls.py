@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 import errno
 import http.client
+import itertools
 import socket
 import ssl
 import time
 
+import unbound
 from binascii import hexlify
 from enum import Enum
 from itertools import product
@@ -1755,10 +1757,15 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         cache_ttl = redis_id.mail_starttls.ttl
         while timer() - start < cache_ttl and not all(results.values()) > 0:
             for server, dane_cb_data, _ in mailservers:
+                cache_key = ";".join(
+                    itertools.chain.from_iterable(
+                        [sorted(task.resolve(server, rr_type)) for rr_type in [unbound.RR_TYPE_A, unbound.RR_TYPE_AAAA]]
+                    )
+                )
                 if results[server]:
                     continue
                 # Check if we already have cached results.
-                cache_id = redis_id.mail_starttls.id.format(server)
+                cache_id = redis_id.mail_starttls.id.format(cache_key)
                 if cache.add(cache_id, False, cache_ttl):
                     # We do not have cached results, get them and cache them.
                     results[server] = check_mail_tls(server, dane_cb_data, task)
