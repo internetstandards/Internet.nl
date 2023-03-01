@@ -34,7 +34,7 @@ __pycache__
 .venv
 
 # When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
-unbound
+./unbound
 _unbound
 python-whois
 pythonwhois.egg-info
