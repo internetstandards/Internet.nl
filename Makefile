@@ -36,7 +36,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 env = env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration_tests
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -334,8 +334,9 @@ nassl: venv .nassl
 
 test: .make.test	## run test suite
 .make.test:
-	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
-		-m pytest --log-cli-level=10  -vvv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*'\
+		-m pytest --log-cli-level=10  -vvv -ra -k 'not integration_celery and not integration_scanners and not system' \
+		--ignore=integration_tests/ ${testargs}
 	# generate coverage
 	${env} coverage report
 	# and pretty html
@@ -343,8 +344,6 @@ test: .make.test	## run test suite
 	# ensure no model updates are commited without migrations
 	# Todo: disabled because the app now requires celery to run. This should be added to the CI first.
 	# ${env} python3 manage.py makemigrations --check
-
-
 
 testcase: ${app}
 	# run specific testcase
@@ -462,6 +461,22 @@ docker-compose-down-remove-volumes:
 
 docker-compose-pull-dependencies:
 	${DOCKER_COMPOSE_CMD} pull --ignore-buildable
+
+integration-tests:
+	${env} pytest -v integration_tests/integration ${testargs}
+
+live-tests:
+	${env} pytest -v integration_tests/live ${testargs}
+
+integration-tests-debug:
+	${env} pytest --setup-show -v --capture=no integration_tests ${testargs}
+
+# run integration-tests against development environment instance
+integration-tests-against-develop: env:=${env} INTERNETNL_USE_DOCKER_COMPOSE_PROJECT="internetnl"
+integration-tests-against-develop: integration-tests
+
+# reset caches in development environment and run integration-tests against development environment instance
+integration-tests-reset-and-against-develop: docker-compose-redis-clear-celery-results integration-tests-against-develop
 
 # Docker container runtime for MacOS
 # until nassl can be built for ARM: https://github.com/nabla-c0d3/nassl/issues/39

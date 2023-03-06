@@ -244,7 +244,7 @@ if CACHE_ENABLED:
 CACHE_TTL = 200
 CACHE_WHOIS_TTL = 60 * 60 * 24
 # Specify domain names for which the cache may be reset through /clear/<dname>
-CACHE_RESET_ALLOWLIST = []
+CACHE_RESET_ALLOWLIST = os.getenv("INTERNETNL_CACHE_RESET_ALLOWLIST", "").split(",")
 
 # --- Language settings
 #
