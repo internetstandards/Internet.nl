@@ -127,10 +127,6 @@ if settings.ENABLE_BATCH is True:
         url(r"^api/batch/", batch.old_url, name="batch_old"),
     ]
 
-
-if settings.DEBUG is True:
-    pass
-
 # Static URLs, these are normally never exposed on production environment as
 # they are served by the webserver upfront. Since they are not accessed, it
 # does not matter to leave them in.
