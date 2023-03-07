@@ -69,3 +69,5 @@ custom-deps
 # Any tmp stuff, like for compilations, translations, unzipping / downloading you name it. Any content in this
 # directory can and will be deleted at random intervals at any moment.
 tmp
+.devenv*
+devenv.local.nix
