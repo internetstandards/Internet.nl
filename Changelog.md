@@ -2,10 +2,29 @@
 
 ## 1.7
 
+- Added specific [error messages in the technical details](https://github.com/internetstandards/Internet.nl/issues/577)
+  for Content-Security-Policy results.
+- Added requirements for [base-uri](https://github.com/internetstandards/Internet.nl/issues/525) and
+  [form-action](https://github.com/internetstandards/Internet.nl/issues/524) to the Content-Security-Policy test.
+- Added translations for [security.txt error messages](https://github.com/internetstandards/Internet.nl/issues/774).
+- Fixed an [uncaught exception](https://github.com/internetstandards/Internet.nl/issues/494)
+  in the security.txt text which could cause the entire test to fail for some HTTP responses.
+- Corrected handling of [bogus TLSA records](https://github.com/internetstandards/Internet.nl/issues/681).
+- [Loosened requirement for null MX](https://github.com/internetstandards/Internet.nl/issues/748)
+  when a domain has no A or AAAA.
+- [Added the version number](https://github.com/internetstandards/Internet.nl/issues/494) to the footer.
+- [Added Sentry support](https://github.com/internetstandards/Internet.nl/issues/770) for error reporting.
+- Code quality was cleaned up in various places.
+- Dependencies were updated.
+
 This release has API version 2.3.0:
-- The `record_org_domain` was added for DMARC.
-- An issue was fixed where the `mx_nameservers` field was not included in results.
+- The `record_org_domain` was added for DMARC
+  ([#489](https://github.com/internetstandards/Internet.nl/issues/489)).
 - The `securitytxt_errors` and `securitytxt_recommendations` types were changed.
+  They now contain error codes (and possibly context) rather than full sentences.
+- The `content_security_policy_errors` field was added with error codes for CSP.
+- An issue was fixed where the `mx_nameservers` field was not included in results
+  ([#882](https://github.com/internetstandards/Internet.nl/issues/882)).
 
 ## 1.6.3
 
