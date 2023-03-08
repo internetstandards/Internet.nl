@@ -404,7 +404,27 @@ ENVIRONMENT ?= develop
 DOCKER_COMPOSE_CMD=docker compose --env-file ${ENVIRONMENT}.env
 
 docker-build:
-	docker build -f docker/Dockerfile -t ${DOCKER_IMAGE} .
+	# use buildx to levarage per layer caching
+	# cache-from: try to pull layers from existing image in registry
+	# BUILDKIT_INLINE_CACHE: include per layer caching manifest into final image
+	docker buildx build \
+		--file docker/Dockerfile \
+		--cache-from=${DOCKER_IMAGE} \
+		--build-arg=BUILDKIT_INLINE_CACHE=1 \
+		--tag ${DOCKER_IMAGE} \
+		.
+
+docker-build-push:
+	# use buildx to levarage per layer caching
+	# cache-from: try to pull layers from existing image in registry
+	# BUILDKIT_INLINE_CACHE: include per layer caching manifest into final image
+	docker buildx build \
+		--file docker/Dockerfile \
+		--cache-from=${DOCKER_IMAGE} \
+		--build-arg=BUILDKIT_INLINE_CACHE=1 \
+		--tag=${DOCKER_IMAGE} \
+		--push \
+		.
 
 docker-build-debug:
 	DOCKER_BUILDKIT=0 docker build -f docker/Dockerfile -t ${DOCKER_IMAGE} .

@@ -1,5 +1,9 @@
 name: Internet.nl
 
+env:
+  DOCKER_IMAGE: ghcr.io/internetstandards/internet.nl:develop
+  RELEASE_IMAGE: ghcr.io/internetstandards/internet.nl:latest
+
 on:
   pull_request:
   push:
@@ -9,6 +13,57 @@ on:
 
 
 jobs:
+  integration-test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        # don't need to test multiple versions since everything runs in Docker,
+        # but keep consistent with rest of the jobs
+        python-version: [ "3.9" ]
+    steps:
+      - uses: actions/checkout@v3
+        # include vendor/ submodules used to build dependencies like nassl and unbound
+        with:
+          submodules: recursive
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # https://docs.docker.com/build/cache/backends/gha/
+      - name: Switch to caching Docker driver
+        run: docker buildx create --use --driver=docker-container
+
+      - name: Prefetch docker-compose dependencies in background
+        run: make docker-compose-pull-dependencies &
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Make venv
+        run: make venv
+      - name: Start test instance
+        run: make docker-compose-up
+      - name: Run integration tests
+        # run integration tests against test instance (which has empty project name)
+        run: INTERNETNL_USE_DOCKER_COMPOSE_PROJECT="" make integration-tests
+      - name: Stop test instance
+        run: make docker-compose-down-remove-volumes &
+
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 15
