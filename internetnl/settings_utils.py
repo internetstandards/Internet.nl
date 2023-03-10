@@ -1,6 +1,10 @@
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from typing import List
+import setuptools_scm
+import logging
+
+log = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -75,3 +79,20 @@ def remove_sentry_pii(event, hint):
         event["extra"]["celery-job"]["args"] = cleaned_args
 
     return event
+
+
+def get_version():
+    # Get version from environment or SCM
+    ENVIRONMENT_VERSION = os.environ.get("INTERNETNL_VERSION", None)
+    try:
+        SCM_VERSION = setuptools_scm.get_version(version_scheme="release-branch-semver")
+    except LookupError:
+        SCM_VERSION = None
+
+    if ENVIRONMENT_VERSION:
+        return ENVIRONMENT_VERSION
+    if SCM_VERSION:
+        return SCM_VERSION
+
+    log.warning("Unable to determine version from environment or SCM.")
+    return "0.0.0-dev0"

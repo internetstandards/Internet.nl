@@ -15,17 +15,14 @@ import os
 from os import getenv
 
 import sentry_sdk
-from setuptools_scm import get_version
 
 from internetnl.settings_utils import (
     split_csv_trim,
     BASE_DIR,
     get_boolean_env,
-    check_if_environment_present,
     remove_sentry_pii,
+    get_version,
 )
-
-check_if_environment_present()
 
 # Infrastructure
 # # Generic / Django Framework
@@ -34,6 +31,7 @@ DEBUG = get_boolean_env("DEBUG", False)
 
 # # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = getenv("SECRET_KEY", "secret")
+SKIP_SECRET_KEY_CHECK = bool(getenv("SKIP_SECRET_KEY_CHECK", DEBUG))
 
 # # If Django is proxied (eg. webserver proxying to django/gunicorn) enable this setting.
 # # Make sure that the `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers;
@@ -71,6 +69,7 @@ CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/
 # Infrastructure
 # # Redis Cache
 CACHE_LOCATION = getenv("CACHE_LOCATION", "redis://localhost:6379/0")
+CACHE_ENABLED = bool(CACHE_LOCATION)
 
 # Infrastructure
 # # LDNS Dane / or ldns-dane-wrapper ('./ldns-dane-wrapper')
@@ -231,15 +230,16 @@ DATABASES = {"default": DATABASES_SETTINGS[DATABASE]}
 #
 # This is the setting for django-redis https://pypi.org/project/django-redis/
 #
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": CACHE_LOCATION,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+if CACHE_ENABLED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": CACHE_LOCATION,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+        }
     }
-}
 
 CACHE_TTL = 200
 CACHE_WHOIS_TTL = 60 * 60 * 24
@@ -581,7 +581,7 @@ LOGGING = {
 
 MEDIA_ROOT = BASE_DIR
 
-if not DEBUG and SECRET_KEY == "secret":
+if SECRET_KEY == "secret" and not SKIP_SECRET_KEY_CHECK:
     print("FATAL: the secret key in the config has not yet been configured. Quitting.")
     exit(-1)
     # Todo: exit the app. Currently not known how things run exactly in production.
@@ -609,5 +609,4 @@ if getenv("SENTRY_DSN"):
         before_breadcrumb=remove_sentry_pii,
     )
 
-
-VERSION = get_version(version_scheme="release-branch-semver")
+VERSION = get_version()

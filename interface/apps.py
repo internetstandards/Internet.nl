@@ -140,8 +140,10 @@ class InterfaceConfig(AppConfig):
 
     def ready(self):
         log.debug("Running interface startup checks.")
-        _load_autoconf_in_cache()
-        _load_padded_macs_in_cache()
-        _clear_cached_pages()
+        if settings.CACHE_ENABLED:
+            _load_autoconf_in_cache()
+            _load_padded_macs_in_cache()
+            _clear_cached_pages()
+
         _batch_startup_checks()
         connection.inc_thread_sharing()
