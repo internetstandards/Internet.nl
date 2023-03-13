@@ -1,7 +1,7 @@
 # Security Policy
 
 ## Supported versions
-Only the lastest release will be actively supported. In case of serious regressions or security issues, we may decide to backport a fix to older versions. 
+Only the [lastest release](https://github.com/internetstandards/Internet.nl/releases) will be actively supported. In case of serious regressions or security issues, we may decide to backport a fix to older versions. 
 
 ## Reporting a vulnerability
 * Before reporting, please take note of our [Coordinated Vulnerability Disclosure (CVD) policy](https://en.internet.nl/disclosure/);
