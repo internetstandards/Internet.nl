@@ -337,8 +337,11 @@ class HeaderCheckerContentSecurityPolicy:
                                 return True
         return False
 
-    def _check_default_src(self, domain):
-        directive = "default-src"
+    def _check_none_self_similar(self, domain, directive: str):
+        """
+        Check whether the value is none, self, the domain, subdomain
+        or superdomain. Originally meant for default-src, now also for base-uri.
+        """
         domain = domain.rstrip(".")
         expected_sources = 0
         matched_host = 0
@@ -397,13 +400,11 @@ class HeaderCheckerContentSecurityPolicy:
         self.result.has_unsafe_inline = self._check_matched_for_groups(dict(unsafe_inline=[]))
         self.result.has_unsafe_eval = self._check_matched_for_groups(dict(unsafe_eval=[]))
         self.result.has_unsafe_hashes = self._check_matched_for_groups(dict(unsafe_hashes=[]))
-        self.result.has_base_uri = self._check_matched_for_groups(
-            dict(self=[], none=[], host=[]), directives=["base-uri"]
-        )
         self.result.has_form_action = self._check_matched_for_groups(
             dict(self=[], none=[], host=[]), directives=["form-action"]
         )
-        self.result.has_default_src = self._check_default_src(domain)
+        self.result.has_base_uri = self._check_none_self_similar(domain, "base-uri")
+        self.result.has_default_src = self._check_none_self_similar(domain, "default-src")
         self.result.has_frame_src = self._check_matched_for_groups(dict(self=[], none=[]), directives=["frame-src"])
         self.result.has_frame_ancestors = self._check_matched_for_groups(
             dict(self=[], none=[]), directives=["frame-ancestors"]
