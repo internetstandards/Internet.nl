@@ -534,7 +534,7 @@ LOGGING = {
             "formatter": "color",
         },
         "file": {
-            "level": "INFO",
+            "level": "DEBUG" if DEBUG else "INFO",
             "class": "logging.FileHandler",
             "filename": "django.log",
         },
