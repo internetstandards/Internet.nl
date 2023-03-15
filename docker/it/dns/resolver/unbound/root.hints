@@ -1,4 +1,0 @@
-; Based on http://www.internic.net/domain/named.root
-.                      3600000     NS    MYROOT.TK.
-MYROOT.TK.             3600000     A     172.16.238.3
-MYROOT.TK.             3600000     AAAA  2001:3200:3200::3

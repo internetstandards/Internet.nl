@@ -1,2 +1,0 @@
-inet_protocols = ipv6
-smtpd_tls_protocols = TLSv1.3
