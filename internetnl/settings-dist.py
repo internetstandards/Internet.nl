@@ -44,6 +44,7 @@ ADMIN_NAME = getenv("ADMIN_NAME", "Administrator")
 ADMIN_EMAIL = getenv("ADMIN_EMAIL", "Administrator")
 SERVER_EMAIL = getenv("SERVER_EMAIL", "django@internet.nl")
 CSP_DEFAULT_SRC = split_csv_trim(getenv("CSP_DEFAULT_SRC", "'self',*.internet.nl"))
+CSP_BASE_URI = CSP_FORM_ACTION = CSP_DEFAULT_SRC
 INTERNAL_IPS = split_csv_trim(getenv("INTERNAL_IPS", ""))
 TIME_ZONE = getenv("TIME_ZONE", "UTC")
 
