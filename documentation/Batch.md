@@ -49,6 +49,16 @@ Django application.
 Management for the HTTP authenticated users needs to happen separately for the
 upfront webserver.
 
+To register a new user on the current internet.nl production setup on int-prod-batch:
+```
+sudo -s -u internetnl
+cd /opt/internetnl/Internet.nl
+source ~internetnl/internet.nl.env
+make -- manage api_users register -n "$NAME" -o "$ORGNAME" -e "$EMAIL" -u "$USERNAME"
+htpasswd /etc/apache2/htpasswd $USERNAME
+# <enter API password>
+```
+
 ### Forwarding resolver
 In batch operation mode it is advised to use a forwarding resolver that all the
 celery tasks are going to forward DNS queries to. This is configurable with the
