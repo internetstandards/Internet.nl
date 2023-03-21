@@ -117,6 +117,8 @@ RUN cp internetnl/settings-dist.py internetnl/settings.py
 
 ENV LDNS_DANE=/usr/bin/ldns-dane
 
+ENV STATIC_ROOT /app/static
+
 # build all static components for the application
 RUN python3 bin/frontend.py js
 RUN python3 bin/frontend.py css
