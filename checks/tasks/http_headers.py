@@ -405,7 +405,9 @@ class HeaderCheckerContentSecurityPolicy:
         )
         self.result.has_base_uri = self._check_none_self_similar(domain, "base-uri")
         self.result.has_default_src = self._check_none_self_similar(domain, "default-src")
-        self.result.has_frame_src = self._check_matched_for_groups(dict(self=[], none=[]), directives=["frame-src"])
+        self.result.has_frame_src = self._check_matched_for_groups(
+            dict(self=[], none=[], host=[]), directives=["frame-src"]
+        )
         self.result.has_frame_ancestors = self._check_matched_for_groups(
             dict(self=[], none=[]), directives=["frame-ancestors"]
         )

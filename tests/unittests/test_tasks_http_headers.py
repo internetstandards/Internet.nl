@@ -276,6 +276,10 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         headers = self.base_policy + "frame-ancestors 'self'; frame-src http:"
         self._is_bad(headers)
 
+    def test_frame_source_domain(self):
+        headers = self.base_policy + "frame-ancestors 'self'; frame-src www.example.org"
+        self._is_good(headers)
+
     def test_two_headers(self):
         headers = self.base_policy + "frame-ancestors https:, frame-ancestors 'none'"
         self._is_good(headers)
