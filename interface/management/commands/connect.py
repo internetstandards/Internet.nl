@@ -1,5 +1,3 @@
-from sys import exit
-
 from django.core.management.base import BaseCommand
 
 from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
@@ -15,7 +13,6 @@ from checks.tasks.tls_connection import (
     DebugConnection,
     ModernConnection,
     SSLConnectionWrapper,
-    http_get,
 )
 
 
@@ -46,13 +43,7 @@ class Command(BaseCommand):
         parser.add_argument("--calc-score", action="store_true", help=("Calculate the prescribed ordering score."))
 
     def handle(self, *args, **options):
-        tls_version = SSLV23
         server_or_url = options["server_or_url"]
-
-        if server_or_url.startswith("http"):
-            rr = http_get(server_or_url)
-            self.stdout.write(rr.text)
-            exit(rr.status_code)
 
         tls_version = {
             "auto": SSLV23,

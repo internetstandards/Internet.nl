@@ -4,6 +4,7 @@ import time
 from urllib.parse import urlparse
 
 import idna
+import requests
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -16,7 +17,6 @@ from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
-from checks.tasks.tls_connection import http_get
 from interface import batch, batch_shared_task, redis_id
 from internetnl import log
 
@@ -759,11 +759,11 @@ def dmarc_fetch_public_suffix_list():
 
     """
     public_suffix_list = []
-    r = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
-    if not r:
+    response = requests.get(settings.PUBLIC_SUFFIX_LIST_URL)
+    if response.status_code != 200 or not response.text:
         return public_suffix_list
 
-    lines = r.text.split("\n")
+    lines = response.text.split("\n")
     for line in lines:
         labels = []
         line = line.rstrip()

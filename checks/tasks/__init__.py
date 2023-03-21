@@ -1,10 +1,13 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import os
+from typing import Dict, Optional
+
 import requests
 import socket
 import time
 
+import urllib3
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -12,6 +15,10 @@ from django.conf import settings
 import unbound
 from internetnl import log
 from timeit import default_timer as timer
+
+# Disable HTTPS warnings.
+# TODO: is this the best place for this call?
+urllib3.disable_warnings()
 
 
 class SetupUnboundContext(Task):
@@ -115,7 +122,7 @@ class SetupUnboundContext(Task):
                 data["rcode"] = result.rcode
         data["done"] = True
 
-    def get(self, url, *args, **kwargs):
+    def http_get(self, url: str, headers: Optional[Dict] = None, *args, **kwargs) -> requests.Response:
         """
         Perform a HTTP GET request using the stored session
         """
@@ -123,6 +130,18 @@ class SetupUnboundContext(Task):
         if not hasattr(self, "_requests_session"):
             self._requests_session = requests.session()
 
+        if not headers:
+            headers = {}
         response = self._requests_session.get(url, *args, **kwargs)
-        log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url}")
+        log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")
         return response
+
+    def http_get_ip(self, domain: str, ip: str, port: int, path: str, https: bool = True) -> requests.Response:
+        # TODO: clean up this awful URL construction
+        if path[0] != "/":
+            path = "/" + path
+        protocol = "https" if https else "http"
+        if ":" in ip:
+            ip = f"[{ip}]"
+        url = f"{protocol}://{ip}:{port}{path}"
+        return self.http_get(url, verify=False, headers={"Host": domain})

@@ -309,7 +309,7 @@ class Routinator(RelyingPartySoftware):
         """
         request = f"{settings.ROUTINATOR_URL}/{asn}/{prefix}"
         try:
-            response = task.get(request)
+            response = task.http_get(request)
 
             # throw exception during Routinator initialization
             response.raise_for_status()
