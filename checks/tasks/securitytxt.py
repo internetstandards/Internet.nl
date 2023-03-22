@@ -48,7 +48,7 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task: SetupUnboundContext) ->
             found_host = urlparse(response.url).hostname
         else:
             found_host = domain
-        content = response.text
+        content = next(response.iter_content(SECURITYTXT_MAX_LENGTH, decode_unicode=False)).decode("utf-8")
     except UnicodeDecodeError:
         return SecuritytxtRetrieveResult(
             found=True,

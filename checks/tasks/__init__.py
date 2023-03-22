@@ -137,7 +137,7 @@ class SetupUnboundContext(Task):
         if not session:
             session = requests.session()
 
-        response = session.get(url, headers=headers, *args, **kwargs)
+        response = session.get(url, headers=headers, stream=True, *args, **kwargs)
         log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")
         return response
 
