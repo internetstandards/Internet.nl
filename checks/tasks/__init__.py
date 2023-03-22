@@ -15,6 +15,7 @@ from django.conf import settings
 import unbound
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
+from checks.tasks.tls_connection_exceptions import NoIpError
 from internetnl import log
 from timeit import default_timer as timer
 
@@ -130,10 +131,13 @@ class SetupUnboundContext(Task):
         """
         Perform a HTTP GET request using the stored session
         """
+        # TODO: auto-retry
+        # TODO: make this this runnable from outside a task
         start_time = timer()
 
         if not headers:
             headers = {}
+        headers["User-Agent"] = "internetnl/1.0"
         if not session:
             session = requests.session()
 
@@ -166,3 +170,17 @@ class SetupUnboundContext(Task):
             url = f"http://{ip}:{port}/{path}"
         headers["Host"] = domain
         return self.http_get(url, verify=False, headers=headers, session=session, *args, **kwargs)
+
+    def http_get_af(self, domain: str, port: int, af: socket.AddressFamily, *args, **kwargs) -> requests.Response:
+        # TODO: rename domain to hostname?
+        rr_type = unbound.RR_TYPE_AAAA if af == socket.AF_INET6 else unbound.RR_TYPE_A
+        # cb_data = ub_resolve_with_timeout(host, rr_type, unbound.RR_CLASS_IN, timeout)
+        # ips = [socket.inet_ntop(af, rr) for rr in cb_data["data"].data]
+        ips = self.resolve(domain, rr_type)
+        exc = NoIpError(f"Unable to resolve {rr_type} record for host '{domain}'")
+        for ip in ips:
+            try:
+                return self.http_get_ip(domain, ip, port, *args, **kwargs)
+            except requests.RequestException as request_exception:
+                exc = request_exception
+        raise exc

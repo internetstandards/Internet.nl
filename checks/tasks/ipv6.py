@@ -7,6 +7,7 @@ import time
 from difflib import SequenceMatcher
 from typing import List
 
+import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -18,8 +19,6 @@ from checks import categories, scoring
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
 from checks.tasks import SetupUnboundContext, dispatcher, shared
 from checks.tasks.dispatcher import check_registry
-from checks.tasks.tls_connection import http_fetch
-from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from interface import batch, batch_shared_task, redis_id
 from interface.views.shared import pretty_domain_name
 from internetnl import log
@@ -557,21 +556,20 @@ def simhash(url, task=None):
     simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
     distance = settings.SIMHASH_MAX + 100
 
-    v4_conn = None
-    v6_conn = None
+    v4_response = None
+    v6_response = None
     for port in [80, 443]:
         try:
-            v4_conn, v4_res, _, _ = http_fetch(url, socket.AF_INET, port=port, task=task, keep_conn_open=True)
-            v6_conn, v6_res, _, _ = http_fetch(url, socket.AF_INET6, port=port, task=task, keep_conn_open=True)
+            v4_response = task.http_get_af(domain=url, port=port, af=socket.AF_INET, https=port == 443)
+            v6_response = task.http_get_af(domain=url, port=port, af=socket.AF_INET6, https=port == 443)
             break
-        except (OSError, NoIpError, http.client.BadStatusLine, ConnectionHandshakeException, ConnectionSocketException):
+        except requests.RequestException:
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
-            if v4_conn:
-                v4_conn.close()
+            if v4_response:
                 return simhash_score, distance
 
-    if not v4_conn:
+    if not v4_response:
         # FAIL: Could not establish a connection on both addresses.
         return simhash_score, distance
 
@@ -579,23 +577,14 @@ def simhash(url, task=None):
     html_v6 = ""
     try:
         # read max 0.5MB
-        html_v4 = v4_res.read(500000)
-        v4_conn.close()
-        v4_conn = None
-
-        html_v6 = v6_res.read(500000)
-        v6_conn.close()
-        v6_conn = None
-    except http.client.IncompleteRead:
+        html_v4 = next(v4_response.iter_content(500000))
+        html_v6 = next(v6_response.iter_coontent(500000))
+    except http.client.IncompleteRead:  # TODO: this is no longer thrown, is in _content_consumed
         log.debug(
             "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
             "need to enlarge it, logging for statistical purposes"
         )
     except OSError:
-        if v4_conn:
-            v4_conn.close()
-        if v6_conn:
-            v6_conn.close()
         return simhash_score, distance
 
     html_v4 = strip_irrelevant_html(html_v4)
