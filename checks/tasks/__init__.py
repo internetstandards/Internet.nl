@@ -13,6 +13,8 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 
 import unbound
+from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
+
 from internetnl import log
 from timeit import default_timer as timer
 
@@ -122,30 +124,45 @@ class SetupUnboundContext(Task):
                 data["rcode"] = result.rcode
         data["done"] = True
 
-    def http_get(self, url: str, headers: Optional[Dict] = None, *args, **kwargs) -> requests.Response:
+    def http_get(
+        self, url: str, headers: Optional[Dict] = None, session: Optional[requests.Session] = None, *args, **kwargs
+    ) -> requests.Response:
         """
         Perform a HTTP GET request using the stored session
         """
         start_time = timer()
-        if not hasattr(self, "_requests_session"):
-            self._requests_session = requests.session()
 
         if not headers:
             headers = {}
-        response = self._requests_session.get(url, headers=headers, *args, **kwargs)
+        if not session:
+            session = requests.session()
+
+        response = session.get(url, headers=headers, *args, **kwargs)
         log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")
         return response
 
-    def http_get_ip(self, domain: str, ip: str, port: int, path: str='/', https: bool = True, headers: Optional[Dict]=None, *args, **kwargs) -> requests.Response:
-        # TODO: clean up this awful URL construction
-        # TODO: probably use ForcedIPHTTPSAdapter
-        if path[0] != "/":
-            path = "/" + path
-        protocol = "https" if https else "http"
-        if ":" in ip:
-            ip = f"[{ip}]"
-        url = f"{protocol}://{ip}:{port}{path}"
+    def http_get_ip(
+        self,
+        domain: str,
+        ip: str,
+        port: int,
+        path: str = "/",
+        https: bool = True,
+        headers: Optional[Dict] = None,
+        *args,
+        **kwargs,
+    ) -> requests.Response:
+        path = path.lstrip("/")
         if not headers:
             headers = {}
+
+        session = requests.session()
+        if https:
+            session.mount(f"https://{domain}", ForcedIPHTTPSAdapter(dest_ip=ip))
+            url = f"https://{domain}:{port}/{path}"
+        else:
+            if ":" in ip:
+                ip = f"[{ip}]"
+            url = f"http://{ip}:{port}/{path}"
         headers["Host"] = domain
-        return self.http_get(url, verify=False, headers=headers, *args, **kwargs)
+        return self.http_get(url, verify=False, headers=headers, session=session, *args, **kwargs)

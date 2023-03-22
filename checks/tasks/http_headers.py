@@ -708,7 +708,6 @@ def http_headers_check(af_ip_pair, domain, header_checkers, task):
             headers=put_headers,
             allow_redirects=False,
         )
-        print(response.request.headers)
     except requests.RequestException:
         # Not able to connect, return negative values
         for h in header_checkers:
