@@ -132,16 +132,20 @@ class SetupUnboundContext(Task):
 
         if not headers:
             headers = {}
-        response = self._requests_session.get(url, *args, **kwargs)
+        response = self._requests_session.get(url, headers=headers, *args, **kwargs)
         log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")
         return response
 
-    def http_get_ip(self, domain: str, ip: str, port: int, path: str, https: bool = True) -> requests.Response:
+    def http_get_ip(self, domain: str, ip: str, port: int, path: str='/', https: bool = True, headers: Optional[Dict]=None, *args, **kwargs) -> requests.Response:
         # TODO: clean up this awful URL construction
+        # TODO: probably use ForcedIPHTTPSAdapter
         if path[0] != "/":
             path = "/" + path
         protocol = "https" if https else "http"
         if ":" in ip:
             ip = f"[{ip}]"
         url = f"{protocol}://{ip}:{port}{path}"
-        return self.http_get(url, verify=False, headers={"Host": domain})
+        if not headers:
+            headers = {}
+        headers["Host"] = domain
+        return self.http_get(url, verify=False, headers=headers, *args, **kwargs)
