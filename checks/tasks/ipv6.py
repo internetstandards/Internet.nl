@@ -560,8 +560,8 @@ def simhash(url, task=None):
     v6_response = None
     for port in [80, 443]:
         try:
-            v4_response = task.http_get_af(domain=url, port=port, af=socket.AF_INET, https=port == 443)
-            v6_response = task.http_get_af(domain=url, port=port, af=socket.AF_INET6, https=port == 443)
+            v4_response = task.http_get_af(hostname=url, port=port, af=socket.AF_INET, https=port == 443)
+            v6_response = task.http_get_af(hostname=url, port=port, af=socket.AF_INET6, https=port == 443)
             break
         except requests.RequestException:
             # Could not connect on given port, try another port.

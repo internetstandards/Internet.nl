@@ -702,7 +702,7 @@ def http_headers_check(af_ip_pair, domain, header_checkers, task):
     put_headers = {"Accept-Encoding": "compress, deflate, exi, gzip, pack200-gzip, x-compress, x-gzip"}
     try:
         response = task.http_get_ip(
-            domain=domain,
+            hostname=domain,
             ip=af_ip_pair[1],
             port=443,
             headers=put_headers,

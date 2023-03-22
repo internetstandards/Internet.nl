@@ -1636,7 +1636,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
             task.http_get_ip(
-                domain=url,
+                hostname=url,
                 ip=af_ip_pair[1],
                 port=443,
             )
@@ -2966,13 +2966,13 @@ def forced_http_check(af_ip_pair, url, task):
     """
     # First connect on port 80 and see if we get refused
     try:
-        task.http_get_ip(domain=url, ip=af_ip_pair[1], port=443, https=True)
+        task.http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
     except requests.RequestException:
         # No HTTPS connection available
         return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
 
     try:
-        response_http = task.http_get_ip(domain=url, ip=af_ip_pair[1], port=80, https=False)
+        response_http = task.http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False)
     except requests.RequestException:
         # No plain HTTP available, but HTTPS is
         return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
