@@ -414,6 +414,18 @@ docker-build:
 		--tag ${DOCKER_IMAGE} \
 		.
 
+docker-build-unbound:
+	# use buildx to levarage per layer caching
+	# cache-from: try to pull layers from existing image in registry
+	# BUILDKIT_INLINE_CACHE: include per layer caching manifest into final image
+	docker buildx build \
+		--file docker/Dockerfile \
+		--cache-from=${DOCKER_IMAGE_UNBOUND} \
+		--build-arg=BUILDKIT_INLINE_CACHE=1 \
+		--tag ${DOCKER_IMAGE_UNBOUND} \
+		--target unbound \
+		.
+
 docker-build-push:
 	# use buildx to levarage per layer caching
 	# cache-from: try to pull layers from existing image in registry

@@ -65,6 +65,48 @@ WORKDIR /src
 
 RUN pip3 install -r requirements.txt
 
+FROM debian:11-slim as unbound
+
+COPY --from=build-unbound /opt/unbound /opt/unbound
+
+RUN apt update && \
+    apt install --no-install-recommends -yqq \
+    # unbound dependencies
+    libevent-2.1-7 \
+    libhiredis0.14 \
+    procps \
+    ldnsutils \
+    openssl \
+    expat \
+    # for envsubst
+    gettext \
+    # since this stage ends up in the final image we care about size and remove cache files
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/opt/unbound/sbin:$PATH"
+
+RUN ldns-keygen -k -a RSASHA256 test-ns-signed.internet.nl
+RUN ldns-keygen -k -a RSASHA256 test-ns6-signed.internet.nl
+
+ADD docker/unbound/test-ns-signed.zone /opt/unbound/etc/unbound/test-ns-signed.zone.template
+ADD docker/unbound/test-ns6-signed.zone /opt/unbound/etc/unbound/test-ns6-signed.zone.template
+
+RUN useradd unbound
+WORKDIR /opt/unbound/etc/unbound
+RUN unbound-control-setup
+RUN unbound-anchor || test $? -eq 1
+
+ADD docker/unbound/entrypoint.sh /entrypoint.sh
+ADD docker/unbound/unbound.conf /opt/unbound/etc/unbound/unbound.conf
+
+RUN chown -R unbound /opt/unbound/etc/unbound
+
+USER unbound
+
+ADD docker/unbound/entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
 FROM debian:11-slim as app
 ARG PYTHON_VERSION
 
@@ -86,7 +128,7 @@ RUN apt update && \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
 
-# copy unbound, unbound Python module into image
+# copy unbound library and unbound Python module into image
 COPY --from=build-unbound /opt/unbound /opt/unbound
 COPY --from=build-unbound /usr/lib/python3/dist-packages/*unbound* /usr/lib/python3/dist-packages/
 

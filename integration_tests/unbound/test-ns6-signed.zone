@@ -1,0 +1,21 @@
+; Zone used for both ipv4+ipv6 and ipv6 only delegation
+		SOA ns.nlnetlabs.nl. ralph.nlnetlabs.nl. (
+			4 ; serial - do not remove this command, used for resigning!
+			14400
+			3600
+			604800
+			3600
+)
+		NS ns
+ns AAAA	2a04:b900:0:100::11
+
+; wildcard matches TLSA query
+*		TLSA 3 1 1 25DE2127E359B8522DDD6E237381458804549CDE5440E4F5B547C562 9E48D46B
+
+; log client address for queries to these records, used in the connection test
+*.a.conn	A	185.49.141.11
+*.aaaa.conn	AAAA	2a04:b900:0:100::11
+*.a-aaaa.conn	A	185.49.141.11
+		AAAA	2a04:b900:0:100::11
+*.bogus.conn	A	185.49.141.11
+		AAAA	2a04:b900:0:100::11
