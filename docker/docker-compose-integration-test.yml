@@ -1,0 +1,116 @@
+# additional services to test against during integration tests and overwrites
+# for existing services to make them work in integration test environment
+version: '2.1'
+
+services:
+  app:
+    dns: $IPV4_IP_RESOLVER_INTERNAL
+  worker:
+    dns: $IPV4_IP_RESOLVER_INTERNAL
+
+  rabbitmq:
+    networks:
+      - internal
+      - public-internet
+    ports:
+      # expose admin GUI to localhost
+      - $RABBITMQ_GUI
+
+  test-target:
+    image: nginx
+
+    networks:
+      public-internet:
+        aliases:
+          - test-target.internet.nl
+
+    ports:
+      - 80
+      - 443
+
+    volumes:
+      - ../integration_tests/nginx_templates/:/etc/nginx/templates/
+      - ../integration_tests/pki:/etc/pki/
+      - ../integration_tests/www:/var/www/
+
+  mail-test-target:
+    image: mailhog/mailhog
+
+    networks:
+      public-internet:
+        aliases:
+          - mx.test-target.internet.nl
+
+    ports:
+      - 25
+
+  browser:
+    image: curlimages/curl
+    user: root
+    command: /entrypoint.sh
+
+    depends_on:
+      unbound:
+        condition: service_healthy
+
+    networks:
+      public-internet: {}
+      internal: {}
+
+    environment:
+      - IPV4_UNBOUND_IP_PUBLIC
+      - IPV6_UNBOUND_IP_PUBLIC
+
+    volumes:
+      - ../integration_tests/browser/entrypoint.sh:/entrypoint.sh
+
+  resolver:
+    image: strm/dnsmasq
+
+    entrypoint: /entrypoint.sh
+
+    networks:
+      public-internet: {}
+      internal:
+        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL
+
+    ports:
+      - "53/udp"
+
+    environment:
+      - IPV4_IP_UNBOUND_INTERNAL
+
+    volumes:
+      - ../integration_tests/dnsmasq/entrypoint.sh:/entrypoint.sh
+
+    cap_add:
+      - NET_ADMIN
+
+  webserver:
+    networks:
+      public-internet:
+        aliases:
+          - $CONN_TEST_DOMAIN
+        ipv6_address: $IPV6_IP_PUBLIC
+        ipv4_address: $IPV4_WEBSERVER_IP_PUBLIC
+
+  unbound:
+    networks:
+      public-internet:
+        ipv4_address: $IPV4_UNBOUND_IP_PUBLIC
+
+networks:
+  public-internet:
+    enable_ipv6: true
+    driver: bridge
+    driver_opts:
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+      # network for internal communication between services
+      com.docker.network.bridge.enable_icc: "true"
+    ipam:
+      config:
+        - subnet: $IPV6_SUBNET_PUBLIC
+          gateway: $IPV6_GATEWAY_PUBLIC
+
+        - subnet: $IPV4_SUBNET_PUBLIC
