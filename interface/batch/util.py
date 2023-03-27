@@ -646,11 +646,11 @@ class DomainTechnicalResults:
                 if not dtdnssec.domain.endswith("."):
                     continue
 
-                    # Old results where not sharing the same MXs on all tests.
-                    # This will result in partial details between the tests here.
-                    if dtdnssec.domain not in mailservers:
-                        mailservers[dtdnssec.domain] = {}
-                    mailservers[dtdnssec.domain]["dnssec"] = {"status": dtdnssec.status.name}
+                # Old results where not sharing the same MXs on all tests.
+                # This will result in partial details between the tests here.
+                if dtdnssec.domain not in mailservers:
+                    mailservers[dtdnssec.domain] = {}
+                mailservers[dtdnssec.domain]["dnssec"] = {"status": dtdnssec.status.name}
 
         if report_table.tls:
             for dttls in report_table.tls.testset.all():
