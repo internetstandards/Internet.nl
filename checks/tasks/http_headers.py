@@ -64,6 +64,7 @@ class HeaderCheckerContentSecurityPolicy:
             self.has_unsafe_eval = False
             self.has_unsafe_hashes = False
             self.has_http = False
+            self.has_bare_https = False
             self.has_data = False
             self.has_base_uri = False
             self.has_form_action = False
@@ -78,6 +79,7 @@ class HeaderCheckerContentSecurityPolicy:
                 "has_unsafe_inline",
                 "has_unsafe_eval",
                 "has_http",
+                "has_bare_https",
                 "has_data",
                 "has_invalid_host",
                 "has_unsafe_hashes",
@@ -110,6 +112,7 @@ class HeaderCheckerContentSecurityPolicy:
                 f"has_unsafe_eval: {self.has_unsafe_eval}\n"
                 f"has_unsafe_hashes: {self.has_unsafe_hashes}\n"
                 f"has_http: {self.has_http}\n"
+                f"has_bare_https: {self.has_bare_https}\n"
                 f"has_data: {self.has_data}\n"
                 f"has_base_uri: {self.has_base_uri}\n"
                 f"has_form_action: {self.has_form_action}\n"
@@ -125,7 +128,7 @@ class HeaderCheckerContentSecurityPolicy:
     host_source_regex = re.compile(
         r"^(?:(?P<scheme>.+)://)?" r"(?P<host>[^:/']+|\[.+\])" r"(?::(?P<port>\d+|\*))?" r"(?P<path>\/.*)?$"
     )
-    scheme_source_regex = re.compile(r"^(?P<scheme>https?|data|mediastream|blob|filesystem):$")
+    scheme_source_regex = re.compile(r"^(?P<scheme_source>https?|data|mediastream|blob|filesystem):$")
     self_none_regex = re.compile(r"^(?:(?P<self>'self')|(?P<none>'none'))$")
     other_source_regex = re.compile(
         r"(?:"
@@ -356,8 +359,6 @@ class HeaderCheckerContentSecurityPolicy:
                 found_self = True
             elif "report_sample" in match.groupdict() and match.group("report_sample"):
                 expected_sources += 1
-            elif "scheme" in match.groupdict() and match.group("scheme") and match.string == "https:":
-                expected_sources += 1
             elif "host" in match.groupdict() and match.group("host"):
                 expected_sources += 1
                 host = match.group("host").rstrip(".")
@@ -392,9 +393,10 @@ class HeaderCheckerContentSecurityPolicy:
         return False
 
     def _verdict(self, domain):
-        self.result.has_http = self._check_matched_for_groups(dict(scheme=["http", "*"]))
+        self.result.has_http = self._check_matched_for_groups(dict(scheme=["http", "*"], scheme_source=["http", "*"]))
+        self.result.has_bare_https = self._check_matched_for_groups(dict(scheme_source=["https"]))
         self.result.has_data = self._check_matched_for_groups(
-            dict(scheme=["data", "*"]), directives=["object-src", "script-src"]
+            dict(scheme_source=["data", "*"]), directives=["object-src", "script-src"]
         )
         self.result.has_invalid_host = self._check_matched_for_groups(dict(host=["*", "127.0.0.1"]))
         self.result.has_unsafe_inline = self._check_matched_for_groups(dict(unsafe_inline=[]))
