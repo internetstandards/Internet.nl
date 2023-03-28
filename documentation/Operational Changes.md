@@ -53,7 +53,7 @@ make frontend
 
 # (exit back to root shell)
 
-# Deploy new configs (changed celery queue conigs)
+# Deploy new configs (changed env file)
 cp -v /opt/internetnl/Internet.nl/documentation/example_configuration/opt_internetnl_etc/* /opt/internetnl/etc/
 
 # Restart services, depending if this a batch or single instance server:
