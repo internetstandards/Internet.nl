@@ -101,7 +101,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_default_src_2(self):
         headers = "form-action 'none'; base-uri 'none'; default-src 'self' https:; frame-ancestors 'self'"
-        self._is_good(headers)
+        self._is_bad(headers)
 
     def test_default_src_3(self):
         headers = "form-action 'none'; base-uri 'none'; default-src 'self' 'report_sample'; frame-ancestors 'self'"
@@ -164,9 +164,13 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         headers = self.base_policy + "frame-ancestors 'self', style-src http:"
         self._is_bad(headers)
 
+    def test_http_3(self):
+        headers = self.base_policy + "frame-ancestors 'self', style-src http://*"
+        self._is_bad(headers)
+
     def test_https_1(self):
         headers = self.base_policy + "frame-ancestors 'self', style-src https:"
-        self._is_good(headers)
+        self._is_bad(headers)
 
     def test_https_2(self):
         headers = self.base_policy + "frame-ancestors 'self', style-src https://whatever.com:443/afsdf"
@@ -175,6 +179,10 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     def test_https_3(self):
         headers = self.base_policy + "frame-ancestors 'self', style-src https://[ipv6:address]:443/afsdf"
         self._is_good(headers)
+
+    def test_https_4(self):
+        headers = "form-action 'none'; base-uri 'self' https:; default-src 'self'; frame-ancestors 'self'"
+        self._is_bad(headers)
 
     def test_star_for_port(self):
         headers = self.base_policy + "frame-ancestors 'self', style-src https://[ipv6:address]:*/afsdf"
@@ -281,7 +289,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_good(headers)
 
     def test_two_headers(self):
-        headers = self.base_policy + "frame-ancestors https:, frame-ancestors 'none'"
+        headers = self.base_policy + "frame-ancestors 'self', frame-ancestors 'none'"
         self._is_good(headers)
 
     def test_syntax_trusted_types_1(self):
@@ -338,7 +346,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
 
     def test_scheme_source_1(self):
         headers = self.base_policy + "frame-ancestors 'none', style-src https:"
-        self._is_good_and_parsed(headers, "style-src")
+        self._is_bad_and_parsed(headers, "style-src")
 
     def test_scheme_source_2(self):
         headers = self.base_policy + "frame-ancestors 'none', style-src http:"
