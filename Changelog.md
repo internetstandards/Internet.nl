@@ -13,6 +13,8 @@
 - Fixed an [uncaught exception](https://github.com/internetstandards/Internet.nl/issues/494)
   in the security.txt text which could cause the entire test to fail for some HTTP responses.
 - Corrected handling of [bogus TLSA records](https://github.com/internetstandards/Internet.nl/issues/681).
+- A bare "https:" is [no longer allowed in Content-Security-Policy](https://github.com/internetstandards/Internet.nl/pull/925)
+  as it matches any HTTPS host.
 - [Loosened requirement for null MX](https://github.com/internetstandards/Internet.nl/issues/748)
   when a domain has no A or AAAA.
 - Fixed an issue where the
