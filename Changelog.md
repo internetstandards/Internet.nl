@@ -7,11 +7,16 @@
 - Added requirements for [base-uri](https://github.com/internetstandards/Internet.nl/issues/525) and
   [form-action](https://github.com/internetstandards/Internet.nl/issues/524) to the Content-Security-Policy test.
 - Added translations for [security.txt error messages](https://github.com/internetstandards/Internet.nl/issues/774).
+- The TLS versions tech table
+  [now shows the detected TLS versions](https://github.com/internetstandards/Internet.nl/issues/512)
+  instead of only TLS versions with issues.
 - Fixed an [uncaught exception](https://github.com/internetstandards/Internet.nl/issues/494)
   in the security.txt text which could cause the entire test to fail for some HTTP responses.
 - Corrected handling of [bogus TLSA records](https://github.com/internetstandards/Internet.nl/issues/681).
 - [Loosened requirement for null MX](https://github.com/internetstandards/Internet.nl/issues/748)
   when a domain has no A or AAAA.
+- Fixed an issue where the
+  [frame-src test was inconsistent with the documentation](https://github.com/internetstandards/Internet.nl/issues/643).
 - [Added the version number](https://github.com/internetstandards/Internet.nl/issues/494) to the footer.
 - [Added Sentry support](https://github.com/internetstandards/Internet.nl/issues/770) for error reporting.
 - Code quality was cleaned up in various places.
