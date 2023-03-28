@@ -122,9 +122,10 @@ class Subtest:
     def add_tech_data_translation_root(self, tech_data):
         rooted_tech_data = []
         for data in tech_data:
-            rooted_tech_data.append(
-                {"msgid": f"{self.tech_data_translation_root} {data['msgid']}", "context": data.get("context", {})}
-            )
+            if data:
+                rooted_tech_data.append(
+                    {"msgid": f"{self.tech_data_translation_root} {data['msgid']}", "context": data.get("context", {})}
+                )
         return rooted_tech_data
 
 
@@ -2348,7 +2349,7 @@ class WebAppsecprivSecuritytxt(Subtest):
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web appsecpriv http-securitytxt verdict good"
-        self.tech_data = self.add_tech_data_translation_root(tech_data)
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data):
         self._status(STATUS_NOTICE)
