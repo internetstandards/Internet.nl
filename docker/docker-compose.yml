@@ -2,7 +2,38 @@ version: '2.1'
 
 services:
   webserver:
-    image: httpd:2.4
+    image: $DOCKER_IMAGE_HTTPD
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
+      public-internet:
+        ipv6_address: $IPV6_IP_PUBLIC
+
+    ports:
+      - $WEBSERVER_PORT
+      - $WEBSERVER_PORT_TLS
+
+    environment:
+      - INTERNETNL_DOMAINNAME
+      - IPV6_TEST_ADDR
+
+    # webserver does not depend on any of the other services directly. So it can
+    # be started and kept running independently from the other services to
+    # provide stale cache or a maintenance page.
+    depends_on: {}
+
+    volumes:
+      - ./webserver/apache_config/entrypoint.sh:/entrypoint.sh
+      - ./webserver/apache_config/sites-available/:/usr/local/apache2/sites-available/
+      - ./webserver/apache_config/sites-enabled/internet_nl.conf:/usr/local/apache2/sites-enabled/internet_nl.conf
+
+    entrypoint: /entrypoint.sh
+
+    # TODO: httpd container image does not contain any useful command to perform healthcheck
+    # healthcheck:
+    #   test: ["CMD", "curl", "http://localhost:80"]
+    #   interval: $HEALTHCHECK_INTERVAL
+    #   retries: 30
 
   app:
     image: $DOCKER_IMAGE
