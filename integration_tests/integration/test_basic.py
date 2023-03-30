@@ -1,7 +1,7 @@
 """Basis functionality that should always be present."""
 import pytest
 from datetime import timedelta
-from .conftest import Internetnl
+from ..conftest import Internetnl
 from bs4 import Tag
 import time
 import requests

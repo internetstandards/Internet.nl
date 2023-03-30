@@ -129,8 +129,10 @@ def internetnl_docker(docker_ip, pytestconfig, unique_id, request) -> Generator[
             # bring the test environment down and remove all containers and volumes
             docker_compose("down -v", silent=True)
 
-def internetnl_live():
-    internetnl = Internetnl("https://internet.nl", "8.8.8.8", 53, None)
+@pytest.fixture(scope="session")
+def internetnl_live(request):
+    domainname = request.param
+    internetnl = Internetnl(f"https://{domainname}", "8.8.8.8", 53, None)
     yield internetnl
 
 @pytest.fixture(scope="session")
