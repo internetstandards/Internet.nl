@@ -139,6 +139,7 @@ INSTALLED_APPS = [
     "interface",
     "checks",
     "django_hosts",
+    "django_statsd",
 ]
 
 TEMPLATES = [
@@ -164,6 +165,8 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE = [
+    "django_statsd.middleware.GraphiteRequestTimingMiddleware",
+    "django_statsd.middleware.GraphiteMiddleware",
     "django_hosts.middleware.HostsRequestMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -613,3 +616,19 @@ if getenv("SENTRY_DSN"):
     )
 
 VERSION = get_version()
+
+# Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
+# https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
+STATSD_HOST = os.environ.get("STATSD_HOST", "127.0.0.1")
+STATSD_PORT = os.environ.get("STATSD_PORT", "8125")
+# add tag support via statshog
+STATSD_TELEGRAF = True
+STATSD_CLIENT = "statshog"
+STATSD_PREFIX = os.environ.get("STATSD_PREFIX", "internetnl_")
+# register hooks for selery tasks
+STATSD_CELERY_SIGNALS = True
+# send database query metric (in production, in development we have debug toolbar for this)
+if not DEBUG:
+    STATSD_PATCHES = [
+        "django_statsd.patches.db",
+    ]

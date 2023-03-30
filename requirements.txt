@@ -25,6 +25,10 @@ bleach==4.1.0
 cached-property==1.5.2
     # via -r requirements.in
 celery==5.2.7
+    # via
+    #   -r requirements.in
+    #   celery-statsd
+celery-statsd==1.0.0
     # via -r requirements.in
 certifi==2022.12.7
     # via
@@ -69,6 +73,8 @@ django-hosts==5.2
 django-markdown-deux==1.0.5
     # via -r requirements.in
 django-redis==4.12.1
+    # via -r requirements.in
+django-statsd-mozilla==0.4.0
     # via -r requirements.in
 dnspython==2.3.0
     # via eventlet
@@ -168,6 +174,7 @@ setuptools-scm==7.1.0
 six==1.16.0
     # via
     #   bleach
+    #   celery-statsd
     #   click-repl
     #   eventlet
     #   pathlib2
@@ -178,6 +185,10 @@ soupsieve==2.3.2.post1
     # via beautifulsoup4
 sqlparse==0.4.3
     # via django
+statsd==4.0.0
+    # via
+    #   celery-statsd
+    #   django-statsd-mozilla
 statshog==1.0.6
     # via -r requirements.in
 toml==0.10.2

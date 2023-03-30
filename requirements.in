@@ -58,3 +58,8 @@ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pytho
 
 # used for statsd ad-hoc metric collection
 statshog
+
+django-statsd-mozilla
+
+# let celery push metrics to statsd
+celery-statsd

@@ -71,6 +71,7 @@ services:
     restart: on-failure
     networks:
       internal:
+        ipv4_address: $IPV4_IP_STATSD_INTERNAL
         aliases:
           - statsd
 

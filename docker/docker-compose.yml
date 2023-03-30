@@ -78,6 +78,7 @@ services:
       - CACHE_LOCATION=redis://redis:6379/0
       - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
       - DJANGO_IS_PROXIED=True
+      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
       - ALLOWED_HOSTS
       - DEBUG
       - INTERNETNL_LOG_LEVEL
@@ -169,6 +170,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CACHE_LOCATION=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
       - DEBUG
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
@@ -222,6 +224,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CACHE_LOCATION=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
       - DEBUG
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL

@@ -6,6 +6,11 @@ scrape_configs:
   - job_name: postgresql_exporter
     scheme: http
     metrics_path: /metrics
+    metric_relabel_configs:
+      # drop exporter internal metrics
+      - source_labels: [ "__name__" ]
+        regex: '(go|python|process)_.+'
+        action: drop
     static_configs:
       - targets:
         - postgresql-exporter:9187
@@ -13,6 +18,11 @@ scrape_configs:
   - job_name: redis_exporter
     scheme: http
     metrics_path: /metrics
+    metric_relabel_configs:
+      # drop exporter internal metrics
+      - source_labels: [ "__name__" ]
+        regex: '(go|python|process)_.+'
+        action: drop
     static_configs:
       - targets:
         - redis-exporter:9121
@@ -20,6 +30,11 @@ scrape_configs:
   - job_name: rabbitmq_exporter
     scheme: http
     metrics_path: /metrics
+    metric_relabel_configs:
+      # drop exporter internal metrics
+      - source_labels: [ "__name__" ]
+        regex: '(go|python|process)_.+'
+        action: drop
     static_configs:
       - targets:
         - rabbitmq:15692
@@ -27,6 +42,11 @@ scrape_configs:
   - job_name: statsd_exporter
     scheme: http
     metrics_path: /metrics
+    metric_relabel_configs:
+      # drop exporter internal metrics
+      - source_labels: [ "__name__" ]
+        regex: '(go|python|process)_.+'
+        action: drop
     static_configs:
       - targets:
         - statsd-exporter:9102
