@@ -3,6 +3,6 @@
 set -e -o pipefail
 
 # TODO: fetch from env
-echo "nameserver 192.168.32.12" > /etc/resolv.conf
+echo "nameserver $IPV4_IP_RESOLVER_INTERNAL" > /etc/resolv.conf
 
 sleep infinity

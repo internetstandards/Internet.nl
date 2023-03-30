@@ -58,8 +58,7 @@ services:
       internal: {}
 
     environment:
-      - IPV4_UNBOUND_IP_PUBLIC
-      - IPV6_UNBOUND_IP_PUBLIC
+      - IPV4_IP_RESOLVER_INTERNAL
 
     volumes:
       - ../integration_tests/browser/entrypoint.sh:/entrypoint.sh
