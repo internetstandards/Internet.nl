@@ -1,0 +1,47 @@
+resolver 127.0.0.11 valid=300s;
+resolver_timeout 10s;
+
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  ${INTERNETNL_DOMAINNAME} *.${INTERNETNL_DOMAINNAME} localhost;
+
+    location / {
+      set $backend backend:8080;
+      proxy_pass http://$backend;
+      proxy_set_header X-Forwarded-For "$http_x_forwarded_for, $realip_remote_addr";
+    }
+}
+
+# server {
+#     listen       443 ssl;
+#     listen  [::]:443 ssl;
+#     server_name  test-target test-target.internet.nl;
+#
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+#
+#     ssl_certificate /etc/pki/default/cert.pem;
+#     ssl_certificate_key /etc/pki/default/key.pem;
+#     ssl_trusted_certificate /etc/pki/default/chain.pem;
+#
+#     add_header 'Strict-Transport-Security' 'max-age=31536000; includeSubdomains' always;
+#     add_header 'X-Frame-Options' 'SAMEORIGIN' always;
+#     add_header 'X-Content-Type-Options' 'nosniff' always;
+#     add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
+#     add_header 'Referrer-Policy' 'no-referrer' always;
+#
+#     location / {
+#         root   /usr/share/nginx/html;
+#         index  index.html index.htm;
+#     }
+#
+#     location /.well-known/ {
+#         alias /var/www/well-known/;
+#     }
+#
+#     error_page   500 502 503 504  /50x.html;
+#     location = /50x.html {
+#         root   /usr/share/nginx/html;
+#     }
+# }
