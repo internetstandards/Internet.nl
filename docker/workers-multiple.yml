@@ -1,0 +1,87 @@
+services:
+  db-worker: &worker
+    image: $DOCKER_IMAGE
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    networks:
+      - internal
+      - public-internet
+    entrypoint: celery
+
+    command: --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --queues $$WORKER_QUEUE --concurrency $$WORKER_CONCURRENCY --hostname $$WORKER_QUEUE
+    depends_on:
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      routinator:
+        # TODO: convert to service_healthy when healthcheck is added to routinator
+        condition: service_started
+    environment:
+      - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - SECRET_KEY
+      - DB_HOST=postgres
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - DEBUG
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
+      - WORKER_QUEUE=db_worker
+      - WORKER_CONCURRENCY=3
+
+  # configure additional workers using YAML anchor templating
+  slow-db-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=slow_db
+      - WORKER_CONCURRENCY=3
+  nassl-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=nassl
+      - WORKER_CONCURRENCY=150
+  ipv6-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=ipv6
+      - WORKER_CONCURRENCY=20
+  mail-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=mail
+      - WORKER_CONCURRENCY=20
+  web-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=web
+      - WORKER_CONCURRENCY=20
+  resolv-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=resolv
+      - WORKER_CONCURRENCY=50
+  dnssec-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=dnssec
+      - WORKER_CONCURRENCY=50
+  rpki-worker:
+    <<: *worker
+    environment:
+      - WORKER_QUEUE=rpki
+      - WORKER_CONCURRENCY=15
