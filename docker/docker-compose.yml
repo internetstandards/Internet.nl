@@ -154,6 +154,47 @@ services:
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
 
+  beat:
+    image: $DOCKER_IMAGE
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    networks:
+      - internal
+      - public-internet
+    entrypoint: celery
+    command: --app internetnl beat
+    depends_on:
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      routinator:
+        # TODO: convert to service_healthy when healthcheck is added to routinator
+        condition: service_started
+    environment:
+      - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - SECRET_KEY
+      - DB_HOST=postgres
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - DEBUG
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
 
   redis:
     image: $DOCKER_IMAGE_REDIS
