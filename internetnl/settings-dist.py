@@ -144,6 +144,7 @@ INSTALLED_APPS = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # TODO: make more explicit to fix autoreload???
         "DIRS": ["", "interface", "interface/templates"],
         "APP_DIRS": True,
         "OPTIONS": {
