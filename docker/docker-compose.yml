@@ -26,6 +26,8 @@ services:
       - ./webserver/apache_config/entrypoint.sh:/entrypoint.sh
       - ./webserver/apache_config/sites-available/:/usr/local/apache2/sites-available/
       - ./webserver/apache_config/sites-enabled/internet_nl.conf:/usr/local/apache2/sites-enabled/internet_nl.conf
+      - "/var/lib/acme/$INTERNETNL_DOMAINNAME:/etc/acme/certs"
+      - "/var/www/$INTERNETNL_DOMAINNAME:/var/www/$INTERNETNL_DOMAINNAME"
 
     entrypoint: /entrypoint.sh
 
