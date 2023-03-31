@@ -87,7 +87,7 @@ def internetnl_docker(docker_ip, pytestconfig, unique_id, request) -> Generator[
 
     # generate temporary instance name or use provided one for existing environment
     if MANAGE_INSTANCE:
-        project_name = "internetnl_test_{}".format(unique_id)
+        project_name = "internetnl-test"
     else:
         project_name = INTERNETNL_USE_DOCKER_COMPOSE_PROJECT
 

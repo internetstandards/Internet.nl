@@ -60,7 +60,7 @@ jobs:
         run: make docker-compose-up
       - name: Run integration tests
         # run integration tests against test instance (which has empty project name)
-        run: INTERNETNL_USE_DOCKER_COMPOSE_PROJECT="" make integration-tests
+        run: make integration-tests-against-develop
       - name: Stop test instance
         run: make docker-compose-down-remove-volumes &
 

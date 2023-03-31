@@ -78,10 +78,11 @@ def test_your_website(internetnl: Internetnl, unique_id, test_domain=TEST_DOMAIN
     score = r.soup.find(class_="testresults-percentage").get("data-resultscore")
     assert int(score) == TEST_DOMAIN_EXPECTED_SCORE
 
-    probe_results = {}
-    for probe in ALL_PROBES:
-         probe_results[probe] = r.soup.find(id=f"site{probe}").get("class")[0]
-    assert probe_results == {probe: "passed" for probe in ALL_PROBES}
+    # TODO: when fully simulated integration test environment
+    # probe_results = {}
+    # for probe in ALL_PROBES:
+    #      probe_results[probe] = r.soup.find(id=f"site{probe}").get("class")[0]
+    # assert probe_results == {probe: "passed" for probe in ALL_PROBES}
 
 @pytest.mark.withoutresponses
 def test_your_email(internetnl: Internetnl, unique_id, test_email=TEST_EMAIL):
@@ -120,6 +121,11 @@ def test_your_email(internetnl: Internetnl, unique_id, test_email=TEST_EMAIL):
     score = r.soup.find(class_="testresults-percentage").get("data-resultscore")
     assert int(score) == TEST_EMAIL_EXPECTED_SCORE
 
+    # TODO: when fully simulated integration test environment
+    # probe_results = {}
+    # for probe in ALL_EMAIL_PROBES:
+    #      probe_results[probe] = r.soup.find(id=f"mail{probe}").get("class")[0]
+    # assert probe_results == {probe: "passed" for probe in ALL_EMAIL_PROBES}
 
 @pytest.mark.withoutresponses
 def test_your_connection(internetnl: Internetnl, browser, unique_id):
