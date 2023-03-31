@@ -33,6 +33,11 @@ services:
       - ../integration_tests/pki:/etc/pki/
       - ../integration_tests/www:/var/www/
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+
   mail-test-target:
     image: mailhog/mailhog
 
@@ -43,6 +48,14 @@ services:
 
     ports:
       - 25
+
+    environment:
+      MH_SMTP_BIND_ADDR: 0.0.0.0:25
+
+    healthcheck:
+      test: ["CMD", "nc", "localhost", "25"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
 
   browser:
     image: curlimages/curl
@@ -110,6 +123,4 @@ networks:
     ipam:
       config:
         - subnet: $IPV6_SUBNET_PUBLIC
-          gateway: $IPV6_GATEWAY_PUBLIC
-
         - subnet: $IPV4_SUBNET_PUBLIC
