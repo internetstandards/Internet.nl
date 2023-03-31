@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import socket
 
 # domain to use as target for website and email tests
-TEST_DOMAIN = 'internet.nl'
+TEST_DOMAIN = 'dashboard.internet.nl'
 ALL_PROBES = {"ipv6", "dnssec", "tls", "appsecpriv", "rpki"}
 TEST_DOMAIN_EXPECTED_SCORE = 100
 
