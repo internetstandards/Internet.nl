@@ -41,7 +41,7 @@ def http_get(
         try:
             response = session.get(url, headers=headers, stream=True, *args, **kwargs)
         except requests.RequestException as exc:
-            log.debug(f"HTTP request raised exception: {url} (headers: {headers})", exc_info=exc)
+            log.debug(f"HTTP request raised exception: {url} (headers: {headers}): {exc}", exc_info=exc)
             raise
 
     log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")

@@ -1,6 +1,5 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import http.client
 import ipaddress
 import socket
 import time
@@ -579,14 +578,16 @@ def simhash(url, task=None):
     try:
         # read max 0.5MB
         html_v4 = next(v4_response.iter_content(500000))
-        html_v6 = next(v6_response.iter_coontent(500000))
-    except http.client.IncompleteRead:  # TODO: this is no longer thrown, is in _content_consumed
+        html_v6 = next(v6_response.iter_content(500000))
+    except (OSError, IOError) as exc:
+        log.debug("simhash encountered exception while reading response: {exc}", exc_info=exc)
+        return simhash_score, distance
+
+    if not v4_response._content_consumed or not v6_response._content_consumed:
         log.debug(
             "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
             "need to enlarge it, logging for statistical purposes"
         )
-    except OSError:
-        return simhash_score, distance
 
     html_v4 = strip_irrelevant_html(html_v4)
     html_v6 = strip_irrelevant_html(html_v6)
