@@ -4,7 +4,6 @@ import time
 from urllib.parse import urlparse
 
 import idna
-import requests
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -12,6 +11,7 @@ from django.core.cache import cache
 
 import unbound
 from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY, categories, scoring
+from checks.http_client import http_get
 from checks.models import DmarcPolicyStatus, MailTestAuth, SpfPolicyStatus
 from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
@@ -759,7 +759,7 @@ def dmarc_fetch_public_suffix_list():
 
     """
     public_suffix_list = []
-    response = requests.get(settings.PUBLIC_SUFFIX_LIST_URL)
+    response = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
     if response.status_code != 200 or not response.text:
         return public_suffix_list
 

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+from checks.http_client import http_get
 from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
 from checks.tasks.tls import SMTPConnection
 from checks.tasks.tls_connection import (
@@ -44,6 +45,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         server_or_url = options["server_or_url"]
+
+        if server_or_url.startswith("http"):
+            response = http_get(server_or_url)
+            self.stdout.write(response.text)
+            exit(response.status_code)
 
         tls_version = {
             "auto": SSLV23,

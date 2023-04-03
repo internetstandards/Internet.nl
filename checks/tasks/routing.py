@@ -13,7 +13,7 @@ from . import SetupUnboundContext
 
 from typing import Any, Dict, List, NewType, Tuple, Type, TypeVar
 
-from ..http_client import http_get
+from checks.http_client import http_get
 
 Asn = NewType("Asn", int)
 Ip = NewType("Ip", str)
