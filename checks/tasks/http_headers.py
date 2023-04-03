@@ -6,6 +6,7 @@ from collections import defaultdict, namedtuple
 import requests
 
 from checks import scoring
+from checks.http_client import http_get_ip
 
 
 def get_multiple_values_from_header(header):
@@ -701,7 +702,7 @@ def http_headers_check(af_ip_pair, domain, header_checkers, task):
 
     put_headers = {"Accept-Encoding": "compress, deflate, exi, gzip, pack200-gzip, x-compress, x-gzip"}
     try:
-        response = task.http_get_ip(
+        response = http_get_ip(
             hostname=domain,
             ip=af_ip_pair[1],
             port=443,

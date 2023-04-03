@@ -9,6 +9,7 @@ import requests
 import sectxt
 
 from checks import scoring
+from checks.http_client import http_get_ip
 from checks.tasks import SetupUnboundContext
 
 SECURITYTXT_LEGACY_PATH = "/security.txt"
@@ -40,10 +41,10 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task: SetupUnboundContext) ->
             "port": 443,
             "path": path,
         }
-        response = task.http_get_ip(**http_kwargs)
+        response = http_get_ip(**http_kwargs)
         if response.status_code != 200:
             http_kwargs["path"] = SECURITYTXT_LEGACY_PATH
-            response = task.http_get_ip(**http_kwargs)
+            response = http_get_ip(**http_kwargs)
         if response.history:
             found_host = urlparse(response.url).hostname
         else:

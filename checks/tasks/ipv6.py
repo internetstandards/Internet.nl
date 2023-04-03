@@ -16,6 +16,7 @@ from django.core.cache import cache
 from django.db import transaction
 
 from checks import categories, scoring
+from checks.http_client import http_get_af
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
 from checks.tasks import SetupUnboundContext, dispatcher, shared
 from checks.tasks.dispatcher import check_registry
@@ -560,8 +561,8 @@ def simhash(url, task=None):
     v6_response = None
     for port in [80, 443]:
         try:
-            v4_response = task.http_get_af(hostname=url, port=port, af=socket.AF_INET, https=port == 443)
-            v6_response = task.http_get_af(hostname=url, port=port, af=socket.AF_INET6, https=port == 443)
+            v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, task=task, https=port == 443)
+            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, task=task, https=port == 443)
             break
         except requests.RequestException:
             # Could not connect on given port, try another port.
