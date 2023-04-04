@@ -584,11 +584,9 @@ def simhash(url, task=None):
         return simhash_score, distance
 
     for html, response in (html_v4, v4_response), (html_v6, v6_response):
-        content_length = response.headers.get('content-length', '')
+        content_length = response.headers.get("content-length", "")
         if content_length.isnumeric() and len(html) < int(content_length):
-            log.debug(
-                f"simhash only read first {SIMHASH_MAX_RESPONSE_SIZE} out of {content_length} bytes"
-            )
+            log.debug(f"simhash only read first {SIMHASH_MAX_RESPONSE_SIZE} out of {content_length} bytes")
 
     html_v4 = strip_irrelevant_html(html_v4)
     html_v6 = strip_irrelevant_html(html_v6)
