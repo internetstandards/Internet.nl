@@ -24,6 +24,8 @@ from interface.views.shared import pretty_domain_name
 from internetnl import log
 from unbound import RR_CLASS_IN, RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS, ub_ctx
 
+SIMHASH_MAX_RESPONSE_SIZE = 500000
+
 # mapping tasks to models
 model_map = dict(web=WebDomain, ns=NsDomain, mx=MxDomain)
 
@@ -573,21 +575,20 @@ def simhash(url, task=None):
         # FAIL: Could not establish a connection on both addresses.
         return simhash_score, distance
 
-    html_v4 = ""
-    html_v6 = ""
     try:
         # read max 0.5MB
-        html_v4 = next(v4_response.iter_content(500000))
-        html_v6 = next(v6_response.iter_content(500000))
+        html_v4 = next(v4_response.iter_content(SIMHASH_MAX_RESPONSE_SIZE))
+        html_v6 = next(v6_response.iter_content(SIMHASH_MAX_RESPONSE_SIZE))
     except (OSError, IOError) as exc:
         log.debug("simhash encountered exception while reading response: {exc}", exc_info=exc)
         return simhash_score, distance
 
-    if not v4_response._content_consumed or not v6_response._content_consumed:
-        log.debug(
-            "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
-            "need to enlarge it, logging for statistical purposes"
-        )
+    for html, response in (html_v4, v4_response), (html_v6, v6_response):
+        content_length = response.headers.get('content-length', '')
+        if content_length.isnumeric() and len(html) < int(content_length):
+            log.debug(
+                f"simhash only read first {SIMHASH_MAX_RESPONSE_SIZE} out of {content_length} bytes"
+            )
 
     html_v4 = strip_irrelevant_html(html_v4)
     html_v6 = strip_irrelevant_html(html_v6)

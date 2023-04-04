@@ -31,12 +31,12 @@ def securitytxt_check(af_ip_pair, domain, task):
     return _evaluate_securitytxt(result)
 
 
-def _retrieve_securitytxt(af_ip_pair, domain: str, task: SetupUnboundContext) -> SecuritytxtRetrieveResult:
+def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) -> SecuritytxtRetrieveResult:
     path = SECURITYTXT_EXPECTED_PATH
     found_host = None
     try:
         http_kwargs = {
-            "domain": domain,
+            "hostname": hostname,
             "ip": af_ip_pair[1],
             "port": 443,
             "path": path,
@@ -48,20 +48,20 @@ def _retrieve_securitytxt(af_ip_pair, domain: str, task: SetupUnboundContext) ->
         if response.history:
             found_host = urlparse(response.url).hostname
         else:
-            found_host = domain
+            found_host = hostname
         content = next(response.iter_content(SECURITYTXT_MAX_LENGTH, decode_unicode=False)).decode("utf-8")
     except UnicodeDecodeError:
         return SecuritytxtRetrieveResult(
             found=True,
             content=None,
-            url=f"https://{domain}{path}",
+            url=f"https://{hostname}{path}",
             found_host=found_host,
             errors=[{"msgid": "utf8"}],
         )
     except requests.RequestException:
-        return _evaluate_response(None, None, domain, path, "", domain)
+        return _evaluate_response(None, None, hostname, path, "", hostname)
     return _evaluate_response(
-        response.status_code, response.headers.get("Content-Type", ""), domain, path, content, found_host
+        response.status_code, response.headers.get("Content-Type", ""), hostname, path, content, found_host
     )
 
 
