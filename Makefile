@@ -73,7 +73,7 @@ translate_content_to_main:
 	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
 	rm -rf tmp/locale_files/
 	rm -f tmp/content_repo.tar.gz
-	git clone https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
+	git clone git@github.com:internetstandards/Internet.nl_content/ tmp/locale_files/
 
 	# If you need a specific branch people are working on:
 	# git clone -b news-item_PLIS-meeting_on_IPv6 https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
