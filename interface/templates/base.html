@@ -94,7 +94,7 @@
     <img id="flag" src="{% static "clear.gif" %}" alt="">
     <div class="wrap">
       {% include "string.html" with name="base info" %}
-      v{{ "VERSION"|get_settings_value }}
+      <div class="version">v{{ "VERSION"|get_settings_value }}</div>
       <hr>
       <ul>
         <li><a class="footlink" href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a></li>
