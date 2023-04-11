@@ -5,7 +5,7 @@ hosters.
 
 ## Change overview for version 1.7
 
-* The package python-whois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
+* The package pythonwhois needs to be manually removed due to [#782](https://github.com/internetstandards/Internet.nl/issues/782)
 
 Based on an existing 1.6 setup:
 
@@ -46,7 +46,8 @@ mv ~/internet.nl.systemd.env /opt/internetnl/etc/internet.nl.systemd.env
 source ~internetnl/internet.nl.env
 # Use a direct PostgreSQL connection instead of bouncer to prevent migration timeouts
 export DB_PORT=5432
-.venv/bin/pip uninstall python-whois
+.venv/bin/pip install -U pip
+.venv/bin/pip uninstall pythonwhois
 .venv/bin/pip install -Ur requirements.txt
 make manage migrate
 make frontend
