@@ -2981,8 +2981,13 @@ def forced_http_check(af_ip_pair, url, task):
     forced_https = ForcedHttpsStatus.bad
     forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_BAD
 
-    if response_http.url and urlparse(response_http.url).scheme == "https":
-        forced_https = ForcedHttpsStatus.good
-        forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
+    for response in response_http.history + [response_http]:
+        if response.url:
+            parsed_url = urlparse(response.url)
+            # Requirement: in case of redirecting, a domain should firstly upgrade itself by
+            # redirecting to its HTTPS version before it may redirect to another domain.
+            if parsed_url.scheme == "https" and parsed_url.netloc in url:
+                forced_https = ForcedHttpsStatus.good
+                forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
 
     return forced_https_score, forced_https
