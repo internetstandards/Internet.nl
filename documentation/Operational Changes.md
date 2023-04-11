@@ -27,7 +27,7 @@ su - internetnl
 cd /opt/internetnl/Internet.nl/
 git reset --hard
 git fetch
-git checkout v1.7
+git checkout v1.7.0
 
 # Update the settings file based on the current dist
 cp -v internetnl/settings-dist.py internetnl/settings.py
