@@ -13,6 +13,8 @@ from . import SetupUnboundContext
 
 from typing import Any, Dict, List, NewType, Tuple, Type, TypeVar
 
+from checks.http_client import http_get
+
 Asn = NewType("Asn", int)
 Ip = NewType("Ip", str)
 Prefix = NewType("Prefix", str)
@@ -309,7 +311,7 @@ class Routinator(RelyingPartySoftware):
         """
         request = f"{settings.ROUTINATOR_URL}/{asn}/{prefix}"
         try:
-            response = task.get(request)
+            response = http_get(request)
 
             # throw exception during Routinator initialization
             response.raise_for_status()

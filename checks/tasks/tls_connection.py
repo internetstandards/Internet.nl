@@ -4,8 +4,6 @@ import ipaddress
 import logging
 import socket
 import time
-from cgi import parse_header
-from collections import namedtuple
 from enum import Enum
 from io import BytesIO
 from urllib.parse import urlparse
@@ -745,47 +743,3 @@ def http_fetch(
         )
 
     return conn, res, ret_headers, ret_visited_hosts
-
-
-def http_get(url):
-    """
-    Simplified use of http_fetch that also downloads and decodes the response
-    body. Similar to calling requests.get(). Passes the current Celery task (if
-    any) for name resolution so that the caller doesn't have to pass the task
-    around just to get it to this point, the caller shouldn't need to know
-    about celery tasks just to be able to do a HTTP GET...
-
-    Doesn't raise any exceptions, instead it returns None.
-
-    TODO: properly extract host from netloc.
-    TODO: don't discard the remainder of the "path" (params, query, fragment)
-
-    """
-    result = None
-    try:
-        scheme, netloc, path, *unused = urlparse(url)
-        port = 443 if scheme == "https" else 80
-        conn, r, *unused = http_fetch(host=netloc, path=path, port=port, keep_conn_open=True)
-        rr = namedtuple("Response", ["status_code", "text"])
-        rr.status_code = r.status
-        if r.status == 200:
-            ct_header = r.getheader("Content-Type", None)
-            encoding = "utf-8"
-            if ct_header:
-                try:
-                    encoding = parse_header(ct_header)[1]["charset"]
-                except (IndexError, KeyError):
-                    pass
-            rr.text = r.read().decode(encoding)
-        conn.close()
-        result = rr
-    except (
-        ValueError,
-        OSError,
-        ConnectionSocketException,
-        http.client.HTTPException,
-        ConnectionHandshakeException,
-        NoIpError,
-    ):
-        pass
-    return result

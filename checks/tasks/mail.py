@@ -11,12 +11,12 @@ from django.core.cache import cache
 
 import unbound
 from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY, categories, scoring
+from checks.http_client import http_get
 from checks.models import DmarcPolicyStatus, MailTestAuth, SpfPolicyStatus
 from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
-from checks.tasks.tls_connection import http_get
 from interface import batch, batch_shared_task, redis_id
 from internetnl import log
 
@@ -759,11 +759,11 @@ def dmarc_fetch_public_suffix_list():
 
     """
     public_suffix_list = []
-    r = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
-    if not r:
+    response = http_get(settings.PUBLIC_SUFFIX_LIST_URL)
+    if response.status_code != 200 or not response.text:
         return public_suffix_list
 
-    lines = r.text.split("\n")
+    lines = response.text.split("\n")
     for line in lines:
         labels = []
         line = line.rstrip()

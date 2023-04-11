@@ -1,12 +1,12 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import http.client
 import ipaddress
 import socket
 import time
 from difflib import SequenceMatcher
 from typing import List
 
+import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -15,15 +15,16 @@ from django.core.cache import cache
 from django.db import transaction
 
 from checks import categories, scoring
+from checks.http_client import http_get_af
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
 from checks.tasks import SetupUnboundContext, dispatcher, shared
 from checks.tasks.dispatcher import check_registry
-from checks.tasks.tls_connection import http_fetch
-from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from interface import batch, batch_shared_task, redis_id
 from interface.views.shared import pretty_domain_name
 from internetnl import log
 from unbound import RR_CLASS_IN, RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS, ub_ctx
+
+SIMHASH_MAX_RESPONSE_SIZE = 500000
 
 # mapping tasks to models
 model_map = dict(web=WebDomain, ns=NsDomain, mx=MxDomain)
@@ -557,46 +558,35 @@ def simhash(url, task=None):
     simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
     distance = settings.SIMHASH_MAX + 100
 
-    v4_conn = None
-    v6_conn = None
+    v4_response = None
+    v6_response = None
     for port in [80, 443]:
         try:
-            v4_conn, v4_res, _, _ = http_fetch(url, socket.AF_INET, port=port, task=task, keep_conn_open=True)
-            v6_conn, v6_res, _, _ = http_fetch(url, socket.AF_INET6, port=port, task=task, keep_conn_open=True)
+            v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, task=task, https=port == 443)
+            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, task=task, https=port == 443)
             break
-        except (OSError, NoIpError, http.client.BadStatusLine, ConnectionHandshakeException, ConnectionSocketException):
+        except requests.RequestException:
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
-            if v4_conn:
-                v4_conn.close()
+            if v4_response:
                 return simhash_score, distance
 
-    if not v4_conn:
+    if not v4_response:
         # FAIL: Could not establish a connection on both addresses.
         return simhash_score, distance
 
-    html_v4 = ""
-    html_v6 = ""
     try:
         # read max 0.5MB
-        html_v4 = v4_res.read(500000)
-        v4_conn.close()
-        v4_conn = None
-
-        html_v6 = v6_res.read(500000)
-        v6_conn.close()
-        v6_conn = None
-    except http.client.IncompleteRead:
-        log.debug(
-            "simhash IncompleteRead content > 5000000 - if  this happens more often we may "
-            "need to enlarge it, logging for statistical purposes"
-        )
-    except OSError:
-        if v4_conn:
-            v4_conn.close()
-        if v6_conn:
-            v6_conn.close()
+        html_v4 = next(v4_response.iter_content(SIMHASH_MAX_RESPONSE_SIZE))
+        html_v6 = next(v6_response.iter_content(SIMHASH_MAX_RESPONSE_SIZE))
+    except (OSError, IOError) as exc:
+        log.debug("simhash encountered exception while reading response: {exc}", exc_info=exc)
         return simhash_score, distance
+
+    for html, response in (html_v4, v4_response), (html_v6, v6_response):
+        content_length = response.headers.get("content-length", "")
+        if content_length.isnumeric() and len(html) < int(content_length):
+            log.debug(f"simhash only read first {SIMHASH_MAX_RESPONSE_SIZE} out of {content_length} bytes")
 
     html_v4 = strip_irrelevant_html(html_v4)
     html_v6 = strip_irrelevant_html(html_v6)

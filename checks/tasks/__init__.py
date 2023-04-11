@@ -1,17 +1,15 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import os
-import requests
 import socket
 import time
 
+import unbound
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 
-import unbound
 from internetnl import log
-from timeit import default_timer as timer
 
 
 class SetupUnboundContext(Task):
@@ -114,15 +112,3 @@ class SetupUnboundContext(Task):
                 data["data"] = result.data
                 data["rcode"] = result.rcode
         data["done"] = True
-
-    def get(self, url, *args, **kwargs):
-        """
-        Perform a HTTP GET request using the stored session
-        """
-        start_time = timer()
-        if not hasattr(self, "_requests_session"):
-            self._requests_session = requests.session()
-
-        response = self._requests_session.get(url, *args, **kwargs)
-        log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url}")
-        return response

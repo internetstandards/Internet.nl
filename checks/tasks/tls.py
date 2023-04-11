@@ -5,7 +5,9 @@ import http.client
 import socket
 import ssl
 import time
+from urllib.parse import urlparse
 
+import requests
 from binascii import hexlify
 from enum import Enum
 from itertools import product
@@ -35,6 +37,7 @@ from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from checks import categories, scoring
+from checks.http_client import http_get_ip
 from checks.models import (
     CipherOrderStatus,
     DaneStatus,
@@ -1633,14 +1636,10 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
         if mode == ChecksMode.WEB:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
-            http_client, *unused = http_fetch(
-                url,
-                af=af_ip_pair[0],
-                path="",
+            http_get_ip(
+                hostname=url,
+                ip=af_ip_pair[1],
                 port=443,
-                ip_address=af_ip_pair[1],
-                depth=MAX_REDIRECT_DEPTH,
-                task=web_cert,
             )
             debug_cert_chain = DebugCertChain
             conn_wrapper = HTTPSConnection
@@ -1676,7 +1675,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
             verify_score, verify_result = starttls_details.trusted_score
             debug_chain = starttls_details.debug_chain
             conn_port = starttls_details.conn_port
-    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
+    except (OSError, requests.RequestException, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
         return dict(tls_cert=False)
 
     if debug_chain is None:
@@ -2965,38 +2964,30 @@ def http_checks(af_ip_pair, url, task):
 def forced_http_check(af_ip_pair, url, task):
     """
     Check if the webserver is properly configured with HTTPS redirection.
-
     """
     # First connect on port 80 and see if we get refused
     try:
-        has_443 = False
-        conn, res, headers, visited_hosts = http_fetch(
-            url, af=af_ip_pair[0], path="", port=443, task=task, ip_address=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH
-        )
-        has_443 = True
-        conn, res, headers, visited_hosts = http_fetch(
-            url, af=af_ip_pair[0], path="", port=80, task=task, ip_address=af_ip_pair[1], depth=MAX_REDIRECT_DEPTH - 1
-        )
-    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
-        if has_443:
-            # If we got refused on port 80 the first time
-            # return the FORCED_HTTPS_NO_HTTP status and score
-            return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
-        else:
-            # No connection anywhere; return failure.
-            return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
+        http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
+    except requests.RequestException:
+        # No HTTPS connection available
+        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
 
-    # Valid if same domain, or *higher* domain. Use case:
-    # www.example.com:80 -> example.com:443. Example.com:443 can set HSTS
-    # with includeSubdomains
+    try:
+        response_http = http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False)
+    except requests.RequestException:
+        # No plain HTTP available, but HTTPS is
+        return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
+
     forced_https = ForcedHttpsStatus.bad
     forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_BAD
 
-    if 443 in visited_hosts and conn.port == 443:
-        for visited_host in visited_hosts[443]:
-            if visited_host in url:
+    for response in response_http.history + [response_http]:
+        if response.url:
+            parsed_url = urlparse(response.url)
+            # Requirement: in case of redirecting, a domain should firstly upgrade itself by
+            # redirecting to its HTTPS version before it may redirect to another domain.
+            if parsed_url.scheme == "https" and parsed_url.netloc in url:
                 forced_https = ForcedHttpsStatus.good
                 forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
-                break
 
     return forced_https_score, forced_https

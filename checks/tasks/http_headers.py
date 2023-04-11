@@ -1,12 +1,12 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import http.client
 import re
 from collections import defaultdict, namedtuple
 
+import requests
+
 from checks import scoring
-from checks.tasks.tls_connection import MAX_REDIRECT_DEPTH, http_fetch
-from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks.http_client import http_get_ip
 
 
 def get_multiple_values_from_header(header):
@@ -700,31 +700,22 @@ def http_headers_check(af_ip_pair, domain, header_checkers, task):
     for h in header_checkers:
         results.update(h.get_positive_values())
 
-    put_headers = (("Accept-Encoding", "compress, deflate, exi, gzip, " "pack200-gzip, x-compress, x-gzip"),)
-    get_headers = [h.name for h in header_checkers]
+    put_headers = {"Accept-Encoding": "compress, deflate, exi, gzip, pack200-gzip, x-compress, x-gzip"}
     try:
-        conn, res, headers, visited_hosts = http_fetch(
-            domain,
-            af=af_ip_pair[0],
-            path="",
+        response = http_get_ip(
+            hostname=domain,
+            ip=af_ip_pair[1],
             port=443,
-            task=task,
-            ip_address=af_ip_pair[1],
-            put_headers=put_headers,
-            depth=MAX_REDIRECT_DEPTH,
-            needed_headers=get_headers,
+            headers=put_headers,
+            allow_redirects=False,
         )
-    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
+    except requests.RequestException:
         # Not able to connect, return negative values
         for h in header_checkers:
             results.update(h.get_negative_values())
         results["server_reachable"] = False
     else:
-        if 443 in headers:
-            for name, value in headers[443]:
-                for header_checker in header_checkers:
-                    if name == header_checker.name:
-                        header_checker.check(value, results, domain)
-                        break
+        for header_checker in header_checkers:
+            header_checker.check(response.headers.get(header_checker.name), results, domain)
 
     return results
