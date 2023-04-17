@@ -9,12 +9,12 @@ import requests
 TEST_DOMAIN = "test-target.internet.nl"
 ALL_PROBES = {"ipv6", "dnssec", "tls", "appsecpriv", "rpki"}
 TEST_DOMAIN_EXPECTED_SCORE = 100
-TEST_DOMAIN_EXPECTED_SCORE = 48
+TEST_DOMAIN_EXPECTED_SCORE = 64
 
 TEST_EMAIL = "internet.nl"
 ALL_EMAIL_PROBES = {"ipv6", "dnssec", "tls", "auth", "rpki"}
 TEST_EMAIL_EXPECTED_SCORE = 100
-TEST_EMAIL_EXPECTED_SCORE = 6
+TEST_EMAIL_EXPECTED_SCORE = 60
 
 TEST_CONNECTION_EXPECTED_SCORE = 100
 
