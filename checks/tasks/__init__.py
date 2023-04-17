@@ -33,6 +33,11 @@ class SetupUnboundContext(Task):
                 self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
             else:
                 self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
+
+            # TODO: make configurable? and catch errors
+            # add Docker DNS as resolver to include test-target in DNS results
+            self._ub_ctx.resolvconf("/etc/resolv.conf")
+
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # Some (unknown) tests probably depend on consistent ordering in unbound responses
             # https://github.com/internetstandards/Internet.nl/pull/613#discussion_r892196819

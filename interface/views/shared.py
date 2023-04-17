@@ -31,6 +31,11 @@ if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_
     ub_ctx.debuglevel(2)
     ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
     ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
+
+# TODO: make configurable? and catch errors
+# add Docker DNS as resolver to include test-target in DNS results
+ub_ctx.resolvconf("/etc/resolv.conf")
+
 # XXX: Remove for now; inconsistency with applying settings on celery.
 # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
 ub_ctx.set_async(True)

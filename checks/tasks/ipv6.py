@@ -302,6 +302,11 @@ def test_ns_connectivity(ip, port, domain):
         data["done"] = True
 
     ctx = ub_ctx()
+
+    # TODO: make configurable? and catch errors
+    # add Docker DNS as resolver to include test-target in DNS results
+    ctx.resolvconf("/etc/resolv.conf")
+
     # XXX: Remove for now; inconsistency with applying settings on celery.
     # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
     ctx.set_async(True)
