@@ -43,4 +43,9 @@ $(document).ready(function(){
         /* initialise */
         fixedHeader.init();
     }
+
+    $("#form-connection-test").submit(function(e){
+        e.preventDefault();
+        window.location = "/connection/";
+    });
 });
