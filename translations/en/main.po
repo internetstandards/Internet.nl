@@ -1909,8 +1909,8 @@ msgstr "Error: Web URI must begin with 'https://' (line {line_no})."
 
 msgid "detail tech data http-securitytxt no_line_separators"
 msgstr ""
-"Fout: Elke regel moet eindigen met óf een carriage return en line feed "
-"characters óf alleen een line feed character."
+"Error: Every line must end with either a carriage return and line feed "
+"characters or just a line feed character."
 
 msgid "detail tech data http-securitytxt no_security_txt_404"
 msgstr "Error: security.txt could not be located."
