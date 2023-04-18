@@ -700,6 +700,8 @@ def save_results(model, results, addr, domain, category):
                     model.cipher_order = result.get("cipher_order")
                     model.cipher_order_score = result.get("cipher_order_score")
                     model.cipher_order_violation = result.get("cipher_order_violation")
+                    model.protocols_good = result.get("prots_good")
+                    model.protocols_sufficient = result.get("prots_sufficient")
                     model.protocols_bad = result.get("prots_bad")
                     model.protocols_phase_out = result.get("prots_phase_out")
                     model.protocols_score = result.get("prots_score")
@@ -975,13 +977,15 @@ def build_report(dttls, category):
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
-            protocols_all = annotate_and_combine(dttls.protocols_bad, dttls.protocols_phase_out)
+            protocols_all = annotate_and_combine_all(
+                dttls.protocols_good, dttls.protocols_sufficient, dttls.protocols_bad, dttls.protocols_phase_out
+            )
             if len(dttls.protocols_bad) > 0:
                 category.subtests["tls_version"].result_bad(protocols_all)
             elif len(dttls.protocols_phase_out) > 0:
                 category.subtests["tls_version"].result_phase_out(protocols_all)
             else:
-                category.subtests["tls_version"].result_good()
+                category.subtests["tls_version"].result_good(protocols_all)
 
             if dttls.compression:
                 category.subtests["tls_compression"].result_bad()
