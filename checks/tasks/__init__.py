@@ -25,12 +25,18 @@ class SetupUnboundContext(Task):
     def ub_ctx(self):
         if self._ub_ctx is None:
             self._ub_ctx = unbound.ub_ctx()
-            if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
-                self._ub_ctx.debuglevel(2)
-                self._ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
-                self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
-            else:
-                self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
+            self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
+
+            self._ub_ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
+
+            if settings.DEBUG_LOG_UNBOUND:
+                self._ub_ctx.set_option("log-queries:", "yes")
+                self._ub_ctx.set_option("verbosity:", "2")
+
+            if settings.INTEGRATION_TESTS:
+                # forward the .test zone used in integration tests
+                self._ub_ctx.zone_add("test.", "transparent")
+
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # Some (unknown) tests probably depend on consistent ordering in unbound responses
             # https://github.com/internetstandards/Internet.nl/pull/613#discussion_r892196819
@@ -39,8 +45,6 @@ class SetupUnboundContext(Task):
             # XXX: Remove for now; inconsistency with applying settings on celery.
             # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
             self._ub_ctx.set_async(True)
-            if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
-                self._ub_ctx.set_fwd(f"{settings.CENTRAL_UNBOUND}")
 
         return self._ub_ctx
 

@@ -137,6 +137,7 @@ def resultscurrent(request, dname):
         rpki = WebTestRpki.objects.filter(domain=addr).order_by("-id")[0]
 
     except IndexError:
+        log.exception("Test not complete")
         # Domain not tested, go back to start test
         return HttpResponseRedirect(f"/site/{addr}/")
 

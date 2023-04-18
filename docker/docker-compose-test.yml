@@ -1,0 +1,82 @@
+services:
+  # environment for checks, linting and unit tests
+  test:
+    image: ${DOCKER_IMAGE_LINTTEST:-ghcr.io/internetstandards/linttest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: linttest
+      args:
+        INTERNETNL_VERSION: 0.0.0-dev0
+
+    networks:
+      - internal
+      # TODO: to properly isolate tests this line needs to be removed and the below uncommented
+      # but for this test_do_rpki needs to be properly mocked first
+      - public-internet
+
+    # TODO: to properly isolate tests these lines need to be uncommented, see above
+    # dns: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+    # dns_search: [.]
+    # dns_opt: ["ndots:0", "timeout:1", "attempts:1"]
+
+    environment:
+      - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - SKIP_SECRET_KEY_CHECK=True
+
+      # settings below are for connecting to supporting services, since not all tests are pure unit tests
+      - RABBIT_HOST=rabbitmq:15672
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
+      - DB_HOST=postgres
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - DEBUG_LOG
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      # TODO: to properly isolate tests this line needs to be uncommented, see above
+      # - INTEGRATION_TESTS
+
+    depends_on:
+      # some services are required for running tests, since not all tests are pure unit tests
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      worker:
+        condition: service_healthy
+      resolver-validating:
+        condition: service_healthy
+      resolver-permissive:
+        condition: service_healthy
+
+    volumes:
+      - ../:/source/
+
+  mock-resolver:
+    image: strm/dnsmasq
+
+    entrypoint: /entrypoint.sh
+
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+
+    # null route external DNS queries to isolate tests
+    dns: 192.0.2.1
+
+    ports:
+      - "53/udp"
+
+    environment:
+      - IPV4_IP_UNBOUND_INTERNAL
+
+    volumes:
+      - ./integration-tests/dnsmasq/entrypoint.sh:/entrypoint.sh
+
+    cap_add:
+      - NET_ADMIN

@@ -21,7 +21,9 @@ from interface.views.shared import (
 
 
 def page404(request, exception):
-    return render(request, "404.html", dict(pageclass="error404", pagetitle=_("page404 title"), pagemenu="home"))
+    return render(
+        request, "404.html", dict(pageclass="error404", pagetitle=_("page404 title"), pagemenu="home"), status=404
+    )
 
 
 @simple_cache_page

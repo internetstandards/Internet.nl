@@ -1,0 +1,314 @@
+name: Internet.nl Docker
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  # builds all docker images in parallel
+  build-docker:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      # limit otherwise we will get timeout errors during builds
+      # max-parallel: 4
+      matrix:
+        include:
+          - image: ghcr.io/internetstandards/internet.nl
+            dockerfile: docker/Dockerfile
+            target: app
+          - image: ghcr.io/internetstandards/unbound
+            dockerfile: docker/Dockerfile
+            target: unbound
+          - image: ghcr.io/internetstandards/linttest
+            dockerfile: docker/Dockerfile
+            target: linttest
+          - image: ghcr.io/internetstandards/test-runner
+            dockerfile: docker/test-runner.Dockerfile
+            target:
+          - image: ghcr.io/internetstandards/webserver
+            dockerfile: docker/webserver.Dockerfile
+            target:
+          - image: ghcr.io/internetstandards/rabbitmq
+            dockerfile: docker/rabbitmq.Dockerfile
+            target:
+          - image: ghcr.io/internetstandards/grafana
+            dockerfile: docker/grafana.Dockerfile
+            target:
+          - image: ghcr.io/internetstandards/prometheus
+            dockerfile: docker/prometheus.Dockerfile
+            target:
+
+    outputs:
+      internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}
+
+    steps:
+      - uses: actions/checkout@v3
+        # include vendor/ submodules used to build dependencies like nassl and unbound
+        with:
+          submodules: recursive
+
+      - name: Unshallow repository for version tag
+        run: |
+          # https://github.com/pypa/setuptools_scm/issues/414
+          git fetch --prune --unshallow
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Generate version number
+        id: get_version
+        run: |
+          pip -q install setuptools_scm
+          # '+' is not supported in Docker Image tags
+          echo "internetnl_version=$(python -m setuptools_scm)" | tr '+' '-'| tee -a "$GITHUB_OUTPUT"
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build ${{ matrix.image }}
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          load: true
+          # tag image with current setuptools_scm generated version
+          # also always tag 'latest', but this is not always pushed (see below)
+          # and tag with current PR number or branch name
+          tags: |
+            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
+
+          cache-from: |
+            type=gha
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
+          cache-to: type=gha,mode=max,ignore-error=true
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+
+      - name: Push ${{ matrix.image }} version
+        run: docker push ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+
+      - name: Push ${{ matrix.image }} latest release
+        # push 'latest' only for versioned
+        # TODO: remove ` || github.ref == 'refs/pull/890/merge'` after merged with master
+        if: github.event_name == 'release' || github.ref == 'refs/pull/890/merge'
+        run: docker push ${{ matrix.image }}:latest
+
+      - name: Push branch/pr tag
+        run: docker push ${{ matrix.image }}:${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
+
+  integration-test:
+    needs: [build-docker]
+    runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      PY_COLORS: "1"
+
+    steps:
+      - name: Enable ip6tables in Docker
+        run: |
+          sudo bash -c 'echo "{ \"ip6tables\": true, \"experimental\":true}" > /etc/docker/daemon.json'
+          sudo systemctl restart docker.service
+          sudo ip6tables -I DOCKER-USER --dst ff00::/8 -j ACCEPT
+
+      - uses: actions/checkout@v3
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull docker images
+        # build env includes all images
+        run: make pull env=build
+
+      - name: Start test instance
+        run: make up env=test
+
+      - name: Run integration tests
+        run: make integration-tests-verbose env=test
+
+      - name: Check nginx config
+        run: make check-gixy
+
+      - name: Collect Docker Compose logs
+        if: always()
+        run: make logs-all-dump env=test > docker-compose.log
+
+      - uses: test-summary/action@v2.1
+        with:
+          paths: test-results.xml
+        if: always()
+        continue-on-error: true
+
+      - name: Failure log
+        if: failure()
+        # log last few lines in case of failure for quick debugging
+        run: make docker-compose args="logs --tail=100" env=test
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Playwright integration test results (screenshots, video)
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Integration test Docker Compose Logs
+          path: docker-compose.log
+          if-no-files-found: ignore
+
+  lintcheck:
+    name: lint/check
+    needs: [build-docker]
+    runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run check
+        run: /bin/bash -o pipefail -c 'make --silent check | tee -a $GITHUB_STEP_SUMMARY'
+
+      - name: Run lint
+        run: /bin/bash -o pipefail -c 'make --silent lint | tee -a $GITHUB_STEP_SUMMARY'
+
+  test:
+    needs: [build-docker]
+    runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull docker images
+        # build env includes all images
+        run: make pull env=build
+
+      - name: Run test
+        run: make test
+
+      - uses: test-summary/action@v2.1
+        with:
+          paths: test-results.xml
+        if: always()
+        continue-on-error: true
+
+  development-environment-test:
+    needs: [build-docker]
+    runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
+      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull docker images
+        # build env includes all images
+        run: make pull env=build
+
+      - name: Start development environment
+        run: make up env=develop
+
+      - name: Run development environment tests
+        run: make develop-tests
+
+      - name: Collect Docker Compose logs
+        if: always()
+        run: make logs-all-dump env=develop > docker-compose.log
+
+      - uses: test-summary/action@v2.1
+        with:
+          paths: test-results.xml
+        if: always()
+        continue-on-error: true
+
+      - name: Failure log
+        if: failure()
+        # log last few lines in case of failure for quick debugging
+        run: make docker-compose args="logs --tail=100" env=develop
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Playwright development environment test results (screenshots, video)
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Development environment test Docker Compose Logs
+          path: docker-compose.log
+          if-no-files-found: ignore

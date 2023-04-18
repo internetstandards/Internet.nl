@@ -1,0 +1,46 @@
+services:
+  # terminate tls so we don't need to have exceptions in the nginx config file for development
+  port-expose:
+    image: nginx
+    networks:
+      - public-internet
+      - internal
+
+    restart: unless-stopped
+
+    ports:
+      - 8080:8080
+
+    volumes:
+      - ./port-expose/nginx_templates/:/etc/nginx/templates/
+
+    environment:
+      - INTERNETNL_DOMAINNAME
+      - IPV4_IP_WEBSERVER_INTERNAL
+      - IPV4_IP_RABBITMQ_INTERNAL
+
+  app:
+    # use Django runserver for better debug abilities during development
+    entrypoint: ["python3", "./manage.py"]
+    command: ["runserver", "0.0.0.0:8080"]
+    volumes:
+      - batch_results:/app/batch_results
+      # mount sources using volumes for quicker dev cycles
+      - ../checks:/app/checks
+      - ../interface:/app/interface
+      - ../internetnl:/app/internetnl
+
+  worker:
+    volumes:
+      - batch_results:/app/batch_results
+      # mount sources using volumes for quicker dev cycles
+      - ../checks:/app/checks
+      - ../interface:/app/interface
+      - ../internetnl:/app/internetnl
+
+  beat:
+    volumes:
+      # mount sources using volumes for quicker dev cycles
+      - ../checks:/app/checks
+      - ../interface:/app/interface
+      - ../internetnl:/app/internetnl

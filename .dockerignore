@@ -1,6 +1,12 @@
-.git
+.git/*
 .gitignore
 *.log
 *.pid
 **/*.pyc
 **/.pytest_cache
+test-results/*
+vendor/openssl-master/fuzz/*
+vendor/openssl-master/test/*
+vendor/openssl-master/doc/*
+unbound/testdata/*
+.venv/*
