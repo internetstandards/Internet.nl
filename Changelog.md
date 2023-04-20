@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.1
+
+- Fixed the new [display of TLS versions](https://github.com/internetstandards/Internet.nl/issues/944) for mail tests. 
+- Fixed a [language mix-up](https://github.com/internetstandards/Internet.nl/issues/941) in the security.txt labels.
+- Fixed an [issue with the connection test and CSP form-action](https://github.com/internetstandards/Internet.nl/issues/945)
+
 ## 1.7
 
 - Added specific [error messages in the technical details](https://github.com/internetstandards/Internet.nl/issues/577)
