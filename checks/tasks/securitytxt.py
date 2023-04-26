@@ -23,6 +23,7 @@ class SecuritytxtRetrieveResult:
     content: Optional[str]
     url: str
     found_host: str
+    found_url: str
     errors: List[Dict[str, str]]
 
 
@@ -61,12 +62,24 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
     except requests.RequestException:
         return _evaluate_response(None, None, hostname, path, "", hostname)
     return _evaluate_response(
-        response.status_code, response.headers.get("Content-Type", ""), hostname, path, content, found_host
+        response.status_code,
+        response.headers.get("Content-Type", ""),
+        hostname,
+        path,
+        content,
+        found_host,
+        response.url,
     )
 
 
 def _evaluate_response(
-    status: Optional[int], content_type: Optional[str], domain: str, path: str, content: str, found_host: str
+    status: Optional[int],
+    content_type: Optional[str],
+    domain: str,
+    path: str,
+    content: str,
+    found_host: str,
+    found_url: str,
 ) -> SecuritytxtRetrieveResult:
     errors = []
     media_type, charset = None, None
@@ -108,6 +121,7 @@ def _evaluate_response(
         content=content,
         url=f"https://{domain}{path}",
         found_host=found_host,
+        found_url=found_url,
         errors=errors,
     )
 
@@ -125,8 +139,7 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
             "securitytxt_recommendations": [],
         }
 
-    # URL intentionally not passed as Canonical testing is out of scope at this time
-    parser = sectxt.Parser(result.content)
+    parser = sectxt.Parser(result.content, urls=result.found_url)
 
     errors = result.errors + parser_format(parser.errors)
     score = scoring.WEB_APPSECPRIV_SECURITYTXT_BAD if errors else scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD
