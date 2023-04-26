@@ -26,8 +26,9 @@ def test_evaluate_response():
         path=SECURITYTXT_EXPECTED_PATH,
         content=sectxt_content,
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
     ):
-        return _evaluate_response(status, content_type, domain, path, content, found_host)
+        return _evaluate_response(status, content_type, domain, path, content, found_host, found_url)
 
     result = _evaluate_with_valid_defaults()
     assert result == SecuritytxtRetrieveResult(
@@ -35,6 +36,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[],
     )
 
@@ -46,6 +48,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "no_security_txt_404"}],
     )
 
@@ -57,6 +60,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "no_security_txt_other", "context": {"status_code": 500}}],
     )
 
@@ -68,6 +72,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "no_content_type"}],
     )
 
@@ -79,6 +84,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "invalid_media"}],
     )
 
@@ -90,6 +96,7 @@ def test_evaluate_response():
         content=None,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "invalid_media"}],
     )
 
@@ -101,6 +108,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/.well-known/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "invalid_charset"}],
     )
 
@@ -112,6 +120,7 @@ def test_evaluate_response():
         content=sectxt_content,
         url="https://example.com/security.txt",
         found_host="example.nl",
+        found_url="https://example.nl/.well-known/security.txt",
         errors=[{"msgid": "location"}],
     )
 
@@ -122,6 +131,7 @@ def test_evaluate_securitytxt():
         content="",
         url="https://example.com/security.txt",
         found_host="host",
+        found_url="https://host/.well-known/security.txt",
         errors=[{"msgid": "example"}],
     )
     assert _evaluate_securitytxt(result) == {
@@ -137,6 +147,7 @@ def test_evaluate_securitytxt():
         content="invalid content",
         url="https://example.com/security.txt",
         found_host="host",
+        found_url="https://host/.well-known/security.txt",
         errors=[],
     )
     assert _evaluate_securitytxt(result) == {
@@ -157,6 +168,7 @@ def test_evaluate_securitytxt():
         content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n",
         url="https://example.com/security.txt",
         found_host="host",
+        found_url="https://host/.well-known/security.txt",
         errors=[{"msgid": "example"}],
     )
     assert _evaluate_securitytxt(result) == {
@@ -173,9 +185,38 @@ def test_evaluate_securitytxt():
 
     result = SecuritytxtRetrieveResult(
         found=True,
-        content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n",
+        content=(
+            "Expires: 2050-09-01T00:00:00.000Z\n"
+            "Contact: mailto:security@example.com\n"
+            "Canonical: https://host-other/.well-known/security.txt\n"
+        ),
         url="https://example.com/security.txt",
         found_host="host",
+        found_url="https://host/.well-known/security.txt",
+        errors=[],
+    )
+    assert _evaluate_securitytxt(result) == {
+        "securitytxt_enabled": True,
+        "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD,
+        "securitytxt_found_host": "host",
+        "securitytxt_errors": [{"msgid": "no_canonical_match", "context": {"line_no": None}}],
+        "securitytxt_recommendations": [
+            {"msgid": "long_expiry", "context": {"line_no": 1}},
+            {"msgid": "no_encryption", "context": {"line_no": None}},
+            {"msgid": "not_signed", "context": {"line_no": None}},
+        ],
+    }
+
+    result = SecuritytxtRetrieveResult(
+        found=True,
+        content=(
+            "Expires: 2050-09-01T00:00:00.000Z\n"
+            "Contact: mailto:security@example.com\n"
+            "Canonical: https://host/.well-known/security.txt\n"
+        ),
+        url="https://example.com/security.txt",
+        found_host="host",
+        found_url="https://host/.well-known/security.txt",
         errors=[],
     )
     assert _evaluate_securitytxt(result) == {
