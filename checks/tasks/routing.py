@@ -194,6 +194,9 @@ class TeamCymruIPtoASN(RouteView):
         """
         try:
             ip = ipaddress.ip_address(ip_in)
+            if getattr(ip, "ipv4_mapped", None):
+                ip = ip.ipv4_mapped
+
             # Reverse the IP. In case of IPv6 we need the exploded address.
             if ip.version == 4:
                 # note we query for the /24 on the assumption that more
