@@ -2323,17 +2323,24 @@ class WebAppsecprivHttpReferrerPolicy(Subtest):
             worst_status=scoring.WEB_APPSECPRIV_REFERRER_POLICY_WORST_STATUS,
             full_score=scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD,
             model_score_field="referrer_policy_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data http-referrer-policy",
         )
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web appsecpriv http-referrer-policy verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data):
-        self._status(STATUS_FAIL)
+        self._status(STATUS_NOTICE)
         self.verdict = "detail web appsecpriv http-referrer-policy verdict bad"
-        self.tech_data = tech_data or ""
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
+    def result_recommendations(self, tech_data):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web appsecpriv http-referrer-policy verdict recommendations"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
 class WebAppsecprivSecuritytxt(Subtest):

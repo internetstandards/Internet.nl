@@ -116,8 +116,10 @@ def save_results(model, results, addr, domain):
                 model.x_content_type_options_score = result.get("x_content_type_options_score")
                 model.x_content_type_options_values = result.get("x_content_type_options_values")
                 model.referrer_policy_enabled = result.get("referrer_policy_enabled")
-                model.referrer_policy_score = result.get("referrer_policy_score")
                 model.referrer_policy_values = result.get("referrer_policy_values")
+                model.referrer_policy_errors = result.get("referrer_policy_errors")
+                model.referrer_policy_recommendations = result.get("referrer_policy_recommendations")
+                model.referrer_policy_score = result.get("referrer_policy_score")
                 model.securitytxt_enabled = result.get("securitytxt_enabled")
                 model.securitytxt_score = result.get("securitytxt_score")
                 model.securitytxt_errors = result.get("securitytxt_errors")
@@ -143,10 +145,25 @@ def build_report(model, category):
         else:
             category.subtests["http_x_frame"].result_bad(model.x_frame_options_values)
 
-        if model.referrer_policy_enabled:
-            category.subtests["http_referrer_policy"].result_good(model.referrer_policy_values)
+        default_message = []
+        if model.referrer_policy_values:
+            default_message = [
+                {
+                    "msgid": "values",
+                    "context": {"values": model.referrer_policy_values},
+                }
+            ]
+
+        if model.referrer_policy_errors or not model.referrer_policy_enabled:
+            category.subtests["http_referrer_policy"].result_bad(
+                default_message + model.referrer_policy_errors + model.referrer_policy_recommendations
+            )
+        elif model.referrer_policy_recommendations:
+            category.subtests["http_referrer_policy"].result_recommendations(
+                default_message + model.referrer_policy_recommendations
+            )
         else:
-            category.subtests["http_referrer_policy"].result_bad(model.referrer_policy_values)
+            category.subtests["http_referrer_policy"].result_good(default_message)
 
         if model.content_security_policy_values:
             csp_message = {
