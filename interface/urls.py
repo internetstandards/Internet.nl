@@ -10,7 +10,7 @@ from interface.batch import views as batch
 from interface.views import connection, domain, mail, stats
 
 regex_tld = r"(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)"
-regex_dname = r"(?P<dname>([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" + regex_tld + ")"
+regex_dname = r"(?P<dname>([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" + regex_tld + "\.?)"
 regex_testid = r"(?P<request_id>[a-zA-Z0-9]{1,35})"
 regex_mailaddr = (
     r"(?P<mailaddr>([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" r"" + regex_tld + ")"

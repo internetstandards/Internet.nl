@@ -45,7 +45,7 @@ ub_ctx.set_option("rrset-roundrobin:", "no")
 # were legal under the original RFC-1035 but not according to the "ICANN
 # Application Guidebook for new TLDs (June 2012)" which stated that "The
 # ASCII label must consist entirely of letters (alphabetic characters a-z)".
-regex_dname = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" "([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)$"
+regex_dname = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" "([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)\.?$"
 
 HOME_STATS_LOCK_ID = redis_id.home_stats_lock.id
 HOME_STATS_LOCK_TTL = redis_id.home_stats_lock.ttl
