@@ -23,7 +23,7 @@ class SecuritytxtRetrieveResult:
     content: Optional[str]
     url: str
     found_host: str
-    found_url: str
+    found_url: Optional[str]
     errors: List[Dict[str, str]]
 
 
@@ -60,7 +60,7 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
             errors=[{"msgid": "utf8"}],
         )
     except requests.RequestException:
-        return _evaluate_response(None, None, hostname, path, "", hostname)
+        return _evaluate_response(None, None, hostname, path, "", hostname, None)
     return _evaluate_response(
         response.status_code,
         response.headers.get("Content-Type", ""),
@@ -79,7 +79,7 @@ def _evaluate_response(
     path: str,
     content: str,
     found_host: str,
-    found_url: str,
+    found_url: Optional[str],
 ) -> SecuritytxtRetrieveResult:
     errors = []
     media_type, charset = None, None
