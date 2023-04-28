@@ -71,3 +71,6 @@ custom-deps
 tmp
 .devenv*
 devenv.local.nix
+
+integration_tests/test-results/
+test-results/

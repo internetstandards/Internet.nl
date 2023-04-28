@@ -449,13 +449,18 @@ docker-run:
 
 docker-compose-up: services=
 docker-compose-up:
-	${DOCKER_COMPOSE_CMD} up --wait ${services}
+	${DOCKER_COMPOSE_CMD} up --wait --no-build ${services}
 
 docker-compose-up-build:
 	${DOCKER_COMPOSE_CMD} up --wait --build ${services}
 
+docker-compose-build: services=
+docker-compose-build:
+	${DOCKER_COMPOSE_CMD} build ${services}
+
+docker-compose-logs: services=webserver app worker test-target batch
 docker-compose-logs:
-	${DOCKER_COMPOSE_CMD} logs -f webserver app worker test-target
+	${DOCKER_COMPOSE_CMD} logs -f ${services}
 
 docker-compose-logs-all:
 	${DOCKER_COMPOSE_CMD} logs -f
@@ -491,11 +496,18 @@ docker-compose-down:
 docker-compose-down-remove-volumes:
 	${DOCKER_COMPOSE_CMD} down --volumes
 
+docker-compose-reset:
+	${DOCKER_COMPOSE_CMD} down --volumes
+	docker network prune -f
+
 docker-compose-pull-dependencies:
 	${DOCKER_COMPOSE_CMD} pull --ignore-buildable
 
 integration-tests:
-	${env} pytest -v integration_tests/integration ${testargs}
+	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/integration/
+
+integration-tests-trace:
+	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure --tracing=retain-on-failure --browser firefox ${testargs} integration_tests/integration/
 
 live-tests:
 	${env} pytest -v integration_tests/live ${testargs}

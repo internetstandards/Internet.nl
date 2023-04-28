@@ -153,6 +153,8 @@ class TeamCymruIPtoASN(RouteView):
         result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)
         if result["nxdomain"]:
             return []
+        elif "rcode" not in result:
+            return []
         elif result["rcode"] == unbound.RCODE_SERVFAIL:
             raise BGPSourceUnavailableError(
                 f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?"

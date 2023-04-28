@@ -12,6 +12,6 @@
   ];
 
   enterShell = ''
-    eval "$(sed -E '/^#|^\s*$/d;s/^/export /' develop.env)"
+    export $(grep COMPOSE_FILE develop.env)
   '';
 }

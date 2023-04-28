@@ -10,7 +10,7 @@ ARG PYTHON_VERSION=3.9
 # hashes/log output prefix build command with: `DOCKER_BUILDKIT=0`
 
 # generic stage used by all build stages
-FROM debian:11-slim as build-deps
+FROM debian:bullseye-20230502-slim as build-deps
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -65,7 +65,7 @@ WORKDIR /src
 
 RUN pip3 install -r requirements.txt
 
-FROM debian:11-slim as unbound
+FROM debian:bullseye-20230502-slim as unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
@@ -107,7 +107,7 @@ ADD docker/unbound/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-FROM debian:11-slim as app
+FROM debian:bullseye-20230502-slim as app
 ARG PYTHON_VERSION
 
 RUN apt update && \

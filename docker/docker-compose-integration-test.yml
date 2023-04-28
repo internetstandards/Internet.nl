@@ -1,12 +1,26 @@
-# additional services to test against during integration tests and overwrites
-# for existing services to make them work in integration test environment
-version: '2.1'
-
 services:
+  # networks during tests are cut off from the outside to provide isolated test results
+  # to provide some debugging possibilities this container is used to expose some ports
+  # from the internal network to the outside
+  port-expose:
+    image: alpine/socat
+    command: TCP-LISTEN:8081,reuseaddr,fork TCP:webserver:80
+    networks:
+      - public-internet
+      - port-expose
+    ports:
+      - 8081:8081
+
   app:
     dns: $IPV4_IP_RESOLVER_INTERNAL
+    # TODO: does this solve issues with slow tests on Github Actions?
+    dns_search: []
+    dns_opt: ["ndots:0", "timeout:1", "attempts:1"]
   worker:
     dns: $IPV4_IP_RESOLVER_INTERNAL
+    # TODO: does this solve issues with slow tests on Github Actions?
+    dns_search: []
+    dns_opt: ["ndots:0", "timeout:1", "attempts:1"]
 
   rabbitmq:
     networks:
@@ -23,6 +37,11 @@ services:
       public-internet:
         aliases:
           - test-target.internet.nl
+          - test-target1.internet.nl
+          - test-target2.internet.nl
+          - test-target3.internet.nl
+          - test-target4.internet.nl
+          - test-target5.internet.nl
 
     ports:
       - 80
@@ -52,29 +71,26 @@ services:
     environment:
       MH_SMTP_BIND_ADDR: 0.0.0.0:25
 
-    healthcheck:
-      test: ["CMD", "nc", "localhost", "25"]
-      interval: $HEALTHCHECK_INTERVAL
-      retries: 30
+    # healthcheck:
+    #   test: ["CMD", "nc", "localhost", "25"]
+    #   interval: $HEALTHCHECK_INTERVAL
+    #   retries: 30
 
-  browser:
-    image: curlimages/curl
-    user: root
-    command: /entrypoint.sh
-
-    depends_on:
-      unbound:
-        condition: service_healthy
-
+  test-runner:
+    image: $DOCKER_IMAGE_TEST_RUNNER
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test-runner
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration_tests/integration/
     networks:
-      public-internet: {}
-      internal: {}
-
-    environment:
-      - IPV4_IP_RESOLVER_INTERNAL
-
+      public-internet:
     volumes:
-      - ../integration_tests/browser/entrypoint.sh:/entrypoint.sh
+      - ../:/source
+      # make docker available inside the container
+      - /var/run/docker.sock:/var/run/docker.sock
+    profiles:
+      - run-tests
 
   resolver:
     image: strm/dnsmasq
@@ -82,9 +98,13 @@ services:
     entrypoint: /entrypoint.sh
 
     networks:
-      public-internet: {}
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL
+
+    # null route external DNS queries to isolate tests
+    dns: 192.0.2.1
+    dns_search: []
+    dns_opt: ["ndots:0", "timeout:1", "attempts:1"]
 
     ports:
       - "53/udp"
@@ -102,7 +122,8 @@ services:
     networks:
       public-internet:
         aliases:
-          - $CONN_TEST_DOMAIN
+          # make internet.nl website available for testing
+          - $INTERNETNL_DOMAINNAME
         ipv6_address: $IPV6_IP_PUBLIC
         ipv4_address: $IPV4_WEBSERVER_IP_PUBLIC
 
@@ -112,7 +133,15 @@ services:
         ipv4_address: $IPV4_UNBOUND_IP_PUBLIC
 
 networks:
+  # network that is not internet to expose internal ports for debugging purposes
+  port-expose:
+    internal: false
+    driver: bridge
+
   public-internet:
+    # make public network internal as well to run tests isolated from the internet
+    internal: true
+    # required to enable IPv6 on Docker Desktop runtime
     enable_ipv6: true
     driver: bridge
     driver_opts:
@@ -121,6 +150,8 @@ networks:
       # network for internal communication between services
       com.docker.network.bridge.enable_icc: "true"
     ipam:
+      driver: default
       config:
-        - subnet: $IPV6_SUBNET_PUBLIC
-        - subnet: $IPV4_SUBNET_PUBLIC
+      - subnet: $IPV6_SUBNET_PUBLIC
+        gateway: $IPV6_GATEWAY_PUBLIC
+      - subnet: $IPV4_SUBNET_PUBLIC

@@ -4,3 +4,4 @@
 *.pid
 **/*.pyc
 **/.pytest_cache
+test-results
