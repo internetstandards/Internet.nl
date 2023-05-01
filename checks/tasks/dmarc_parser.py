@@ -31,6 +31,7 @@ ParserElement.setDefaultWhitespaceChars("")  # Whitespace is in the grammar
 # The following directives can be found under <parsed_result>['directives']
 # if any:
 #     - request, (p=);
+#     - nrequest, (np=);
 #     - srequest, (sp=);
 #     - auri, (rua=);
 #     - furi, (ruf=);
@@ -103,6 +104,11 @@ srequest = Combine(
     + equal
     + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
 )("srequest")
+nrequest = Combine(
+    CaselessLiteral("np")
+    + equal
+    + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
+)("nrequest")
 request = Combine(
     CaselessLiteral("p") + equal + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
 )("request")
@@ -111,6 +117,7 @@ directives = (
     Optional(request)
     + (
         Optional(sep + srequest)
+        & Optional(sep + nrequest)
         & Optional(sep + auri)
         & Optional(sep + furi)
         & Optional(sep + adkim)
