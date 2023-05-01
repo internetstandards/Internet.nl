@@ -65,6 +65,7 @@ class HeaderCheckerContentSecurityPolicy:
             self.has_unsafe_hashes = False
             self.has_http = False
             self.has_bare_https = False
+            self.has_host_without_scheme = False
             self.has_data = False
             self.has_base_uri = False
             self.has_form_action = False
@@ -80,6 +81,7 @@ class HeaderCheckerContentSecurityPolicy:
                 "has_unsafe_eval",
                 "has_http",
                 "has_bare_https",
+                "has_host_without_scheme",
                 "has_data",
                 "has_invalid_host",
                 "has_unsafe_hashes",
@@ -113,6 +115,7 @@ class HeaderCheckerContentSecurityPolicy:
                 f"has_unsafe_hashes: {self.has_unsafe_hashes}\n"
                 f"has_http: {self.has_http}\n"
                 f"has_bare_https: {self.has_bare_https}\n"
+                f"has_host_without_scheme: {self.has_host_without_scheme}\n"
                 f"has_data: {self.has_data}\n"
                 f"has_base_uri: {self.has_base_uri}\n"
                 f"has_form_action: {self.has_form_action}\n"
@@ -308,7 +311,7 @@ class HeaderCheckerContentSecurityPolicy:
         self.parsed = None
         self.result = None
 
-    def _get_directives(self, directives):
+    def _get_directives(self, directives=None):
         if not directives:
             return self.parsed.keys()
         res = []
@@ -338,6 +341,20 @@ class HeaderCheckerContentSecurityPolicy:
                         for value in values:
                             if value == match.group(group):
                                 return True
+        return False
+
+    def _check_hosts_without_scheme(self):
+        """
+        Check for any directives with host, without a scheme (#810)
+        """
+        dirs = self._get_directives()
+        for dir in dirs:
+            for match in self.parsed[dir]:
+                try:
+                    if match.group("host") and not match.group("scheme"):
+                        return True
+                except IndexError:
+                    pass
         return False
 
     def _check_none_self_similar(self, domain, directive: str):
@@ -395,6 +412,7 @@ class HeaderCheckerContentSecurityPolicy:
     def _verdict(self, domain):
         self.result.has_http = self._check_matched_for_groups(dict(scheme=["http", "*"], scheme_source=["http", "*"]))
         self.result.has_bare_https = self._check_matched_for_groups(dict(scheme_source=["https"]))
+        self.result.has_host_without_scheme = self._check_hosts_without_scheme()
         self.result.has_data = self._check_matched_for_groups(
             dict(scheme_source=["data", "*"]), directives=["object-src", "script-src"]
         )

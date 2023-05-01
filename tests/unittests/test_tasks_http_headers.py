@@ -96,7 +96,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_bad(headers)
 
     def test_default_src_1(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src internet.nl; frame-ancestors 'self'"
+        headers = "form-action 'none'; base-uri 'none'; default-src https://internet.nl; frame-ancestors 'self'"
         self._is_bad(headers)
 
     def test_default_src_2(self):
@@ -108,44 +108,54 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_good(headers)
 
     def test_default_src_4(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' internet.nl; frame-ancestors 'self'"
+        headers = "form-action 'none'; base-uri 'none'; default-src 'self' https://internet.nl; frame-ancestors 'self'"
         self._is_good(headers)
 
     def test_default_src_5(self):
         headers = (
-            "form-action 'none'; base-uri 'none'; default-src 'self' internet.nl *.internet.nl; frame-ancestors 'self'"
+            "form-action 'none'; base-uri 'none'; default-src 'self' https://internet.nl https://*.internet.nl;"
+            " frame-ancestors 'self'"
         )
         self._is_good(headers)
 
     def test_default_src_6(self):
         headers = (
-            "form-action 'none'; base-uri 'none'; default-src 'self' internet.nl *.internet.nl www.internet.nl;"
+            "form-action 'none'; base-uri 'none'; "
+            "default-src 'self' https://internet.nl https://*.internet.nl https://www.internet.nl;"
             "frame-ancestors 'self'"
         )
         self._is_good(headers)
 
     def test_default_src_7(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' internet.nl *.internet.nl internet.com; frame-ancestors 'self'"  # noqa
+        headers = "form-action 'none'; base-uri 'none'; default-src 'self' https://internet.nl https://*.internet.nl internet.com; frame-ancestors 'self'"  # noqa
         self._is_bad(headers)
 
     def test_default_src_8(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' www.internet.nl; frame-ancestors 'self'"
+        headers = (
+            "form-action 'none'; base-uri 'none'; default-src 'self' https://www.internet.nl; frame-ancestors 'self'"
+        )
         self._is_good(headers)
 
     def test_default_src_9(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' www.internet.nl; frame-ancestors 'self'"
+        headers = (
+            "form-action 'none'; base-uri 'none'; default-src 'self' https://www.internet.nl; frame-ancestors 'self'"
+        )
         self._is_good(headers)
 
     def test_default_src_10(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' nl *.nl www.internet.nl internet.com; frame-ancestors 'self'"  # noqa
+        headers = "form-action 'none'; base-uri 'none'; default-src 'self' nl *.nl https://www.internet.nl internet.com; frame-ancestors 'self'"  # noqa
         self._is_bad(headers)
 
     def test_default_src_11(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' www.internet.nl; frame-ancestors 'self'"
+        headers = (
+            "form-action 'none'; base-uri 'none'; default-src 'self' https://www.internet.nl; frame-ancestors 'self'"
+        )
         self._is_good(headers)
 
     def test_default_src_12(self):
-        headers = "form-action 'none'; base-uri 'none'; default-src 'self' *.internet.nl; frame-ancestors 'self'"
+        headers = (
+            "form-action 'none'; base-uri 'none'; default-src 'self' https://*.internet.nl; frame-ancestors 'self'"
+        )
         self._is_good(headers)
 
     def test_default_src_13(self):
@@ -257,7 +267,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_good(headers)
 
     def test_uri_base_uri(self):
-        headers = "form-action 'none'; base-uri www.internet.nl; default-src 'self'; frame-ancestors 'self'"
+        headers = "form-action 'none'; base-uri https://www.internet.nl; default-src 'self'; frame-ancestors 'self'"
         self._is_bad(headers)
 
     def test_missing_form_action(self):
@@ -269,7 +279,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_good(headers)
 
     def test_uri_form_action(self):
-        headers = "form-action www.internet.nl; base-uri 'none'; default-src 'self'; frame-ancestors 'self'"
+        headers = "form-action https://www.internet.nl; base-uri 'none'; default-src 'self'; frame-ancestors 'self'"
         self._is_good(headers)
 
     def test_missing_frame_ancestors(self):
@@ -285,7 +295,7 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_bad(headers)
 
     def test_frame_source_domain(self):
-        headers = self.base_policy + "frame-ancestors 'self'; frame-src www.example.org"
+        headers = self.base_policy + "frame-ancestors 'self'; frame-src https://www.example.org"
         self._is_good(headers)
 
     def test_two_headers(self):
@@ -337,11 +347,11 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         self._is_good_and_parsed(headers, "style-src")
 
     def test_host_source_2(self):
-        headers = self.base_policy + "frame-ancestors 'none', style-src fas.com:443"
+        headers = self.base_policy + "frame-ancestors 'none', style-src https://fas.com:443"
         self._is_good_and_parsed(headers, "style-src")
 
     def test_host_source_3(self):
-        headers = self.base_policy + "frame-ancestors 'none', style-src fas.com"
+        headers = self.base_policy + "frame-ancestors 'none', style-src https://fas.com"
         self._is_good_and_parsed(headers, "style-src")
 
     def test_scheme_source_1(self):
@@ -355,6 +365,10 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     def test_scheme_source_3(self):
         headers = self.base_policy + "frame-ancestors 'none', style-src fasdf:"
         self._is_good_and_not_parsed(headers, "style-src")
+
+    def test_scheme_source_4(self):
+        headers = self.base_policy + "frame-ancestors 'none', style-src internet.nl"
+        self._is_bad_and_parsed(headers, "style-src")
 
     def test_other_source_nonce_1(self):
         headers = self.base_policy + "frame-ancestors 'none', style-src 'nonce-fdasdfas5678589+5346/sfdg'"
