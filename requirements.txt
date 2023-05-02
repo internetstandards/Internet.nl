@@ -8,6 +8,8 @@ abnf==2.3.1
     # via -r requirements.in
 amqp==5.3.1
     # via kombu
+annotated-types==0.6.0
+    # via pydantic
 argparse==1.4.0
     # via
     #   -r requirements.in
@@ -56,10 +58,11 @@ click-repl==0.3.0
     # via celery
 colorlog==6.9.0
     # via -r requirements.in
-cryptography==38.0.4
+cryptography==43.0.3
     # via
     #   -r requirements.in
     #   pgpy-dtc
+    #   sslyze
 django==4.2.24
     # via
     #   -r requirements.in
@@ -145,6 +148,12 @@ pyasn1==0.6.1
     # via pgpy-dtc
 pycparser==2.22
     # via cffi
+pydantic==2.6.4
+    # via -r requirements.in
+pydantic-core==2.16.3
+    # via pydantic
+pyopenssl==24.2.1
+    # via -r requirements.in
 pyparsing==3.2.1
     # via -r requirements.in
 pyrabbit2==1.0.7
@@ -207,6 +216,9 @@ statsd==4.0.0
     #   django-statsd-mozilla
 statshog==1.0.6
     # via -r requirements.in
+tls-parser==2.0.1
+    # via -r requirements.in
+    # via sslyze
 tinycss2==1.1.1
     # via bleach
 tomli==2.2.1
@@ -224,6 +236,13 @@ tzdata==2024.2
     #   celery
     #   kombu
 urllib3==2.3.0
+    #   pydantic
+    #   pydantic-core
+    #   setuptools-rust
+    #   setuptools-scm
+tzdata==2023.3
+    # via celery
+urllib3==2.0.7
     # via
     #   requests
     #   selenium

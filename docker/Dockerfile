@@ -55,14 +55,13 @@ RUN make install
 
 FROM build-deps AS build-nassl
 
-COPY vendor/nassl /src/vendor/nassl
+COPY vendor/nassl6 /src/vendor/nassl
 WORKDIR /src/vendor/nassl
 
-ADD vendor/zlib-1.2.13.tar.gz ./
-COPY vendor/openssl-1.0.2e ./openssl-1.0.2e
-COPY vendor/openssl-master ./openssl-master
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
-RUN python3 build_from_scratch.py
+RUN pip3 install -r requirements-dev.txt
+RUN invoke build.all
 RUN python3 setup.py install
 
 # intermediate stage with apt and python dependencies
@@ -75,6 +74,10 @@ WORKDIR /src
 ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system -r requirements.txt
+# sslyze is installed from our own fork, and installed
+# without deps to avoid it trying to install nassl, when
+# we have our custom nassl
+RUN pip3 install --no-deps https://github.com/mxsasha/sslyze/archive/refs/tags/6.0.0+internetnl6.tar.gz
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps

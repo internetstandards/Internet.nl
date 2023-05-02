@@ -19,6 +19,13 @@ from internetnl import log
 urllib3.disable_warnings()
 
 
+DEFAULT_TIMEOUT = 10
+
+
+class NoIpError(Exception):
+    pass
+
+
 def _do_request(args, headers, kwargs, session, url):
     """
     This small wrapper helps with handling of redirects.
