@@ -1085,24 +1085,9 @@ class WebTlsCipherOrder(Subtest):
         self.verdict = "detail web tls cipher-order verdict good"
         self.tech_data = ""
 
-    def result_bad(self):
+    def result_bad(self, cipher_order_violation):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls cipher-order verdict bad"
-        self.tech_data = ""
-
-    def result_seclevel_bad(self, cipher_order_violation):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web tls cipher-order verdict seclevel-bad"
-        self.tech_data = cipher_order_violation
-
-    def result_score_warning(self, cipher_order_violation):
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail web tls cipher-order verdict warning"
-        self.tech_data = cipher_order_violation
-
-    def result_score_info(self, cipher_order_violation):
-        self._status(STATUS_INFO)
-        self.verdict = "detail web tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
     def result_na(self):
@@ -1674,28 +1659,10 @@ class MailTlsCipherOrder(Subtest):
         self.verdict = "detail mail tls cipher-order verdict good"
         self.tech_data = ""
 
-    def result_bad(self):
+    def result_bad(self, cipher_order_violation):
         self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls cipher-order verdict bad"
-        self.tech_data = ""
-
-    def result_seclevel_bad(self, cipher_order_violation):
-        self.was_tested()
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls cipher-order verdict seclevel-bad"
-        self.tech_data = cipher_order_violation
-
-    def result_warning(self, cipher_order_violation):
-        self.was_tested()
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail mail tls cipher-order verdict warning"
-        self.tech_data = cipher_order_violation
-
-    def result_info(self, cipher_order_violation):
-        self.was_tested()
-        self._status(STATUS_INFO)
-        self.verdict = "detail mail tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
     def result_na(self):
