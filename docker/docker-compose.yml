@@ -140,7 +140,9 @@ services:
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
       - INTEGRATION_TESTS
+      - DJANGO_LOG_LEVEL
       - INTERNETNL_LOG_LEVEL
+      - CELERY_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
@@ -208,7 +210,9 @@ services:
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
+      - DJANGO_LOG_LEVEL
       - INTERNETNL_LOG_LEVEL
+      - CELERY_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - WORKER_CONCURRENCY
 
@@ -241,7 +245,7 @@ services:
     user: root
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow,nassl_worker
 
     depends_on:
       db-migrate:
@@ -291,7 +295,9 @@ services:
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
       - INTEGRATION_TESTS
+      - DJANGO_LOG_LEVEL
       - INTERNETNL_LOG_LEVEL
+      - CELERY_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - ROUTINATOR_URL
       - CONN_TEST_DOMAIN
@@ -318,31 +324,6 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
-
-  # worker for queue with potential memory leak
-  worker-nassl:
-    # copy all attributes from 'worker' service and overwrite specific settings below
-    <<: *worker
-
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues nassl_worker
-
-  # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
-  restart-nassl-worker:
-    image: alpinelinux/docker-cli:latest
-    command: crond -f -d7
-    configs:
-      - source: restart_nassl_worker_cron
-        target: /etc/periodic/hourly/restart_nassl_worker
-        mode: 0755
-    restart: unless-stopped
-    logging:
-      driver: $LOGGING_DRIVER
-      options:
-        tag: '{{.Name}}'
-    network_mode: "none"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
 
   # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
   worker-slow:
@@ -413,7 +394,9 @@ services:
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
       - INTEGRATION_TESTS
+      - DJANGO_LOG_LEVEL
       - INTERNETNL_LOG_LEVEL
+      - CELERY_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - ROUTINATOR_URL
       - CONN_TEST_DOMAIN
@@ -964,12 +947,7 @@ configs:
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
 
-  restart_nassl_worker_cron:
-    content: |
-      #!/bin/sh
-      set -e
-      # find nassl worker and restart the container
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
+
 
 networks:
   # disable default network
