@@ -41,7 +41,7 @@ if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
     from checks.tasks import mail
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    from checks.tasks import tls
+    from checks.tasks.tls import tasks_reports as tls_tasks
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     from checks.tasks import appsecpriv
@@ -413,7 +413,7 @@ if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    web_probe_tls = Probe("tls", "site", model=WebTestTls, category=categories.WebTls, taskset=tls.web_registered)
+    web_probe_tls = Probe("tls", "site", model=WebTestTls, category=categories.WebTls, taskset=tls_tasks.web_registered)
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
     web_probe_appsecpriv = Probe(
@@ -445,7 +445,7 @@ if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     batch_web_probe_tls = Probe(
-        "tls", "site", model=WebTestTls, category=categories.WebTls, taskset=tls.batch_web_registered
+        "tls", "site", model=WebTestTls, category=categories.WebTls, taskset=tls_tasks.batch_web_registered
     )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
@@ -518,7 +518,9 @@ if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
     )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    mail_probe_tls = Probe("tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls.mail_registered)
+    mail_probe_tls = Probe(
+        "tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls_tasks.mail_registered
+    )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
     mail_probe_rpki = Probe(
@@ -542,7 +544,7 @@ if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
     batch_mail_probe_tls = Probe(
-        "tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls.batch_mail_registered
+        "tls", "mail", model=MailTestTls, category=categories.MailTls, taskset=tls_tasks.batch_mail_registered
     )
 
 if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
