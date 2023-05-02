@@ -1,11 +1,9 @@
-import binascii
 import concurrent.futures
 from binascii import hexlify
 from enum import Enum
 from pathlib import Path
-import socket
 from ssl import match_hostname, CertificateError
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import List, Tuple, Generator, Dict, Any, Optional
 
 import subprocess
 from cryptography.hazmat._oid import NameOID
@@ -15,8 +13,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa, dsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
-from dns.name import EmptyLabel
-from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
 from nassl._nassl import OpenSSLError
 from nassl.ssl_client import ClientCertificateRequested, OpenSslDigestNidEnum
 from sslyze import (
@@ -58,9 +54,10 @@ from checks.models import (
     DaneStatus,
     ZeroRttStatus,
     KexHashFuncStatus,
+    OcspStatus,
     CipherOrderStatus,
 )
-from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
+from checks.tasks.shared import resolve_dane
 from checks.tasks.tls import TLSException
 from checks.tasks.tls.evaluation import (
     TLSProtocolEvaluation,
@@ -68,7 +65,6 @@ from checks.tasks.tls.evaluation import (
     TLSCipherEvaluation,
     KeyExchangeHashFunctionEvaluation,
     TLSCipherOrderEvaluation,
-    TLSOCSPEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
@@ -140,19 +136,26 @@ def dane(
     stdout = ""
     rollover = False
 
-    dane_qname = f"_{port}._tcp.{url}"
-    dane_data = None
-    dnssec_status = None
-    try:
-        rrset, dnssec_status = dns_resolve_tlsa(dane_qname)
-        dane_data = [(rr.usage, rr.selector, rr.mtype, binascii.hexlify(rr.cert).decode("ascii")) for rr in rrset]
-        if dnssec_status == DNSSECStatus.BOGUS:
+    continue_testing = False
+
+    cb_data = resolve_dane(port, url)
+
+    # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
+    # returned for the TLSA domain (faulty signer).
+    if cb_data.get("bogus"):
+        status = DaneStatus.none_bogus
+        score = score_none_bogus
+    elif cb_data.get("data") and cb_data.get("secure"):
+        # If there is a secure TLSA record check for the existence of
+        # possible bogus (unsigned) NXDOMAIN in A.
+        tmp_data = resolve_dane(port, url, check_nxdomain=True)
+        if tmp_data.get("nxdomain") and tmp_data.get("bogus"):
             status = DaneStatus.none_bogus
             score = score_none_bogus
-    except (NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout, EmptyLabel):
-        pass
+        else:
+            continue_testing = True
 
-    if not dane_data or dnssec_status != DNSSECStatus.SECURE:
+    if not continue_testing:
         return dict(
             dane_score=score,
             dane_status=status,
@@ -161,29 +164,13 @@ def dane(
             dane_rollover=rollover,
         )
 
-    # Try to look up an A record for this qname, likely resulting in nxdomain, which must not be bogus
-    try:
-        dns_resolve_a(dane_qname)
-    except (NoAnswer, NoNameservers, LifetimeTimeout, EmptyLabel):
-        pass
-    except NXDOMAIN as nxdomain:
-        a_dnssec_status = DNSSECStatus.from_message(nxdomain.response(dane_qname))
-        if a_dnssec_status == DNSSECStatus.BOGUS:
-            return dict(
-                dane_score=score_none_bogus,
-                dane_status=DaneStatus.none_bogus,
-                dane_log=stdout,
-                dane_records=records,
-                dane_rollover=rollover,
-            )
-
     # Record TLSA data and also check for DANE rollover types.
     # Accepted pairs are:
     # * 3 x x - 3 x x
     # * 3 x x - 2 x x
     two_x_x = 0
     three_x_x = 0
-    for cert_usage, selector, match, data in dane_data:
+    for cert_usage, selector, match, data in cb_data["data"]:
         if port == 25 and cert_usage in (0, 1):
             # Ignore PKIX TLSA records for mail.
             continue
@@ -213,7 +200,6 @@ def dane(
     for cert in chain:
         chain_pem.append(cert.public_bytes(Encoding.PEM).decode("ascii"))
     chain_txt = "\n".join(chain_pem)
-    resolver = socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)
     with subprocess.Popen(
         [
             settings.LDNS_DANE,
@@ -222,7 +208,7 @@ def dane(
             "-n",  # Do not validate hostname
             "-T",  # Exit status 2 for PKIX without (secure) TLSA records
             "-r",
-            resolver,
+            settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING,  # Use internal unbound resolver
             "-f",
             settings.CA_CERTIFICATES,  # CA file
             "verify",
@@ -490,7 +476,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
             message = f"{common_name}: {failed_key_type}-{key_size} key_size"
             if curve:
                 message += f", curve: {curve}"
-            if isinstance(public_key, EllipticCurvePublicKey) and type(public_key.curve) in CERT_EC_CURVES_PHASE_OUT:
+            if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
                 phase_out_pubkey.append(message)
             else:
                 bad_pubkey.append(message)
@@ -503,11 +489,13 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
     Perform sslyze probing on all mail servers, in parallel.
     """
     scans = []
+    dane_cb_per_server = {}
     results = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         future_to_server = {}
 
-        for server in server_tuples:
+        for server, dane_cb_data in server_tuples:
+            dane_cb_per_server[server] = dane_cb_data
             future = executor.submit(_generate_mail_server_scan_request, server)
             future_to_server[future] = server
 
@@ -529,7 +517,8 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
             results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
             continue
         log.debug(f"sslyze mail scan complete for {result.server_location.hostname}, other scans may be pending")
-        results[result.server_location.hostname] = check_mail_tls(result, all_suites)
+        dane_cb_data = dane_cb_per_server[result.server_location.hostname]
+        results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data)
         log.debug(f"check_mail_tls complete for {result.server_location.hostname}")
     return results
 
@@ -558,7 +547,7 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
         log.info(f"unable to resolve MX host {mx_hostname}, marking server unreachable")
         return None
     network_configuration = ServerNetworkConfiguration(
-        tls_server_name_indication=mx_hostname.rstrip("."),
+        tls_server_name_indication=mx_hostname,
         tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
         smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
@@ -587,7 +576,7 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
     )
 
 
-def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt]):
+def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt], dane_cb_data):
     """
     Perform evaluation and additional probes for a single mail server.
     This happens after sslyze has already been run on it.
@@ -599,18 +588,16 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-    server_connectivity_info = ServerConnectivityInfo(
-        server_location=result.server_location,
-        network_configuration=result.network_configuration,
-        tls_probing_result=result.connectivity_result,
-    )
     cipher_order_evaluation = test_cipher_order(
-        server_connectivity_info,
+        ServerConnectivityInfo(
+            server_location=result.server_location,
+            network_configuration=result.network_configuration,
+            tls_probing_result=result.connectivity_result,
+        ),
         prots_accepted,
         cipher_evaluation,
     )
-    key_exchange_hash_evaluation = test_key_exchange_hash(server_connectivity_info)
-    cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
+    cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL, dane_cb_data)
 
     # HACK for DANE-TA(2) and hostname mismatch!
     # Give a good hosmatch score if DANE-TA *is not* present.
@@ -648,8 +635,7 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
         else None,
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
-            if result.scan_result.tls_compression.result
-            and result.scan_result.tls_compression.result.supports_compression
+            if result.scan_result.tls_compression.result.supports_compression
             else scoring.WEB_TLS_COMPRESSION_GOOD
         ),
         dh_param=fs_evaluation.max_dh_size,
@@ -667,8 +653,8 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        kex_hash_func=key_exchange_hash_evaluation.status,
-        kex_hash_func_score=key_exchange_hash_evaluation.score,
+        kex_hash_func=KexHashFuncStatus.good,
+        kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
     results.update(cert_results)
     return results
@@ -690,7 +676,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     server_location = ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1])
     network_configuration = ServerNetworkConfiguration(
-        tls_server_name_indication=url.rstrip("."),
+        tls_server_name_indication=url,
         http_user_agent=settings.USER_AGENT,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
@@ -742,9 +728,18 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ),
     )
 
-    ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
-        result.scan_result.certificate_info.result.certificate_deployments[0]
-    )
+    ocsp_status = OcspStatus.ok
+    if any(
+        [d.ocsp_response_is_trusted is True for d in result.scan_result.certificate_info.result.certificate_deployments]
+    ):
+        ocsp_status = OcspStatus.good
+    elif any(
+        [
+            d.ocsp_response_is_trusted is False
+            for d in result.scan_result.certificate_info.result.certificate_deployments
+        ]
+    ):
+        ocsp_status = OcspStatus.not_trusted
 
     probe_result = dict(
         tls_enabled=True,
@@ -771,13 +766,10 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
             else scoring.WEB_TLS_CLIENT_RENEG_GOOD
         ),
-        compression=result.scan_result.tls_compression.result.supports_compression
-        if result.scan_result.tls_compression.result
-        else None,
+        compression=result.scan_result.tls_compression.result.supports_compression,
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
-            if result.scan_result.tls_compression.result
-            and result.scan_result.tls_compression.result.supports_compression
+            if result.scan_result.tls_compression.result.supports_compression
             else scoring.WEB_TLS_COMPRESSION_GOOD
         ),
         dh_param=fs_evaluation.max_dh_size,
@@ -795,8 +787,10 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        ocsp_stapling=ocsp_evaluation.status,
-        ocsp_stapling_score=ocsp_evaluation.score,
+        ocsp_stapling=ocsp_status,
+        ocsp_stapling_score=(
+            scoring.WEB_TLS_OCSP_STAPLING_GOOD if ocsp_status == OcspStatus.good else scoring.WEB_TLS_OCSP_STAPLING_BAD
+        ),
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
     )
@@ -848,10 +842,10 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
     """
     last_error_trace = None
     for scan_result in vars(result.scan_result).values():
-        error_trace = getattr(scan_result, "error_trace", None)
+        error_trace = getattr(scan_result, "error_trace")
         if error_trace:
             last_error_trace = error_trace
-            log.info(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
+            log.error(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
     if last_error_trace:
         raise TLSException(str(last_error_trace))
 
@@ -865,7 +859,7 @@ def test_key_exchange_hash(
     There are few or no hosts that do not meet this requirement.
     """
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
-    ssl_connection.ssl_client.set_signature_algorithms(SIGNATURE_ALGORITHMS_SHA2)
+    ssl_connection.ssl_client.set_sigalgs(SIGNATURE_ALGORITHMS_SHA2)
 
     try:
         ssl_connection.connect()
@@ -1019,13 +1013,8 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
-        except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut) as exc:
-            log.debug(
-                f"Server {server_connectivity_info.server_location.hostname}"
-                f"/{server_connectivity_info.server_location.ip_address}"
-                f" rejected {tls_version.name}:"
-                f" {str(exc).strip()} ({requires_legacy_openssl=})"
-            )
+        except (ConnectionToServerFailed, OpenSSLError) as exc:
+            log.debug(f"Server {server_connectivity_info.server_location.hostname} rejected {tls_version.name}: {exc}")
         finally:
             ssl_connection.close()
 
