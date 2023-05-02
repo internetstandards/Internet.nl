@@ -1,10 +1,10 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import errno
-import http.client
 import socket
 import ssl
 import time
+from typing import List
 from urllib.parse import urlparse
 
 import requests
@@ -34,7 +34,17 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 from nassl import _nassl
+from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum, DhEphemeralKeyInfo, OpenSslEcNidEnum, EcDhEphemeralKeyInfo
 from nassl.ocsp_response import OcspResponseNotTrustedError
+from sslyze import (
+    Scanner,
+    ServerScanRequest,
+    ServerNetworkLocation,
+    ServerScanStatusEnum,
+    ScanCommand,
+    TlsVersionEnum,
+    CipherSuiteAcceptedByServer,
+)
 
 from checks import categories, scoring
 from checks.http_client import http_get_ip
@@ -69,7 +79,6 @@ from checks.tasks.shared import (
     results_per_domain,
 )
 from checks.tasks.tls_connection import (
-    MAX_REDIRECT_DEPTH,
     SSLV2,
     SSLV3,
     SSLV23,
@@ -82,7 +91,6 @@ from checks.tasks.tls_connection import (
     HTTPSConnection,
     ModernConnection,
     SSLConnectionWrapper,
-    http_fetch,
 )
 from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
 from interface import batch, batch_shared_task, redis_id
@@ -2855,75 +2863,230 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     Check the webserver's TLS configuration.
 
     """
+    scans = [
+        ServerScanRequest(
+            server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
+            scan_commands={
+                ScanCommand.CERTIFICATE_INFO,
+                ScanCommand.SSL_2_0_CIPHER_SUITES,
+                ScanCommand.SSL_3_0_CIPHER_SUITES,
+                ScanCommand.TLS_1_0_CIPHER_SUITES,
+                ScanCommand.TLS_1_1_CIPHER_SUITES,
+                ScanCommand.TLS_1_2_CIPHER_SUITES,
+                ScanCommand.TLS_1_3_CIPHER_SUITES,
+                ScanCommand.TLS_COMPRESSION,
+                ScanCommand.TLS_1_3_EARLY_DATA,
+                ScanCommand.SESSION_RENEGOTIATION,
+                ScanCommand.ELLIPTIC_CURVES,
+            },
+        ),
+    ]
+    scanner = Scanner(per_server_concurrent_connections_limit=25)
+    scanner.queue_scans(scans)
+    result = next(scanner.get_results())
 
-    def connect_to_web_server():
-        http_client, *_ = http_fetch(
-            url,
-            af=af_ip_pair[0],
-            path="",
-            port=443,
-            ip_address=af_ip_pair[1],
-            depth=MAX_REDIRECT_DEPTH,
-            task=web_conn,
-            keep_conn_open=True,
-        )
-        return http_client.conn
-
-    try:
-        # connect with the higest possible TLS version assuming that the server
-        # responds to HTTP requests, then check some interesting properties of
-        # this 'best possible' connection.
-        with connect_to_web_server() as conn:
-            with ConnectionChecker(conn, ChecksMode.WEB) as checker:
-                # Note: additional connections will be created by the checker
-                # as needed. The order of the checks attempts to benefit from
-                # data acquired during previous checks.
-                ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
-                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
-                client_reneg_score, client_reneg = checker.check_client_reneg()
-                compression_score, compression = checker.check_compression()
-                ciphers_score, ciphers_result = checker.check_cipher_sec_level()
-                zero_rtt_score, zero_rtt = checker.check_zero_rtt()
-                prots_score, prots_result = checker.check_protocol_versions()
-                fs_score, fs_result = checker.check_dh_params()
-                kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
-                cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
-
-        return dict(
-            tls_enabled=True,
-            prots_bad=prots_result["bad"],
-            prots_phase_out=prots_result["phase_out"],
-            prots_good=prots_result["good"],
-            prots_sufficient=prots_result["sufficient"],
-            prots_score=prots_score,
-            ciphers_bad=ciphers_result["bad"],
-            ciphers_phase_out=ciphers_result["phase_out"],
-            ciphers_score=ciphers_score,
-            cipher_order_score=cipher_order_score,
-            cipher_order=cipher_order,
-            cipher_order_violation=cipher_order_violation,
-            secure_reneg=secure_reneg,
-            secure_reneg_score=secure_reneg_score,
-            client_reneg=client_reneg,
-            client_reneg_score=client_reneg_score,
-            compression=compression,
-            compression_score=compression_score,
-            dh_param=fs_result["dh_param"],
-            ecdh_param=fs_result["ecdh_param"],
-            fs_bad=fs_result["bad"],
-            fs_phase_out=fs_result["phase_out"],
-            fs_score=fs_score,
-            zero_rtt_score=zero_rtt_score,
-            zero_rtt=zero_rtt,
-            ocsp_stapling=ocsp_stapling,
-            ocsp_stapling_score=ocsp_stapling_score,
-            kex_hash_func=kex_hash_func,
-            kex_hash_func_score=kex_hash_func_score,
-        )
-    except (OSError, NoIpError, ConnectionSocketException):
+    if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
         return dict(server_reachable=False, tls_enabled=False)
-    except (http.client.BadStatusLine, ConnectionHandshakeException):
-        return dict(tls_enabled=False)
+        # return dict(tls_enabled=False) ???
+
+    all_suites = [
+        result.scan_result.ssl_2_0_cipher_suites,
+        result.scan_result.ssl_3_0_cipher_suites,
+        result.scan_result.tls_1_0_cipher_suites,
+        result.scan_result.tls_1_1_cipher_suites,
+        result.scan_result.tls_1_2_cipher_suites,
+        result.scan_result.tls_1_3_cipher_suites,
+    ]
+    prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
+    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+
+    prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
+    dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
+    ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
+
+    ocsp_status = (
+        OcspStatus.good
+        if any([d.ocsp_response_is_trusted for d in result.scan_result.certificate_info.result.certificate_deployments])
+        else OcspStatus.ok
+    )
+    return dict(
+        tls_enabled=True,
+        prots_bad=prots_bad,
+        prots_phase_out=prots_phase_out,
+        prots_good=prots_good,
+        prots_sufficient=prots_sufficient,
+        prots_score=prots_score,
+        ciphers_bad=ciphers_bad,
+        ciphers_phase_out=ciphers_phase_out,
+        ciphers_score=ciphers_score,
+        # TODO, currently unsupported
+        cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
+        cipher_order="TODO",
+        cipher_order_violation="TODO",
+        secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
+        secure_reneg_score=(
+            scoring.WEB_TLS_SECURE_RENEG_GOOD
+            if result.scan_result.session_renegotiation.result.supports_secure_renegotiation
+            else scoring.WEB_TLS_SECURE_RENEG_BAD
+        ),
+        client_reneg=result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos,
+        client_reneg_score=(
+            scoring.WEB_TLS_CLIENT_RENEG_BAD
+            if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
+            else scoring.WEB_TLS_CLIENT_RENEG_GOOD
+        ),
+        compression=result.scan_result.tls_compression.result.supports_compression,
+        compression_score=(
+            scoring.WEB_TLS_COMPRESSION_BAD
+            if result.scan_result.tls_compression.result.supports_compression
+            else scoring.WEB_TLS_COMPRESSION_GOOD
+        ),
+        dh_param=dh_param,
+        ecdh_param=ec_param,
+        fs_bad=list(fs_bad),
+        fs_phase_out=list(fs_phase_out),
+        fs_score=fs_score,
+        zero_rtt=(
+            ZeroRttStatus.bad
+            if result.scan_result.tls_1_3_early_data.result.supports_early_data
+            else ZeroRttStatus.good
+        ),
+        zero_rtt_score=(
+            scoring.WEB_TLS_ZERO_RTT_BAD
+            if result.scan_result.tls_1_3_early_data.result.supports_early_data
+            else scoring.WEB_TLS_ZERO_RTT_GOOD
+        ),
+        # TODO make sure this uses the same trust store
+        ocsp_stapling=ocsp_status,
+        ocsp_stapling_score=(
+            scoring.WEB_TLS_OCSP_STAPLING_GOOD if ocsp_status == OcspStatus.good else scoring.WEB_TLS_OCSP_STAPLING_BAD
+        ),
+        # TODO appears to be currently unsupported
+        kex_hash_func=KexHashFuncStatus.good,
+        kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+    )
+
+
+def evaluate_tls_protocols(prots_accepted: List[TlsVersionEnum]):
+    prots_good = []
+    prots_sufficient = []
+    prots_bad = []
+    prots_phase_out = []
+    prots_score = scoring.WEB_TLS_PROTOCOLS_GOOD
+
+    prot_test_configs = {
+        TlsVersionEnum.TLS_1_3: ("TLS 1.3", prots_good, scoring.WEB_TLS_PROTOCOLS_GOOD),
+        TlsVersionEnum.TLS_1_2: ("TLS 1.2", prots_sufficient, scoring.WEB_TLS_PROTOCOLS_GOOD),
+        TlsVersionEnum.TLS_1_1: ("TLS 1.1", prots_phase_out, scoring.WEB_TLS_PROTOCOLS_GOOD),
+        TlsVersionEnum.TLS_1_0: ("TLS 1.0", prots_phase_out, scoring.WEB_TLS_PROTOCOLS_GOOD),
+        TlsVersionEnum.SSL_3_0: ("SSL 3.0", prots_bad, scoring.WEB_TLS_PROTOCOLS_BAD),
+        TlsVersionEnum.SSL_2_0: ("SSL 2.0", prots_bad, scoring.WEB_TLS_PROTOCOLS_BAD),
+    }
+    for prot_accepted in prots_accepted:
+        name, target_list, score = prot_test_configs[prot_accepted]
+        target_list.append(name)
+        prots_score = min(prots_score, score)
+
+    return prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score
+
+
+def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+    dh_sizes = [
+        suite.ephemeral_key.size
+        for suite in ciphers_accepted
+        if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.DH
+    ]
+    dh_param = max(dh_sizes) if dh_sizes else None
+    ec_sizes = [
+        suite.ephemeral_key.size
+        for suite in ciphers_accepted
+        if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.EC
+    ]
+    ec_param = max(ec_sizes) if ec_sizes else None
+
+    ec_good = [
+        OpenSslEcNidEnum.SECP521R1,
+        OpenSslEcNidEnum.SECP384R1,
+        OpenSslEcNidEnum.SECP256R1,
+    ]
+    ec_phase_out = [
+        OpenSslEcNidEnum.SECP224R1,
+    ]
+    fs_bad = set()
+    fs_phase_out = set()
+    for suite in ciphers_accepted:
+        key = suite.ephemeral_key
+        if not key:
+            continue
+        if isinstance(key, EcDhEphemeralKeyInfo):
+            if key.size < 224:
+                fs_bad.add(f"ECDH-{key.size}")
+            if key.curve in ec_phase_out:
+                fs_phase_out.add(f"ECDH-{key.curve_name}")
+            elif key.curve not in ec_good:
+                fs_bad.add(f"ECDH-{key.curve_name}")
+        if isinstance(key, DhEphemeralKeyInfo):
+            if key.size < 2048:
+                fs_bad.add(f"DH-{key.size}")
+            if key.generator == FFDHE_GENERATOR:
+                if key.prime == FFDHE2048_PRIME:
+                    fs_phase_out.add("FFDHE-2048")
+                elif key.prime not in FFDHE_SUFFICIENT_PRIMES:
+                    fs_bad.add(f"DH-{key.size}")
+    fs_score = scoring.WEB_TLS_FS_BAD if fs_bad else scoring.WEB_TLS_FS_OK
+    return dh_param, ec_param, fs_bad, fs_phase_out, fs_score
+
+
+def evaluate_tls_ciphers(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+    good = [
+        "TLS_AES_256_GCM_SHA384",
+        "TLS_CHACHA20_POLY1305_SHA256",
+        "TLS_AES_128_GCM_SHA256",
+    ]
+    sufficient = [
+        "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+        "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+    ]
+    phase_out = [
+        "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
+        "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+        "TLS_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_RSA_WITH_AES_256_CBC_SHA256",
+        "TLS_RSA_WITH_AES_256_CBC_SHA",
+        "TLS_RSA_WITH_AES_128_CBC_SHA256",
+        "TLS_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+    ]
+    ciphers_bad = []
+    ciphers_phase_out = []
+    for suite in ciphers_accepted:
+        if suite.cipher_suite.name in phase_out:
+            ciphers_phase_out.append(suite.cipher_suite.openssl_name)
+        if suite.cipher_suite.name not in sufficient + good:
+            ciphers_bad.append(suite.cipher_suite.openssl_name)
+    ciphers_score = scoring.WEB_TLS_SUITES_BAD if ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
+    return ciphers_bad, ciphers_phase_out, ciphers_score
 
 
 def do_web_http(af_ip_pairs, url, task, *args, **kwargs):

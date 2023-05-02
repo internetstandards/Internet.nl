@@ -335,6 +335,8 @@ class CipherScoreAndSecLevel:
 
 # Load OpenSSL data about cipher suites
 def load_cipher_info():
+    return {}
+
     class CipherInfo:
         def __init__(self, conn_class, match):
             self.conn_class = conn_class
