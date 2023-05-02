@@ -223,6 +223,9 @@ statsd==4.0.0
     #   django-statsd-mozilla
 statshog==1.0.6
     # via -r requirements.in
+tls-parser==2.0.1
+    # via -r requirements.in
+    # via sslyze
 tinycss2==1.1.1
     # via bleach
 tls-parser==2.0.1
@@ -246,6 +249,13 @@ tzdata==2025.1
     #   celery
     #   kombu
 urllib3==2.3.0
+    #   pydantic
+    #   pydantic-core
+    #   setuptools-rust
+    #   setuptools-scm
+tzdata==2023.3
+    # via celery
+urllib3==2.0.7
     # via
     #   requests
     #   selenium

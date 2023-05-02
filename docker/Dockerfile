@@ -52,6 +52,17 @@ RUN ./configure \
 RUN make
 RUN make install
 
+FROM build-deps AS build-nassl
+
+COPY vendor/nassl6 /src/vendor/nassl
+WORKDIR /src/vendor/nassl
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+RUN pip3 install -r requirements-dev.txt
+RUN invoke build.all
+RUN python3 setup.py install
+
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
@@ -59,7 +70,13 @@ COPY requirements.txt /src/
 
 WORKDIR /src
 
-RUN pip3 install --system -r requirements.txt
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system -r requirements.txt
+# sslyze is installed from our own fork, and installed
+# without deps to avoid it trying to install nassl, when
+# we have our custom nassl
+RUN pip3 install --no-deps https://github.com/mxsasha/sslyze/archive/refs/tags/6.0.0+internetnl6.tar.gz
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps

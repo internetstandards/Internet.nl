@@ -8,6 +8,7 @@ from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite, Cer
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
+from checks.models import KexHashFuncStatus, CipherOrderStatus
 from checks.models import KexHashFuncStatus, CipherOrderStatus, OcspStatus
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
