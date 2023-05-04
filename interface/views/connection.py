@@ -3,6 +3,7 @@
 import ipaddress
 import json
 import socket
+import re
 
 from django import db
 from django.conf import settings
@@ -450,10 +451,10 @@ def jsonp(func):
     def dec(request, *args, **kw):
         resp = func(request, *args, **kw)
         cb = request.GET.get("callback")
-        if not cb:
+        if not cb or not re.search(r"^jQuery\d+_\d+$", cb):
             cb = ""
         resp["Content-Type"] = "application/javascript"
-        resp.content = f"{cb}({resp.content})"
+        resp.content = f"{cb}({resp.content.decode()})"
         return resp
 
     return dec
