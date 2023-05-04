@@ -324,6 +324,7 @@ class DomainTestIpv6(BaseTestModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_domaintestipv6_dom_idx")]
 
 
 class IPv6TestDomain(models.Model):
@@ -915,6 +916,7 @@ class MailTestIpv6(BaseTestModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_mailtestipv6_domain_idx")]
 
 
 class NsDomain(IPv6TestDomain):
