@@ -5,13 +5,13 @@
     {% include "content.html" with name="widget site intro" %}
     <h2><label for="html-block">HTML</label></h2>
     <div>
-    <textarea id="html-block" readonly>&lt;form action="https://internet.nl/site/" method="POST"&gt;
+    <textarea id="html-block" readonly>&lt;form action="https://internet.nl/site/" method="POST" novalidate&gt;
   &lt;p&gt;
     &lt;img class="internetnl" src="https://internet.nl/static/logo_en.svg" alt="{% translate 'page sitedescription' %}"/&gt;
     {% translate 'widget site html-block' %}
   &lt;/p&gt;
   &lt;label for="internetnl-site-url"&gt;{% translate 'base test website input'%}&lt;/label&gt;
-  &lt;input id="internetnl-site-url" type="text" name="url" placeholder="www.example.nl"&gt;
+  &lt;input id="internetnl-site-url" type="url" name="url" placeholder="www.example.nl"&gt;
   &lt;button class="internetnl"&gt;{% translate 'base test start'%}&lt;/button&gt;
 &lt;/form&gt;</textarea>
     </div>

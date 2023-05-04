@@ -132,10 +132,10 @@
        <h2>
          {% include "string.html" with name="results test website label" %}
        </h2>
-       <form action="/site/" method="POST">
+       <form action="/site/" method="POST" novalidate>
          <label class="text-input" for="web-url">
            {% include "string.html" with name="base test website input" %}
-           <input id="web-url" type="text" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+           <input id="web-url" type="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
          </label>
          <div class="contains-button">
            <button>
@@ -164,11 +164,11 @@
        <h2>
          {% include "string.html" with name="results test email label" %}
        </h2>
-       <form action="/mail/" method="POST">
+       <form action="/mail/" method="POST" novalidate>
          <label class="text-input" for="mail-url">
            {% include "string.html" with name="base test mail input" %}
            <span class="emailfield before">
-             <input id="mail-url" class="email" type="text" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+             <input id="mail-url" class="email" type="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
            </span>
          </label>
          <div class="contains-button">
