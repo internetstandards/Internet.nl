@@ -43,7 +43,7 @@ from sslyze import (
     ServerScanStatusEnum,
     ScanCommand,
     TlsVersionEnum,
-    CipherSuiteAcceptedByServer,
+    CipherSuiteAcceptedByServer, ServerNetworkConfiguration, ProtocolWithOpportunisticTlsEnum,
 )
 
 from checks import categories, scoring
@@ -1772,19 +1772,22 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # Always try to get cached results (within the allowed time frame) to
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
-        while timer() - start < cache_ttl and not all(results.values()) > 0:
-            for server, dane_cb_data, _ in mailservers:
-                if results[server]:
-                    continue
-                # Check if we already have cached results.
-                cache_id = redis_id.mail_starttls.id.format(server)
-                if cache.add(cache_id, False, cache_ttl):
-                    # We do not have cached results, get them and cache them.
-                    results[server] = check_mail_tls(server, dane_cb_data, task)
-                    cache.set(cache_id, results[server], cache_ttl)
-                else:
-                    results[server] = cache.get(cache_id, False)
-            time.sleep(1)
+        # TODO: re-enable this cache
+        for server, dane_cb_data, _ in mailservers:
+            results[server] = check_mail_tls(server, dane_cb_data, task)
+        # while timer() - start < cache_ttl and not all(results.values()) > 0:
+        #     for server, dane_cb_data, _ in mailservers:
+        #         if results[server]:
+        #             continue
+        #         # Check if we already have cached results.
+        #         cache_id = redis_id.mail_starttls.id.format(server)
+        #         if cache.add(cache_id, False, cache_ttl):
+        #             # We do not have cached results, get them and cache them.
+        #             results[server] = check_mail_tls(server, dane_cb_data, task)
+        #             cache.set(cache_id, results[server], cache_ttl)
+        #         else:
+        #             results[server] = cache.get(cache_id, False)
+        #     time.sleep(1)
         for server in results:
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
@@ -1796,127 +1799,115 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
     return ("smtp_starttls", results)
 
 
-# At the time of writing this function makes up to 16 SMTP+STARTTLS connections
-# to the target server, excluding retries, e.g.:
-#   #   Connection Class    Protocol   Caller
-#   ---------------------------------------------------------------------------
-#   1   ModernConnection    SSLV23     initial connection
-#   2   DebugConnection     SSLV23     initial connection (fallback 1)
-#   3   ModernConnection    TLSV1_2    initial connection (fallback 2)
-#   4   DebugConnection     SSLV23     check_client_reneg
-#   5   DebugConnection     SSLV23     check_cipher_sec_level
-#   6   DebugConnection     SSLV23     check_cipher_sec_level
-#   7   ModernConnection    SSLV23     check_cipher_sec_level
-#   8   ModernConnection    TLSV1_3    check_zero_rtt (if TLSV1_3)
-#   9   DebugConnection     TLSV1_1    check_protocol_versions (if not initial)
-#   10  DebugConnection     TLSV1      check_protocol_versions (if not initial)
-#   11  DebugConnection     SSLV3      check_protocol_versions (if not initial)
-#   12  DebugConnection     SSLV2      check_protocol_versions (if not initial)
-#   13  DebugConnection     SSLV23     check_dh_params
-#   14  DebugConnection     SSLV23     check_dh_params
-#   15  ModernConnection    TLSV1_2    check_kex_hash_func (if not TLSV1_3)
-#   16  DebugConnection     SSLV23     check_cipher_order
-#   ---------------------------------------------------------------------------
 def check_mail_tls(server, dane_cb_data, task):
     """
     Perform all the TLS related checks for this mail server in series.
 
     """
-    try:
-        starttls_details = StarttlsDetails()
-        starttls_details.dane_cb_data = dane_cb_data
-        send_SNI = dane_cb_data.get("data") and dane_cb_data.get("secure")
+    # send_SNI = dane_cb_data.get("data") and dane_cb_data.get("secure")
+    print(f"starting sslyze scan for {server} {dane_cb_data}")
+    scans = [
+        ServerScanRequest(
+            server_location=ServerNetworkLocation(hostname=server, port=25),
+            network_configuration=ServerNetworkConfiguration(tls_server_name_indication=server, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP),
+            scan_commands={
+                # ScanCommand.CERTIFICATE_INFO,
+                ScanCommand.SSL_2_0_CIPHER_SUITES,
+                ScanCommand.SSL_3_0_CIPHER_SUITES,
+                ScanCommand.TLS_1_0_CIPHER_SUITES,
+                ScanCommand.TLS_1_1_CIPHER_SUITES,
+                ScanCommand.TLS_1_2_CIPHER_SUITES,
+                ScanCommand.TLS_1_3_CIPHER_SUITES,
+                ScanCommand.TLS_COMPRESSION,
+                ScanCommand.TLS_1_3_EARLY_DATA,
+                ScanCommand.SESSION_RENEGOTIATION,
+                ScanCommand.ELLIPTIC_CURVES,
+            },
+        ),
+    ]
+    scanner = Scanner(per_server_concurrent_connections_limit=2)
+    scanner.queue_scans(scans)
+    result = next(scanner.get_results())
+    print(f"scan status result {result.scan_status}")
+    if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
+        return dict(server_reachable=False, tls_enabled=False)
+        # return dict(tls_enabled=False) ??? # could_not_test_smtp_starttls ???
 
-        with SMTPConnection(server_name=server, send_SNI=send_SNI).conn as conn:
-            with ConnectionChecker(conn, ChecksMode.MAIL) as checker:
-                # Record the starttls_details with the current connection.
-                # It will skip a further connection for the cert_checks
-                # later on.
-                starttls_details.trusted_score = checker.check_cert_trust()
-                starttls_details.debug_chain = DebugCertChainMail(conn.get_peer_certificate_chain())
-                starttls_details.conn_port = conn.port
+    all_suites = [
+        result.scan_result.ssl_2_0_cipher_suites,
+        result.scan_result.ssl_3_0_cipher_suites,
+        result.scan_result.tls_1_0_cipher_suites,
+        result.scan_result.tls_1_1_cipher_suites,
+        result.scan_result.tls_1_2_cipher_suites,
+        result.scan_result.tls_1_3_cipher_suites,
+    ]
+    prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
+    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
 
-                # OCSP disabled for mail.
-                # ocsp_stapling_score, ocsp_stapling = checker.check_ocsp_stapling()
+    prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
+    dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
+    ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
 
-                # check_zero_rtt closes and reopens the main connection.
-                # Close the main connection after testing, not needed anymore.
-                # Tests below open their own connections.
-                zero_rtt_score, zero_rtt = checker.check_zero_rtt()
-                checker._conn.safe_shutdown()
+    # Check the certificates.
+    # cert_results = cert_checks(server, ChecksMode.MAIL, task, starttls_details=starttls_details)
 
-                # check_compression and check_secure_reneg use a debug_conn.
-                # Close it after testing.
-                compression_score, compression = checker.check_compression()
-                secure_reneg_score, secure_reneg = checker.check_secure_reneg()
-                checker.close()
+    # HACK for DANE-TA(2) and hostname mismatch!
+    # Give a good hosmatch score if DANE-TA *is not* present.
+    # if cert_results["tls_cert"] and not has_daneTA(cert_results["dane_records"]) and cert_results["hostmatch_bad"]:
+    #     cert_results["hostmatch_score"] = scoring.MAIL_TLS_HOSTMATCH_GOOD
 
-                # Checks here manage their own connections.
-                client_reneg_score, client_reneg = checker.check_client_reneg()
-                ciphers_score, ciphers_result = checker.check_cipher_sec_level()
-                prots_score, prots_result = checker.check_protocol_versions()
-                fs_score, fs_result = checker.check_dh_params()
-                kex_hash_func_score, kex_hash_func = checker.check_kex_hash_func()
-                cipher_order_score, cipher_order, cipher_order_violation = checker.check_cipher_order()
-
-        # Check the certificates.
-        cert_results = cert_checks(server, ChecksMode.MAIL, task, starttls_details=starttls_details)
-
-        # HACK for DANE-TA(2) and hostname mismatch!
-        # Give a good hosmatch score if DANE-TA *is not* present.
-        if cert_results["tls_cert"] and not has_daneTA(cert_results["dane_records"]) and cert_results["hostmatch_bad"]:
-            cert_results["hostmatch_score"] = scoring.MAIL_TLS_HOSTMATCH_GOOD
-
-        results = dict(
-            tls_enabled=True,
-            tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
-            prots_bad=prots_result["bad"],
-            prots_phase_out=prots_result["phase_out"],
-            prots_good=prots_result["good"],
-            prots_sufficient=prots_result["sufficient"],
-            prots_score=prots_score,
-            ciphers_bad=ciphers_result["bad"],
-            ciphers_phase_out=ciphers_result["phase_out"],
-            ciphers_score=ciphers_score,
-            cipher_order_score=cipher_order_score,
-            cipher_order=cipher_order,
-            cipher_order_violation=cipher_order_violation,
-            secure_reneg=secure_reneg,
-            secure_reneg_score=secure_reneg_score,
-            client_reneg=client_reneg,
-            client_reneg_score=client_reneg_score,
-            compression=compression,
-            compression_score=compression_score,
-            dh_param=fs_result["dh_param"],
-            ecdh_param=fs_result["ecdh_param"],
-            fs_bad=fs_result["bad"],
-            fs_phase_out=fs_result["phase_out"],
-            fs_score=fs_score,
-            zero_rtt_score=zero_rtt_score,
-            zero_rtt=zero_rtt,
-            # OCSP disabled for mail.
-            # ocsp_stapling=ocsp_stapling,
-            # ocsp_stapling_score=ocsp_stapling_score,
-            kex_hash_func=kex_hash_func,
-            kex_hash_func_score=kex_hash_func_score,
-        )
-        results.update(cert_results)
-
-    except ConnectionSocketException:
-        return dict(server_reachable=False)
-
-    except ConnectionHandshakeException:
-        return dict(tls_enabled=False)
-
-    except SMTPConnectionCouldNotTestException:
-        # If we could not test something, fail the starttls test.
-        # We do not show partial results.
-        return dict(
-            tls_enabled=False,
-            could_not_test_smtp_starttls=True,
-        )
-
-    return results
+    return dict(
+        tls_enabled=True,
+        tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
+        prots_bad=prots_bad,
+        prots_phase_out=prots_phase_out,
+        prots_good=prots_good,
+        prots_sufficient=prots_sufficient,
+        prots_score=prots_score,
+        ciphers_bad=ciphers_bad,
+        ciphers_phase_out=ciphers_phase_out,
+        ciphers_score=ciphers_score,
+        # TODO, currently unsupported
+        cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
+        cipher_order="TODO",
+        cipher_order_violation="TODO",
+        secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
+        secure_reneg_score=(
+            scoring.WEB_TLS_SECURE_RENEG_GOOD
+            if result.scan_result.session_renegotiation.result.supports_secure_renegotiation
+            else scoring.WEB_TLS_SECURE_RENEG_BAD
+        ),
+        client_reneg=result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos,
+        client_reneg_score=(
+            scoring.WEB_TLS_CLIENT_RENEG_BAD
+            if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
+            else scoring.WEB_TLS_CLIENT_RENEG_GOOD
+        ),
+        compression=result.scan_result.tls_compression.result.supports_compression,
+        compression_score=(
+            scoring.WEB_TLS_COMPRESSION_BAD
+            if result.scan_result.tls_compression.result.supports_compression
+            else scoring.WEB_TLS_COMPRESSION_GOOD
+        ),
+        dh_param=dh_param,
+        ecdh_param=ec_param,
+        fs_bad=list(fs_bad),
+        fs_phase_out=list(fs_phase_out),
+        fs_score=fs_score,
+        zero_rtt=(
+            ZeroRttStatus.bad
+            if result.scan_result.tls_1_3_early_data.result.supports_early_data
+            else ZeroRttStatus.good
+        ),
+        zero_rtt_score=(
+            scoring.WEB_TLS_ZERO_RTT_BAD
+            if result.scan_result.tls_1_3_early_data.result.supports_early_data
+            else scoring.WEB_TLS_ZERO_RTT_GOOD
+        ),
+        # TODO appears to be currently unsupported
+        kex_hash_func=KexHashFuncStatus.good,
+        kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+    )
 
 
 def has_daneTA(tlsa_records):
@@ -3081,10 +3072,11 @@ def evaluate_tls_ciphers(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
     ciphers_bad = []
     ciphers_phase_out = []
     for suite in ciphers_accepted:
+        # TODO: remove IANA name, just here for debugging now
         if suite.cipher_suite.name in phase_out:
-            ciphers_phase_out.append(suite.cipher_suite.openssl_name)
-        if suite.cipher_suite.name not in sufficient + good:
-            ciphers_bad.append(suite.cipher_suite.openssl_name)
+            ciphers_phase_out.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
+        if suite.cipher_suite.name not in sufficient + good + phase_out:
+            ciphers_bad.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
     ciphers_score = scoring.WEB_TLS_SUITES_BAD if ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
     return ciphers_bad, ciphers_phase_out, ciphers_score
 
