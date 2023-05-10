@@ -1,7 +1,7 @@
 server {
     listen       80;
     listen  [::]:80;
-    server_name  test-target test-target.internet.nl test-target1.internet.nl test-target2.internet.nl test-target3.internet.nl test-target4.internet.nl test-target5.internet.nl;
+    server_name  test-target test-target.internet.nl *.test-target.internet.nl;
 
     location / {
         return 301 https://$host$request_uri;

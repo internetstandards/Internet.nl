@@ -3,4 +3,4 @@ basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 subjectAltName = @alt_names
 [alt_names]
-DNS.1 = test-target.internet.nl
+DNS.1 = *.test-target.internet.nl

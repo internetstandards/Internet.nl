@@ -35,13 +35,8 @@ services:
 
     networks:
       public-internet:
-        aliases:
-          - test-target.internet.nl
-          - test-target1.internet.nl
-          - test-target2.internet.nl
-          - test-target3.internet.nl
-          - test-target4.internet.nl
-          - test-target5.internet.nl
+        ipv4_address: $IPV4_IP_TEST_TARGET_PUBLIC
+        ipv6_address: $IPV6_IP_TEST_TARGET_PUBLIC
 
     ports:
       - 80
@@ -85,12 +80,14 @@ services:
     command: python3 -m pytest -v integration_tests/integration/
     networks:
       public-internet:
+      internal:
     volumes:
       - ../:/source
       # make docker available inside the container
       - /var/run/docker.sock:/var/run/docker.sock
     profiles:
       - run-tests
+    dns: $IPV4_IP_RESOLVER_INTERNAL
 
   resolver:
     image: strm/dnsmasq
@@ -101,16 +98,17 @@ services:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL
 
-    # null route external DNS queries to isolate tests
-    dns: 192.0.2.1
-    dns_search: []
-    dns_opt: ["ndots:0", "timeout:1", "attempts:1"]
-
     ports:
       - "53/udp"
 
     environment:
       - IPV4_IP_UNBOUND_INTERNAL
+      - CONN_TEST_DOMAIN
+      - INTERNETNL_DOMAINNAME
+      - IPV4_WEBSERVER_IP_PUBLIC
+      - TEST_TARGET_DOMAINNAME
+      - IPV4_IP_TEST_TARGET_PUBLIC
+      - IPV6_IP_TEST_TARGET_PUBLIC
 
     volumes:
       - ../integration_tests/dnsmasq/entrypoint.sh:/entrypoint.sh
@@ -121,9 +119,6 @@ services:
   webserver:
     networks:
       public-internet:
-        aliases:
-          # make internet.nl website available for testing
-          - $INTERNETNL_DOMAINNAME
         ipv6_address: $IPV6_IP_PUBLIC
         ipv4_address: $IPV4_WEBSERVER_IP_PUBLIC
 
