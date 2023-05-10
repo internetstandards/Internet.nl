@@ -67,6 +67,7 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - PUBLIC_SUFFIX_LIST_URL
       - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - DB_HOST=postgres
       - DB_NAME=internetnl_db1
@@ -90,6 +91,9 @@ services:
       interval: $HEALTHCHECK_INTERVAL
       retries: 30
 
+    volumes:
+      - batch_results:/app/batch_results
+
   db-migrate:
     image: $DOCKER_IMAGE
     build:
@@ -106,6 +110,7 @@ services:
         condition: service_healthy
     environment:
       - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - DB_HOST=postgres
       - DB_NAME=internetnl_db1
@@ -126,9 +131,11 @@ services:
     networks:
       - internal
       - public-internet
-    entrypoint: celery
 
-    command: --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --queues default,celery,db_worker,slow_db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker --concurrency 500
+    # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
+    user: root
+    entrypoint: /entrypoint.sh
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --queues default,celery,db_worker,slow_db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow --concurrency 100
 
     depends_on:
       db-migrate:
@@ -152,6 +159,7 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - PUBLIC_SUFFIX_LIST_URL
       - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - DB_HOST=postgres
       - DB_NAME=internetnl_db1
@@ -167,6 +175,10 @@ services:
       - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
+
+    volumes:
+      - batch_results:/app/batch_results
+      - ./worker/entrypoint.sh:/entrypoint.sh
 
   beat:
     image: $DOCKER_IMAGE
@@ -200,6 +212,7 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_APPSECPRIV
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - DB_HOST=postgres
       - DB_NAME=internetnl_db1
@@ -300,6 +313,7 @@ volumes:
   redis: {}
   rabbitmq: {}
   routinator: {}
+  batch_results: {}
 
 networks:
   # disable default network

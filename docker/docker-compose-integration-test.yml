@@ -4,12 +4,14 @@ services:
   # from the internal network to the outside
   port-expose:
     image: alpine/socat
-    command: TCP-LISTEN:8081,reuseaddr,fork TCP:webserver:80
+    entrypoint: /bin/sh
+    command: -c "socat TCP-LISTEN:8081,reuseaddr,fork TCP:webserver:80|socat TCP-LISTEN:15672,reuseaddr,fork TCP:rabbitmq:15672"
     networks:
       - public-internet
       - port-expose
     ports:
       - 8081:8081
+      - 15672:15672
 
   app:
     dns: $IPV4_IP_RESOLVER_INTERNAL

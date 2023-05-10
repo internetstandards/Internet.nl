@@ -161,6 +161,9 @@ ENV LDNS_DANE=/usr/bin/ldns-dane
 
 ENV STATIC_ROOT /app/static
 
+VOLUME /app/batch_results
+RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
+
 # build all static components for the application
 RUN python3 bin/frontend.py js
 RUN python3 bin/frontend.py css
