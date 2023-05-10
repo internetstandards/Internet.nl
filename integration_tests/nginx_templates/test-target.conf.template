@@ -10,6 +10,10 @@ server {
     location /.well-known/ {
         alias /var/www/well-known/;
     }
+
+    location /static/ {
+        alias /var/www/static/;
+    }
 }
 
 server {
