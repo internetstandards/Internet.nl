@@ -506,8 +506,11 @@ docker-compose-pull-dependencies:
 integration-tests:
 	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/integration/
 
-integration-tests-trace:
-	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure --tracing=retain-on-failure --browser firefox ${testargs} integration_tests/integration/
+integration-tests-all-browser: testargs=--browser=firefox --browser=chromium --browser=webkit
+integration-tests-all-browser: integration-tests
+
+integration-tests-trace: testargs=--tracing=retain-on-failure --browser firefox
+integration-tests-trace: integration-tests
 
 live-tests:
 	${env} pytest -v integration_tests/live ${testargs}
