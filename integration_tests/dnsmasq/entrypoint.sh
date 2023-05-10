@@ -6,6 +6,8 @@ cat >/etc/dnsmasq.d/connection-test.conf <<EOF
 address=/$INTERNETNL_DOMAINNAME/$IPV4_WEBSERVER_IP_PUBLIC
 address=/$TEST_TARGET_DOMAINNAME/$IPV4_IP_TEST_TARGET_PUBLIC
 address=/$TEST_TARGET_DOMAINNAME/$IPV6_IP_TEST_TARGET_PUBLIC
+address=/mx.test-target.internet.nl/$IPV4_IP_TEST_TARGET_MAIL_PUBLIC
+address=/mx.test-target.internet.nl/$IPV6_IP_TEST_TARGET_MAIL_PUBLIC
 address=/invalid-domain.example.com/
 server=/test-ns-signed.internet.nl/$IPV4_IP_UNBOUND_INTERNAL
 server=/test-ns6-signed.internet.nl/$IPV4_IP_UNBOUND_INTERNAL

@@ -57,8 +57,8 @@ services:
 
     networks:
       public-internet:
-        aliases:
-          - mx.test-target.internet.nl
+        ipv4_address: $IPV4_IP_TEST_TARGET_MAIL_PUBLIC
+        ipv6_address: $IPV6_IP_TEST_TARGET_MAIL_PUBLIC
 
     ports:
       - 25
@@ -109,6 +109,8 @@ services:
       - TEST_TARGET_DOMAINNAME
       - IPV4_IP_TEST_TARGET_PUBLIC
       - IPV6_IP_TEST_TARGET_PUBLIC
+      - IPV4_IP_TEST_TARGET_MAIL_PUBLIC
+      - IPV6_IP_TEST_TARGET_MAIL_PUBLIC
 
     volumes:
       - ../integration_tests/dnsmasq/entrypoint.sh:/entrypoint.sh
