@@ -1,20 +1,31 @@
-# Docker / Docker Compose
+# Docker / Docker Compose / Getting Started
 
-This project uses Docker images as release artifacts and Docker Compose to orchestrate the application stack.
+This documented is intended as a quick simple guide to setup a development environment or run an integration test. For more detailed information refer to the [Development Environment](documentation/Docker-development-environment.md) or [Integration tests](documentation/Docker-integration-tests.md) files.
 
 ## Prerequisites
 
-An OCI compatible container runtime is required to run the project. Docker is adviced but any compatible runtime should do like Podman or Colima.
+An OCI compatible container runtime with [Compose V2](https://docs.docker.com/compose/compose-file/compose-file-v2/) is required to run the project. For example one of the following:
 
-## Building/Running
+- [Docker](https://docs.docker.com/get-docker/) for Linux, (supported)
+- [Docker](https://docs.docker.com/get-docker/) for Mac (supported)
+- [Colima](https://github.com/abiosoft/colima) for Mac (recommended)
+- [Docker](https://docs.docker.com/get-docker/) for Windows (untested)
+
+## Building
+
+After cloning this repository locally make sure all Git Submodules are checked out and up to date with the following command:
+
+    git submodule update --init
 
 First build the Docker images for the application using the following command:
 
-    make docker-build
+    make docker-compose-build
 
-After which the application is accesible on the adres: http://localhost:8080
+## Development environment
 
-To run the application stack use the following command:
+The development environment runs the full application stack and allows testing against targets on the internet.
+
+To start the development environment use the following command:
 
     make docker-compose-up
 
@@ -22,7 +33,7 @@ The command will wait for the stack to come up completely and be in a healthy st
 
     make docker-compose-logs
 
-Please be aware some features don't work out of the box due to limitations of the environment. IPv6 connectivity is likely to not be working. RPKI tests rely on Routinator syncing up from external databases and will take a while (`docker logs internetnl-routinator-1 -f`). Connection test will not work because it requires external connectivity and DNS records to be setup.
+Please be aware some features don't work out of the box due to limitations of the environment. IPv6 connectivity is not available. RPKI tests rely on Routinator syncing up from external databases and will take a while (`docker logs internetnl-routinator-1 -f`). Connection test will not work because it requires external connectivity and DNS records to be setup.
 
 To stop the running stack use:
 
@@ -32,4 +43,36 @@ This will keep transient data (databases, etc). The stack can be brought up agai
 
 To completely stop and remove all data from the instance run:
 
-    make compose-down-remove-volumes
+    make docker-compose-down-remove-volumes
+
+Please refer to [Development Environment](documentation/Docker-development-environment.md) for further reading.
+
+## Integration tests
+
+The integration test suite runs the full application stack and additional components (internal resolver, mock target, test-runner, etc) required for testing. It is a separate environment from the development environment and runs isolated without internet connection to ensure test consistency. It has an internal IPv6 network.
+
+Bring up the integration test environment:
+
+    make docker-compose-up environment=test
+
+The command will wait for the stack to come up completely and be in a healthy state. Though the environment is isolated it is possible to visit the app at the address: http://localhost:8081. Targets on the internet will not be available for testing, instead use the mock targets, eg: https://target.test.
+
+Run the test suite using the following command:
+
+    make integration-test environment=test
+
+To stop the running stack use:
+
+    make docker-compose-stop environment=test
+
+To completely stop and remove all data from the instance run:
+
+    make docker-compose-down-remove-volumes environment=test
+
+Please refer to [Integration tests](documentation/Docker-integration-tests.md) for further reading.
+
+## References
+
+- https://docs.docker.com/compose/compose-file/
+- https://github.com/compose-spec/compose-spec/blob/master/spec.md
+- https://docs.docker.com/compose/extends/

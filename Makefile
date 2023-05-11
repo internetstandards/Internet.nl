@@ -400,8 +400,8 @@ enable:
 .QA: qa
 qa: fix check test
 
-ENVIRONMENT ?= develop
-DOCKER_COMPOSE_CMD=docker compose --env-file ${ENVIRONMENT}.env
+environment ?= develop
+DOCKER_COMPOSE_CMD=docker compose --env-file ${environment}.env
 
 docker-build:
 	# use buildx to levarage per layer caching
@@ -458,6 +458,13 @@ docker-compose-build: services=
 docker-compose-build:
 	${DOCKER_COMPOSE_CMD} build ${services}
 
+docker-compose-build-up: docker-compose-build docker-compose-up
+
+docker-compose-build-up-logs: docker-compose-build docker-compose-up docker-compose-logs
+
+docker-compose-app-attach:
+	${DOCKER_COMPOSE_CMD} attach -ti app
+
 docker-compose-logs: services=webserver app worker test-target batch
 docker-compose-logs:
 	${DOCKER_COMPOSE_CMD} logs -f ${services}
@@ -502,6 +509,9 @@ docker-compose-reset:
 
 docker-compose-pull-dependencies:
 	${DOCKER_COMPOSE_CMD} pull --ignore-buildable
+
+docker-compose-test-runner-shell:
+	${DOCKER_COMPOSE_CMD} run test-runner /bin/bash
 
 integration-tests:
 	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/integration/

@@ -2,6 +2,17 @@
 
 
 
+## Live tests
+
+### IPv6
+
+    export IPV6_SUBNET_LIVE_TESTS=2a01:4f9:c010:dd7b:10::/80
+    export IPV6_GATEWAY_LIVE_TESTS=2a01:4f9:c010:dd7b:10::1
+    export IPV4_SUBNET_PUBLIC=172.44.0.0/16
+    export APP_URLS=https://internet.nl,https://locohost.nl
+    export TEST_DOMAINS=internet.nl,locohost.nl
+    make live-tests-ipv6 testargs=-kwebsite
+
 ### Debugging tests
 
 #### Local
