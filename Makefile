@@ -483,7 +483,7 @@ docker-compose-redis-shell:
 	${DOCKER_COMPOSE_CMD} exec redis redis-cli
 
 docker-compose-reset-test-target:
-	curl http://localhost:8080/clear/test-target.internet.nl/ -s
+	curl http://localhost:8080/clear/target.test/ -s
 
 # pause all containers, but don't remove them
 docker-compose-stop:

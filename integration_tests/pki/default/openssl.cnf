@@ -9,7 +9,7 @@ stateOrProvinceName    = Sto Plains
 localityName           = Ankh-Morpork
 organizationName       = Internet.nl
 organizationalUnitName = Integration tests
-commonName             = test-target.internet.nl
+commonName             = target.test
 emailAddress           = test@example.com
 
 [v3_req]

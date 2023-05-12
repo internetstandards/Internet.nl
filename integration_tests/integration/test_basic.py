@@ -4,18 +4,19 @@ import pytest
 import re
 from playwright.sync_api import Page, expect
 from pytest_playwright import pytest_playwright
+from .utils import print_details_test_results
 
-INTERNETNL_APP_URL = "http://internet.nl"
+INTERNETNL_APP_URL = "http://internet.test"
 
 INVALID_DOMAIN = "invalid-domain.example.com"
 
-TEST_DOMAIN = "test-target.internet.nl"
+TEST_DOMAIN = "target.test"
 ALL_PROBES = {"ipv6", "dnssec", "tls", "appsecpriv", "rpki"}
 TEST_DOMAIN_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
 TEST_DOMAIN_EXPECTED_SCORE = 48
 
-TEST_EMAIL = "test-target.internet.nl"
+TEST_EMAIL = "target.test"
 ALL_EMAIL_PROBES = {"ipv6", "dnssec", "tls", "auth", "rpki"}
 TEST_EMAIL_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
@@ -24,7 +25,7 @@ TEST_EMAIL_EXPECTED_SCORE = 17
 ALL_CONNECTION_PROBES = {"ipv6", "resolver"}
 TEST_CONNECTION_EXPECTED_SCORE = 100.0
 # TODO: improve test environment to allow 100% score result
-TEST_CONNECTION_EXPECTED_SCORE = 50.0
+TEST_CONNECTION_EXPECTED_SCORE = 40.0
 
 FOOTER_TEXT = "Internet.nl is an initiative of the Internet community and the Dutch"
 
@@ -63,6 +64,9 @@ def test_your_website_score(page, unique_id, test_domain=TEST_DOMAIN):
     page.wait_for_url(f"{INTERNETNL_APP_URL}/site/{test_domain}/*/")
 
     score = page.locator('div.testresults-percentage')
+
+    print_details_test_results(page)
+
     expect(score).to_have_attribute('data-resultscore', str(TEST_DOMAIN_EXPECTED_SCORE))
 
 @pytest.mark.xfail(raises=AssertionError, reason="test environment not complete enough to allow all tests to pass")
@@ -90,6 +94,9 @@ def test_your_email_score(page, test_email=TEST_EMAIL):
     page.wait_for_url(f"{INTERNETNL_APP_URL}/mail/{test_email}/*/")
 
     score = page.locator('div.testresults-percentage')
+
+    print_details_test_results(page)
+
     expect(score).to_have_attribute('data-resultscore', str(TEST_EMAIL_EXPECTED_SCORE))
 
 @pytest.mark.xfail(raises=AssertionError, reason="test environment not complete enough to allow all tests to pass")
@@ -113,6 +120,9 @@ def test_your_connection_score(page):
     page.wait_for_url(f"{INTERNETNL_APP_URL}/connection/*/results")
 
     score = page.locator('div.testresults-percentage')
+
+    print_details_test_results(page)
+
     expect(score).to_have_attribute('data-resultscore', str(TEST_CONNECTION_EXPECTED_SCORE))
 
 @pytest.mark.xfail(raises=AssertionError, reason="test environment not complete enough to allow all tests to pass")

@@ -37,6 +37,8 @@ class SetupUnboundContext(Task):
             # TODO: make configurable? and catch errors
             # add Docker DNS as resolver to include test-target in DNS results
             self._ub_ctx.resolvconf("/etc/resolv.conf")
+            # forward the .test zone used in integration tests
+            self._ub_ctx.zone_add("test.", "transparent")
 
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # Some (unknown) tests probably depend on consistent ordering in unbound responses

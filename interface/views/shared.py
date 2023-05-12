@@ -35,6 +35,8 @@ if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_
 # TODO: make configurable? and catch errors
 # add Docker DNS as resolver to include test-target in DNS results
 ub_ctx.resolvconf("/etc/resolv.conf")
+# forward the .test zone used in integration tests
+ub_ctx.zone_add("test.", "transparent")
 
 # XXX: Remove for now; inconsistency with applying settings on celery.
 # YYY: Removal caused infinite waiting on pipe to unbound. Added again.

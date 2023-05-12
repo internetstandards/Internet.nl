@@ -9,7 +9,7 @@ default/key.pem default/cert.csr:
 	# generate server private key and certificate signing request
 	openssl req -new -newkey rsa:4096 -keyout default/key.pem -out default/cert.csr -nodes -config default/openssl.cnf
 
-default/cert.pem: default/cert.csr | root/cert.pem
+default/cert.pem: default/cert.csr extfile.ext | root/cert.pem
 	# sign csr with root CA
 	openssl x509 -passin pass:geheim123 -req -sha256 -CA root/cert.pem -CAkey root/key.pem -in $< -out $@ -days 365 -CAcreateserial -extfile extfile.ext
 
