@@ -96,14 +96,14 @@ jobs:
 
       - name: Start test instance
         run: |
-          make docker-compose-up ENVIRONMENT=test
+          make docker-compose-up environment=test
 
       - name: Pull test-runner
         run: |
           docker compose --env-file test.env pull test-runner
 
       - name: Run integration tests
-        run: make integration-tests ENVIRONMENT=test
+        run: make integration-tests environment=test
 
       - name: Archive test results
         uses: actions/upload-artifact@v3

@@ -1,0 +1,30 @@
+services:
+  resolver:
+    image: strm/dnsmasq
+
+    entrypoint: /entrypoint.sh
+
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL
+
+    ports:
+      - "53/udp"
+
+    environment:
+      - IPV4_IP_UNBOUND_INTERNAL
+      - CONN_TEST_DOMAIN
+      - INTERNETNL_DOMAINNAME
+      - IPV4_WEBSERVER_IP_PUBLIC
+      - TEST_TARGET_DOMAINNAME
+      - IPV4_IP_TEST_TARGET_PUBLIC
+      - IPV6_IP_TEST_TARGET_PUBLIC
+      - IPV4_IP_TEST_TARGET_MAIL_PUBLIC
+      - IPV6_IP_TEST_TARGET_MAIL_PUBLIC
+
+    volumes:
+      - ../integration_tests/dnsmasq/entrypoint.sh:/entrypoint.sh
+
+    cap_add:
+      - NET_ADMIN
+

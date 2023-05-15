@@ -1,0 +1,38 @@
+services:
+  # test runner for integration tests in isolated environment
+  test-runner:
+    image: $DOCKER_IMAGE_TEST_RUNNER
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test-runner
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration_tests/integration/
+    networks:
+      public-internet:
+      internal:
+    volumes:
+      - ../:/source
+      # make docker available inside the container
+      - /var/run/docker.sock:/var/run/docker.sock
+    profiles:
+      - run-tests
+    dns: $IPV4_IP_RESOLVER_INTERNAL
+
+  # test runner intended to run live tests against targets on public internet
+  test-runner-live:
+    image: $DOCKER_IMAGE_TEST_RUNNER
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test-runner
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration_tests/live/
+    networks:
+      live-tests:
+    volumes:
+      - ../:/source
+    profiles:
+      - run-tests
+
+networks:
+  live-tests:
+    driver: bridge
