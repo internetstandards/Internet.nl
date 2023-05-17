@@ -768,7 +768,7 @@ class DomainTestAppsecpriv(BaseTestModel):
 
     class Meta:
         app_label = "checks"
-        indexes = [models.Index(fields=["domain", "-id"], name="checks_domtstappsec_dom_idx")]
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_domtestappsec_dom_idx")]
 
 
 # RPKI

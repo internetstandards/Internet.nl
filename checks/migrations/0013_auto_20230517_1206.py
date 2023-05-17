@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name="domaintestappsecpriv",
-            index=models.Index(fields=["domain", "-id"], name="checks_domtstappsec_dom_idx"),
+            index=models.Index(fields=["domain", "-id"], name="checks_domtestappsec_dom_idx"),
         ),
         migrations.AddIndex(
             model_name="domaintestdnssec",
