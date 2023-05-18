@@ -412,6 +412,7 @@ class MailTestTls(DomainServersModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_mailtesttls_dom_idx")]
 
 
 class MailTestDnssec(DomainServersModel):
@@ -428,6 +429,7 @@ class MailTestDnssec(DomainServersModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_mailtestdnssec_dom_idx")]
 
 
 # DNSSEC
@@ -446,6 +448,7 @@ class DomainTestDnssec(BaseTestModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_domtestdnssec_dom_idx")]
 
 
 class WebTestTls(DomainServersModel):
@@ -458,6 +461,7 @@ class WebTestTls(DomainServersModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_webtesttls_dom_idx")]
 
 
 class DomainTestTls(BaseTestModel):
@@ -764,6 +768,7 @@ class DomainTestAppsecpriv(BaseTestModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_domtestappsec_dom_idx")]
 
 
 # RPKI
@@ -779,6 +784,9 @@ class WebTestRpki(BaseTestModel):
     def __dir__(self):
         return ["timestamp", "domain", "report", "web_score", "ns_score", "score", "max_score"]
 
+    class Meta:
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_webtestrpki_dom_idx")]
+
 
 class MailTestRpki(BaseTestModel):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -791,6 +799,9 @@ class MailTestRpki(BaseTestModel):
 
     def __dir__(self):
         return ["timestamp", "domain", "report", "mail_score", "ns_score", "score", "max_score"]
+
+    class Meta:
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_mailtestrpki_dom_idx")]
 
 
 class RpkiTestHost(models.Model):
@@ -1020,6 +1031,7 @@ class MailTestAuth(BaseTestModel):
 
     class Meta:
         app_label = "checks"
+        indexes = [models.Index(fields=["domain", "-id"], name="checks_mailtestauth_dom_idx")]
 
 
 class MailTestReport(models.Model):
