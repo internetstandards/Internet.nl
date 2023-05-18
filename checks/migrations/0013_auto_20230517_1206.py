@@ -4,41 +4,68 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    # Concurrent index creation happens outside of a transaction.
+    atomic = False
+
     dependencies = [
         ("checks", "0012_domain_index_performance_non_existing_domains"),
     ]
 
     operations = [
-        migrations.AddIndex(
-            model_name="domaintestappsecpriv",
-            index=models.Index(fields=["domain", "-id"], name="checks_domtestappsec_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="domaintestdnssec",
-            index=models.Index(fields=["domain", "-id"], name="checks_domtestdnssec_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="mailtestauth",
-            index=models.Index(fields=["domain", "-id"], name="checks_mailtestauth_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="mailtestdnssec",
-            index=models.Index(fields=["domain", "-id"], name="checks_mailtestdnssec_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="mailtestrpki",
-            index=models.Index(fields=["domain", "-id"], name="checks_mailtestrpki_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="mailtesttls",
-            index=models.Index(fields=["domain", "-id"], name="checks_mailtesttls_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="webtestrpki",
-            index=models.Index(fields=["domain", "-id"], name="checks_webtestrpki_dom_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="webtesttls",
-            index=models.Index(fields=["domain", "-id"], name="checks_webtesttls_dom_idx"),
+        migrations.RunSQL(
+            sql=[
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_domtestappsec_dom_idx" ON "checks_domaintestappsecpriv" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_domtestdnssec_dom_idx" ON "checks_domaintestdnssec" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_mailtestauth_dom_idx" ON "checks_mailtestauth" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_mailtestdnssec_dom_idx" ON "checks_mailtestdnssec" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_mailtestrpki_dom_idx" ON "checks_mailtestrpki" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_mailtesttls_dom_idx" ON "checks_mailtesttls" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_webtestrpki_dom_idx" ON "checks_webtestrpki" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_webtesttls_dom_idx" ON "checks_webtesttls" ("domain", "id" DESC);',
+            ],
+            reverse_sql=[
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_webtesttls_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_webtestrpki_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_mailtesttls_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_mailtestrpki_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_mailtestdnssec_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_mailtestauth_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_domtestdnssec_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_domtestappsec_dom_idx";',
+            ],
+            state_operations=[
+                migrations.AddIndex(
+                    model_name="domaintestappsecpriv",
+                    index=models.Index(fields=["domain", "-id"], name="checks_domtestappsec_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="domaintestdnssec",
+                    index=models.Index(fields=["domain", "-id"], name="checks_domtestdnssec_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="mailtestauth",
+                    index=models.Index(fields=["domain", "-id"], name="checks_mailtestauth_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="mailtestdnssec",
+                    index=models.Index(fields=["domain", "-id"], name="checks_mailtestdnssec_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="mailtestrpki",
+                    index=models.Index(fields=["domain", "-id"], name="checks_mailtestrpki_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="mailtesttls",
+                    index=models.Index(fields=["domain", "-id"], name="checks_mailtesttls_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="webtestrpki",
+                    index=models.Index(fields=["domain", "-id"], name="checks_webtestrpki_dom_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="webtesttls",
+                    index=models.Index(fields=["domain", "-id"], name="checks_webtesttls_dom_idx"),
+                ),
+            ],
         ),
     ]
