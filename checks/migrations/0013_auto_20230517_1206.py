@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             sql=[
-                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_domtestappsec_dom_idx" ON "checks_domaintestappsecpriv" ("domain", "id" DESC);',
+                'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_webtestappsec_dom_idx" ON "checks_webtestappsecpriv" ("domain", "id" DESC);',
                 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_domtestdnssec_dom_idx" ON "checks_domaintestdnssec" ("domain", "id" DESC);',
                 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_mailtestauth_dom_idx" ON "checks_mailtestauth" ("domain", "id" DESC);',
                 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "checks_mailtestdnssec_dom_idx" ON "checks_mailtestdnssec" ("domain", "id" DESC);',
@@ -31,12 +31,12 @@ class Migration(migrations.Migration):
                 'DROP INDEX CONCURRENTLY IF EXISTS "checks_mailtestdnssec_dom_idx";',
                 'DROP INDEX CONCURRENTLY IF EXISTS "checks_mailtestauth_dom_idx";',
                 'DROP INDEX CONCURRENTLY IF EXISTS "checks_domtestdnssec_dom_idx";',
-                'DROP INDEX CONCURRENTLY IF EXISTS "checks_domtestappsec_dom_idx";',
+                'DROP INDEX CONCURRENTLY IF EXISTS "checks_webtestappsec_dom_idx";',
             ],
             state_operations=[
                 migrations.AddIndex(
-                    model_name="domaintestappsecpriv",
-                    index=models.Index(fields=["domain", "-id"], name="checks_domtestappsec_dom_idx"),
+                    model_name="webtestappsecpriv",
+                    index=models.Index(fields=["domain", "-id"], name="checks_webtestappsec_dom_idx"),
                 ),
                 migrations.AddIndex(
                     model_name="domaintestdnssec",
