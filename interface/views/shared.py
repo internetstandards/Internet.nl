@@ -26,6 +26,8 @@ from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
 
+from statshog.defaults.django import statsd
+
 ub_ctx = unbound.ub_ctx()
 if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
     ub_ctx.debuglevel(2)
@@ -281,6 +283,7 @@ def get_retest_time(report):
     return int(max(0, settings.CACHE_TTL - time_delta.total_seconds()))
 
 
+@statsd.timer("ub_resolve_with_timeout")
 def ub_resolve_with_timeout(qname, qtype, rr_class, timeout):
     def ub_callback(data, status, result):
         if status == 0 and result.havedata:
