@@ -55,3 +55,6 @@ cached-property
 
 # our custom fork
 https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+
+# used for statsd ad-hoc metric collection
+statshog

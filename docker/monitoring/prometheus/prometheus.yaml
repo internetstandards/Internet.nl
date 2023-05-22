@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 10s
+  scrape_timeout: 5s
+
+scrape_configs:
+  - job_name: postgresql_exporter
+    scheme: http
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+        - postgresql-exporter:9187
+
+  - job_name: redis_exporter
+    scheme: http
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+        - redis-exporter:9121
+
+  - job_name: rabbitmq_exporter
+    scheme: http
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+        - rabbitmq:15692
+
+  - job_name: statsd_exporter
+    scheme: http
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+        - statsd-exporter:9102
+
