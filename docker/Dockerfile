@@ -154,9 +154,6 @@ COPY --chown=nobody:nogroup internetnl ./internetnl
 COPY --chown=nobody:nogroup translations ./translations
 COPY --chown=nobody:nogroup remote_data ./remote_data
 
-# TODO: settings file should be parametrized by environment variables
-RUN cp internetnl/settings-dist.py internetnl/settings.py
-
 ENV LDNS_DANE=/usr/bin/ldns-dane
 
 ENV STATIC_ROOT /app/static

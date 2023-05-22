@@ -223,9 +223,6 @@ jobs:
             ./nassl_freebsd/
           key: ${{ runner.os }}-${{ matrix.python-version }}-v5-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile', '.github/workflows/*') }}
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
-      - name: Setup Application Configuration
-        run: |
-          cp ./internetnl/settings-dist.py ./internetnl/settings.py
       - name: Make venv (if not from cache)
         run: make venv
         if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
