@@ -303,11 +303,11 @@ def test_ns_connectivity(ip, port, domain):
 
     ctx = ub_ctx()
 
-    # TODO: make configurable? and catch errors
-    # add Docker DNS as resolver to include test-target in DNS results
-    ctx.resolvconf("/etc/resolv.conf")
-    # forward the .test zone used in integration tests
-    ctx.zone_add("test.", "transparent")
+    if settings.INTEGRATION_TESTS:
+        # add Docker DNS as resolver to include test-target in DNS results
+        ctx.resolvconf("/etc/resolv.conf")
+        # forward the .test zone used in integration tests
+        ctx.zone_add("test.", "transparent")
 
     # XXX: Remove for now; inconsistency with applying settings on celery.
     # YYY: Removal caused infinite waiting on pipe to unbound. Added again.

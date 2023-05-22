@@ -27,18 +27,18 @@ class SetupUnboundContext(Task):
     def ub_ctx(self):
         if self._ub_ctx is None:
             self._ub_ctx = unbound.ub_ctx()
-            if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
+            if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TESTS:
                 self._ub_ctx.debuglevel(2)
                 self._ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
                 self._ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
             else:
                 self._ub_ctx.add_ta_file(os.path.join(os.getcwd(), settings.DNS_ROOT_KEY))
 
-            # TODO: make configurable? and catch errors
-            # add Docker DNS as resolver to include test-target in DNS results
-            self._ub_ctx.resolvconf("/etc/resolv.conf")
-            # forward the .test zone used in integration tests
-            self._ub_ctx.zone_add("test.", "transparent")
+            if settings.INTEGRATION_TESTS:
+                # add Docker DNS as resolver to include test-target in DNS results
+                self._ub_ctx.resolvconf("/etc/resolv.conf")
+                # forward the .test zone used in integration tests
+                self._ub_ctx.zone_add("test.", "transparent")
 
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # Some (unknown) tests probably depend on consistent ordering in unbound responses

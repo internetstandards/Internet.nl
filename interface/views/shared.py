@@ -29,16 +29,16 @@ from internetnl import log
 from statshog.defaults.django import statsd
 
 ub_ctx = unbound.ub_ctx()
-if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
+if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TESTS:
     ub_ctx.debuglevel(2)
     ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
     ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
 
-# TODO: make configurable? and catch errors
-# add Docker DNS as resolver to include test-target in DNS results
-ub_ctx.resolvconf("/etc/resolv.conf")
-# forward the .test zone used in integration tests
-ub_ctx.zone_add("test.", "transparent")
+if settings.INTEGRATION_TESTS:
+    # add Docker DNS as resolver to include test-target in DNS results
+    ub_ctx.resolvconf("/etc/resolv.conf")
+    # forward the .test zone used in integration tests
+    ub_ctx.zone_add("test.", "transparent")
 
 # XXX: Remove for now; inconsistency with applying settings on celery.
 # YYY: Removal caused infinite waiting on pipe to unbound. Added again.

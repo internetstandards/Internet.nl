@@ -81,6 +81,7 @@ services:
       - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
       - ALLOWED_HOSTS
       - DEBUG
+      - INTEGRATION_TESTS
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - CONN_TEST_DOMAIN
@@ -172,6 +173,7 @@ services:
       - DJANGO_SETTINGS_MODULE=internetnl.settings
       - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
       - DEBUG
+      - INTEGRATION_TESTS
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
@@ -226,6 +228,7 @@ services:
       - DJANGO_SETTINGS_MODULE=internetnl.settings
       - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
       - DEBUG
+      - INTEGRATION_TESTS
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
       - ROUTINATOR_URL=http://routinator:9556/api/v1/validity

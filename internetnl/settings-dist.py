@@ -632,3 +632,5 @@ if not DEBUG:
     STATSD_PATCHES = [
         "django_statsd.patches.db",
     ]
+
+INTEGRATION_TESTS = get_boolean_env("INTEGRATION_TESTS", False)
