@@ -453,7 +453,7 @@ def jsonp(func):
         if not cb:
             cb = ""
         resp["Content-Type"] = "application/javascript"
-        resp.content = f"{cb}({resp.content})"
+        resp.content = f"{cb}({resp.content.decode('utf-8')})".encode("utf-8")
         return resp
 
     return dec
