@@ -456,7 +456,10 @@ docker-compose-up-build:
 
 docker-compose-build: services=
 docker-compose-build:
-	${DOCKER_COMPOSE_CMD} build ${services}
+	# version number is taken from the most recent tag + current commit short SHA + '-dev' if working directory is dirty
+	${DOCKER_COMPOSE_CMD} build \
+		--build-arg=INTERNETNL_VERSION="$$(git describe --tags --abbrev=0|tr -d v)-$$(git rev-parse --short HEAD)$$(test -z "$$(git status --porcelain)" || echo '-dev')" \
+		${services}
 
 docker-compose-build-up: docker-compose-build docker-compose-up
 

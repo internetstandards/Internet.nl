@@ -177,6 +177,9 @@ RUN python3 --version | grep "$PYTHON_VERSION."
 RUN /opt/unbound/sbin/unbound -V
 RUN python3 -c 'import nassl; print(nassl.__version__)'
 
+ARG INTERNETNL_VERSION
+ENV INTERNETNL_VERSION $INTERNETNL_VERSION
+
 # define default entrypoint and command
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
