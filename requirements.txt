@@ -93,9 +93,7 @@ hiredis==2.2.2
 idna==3.4
     # via requests
 importlib-metadata==4.13.0
-    # via
-    #   -r requirements.in
-    #   markdown
+    # via -r requirements.in
 iniconfig==2.0.0
     # via pytest
 ip-address==1.4.2
@@ -149,7 +147,7 @@ pyyaml==6.0
     # via -r requirements.in
 redis==4.5.4
     # via django-redis
-requests==2.28.2
+requests==2.31.0
     # via
     #   -r requirements.in
     #   forcediphttpsadapter
@@ -185,8 +183,6 @@ sqlparse==0.4.3
     # via django
 toml==0.10.2
     # via pytest
-tomli==2.0.1
-    # via setuptools-scm
 typing-extensions==4.4.0
     # via
     #   setuptools-rust
