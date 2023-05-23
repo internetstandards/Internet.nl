@@ -4,7 +4,7 @@ import pytest
 import re
 from playwright.sync_api import Page, expect
 from pytest_playwright import pytest_playwright
-from .utils import print_details_test_results
+from ..utils import print_details_test_results
 
 INTERNETNL_APP_URL = "http://internet.test"
 

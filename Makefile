@@ -513,9 +513,11 @@ docker-compose-reset:
 docker-compose-pull-dependencies:
 	${DOCKER_COMPOSE_CMD} pull --ignore-buildable
 
+docker-compose-test-runner-shell: environment=test
 docker-compose-test-runner-shell:
 	${DOCKER_COMPOSE_CMD} run test-runner /bin/bash
 
+integration-tests: environment=test
 integration-tests:
 	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/integration/
 
@@ -525,8 +527,13 @@ integration-tests-all-browser: integration-tests
 integration-tests-trace: testargs=--tracing=retain-on-failure --browser firefox
 integration-tests-trace: integration-tests
 
+live-tests: environment=test-live
 live-tests:
-	${env} pytest -v integration_tests/live ${testargs}
+	${DOCKER_COMPOSE_CMD} run --rm test-runner-live python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/live/
+
+live-tests-ipv6: environment=test-live-ipv6
+live-tests-ipv6:
+	${DOCKER_COMPOSE_CMD} run --rm test-runner-live-ipv6 python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/live/
 
 integration-tests-debug:
 	${env} pytest --setup-show -v --capture=no integration_tests ${testargs}

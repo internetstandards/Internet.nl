@@ -1,0 +1,33 @@
+services:
+  # test runner intended to run live tests against targets on public internet with IPv6
+  test-runner-live-ipv6:
+    image: $DOCKER_IMAGE_TEST_RUNNER
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test-runner
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration_tests/live/
+    environment:
+      - APP_URLS
+      - TEST_DOMAINS
+    networks:
+      live-tests-ipv6:
+    volumes:
+      - ../:/source
+    profiles:
+      - run-tests
+
+networks:
+  live-tests-ipv6:
+    # required to enable IPv6 on Docker Desktop runtime
+    enable_ipv6: true
+    driver: bridge
+    driver_opts:
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+    ipam:
+      driver: default
+      config:
+      - subnet: $IPV6_SUBNET_LIVE_TESTS
+        gateway: $IPV6_GATEWAY_LIVE_TESTS
+      - subnet: $IPV4_SUBNET_PUBLIC

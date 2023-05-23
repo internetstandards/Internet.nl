@@ -1,0 +1,22 @@
+services:
+  # test runner intended to run live tests against targets on public internet
+  test-runner-live:
+    image: $DOCKER_IMAGE_TEST_RUNNER
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test-runner
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration_tests/live/
+    environment:
+      - APP_URLS
+      - TEST_DOMAINS
+    networks:
+      live-tests:
+    volumes:
+      - ../:/source
+    profiles:
+      - run-tests
+
+networks:
+  live-tests:
+    driver: bridge
