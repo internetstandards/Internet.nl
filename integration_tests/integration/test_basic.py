@@ -69,7 +69,7 @@ def test_your_website_score(page, unique_id, test_domain=TEST_DOMAIN):
 
     expect(score).to_have_attribute('data-resultscore', str(TEST_DOMAIN_EXPECTED_SCORE))
 
-@pytest.mark.xfail(raises=AssertionError, reason="test environment not complete enough to allow all tests to pass")
+@pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
 @pytest.mark.parametrize("probe", ALL_PROBES)
 def test_your_website_probe_success(page, probe, unique_id, test_domain=TEST_DOMAIN):
     test_domain = f"{unique_id}.{test_domain}"
@@ -99,7 +99,7 @@ def test_your_email_score(page, test_email=TEST_EMAIL):
 
     expect(score).to_have_attribute('data-resultscore', str(TEST_EMAIL_EXPECTED_SCORE))
 
-@pytest.mark.xfail(raises=AssertionError, reason="test environment not complete enough to allow all tests to pass")
+@pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
 @pytest.mark.parametrize("probe", ALL_EMAIL_PROBES)
 def test_your_email_probe_success(page, probe, test_email=TEST_EMAIL):
     page.goto(f"{INTERNETNL_APP_URL}/mail/{test_email}")
@@ -125,7 +125,7 @@ def test_your_connection_score(page):
 
     expect(score).to_have_attribute('data-resultscore', str(TEST_CONNECTION_EXPECTED_SCORE))
 
-@pytest.mark.xfail(raises=AssertionError, reason="test environment not complete enough to allow all tests to pass")
+@pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
 @pytest.mark.parametrize("probe", ALL_CONNECTION_PROBES)
 def test_your_connection_probe_success(page, probe):
     page.goto(f"{INTERNETNL_APP_URL}/connection/")
