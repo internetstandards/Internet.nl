@@ -17,22 +17,19 @@ services:
     profiles:
       - run-tests
     dns: $IPV4_IP_RESOLVER_INTERNAL
-
-  # test runner intended to run live tests against targets on public internet
-  test-runner-live:
-    image: $DOCKER_IMAGE_TEST_RUNNER
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.test-runner
-    # don't run anything, just make this container available to run tests in on demand
-    command: python3 -m pytest -v integration_tests/live/
-    networks:
-      live-tests:
-    volumes:
-      - ../:/source
-    profiles:
-      - run-tests
-
-networks:
-  live-tests:
-    driver: bridge
+    depends_on:
+      webserver:
+        condition: service_started
+      app:
+        condition: service_healthy
+      worker:
+        condition: service_started
+      test-target:
+        condition: service_healthy
+      mail-test-target:
+        condition: service_started
+      resolver:
+        condition: service_started
+      # not required for running the test suite, but useful to access the test environment
+      port-expose:
+        condition: service_started

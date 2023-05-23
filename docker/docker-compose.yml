@@ -57,6 +57,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      unbound:
+        condition: service_healthy
 
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
@@ -152,6 +154,9 @@ services:
       routinator:
         # TODO: convert to service_healthy when healthcheck is added to routinator
         condition: service_started
+      unbound:
+        condition: service_healthy
+
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
       - INTERNET_NL_CHECK_SUPPORT_DNSSEC

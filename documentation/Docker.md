@@ -51,17 +51,15 @@ Please refer to [Development Environment](documentation/Docker-development-envir
 
 The integration test suite runs the full application stack and additional components (internal resolver, mock target, test-runner, etc) required for testing. It is a separate environment from the development environment and runs isolated without internet connection to ensure test consistency. It has an internal IPv6 network.
 
-Bring up the integration test environment:
-
-    make docker-compose-up environment=test
-
-The command will wait for the stack to come up completely and be in a healthy state. Though the environment is isolated it is possible to visit the app at the address: http://localhost:8081. Targets on the internet will not be available for testing, instead use the mock targets, eg: https://target.test.
-
-Run the test suite using the following command:
+To bring up the test environment and run the test suite use the following command:
 
     make integration-test environment=test
 
-To stop the running stack use:
+This command will wait for the stack to come up completely and be in a healthy state, after which the testsuite will begin to run.
+
+Though the environment is isolated it is possible to visit the app at the address: http://localhost:8081. Targets on the internet will not be available for testing, instead use the mock targets, eg: https://target.test.
+
+The test environment will remain running after the test, to stop the running stack use:
 
     make docker-compose-stop environment=test
 
