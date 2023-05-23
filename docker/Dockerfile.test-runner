@@ -13,6 +13,7 @@ RUN echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/d
 RUN apt-get update && apt-get install -y \
   docker-ce-cli \
   docker-compose-plugin \
+  dnsutils \
   && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /source
