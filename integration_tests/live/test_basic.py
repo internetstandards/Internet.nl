@@ -28,6 +28,10 @@ TEST_CONNECTION_EXPECTED_SCORE = 100.0
 
 FOOTER_TEXT = "Internet.nl is an initiative of the Internet community and the Dutch"
 
+SECURITY_TXT_TEXT = "Contact: https://internet.nl/disclosure/"
+
+ROBOTS_TXT_TEXT = "Disallow: /site/"
+
 @pytest.mark.parametrize("app_url", APP_URLS)
 def test_index_http_ok(page, app_url):
     response = page.request.get(app_url)
@@ -39,6 +43,18 @@ def test_index_footer_text_present(page, app_url):
     footer = page.locator("#footer")
 
     expect(footer).to_have_text(re.compile(FOOTER_TEXT))
+
+@pytest.mark.parametrize("app_url", APP_URLS)
+def test_security_txt(page, app_url):
+    page.goto(app_url + "/.well-known/security.txt")
+
+    assert SECURITY_TXT_TEXT in page.content()
+
+@pytest.mark.parametrize("app_url", APP_URLS)
+def test_robots_txt(page, app_url):
+    page.goto(app_url + "/robots.txt")
+
+    assert ROBOTS_TXT_TEXT in page.content()
 
 @pytest.mark.parametrize("app_url", APP_URLS)
 def test_reject_invalid_domain(page, app_url):

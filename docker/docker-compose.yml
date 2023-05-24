@@ -26,6 +26,9 @@ services:
       - ./webserver/apache_config/sites-enabled/internet_nl.conf:/usr/local/apache2/sites-enabled/internet_nl.conf
       - "/var/lib/acme/$INTERNETNL_DOMAINNAME:/etc/acme/certs"
       - "/var/www/$INTERNETNL_DOMAINNAME:/var/www/$INTERNETNL_DOMAINNAME"
+      - ../.well-known/security.txt:/var/www/$INTERNETNL_DOMAINNAME/.well-known/security.txt
+      - ../robots.txt:/var/www/$INTERNETNL_DOMAINNAME/robots.txt
+
 
     entrypoint: /entrypoint.sh
 

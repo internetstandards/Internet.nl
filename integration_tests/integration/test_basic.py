@@ -29,6 +29,10 @@ TEST_CONNECTION_EXPECTED_SCORE = 50.0
 
 FOOTER_TEXT = "Internet.nl is an initiative of the Internet community and the Dutch"
 
+SECURITY_TXT_TEXT = "Contact: https://internet.nl/disclosure/"
+
+ROBOTS_TXT_TEXT = "Disallow: /site/"
+
 def test_index_http_ok(page):
     response = page.request.get(INTERNETNL_APP_URL)
     expect(response).to_be_ok()
@@ -38,6 +42,16 @@ def test_index_footer_text_present(page):
     footer = page.locator("#footer")
 
     expect(footer).to_have_text(re.compile(FOOTER_TEXT))
+
+def test_security_txt(page):
+    page.goto(INTERNETNL_APP_URL + "/.well-known/security.txt")
+
+    assert SECURITY_TXT_TEXT in page.content()
+
+def test_robots_txt(page):
+    page.goto(INTERNETNL_APP_URL + "/robots.txt")
+
+    assert ROBOTS_TXT_TEXT in page.content()
 
 def test_reject_invalid_domain(page):
     domain = INVALID_DOMAIN
