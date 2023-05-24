@@ -53,6 +53,10 @@ def test_robots_txt(page):
 
     assert ROBOTS_TXT_TEXT in page.content()
 
+def test_favicon_ico(page):
+    response = page.request.get(INTERNETNL_APP_URL + "/favicon.ico")
+    expect(response).to_be_ok()
+
 def test_reject_invalid_domain(page):
     domain = INVALID_DOMAIN
 

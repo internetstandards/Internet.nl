@@ -28,6 +28,7 @@ services:
       - "/var/www/$INTERNETNL_DOMAINNAME:/var/www/$INTERNETNL_DOMAINNAME"
       - ../.well-known/security.txt:/var/www/$INTERNETNL_DOMAINNAME/.well-known/security.txt
       - ../robots.txt:/var/www/$INTERNETNL_DOMAINNAME/robots.txt
+      - ../interface/static/favicon.ico:/var/www/$INTERNETNL_DOMAINNAME/favicon.ico
 
 
     entrypoint: /entrypoint.sh

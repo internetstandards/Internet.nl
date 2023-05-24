@@ -57,6 +57,11 @@ def test_robots_txt(page, app_url):
     assert ROBOTS_TXT_TEXT in page.content()
 
 @pytest.mark.parametrize("app_url", APP_URLS)
+def test_favicon_ico(page, app_url):
+    response = page.request.get(app_url + "/favicon.ico")
+    expect(response).to_be_ok()
+
+@pytest.mark.parametrize("app_url", APP_URLS)
 def test_reject_invalid_domain(page, app_url):
     domain = INVALID_DOMAIN
 
