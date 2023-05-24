@@ -4,7 +4,7 @@ import pytest
 import re
 from playwright.sync_api import Page, expect
 from pytest_playwright import pytest_playwright
-from ..utils import print_details_test_results
+from ..conftest import print_details_test_results
 
 TEST_EMAIL = "target.test"
 ALL_EMAIL_PROBES = {"ipv6", "dnssec", "tls", "auth", "rpki"}

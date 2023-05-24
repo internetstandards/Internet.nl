@@ -5,8 +5,8 @@ import os
 import re
 from playwright.sync_api import Page, expect
 from pytest_playwright import pytest_playwright
-from ..utils import print_details_test_results
-from .utils import ipv6_available
+from ..conftest import print_details_test_results
+from .conftest import ipv6_available
 
 INVALID_DOMAIN = "invalid-domain.example.com"
 
