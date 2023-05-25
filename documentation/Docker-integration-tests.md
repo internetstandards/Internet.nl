@@ -2,7 +2,7 @@
 
 
 
-## Live tests
+**notice**: depending on the Docker runtime it might take a moment for changes made to a file to synchonize into the running containers.
 
 ### IPv6
 
