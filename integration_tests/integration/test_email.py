@@ -6,14 +6,13 @@ from playwright.sync_api import Page, expect
 from pytest_playwright import pytest_playwright
 from ..conftest import print_details_test_results
 
-TEST_EMAIL = "target.test"
 ALL_EMAIL_PROBES = {"ipv6", "dnssec", "tls", "auth", "rpki"}
 TEST_EMAIL_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
 TEST_EMAIL_EXPECTED_SCORE = 17
 
 
-def test_your_email_score(page, app_url, test_email=TEST_EMAIL):
+def test_your_email_score(page, app_url, test_email):
     """Runs the 'Test your email' and expects a decent result."""
 
     page.goto(app_url)
@@ -33,7 +32,7 @@ def test_your_email_score(page, app_url, test_email=TEST_EMAIL):
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
 @pytest.mark.parametrize("probe", ALL_EMAIL_PROBES)
-def test_your_email_probe_success(page, app_url, probe, test_email=TEST_EMAIL):
+def test_your_email_probe_success(page, app_url, probe, test_email):
     page.goto(f"{app_url}/mail/{test_email}")
     page.wait_for_url(f"{app_url}/mail/{test_email}/*/")
 

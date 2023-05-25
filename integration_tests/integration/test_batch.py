@@ -34,11 +34,6 @@ def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=N
     return status_data
 
 @pytest.fixture(scope="session")
-def unique_id():
-    """Generate a unique (enough) ID so multiple test instances running at the same time don't conflict on resources."""
-    return str(uuid.uuid4())
-
-@pytest.fixture(scope="session")
 def register_test_user(unique_id):
     """Register user that can login on the batch API."""
 
@@ -63,8 +58,8 @@ def test_batch_requires_auth(path):
     response = requests.post(INTERNETNL_API + path, json={})
     assert response.status_code == 401
 
-def test_batch_request(unique_id, register_test_user):
-    request_data = {"type": "web", "domains": [TEST_DOMAIN], "name": unique_id}
+def test_batch_request(unique_id, register_test_user, test_domain):
+    request_data = {"type": "web", "domains": [test_domain], "name": unique_id}
 
     auth = register_test_user
 
@@ -85,7 +80,7 @@ def test_batch_request(unique_id, register_test_user):
     wait_for_request_status(INTERNETNL_API + "requests/" + test_id, "running", timeout=10, auth=auth)
 
     # wait for batch tests to complete and report to be generated
-    wait_for_request_status(INTERNETNL_API + "requests/" + test_id, "generating", interval=2, timeout=60, auth=auth)
+    wait_for_request_status(INTERNETNL_API + "requests/" + test_id, "generating", interval=2, timeout=120, auth=auth)
 
     # wait for report generation and batch to be done
     wait_for_request_status(INTERNETNL_API + "requests/" + test_id, "done", timeout=60, auth=auth)
@@ -97,9 +92,9 @@ def test_batch_request(unique_id, register_test_user):
 
     # assert batch results contents
     results_response_data = results_response.json()
-    print(json.dumps(results_response_data["domains"][TEST_DOMAIN]["results"], indent=2))
-    assert results_response_data["domains"][TEST_DOMAIN]["status"] == "ok"
-    assert results_response_data["domains"][TEST_DOMAIN]["scoring"]["percentage"] == TEST_DOMAIN_EXPECTED_SCORE
+    print(json.dumps(results_response_data["domains"][test_domain]["results"], indent=2))
+    assert results_response_data["domains"][test_domain]["status"] == "ok"
+    assert results_response_data["domains"][test_domain]["scoring"]["percentage"] == TEST_DOMAIN_EXPECTED_SCORE
 
     # get batch technical results
     results_technical_response = requests.get(INTERNETNL_API + "requests/" + test_id + "/results_technical", auth=auth)
@@ -108,6 +103,6 @@ def test_batch_request(unique_id, register_test_user):
 
     # assert batch technical results
     results_technical_response_data = results_technical_response.json()
-    print(json.dumps(results_technical_response_data["domains"][TEST_DOMAIN], indent=2))
-    assert results_technical_response_data["domains"][TEST_DOMAIN]["status"] == "ok"
-    assert results_technical_response_data["domains"][TEST_DOMAIN]["webservers"]["ipv6"]["https_enabled"] == True
+    print(json.dumps(results_technical_response_data["domains"][test_domain], indent=2))
+    assert results_technical_response_data["domains"][test_domain]["status"] == "ok"
+    assert results_technical_response_data["domains"][test_domain]["webservers"]["ipv6"]["https_enabled"] == True
