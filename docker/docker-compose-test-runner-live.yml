@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.test-runner
     # don't run anything, just make this container available to run tests in on demand
-    command: python3 -m pytest -v integration_tests/live/
+    command: python3 -m pytest -v integration-tests/live/
     environment:
       - APP_URLS
       - TEST_DOMAINS

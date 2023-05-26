@@ -36,7 +36,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 env = env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration_tests
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -539,7 +539,7 @@ live-tests-ipv6:
 	${DOCKER_COMPOSE_CMD} run --rm test-runner-live-ipv6 python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/live/
 
 integration-tests-debug:
-	${env} pytest --setup-show -v --capture=no integration_tests ${testargs}
+	${env} pytest --setup-show -v --capture=no integration-tests ${testargs}
 
 # run integration-tests against development environment instance
 integration-tests-against-develop: env:=${env} INTERNETNL_USE_DOCKER_COMPOSE_PROJECT="internetnl"

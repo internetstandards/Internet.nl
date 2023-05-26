@@ -45,9 +45,9 @@ services:
       - 443
 
     volumes:
-      - ../integration_tests/nginx_templates/:/etc/nginx/templates/
-      - ../integration_tests/pki:/etc/pki/
-      - ../integration_tests/www:/var/www/
+      - ./integration-tests/nginx_templates/:/etc/nginx/templates/
+      - ./integration-tests/pki:/etc/pki/
+      - ./integration-tests/www:/var/www/
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
@@ -92,7 +92,7 @@ services:
       - IPV4_IP_UNBOUND_INTERNAL
 
     volumes:
-      - ../integration_tests/dnsmasq/entrypoint.sh:/entrypoint.sh
+      - ./integration-tests/dnsmasq/entrypoint.sh:/entrypoint.sh
 
     cap_add:
       - NET_ADMIN

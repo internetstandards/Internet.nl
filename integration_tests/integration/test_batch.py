@@ -39,7 +39,7 @@ def register_test_user(unique_id):
     """Register user that can login on the batch API."""
 
     username = f"int-test-{unique_id}"
-    name = f"integration-test-user-{unique_id}"
+    name = f"integration-tests-user-{unique_id}"
     organization = "integration-test"
     email = f"{username}@internet.test"
 

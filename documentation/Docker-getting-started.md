@@ -53,7 +53,7 @@ The integration test suite runs the full application stack and additional compon
 
 To bring up the test environment and run the test suite use the following command:
 
-    make integration-test environment=test
+    make integration-tests environment=test
 
 This command will wait for the stack to come up completely and be in a healthy state, after which the testsuite will begin to run.
 
