@@ -1,4 +1,3 @@
-import uuid
 import requests
 import pytest
 import subprocess
@@ -14,7 +13,8 @@ TEST_DOMAIN_EXPECTED_SCORE = 48
 
 
 def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=None):
-    """Poll url and parse JSON for request.status, return if value matches expected status or fail when timeout expires."""
+    """Poll url and parse JSON for request.status, return if value matches expected status or
+    fail when timeout expires."""
     max_tries = int(timeout / interval)
 
     tries = 0
@@ -33,6 +33,7 @@ def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=N
 
     return status_data
 
+
 @pytest.fixture(scope="session")
 def register_test_user(unique_id):
     """Register user that can login on the batch API."""
@@ -43,20 +44,31 @@ def register_test_user(unique_id):
     email = f"{username}@internet.test"
 
     # create test user in Django DB
-    command = f'docker compose --ansi=never --env-file "test.env" --project-name "internetnl-test" exec app ./manage.py api_users register -u {username} -n {name} -o {organization} -e {email}'
+    command = (
+        f'docker compose --ansi=never --env-file "test.env" --project-name "internetnl-test"'
+        f" exec app ./manage.py api_users register -u {username} -n {name} -o {organization} -e {email}"
+    )
     subprocess.check_call(command, shell=True, universal_newlines=True)
 
     # create test used in Apache2 password file
-    command = f'docker compose --ansi=never --env-file "test.env" --project-name "internetnl-test" exec webserver htpasswd -cb /usr/local/apache2/htpasswd {username} {username}'
+    command = (
+        f'docker compose --ansi=never --env-file "test.env" --project-name "internetnl-test"'
+        f" exec webserver htpasswd -cb /usr/local/apache2/htpasswd {username} {username}"
+    )
     subprocess.check_call(command, shell=True, universal_newlines=True)
 
     # for testing password is the same as username
     yield (username, username)
 
-@pytest.mark.parametrize("path", ["requests", "requests/414878c6bde74343bcbf6a14de7d62de", "requests/414878c6bde74343bcbf6a14de7d62de/results"])
+
+@pytest.mark.parametrize(
+    "path",
+    ["requests", "requests/414878c6bde74343bcbf6a14de7d62de", "requests/414878c6bde74343bcbf6a14de7d62de/results"],
+)
 def test_batch_requires_auth(path):
     response = requests.post(INTERNETNL_API + path, json={})
     assert response.status_code == 401
+
 
 def test_batch_request(unique_id, register_test_user, test_domain):
     request_data = {"type": "web", "domains": [test_domain], "name": unique_id}
@@ -105,4 +117,4 @@ def test_batch_request(unique_id, register_test_user, test_domain):
     results_technical_response_data = results_technical_response.json()
     print(json.dumps(results_technical_response_data["domains"][test_domain], indent=2))
     assert results_technical_response_data["domains"][test_domain]["status"] == "ok"
-    assert results_technical_response_data["domains"][test_domain]["webservers"]["ipv6"]["https_enabled"] == True
+    assert results_technical_response_data["domains"][test_domain]["webservers"]["ipv6"]["https_enabled"] is True

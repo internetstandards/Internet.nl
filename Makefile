@@ -30,7 +30,7 @@ else
 	POFILES_TAR_ARGS+=$(TAR)
 endif
 
-pysrcdirs = internetnl tests interface checks
+pysrcdirs = internetnl tests interface checks integration_tests
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
 bin = .venv/bin
