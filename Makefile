@@ -517,6 +517,9 @@ docker-compose-test-runner-shell: environment=test
 docker-compose-test-runner-shell:
 	${DOCKER_COMPOSE_CMD} run test-runner /bin/bash
 
+docker-compose-batch-api-create-db-indexes:
+	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_create_db_indexes
+
 integration-tests: environment=test
 integration-tests:
 	${DOCKER_COMPOSE_CMD} run --rm test-runner python3 -m pytest --verbose --screenshot=only-on-failure --video=retain-on-failure ${testargs} integration_tests/integration/
