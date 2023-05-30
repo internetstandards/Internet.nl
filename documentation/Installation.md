@@ -64,7 +64,7 @@ connection test domain.
 If you setup a python virtual environment you should enable it for unbound's
 installation.
 
-For the connection test, [specific DNS records are needed](https://github.com/internetstandards/unbound#configuration=).
+For the connection test, [specific DNS records are needed](https://github.com/internetstandards/unbound/blob/internetnl/README.md#configuration).
 
 Manually running unbound can be done with `unbound -d -vvvv`. This opens unbound in a console with maximum debug logging.
 This helps figuring out if everything is set up properly. Unbound will use syslog after starting, and you'll need to
