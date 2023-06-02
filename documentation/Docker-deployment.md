@@ -70,6 +70,8 @@ Create a configuration file, the following inputs are required:
 
   `docker run -ti --rm --entrypoint python3 django -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'`
 
+  Be sure to wrap the resulting key in single quotes because it might contain characters that would be interpreted by the shell.
+
 - `IPV4_IP_PUBLIC`:
 
   Public IPv4 address (eg: `192.0.2.1`)
@@ -105,7 +107,7 @@ Create a configuration file, the following inputs are required:
 Use the values determined above to fill in the variables below and run the following command (protip: use ctrl-x ctrl-e in Bash to open a text editor to easily paste and edit the command):
 
     INTERNETNL_DOMAINNAME=example.com \
-    SECRET_KEY=this-is-not-a-secret \
+    SECRET_KEY='this-is-not-a-secret' \
     IPV4_IP_PUBLIC=192.0.2.1 \
     IPV6_SUBNET_PUBLIC=2001:db8:1::/80 \
     IPV6_GATEWAY_PUBLIC=2001:db8:1::1 \
