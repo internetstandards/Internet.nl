@@ -1,4 +1,4 @@
-# Security.txt check
+# security.txt check
 
 The security.txt test looks for the existence and validity of a 
 [RFC9116](https://www.rfc-editor.org/rfc/rfc9116.html) security.txt file
