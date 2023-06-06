@@ -5,10 +5,10 @@
       <h1>{% include "string.html" with name="base test mail title" %}</h1>
       {% include "content.html" with name="base test mail explain" %}
     </div>
-    <form action="/mail/" method="POST">
+    <form action="/mail/" method="POST" novalidate>
       <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
         <span class="emailfield before">
-          <input id="mail-url" class="email" type="text" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+          <input id="mail-url" class="email" type="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
         </span>
       </label>
       {% if request.GET.invalid != None %}

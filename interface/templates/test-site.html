@@ -5,9 +5,9 @@
       <h1>{% include "string.html" with name="base test website title" %}</h1>
       {% include "content.html" with name="base test website explain" %}
     </div>
-    <form action="/site/" method="POST">
+    <form action="/site/" method="POST" novalidate>
       <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-        <input id="web-url" type="text" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+        <input id="web-url" type="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
       </label>
       {% if request.GET.invalid != None %}
       <div class="invalid-domain">
