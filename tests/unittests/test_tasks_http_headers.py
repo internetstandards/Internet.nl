@@ -67,6 +67,12 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
         headers = self.base_policy + "frame-ancestors 'self'"
         self._is_good(headers)
 
+    def test_none_with_others_invalid_url(self):  # #913
+        headers = "form-action 'none'; base-uri 'none' https://example.nl; default-src 'self'; frame-ancestors 'self'"
+        self._is_bad(headers)
+        headers = "form-action 'none' http://example.nl/; base-uri 'none'; default-src 'self'; frame-ancestors 'self'"
+        self._is_bad(headers)
+
     def test_invalid_frame_ancestors(self):
         headers = self.base_policy + "frame-ancestors 💩"
         self._is_bad(headers)
