@@ -367,11 +367,9 @@ class HeaderCheckerContentSecurityPolicy:
         matched_host = 0
         found_self = False
         found_hosts = set()
+        found_none = False
         for match in self.parsed[directive]:
-            if "none" in match.groupdict() and match.group("none"):
-                # There is 'none' we don't care about the rest.
-                return True
-            elif "self" in match.groupdict() and match.group("self"):
+            if "self" in match.groupdict() and match.group("self"):
                 expected_sources += 1
                 found_self = True
             elif "report_sample" in match.groupdict() and match.group("report_sample"):
@@ -393,6 +391,11 @@ class HeaderCheckerContentSecurityPolicy:
                     if not host.endswith(domain):
                         return False
                     matched_host += 1
+            elif "none" in match.groupdict() and match.group("none"):
+                found_none = True
+        if found_none and not found_self and not expected_sources:
+            # 'none' is a short circuit accept if not mixed with any others
+            return True
         if not found_self:
             return False
         # Since we are here, at least one host matched (the visiting domain via
