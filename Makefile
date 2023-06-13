@@ -451,6 +451,10 @@ docker-compose-up: services=
 docker-compose-up:
 	${DOCKER_COMPOSE_CMD} up --wait --no-build ${services}
 
+docker-compose-restart: services=
+docker-compose-restart:
+	${DOCKER_COMPOSE_CMD} restart --no-deps ${services}
+
 docker-compose-up-build:
 	${DOCKER_COMPOSE_CMD} up --wait --build ${services}
 
@@ -557,3 +561,7 @@ docker-compose-runtime-start:
 docker-compose-runtime-stop:
 	colima stop
 
+images = $(patsubst %.py,%.png,$(wildcard documentation/images/*.py))
+documentation-images: ${images}
+documentation/images/%.png: documentation/images/%.py | ${nwdiag}
+	docker run -it --rm -v "$${PWD}/$(@D)/":/$(@D) -w /$(@D) mjdk/diagrams $(<F)

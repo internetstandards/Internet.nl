@@ -1,6 +1,6 @@
 # Docker / Docker Compose / Getting Started
 
-This documented is intended as a quick simple guide to setup a development environment or run an integration test. For more detailed information refer to the [Development Environment](documentation/Docker-development-environment.md) or [Integration tests](documentation/Docker-integration-tests.md) files.
+This documented is intended as a quick simple guide to setup a development environment or run the integration test environment. For more detailed information refer to the [Development Environment](documentation/Docker-development-environment.md) or [Integration tests](documentation/Docker-integration-tests.md) files.
 
 ## Prerequisites
 
@@ -13,11 +13,15 @@ An OCI compatible container runtime with [Compose V2](https://docs.docker.com/co
 
 ## Building
 
-After cloning this repository locally make sure all Git Submodules are checked out and up to date with the following command:
+Clone this repository to a local directory:
 
-    git submodule update --init
+    git clone https://github.com/internetstandards/Internet.nl/ --branch docker
 
-First build the Docker images for the application using the following command:
+Then make sure all Git Submodules are checked out and up to date with the following command:
+
+    GIT_LFS_SKIP_SMUDGE=1 git submodule update --init
+
+Build the Docker images for the application:
 
     make docker-compose-build
 
@@ -29,7 +33,7 @@ To start the development environment use the following command:
 
     make docker-compose-up
 
-The command will wait for the stack to come up completely and be in a healthy state. After which the application is accesible on the address: http://localhost:8080. Logs can be streamed using:
+The command will wait for the stack to come up completely and be in a healthy state. This might take a minute or 3. After which the application is accesible on the address: http://localhost:8080. Logs can be streamed using:
 
     make docker-compose-logs
 
@@ -55,7 +59,7 @@ To bring up the test environment and run the test suite use the following comman
 
     make integration-tests environment=test
 
-This command will wait for the stack to come up completely and be in a healthy state, after which the testsuite will begin to run.
+This command will wait for the stack to come up completely and be in a healthy state, after which the testsuite will begin to run. The environment can also be brought up without running tests using: `make docker-compose-up environment=test`.
 
 Though the environment is isolated it is possible to visit the app at the address: http://localhost:8081. Targets on the internet will not be available for testing, instead use the mock targets, eg: https://target.test.
 

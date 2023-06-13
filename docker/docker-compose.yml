@@ -30,7 +30,6 @@ services:
       - ../robots.txt:/var/www/$INTERNETNL_DOMAINNAME/robots.txt
       - ../interface/static/favicon.ico:/var/www/$INTERNETNL_DOMAINNAME/favicon.ico
 
-
     entrypoint: /entrypoint.sh
 
     # TODO: httpd container image does not contain any useful command to perform healthcheck
@@ -101,6 +100,9 @@ services:
 
     volumes:
       - batch_results:/app/batch_results
+      # uncomment for development
+      # - ../interface:/source/interface
+      # - ../internetnl:/source/internetnl
 
   db-migrate:
     image: $DOCKER_IMAGE
@@ -192,6 +194,9 @@ services:
     volumes:
       - batch_results:/app/batch_results
       - ./worker/entrypoint.sh:/entrypoint.sh
+      # uncomment for development
+      # - ../interface:/source/interface
+      # - ../internetnl:/source/internetnl
 
   beat:
     image: $DOCKER_IMAGE
@@ -243,6 +248,11 @@ services:
       - ROUTINATOR_URL=http://routinator:9556/api/v1/validity
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
+
+    # uncomment for development
+    # volumes:
+    #   - ../interface:/source/interface
+    #   - ../internetnl:/source/internetnl
 
   redis:
     image: $DOCKER_IMAGE_REDIS
