@@ -7,7 +7,7 @@ from .conftest import print_results_url
 ALL_EMAIL_PROBES = {"ipv6", "dnssec", "tls", "auth", "rpki"}
 TEST_EMAIL_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
-TEST_EMAIL_EXPECTED_SCORE = 17
+TEST_EMAIL_EXPECTED_SCORE = 20
 
 
 def test_your_email_score(page, app_url, test_email):

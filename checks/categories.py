@@ -260,6 +260,7 @@ class RpkiExists(Subtest):
     _label = None
     _test_label = "exists"
     _test_name = None
+    _score_field = None
 
     def __init__(self):
         super().__init__(
@@ -268,7 +269,9 @@ class RpkiExists(Subtest):
             explanation=f"detail {self._label} rpki {self._test_label} exp",
             tech_string=f"detail {self._label} rpki {self._test_label} tech table",
             init_tech_type="table_multi_col",
-            worst_status=STATUS_INFO,
+            worst_status=STATUS_FAIL,
+            full_score=scoring.RPKI_EXISTS_GOOD,
+            model_score_field=self._score_field,
         )
 
     def was_tested(self):
@@ -299,6 +302,7 @@ class RpkiExists(Subtest):
 class WebRpkiExists(RpkiExists):
     _label = "web"
     _test_name = "web_rpki_exists"
+    _score_field = "web_exists_score"
 
     def was_tested(self):
         self.worst_status = scoring.WEB_RPKI_EXISTENCE_WORST_STATUS
@@ -307,6 +311,7 @@ class WebRpkiExists(RpkiExists):
 class MailRpkiExists(RpkiExists):
     _label = "mail"
     _test_name = "mail_rpki_exists"
+    _score_field = "mail_exists_score"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_EXISTENCE_WORST_STATUS
@@ -316,6 +321,7 @@ class RpkiValid(Subtest):
     _label = None
     _test_label = "valid"
     _test_name = None
+    _score_field = None
 
     def __init__(self):
         super().__init__(
@@ -324,7 +330,8 @@ class RpkiValid(Subtest):
             explanation=f"detail {self._label} rpki {self._test_label} exp",
             tech_string=f"detail {self._label} rpki {self._test_label} tech table",
             init_tech_type="table",
-            worst_status=STATUS_INFO,
+            full_score=scoring.RPKI_VALID_GOOD,
+            model_score_field=self._score_field,
         )
 
     def was_tested(self):
@@ -365,6 +372,7 @@ class RpkiValid(Subtest):
 class WebRpkiValid(RpkiValid):
     _label = "web"
     _test_name = "web_rpki_valid"
+    _score_field = "web_valid_score"
 
     def was_tested(self):
         self.worst_status = scoring.WEB_RPKI_VALIDITY_WORST_STATUS
@@ -373,6 +381,7 @@ class WebRpkiValid(RpkiValid):
 class MailRpkiValid(RpkiValid):
     _label = "mail"
     _test_name = "mail_rpki_valid"
+    _score_field = "mail_valid_score"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_VALIDITY_WORST_STATUS
@@ -382,6 +391,7 @@ class NsRpkiExists(RpkiExists):
     _label = "web-mail"
     _test_label = "ns-exists"
     _test_name = "ns_rpki_exists"
+    _score_field = "ns_exists_score"
 
     def was_tested(self):
         self.worst_status = scoring.RPKI_NS_EXISTENCE_WORST_STATUS
@@ -391,6 +401,7 @@ class NsRpkiValid(RpkiValid):
     _label = "web-mail"
     _test_label = "ns-valid"
     _test_name = "ns_rpki_valid"
+    _score_field = "ns_valid_score"
 
     def was_tested(self):
         self.worst_status = scoring.RPKI_NS_VALIDITY_WORST_STATUS
@@ -400,6 +411,7 @@ class MailMxNsRpkiExists(RpkiExists):
     _label = "mail"
     _test_label = "mx-ns-exists"
     _test_name = "mail_mx_ns_rpki_exists"
+    _score_field = "mx_ns_exists_score"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_MX_NS_EXISTENCE_WORST_STATUS
@@ -409,6 +421,7 @@ class MailMxNsRpkiValid(RpkiValid):
     _label = "mail"
     _test_label = "mx-ns-valid"
     _test_name = "mail_mx_ns_rpki_valid"
+    _score_field = "mx_ns_valid_score"
 
     def was_tested(self):
         self.worst_status = scoring.MAIL_RPKI_MX_NS_VALIDITY_WORST_STATUS

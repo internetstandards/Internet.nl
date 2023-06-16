@@ -7,7 +7,7 @@ from .conftest import ipv6_available
 INVALID_DOMAIN = "invalid-domain.example.com"
 
 TEST_DOMAIN_EXPECTED_SCORE = 100
-TEST_DOMAIN_EXPECTED_SCORE_NO_IPV6 = 48
+TEST_DOMAIN_EXPECTED_SCORE_NO_IPV6 = 61
 
 LONG_TIMEOUT = 1000 * 3 * 60
 
