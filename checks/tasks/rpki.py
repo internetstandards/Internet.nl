@@ -21,7 +21,7 @@ from .routing import (
     TeamCymruIPtoASN,
     RelyingPartyUnvailableError,
 )
-from .. import categories
+from .. import categories, scoring
 from ..models import (
     MailTestRpki,
     WebTestRpki,
@@ -249,7 +249,7 @@ def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     return do_mx_ns_rpki(mx_ips_pairs, url, self, *args, **kwargs)
 
 
-def generate_roa_existence_report(subtestname, category, hostset) -> None:
+def generate_roa_existence_report(subtestname, category, hostset) -> int:
     """Generate a test report for the existence of ROAs."""
 
     def gen_tech_data(host, ip, validity) -> List[List[str]]:
@@ -296,11 +296,13 @@ def generate_roa_existence_report(subtestname, category, hostset) -> None:
         category.subtests[subtestname].result_no_addresses()
     elif missing_count > 0:
         category.subtests[subtestname].result_bad(tech_data)
+        return scoring.RPKI_EXISTS_FAIL
     else:
         category.subtests[subtestname].result_good(tech_data)
+    return scoring.RPKI_EXISTS_GOOD
 
 
-def generate_validity_report(subtestname, category, hostset) -> None:
+def generate_validity_report(subtestname, category, hostset) -> int:
     """Generate a test report based on Route Origin Validation.
 
     This compares routing data from BGP with published ROAs.
@@ -368,12 +370,15 @@ def generate_validity_report(subtestname, category, hostset) -> None:
         category.subtests[subtestname].result_no_addresses()
     elif invalid_count > 0:
         category.subtests[subtestname].result_invalid(tech_data)
+        return scoring.RPKI_VALID_FAIL
     elif not_valid_count > 0:
         category.subtests[subtestname].result_bad(tech_data)
+        return scoring.RPKI_VALID_FAIL
     elif not_routed_count == count:  # no BGP data for all IPs
         category.subtests[subtestname].result_not_routed(tech_data)
     else:
         category.subtests[subtestname].result_good(tech_data)
+    return scoring.RPKI_VALID_GOOD
 
 
 def build_summary_report(parent, parent_name, category) -> None:
@@ -382,22 +387,22 @@ def build_summary_report(parent, parent_name, category) -> None:
         webset = parent.webhosts.all().order_by("host")
         nsset = parent.nshosts.all().order_by("host")
 
-        generate_roa_existence_report("web_rpki_exists", category, webset)
-        generate_validity_report("web_rpki_valid", category, webset)
-        generate_roa_existence_report("ns_rpki_exists", category, nsset)
-        generate_validity_report("ns_rpki_valid", category, nsset)
+        parent.web_exists_score = generate_roa_existence_report("web_rpki_exists", category, webset)
+        parent.web_valid_score = generate_validity_report("web_rpki_valid", category, webset)
+        parent.ns_exists_score = generate_roa_existence_report("ns_rpki_exists", category, nsset)
+        parent.ns_valid_score = generate_validity_report("ns_rpki_valid", category, nsset)
 
     elif parent_name == "mailtestrpki":
         mxset = parent.mxhosts.all().order_by("host")
         nsset = parent.nshosts.all().order_by("host")
         mxnsset = parent.mxnshosts.all().order_by("host")
 
-        generate_roa_existence_report("mail_rpki_exists", category, mxset)
-        generate_validity_report("mail_rpki_valid", category, mxset)
-        generate_roa_existence_report("ns_rpki_exists", category, nsset)
-        generate_validity_report("ns_rpki_valid", category, nsset)
-        generate_roa_existence_report("mail_mx_ns_rpki_exists", category, mxnsset)
-        generate_validity_report("mail_mx_ns_rpki_valid", category, mxnsset)
+        parent.mail_exists_score = generate_roa_existence_report("mail_rpki_exists", category, mxset)
+        parent.mail_valid_score = generate_validity_report("mail_rpki_valid", category, mxset)
+        parent.ns_exists_score = generate_roa_existence_report("ns_rpki_exists", category, nsset)
+        parent.ns_valid_score = generate_validity_report("ns_rpki_valid", category, nsset)
+        parent.mx_ns_exists_score = generate_roa_existence_report("mail_mx_ns_rpki_exists", category, mxnsset)
+        parent.mx_ns_valid_score = generate_validity_report("mail_mx_ns_rpki_valid", category, mxnsset)
 
     parent.report = category.gen_report()
     parent.save()

@@ -9,7 +9,7 @@ INVALID_DOMAIN = "invalid-domain.example.com"
 ALL_PROBES = {"ipv6", "dnssec", "tls", "appsecpriv", "rpki"}
 TEST_DOMAIN_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
-TEST_DOMAIN_EXPECTED_SCORE = 48
+TEST_DOMAIN_EXPECTED_SCORE = 49
 
 
 def test_reject_invalid_domain(page, app_url):

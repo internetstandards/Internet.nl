@@ -10,7 +10,7 @@ INTERNETNL_API = "https://internet.test/api/batch/v2/"
 TEST_DOMAIN = "target.test"
 TEST_DOMAIN_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
-TEST_DOMAIN_EXPECTED_SCORE = 48
+TEST_DOMAIN_EXPECTED_SCORE = 49
 
 
 def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=None):
