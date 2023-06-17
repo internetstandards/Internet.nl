@@ -24,6 +24,8 @@ services:
         condition: service_healthy
       worker:
         condition: service_started
+      beat:
+        condition: service_started
       test-target:
         condition: service_healthy
       mail-test-target:
