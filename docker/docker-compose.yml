@@ -1,6 +1,9 @@
 services:
   webserver:
-    image: $DOCKER_IMAGE_HTTPD
+    image: $DOCKER_IMAGE_WEBSERVER
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.webserver
     networks:
       internal:
         ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
@@ -20,23 +23,10 @@ services:
     # provide stale cache or a maintenance page.
     depends_on: {}
 
-    volumes:
-      - ./webserver/apache_config/entrypoint.sh:/entrypoint.sh
-      - ./webserver/apache_config/sites-available/:/usr/local/apache2/sites-available/
-      - ./webserver/apache_config/sites-enabled/internet_nl.conf:/usr/local/apache2/sites-enabled/internet_nl.conf
-      - "/var/lib/acme/$INTERNETNL_DOMAINNAME:/etc/acme/certs"
-      - "/var/www/$INTERNETNL_DOMAINNAME:/var/www/$INTERNETNL_DOMAINNAME"
-      - ../.well-known/security.txt:/var/www/$INTERNETNL_DOMAINNAME/.well-known/security.txt
-      - ../robots.txt:/var/www/$INTERNETNL_DOMAINNAME/robots.txt
-      - ../interface/static/favicon.ico:/var/www/$INTERNETNL_DOMAINNAME/favicon.ico
-
-    entrypoint: /entrypoint.sh
-
-    # TODO: httpd container image does not contain any useful command to perform healthcheck
-    # healthcheck:
-    #   test: ["CMD", "curl", "http://localhost:80"]
-    #   interval: $HEALTHCHECK_INTERVAL
-    #   retries: 30
+    healthcheck:
+      test: ["CMD", "service nginx status || exit 1"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
 
   app:
     image: $DOCKER_IMAGE

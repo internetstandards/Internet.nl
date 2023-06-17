@@ -7,9 +7,24 @@ server {
     server_name  ${INTERNETNL_DOMAINNAME} *.${INTERNETNL_DOMAINNAME} localhost;
 
     location / {
-      set $backend backend:8080;
+      set $backend app:8080;
+      proxy_set_header X-Forwarded-Host $host:$server_port;
+      proxy_set_header X-Forwarded-Server $host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $host;
       proxy_pass http://$backend;
-      proxy_set_header X-Forwarded-For "$http_x_forwarded_for, $realip_remote_addr";
+    }
+
+    location /.well-known/ {
+        alias /var/www/internet.nl/.well-known/;
+    }
+
+    location /robots.txt {
+        alias /var/www/internet.nl/robots.txt;
+    }
+
+    location /favicon.ico {
+        alias /var/www/internet.nl/favicon.ico;
     }
 }
 

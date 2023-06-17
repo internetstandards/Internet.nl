@@ -1,0 +1,10 @@
+FROM nginx:1.25.1
+
+RUN mkdir -p /var/www/internet.nl/
+
+COPY robots.txt /var/www/internet.nl/
+COPY .well-known/ /var/www/internet.nl/.well-known/
+COPY interface/static/favicon.ico /var/www/internet.nl/
+
+COPY docker/webserver/nginx_templates/* /etc/nginx/templates/
+
