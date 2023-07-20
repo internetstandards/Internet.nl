@@ -44,6 +44,8 @@ class RpkiTestCase(SimpleTestCase):
                 fqdn_ip_pairs = [(domain, do_resolve_a_aaaa(self.task, domain))]
                 result = do_rpki(self.task, fqdn_ip_pairs)
 
+                assert result
+
                 for ip in result[domain]:
                     for route in ip["routes"]:
                         self.assertIn(route, expected_result["routes"])
