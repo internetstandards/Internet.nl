@@ -19,6 +19,27 @@ from internetnl import log
 urllib3.disable_warnings()
 
 
+def _do_request(args, headers, kwargs, session, url):
+    """
+    This small wrapper helps with handling of redirects.
+    As we often connect on an explicit IP, we also set an explicit Host header
+    as it can't be inferred from the URL. However, this breaks redirect following,
+    causing a redirect loop (#1033). This wrapper makes sure to remove it before
+    following the redirect chain, then ensures response.history is complete.
+    """
+    user_allow_redirects = kwargs.pop("allow_redirects", True)
+    response = session.get(url, headers=headers, stream=True, allow_redirects=False, *args, **kwargs)
+    if response.next and user_allow_redirects:
+        headers.pop("Host", None)
+        initial_response = response
+        response = session.get(
+            initial_response.next.url, headers=headers, stream=True, allow_redirects=True, *args, **kwargs
+        )
+        response.history.insert(0, initial_response)
+
+    return response
+
+
 def http_get(
     url: str, headers: Optional[Dict] = None, session: Optional[requests.Session] = None, *args, **kwargs
 ) -> requests.Response:
@@ -35,11 +56,11 @@ def http_get(
         session = requests.session()
 
     try:
-        response = session.get(url, headers=headers, stream=True, *args, **kwargs)
+        response = _do_request(args, headers, kwargs, session, url)
     except requests.RequestException:
         # Retry, once, then log and raise the exception
         try:
-            response = session.get(url, headers=headers, stream=True, *args, **kwargs)
+            response = _do_request(args, headers, kwargs, session, url)
         except requests.RequestException as exc:
             log.debug(f"HTTP request raised exception: {url} (headers: {headers}): {exc}", exc_info=exc)
             raise exc
@@ -69,8 +90,8 @@ def http_get_ip(
         headers = {}
 
     session = requests.session()
+    session.mount(f"https://{hostname}", ForcedIPHTTPSAdapter(dest_ip=ip))
     if https:
-        session.mount(f"https://{hostname}", ForcedIPHTTPSAdapter(dest_ip=ip))
         url = f"https://{hostname}:{port}/{path}"
     else:
         if ":" in ip:
