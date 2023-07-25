@@ -538,6 +538,10 @@ class WebIpv6WsIpv46(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail web ipv6 web-ipv46 verdict bad"
 
+    def result_notice(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web ipv6 web-ipv46 verdict notice"
+
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web ipv6 web-ipv46 verdict good"
