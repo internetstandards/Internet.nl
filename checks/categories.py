@@ -534,9 +534,9 @@ class WebIpv6WsIpv46(Subtest):
             model_score_field="web_simhash_score",
         )
 
-    def result_info(self):
-        self._status(STATUS_INFO)
-        self.verdict = "detail web ipv6 web-ipv46 verdict info"
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web ipv6 web-ipv46 verdict bad"
 
     def result_good(self):
         self._status(STATUS_SUCCESS)
