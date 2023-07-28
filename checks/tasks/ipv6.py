@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+
 from django.core.cache import cache
 from django.db import transaction
 
@@ -25,6 +26,7 @@ from internetnl import log
 from unbound import RR_CLASS_IN, RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS, ub_ctx
 
 SIMHASH_MAX_RESPONSE_SIZE = 500000
+SIMHASH_NOT_CALCULABLE = settings.SIMHASH_MAX + 10000
 
 # mapping tasks to models
 model_map = dict(web=WebDomain, ns=NsDomain, mx=MxDomain)
@@ -276,8 +278,10 @@ def callback(results, addr, parent, parent_name, category):
                 if len(good_conn) > 0:
                     if web_simhash_distance <= settings.SIMHASH_MAX and web_simhash_distance >= 0:
                         category.subtests["web_ipv46"].result_good()
+                    elif web_simhash_distance == SIMHASH_NOT_CALCULABLE:
+                        category.subtests["web_ipv46"].result_bad()
                     elif web_simhash_distance >= 0:
-                        category.subtests["web_ipv46"].result_info()
+                        category.subtests["web_ipv46"].result_notice()
                     else:
                         category.subtests["web_ipv46"].result_no_v4()
 
@@ -556,7 +560,7 @@ def simhash(url, task=None):
             return html
 
     simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
-    distance = settings.SIMHASH_MAX + 100
+    distance = SIMHASH_NOT_CALCULABLE
 
     v4_response = None
     v6_response = None
@@ -603,7 +607,7 @@ def do_web(self, url, *args, **kwargs):
         log.debug("Performing IPv6 check")
         domain = []
         simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
-        simhash_distance = settings.SIMHASH_MAX + 100
+        simhash_distance = SIMHASH_NOT_CALCULABLE
         score = scoring.WEB_IPV6_WS_CONN_FAIL
 
         domain = get_domain_results(
