@@ -14,7 +14,7 @@ kombu<5.3
 
 setuptools-rust
 beautifulsoup4
-cryptography<39.0.0
+cryptography<42.0.0
 django-bleach<3  # 3 and up has no Python 3.7 support
 django-csp
 django-enumfields
