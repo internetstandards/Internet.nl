@@ -92,11 +92,13 @@ def http_get_ip(
     session = requests.session()
     session.mount(f"https://{hostname}", ForcedIPHTTPSAdapter(dest_ip=ip))
     if https:
-        url = f"https://{hostname}:{port}/{path}"
+        port_suffix = "" if port == 443 else f":{port}"
+        url = f"https://{hostname}{port_suffix}/{path}"
     else:
         if ":" in ip:
             ip = f"[{ip}]"
-        url = f"http://{ip}:{port}/{path}"
+        port_suffix = "" if port == 80 else f":{port}"
+        url = f"http://{ip}{port_suffix}/{path}"
     headers["Host"] = hostname
     return http_get(url, verify=False, headers=headers, session=session, *args, **kwargs)
 
