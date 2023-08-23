@@ -702,6 +702,8 @@ class DomainTestAppsecpriv(BaseTestModel):
 
     referrer_policy_enabled = models.BooleanField(null=True, default=False)
     referrer_policy_values = ListField(default=[])
+    referrer_policy_errors = ListField(default=[])
+    referrer_policy_recommendations = ListField(default=[])
     referrer_policy_score = models.IntegerField(null=True)
 
     content_security_policy_enabled = models.BooleanField(null=True, default=False)

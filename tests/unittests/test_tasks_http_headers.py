@@ -407,3 +407,77 @@ class HeaderCheckerContentSecurityPolicyTestCase(SimpleTestCase):
     def test_other_source_hash_4(self):
         headers = self.base_policy + "frame-ancestors 'none', style-src 'sha513-fdasdfas5678589+5346/sfdg=='"
         self._is_good_and_not_parsed(headers, "style-src")
+
+
+class HeaderCheckerReferrerPolicyTestCase(SimpleTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.checker = http_headers.HeaderCheckerReferrerPolicy()
+        cls.enabled = "referrer_policy_enabled"
+        cls.errors = "referrer_policy_errors"
+        cls.recommendations = "referrer_policy_recommendations"
+        cls.values = "referrer_policy_values"
+        cls.score = "referrer_policy_score"
+
+    def _is_good(self, header):
+        results = self.checker.get_positive_values()
+        self.checker.check(header, results, "example.nl")
+        self.assertTrue(results[self.enabled])
+        self.assertEqual(results[self.score], scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD)
+        self.assertEqual(results[self.values], [header])
+        self.assertEqual(results[self.errors], [])
+        self.assertEqual(results[self.recommendations], [])
+
+    def _is_bad(self, header, expect_error=False):
+        results = self.checker.get_positive_values()
+        self.checker.check(header, results, "example.nl")
+        self.assertFalse(results[self.enabled])
+        self.assertEqual(results[self.score], scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD)
+        self.assertEqual(results[self.values], [header])
+        self.assertEqual(results[self.recommendations], [])
+        if expect_error:
+            self.assertNotEqual(results[self.errors], [])
+
+    def _has_recommendations(self, header):
+        results = self.checker.get_positive_values()
+        self.checker.check(header, results, "example.nl")
+        self.assertTrue(results[self.enabled])
+        self.assertEqual(results[self.score], scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD)
+        if header:
+            self.assertEqual(results[self.values], [header])
+        self.assertEqual(results[self.errors], [])
+        self.assertNotEqual(results[self.recommendations], [])
+
+    def test_no_policy(self):
+        self._has_recommendations(None)
+
+    def test_empty_policy(self):
+        self._is_bad('""')
+
+    def test_good_policies(self):
+        good_policies = ["same-origin", "no-referrer"]
+        for policy in good_policies:
+            self._is_good(policy)
+
+    def test_bad_policies(self):
+        bad_policies = [
+            "origin",
+            "origin-when-cross-origin",
+            "no-referrer-when-downgrade",
+            "unsafe-url",
+        ]
+        for policy in bad_policies:
+            self._is_bad(policy, expect_error=True)
+
+    def test_recommendation_policies(self):
+        recommendation_policies = [
+            "strict-origin",
+            "strict-origin-when-cross-origin",
+        ]
+        for policy in recommendation_policies:
+            self._has_recommendations(policy)
+
+    def test_multiple_policies(self):
+        self._is_bad("same-origin,no-referrer")
+        self._is_bad("same-origin,unsafe-url")

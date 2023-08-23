@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import re
 from collections import defaultdict, namedtuple
+from typing import Optional, Dict
 
 import requests
 
@@ -662,56 +663,60 @@ class HeaderCheckerReferrerPolicy:
 
     """
 
+    good_policies = {"same-origin", "no-referrer"}
+    recommendation_policies = {
+        "strict-origin",
+        "strict-origin-when-cross-origin",
+    }
+    bad_policies = {
+        "origin",
+        "origin-when-cross-origin",
+        "no-referrer-when-downgrade",
+        "unsafe-url",
+    }
+    known_policies = good_policies | recommendation_policies | bad_policies
+
     def __init__(self):
         self.name = "Referrer-Policy"
 
-    def check(self, value, results, domain):
+    def check(self, value: Optional[str], results: Dict, domain: str):
         """
         Check if the header has any of the allowed values.
 
         """
-        if value == "":
-            # Empty string defaults to 'no-referrer-when-downgrade'.
-            results["referrer_policy_values"] = ['""']
-
-        elif not value:
-            score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD
-            results["referrer_policy_score"] = score
-            results["referrer_policy_enabled"] = False
-
+        if not value:
+            # Empty string defaults to strict-origin-when-cross-origin
+            results.update(self.get_result(values=[], recommendations=["no-policy"]))
         else:
-            values = get_multiple_values_from_header(value)
-            for value in values:
-                if value.lower() not in [
-                    "no-referrer",
-                    "no-referrer-when-downgrade",
-                    "origin",
-                    "origin-when-cross-origin",
-                    "same-origin",
-                    "strict-origin",
-                    "strict-origin-when-cross-origin",
-                    "unsafe-url",
-                ]:
-                    score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD
-                    results["referrer_policy_score"] = score
-                    results["referrer_policy_enabled"] = False
-            results["referrer_policy_values"].extend(values)
+            if value in self.good_policies:
+                results.update(self.get_result(values=[value]))
+            elif value in self.recommendation_policies:
+                results.update(
+                    self.get_result(
+                        values=[value],
+                        recommendations=[f"recommendation-{value}"],
+                    )
+                )
+            elif value in self.bad_policies:
+                results.update(self.get_result(values=[value], errors=[f"bad-{value}"]))
+            else:
+                results.update(self.get_result(values=[value], errors=["bad-invalid"]))
+
+    def get_result(self, values, errors=None, recommendations=None, enabled=None):
+        score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD if errors else scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD
+        return {
+            "referrer_policy_enabled": not bool(errors) if enabled is None else enabled,
+            "referrer_policy_values": values,
+            "referrer_policy_errors": errors if errors else [],
+            "referrer_policy_recommendations": recommendations if recommendations else [],
+            "referrer_policy_score": score,
+        }
 
     def get_positive_values(self):
-        score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD
-        return {
-            "referrer_policy_enabled": True,
-            "referrer_policy_score": score,
-            "referrer_policy_values": [],
-        }
+        return self.get_result([], [], [])
 
     def get_negative_values(self):
-        score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD
-        return {
-            "referrer_policy_enabled": False,
-            "referrer_policy_score": score,
-            "referrer_policy_values": [],
-        }
+        return self.get_result([], [], [], enabled=False)
 
 
 def http_headers_check(af_ip_pair, domain, header_checkers, task):
