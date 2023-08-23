@@ -35,7 +35,7 @@ DESC_INTRO_REDOCLY_LINK = "https://batch.internet.nl/api/batch/openapi.yaml"
 DESC_INTRO_EXTRA = """
 ## Requesting access
 
-Send a request for access to the help desk.
+Instructions and more information can be found here: [https://github.com/internetstandards/Internet.nl-API-docs/tree/main/application_form](https://github.com/internetstandards/Internet.nl-API-docs/tree/main/application_form).
 
 ## Dashboard or API?
 
@@ -61,4 +61,4 @@ series of features that you might convenient. Such as:
 
 
 Requesting access to the dashboard can be done by contacting the help desk.
-"""
+"""  # noqa: E501
