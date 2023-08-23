@@ -320,7 +320,7 @@ nassl: venv .nassl
 	#  cd nassl_freebsd && git checkout internetnl
 	cd nassl_freebsd && mkdir -p bin/openssl-legacy/freebsd64
 	cd nassl_freebsd && mkdir -p bin/openssl-modern/freebsd64
-	cd nassl_freebsd && wget https://zlib.net/zlib-1.2.13.tar.gz
+	cd nassl_freebsd && wget https://zlib.net/zlib-1.3.tar.gz
 	cd nassl_freebsd && tar xvfz  zlib-1.2.13.tar.gz
 	cd nassl_freebsd && git clone https://github.com/PeterMosmans/openssl.git openssl-1.0.2e
 	# We generally follow 1.0.2-chacha branch, which moves little, but pinned to latest commit here for reproducibility
