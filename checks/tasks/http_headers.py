@@ -686,7 +686,7 @@ class HeaderCheckerReferrerPolicy:
         """
         if not value:
             # Empty string defaults to strict-origin-when-cross-origin
-            results.update(self.get_result(values=[], recommendations=["no-policy"]))
+            results.update(self.get_result(values=[], recommendations=[{"msgid": "no-policy"}]))
         else:
             if value in self.good_policies:
                 results.update(self.get_result(values=[value]))
@@ -694,13 +694,13 @@ class HeaderCheckerReferrerPolicy:
                 results.update(
                     self.get_result(
                         values=[value],
-                        recommendations=[f"recommendation-{value}"],
+                        recommendations=[{"msgid": f"recommendation-{value}"}],
                     )
                 )
             elif value in self.bad_policies:
-                results.update(self.get_result(values=[value], errors=[f"bad-{value}"]))
+                results.update(self.get_result(values=[value], errors=[{"msgid": f"bad-{value}"}]))
             else:
-                results.update(self.get_result(values=[value], errors=["bad-invalid"]))
+                results.update(self.get_result(values=[value], errors=[{"msgid": "bad-invalid"}]))
 
     def get_result(self, values, errors=None, recommendations=None, enabled=None):
         score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD if errors else scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD
