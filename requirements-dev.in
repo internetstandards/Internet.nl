@@ -17,6 +17,6 @@ pytest-html
 pytest-selenium<4
 
 # linting
-autoflake
+autoflake<2.2  # 3.7
 black
 pylama

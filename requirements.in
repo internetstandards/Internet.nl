@@ -21,7 +21,7 @@ django-enumfields
 django-hosts
 django-markdown_deux
 eventlet
-gevent
+gevent < 22.10.2  # pinned for 3.7
 libsass
 markdown
 polib
@@ -44,6 +44,11 @@ colorlog
 setuptools_scm
 sentry-sdk
 forcediphttpsadapter
+
+# Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
+dnspython < 2.4.0  # dependency of eventlet
+pluggy==1.2.0  # dependency of pytest
+zipp==3.15.0  # dependency of importlib-metadata
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
