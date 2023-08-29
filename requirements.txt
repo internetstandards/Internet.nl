@@ -12,8 +12,6 @@ argparse==1.4.0
     #   pythonwhois-internet-nl
 asgiref==3.7.2
     # via django
-async-timeout==4.0.3
-    # via redis
 attrs==23.1.0
     # via pytest
 beautifulsoup4==4.12.2
@@ -51,9 +49,7 @@ click-repl==0.3.0
 colorlog==6.7.0
     # via -r requirements.in
 cryptography==38.0.4
-    # via
-    #   -r requirements.in
-    #   pgpy
+    # via -r requirements.in
 django==3.2.20
     # via
     #   -r requirements.in
@@ -97,9 +93,7 @@ hiredis==2.2.3
 idna==3.4
     # via requests
 importlib-metadata==4.13.0
-    # via
-    #   -r requirements.in
-    #   markdown
+    # via -r requirements.in
 iniconfig==2.0.0
     # via pytest
 ip-address==1.4.2
@@ -125,8 +119,6 @@ packaging==23.1
     #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
-pgpy==0.6.0
-    # via sectxt
 pluggy==1.2.0
     # via
     #   -r requirements.in
@@ -139,8 +131,6 @@ psycopg2-binary==2.9.7
     # via -r requirements.in
 py==1.11.0
     # via pytest
-pyasn1==0.5.0
-    # via pgpy
 pycparser==2.21
     # via cffi
 pyparsing==3.1.1
@@ -196,13 +186,8 @@ sqlparse==0.4.4
     # via django
 toml==0.10.2
     # via pytest
-tomli==2.0.1
-    # via
-    #   setuptools-rust
-    #   setuptools-scm
 typing-extensions==4.7.1
     # via
-    #   asgiref
     #   setuptools-rust
     #   setuptools-scm
 urllib3==2.0.4
