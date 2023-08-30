@@ -61,6 +61,8 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
         )
     except requests.RequestException:
         return _evaluate_response(None, None, hostname, path, "", hostname, None)
+    except StopIteration:  # 200 response with empty content
+        content = ""
     return _evaluate_response(
         response.status_code,
         response.headers.get("Content-Type", ""),
