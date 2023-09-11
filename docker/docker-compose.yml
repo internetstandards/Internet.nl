@@ -5,7 +5,7 @@
 
 services:
   webserver:
-    image: ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver}
+    image: ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/webserver.Dockerfile
@@ -53,7 +53,7 @@ services:
       retries: 10
 
   app:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -145,7 +145,7 @@ services:
       - batch_results:/app/batch_results
 
   db-migrate:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -179,7 +179,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -271,7 +271,7 @@ services:
       retries: 10
 
   beat:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -348,7 +348,7 @@ services:
       - redis:/data
 
   rabbitmq:
-    image: ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq}
+    image: ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/rabbitmq.Dockerfile
@@ -412,7 +412,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound}
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -451,7 +451,7 @@ services:
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound}
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -476,7 +476,7 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound}
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -500,7 +500,7 @@ services:
       retries: 10
 
   grafana:
-    image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana}
+    image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/grafana.Dockerfile
@@ -533,7 +533,7 @@ services:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
   prometheus:
-    image: ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus}
+    image: ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/prometheus.Dockerfile

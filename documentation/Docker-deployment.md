@@ -63,11 +63,12 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
+    RELEASE=main
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/host-dist.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
@@ -109,7 +110,7 @@ For instance specific configuration use the `docker/local.env` file. Please refe
 
 Spin up instance:
 
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    env -i RELEASE=main docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
 
 The `env -i` part is to ensure no environment variables that might be set in the shell overwrite values from the `.env` files (eg: the `DEBUG` variable).
 
@@ -222,32 +223,40 @@ The issue can be resolved by restarting the application:
 
 ## Updating
 
-To update the application stack first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components.
+To update the application stack first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components, use the following commands:
 
-For the latest **released version**:
-
+    RELEASE=main
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml && \
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
-For the latest **main branch**:
+This will update the deployment with the latest `main` branch. If you want to update to a tagged version release or follow a specific development branch, adjust the value of `RELEASE` accordingly.
 
+To update to `v1.8.0`:
+
+    RELEASE=v1.8.0
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/docker-compose.yml && \
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
-    env -i \
-        DOCKER_IMAGE_WEBSERVER=ghcr.io/internetstandards/webserver:main \
-        DOCKER_IMAGE_APP=ghcr.io/internetstandards/internet.nl:main \
-        DOCKER_IMAGE_RABBITMQ=ghcr.io/internetstandards/rabbitmq:main \
-        DOCKER_IMAGE_UNBOUND=ghcr.io/internetstandards/unbound:main \
-        DOCKER_IMAGE_GRAFANA=ghcr.io/internetstandards/grafana:main \
-        DOCKER_IMAGE_PROMETHEUS=ghcr.io/internetstandards/prometheus:main \
-        docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
-    
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
+To update to the latest build of the `feature-x` branch:
+
+    RELEASE=feature-x
+    cd /opt/Internet.nl/ && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
+
+### Updating to specific release
+
+https://github.com/internetstandards/Internet.nl/blob/21baea392039ede54257f729cf951d6d6e129199/docker/docker-compose.yml
 
 ## HTTPS/Letsencrypt
 
