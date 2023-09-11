@@ -110,8 +110,7 @@ jobs:
 
       - name: Push ${{ matrix.image }} latest release
         # push 'latest' only for versioned
-        # TODO: remove ` || github.ref == 'refs/pull/890/merge'` after merged with master
-        if: github.event_name == 'release' || github.ref == 'refs/pull/890/merge'
+        if: github.event_name == 'release'
         run: docker push ${{ matrix.image }}:latest
 
       - name: Push branch/pr tag

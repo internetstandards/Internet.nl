@@ -65,9 +65,9 @@ Run the following commands to install the files in the expected location:
 
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/host-dist.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/host-dist.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/docker-compose.yml && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
@@ -225,8 +225,8 @@ The issue can be resolved by restarting the application:
 To update the application stack first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components.
 
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/docker-compose.yml && \
     env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 

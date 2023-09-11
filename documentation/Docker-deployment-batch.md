@@ -67,8 +67,8 @@ Run the following commands to install the files in the expected location:
 
     mkdir -p /opt/Internet.nl/docker
     cd /opt/Internet.nl/
-    curl -s https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env > docker/defaults.env
-    curl -s https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml > docker/docker-compose.yml
+    curl -s https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/defaults.env > docker/defaults.env
+    curl -s https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/docker-compose.yml > docker/docker-compose.yml
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following input is required:
