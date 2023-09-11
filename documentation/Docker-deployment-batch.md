@@ -65,10 +65,12 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
-    mkdir -p /opt/Internet.nl/docker
-    cd /opt/Internet.nl/
-    curl -s https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env > docker/defaults.env
-    curl -s https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml > docker/docker-compose.yml
+    RELEASE=main
+    mkdir -p /opt/Internet.nl/docker && \
+    cd /opt/Internet.nl/ && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following input is required:
@@ -116,10 +118,9 @@ For example:
     ALLOW_LIST=198.51.100.1,2001:db8:2::1
     EOF
 
-
 After configuration, spin up the instance:
 
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    env -i RELEASE=main docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
 
 This command should complete without an error, indicating the application stack is up and running healthy.
 

@@ -17,7 +17,7 @@ An OCI compatible container runtime with [Compose V2](https://docs.docker.com/co
 
 Clone this repository to a local directory:
 
-    git clone https://github.com/internetstandards/Internet.nl/ --branch docker
+    git clone https://github.com/internetstandards/Internet.nl/
     cd Internet.nl
 
 Then make sure all Git Submodules are checked out and up to date with the following command:
