@@ -357,7 +357,8 @@ def change_language(request):
                 if not has_translation:
                     previous_page = "/articles/"
 
-        if new_language and translation.check_for_language(new_language):
+        known_languages = [language[0] for language in settings.LANGUAGES]
+        if new_language and new_language in known_languages:
             url_regex = re.compile("^(?P<protocol>http[s]?://).*$")
             uri = request.build_absolute_uri()
             protocol = url_regex.match(uri).group("protocol")
@@ -367,7 +368,7 @@ def change_language(request):
             # default language site) remove it so that the language prefix gets
             # applied to the domain name.
             previous_language = hostname.split(".", 1)[0]
-            if translation.check_for_language(previous_language) or previous_language == "www":
+            if previous_language in known_languages or previous_language == "www":
                 no_language_host = request.get_host().replace(previous_language + ".", "", 1)
             else:
                 no_language_host = request.get_host()
