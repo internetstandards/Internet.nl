@@ -72,9 +72,3 @@ def test_task_with_unbound_context(custom_celery_worker):
 
     _, measurement = result
     assert measurement["domains"][0]["domain"] == "internet.nl"
-
-
-def test_gunicorn_webserver():
-    # test if the application starts with a gunicorn server and if there is a front page.
-    # In the future we want to be able to start a test via the frontpage and see that happen on eventlet.
-    ...

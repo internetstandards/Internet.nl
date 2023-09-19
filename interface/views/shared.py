@@ -26,17 +26,26 @@ from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
 
+from statshog.defaults.django import statsd
+
 ub_ctx = unbound.ub_ctx()
-if hasattr(settings, "ENABLE_INTEGRATION_TEST") and settings.ENABLE_INTEGRATION_TEST:
-    ub_ctx.debuglevel(2)
-    ub_ctx.config(settings.IT_UNBOUND_CONFIG_PATH)
-    ub_ctx.set_fwd(settings.IT_UNBOUND_FORWARD_IP)
+ub_ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
+
+if settings.INTEGRATION_TESTS:
+    # forward the .test zone used in integration tests
+    ub_ctx.zone_add("test.", "transparent")
+
+if settings.DEBUG_LOG_UNBOUND:
+    ub_ctx.set_option("log-queries:", "yes")
+    ub_ctx.set_option("verbosity:", "2")
+
 # XXX: Remove for now; inconsistency with applying settings on celery.
 # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
 ub_ctx.set_async(True)
-if settings.ENABLE_BATCH and settings.CENTRAL_UNBOUND:
-    ub_ctx.set_fwd(f"{settings.CENTRAL_UNBOUND}")
 ub_ctx.set_option("rrset-roundrobin:", "no")
+
+# fire an initial DNS query to start unbound background worker and prevent race conditions that can occur
+ub_ctx.resolve_async("internet.nl", {}, lambda x, y, z: None, unbound.RR_TYPE_A, unbound.RR_CLASS_IN)
 
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
 # RFCs and other rulings that combine to define what is a valid domain name.
@@ -274,6 +283,7 @@ def get_retest_time(report):
     return int(max(0, settings.CACHE_TTL - time_delta.total_seconds()))
 
 
+@statsd.timer("ub_resolve_with_timeout")
 def ub_resolve_with_timeout(qname, qtype, rr_class, timeout):
     def ub_callback(data, status, result):
         if status == 0 and result.havedata:

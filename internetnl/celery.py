@@ -38,7 +38,8 @@ if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule = {
         "run_batch": {"task": "interface.batch.scheduler.run", "schedule": app.conf.BATCH_SCHEDULER_INTERVAL}
     }
-else:
+
+if app.conf.ENABLE_HOF:
     # Disable HoF when on batch mode, too much DB activity.
     app.conf.beat_schedule = {
         "generate_HoF": {"task": "checks.tasks.update.update_hof", "schedule": app.conf.HOF_UPDATE_INTERVAL}

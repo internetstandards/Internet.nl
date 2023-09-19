@@ -1198,6 +1198,8 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
             "/dev/stdin",  # Read certificate chain from stdin
             "-n",  # Do not validate hostname
             "-T",  # Exit status 2 for PKIX without (secure) TLSA records
+            "-r",
+            settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING,  # Use internal unbound resolver
             "-f",
             settings.CA_CERTIFICATES,  # CA file
             "verify",

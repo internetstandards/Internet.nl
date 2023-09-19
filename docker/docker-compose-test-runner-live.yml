@@ -1,0 +1,36 @@
+services:
+  # test runner intended to run live tests against targets on public internet
+  test-runner-live:
+    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner}
+    build:
+      context: ..
+      dockerfile: docker/test-runner.Dockerfile
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration-tests/live/
+    environment:
+      - APP_URLS=${APP_URLS:-https://internet.nl}
+      - BATCH_API_AUTH
+      - TEST_DOMAINS
+      - TEST_EMAILS
+    networks:
+      live-tests:
+    volumes:
+      - ../:/source
+    profiles:
+      - build
+      - run-tests
+
+networks:
+  live-tests:
+    # required to enable IPv6 on Docker Desktop runtime
+    enable_ipv6: true
+    driver: bridge
+    driver_opts:
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+    ipam:
+      driver: default
+      config:
+        # configure a private IPv6 subnet
+        # https://docs.docker.com/config/daemon/ipv6/#create-an-ipv6-network
+        - subnet: fd00:44::/80

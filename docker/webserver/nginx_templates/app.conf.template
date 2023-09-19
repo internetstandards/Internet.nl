@@ -1,0 +1,284 @@
+# override default log format to include vhost
+log_format default '$remote_addr $host $remote_user [$time_local] "$request" '
+                   '$status $body_bytes_sent "$http_referer" '
+                   '"$http_user_agent" "$http_x_forwarded_for"';
+
+access_log /var/log/nginx/access.log default;
+
+# disable version in server banner
+server_tokens off;
+# requires openresty
+# more_set_headers 'Server: intentionally-undisclosed-internetnl-139sj2W9kB8';
+
+# caching settings
+proxy_cache_path  /var/tmp/nginx_cache  levels=1:2  keys_zone=default_cache:10m inactive=24h  max_size=1g;
+
+# default headers added to all responses
+add_header 'X-Frame-Options' 'SAMEORIGIN' always;
+add_header 'X-Content-Type-Options' 'nosniff' always;
+add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
+add_header 'Referrer-Policy' 'same-origin' always;
+add_header 'X-XSS-Protection' '1; mode=block' always;
+
+root /var/www/internet.nl;
+
+# default server for http, primary used for ACME and https redirect
+server {
+    listen       80;
+    listen  [::]:80;
+
+    server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME};
+
+    # letsencrypt/ACME
+    location /.well-known/acme-challenge/ {
+        # basic auth should not apply to this path
+        auth_basic off;
+    }
+
+    # redirect everything to https
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# http server for connection test, does not redirect to https
+server {
+    listen       80;
+    listen  [::]:80;
+
+    server_name ~(conn|(?<subdomain>en\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
+
+    # pass specific connection test paths to backend
+    # /connection/
+    # /connection/gettestid/
+    # /connection/finished/6330d6a09e56387e4dd59502418fa642/results
+    location ~ ^(/connection/?|/connection/gettestid/?|/connection/finished/.+)$ {
+      # forward information about the connecting client to the connection test
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      # disable CSP on connection test
+      proxy_hide_header Content-Security-Policy;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+    }
+
+    # letsencrypt/ACME
+    location /.well-known/acme-challenge/ {
+        # basic auth should not apply to this path
+        auth_basic off;
+    }
+
+    # redirect everything else to https and non conn. domain
+    # used named capture `subdomain` from `server_name` above as prefix
+    location / {
+        return 301 https://${subdomain}${INTERNETNL_DOMAINNAME}$request_uri;
+    }
+}
+# http server for connection test XHR requests
+server {
+    listen       80;
+    listen  [::]:80;
+
+    server_name
+      *.test-ns-signed.${INTERNETNL_DOMAINNAME}
+      *.test-ns6-signed.${INTERNETNL_DOMAINNAME}
+      [${IPV6_TEST_ADDR}];
+
+    # pass specific connection test paths to backend
+    # /
+    # /connection/addr-test/6330d6a09e56387e4dd59502418fa642/
+    location ~ ^(/|/connection/addr-test/.+/)$ {
+      # forward information about the connecting client to the connection test
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      # disable CSP on connection test
+      proxy_hide_header Content-Security-Policy;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+    }
+}
+
+# No-www.org Class B compliance, see https://www.no-www.org/faq.php
+server {
+    listen       443 ssl;
+    listen  [::]:443 ssl;
+
+    server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME};
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+
+    ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
+
+    # letsencrypt/ACME
+    location /.well-known/acme-challenge/ {
+        # basic auth should not apply to this path
+        auth_basic off;
+    }
+
+    # redirect to no-www domainname
+    location ~ /(.*) {
+        return 301 https://${INTERNETNL_DOMAINNAME}$request_uri;
+    }
+}
+
+# default https server
+server {
+    listen       443 ssl;
+    listen  [::]:443 ssl;
+
+    server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>nl\.|en\.|www\.|ipv6\.)${INTERNETNL_DOMAINNAME};
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+
+    ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
+
+    # include all default headers again and add HSTS header
+    add_header 'X-Frame-Options' 'SAMEORIGIN' always;
+    add_header 'X-Content-Type-Options' 'nosniff' always;
+    add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
+    add_header 'Referrer-Policy' 'same-origin' always;
+    add_header 'X-XSS-Protection' '1; mode=block' always;
+    # Do *not* add includeSubdomains before https://github.com/internetstandards/Internet.nl/issues/324 is resolved,
+    # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
+    add_header 'Strict-Transport-Security' 'max-age=31536000;' always;
+
+    # by default proxy everything to the application
+    location / {
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+    }
+
+    # letsencrypt/ACME and security.txt file
+    location /.well-known/ {
+        # basic auth should not apply to this path
+        auth_basic off;
+        alias /var/www/internet.nl/.well-known/;
+    }
+    # static files served from Nginx container
+    location = /robots.txt {
+        alias /var/www/internet.nl/robots.txt;
+    }
+    location = /favicon.ico {
+        alias /var/www/internet.nl/favicon.ico;
+    }
+
+    # static files served from app
+    location /static {
+      # enable cache
+      proxy_cache            default_cache;
+      # cache files for 1 day
+      proxy_cache_valid      200  1d;
+      # server old version of files when backend experiences errors
+      proxy_cache_use_stale  error timeout invalid_header updating http_500 http_502 http_503 http_504;
+      # tell client browser to also cache these resources
+      expires 1d;
+
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+    }
+
+    # redirect connection test to http subdomain to start test, needs 301 permanent
+    # otherwise browsers might ignore the protocol change
+    # only redirect connection test start, other connection test paths still need to
+    # pass to the application
+    # used named capture `subdomain` from `server_name` above as prefix
+    location = /connection/ {
+      return 301 http://${subdomain}conn.${INTERNETNL_DOMAINNAME}/connection/;
+    }
+
+    # batch API, requires authentication and passes basic auth user to Django App via headers
+    location /api/batch/v2 {
+      auth_basic "Please enter your username and password";
+      auth_basic_user_file /etc/nginx/htpasswd/batch_api.htpasswd;
+
+      # pass logged in user to Django
+      proxy_set_header REMOTE-USER $remote_user;
+
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+    }
+
+    # monitoring, requires authentication
+    location /grafana {
+      auth_basic "Please enter your username and password";
+      auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+      proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
+    }
+    location /prometheus {
+      auth_basic "Please enter your username and password";
+      auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+      proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
+    }
+}
+
+# Temporary (1 year) exception for conn. subdomain to disable HSTS and redirect back to HTTP for
+# clients that accessed the HTTPS version in the past and got a HSTS set of 1 year.
+server {
+    listen       443 ssl;
+    listen  [::]:443 ssl;
+
+    server_name  conn.${INTERNETNL_DOMAINNAME};
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+
+    ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
+
+    # include all default headers again and add HSTS header
+    add_header 'X-Frame-Options' 'SAMEORIGIN' always;
+    add_header 'X-Content-Type-Options' 'nosniff' always;
+    add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
+    add_header 'Referrer-Policy' 'same-origin' always;
+    add_header 'X-XSS-Protection' '1; mode=block' always;
+    # Do *not* add includeSubdomains before https://github.com/internetstandards/Internet.nl/issues/324 is resolved,
+    # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
+    # Set max-age to 0 to effectivily disable HSTS on this subdomain to undo any HSTS settings done in the past.
+    # This can be removed 1 year after initial release. See issue #894.
+    add_header 'Strict-Transport-Security' 'max-age=0;' always;
+
+    # redirect to non-https version for connection test
+    location / {
+        return 301 http://conn.${INTERNETNL_DOMAINNAME};
+    }
+}
+
+# reject connection to any HTTPS vhost not explicitly served
+server {
+    listen       443 ssl default_server;
+    listen  [::]:443 ssl default_server;
+
+    ssl_reject_handshake on;
+
+    location / {
+        return 404;
+    }
+}
+
+# error a connection to any HTTP vhost not explicitly served
+server {
+    listen       80 default_server;
+    listen  [::]:80 default_server;
+
+    server_name _;
+
+    location / {
+        return 404;
+    }
+}

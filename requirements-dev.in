@@ -20,3 +20,6 @@ pytest-selenium<4
 autoflake<2.2  # 3.7
 black
 pylama
+
+# requirements management
+pip-tools

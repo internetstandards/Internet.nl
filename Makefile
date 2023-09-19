@@ -12,10 +12,13 @@ MACSDIR=$(REMOTEDATADIR)/macs
 CERTSSDIR=$(REMOTEDATADIR)/certs
 DNSDIR=$(REMOTEDATADIR)/dns
 
+# default version if nothing is provided by environment
+INTERNETNL_VERSION ?= 0.0.0-dev0
+
 ifeq ($(shell uname -m),arm64)
-env = env PATH="${bin}:$$PATH /usr/bin/arch -x86_64"
+_env = env PATH="${bin}:$$PATH /usr/bin/arch -x86_64"
 else
-env = env PATH="${bin}:$$PATH"
+_env = env PATH="${bin}:$$PATH"
 endif
 
 # https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile
@@ -30,13 +33,13 @@ else
 	POFILES_TAR_ARGS+=$(TAR)
 endif
 
-pysrcdirs = internetnl tests interface checks
+pysrcdirs = internetnl tests interface checks integration_tests
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
 bin = .venv/bin
-env = env PATH="${bin}:$$PATH"
+_env ?= env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -51,20 +54,20 @@ help:
 	@echo '   make update_root_key_file                  update DNS root key file'
 
 translations:
-	. .venv/bin/activate && ${env} python3 $(POFILESEXEC) to_django
+	. .venv/bin/activate && ${_env} python3 $(POFILESEXEC) to_django
 	@echo "Make sure to run 'compilemessages' on the server to update the actual content"
 
 translations_tar:
-	. .venv/bin/activate && ${env} python3 $(POFILESEXEC) $(POFILES_TAR_ARGS)
+	. .venv/bin/activate && ${_env} python3 $(POFILESEXEC) $(POFILES_TAR_ARGS)
 
 frontend:
 	# Rebuilds entire frontend, with minified styles and current translations.
-	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) js
-	. .venv/bin/activate && ${env} python3 $(FRONTENDEXEC) css
+	. .venv/bin/activate && ${_env} python3 $(FRONTENDEXEC) js
+	. .venv/bin/activate && ${_env} python3 $(FRONTENDEXEC) css
 	${MAKE} translations
-	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
-	. .venv/bin/activate && ${env} python3 manage.py collectstatic --no-input
-	. .venv/bin/activate && ${env} python3 manage.py api_generate_doc
+	. .venv/bin/activate && ${_env} python3 manage.py compilemessages --ignore=.venv
+	. .venv/bin/activate && ${_env} python3 manage.py collectstatic --no-input
+	. .venv/bin/activate && ${_env} python3 manage.py api_generate_doc
 
 
 translate_content_to_main:
@@ -82,7 +85,7 @@ translate_content_to_main:
 	cd tmp && tar zcvf content_repo.tar.gz locale_files/*
 	${MAKE} translations_tar TAR=tmp/content_repo.tar.gz
 	${MAKE} translations
-	. .venv/bin/activate && ${env} python3 manage.py compilemessages --ignore=.venv
+	. .venv/bin/activate && ${_env} python3 manage.py compilemessages --ignore=.venv
 	# Purposefully _not_ deleting things in the tmp dir so it allows inspection after execution.
 
 
@@ -104,9 +107,9 @@ venv: .venv/make_venv_complete ## Create virtual environment
 	${MAKE} clean
 	# todo: how to set python3 correctly on m1 macs??
 	python3 -m venv .venv
-	. .venv/bin/activate && ${env} pip install -U pip pip-tools
-	. .venv/bin/activate && ${env} pip install -Ur requirements.txt
-	. .venv/bin/activate && ${env} pip install -Ur requirements-dev.txt
+	. .venv/bin/activate && ${_env} pip install -U pip pip-tools
+	. .venv/bin/activate && ${_env} pip install -Ur requirements.txt
+	. .venv/bin/activate && ${_env} pip install -Ur requirements-dev.txt
 	# After this you also need to make an unbound, see below for a list of commands and flavors.
 	# Example: make unbound
 	# You also need to make nassl
@@ -121,56 +124,55 @@ clean_venv:  # Remove venv
 	@rm -rf .venv
 	@rm -f .unbound
 
-
 pip-compile:  ## compile an updated requirements.txt
-	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
+	. .venv/bin/activate && ${_env} python3 -m piptools compile requirements.in
 
 pip-compile-dev:  ## compile an updated requirements{-dev}.txt
-	. .venv/bin/activate && ${env} python3 -m piptools compile requirements.in
-	. .venv/bin/activate && ${env} python3 -m piptools compile requirements-dev.in
+	. .venv/bin/activate && ${_env} python3 -m piptools compile requirements.in
+	. .venv/bin/activate && ${_env} python3 -m piptools compile requirements-dev.in
 
 pip-upgrade: ## upgrades all packages in requirements.txt to latest permitted version
-	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
+	. .venv/bin/activate && ${_env} python3 -m piptools compile --upgrade requirements.in
 
 pip-upgrade-dev: ## upgrades all packages in requirements{-dev}.txt to latest permitted version
-	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements.in
-	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade requirements-dev.in
+	. .venv/bin/activate && ${_env} python3 -m piptools compile --upgrade requirements.in
+	. .venv/bin/activate && ${_env} python3 -m piptools compile --upgrade requirements-dev.in
 
 pip-upgrade-package: ## Upgrades a specific package in the requirements.txt
 	# example: make pip-upgrade-package package=django
-	. .venv/bin/activate && ${env} python3 -m piptools compile --upgrade-package ${package}
+	. .venv/bin/activate && ${_env} python3 -m piptools compile --upgrade-package ${package}
 
 pip-install:  ## install all packages from requirements.txt
 	# We use pip install rather than pip-sync here, because we have external dependencies (#695)
-	. .venv/bin/activate && ${env} python3 -m pip install -U -r requirements.txt
+	. .venv/bin/activate && ${_env} python3 -m pip install -U -r requirements.txt
 
 pip-install-dev:  ## install all packages requirements{-dev}.txt
 	# We use pip install rather than pip-sync here, because we have external dependencies (#695)
-	. .venv/bin/activate && ${env} python3 -m pip install -U -r requirements.txt -r requirements-dev.txt
+	. .venv/bin/activate && ${_env} python3 -m pip install -U -r requirements.txt -r requirements-dev.txt
 
-run: venv
-	. .venv/bin/activate && ${env} python3 manage.py runserver [::1]:8000
+run-app: venv
+	. .venv/bin/activate && ${_env} python3 manage.py runserver [::1]:8000
 
 run-worker: venv
 	# The original worker has mapping suchas Q:w1 default etc, this translates to CELERY ROUTES in settings.py it seems.
 	# Todo: currently it seems that all tasks are put on the default or celery queue as mapping is not applied.
 	# Todo: Eventlet results in a database deadlock, gevent does not.
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker --pool eventlet -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler,worker_nassl,ipv6_worker,resolv_worker,dnssec_worker,nassl_worker,rpki_worker,web_worker,mail_worker --time-limit=300 --concurrency=20 -n generic_worker
+	. .venv/bin/activate && ${_env} python3 -m celery -A internetnl worker --pool eventlet -E -ldebug -Q db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,celery,default,batch_slow,batch_scheduler,worker_nassl,ipv6_worker,resolv_worker,dnssec_worker,nassl_worker,rpki_worker,web_worker,mail_worker --time-limit=300 --concurrency=20 -n generic_worker
 
 run-worker-batch-main: venv
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300 --concurrency=20 -n batch_main
+	. .venv/bin/activate && ${_env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_main --time-limit=300 --concurrency=20 -n batch_main
 
 run-worker-batch-scheduler: venv
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_scheduler --time-limit=300 --concurrency=2 -n batch_scheduler
+	. .venv/bin/activate && ${_env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_scheduler --time-limit=300 --concurrency=2 -n batch_scheduler
 
 run-worker-batch-callback: venv
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_callback --time-limit=300 --concurrency=2 -n batch_callback
+	. .venv/bin/activate && ${_env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_callback --time-limit=300 --concurrency=2 -n batch_callback
 
 run-worker-batch-slow: venv
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_slow --time-limit=300 --concurrency=2 -n batch_slow
+	. .venv/bin/activate && ${_env} python3 -m celery -A internetnl worker -E -ldebug -Q batch_slow --time-limit=300 --concurrency=2 -n batch_slow
 
 run-heartbeat: venv
-	. .venv/bin/activate && ${env} python3 -m celery -A internetnl beat
+	. .venv/bin/activate && ${_env} python3 -m celery -A internetnl beat
 
 run-broker:
 	docker run --rm --name=redis -p 6379:6379 redis
@@ -210,14 +212,19 @@ prog: # ...
 manage: venv
 	# https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
 	# Example: make manage api_check_ipv6 ARGS="--domain nu.nl"
-	. .venv/bin/activate && ${env} python3 manage.py $(RUN_ARGS) $(ARGS)
+	. .venv/bin/activate && ${_env} python3 manage.py $(RUN_ARGS) $(ARGS)
 
-
+# use venv prerequisite or empty env variable depending on running in docker or old environment
+ifeq (,$(wildcard /.dockerenv))
 run-test-worker: venv
+else
+run-test-worker: _env=
+run-test-worker:
+endif
 	# Know that the worker will complain that the database is plainly been dropped, this is exactly what happens during
 	# tests. It will keep on running, and the tests will run well.
 	# DJANGO_DATABASE=testworker
-	. .venv/bin/activate && ${env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,nassl_worker,rpki_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
+	${_env} python3 -m celery --app internetnl worker -E -ldebug --pool $(RUN_ARGS) --queues celery,default,db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,nassl_worker,rpki_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker --time-limit=300 --concurrency=20 -n generic_worker > debug.log 2>&1
 
 # compiling unbound for an x86_64 system:
 ifeq ($(shell uname -m),arm64)
@@ -230,29 +237,29 @@ endif
 
 
 version:
-	. .venv/bin/activate && ${env} python3 --version
-	. .venv/bin/activate && ${env} python3 manage.py version
+	. .venv/bin/activate && ${_env} python3 --version
+	. .venv/bin/activate && ${_env} python3 manage.py version
 
 
 unbound-3.9: venv .unbound-3.9
 .unbound-3.9:
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
+	cd unbound && ${_env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.9 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.9/site-packages &&  make install
 	touch .unbound-3.9
 
 unbound-3.8: venv .unbound-3.8
 .unbound-3.8:
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.8/site-packages &&  make install
+	cd unbound && ${_env} ./configure --prefix=/home/$(USER)/usr/local --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.8 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.8/site-packages &&  make install
 	touch .unbound-3.8
 
 unbound-3.7: venv .unbound-3.7
 .unbound-3.7:
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	cd unbound && ${_env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound-3.7
 
 
@@ -260,7 +267,7 @@ unbound-3.7-non-standard: venv .unbound-3.7-non-standard
 .unbound-3.7-non-standard:
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/bin/python3.7"  PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8 -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8/config-3.8-darwin -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib -lpython3.7" PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	cd unbound && ${_env} ./configure --prefix=/opt/$(USER)/unbound2/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON="/usr/local/bin/python3.7"  PYTHON_LDFLAGS="-L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8 -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib/python3.8/config-3.8-darwin -L/usr/local/Cellar/python@3.8/3.8.12_1/Frameworks/Python.framework/Versions/3.8/lib -lpython3.7" PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound-3.7-non-standard
 
 unbound-3.7-github: venv .unbound-3.7-github
@@ -269,14 +276,14 @@ unbound-3.7-github: venv .unbound-3.7-github
 	# Todo: would it make sense to enable the venv before this so we always have the right python binaries?
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=$(ROOT_DIR)/_unbound/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
+	cd unbound && ${_env} ./configure --prefix=$(ROOT_DIR)/_unbound/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.7 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.7/site-packages &&  make install
 	touch .unbound-3.7-github
 
 unbound-3.10-github: venv .unbound-3.10-github
 .unbound-3.10-github:
 	rm -rf unbound
 	git clone https://github.com/internetstandards/unbound
-	cd unbound && ${env} ./configure --prefix=$(ROOT_DIR)/_unbound/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.10 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.10/site-packages &&  make install
+	cd unbound && ${_env} ./configure --prefix=$(ROOT_DIR)/_unbound/ --enable-internetnl --with-pyunbound --with-libevent --with-libhiredis PYTHON_VERSION=3.10 PYTHON_SITE_PKG=$(ROOT_DIR)/.venv/lib/python3.10/site-packages &&  make install
 	touch .unbound-3.10-github
 
 unbound-x86-3.9: .unbound-x86-3.9
@@ -327,52 +334,50 @@ nassl: venv .nassl
 	cd nassl_freebsd && cd openssl-1.0.2e; git checkout 08802aaaa43a43c3bffc0d7cba8aed013bd14a55; cd ..
 	cd nassl_freebsd && git clone https://github.com/openssl/openssl.git openssl-master
 	cd nassl_freebsd && cd openssl-master; git checkout OpenSSL_1_1_1c; cd ..
-	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 build_from_scratch.py
-	. .venv/bin/activate && cd nassl_freebsd && ${env} python3 setup.py install
+	. .venv/bin/activate && cd nassl_freebsd && ${_env} python3 build_from_scratch.py
+	. .venv/bin/activate && cd nassl_freebsd && ${_env} python3 setup.py install
 	touch .nassl
 
 
-test: .make.test	## run test suite
+old-test: .make.test
 .make.test:
-	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} coverage run --include 'internetnl/*' --omit '*migrations*' \
-		-m pytest --log-cli-level=10  -vvv -ra -k 'not integration_celery and not integration_scanners and not system' ${testargs}
+	DJANGO_SETTINGS_MODULE=internetnl.settings ${_env} coverage run --omit '*migrations*'\
+		-m pytest --log-cli-level=10  -vvv -ra -k 'not integration_celery and not integration_scanners and not system' \
+		--ignore=integration_tests/ ${test_args}
 	# generate coverage
-	${env} coverage report
+	${_env} coverage report
 	# and pretty html
-	${env} coverage html
+	${_env} coverage html
 	# ensure no model updates are commited without migrations
 	# Todo: disabled because the app now requires celery to run. This should be added to the CI first.
-	# ${env} python3 manage.py makemigrations --check
-
-
+	# ${_env} python3 manage.py makemigrations --check
 
 testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
-	DJANGO_SETTINGS_MODULE=internetnl.settings ${env} pytest -vvv --log-cli-level=10 -k ${case}
+	DJANGO_SETTINGS_MODULE=internetnl.settings ${_env} pytest -vvv --log-cli-level=10 -k ${case}
 
 
-check: .make.check.py  ## code quality checks
+old-check: .make.check.py
 .make.check.py: ${pysrc}
 	# check code quality
-	${env} pylama ${pysrcdirs} --skip "**/migrations/*"
+	${_env} pylama ${pysrcdirs} --skip "**/migrations/*"
 	# check formatting
-	${env} black --line-length 120 --check ${pysrcdirs}
+	${_env} black --line-length 120 --check ${pysrcdirs}
 
-autofix fix: .make.fix  ## automatic fix of trivial code quality issues
+autofix: .make.fix  ## automatic fix of trivial code quality issues
 .make.fix: ${pysrc}
 	# remove unused imports
-	${env} autoflake -ri --remove-all-unused-imports ${pysrcdirs}
+	${_env} autoflake -ri --remove-all-unused-imports ${pysrcdirs}
 	# autoformat code
 	# -q is used because a few files cannot be formatted with black, and will raise errors
-	${env} black --line-length 120 -q ${pysrcdirs}
+	${_env} black --line-length 120 -q ${pysrcdirs}
 	# replaced by black: fix trivial pep8 style issues
-	# replaced by black: ${env} autopep8 -ri ${pysrcdirs}
+	# replaced by black: ${_env} autopep8 -ri ${pysrcdirs}
 	# replaced by black: sort imports
-	# replaced by black: ${env} isort -rc ${pysrcdirs}
+	# replaced by black: ${_env} isort -rc ${pysrcdirs}
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
-
 
 run-gunicorn:
 	# 2022 02 03: gunicorn does not work with eventlet > 0.30.2, but that version has security issue GHSA-9p9m-jm8w-94p2
@@ -392,7 +397,7 @@ run-gunicorn:
 	# source ~/internet.nl.env
 	# source ./.venv/bin/activate
 	# python3 -m celery --app internetnl worker -E -ldebug --pool prefork --queues db_worker,slow_db_worker,batch_callback,batch_main,worker_slow,batch_slow,batch_scheduler,celery,default --time-limit=300 --concurrency=5 -n generic_worker
-	. .venv/bin/activate && ${env} gunicorn --bind localhost:8000 --workers 3 --worker-class gevent internetnl.wsgi:application --access-logfile gunicorn-access.log --error-logfile gunicorn-error.log
+	. .venv/bin/activate && ${_env} gunicorn --bind localhost:8000 --workers 3 --worker-class gevent internetnl.wsgi:application --access-logfile gunicorn-access.log --error-logfile gunicorn-error.log
 
 enable:
 	source /opt/internetnl/internet.nl.env
@@ -400,3 +405,255 @@ enable:
 
 .QA: qa
 qa: fix check test
+
+# create some shorthands
+env ?=
+environment ?= ${env}
+test_args ?= ${testargs}
+ifeq (${environment},dev)
+	environment = develop
+endif
+
+# allow overriding settings
+ifneq (,$(wildcard docker/local.env))
+	localenv=--env-file=docker/local.env
+endif
+
+# command used to bring projects up
+DOCKER_COMPOSE_UP_PULL_CMD=docker compose ${compose_args} \
+	--env-file=docker/defaults.env \
+	--env-file=docker/${environment}.env \
+	${localenv}
+
+# after the project is up, we can use the project name instead of providing all environment files
+DOCKER_COMPOSE_CMD=docker compose ${compose_args} --project-name=internetnl-${environment}
+
+# build.env includes all compose files, so this will build all services images
+DOCKER_COMPOSE_BUILD_CMD=docker compose ${compose_args} \
+	--env-file=docker/defaults.env \
+	--env-file=docker/build.env
+
+build docker-compose-build:
+	${DOCKER_COMPOSE_BUILD_CMD} build --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+
+docker-compose:
+	${DOCKER_COMPOSE_CMD} ${args}
+
+up docker-compose-up:
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans ${services}
+	@if [ "${environment}" = "test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
+	@if [ "${environment}" = "develop" ]; then echo -e "\n🚀 Running on http://localhost:8080"; fi
+
+run docker-compose-run:
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --no-build ${services}
+
+restart docker-compose-restart:
+	${DOCKER_COMPOSE_CMD} restart --no-deps ${services}
+
+docker-compose-up-build-no-deps:
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --build --no-deps --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+
+up-no-deps:
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-deps ${services}
+
+ps docker-compose-ps:
+	${DOCKER_COMPOSE_CMD} ps
+
+docker-compose-app-attach:
+	${DOCKER_COMPOSE_CMD} attach -ti app
+
+logs docker-compose-logs: services=webserver app worker resolver test-target
+logs docker-compose-logs:
+	${DOCKER_COMPOSE_CMD} logs --follow ${services}
+
+logs-all docker-compose-logs-all:
+	${DOCKER_COMPOSE_CMD} logs --follow
+
+logs-all-dump:
+	${DOCKER_COMPOSE_CMD} logs
+
+exec docker-compose-exec: service=app
+exec docker-compose-exec: cmd=/bin/bash
+exec docker-compose-exec:
+	${DOCKER_COMPOSE_CMD} exec --user root ${service} ${cmd}
+
+run-shell: service=app
+run-shell: cmd=/bin/bash
+run-shell:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run ${run_args} --entrypoint ${cmd} ${service}
+
+docker-compose-create-superuser:
+	${DOCKER_COMPOSE_CMD} exec app ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')"
+
+docker-compose-rabbitmq-admin:
+	open "http://guest:guest@localhost:$$(${DOCKER_COMPOSE_CMD} port rabbitmq 15672)"
+
+postgres-shell docker-compose-postgres-shell:
+	${DOCKER_COMPOSE_CMD} exec postgres psql --username "internetnl" --dbname "internetnl_db1"
+
+redis-shell docker-compose-redis-shell:
+	${DOCKER_COMPOSE_CMD} exec redis redis-cli
+
+docker-compose-reset-test-target:
+	curl http://localhost:8080/clear/target.test/ -s
+
+# pause all containers, but don't remove them
+stop docker-compose-stop:
+	${DOCKER_COMPOSE_CMD} stop
+
+# stop and remove all containers, but keep volumes (eg: routinator cache, databases)
+down docker-compose-down:
+	${DOCKER_COMPOSE_CMD} down
+
+down-remove-volumes docker-compose-down-remove-volumes:
+	${DOCKER_COMPOSE_CMD} down --volumes
+
+docker-compose-reset:
+	${DOCKER_COMPOSE_CMD} down --volumes
+	docker network prune -f
+
+pull docker-compose-pull:
+	${DOCKER_COMPOSE_UP_PULL_CMD} pull ${pull_args}
+
+test-runner-shell integration-tests-shell docker-compose-test-runner-shell: env=test
+test-runner-shell integration-tests-shell docker-compose-test-runner-shell:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --entrypoint /bin/bash test-runner
+
+batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
+	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_create_db_indexes
+
+integration-tests: env=test
+integration-tests:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} integration_tests/integration/
+
+integration-tests-verbose: _test_args=--verbose --verbose
+integration-tests-verbose: integration-tests
+
+integration-tests-all-browser: _test_args=--browser=firefox --browser=chromium --browser=webkit
+integration-tests-all-browser: integration-tests
+
+integration-tests-trace: _test_args=--tracing=retain-on-failure
+integration-tests-trace: integration-tests
+
+live-tests:
+	COMPOSE_FILE=docker/docker-compose-test-runner-live.yml docker compose run --rm test-runner-live \
+		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} integration_tests/live/
+
+# use OS specific hostname for Docker host
+ifeq ($(shell uname -s),Darwin)
+docker_host = host.docker.internal
+else
+docker_host = host-gateway
+endif
+
+DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/docker-compose-test-runner-develop.yml docker compose
+
+# this runs limited live test suite against the development environment to test its sanity
+develop-tests development-environment-tests:
+	APP_URLS=http://${docker_host}:8080  ${DOCKER_COMPOSE_DEVELOP_CMD} run --rm test-runner-development-environment \
+		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} integration_tests/develop/
+
+develop-tests-shell:
+	${DOCKER_COMPOSE_DEVELOP_CMD} run --rm --entrypoint bash test-runner-development-environment
+
+DOCKER_COMPOSE_TEST_CMD=COMPOSE_FILE=docker/docker-compose.yml:docker/docker-compose-test.yml \
+	docker compose ${compose_args} \
+	--env-file=docker/defaults.env \
+	--env-file=docker/test.env \
+	${localenv}
+
+test:
+	${DOCKER_COMPOSE_TEST_CMD} run --rm test python3 \
+	-m coverage run \
+	-m pytest -vvv -ra \
+	--junit-xml=test-results.xml \
+	$(filter-out integration_tests,${pysrcdirs}) \
+	${test_args}
+
+test-shell:
+	${DOCKER_COMPOSE_TEST_CMD} run --rm test bash
+
+test-all:
+	# bring running environments down
+	$(MAKE) down environment=develop
+	$(MAKE) down environment=test
+	# build all images
+	$(MAKE) build
+	# run checks
+	$(MAKE) check
+	# run unittests
+	$(MAKE) up environment=test
+	$(MAKE) test
+	$(MAKE) down environment=test
+	# run development environment tests
+	$(MAKE) up environment=develop
+	$(MAKE) develop-tests
+	$(MAKE) down environment=develop
+	# run integration tests
+	$(MAKE) up environment=test
+	$(MAKE) integration-tests
+	$(MAKE) down environment=test
+
+DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/docker-compose-tools.yml docker compose
+
+lint:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
+
+check:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh ${pysrcdirs}
+
+fix:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/fix.sh ${pysrcdirs}
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
+
+check-gixy: env=test
+check-gixy:
+	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy /etc/nginx/nginx.conf
+
+build-linttest linttest-build:
+	${DOCKER_COMPOSE_TOOLS_CMD} build tools
+
+linttest-shell:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bash
+
+requirements: requirements.txt requirements-dev.txt
+
+requirements.txt: requirements.in
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile requirements.in
+
+requirements-dev.txt: requirements-dev.in
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile requirements-dev.in
+
+integration-tests-debug:
+	${_env} pytest --setup-show -v --capture=no integration-tests ${test_args}
+
+# run integration-tests against development environment instance
+integration-tests-against-develop: _env:=${_env} INTERNETNL_USE_DOCKER_COMPOSE_PROJECT="internetnl"
+integration-tests-against-develop: integration-tests
+
+# reset caches in development environment and run integration-tests against development environment instance
+integration-tests-reset-and-against-develop: docker-compose-redis-clear-celery-results integration-tests-against-develop
+
+# Docker container runtime for MacOS
+# until nassl can be built for ARM: https://github.com/nabla-c0d3/nassl/issues/39
+# it is required to emulate x86_64 under Apple Silicon Macs
+docker-compose-runtime-start:
+	colima start --cpu 4 --memory 8 --arch x86_64
+
+docker-compose-runtime-stop:
+	colima stop
+
+images = $(patsubst %.py,%.png,$(wildcard documentation/images/*.py))
+documentation-images: ${images}
+documentation/images/%.png: documentation/images/%.py | ${nwdiag}
+	docker run -it --rm -v "$${PWD}/$(@D)/":/$(@D) -w /$(@D) gtramontina/diagrams:0.23.1 $(<F)
+
+batch-api-add-user docker-compose-batch-api-add-user: name=${username}
+batch-api-add-user docker-compose-batch-api-add-user: organization=internetnl
+batch-api-add-user docker-compose-batch-api-add-user: email=${username}@example.com
+batch-api-add-user docker-compose-batch-api-add-user:
+	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_users register -u ${username} -n ${name} -o ${organization} -e ${email}
+	${DOCKER_COMPOSE_CMD} exec webserver htpasswd -b /etc/nginx/htpasswd/batch_api.htpasswd ${username} ${password}
+
+test-%: env=test
+test-up test-down test-build test-stop: test-%: %

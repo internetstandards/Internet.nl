@@ -1,0 +1,207 @@
+services:
+  # networks during tests are cut off from the outside to provide isolated test results
+  # to provide some debugging possibilities this container is used to expose some ports
+  # from the internal network to the outside
+  # also terminate tls so we don't need to have exceptions in the nginx config file for development
+  port-expose:
+    image: nginx
+    networks:
+      - public-internet
+      - port-expose
+      - internal
+
+    restart: unless-stopped
+
+    ports:
+      - 8081:8080
+      - 15673:15672
+
+    volumes:
+      - ./port-expose/nginx_templates/:/etc/nginx/templates/
+
+    environment:
+      - INTERNETNL_DOMAINNAME
+      - IPV4_IP_WEBSERVER_INTERNAL
+      - IPV4_IP_RABBITMQ_INTERNAL
+
+  # test runner for integration tests in isolated environment
+  test-runner:
+    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner}
+    build:
+      context: ..
+      dockerfile: docker/test-runner.Dockerfile
+    # don't run anything, just make this container available to run tests in on demand
+    command: python3 -m pytest -v integration_tests/integration/
+    networks:
+      public-internet:
+      internal:
+    volumes:
+      - ../:/source/
+      # make docker available inside the container
+      - /var/run/docker.sock:/var/run/docker.sock
+    profiles:
+      - build
+      - run-tests
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
+    depends_on:
+      webserver:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+      worker:
+        condition: service_healthy
+      unbound:
+        condition: service_healthy
+      beat:
+        condition: service_started
+      test-target:
+        condition: service_healthy
+      mail-test-target:
+        condition: service_started
+      resolver-validating:
+        condition: service_healthy
+      resolver-permissive:
+        condition: service_healthy
+      mock-resolver:
+        condition: service_healthy
+      grafana:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      # not required for running the test suite, but useful to access the test environment
+      port-expose:
+        condition: service_started
+
+  rabbitmq:
+    networks:
+      - internal
+      - public-internet
+    ports:
+      # expose admin GUI to localhost
+      - $RABBITMQ_GUI
+
+  test-target:
+    image: nginx
+
+    networks:
+      public-internet:
+        ipv4_address: $IPV4_IP_TEST_TARGET_PUBLIC
+        ipv6_address: $IPV6_IP_TEST_TARGET_PUBLIC
+
+    restart: unless-stopped
+
+    ports:
+      - 80
+      - 443
+
+    volumes:
+      - ./integration-tests/nginx_templates/:/etc/nginx/templates/
+      - ./integration-tests/pki:/etc/pki/
+      - ./integration-tests/www:/var/www/
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+
+  mail-test-target:
+    image: mailhog/mailhog
+
+    networks:
+      public-internet:
+        ipv4_address: $IPV4_IP_TEST_TARGET_MAIL_PUBLIC
+        ipv6_address: $IPV6_IP_TEST_TARGET_MAIL_PUBLIC
+
+    restart: unless-stopped
+
+    ports:
+      - 25
+
+    environment:
+      MH_SMTP_BIND_ADDR: 0.0.0.0:25
+
+  # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
+  mock-resolver:
+    image: ${DOCKER_IMAGE_RESOLVER:-strm/dnsmasq}
+
+    entrypoint: /entrypoint.sh
+
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+
+    restart: unless-stopped
+
+    ports:
+      - "53/udp"
+
+    environment:
+      - IPV4_IP_UNBOUND_INTERNAL
+      - CONN_TEST_DOMAIN
+      - INTERNETNL_DOMAINNAME
+      - IPV4_WEBSERVER_IP_PUBLIC
+      - TEST_TARGET_DOMAINNAME
+      - IPV4_IP_TEST_TARGET_PUBLIC
+      - IPV6_IP_TEST_TARGET_PUBLIC
+      - IPV4_IP_TEST_TARGET_MAIL_PUBLIC
+      - IPV6_IP_TEST_TARGET_MAIL_PUBLIC
+
+    volumes:
+      - ./integration-tests/dnsmasq/entrypoint.sh:/entrypoint.sh
+
+    cap_add:
+      - NET_ADMIN
+
+    healthcheck:
+      test: ["CMD", "nslookup", "$TEST_TARGET_DOMAINNAME", "127.0.0.1"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+
+  webserver:
+    networks:
+      public-internet:
+        ipv6_address: $IPV6_IP_PUBLIC
+        ipv4_address: $IPV4_WEBSERVER_IP_PUBLIC
+
+  unbound:
+    networks:
+      public-internet:
+        ipv4_address: $IPV4_UNBOUND_IP_PUBLIC
+        ipv6_address: $IPV6_UNBOUND_IP_PUBLIC
+
+  resolver-validating:
+    volumes:
+      - ./integration-tests/resolver/test.conf:/opt/unbound/etc/unbound/test.conf
+
+  resolver-permissive:
+    volumes:
+      - ./integration-tests/resolver/test.conf:/opt/unbound/etc/unbound/test.conf
+
+
+networks:
+  # network that is not internet to expose internal ports for debugging purposes
+  port-expose:
+    internal: false
+    driver: bridge
+
+  public-internet:
+    # make public network internal as well to run tests isolated from the internet
+    internal: true
+    # required to enable IPv6 on Docker Desktop runtime
+    enable_ipv6: true
+    driver: bridge
+    driver_opts:
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+      # network for internal communication between services
+      com.docker.network.bridge.enable_icc: "true"
+    ipam:
+      driver: default
+      config:
+      - subnet: $IPV6_SUBNET_PUBLIC
+        gateway: $IPV6_GATEWAY_PUBLIC
+      - subnet: $IPV4_SUBNET_PUBLIC

@@ -1,0 +1,47 @@
+# Taken from: /opt/internetnl/unbound/etc/unbound on internet.nl
+server:
+  num-threads: 2
+  username: "unbound"
+  local-zone: "." refuse
+  local-zone: "test-ns-signed.${CONN_TEST_DOMAIN}" transparent
+  local-zone: "test-ns6-signed.${CONN_TEST_DOMAIN}" transparent
+  interface: 0.0.0.0
+  interface: ::
+  access-control: 0.0.0.0/0 allow_setrd
+  access-control: ::/0 allow_setrd
+
+  # enable module specific for connection test
+  module-config: "internetnl iterator"
+  chroot: ""
+
+  logfile: /dev/stdout
+  verbosity: 2
+  log-queries: yes
+
+  auto-trust-anchor-file: "/opt/unbound/etc/unbound/root.key"
+
+# serve connection test signed zones
+auth-zone:
+  name: "test-ns-signed.${CONN_TEST_DOMAIN}"
+  zonefile: "/opt/unbound/etc/unbound/zones/test-ns.zone.signed"
+  fallback-enabled: no
+  for-upstream: yes
+  for-downstream: no
+
+auth-zone:
+  name: "test-ns6-signed.${CONN_TEST_DOMAIN}"
+  zonefile: "/opt/unbound/etc/unbound/zones/test-ns6.zone.signed"
+  fallback-enabled: no
+  for-upstream: yes
+  for-downstream: no
+
+# write DNS queries to Redis for connection tests
+cachedb:
+  redis-server-host: redis
+  redis-server-port: 6379
+  redis-timeout: 1000
+
+# required for status checks
+remote-control:
+  control-enable: yes
+  control-interface: 127.0.0.1

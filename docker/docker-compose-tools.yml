@@ -1,0 +1,14 @@
+services:
+  tools:
+    image: ${DOCKER_IMAGE_LINTTEST:-ghcr.io/internetstandards/linttest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: linttest
+      args:
+        INTERNETNL_VERSION: 0.0.0-dev0
+
+    volumes:
+      - ../:/source/
+      # make docker available inside the container
+      - /var/run/docker.sock:/var/run/docker.sock

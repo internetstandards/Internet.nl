@@ -57,82 +57,100 @@ def _clear_cached_pages():
 
 
 def _batch_startup_checks():
-    if settings.ENABLE_BATCH:
-        log.debug("Performing batch startup checks.")
-        from interface.batch import BATCH_INDEXES
-        from interface.batch.custom_results import CUSTOM_RESULTS_MAP
-        from interface.batch.util import APIMetadata
+    log.debug("Performing batch startup checks.")
+    from interface.batch import BATCH_INDEXES
+    from interface.batch.custom_results import CUSTOM_RESULTS_MAP
+    from interface.batch.util import APIMetadata
 
-        def cache_report_metadata():
-            """
-            Stores the report metadata used in the batch API.
+    def cache_report_metadata():
+        """
+        Stores the report metadata used in the batch API.
 
-            """
-            APIMetadata.build_metadata()
+        """
+        APIMetadata.build_metadata()
 
-        def check_custom_results_names():
-            """
-            Checks that names used for the custom results do not conflict with
-            existing names and configured values are correct.
+    def check_custom_results_names():
+        """
+        Checks that names used for the custom results do not conflict with
+        existing names and configured values are correct.
 
-            """
-            for result_name in settings.BATCH_API_CUSTOM_RESULTS:
-                if result_name not in CUSTOM_RESULTS_MAP:
-                    raise ValueError(f"Unknown configured custom result ({result_name}).")
+        """
+        for result_name in settings.BATCH_API_CUSTOM_RESULTS:
+            if result_name not in CUSTOM_RESULTS_MAP:
+                raise ValueError(f"Unknown configured custom result ({result_name}).")
 
-            metadata = APIMetadata.get_report_metadata()["data"]
-            for name, r in CUSTOM_RESULTS_MAP.items():
-                if r.name in metadata:
-                    raise ValueError(
-                        f"Custom result ({name}) has a conflicting name " f"({r.name}) with an existing report item."
-                    )
-
-        def check_indexes_in_place():
-            """
-            Checks that indexes are in place when batch is activated and
-            prompts the user.
-
-            """
-
-            # Only perform this check when running on oracle (as intended)
-            # Do not run these checks on sqlite while developing
-            if "lite" in settings.DATABASES["default"]["ENGINE"]:
-                log.warning(
-                    "You are running the batch service on a sqlite database without proper indexes."
-                    "Only do this during development. Otherwise run Oracle and apply the indexes if "
-                    "a startup warning shows."
+        metadata = APIMetadata.get_report_metadata()["data"]
+        for name, r in CUSTOM_RESULTS_MAP.items():
+            if r.name in metadata:
+                raise ValueError(
+                    f"Custom result ({name}) has a conflicting name " f"({r.name}) with an existing report item."
                 )
-                return True
 
-            for table, index_field, index_name in BATCH_INDEXES:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        f"""
+    def check_indexes_in_place():
+        """
+        Checks that indexes are in place when batch is activated and
+        prompts the user.
+
+        """
+
+        # Only perform this check when running on oracle (as intended)
+        # Do not run these checks on sqlite while developing
+        if "lite" in settings.DATABASES["default"]["ENGINE"]:
+            log.warning(
+                "You are running the batch service on a sqlite database without proper indexes."
+                "Only do this during development. Otherwise run Oracle and apply the indexes if "
+                "a startup warning shows."
+            )
+            return True
+
+        for table, index_field, index_name in BATCH_INDEXES:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    f"""
 SELECT
     FROM   pg_class c
     JOIN   pg_namespace n ON n.oid = c.relnamespace
     JOIN   pg_index i on c.oid = i.indexrelid
     WHERE  c.relname = '{index_name}'"""
+                )
+                res = cursor.fetchall()
+                if len(res) == 0:
+                    logger.warning(
+                        "ENABLE_BATCH is set for this server but the "
+                        "database is lacking the required indexes. "
+                        "Consider running "
+                        "`manage.py api_create_db_indexes`."
                     )
-                    res = cursor.fetchall()
-                    if len(res) == 0:
-                        logger.warning(
-                            "ENABLE_BATCH is set for this server but the "
-                            "database is lacking the required indexes. "
-                            "Consider running "
-                            "`manage.py api_create_db_indexes`."
-                        )
-                        break
-                    elif len(res) > 1:
-                        logger.warning(
-                            "Something seemws wrong with the database "
-                            "as more than one results are returned for the "
-                            f"'{index_name}' index."
-                        )
+                    break
+                elif len(res) > 1:
+                    logger.warning(
+                        "Something seemws wrong with the database "
+                        "as more than one results are returned for the "
+                        f"'{index_name}' index."
+                    )
 
-        cache_report_metadata()
-        check_custom_results_names()
-        check_indexes_in_place()
+    cache_report_metadata()
+    check_custom_results_names()
+    check_indexes_in_place()
+
+
+def _batch_register_users():
+    """Register Batch API users passed through from the BATCH_AUTH environment variable."""
+    from checks.models import BatchUser
+    from interface.batch.util import create_batch_user
+
+    users = settings.BATCH_USERS
+    organization = settings.BATCH_USER_DEFAULT_ORGANISATION
+
+    for user in users:
+        try:
+            BatchUser.objects.get(username=user)
+            log.info("User %s already exists", user)
+        except BatchUser.DoesNotExist:
+            name = user
+            email = user + "@" + settings.BATCH_USER_DEFAULT_EMAIL_DOMAIN
+            create_batch_user(user, name, organization, email)
+            log.info("Created batch user %s", user)
 
 
 class InterfaceConfig(AppConfig):
@@ -140,8 +158,18 @@ class InterfaceConfig(AppConfig):
 
     def ready(self):
         log.debug("Running interface startup checks.")
-        _load_autoconf_in_cache()
-        _load_padded_macs_in_cache()
-        _clear_cached_pages()
-        _batch_startup_checks()
+
+        if settings.INTEGRATION_TESTS:
+            log.warning(
+                "Running in integration test mode, forwarding DNS queries to internal resolver and allowing .test TLD."
+            )
+
+        if settings.CACHE_ENABLED:
+            _load_autoconf_in_cache()
+            _load_padded_macs_in_cache()
+            _clear_cached_pages()
+
+        if settings.ENABLE_BATCH:
+            _batch_startup_checks()
+            _batch_register_users()
         connection.inc_thread_sharing()

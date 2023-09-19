@@ -1,5 +1,4 @@
 *.sqlite3
-/internetnl/settings.py
 /internetnl/settings.dev.batch.internet.nl.py
 /internetnl/settings.dev.internet.nl.py
 /internetnl/batch_api_doc_conf.py
@@ -34,7 +33,7 @@ __pycache__
 .venv
 
 # When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
-unbound
+./unbound
 _unbound
 python-whois
 pythonwhois.egg-info
@@ -69,3 +68,11 @@ custom-deps
 # Any tmp stuff, like for compilations, translations, unzipping / downloading you name it. Any content in this
 # directory can and will be deleted at random intervals at any moment.
 tmp
+
+integration_tests/test-results/
+test-results/
+
+production.env
+
+test-results.xml
+docker/local.env

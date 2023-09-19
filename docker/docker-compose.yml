@@ -1,43 +1,660 @@
-version: '2.1'
+# This document uses the open "Docker Compose V2" file specification.
+# More info: https://www.compose-spec.io and https://github.com/compose-spec/compose-spec/blob/master/spec.md
+# Please note this is different from the "Compose file version 2" specification. Which is for Docker Compose V1.
+# Hence no `version` is specified in this file.
 
 services:
+  webserver:
+    image: ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver}
+    build:
+      context: ..
+      dockerfile: docker/webserver.Dockerfile
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
+      public-internet: {}
+
+    ports:
+      - $WEBSERVER_PORT
+      - $WEBSERVER_PORT_TLS
+
+    environment:
+      - INTERNETNL_DOMAINNAME
+      - IPV6_TEST_ADDR
+      - BATCH_AUTH
+      - MONITORING_AUTH
+      - BASIC_AUTH
+      - BATCH_AUTH_RAW
+      - MONITORING_AUTH_RAW
+      - BASIC_AUTH_RAW
+      - ALLOW_LIST
+      - IPV4_IP_APP_INTERNAL
+      - IPV4_IP_GRAFANA_INTERNAL
+      - IPV4_IP_PROMETHEUS_INTERNAL
+      - LETSENCRYPT_STAGING
+      - LETSENCRYPT_EMAIL
+
+    # webserver does not depend on any of the other services directly. So it can
+    # be started and kept running independently from the other services to
+    # provide stale cache or a maintenance page.
+    depends_on: {}
+
+    volumes:
+      # persist certbot configuration between restarts
+      - certbot-config:/etc/letsencrypt
+
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
   app:
-    image: internetnl/internetnl
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    network_mode: host
-    dns: 127.0.0.1
-    ports:
-      - "8080:8080"
+      target: app
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_APP_INTERNAL
+      public-internet: {}
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
+    entrypoint: uwsgi
+    command: >
+      --module=internetnl.wsgi:application
+      --http=0.0.0.0:8080
+      --master
+      --processes=4
+      --stats 127.0.0.1:1717 --stats-http
     depends_on:
-      - redis
-      - rabbitmq
-      - postgres
-      - routinator
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      unbound:
+        condition: service_healthy
+      resolver-validating:
+        condition: service_healthy
+      resolver-permissive:
+        condition: service_healthy
+
     environment:
-      - ENABLE_BATCH=${ENABLE_BATCH:-False}
+      - INTERNET_NL_CHECK_SUPPORT_IPV6
+      - INTERNET_NL_CHECK_SUPPORT_DNSSEC
+      - INTERNET_NL_CHECK_SUPPORT_MAIL
+      - INTERNET_NL_CHECK_SUPPORT_TLS
+      - INTERNET_NL_CHECK_SUPPORT_APPSECPRIV
+      - INTERNET_NL_CHECK_SUPPORT_RPKI
+      - PUBLIC_SUFFIX_LIST_URL
+      - ENABLE_BATCH
+      - ENABLE_HOF
+      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - SECRET_KEY
+      - GENERATE_SECRET_KEY
+      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672//
+      - CELERY_RESULT_BACKEND=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - CACHE_LOCATION=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - ROUTINATOR_URL
+      - DJANGO_IS_PROXIED=True
+      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
+      - ALLOWED_HOSTS
+      - DEBUG
+      - DEBUG_LOG
+      - DEBUG_LOG_UNBOUND
+      - INTEGRATION_TESTS
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
+      - IPV6_TEST_ADDR
+      - CSP_DEFAULT_SRC
+      - BATCH_AUTH
+      - BATCH_USER_DEFAULT_ORGANISATION
+      - BATCH_USER_DEFAULT_EMAIL_DOMAIN
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
+    volumes:
+      - batch_results:/app/batch_results
+
+  db-migrate:
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    networks:
+      - internal
+    command: migrate
+    # this container runs to completion and exits with 0
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - SECRET_KEY
+      - GENERATE_SECRET_KEY
+      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      # disable redis cache as it is not used in db migrations
+      - CACHE_LOCATION=
+      # disable batch checks
+      - ENABLE_BATCH=False
+      - ENABLE_HOF=False
+      - DEBUG
+      - DEBUG_LOG
+      - DEBUG_LOG_UNBOUND
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - WORKER_CONCURRENCY
+
+  worker:
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    restart: unless-stopped
+    networks:
+      - internal
+      - public-internet
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
+
+    # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
+    user: root
+    entrypoint: /entrypoint-worker.sh
+    command: >
+      celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues default,celery,db_worker,slow_db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+
+    depends_on:
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      routinator:
+        # TODO: convert to service_healthy when healthcheck is added to routinator
+        condition: service_started
+      unbound:
+        condition: service_healthy
+      resolver-validating:
+        condition: service_healthy
+      resolver-permissive:
+        condition: service_healthy
+
+    environment:
+      - INTERNET_NL_CHECK_SUPPORT_IPV6
+      - INTERNET_NL_CHECK_SUPPORT_DNSSEC
+      - INTERNET_NL_CHECK_SUPPORT_MAIL
+      - INTERNET_NL_CHECK_SUPPORT_TLS
+      - INTERNET_NL_CHECK_SUPPORT_APPSECPRIV
+      - INTERNET_NL_CHECK_SUPPORT_RPKI
+      - PUBLIC_SUFFIX_LIST_URL
+      - ENABLE_BATCH
+      - ENABLE_HOF
+      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - SECRET_KEY
+      - GENERATE_SECRET_KEY
+      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672//
+      - CELERY_RESULT_BACKEND=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - CACHE_LOCATION=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
+      - DEBUG
+      - DEBUG_LOG
+      - DEBUG_LOG_UNBOUND
+      - INTEGRATION_TESTS
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - ROUTINATOR_URL
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      # even though eventlet is used and childs are not really threads or processes, this settings reduces
+      # issues with high memory usage, probably because some objects are freed?
+      - CELERYD_MAX_TASKS_PER_CHILD=100
+    volumes:
+      - batch_results:/app/batch_results
+
+    healthcheck:
+      test: ["CMD", "/bin/sh", "-c", "celery --app=internetnl inspect ping --destination=celery@$(hostname)"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
+  beat:
+    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    restart: unless-stopped
+    networks:
+      - internal
+      - public-internet
+    entrypoint: celery
+    command: --app internetnl beat
+    depends_on:
+      db-migrate:
+        # wait for DB migration to be completed
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      routinator:
+        # TODO: convert to service_healthy when healthcheck is added to routinator
+        condition: service_started
+    environment:
+      - INTERNET_NL_CHECK_SUPPORT_IPV6
+      - INTERNET_NL_CHECK_SUPPORT_DNSSEC
+      - INTERNET_NL_CHECK_SUPPORT_MAIL
+      - INTERNET_NL_CHECK_SUPPORT_TLS
+      - INTERNET_NL_CHECK_SUPPORT_APPSECPRIV
+      - INTERNET_NL_CHECK_SUPPORT_RPKI
+      - ENABLE_BATCH
+      - ENABLE_HOF
+      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - SECRET_KEY
+      - GENERATE_SECRET_KEY
+      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CELERY_BROKER_URL=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672//
+      - CELERY_RESULT_BACKEND=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - CACHE_LOCATION=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - DJANGO_SETTINGS_MODULE=internetnl.settings
+      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
+      - DEBUG
+      - DEBUG_LOG
+      - DEBUG_LOG_UNBOUND
+      - INTEGRATION_TESTS
+      - INTERNETNL_LOG_LEVEL
+      - INTERNETNL_CACHE_TTL
+      - ROUTINATOR_URL
+      - CONN_TEST_DOMAIN
+      - SMTP_EHLO_DOMAIN
+      - BATCH_SCHEDULER_INTERVAL
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
 
   redis:
-    network_mode: host
-    image: redis:alpine
+    image: ${DOCKER_IMAGE_REDIS:-redis:7.0-alpine}
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_REDIS_INTERNAL
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+    volumes:
+      - redis:/data
 
   rabbitmq:
-    network_mode: host
-    image: rabbitmq:management-alpine
+    image: ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq}
+    build:
+      context: ..
+      dockerfile: docker/rabbitmq.Dockerfile
+    restart: unless-stopped
+    user: rabbitmq
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_RABBITMQ_INTERNAL
+    ports:
+      # expose admin GUI to localhost
+      - $RABBITMQ_GUI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "--quiet", "check_running"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      # rabbitmq can initially take a long time to start
+      start_period: 5m
+      retries: 10
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
 
   postgres:
-    network_mode: host
-    image: postgres:alpine
+    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.3-alpine}
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_POSTGRES_INTERNAL
     environment:
-      - POSTGRES_USER=internetnl
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=internetnl_db1
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    healthcheck:
+      test: pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+    volumes:
+      - postgres:/var/lib/postgresql/data
 
   routinator:
-    network_mode: host
-    image: nlnetlabs/routinator
+    image: ${DOCKER_IMAGE_ROUTINATOR:-nlnetlabs/routinator:v0.12.1}
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
+      public-internet: {}
     volumes:
-            - routinator-tals:/home/routinator/.rpki-cache/tals
+      - routinator:/home/routinator/.rpki-cache/
+    # TODO: disabled because it takes a long time to start, needs refactoring like splitting up the api and sync parts
+    # healthcheck:
+    #   test: wget -q -O/dev/null http://127.0.0.1:9556/api/v1/status
+    #   interval: $HEALTHCHECK_INTERVAL
+    #   # TODO: waiting for: https://github.com/docker/compose/issues/10830
+    #   # start_interval: 5s
+    #   # routinator has to rsync a lot of data initally which can take a long time
+    #   start_period: 30m
+    #   retries: 10
+
+  # unbound DNS server used for connection test
+  unbound:
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
+      public-internet: {}
+    ports:
+      - $UNBOUND_PORT_TCP
+      - $UNBOUND_PORT_UDP
+      - $UNBOUND_PORT_IPV6_TCP
+      - $UNBOUND_PORT_IPV6_UDP
+
+    environment:
+      - IPV4_IP_PUBLIC
+      - IPV6_IP_PUBLIC
+      - CONN_TEST_DOMAIN
+
+    volumes:
+      # stores DNSSEC key information and signed zone files
+      - unbound-zones:/opt/unbound/etc/unbound/zones/
+
+    healthcheck:
+      test: ["CMD", "unbound-control", "status"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
+  # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
+  resolver-permissive:
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+
+    entrypoint: /opt/unbound/sbin/unbound
+    command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf"]
+
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      public-internet: {}
+
+    healthcheck:
+      test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
+  # unbound resolver used for ldns-dane that require DNSSEC validation
+  resolver-validating:
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+
+    entrypoint: /opt/unbound/sbin/unbound
+    command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf"]
+
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+      public-internet: {}
+
+    healthcheck:
+      test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
+  grafana:
+    image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana}
+    build:
+      context: ..
+      dockerfile: docker/grafana.Dockerfile
+
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_BASIC_ENABLED=false
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_DISABLE_SIGNOUT_MENU=true
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/dashboards/home.json
+      - GF_SERVER_ROOT_URL=http://localhost:8080/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      # disable grafana from trying to reach out and filling logging with failed DNS queries
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false
+      # disables live functionality which is not used, because it uses websockets which don't play well with authentication
+      - GF_LIVE_MAX_CONNECTIONS=0
+      - INTERNETNL_DOMAINNAME
+
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
+
+  prometheus:
+    image: ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus}
+    build:
+      context: ..
+      dockerfile: docker/prometheus.Dockerfile
+
+    command:
+      - --config.file=/prometheus.yaml
+      - --web.external-url=/prometheus/
+      - --storage.tsdb.retention=5y
+      - --web.enable-admin-api
+
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_PROMETHEUS_INTERNAL
+
+    volumes:
+      - prometheus-data:/prometheus
+
+  postgresql-exporter:
+    image: ${DOCKER_IMAGE_POSTGRESQL_EXPORTER:-prometheuscommunity/postgres-exporter:v0.12.0}
+
+    environment:
+      - DATA_SOURCE_NAME=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$IPV4_IP_POSTGRES_INTERNAL:5432/$POSTGRES_DB?sslmode=disable
+
+    restart: unless-stopped
+    networks:
+      - internal
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.50.0
+
+    environment:
+      - REDIS_ADDR=redis://$IPV4_IP_REDIS_INTERNAL:6379
+
+    restart: unless-stopped
+    networks:
+      - internal
+
+  statsd-exporter:
+    image: ${DOCKER_IMAGE_STATSD_EXPORTER:-prom/statsd-exporter:v0.23.1}
+
+    command:
+      - --statsd.listen-udp=:8125
+      - --statsd.listen-tcp=:8125
+
+    restart: unless-stopped
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_STATSD_INTERNAL
+        aliases:
+          - statsd
+
+  celery-exporter:
+    image: aequitas/celery-exporter:0.9.1
+    command:
+      - --broker-url=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672/
+      - --accept-content=json,pickle
+      # retry connecting to broker on failure
+      - --retry-interval=10
+    restart: unless-stopped
+    networks:
+      - internal
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # https://github.com/prometheus/node_exporter#docker
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.6.1
+    command:
+      - --path.rootfs=/host
+      - --collector.systemd
+      # disable metrics about the exporter itself
+      - --web.disable-exporter-metrics
+      # ignore docker container interfaces
+      - --collector.netdev.device-exclude=veth
+      # ignore docker container interfaces
+      - --collector.netclass.ignored-devices=veth
+    restart: unless-stopped
+    pid: host
+    networks:
+      - internal
+    volumes:
+      - /:/host:ro
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+
 volumes:
-  routinator-tals: {}
+  postgres: {}
+  redis: {}
+  rabbitmq: {}
+  routinator: {}
+  batch_results: {}
+  certbot-config: {}
+  unbound-zones: {}
+  # permanent storage for Prometheus metrics
+  prometheus-data: {}
+  # permanent storage for Grafana custom dashboards
+  grafana-data: {}
+
+networks:
+  # disable default network
+  default:
+    driver: none
+  internal:
+    internal: true
+    driver: bridge
+    # no IPv6 required
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+      - subnet: $IPV4_SUBNET_INTERNAL
+
+  # allows connected services to access public internet
+  public-internet:
+    # required to enable IPv6 on Docker Desktop runtime
+    enable_ipv6: true
+    driver: bridge
+    driver_opts:
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+      # network for internal communication between services
+      com.docker.network.bridge.enable_icc: "true"
+    ipam:
+      driver: default
+      config:
+      - subnet: $IPV6_SUBNET_PUBLIC
+        gateway: $IPV6_GATEWAY_PUBLIC
+      - subnet: $IPV4_SUBNET_PUBLIC
+

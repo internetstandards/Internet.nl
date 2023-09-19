@@ -1,9 +1,0 @@
-server:
-    log-time-ascii: yes
-	log-queries: yes
-	log-replies: yes
-    log-tag-queryreply: yes
-    log-servfail: yes
-    val-log-level: 2
-    root-hints: /app/docker/it/dns/resolver/unbound/root.hints
-    trust-anchor-file: "/tmp/root_zsk.key"
