@@ -131,6 +131,8 @@ services:
       - BATCH_USER_DEFAULT_EMAIL_DOMAIN
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      - SENTRY_DSN
+      - SENTRY_ENVIRONMENT
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
@@ -252,6 +254,8 @@ services:
       - SMTP_EHLO_DOMAIN
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      - SENTRY_DSN
+      - SENTRY_ENVIRONMENT
       # even though eventlet is used and childs are not really threads or processes, this settings reduces
       # issues with high memory usage, probably because some objects are freed?
       - CELERYD_MAX_TASKS_PER_CHILD=100
@@ -324,6 +328,8 @@ services:
       - BATCH_SCHEDULER_INTERVAL
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      - SENTRY_DSN
+      - SENTRY_ENVIRONMENT
 
   redis:
     image: ${DOCKER_IMAGE_REDIS:-redis:7.0-alpine}
