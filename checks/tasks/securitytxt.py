@@ -9,7 +9,7 @@ import requests
 import sectxt
 
 from checks import scoring
-from checks.http_client import http_get_ip
+from checks.http_client import http_get_ip, response_content_chunk
 from checks.tasks import SetupUnboundContext
 
 SECURITYTXT_LEGACY_PATH = "/security.txt"
@@ -50,7 +50,7 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
             found_host = urlparse(response.url).hostname
         else:
             found_host = hostname
-        content = next(response.iter_content(SECURITYTXT_MAX_LENGTH, decode_unicode=False)).decode("utf-8")
+        content = response_content_chunk(response, SECURITYTXT_MAX_LENGTH).decode("utf-8")
     except UnicodeDecodeError:
         return SecuritytxtRetrieveResult(
             found=True,

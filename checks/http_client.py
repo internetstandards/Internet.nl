@@ -123,3 +123,19 @@ def http_get_af(
         except requests.RequestException as request_exception:
             exc = request_exception
     raise exc
+
+
+def response_content_chunk(response: requests.Response, max_length: int) -> bytes:
+    """
+    Retrieve the content from a response, up to max_length.
+    Used in various HTTP requests to avoid giant responses from breaking parsers.
+    """
+    chunk = b""
+    try:
+        response_iter = response.iter_content(max_length)
+        while len(chunk) < max_length:
+            chunk += next(response_iter)
+    except StopIteration:
+        pass
+    # It's possible we retrieved too much, trim to avoid inconsistency
+    return chunk[:max_length]
