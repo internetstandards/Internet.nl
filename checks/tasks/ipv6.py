@@ -16,7 +16,7 @@ from django.core.cache import cache
 from django.db import transaction
 
 from checks import categories, scoring
-from checks.http_client import http_get_af
+from checks.http_client import http_get_af, response_content_chunk
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
 from checks.tasks import SetupUnboundContext, dispatcher, shared
 from checks.tasks.dispatcher import check_registry
@@ -591,9 +591,8 @@ def simhash(url, task=None):
         return simhash_score, distance
 
     try:
-        # read max 0.5MB
-        html_v4 = next(v4_response.iter_content(SIMHASH_MAX_RESPONSE_SIZE))
-        html_v6 = next(v6_response.iter_content(SIMHASH_MAX_RESPONSE_SIZE))
+        html_v4 = response_content_chunk(v4_response, SIMHASH_MAX_RESPONSE_SIZE)
+        html_v6 = response_content_chunk(v6_response, SIMHASH_MAX_RESPONSE_SIZE)
     except (OSError, IOError) as exc:
         log.debug("simhash encountered exception while reading response: {exc}", exc_info=exc)
         return simhash_score, distance
