@@ -64,7 +64,7 @@ def test_your_website_probe_success(page, app_url, test_domain, probe):
         ("ipv6.google.com", 65),  # no DNSSEC, bad HTTPS
         ("ipv6.internet.nl", 97),  # no HTTPS redirect
         # bogus DNSSEC
-        ("servfail.nl", 44),
+        ("servfail.nl", 61),
         ("brokendnssec.net", 15),
         ("ok.bogussig.ok.bad-dnssec.wb.sidnlabs.nl", 58),
         # wrong DANE

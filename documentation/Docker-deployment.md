@@ -176,7 +176,9 @@ You can verify DNSSEC using:
 
 After deployment is complete, all services are healthy and DNS is setup you can visit the website on eg: `https://example.com` and perform tests manually. Or use the Live test suite to perform automated tests. For this run the following command from the deployed machine or anywhere else with Docker:
 
-    docker pull ghcr.io/internetstandards/test-runner &&docker run -ti --rm --env=APP_URLS=https://example.com ghcr.io/internetstandards/test-runner
+    APP_URL=https://example.com
+    docker pull ghcr.io/internetstandards/test-runner && \
+    docker run -ti --rm --env=APP_URLS=$APP_URL ghcr.io/internetstandards/test-runner
 
 For more information see: [documentation/Docker-live-tests.md](Docker-live-tests.md)
 
