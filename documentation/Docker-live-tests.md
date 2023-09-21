@@ -24,7 +24,9 @@ By default some tests will be skipped, for example due to limitations of the env
 
 It is also possible to run the live tests suite without checkout out the source and building the test image, for this run:
 
-    docker pull ghcr.io/internetstandards/test-runner && docker run -ti --rm --env=APP_URLS=https://example.com ghcr.io/internetstandards/test-runner integration_tests/live/
+    APP_URL=https://example.com
+    docker pull ghcr.io/internetstandards/test-runner && \
+    docker run -ti --rm --env=APP_URLS=$APP_URL ghcr.io/internetstandards/test-runner
 
 Note that if IPv6 is not enabled in your environment some IPv6 related "Test your connection" tests are skipped.
 

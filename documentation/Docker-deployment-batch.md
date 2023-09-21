@@ -134,7 +134,10 @@ After deployment you can visit the website on eg: `https://example.com` and perf
 
 You can also use the Live test suite to perform automated tests for the Batch API. For this run the following command from the deployed machine or anywhere else with Docker (replacing `APP_URLS` and `BATCH_API_AUTH` values with those determined above):
 
-    docker pull ghcr.io/internetstandards/test-runner && docker run -ti --rm --env=APP_URLS=https://example.com --env=BATCH_API_AUTH=user:welkom01 ghcr.io/internetstandards/test-runner integration_tests/live/test_batch.py
+    APP_URL=https://example.com
+    BATCH_API_AUTH=user:welkom01
+    docker pull ghcr.io/internetstandards/test-runner && \
+    docker run -ti --rm --env=APP_URLS=$APP_URL --env=BATCH_API_AUTH=$BATCH_API_AUTH ghcr.io/internetstandards/test-runner integration_tests/live/test_batch.py
 
 For more information see: [documentation/Docker-live-tests.md](Docker-live-tests.md)
 
