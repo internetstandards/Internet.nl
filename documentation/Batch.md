@@ -8,20 +8,7 @@ This is accomplished through a REST API.
 ## Information for operators
 
 ### Enabling the API
-1. Change the `ENABLE_BATCH` value in `internetnl/settings.py` to `True`.
-
-2. The `BATCH_TEST_USER` is only meant for initial debugging (the user still
-   needs to be created; look below) and is not to be used in a production
-   environment.
-
-3. Make sure that `CELERY_ROUTES` are only defined once in the file. The
-   default values that come in the batch section allow for a more fine grained
-   celery routing and are recommended for the constant volume of tasks.
-   Of course you would need to change your celery configuration (nodes, queues)
-   accordingly.
-
-4. Make sure that the management plugin is available and enabled on your
-   rabbitMQ installation.
+See [Deployment Batch](Docker-deployment-batch.md).
 
 ### Generating the documentation
 The API follows the [OpenAPI specification](https://swagger.io/specification/).

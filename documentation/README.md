@@ -6,18 +6,19 @@ To start, read the [architecture overview](architecture.md) to understand the
 various components and how they interact.
 
 Internet.nl is fundamentally a [Django](https://www.djangoproject.com/)
-based application. Current install base is Django 3.2 with Python 3.7.
+based application, developed/tested/deployed through Docker containers.
 
-To run the project, there are a few options:
+- [Getting started](Docker-getting-started.md)
+- [Architecture](Docker-architecture.md)
+- [Development Environment](Docker-development-environment.md)
+- [Integration tests](Docker-integration-tests.md)
+- [Deployment](Docker-deployment.md)
+- [Deployment Batch](Docker-deployment-batch.md)
+- [Live tests](Docker-live-tests.md)
+- [Metrics](Docker-metrics.md)
 
-* [Running with Docker](https://github.com/internetstandards/Internet.nl/blob/main/docker/README.md).
-  Simplest install, only supported on Linux hosts.
-  **Not confirmed to work as of May 2022**.
-* A [typical local installation for development](development.md).
-  **Status on M1 mac unclear**.
-* A [full install on a server](Installation.md).
 
-Note that the connection test requires a lot more moving parts than the other
+Note that the connection test requires more moving parts than the other
 tests, as it handles inbound connections.
 
 Other important resources:

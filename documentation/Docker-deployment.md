@@ -224,12 +224,29 @@ The issue can be resolved by restarting the application:
 
 To update the application stack first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components.
 
+For the latest **released version**:
+
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/docker/docker/docker-compose.yml && \
     env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
+For the latest **main branch**:
+
+    cd /opt/Internet.nl/ && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/docker-compose.yml && \
+    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    env -i \
+        DOCKER_IMAGE_WEBSERVER=ghcr.io/internetstandards/webserver:main \
+        DOCKER_IMAGE_APP=ghcr.io/internetstandards/internet.nl:main \
+        DOCKER_IMAGE_RABBITMQ=ghcr.io/internetstandards/rabbitmq:main \
+        DOCKER_IMAGE_UNBOUND=ghcr.io/internetstandards/unbound:main \
+        DOCKER_IMAGE_GRAFANA=ghcr.io/internetstandards/grafana:main \
+        DOCKER_IMAGE_PROMETHEUS=ghcr.io/internetstandards/prometheus:main \
+        docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+    
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
 
 ## HTTPS/Letsencrypt
