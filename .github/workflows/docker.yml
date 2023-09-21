@@ -81,6 +81,8 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build ${{ matrix.image }}
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -106,14 +108,20 @@ jobs:
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Push ${{ matrix.image }} version
+        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 10
         run: docker push ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Push ${{ matrix.image }} latest release
+        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 10
         # push 'latest' only for versioned
         if: github.event_name == 'release'
         run: docker push ${{ matrix.image }}:latest
 
       - name: Push branch/pr tag
+        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 10
         run: docker push ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
 
   docs:
