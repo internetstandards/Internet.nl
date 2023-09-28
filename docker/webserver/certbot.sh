@@ -28,16 +28,18 @@ configure_letsencrypt() {
 
     # request new certificate for main domain
     /opt/certbot/bin/certbot certonly --webroot \
-        --webroot-path /var/www/internet.nl \
-        --rsa-key-size 4096 \
-        --agree-tos \
-        --force-renewal \
-        --post-hook "nginx -s reload" \
-        --webroot \
-        $staging \
-        $email \
-        --cert-name $domain \
-        -d $domain
+      # run non-interactive
+      -n \
+      --webroot-path /var/www/internet.nl \
+      --rsa-key-size 4096 \
+      --agree-tos \
+      --force-renewal \
+      --post-hook "nginx -s reload" \
+      --webroot \
+      $staging \
+      $email \
+      --cert-name $domain \
+      -d $domain
     cert_acquired=$?
 
     if [ $cert_acquired -eq 0 ];then
@@ -54,18 +56,20 @@ configure_letsencrypt() {
     # request new certificate for subdomains as well, but in a seperate step so we
     # don't fail if they are not properly setup
     /opt/certbot/bin/certbot certonly --webroot \
-        --webroot-path /var/www/internet.nl \
-        --rsa-key-size 4096 \
-        --agree-tos \
-        --force-renewal \
-        --post-hook "nginx -s reload" \
-        --webroot \
-        $staging \
-        $email \
-        --cert-name $domain \
-        -d $domain \
-        -d $subdomains \
-        --expand
+      # run non-interactive
+      -n \
+      --webroot-path /var/www/internet.nl \
+      --rsa-key-size 4096 \
+      --agree-tos \
+      --force-renewal \
+      --post-hook "nginx -s reload" \
+      --webroot \
+      $staging \
+      $email \
+      --cert-name $domain \
+      -d $domain \
+      -d $subdomains \
+      --expand
   fi
 }
 
