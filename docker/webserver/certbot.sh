@@ -28,7 +28,6 @@ configure_letsencrypt() {
 
     # request new certificate for main domain
     /opt/certbot/bin/certbot certonly --webroot \
-      # run non-interactive
       -n \
       --webroot-path /var/www/internet.nl \
       --rsa-key-size 4096 \
@@ -52,11 +51,10 @@ configure_letsencrypt() {
   fi
 
   # skip if subdomains are already configured or is main domain is not configured
-  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ -z "$(grep www.$domain /etc/letsencrypt/renewal/$domain.conf)" ]; then
+  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ -z "$(grep www\.$domain /etc/letsencrypt/renewal/$domain.conf)" ]; then
     # request new certificate for subdomains as well, but in a seperate step so we
     # don't fail if they are not properly setup
     /opt/certbot/bin/certbot certonly --webroot \
-      # run non-interactive
       -n \
       --webroot-path /var/www/internet.nl \
       --rsa-key-size 4096 \
