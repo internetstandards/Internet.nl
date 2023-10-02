@@ -43,7 +43,7 @@ services:
       - build
       - run-tests
     # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+    dns: $IPV4_IP_MOCK_RESOLVER_PUBLIC
     # also disable search domains and force default resolv settings
     dns_search: [.]
     dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
@@ -126,40 +126,32 @@ services:
 
   # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
   mock-resolver:
-    image: ${DOCKER_IMAGE_RESOLVER:-strm/dnsmasq}
+    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
 
-    entrypoint: /entrypoint.sh
-
-    networks:
-      internal:
-        ipv4_address: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+    entrypoint: /opt/unbound/sbin/unbound
+    command: ["-d", "-c", "/opt/unbound/etc/unbound/mock.conf"]
 
     restart: unless-stopped
-
-    ports:
-      - "53/udp"
-
-    environment:
-      - IPV4_IP_UNBOUND_INTERNAL
-      - CONN_TEST_DOMAIN
-      - INTERNETNL_DOMAINNAME
-      - IPV4_WEBSERVER_IP_PUBLIC
-      - TEST_TARGET_DOMAINNAME
-      - IPV4_IP_TEST_TARGET_PUBLIC
-      - IPV6_IP_TEST_TARGET_PUBLIC
-      - IPV4_IP_TEST_TARGET_MAIL_PUBLIC
-      - IPV6_IP_TEST_TARGET_MAIL_PUBLIC
+    networks:
+      public-internet:
+        ipv4_address: $IPV4_IP_MOCK_RESOLVER_PUBLIC
+        ipv6_address: $IPV6_IP_MOCK_RESOLVER_PUBLIC
 
     volumes:
-      - ./integration-tests/dnsmasq/entrypoint.sh:/entrypoint.sh
-
-    cap_add:
-      - NET_ADMIN
+      - ./integration-tests/mock-resolver/mock.conf:/opt/unbound/etc/unbound/mock.conf
+      - ./integration-tests/mock-resolver/test.zone:/opt/unbound/etc/unbound/test.zone
 
     healthcheck:
-      test: ["CMD", "nslookup", "$TEST_TARGET_DOMAINNAME", "127.0.0.1"]
+      test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/mock.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      retries: 30
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
 
   webserver:
     networks:

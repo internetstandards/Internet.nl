@@ -2,6 +2,7 @@
 import pytest
 from playwright.sync_api import expect
 from ..conftest import print_details_test_results
+from .conftest import print_results_url
 
 INVALID_DOMAIN = "invalid-domain.example.com"
 
@@ -18,6 +19,8 @@ def test_reject_invalid_domain(page, app_url):
 
     page.locator("#web-url").fill(domain)
     page.locator("section.websitetest button").click()
+
+    print_results_url(page)
 
     assert page.url == f"{app_url}/test-site/?invalid"
 
@@ -37,6 +40,7 @@ def test_your_website_score(page, app_url, test_domain):
     score = page.locator("div.testresults-percentage")
 
     print_details_test_results(page)
+    print_results_url(page)
 
     expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
 

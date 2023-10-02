@@ -4,7 +4,9 @@ import subprocess
 
 # primary URL for internet.nl test website
 APP_DOMAIN = "internet.test"
+
 APP_URL = f"https://{APP_DOMAIN}"
+INTEGRATIONTEST_APP_URL = "http://localhost:8081"
 
 # additional subdomains that serve the test website
 APP_URL_SUBDOMAINS = [
@@ -18,7 +20,7 @@ APP_URL_SUBDOMAINS = [
 TEST_DOMAIN = "target.test"
 
 # domain used for the test target email server
-TEST_EMAIL = "target.test"
+TEST_EMAIL = "mail-target.test"
 
 # exclude lines matching this grep extended regex so debug logging is not so crowded
 REGEX_LOGGING_EXCLUDE = "GET /static"
@@ -30,7 +32,7 @@ def browser_context_args(browser_context_args):
 
 
 @pytest.fixture(scope="session")
-def app_url():
+def app_url(request):
     return APP_URL
 
 
@@ -51,7 +53,7 @@ def test_domain(unique_id):
 
 @pytest.fixture(scope="function")
 def test_email(unique_id):
-    return TEST_EMAIL
+    return f"{unique_id}.{TEST_EMAIL}"
 
 
 @pytest.fixture(scope="function")
@@ -77,3 +79,7 @@ def docker_compose_logs():
     yield process
 
     process.terminate()
+
+
+def print_results_url(page):
+    print(f"\nResults page url: {page.url.replace(APP_URL,  INTEGRATIONTEST_APP_URL)}")
