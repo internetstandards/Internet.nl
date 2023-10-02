@@ -1,0 +1,44 @@
+			SOA example.com. example.com. ( 4 14400 3600 604800 3600 )
+
+; configure DNS for the internet.nl application instance that is running in test
+internet                    A                    172.43.0.100
+                            AAAA                 fd00:43:1::100
+; all it's subdomains
+nl.internet                 CNAME                internet
+en.internet                 CNAME                internet
+www.internet                CNAME                internet
+; IPv6 only address
+ipv6.internet               AAAA                 fd00:43:1::100
+; and it's subdomains
+nl.ipv6.internet            CNAME                ipv6.internet
+en.ipv6.internet            CNAME                ipv6.internet
+www.ipv6.internet           CNAME                ipv6.internet
+; connection test domain and subdomains
+conn.internet               CNAME                internet
+nl.conn.internet            CNAME                internet
+en.conn.internet            CNAME                internet
+www.conn.internet           CNAME                internet
+; and the IPv6 only subdomains
+conn.ipv6.internet          CNAME                ipv6.internet
+conn.nl.ipv6.internet       CNAME                ipv6.internet
+conn.en.ipv6.internet       CNAME                ipv6.internet
+conn.www.ipv6.internet      CNAME                ipv6.internet
+
+; nameserver setup for the connection test
+test-ns-signed.internet     NS                   ns.test-ns-signed.internet
+ns.test-ns-signed.internet  A                    172.43.0.101
+                            AAAA                 fd00:43:1::101
+
+test-ns6-signed.internet    NS                   ns.test-ns6-signed.internet
+ns.test-ns6-signed.internet AAAA                 fd00:43:1::101
+
+
+; configure DNS for targets that are tested by the internet.test instance
+; normal 100% website test target
+*.target                    A                    172.43.0.51
+                            AAAA                 fd00:43:1::51
+
+; normal 100% email test target
+*.mail-target           MX                   10 mx.mail-target.test.
+mx.mail-target          A                    172.43.0.52
+                        AAAA                 fd00:43:1::52

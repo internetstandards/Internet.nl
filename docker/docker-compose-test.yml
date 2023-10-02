@@ -16,7 +16,7 @@ services:
       - public-internet
 
     # TODO: to properly isolate tests these lines need to be uncommented, see above
-    # dns: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+    # dns: $IPV4_IP_MOCK_RESOLVER_PUBLIC
     # dns_search: [.]
     # dns_opt: ["ndots:0", "timeout:1", "attempts:1"]
 
@@ -63,8 +63,9 @@ services:
     entrypoint: /entrypoint.sh
 
     networks:
-      internal:
-        ipv4_address: $IPV4_IP_MOCK_RESOLVER_INTERNAL
+      public-internet:
+        ipv4_address: $IPV4_IP_MOCK_RESOLVER_PUBLIC
+        ipv6_address: $IPV6_IP_MOCK_RESOLVER_PUBLIC
 
     # null route external DNS queries to isolate tests
     dns: 192.0.2.1

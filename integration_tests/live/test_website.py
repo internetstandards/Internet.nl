@@ -46,6 +46,9 @@ def test_your_website_score(page, app_url, test_domain):
 @pytest.mark.parametrize("probe", ALL_PROBES)
 def test_your_website_probe_success(page, app_url, test_domain, probe):
     page.goto(f"{app_url}/site/{test_domain}/")
+    # make sure the test has been started
+    page.get_by_text(f"Website test: {test_domain}")
+    # make sure the test is completed
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
     probe_result = page.locator(f"#site{probe}-results")

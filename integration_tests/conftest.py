@@ -35,3 +35,10 @@ def pytest_report_header(config):
         f"docker_version: {docker_version}",
         f"docker_compose_version: {docker_compose_version}",
     ]
+
+
+def print_red(*args):
+    """Color things red to make them stand out more in test output."""
+    print("\033[91m", end=None)
+    print(*args)
+    print("\033[0m", end=None)

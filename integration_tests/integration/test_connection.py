@@ -1,7 +1,9 @@
 """Basis functionality that should always be present."""
 import pytest
 from playwright.sync_api import expect
-from ..conftest import print_details_test_results
+from ..conftest import print_details_test_results, print_red
+
+from .conftest import print_results_url
 import requests
 import re
 
@@ -13,6 +15,9 @@ TEST_CONNECTION_EXPECTED_SCORE = 50.0
 
 def test_your_connection_score(page, app_url, app_domain):
     """Runs the 'Test your connection' and expects a decent result."""
+
+    # print failed requests
+    page.on("requestfailed", lambda request: print_red("Request failed:", request.url, request.failure))
 
     page.goto(app_url)
 
@@ -27,6 +32,12 @@ def test_your_connection_score(page, app_url, app_domain):
     score = page.locator("div.testresults-percentage")
 
     print_details_test_results(page)
+    print_results_url(page)
+    print(
+        "\nScreenshot, video and `trace.zip` can be found in `./test-results/`. "
+        "Run using `make integration-test-trace` for trace.zip file. Upload trace file to: "
+        "https://trace.playwright.dev for viewing."
+    )
 
     expect(score).to_have_attribute("data-resultscore", str(TEST_CONNECTION_EXPECTED_SCORE))
 
