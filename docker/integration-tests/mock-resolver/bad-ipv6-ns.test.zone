@@ -1,0 +1,20 @@
+; Zone used for both ipv4+ipv6 and ipv6 only delegation
+		SOA ns.nlnetlabs.nl. ralph.nlnetlabs.nl. (
+			4 ; serial - do not remove this command, used for resigning!
+			14400
+			3600
+			604800
+			3600
+)
+
+    NS good-ns1
+    NS bad-ns1
+    NS bad-ns2
+
+good-ns1  A 172.43.0.114
+good-ns1  AAAA fd00:43:1::114
+bad-ns1  AAAA fd00:90::1
+bad-ns2  AAAA fd00:90::2
+
+* A 172.43.0.51
+  AAAA fd00:43:1::51

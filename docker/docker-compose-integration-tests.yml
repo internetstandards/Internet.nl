@@ -144,6 +144,7 @@ services:
     volumes:
       - ./integration-tests/mock-resolver/mock.conf:/opt/unbound/etc/unbound/mock.conf
       - ./integration-tests/mock-resolver/test.zone:/opt/unbound/etc/unbound/test.zone
+      - ./integration-tests/mock-resolver/bad-ipv6-ns.test.zone:/opt/unbound/etc/unbound/bad-ipv6-ns.test.zone
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/mock.conf", "status"]

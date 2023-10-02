@@ -42,3 +42,13 @@ ns.test-ns6-signed.internet AAAA                 fd00:43:1::101
 *.mail-target           MX                   10 mx.mail-target.test.
 mx.mail-target          A                    172.43.0.52
                         AAAA                 fd00:43:1::52
+
+; unhappy flows
+; badly configured IPv6 DNS servers
+bad-ipv6-ns             NS                   good-ns1.bad-ipv6-ns
+                        NS                   bad-ns2.bad-ipv6-ns
+                        NS                   bad-ns3.bad-ipv6-ns
+good-ns1.bad-ipv6-ns    A                    172.43.0.114
+good-ns1.bad-ipv6-ns    AAAA                 fd00:43:1::114
+bad-ns2.bad-ipv6-ns     AAAA                 fd00:90::1
+bad-ns3.bad-ipv6-ns     AAAA                 fd00:90::2
