@@ -330,6 +330,13 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+    healthcheck:
+      test: ["CMD", "pgrep", "celery"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
 
   redis:
     image: ${DOCKER_IMAGE_REDIS:-redis:7.0-alpine}
@@ -400,15 +407,19 @@ services:
       public-internet: {}
     volumes:
       - routinator:/home/routinator/.rpki-cache/
-    # TODO: disabled because it takes a long time to start, needs refactoring like splitting up the api and sync parts
-    # healthcheck:
-    #   test: wget -q -O/dev/null http://127.0.0.1:9556/api/v1/status
-    #   interval: $HEALTHCHECK_INTERVAL
-    #   # TODO: waiting for: https://github.com/docker/compose/issues/10830
-    #   # start_interval: 5s
-    #   # routinator has to rsync a lot of data initally which can take a long time
-    #   start_period: 30m
-    #   retries: 10
+
+    healthcheck:
+      # verify routinator webserver is responsive
+      test: wget -q -O/dev/null http://127.0.0.1:9556/
+      # TODO: should verify the API endpoint status, but because it takes a long time to start
+      # needs refactoring like splitting up the api and sync parts
+      # test: wget -q -O/dev/null http://127.0.0.1:9556/api/v1/status
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      # routinator has to rsync a lot of data initally which can take a long time
+      start_period: 30m
+      retries: 10
 
   # unbound DNS server used for connection test
   unbound:

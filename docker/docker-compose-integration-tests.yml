@@ -57,7 +57,7 @@ services:
       unbound:
         condition: service_healthy
       beat:
-        condition: service_started
+        condition: service_healthy
       test-target:
         condition: service_healthy
       mail-test-target:
