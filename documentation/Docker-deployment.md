@@ -196,9 +196,9 @@ Or only for specific services:
 
 When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers:
 
-    env -i docker compose --project-name=internetnl-prod  ps
+    env -i docker compose --project-name=internetnl-prod  ps -a
 
-There should be no containers with `STATUS` of `unhealthy`.
+Containers should have a `STATUS` of `Up` and there should be no containers with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
 
 It might be possible not all containers that should be running are running. To have Docker Compose check the running instance and bring up any missing components run:
 
@@ -210,6 +210,10 @@ If this does not solve the issue you might want to reset the instance by bringin
     env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
 
 If this does not work problems might lay deeper and OS level troubleshooting might be required.
+
+## Autohealing
+
+Critial services/containers have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
 
 ### Known issues
 
@@ -281,6 +285,48 @@ Besides the single scan webpage, the Internet.nl application also contains a Bat
 The default deployment includes a metrics collection system. It consists of a Prometheus metrics server with various exporters and a Grafana frontend. To view metrics and graphs visit: `https://example.com/grafana/`. Authentication is configured using the `MONITORING_AUTH` variable.
 
 Also see: [Metrics](Docker-metrics.md)
+
+## Monitoring/alerting
+
+Though the metrics collection system described above can be used for monitoring on the application level it is not suited for alerting or monitoring when the system is under cricital load, due to it running within the same Docker environment.
+
+For the best reliability it is advised to setup monitoring checks external to the server to verify the health of the application components. Because this is very specific to the environment in which the server is running we can only provide generic instructions on what to monitoring.
+
+Basic system checks:
+
+- CPU
+- memory/swap
+- free disk space on `/var`
+
+All stateful data resides in persistent Docker volumes under `/var/lib/docker/volumes`, a large amount of non-stateful data (ie: images/container volumes) is stored under `/var/lib/docker`.
+
+- Docker daemon status
+
+Because the entire application runs in the Docker container engine it should be monitored for running status. For this check the systemd state of the `docker` unit with for example:
+
+	systemctl is-active docker
+
+This will return a 0 exit code if everything is as expected. Due to Docker being configured with `live-restore`, the daemon itself being down has no direct and immediate impact on the application. But selfhealing behaviour and further interaction with the services will be unavailable.
+
+- Critital application services/containers status
+
+All services/containers critical to the application's primary functionality have a Docker healthcheck configured. This will run at an configured interval to verify the proper operation of the service.
+
+To verify the health status of the critial services use these commands:
+
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-webserver-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-app-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-worker-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-beat-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-postgres-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-redis-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-rabbitmq-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-unbound-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-routinator-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-resolver-permissive-1|grep -qw healthy
+	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-resolver-validating-1|grep -qw healthy
+
+The services `webserver`, `app`, `postgres` and `redis` are critical for the user facing HTTP frontend, no page will show if these are not running. The services `worker`, `rabbitmq`, `routinator`, `unbound`, `resolver-permissive` and `resolver-validating` are additionally required for new tests to be performed. The `beat` service is required for updating hall-of-fame. For Batch Deployment this is however a critical service to schedule batch tests submitted via the API.
 
 ## Restricting access
 
