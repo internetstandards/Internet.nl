@@ -142,6 +142,7 @@ RUN apt update && \
     iproute2 \
     # healthcheck
     netcat \
+    procps \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
 
