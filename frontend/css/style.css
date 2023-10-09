@@ -1371,28 +1371,6 @@ footer ul li:last-child {
 
 /* ============ */
 /* social media */
-.tweet {
-  background: url('/static/icon-twitter.svg');
-  background: url('/static/icon-twitter.png');
-  background-color: #e3e3e3;
-  background-repeat: no-repeat;
-  background-position: 5px center;
-  background-size: 1.25em 1.25em;
-  color: #ffffff;
-  padding: .1em .75em .15em 2em;
-  border: solid .15em #e3e3e3;
-  border-radius: 1em;
-  font-family: 'robotobold', arial, sans-serif;
-  font-weight: bold;
-  font-size: 100%;
-  text-decoration: none;
-  display: block;
-  float: right;
-}
-.tweet:hover {
-  background-color: #ffffff
-}
-
 .mastodonfollow {
   background: url('/static/uxwing/icon-mastodonfollow-small.png');
   background-color: transparent;
