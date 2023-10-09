@@ -479,5 +479,10 @@ class HeaderCheckerReferrerPolicyTestCase(SimpleTestCase):
             self._has_recommendations(policy)
 
     def test_multiple_policies(self):
-        self._is_bad("same-origin,no-referrer")
-        self._is_bad("same-origin,unsafe-url")
+        results = self.checker.get_positive_values()
+        self.checker.check("same-origin,same-origin", results, "example.nl")
+        self.assertTrue(results[self.enabled])
+
+        results = self.checker.get_positive_values()
+        self.checker.check("same-origin,unsafe-url", results, "example.nl")
+        self.assertFalse(results[self.enabled])
