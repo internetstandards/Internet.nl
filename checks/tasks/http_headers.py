@@ -684,23 +684,27 @@ class HeaderCheckerReferrerPolicy:
         Check if the header has any of the allowed values.
 
         """
-        if not value:
+        if not value or not value.strip():
             # Empty string defaults to strict-origin-when-cross-origin
             results.update(self.get_result(values=[], recommendations=[{"msgid": "no-policy"}]))
         else:
-            if value in self.good_policies:
-                results.update(self.get_result(values=[value]))
-            elif value in self.recommendation_policies:
+            # May contain multiple policies for fallback, evaluate last value
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy#specify_a_fallback_policy
+            values = [v.strip() for v in value.split(",")]
+            significant_value = values[-1]
+            if significant_value in self.good_policies:
+                results.update(self.get_result(values=values))
+            elif significant_value in self.recommendation_policies:
                 results.update(
                     self.get_result(
-                        values=[value],
+                        values=values,
                         recommendations=[{"msgid": f"recommendation-{value}"}],
                     )
                 )
-            elif value in self.bad_policies:
-                results.update(self.get_result(values=[value], errors=[{"msgid": f"bad-{value}"}]))
+            elif significant_value in self.bad_policies:
+                results.update(self.get_result(values=values, errors=[{"msgid": f"bad-{significant_value}"}]))
             else:
-                results.update(self.get_result(values=[value], errors=[{"msgid": "bad-invalid"}]))
+                results.update(self.get_result(values=values, errors=[{"msgid": "bad-invalid"}]))
 
     def get_result(self, values, errors=None, recommendations=None, enabled=None):
         score = scoring.WEB_APPSECPRIV_REFERRER_POLICY_BAD if errors else scoring.WEB_APPSECPRIV_REFERRER_POLICY_GOOD
