@@ -49,3 +49,14 @@ server {
         root   /usr/share/nginx/html;
     }
 }
+
+# serve mock for publicsuffix.org in integration test environment
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  publicsuffix.org;
+
+    location /static/ {
+        alias /var/www/static/;
+    }
+}
