@@ -20,7 +20,6 @@ nav,
 aside,
 .footlink,
 .panel-button-container,
-.tweet,
 .panel-title a .icon,
 .timestamp,
 #site-description {
@@ -74,7 +73,6 @@ div[aria-hidden=true] {
 main,
 .mainwrap,
 .testresults,
-.tweet,
 .body-with-semifixed-header {
   background-color: #ffffff  !important;
 }

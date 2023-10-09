@@ -8,11 +8,6 @@
   {{block.super}}
 {% endblock %}
 
-{% block testmiddlecontent %}
-    {% expand "mail tweetmessage" as tweetmessage %}
-    {{block.super}}
-{% endblock %}
-
 {% block testdetailitems%}
   {% if probe.name == 'mailipv6' %}
     <div class="test-subsection">

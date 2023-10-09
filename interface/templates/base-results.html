@@ -59,7 +59,6 @@
       </ul>
       {% block testmiddlecontent %}
           <div class="timestamp">
-            <span><a class="tweet" href="https://twitter.com/intent/tweet?url={{permalink}}&amp;text={% translate tweetmessage %}">Tweet</a></span>
             <a href="{% url "faqs_report" %}" class="icon-testinfo">{% include "string.html" with name="results test-info" %}</a>
             <br>
             <a href="{{permalink}}" class="permalink">{% include "string.html" with name="results permalink" %}</a>
