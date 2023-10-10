@@ -12,36 +12,6 @@ jobs:
   build-docker:
     runs-on: ubuntu-22.04
 
-    strategy:
-      # limit otherwise we will get timeout errors during builds
-      # max-parallel: 4
-      matrix:
-        include:
-          - image: ghcr.io/internetstandards/internet.nl
-            dockerfile: docker/Dockerfile
-            target: app
-          - image: ghcr.io/internetstandards/unbound
-            dockerfile: docker/Dockerfile
-            target: unbound
-          - image: ghcr.io/internetstandards/linttest
-            dockerfile: docker/Dockerfile
-            target: linttest
-          - image: ghcr.io/internetstandards/test-runner
-            dockerfile: docker/test-runner.Dockerfile
-            target:
-          - image: ghcr.io/internetstandards/webserver
-            dockerfile: docker/webserver.Dockerfile
-            target:
-          - image: ghcr.io/internetstandards/rabbitmq
-            dockerfile: docker/rabbitmq.Dockerfile
-            target:
-          - image: ghcr.io/internetstandards/grafana
-            dockerfile: docker/grafana.Dockerfile
-            target:
-          - image: ghcr.io/internetstandards/prometheus
-            dockerfile: docker/prometheus.Dockerfile
-            target:
-
     outputs:
       internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}
 
@@ -78,51 +48,63 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build ${{ matrix.image }}
-        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 15
-        uses: docker/build-push-action@v5
+      - name: Build images
+        run: RELEASE=${{ steps.get_version.outputs.internetnl_version }} make build
+
+      - name: Save images to file
+        run: RELEASE=${{ steps.get_version.outputs.internetnl_version }} make images-save
+
+      - name: Save Docker images to cache for consequent jobs
+        uses: actions/upload-artifact@v3
         with:
-          context: .
-          file: ${{ matrix.dockerfile }}
-          target: ${{ matrix.target }}
-          load: true
-          # tag image with current setuptools_scm generated version
-          # also always tag 'latest', but this is not always pushed (see below)
-          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
-          tags: |
-            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:latest
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          name: images
+          path: "*.tar"
 
-          cache-from: |
-            type=gha
-            ${{ matrix.image }}:latest
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-          cache-to: type=gha,mode=max,ignore-error=true
-          # makes build images better usable as cache by allowing individual layers to be pulled from cache
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
-            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+      # - name: Build ${{ matrix.image }}
+      #   # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+      #   timeout-minutes: 15
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: ${{ matrix.dockerfile }}
+      #     target: ${{ matrix.target }}
+      #     load: true
+      #     # tag image with current setuptools_scm generated version
+      #     # also always tag 'latest', but this is not always pushed (see below)
+      #     # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
+      #     tags: |
+      #       ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+      #       ${{ matrix.image }}:latest
+      #       ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+      #
+      #     cache-from: |
+      #       type=gha
+      #       ${{ matrix.image }}:latest
+      #       ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+      #     cache-to: type=gha,mode=max,ignore-error=true
+      #     # makes build images better usable as cache by allowing individual layers to be pulled from cache
+      #     build-args: |
+      #       BUILDKIT_INLINE_CACHE=1
+      #       INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push ${{ matrix.image }} version
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        run: docker push ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-
-      - name: Push ${{ matrix.image }} latest release
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        # push 'latest' only for versioned
-        if: github.event_name == 'release'
-        run: docker push ${{ matrix.image }}:latest
-
-      - name: Push branch/pr tag
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        run: docker push ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+      # - name: Push ${{ matrix.image }} version
+      #   # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+      #   timeout-minutes: 10
+      #   run: docker push ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+      #
+      # - name: Push ${{ matrix.image }} latest release
+      #   # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+      #   timeout-minutes: 10
+      #   # push 'latest' only for versioned
+      #   if: github.event_name == 'release'
+      #   run: docker push ${{ matrix.image }}:latest
+      #
+      # - name: Push branch/pr tag
+      #   # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+      #   timeout-minutes: 10
+      #   run: docker push ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
 
   docs:
     runs-on: ubuntu-22.04
@@ -148,13 +130,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
       PY_COLORS: "1"
 
     steps:
@@ -174,9 +150,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull docker images
+      - name: Fetch Docker images build in previous job from cache
+        uses: actions/download-artifact@v3
+        with:
+          path: .
+
+      - name: Load docker images
+        run: make images-load
+
+      - name: Pull remaining docker images
         # build env includes all images
-        run: make pull env=build
+        run: make pull env=build pull_args=--ignore-buildable
 
       - name: Start test instance
         run: make up env=test
@@ -224,7 +208,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -248,7 +232,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -261,9 +245,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull docker images
+      - name: Fetch Docker images build in previous job from cache
+        uses: actions/download-artifact@v3
+        with:
+          path: .
+
+      - name: Load docker images
+        run: make images-load
+
+      - name: Pull remaining docker images
         # build env includes all images
-        run: make pull env=build
+        run: make pull env=build pull_args=--ignore-buildable
 
       - name: Run test
         run: make test
@@ -279,13 +271,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -298,9 +284,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull docker images
+      - name: Fetch Docker images build in previous job from cache
+        uses: actions/download-artifact@v3
+        with:
+          path: .
+
+      - name: Load docker images
+        run: make images-load
+
+      - name: Pull remaining docker images
         # build env includes all images
-        run: make pull env=build
+        run: make pull env=build pull_args=--ignore-buildable
 
       - name: Start development environment
         run: make up env=develop
@@ -339,3 +333,5 @@ jobs:
           path: docker-compose.log
           if-no-files-found: ignore
 
+
+      # - name: publish image
