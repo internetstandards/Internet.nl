@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.8.0
+
+- A new [Docker based deployment, development, testing and CI setup](https://github.com/internetstandards/Internet.nl/pull/890) has been added to replace all previous processes. See the [getting started guide](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-getting-started.md) for how to use this.
+- The test for Referrer-Policy has been updated to [check for a sufficiently secure and valid policy](https://github.com/internetstandards/Internet.nl/issues/357).
+- The security.txt test now [checks the Canonical field](https://github.com/internetstandards/Internet.nl/issues/772) as well.
+- Updated to [version 0.8.3 of the sectxt library](https://github.com/DigitalTrustCenter/sectxt) including validation of CSAF fields.
+- RFC9091 np= is now [permitted in DMARC policies](https://github.com/internetstandards/Internet.nl/issues/876).
+- The Content-Security-Policy check now [requires explicit https: scheme](https://github.com/internetstandards/Internet.nl/issues/810) and an issue was fixed where ['none' combined with other sources](https://github.com/internetstandards/Internet.nl/issues/913) was incorrectly accepted.
+- The IPv4/IPv6 similarity test was [relaxed to a notice](https://github.com/internetstandards/Internet.nl/issues/485) when the response contents are different.
+- Fixed [incorrect handling of IPv6-mapped IPv4 addresses](https://github.com/internetstandards/Internet.nl/issues/824) in the RPKI test.
+- [Improved attributes in input fields](https://github.com/internetstandards/Internet.nl/issues/943) for improved user experience.
+- Fixed an [issue in footer alignment](https://github.com/internetstandards/Internet.nl/issues/494).
+
+This release has API version 2.4.0:
+- The `referrer_policy_errors` and `referrer_policy_recommendations` fields were added.
+  These contain errors and/or recommendations regarding the Referrer-Policy test.
+
 ## 1.7.1
 
 - Fixed the new [display of TLS versions](https://github.com/internetstandards/Internet.nl/issues/944) for mail tests. 
