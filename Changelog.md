@@ -2,7 +2,7 @@
 
 ## 1.8.0
 
-- A new [Docker based deployment, development, testing and CI setup ](https://github.com/internetstandards/Internet.nl/pull/890)has been added to replace all previous processes. See the [getting started guide](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-getting-started.md) for how to use this.
+- A new [Docker based deployment, development, testing and CI setup](https://github.com/internetstandards/Internet.nl/pull/890) has been added to replace all previous processes. See the [getting started guide](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-getting-started.md) for how to use this.
 - The test for Referrer-Policy has been updated to [check for a sufficiently secure and valid policy](https://github.com/internetstandards/Internet.nl/issues/357).
 - The security.txt test now [checks the Canonical field](https://github.com/internetstandards/Internet.nl/issues/772) as well.
 - Updated to [version 0.8.3 of the sectxt library](https://github.com/DigitalTrustCenter/sectxt) including validation of CSAF fields.
@@ -13,6 +13,9 @@
 - [Improved attributes in input fields](https://github.com/internetstandards/Internet.nl/issues/943) for improved user experience.
 - Fixed an [issue in footer alignment](https://github.com/internetstandards/Internet.nl/issues/494).
 
+This release has API version 2.4.0:
+- The `referrer_policy_errors` and `referrer_policy_recommendations` fields were added.
+  These contain errors and/or recommendations regarding the Referrer-Policy test.
 
 ## 1.7.1
 
