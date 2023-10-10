@@ -434,7 +434,17 @@ DOCKER_COMPOSE_BUILD_CMD=docker compose ${compose_args} \
 	--env-file=docker/build.env
 
 build docker-compose-build:
-	${DOCKER_COMPOSE_BUILD_CMD} build --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+	${DOCKER_COMPOSE_BUILD_CMD} build --build-arg=BUILDKIT_INLINE_CACHE=1 --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+
+# save docker images used by project to disk (for Github CI)
+images-save docker-images-save:
+	docker save --output=/tmp/images.tar $$(docker image ls --format "{{.Repository}}:{{.Tag}}" ghcr.io/internetstandards/\*:$$RELEASE)
+
+images-load docker-images-load:
+	docker load --input /tmp/images.tar
+
+push docker-compose-push:
+	${DOCKER_COMPOSE_BUILD_CMD} push ${services}
 
 docker-compose:
 	${DOCKER_COMPOSE_CMD} ${args}

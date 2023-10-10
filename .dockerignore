@@ -8,5 +8,6 @@ test-results/*
 vendor/openssl-master/fuzz/*
 vendor/openssl-master/test/*
 vendor/openssl-master/doc/*
+vendor/*/.git
 unbound/testdata/*
 .venv/*

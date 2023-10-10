@@ -8,6 +8,10 @@ services:
     image: ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+      # cache_from:
+      #   - type=gha
+      #   - ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:latest}
       dockerfile: docker/webserver.Dockerfile
     restart: unless-stopped
     networks:
@@ -56,6 +60,10 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
@@ -148,6 +156,10 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
       dockerfile: docker/Dockerfile
       target: app
     networks:
@@ -182,6 +194,10 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
@@ -274,6 +290,10 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
@@ -358,6 +378,10 @@ services:
     image: ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:latest}
       dockerfile: docker/rabbitmq.Dockerfile
     restart: unless-stopped
     user: rabbitmq
@@ -426,6 +450,10 @@ services:
     image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
       dockerfile: docker/Dockerfile
       target: unbound
     depends_on:
@@ -465,6 +493,10 @@ services:
     image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
       dockerfile: docker/Dockerfile
       target: unbound
 
@@ -490,6 +522,10 @@ services:
     image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
       dockerfile: docker/Dockerfile
       target: unbound
 
@@ -514,6 +550,10 @@ services:
     image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:latest}
       dockerfile: docker/grafana.Dockerfile
 
     environment:
@@ -547,6 +587,10 @@ services:
     image: ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:${RELEASE:-latest}}
     build:
       context: ..
+        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
+        # cache_from:
+        # - type=gha
+        # - ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:latest}
       dockerfile: docker/prometheus.Dockerfile
 
     command:
