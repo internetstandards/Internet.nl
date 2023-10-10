@@ -83,7 +83,7 @@ jobs:
       - name: Build ${{ matrix.image }}
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ${{ matrix.dockerfile }}
