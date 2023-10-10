@@ -809,7 +809,7 @@ components:
             type: string
         referrer_policy_enabled:
           type: boolean
-          description: If the Referrer-Policy header is set by the server.
+          description: If a valid Referrer-Policy header is set by the server.
         referrer_policy_values:
           type: array
           description: >
@@ -817,6 +817,18 @@ components:
             behavior.
           items:
             type: string
+        referrer_policy_errors:
+          type: array
+          description: >
+            Errors found in the evaluation of the Referrer-Policy header.
+          items:
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
+        referrer_policy_recommendations:
+          type: array
+          description: >
+            Recommendations found in the evaluation of the Referrer-Policy header.
+          items:
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
         securitytxt_enabled:
           type: boolean
           description: If an RFC9116 security.txt file was found
