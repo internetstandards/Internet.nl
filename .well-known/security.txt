@@ -1,5 +1,5 @@
 -----BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Hash: SHA512
 
 # Canonical URLs
 Canonical: https://internet.nl/.well-known/security.txt
@@ -20,28 +20,29 @@ Canonical: https://ipv6kaart.internet.nl/.well-known/security.txt
 Canonical: https://matomo.internet.nl/.well-known/security.txt
 
 # Our security address
-Contact: https://internet.nl/disclosure/
+Contact: mailto:question@internet.nl
 
 # Our OpenPGP key
-Encryption: https://internet.nl/disclosure/
+Encryption: https://internet.nl/static/question@internet.nl_0x45028563.asc
 
 # Our security policy
 Policy: https://internet.nl/disclosure/
 
-Expires: 2023-10-10T00:00:00z
+Expires: 2024-10-10T00:00:00Z
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCAAdFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmNEYVUACgkQ2JThX0UC
-hWP2LBAAoLWdySTKn8uCH/paoWoXEpbmPGw14pfEbXQfZcjV+VIO5iWqCX9ZTbfz
-Q7Ca5MWl4rJuTxJr6KYy59PyzC7nG/FuAWFPQTpEFzpK6mZZUi1mT6MFNUp/QI0o
-gJNy+XLJjiqeNb3bCCDJ5xhtDflSnSpjk4gR3Ss7aH7iqi+MOl45u/w0R8C057Fs
-Bt5ukfIlK1exUImmX0XU/ckc5oCfemnIX10Ltcz5WAbRkPhIZj6xf6QkOHfgG4l2
-ws0rkh05ucUs1X7LB5JirzebflVTG0vUjS1WJffiUJ+pBEGn4RqRnH1P8hSJvfIE
-mQCTls3csoeRlU7oj433LyqBzvf6yBnbowidsQFxgp/Cq8TTb/+SY4xiMtNUwwks
-tINxIRSzPCLNztftJqNV0pnR/CSW2q2oZOaVxsCdy1N0DfsQo637e4B6xj0LUYvN
-fcr/9B9mM3UUGiOqMDPfqDqUYR1YRjQh/4x/6wZ+axVZ5y8xuuHqfWkeJQfN++e+
-QZeu33lv4vK+1Pc0y9sncH21wsnf8DB7AwePrKdf1h1yScaZbMseuOV5hxLi80Js
-oLqZFoK6Ap23g89iR1995zw2ja5apvulqPy5EWVkaN52ibikl8BanFJkhcSDCw/W
-zYbgmZQ8WPHYUK9XbLfSuG/i55/9R8SXiWD7RDYJ2J0ZLhkyxAg=
-=hnNz
+iQJJBAEBCgAzFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmUlEpgVHHF1ZXN0aW9u
+QGludGVybmV0Lm5sAAoJENiU4V9FAoVjqI4P/2GmGBLomI45levzqiBg1DIZr1je
+zIdk0WXBDM+YTdN3VkHQwgz2KZsO+yFR/F8m0iXI47pr9I7iYFCCvp4Gdk7s8QYe
+9geCYIrd0hT+0cCQwXD74AKKGcuEKJSFNK/f0ujgZii3WcQFZxZfTAhrzTLgWjlm
+IPENJNCYKQovEkKguxZ4F39BQZNJ4joEjR3Tpg6JfIApE919UAmdYHeJfSvu41Zf
+TumEvIa/O8O40huA62PreDy9I/pTAWCnh+AofoDbTz/Pbt71Aj/JhYesKYcjgXgL
+aLsh1o3e9gITHpv+o9qNzaumy0N9D5WBnYbo8PKMLuDxEFOHA2QQK3EtHRaOVNfT
+h4gmgVTh34BG7mNQxqzfP4HjhOn4Gl0IGFAo4UPd/KZlnRgQZpxbOD2f+ED1Nw4G
+JKkUS5hkcXQpfNNoAoVMYA61MmnTe82tJkQ7n2TDAx56Cql0lAs3d5fWRuwdOJQQ
+GnuAND3KrJJfWJUMULaxn15HZQQah1ucGk35M++XoxbhLDTkgro4EOGLJxUWdIdr
+9iO0GQc1HzJyCHzW1ahgMXUIDACsFt8XZ9iDQOKaJtUOvHXUcJqD4O3dRbyLmOrP
+ruWoAREFaFyFXgd3N+n4uj/90spJC7rtsuopy1/xD8AZdeCLgql0X/Oza8MOgLqy
+qC6nSCS6rC9TfEP4
+=LlYT
 -----END PGP SIGNATURE-----
