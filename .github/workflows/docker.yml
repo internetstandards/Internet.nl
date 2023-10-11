@@ -134,7 +134,7 @@ jobs:
           cat >> $GITHUB_STEP_SUMMARY <<EOF
           To deploy this branch to a existing deployment run the following update commands:
 
-              RELEASE="${{ github.head_ref }}"
+              RELEASE="${{ github.head_ref }}" && \\
               cd /opt/Internet.nl/ && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/defaults.env && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/docker-compose.yml && \\
