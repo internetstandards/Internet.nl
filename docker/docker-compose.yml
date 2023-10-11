@@ -10,6 +10,10 @@ services:
       context: ..
       dockerfile: docker/webserver.Dockerfile
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
@@ -59,6 +63,10 @@ services:
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_APP_INTERNAL
@@ -155,6 +163,10 @@ services:
     command: migrate
     # this container runs to completion and exits with 0
     restart: on-failure
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     depends_on:
       postgres:
         condition: service_healthy
@@ -185,6 +197,10 @@ services:
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       - internal
       - public-internet
@@ -277,6 +293,10 @@ services:
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       - internal
       - public-internet
@@ -341,6 +361,10 @@ services:
   redis:
     image: ${DOCKER_IMAGE_REDIS:-redis:7.0-alpine}
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_REDIS_INTERNAL
@@ -360,6 +384,10 @@ services:
       context: ..
       dockerfile: docker/rabbitmq.Dockerfile
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     user: rabbitmq
     networks:
       internal:
@@ -381,6 +409,10 @@ services:
   postgres:
     image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.3-alpine}
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_POSTGRES_INTERNAL
@@ -401,6 +433,10 @@ services:
   routinator:
     image: ${DOCKER_IMAGE_ROUTINATOR:-nlnetlabs/routinator:v0.12.1}
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
@@ -433,6 +469,10 @@ services:
         condition: service_healthy
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
@@ -472,6 +512,10 @@ services:
     command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf"]
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
@@ -497,6 +541,10 @@ services:
     command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf"]
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
@@ -539,6 +587,10 @@ services:
       - grafana-data:/var/lib/grafana
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
@@ -556,6 +608,10 @@ services:
       - --web.enable-admin-api
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_PROMETHEUS_INTERNAL
@@ -570,6 +626,10 @@ services:
       - DATA_SOURCE_NAME=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$IPV4_IP_POSTGRES_INTERNAL:5432/$POSTGRES_DB?sslmode=disable
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       - internal
 
@@ -580,6 +640,10 @@ services:
       - REDIS_ADDR=redis://$IPV4_IP_REDIS_INTERNAL:6379
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       - internal
 
@@ -591,6 +655,10 @@ services:
       - --statsd.listen-tcp=:8125
 
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       internal:
         ipv4_address: $IPV4_IP_STATSD_INTERNAL
@@ -605,6 +673,10 @@ services:
       # retry connecting to broker on failure
       - --retry-interval=10
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     networks:
       - internal
     depends_on:
@@ -624,6 +696,10 @@ services:
       # ignore docker container interfaces
       - --collector.netclass.ignored-devices=veth
     restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
     pid: host
     networks:
       - internal

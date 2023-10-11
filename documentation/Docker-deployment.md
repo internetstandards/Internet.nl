@@ -192,6 +192,16 @@ Or only for specific services:
 
     docker compose --project-name=internetnl-prod logs -f app
 
+These same logs are also sent to the `journald` daemon to be logged by the OS. This can then be used to forward to remote logging, etc.
+
+To view the logs for a specific app through `journald`, eg. for the `app` service, run:
+
+	journalctl CONTAINER_NAME=internetnl-prod-app-1 --follow
+
+Or to view all logs related to the project use:
+
+	journalctl --follow | grep internetnl-prod-
+
 ## Troubleshooting/mitigation
 
 When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers:
