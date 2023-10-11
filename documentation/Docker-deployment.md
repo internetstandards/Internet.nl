@@ -63,7 +63,7 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
-    RELEASE=main
+    RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
@@ -186,17 +186,17 @@ For more information see: [documentation/Docker-live-tests.md](Docker-live-tests
 
 Log output from containers can be obtained using the following command:
 
-    env -i docker compose --project-name=internetnl-prod logs -f
+    docker compose --project-name=internetnl-prod logs -f
 
 Or only for specific services:
 
-    env -i docker compose --project-name=internetnl-prod logs -f app
+    docker compose --project-name=internetnl-prod logs -f app
 
 ## Troubleshooting/mitigation
 
 When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers:
 
-    env -i docker compose --project-name=internetnl-prod  ps -a
+    docker compose --project-name=internetnl-prod  ps -a
 
 Containers should have a `STATUS` of `Up` and there should be no containers with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
 
@@ -206,7 +206,7 @@ It might be possible not all containers that should be running are running. To h
 
 If this does not solve the issue you might want to reset the instance by bringing everything down and up again:
 
-    env -i docker compose --project-name=internetnl-prod down
+    docker compose --project-name=internetnl-prod down
     env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
 
 If this does not work problems might lay deeper and OS level troubleshooting might be required.
@@ -225,13 +225,13 @@ Docker Compose relies on an internal DNS resolver to resolve container names so 
 
 The issue can be resolved by restarting the application:
 
-    env -i docker compose --project-name=internetnl-prod restart
+    docker compose --project-name=internetnl-prod restart
 
 ## Updating
 
 To update the application stack first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components, use the following commands:
 
-    RELEASE=main
+    RELEASE=main && \
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
@@ -242,7 +242,7 @@ This will update the deployment with the latest `main` branch. If you want to up
 
 To update to `v1.8.0`:
 
-    RELEASE=v1.8.0
+    RELEASE=v1.8.0 && \
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
@@ -251,7 +251,7 @@ To update to `v1.8.0`:
 
 To update to the latest build of the `feature-x` branch:
 
-    RELEASE=feature-x
+    RELEASE=feature-x && \
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
@@ -268,11 +268,11 @@ https://github.com/internetstandards/Internet.nl/blob/21baea392039ede54257f729cf
 
 By default the installation will try to request a HTTPS certificate with Letsencrypt for the domain and it's subdomains. If this is not possible it will fall back to a self-signed 'localhost' certificate. If requesting a certificate fails you can debug it by viewing the logs using:
 
-    env -i docker compose --project-name=internetnl-prod logs webserver
+    docker compose --project-name=internetnl-prod logs webserver
 
 and
 
-    env -i docker compose --project-name=internetnl-prod exec webserver "cat /var/log/letsencrypt/letsencrypt.log"
+    docker compose --project-name=internetnl-prod exec webserver "cat /var/log/letsencrypt/letsencrypt.log"
 
 It may take a few minutes after starting for the Letsencrypt certificates to be registered and loaded.
 

@@ -65,7 +65,7 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
-    RELEASE=main
+    RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
@@ -126,7 +126,7 @@ This command should complete without an error, indicating the application stack 
 
 Create database indexes:
 
-    env -i docker compose --project-name=internetnl-prodexec app ./manage.py api_create_db_indexes
+    docker compose --project-name=internetnl-prodexec app ./manage.py api_create_db_indexes
 
 ## Testing your installation
 
