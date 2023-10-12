@@ -15,6 +15,15 @@ jobs:
       internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}
 
     steps:
+      - name: Acquire some more disk space
+        run: |
+          # remove some unused things to make sure we don't hit disk space limit during Docker builds
+          # https://github.com/apache/arrow/blob/cc314b6b80467a128969ecd142a946d8628cf86f/ci/scripts/util_free_space.sh
+          # https://github.com/easimon/maximize-build-space/blob/master/action.yml
+          sudo rm -rf /usr/share/dotnet /usr/local/share/chromium /usr/local/share/powershell \
+            /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /opt/hostedtoolcache/go \
+            /opt/hostedtoolcache/node &
+
       - uses: actions/checkout@v3
         # include vendor/ submodules used to build dependencies like nassl and unbound
         with:
