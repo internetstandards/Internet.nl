@@ -8,10 +8,11 @@ services:
     image: ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-      # cache_from:
-      # - type=gha
-      # - ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -68,10 +69,11 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -172,10 +174,11 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -218,10 +221,11 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -322,10 +326,11 @@ services:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -422,10 +427,11 @@ services:
     image: ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -510,10 +516,11 @@ services:
     image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -561,10 +568,11 @@ services:
     image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -598,10 +606,11 @@ services:
     image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -634,10 +643,11 @@ services:
     image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
@@ -679,10 +689,11 @@ services:
     image: ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:${RELEASE:-latest}}
     build:
       context: ..
-        # TODO: is currently borken: https://github.com/moby/buildkit/issues/2041#issuecomment-1748507976
-        # cache_from:
-        # - type=gha
-        # - ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:latest}
+      cache_from:
+        - type=gha
+        - ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:latest}
+      cache_to:
+        - type=gha,mode=max,ignore-error=true
       args:
         # generate inline cache needed for `cache_from`
         - BUILDKIT_INLINE_CACHE=1
