@@ -446,7 +446,9 @@ images-load docker-images-load:
 	ls *.tar | xargs -n1 docker load --input
 
 push docker-compose-push:
-	${DOCKER_COMPOSE_BUILD_CMD} push ${services}
+	for image in $$(docker image ls --format "{{.Repository}}:{{.Tag}}" ghcr.io/internetstandards/\*:$$RELEASE);do \
+		docker push $$image; \
+	done
 
 docker-compose:
 	${DOCKER_COMPOSE_CMD} ${args}
@@ -536,7 +538,7 @@ batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
 
 integration-tests: env=test
 integration-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} integration_tests/integration/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=integration-test-results.xml ${_test_args} ${test_args} integration_tests/integration/
 
 integration-tests-verbose: _test_args=--verbose --verbose
 integration-tests-verbose: integration-tests
@@ -563,7 +565,7 @@ DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/docker-compose-test-runner-develo
 # this runs limited live test suite against the development environment to test its sanity
 develop-tests development-environment-tests:
 	APP_URLS=http://${docker_host}:8080  ${DOCKER_COMPOSE_DEVELOP_CMD} run --rm test-runner-development-environment \
-		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} integration_tests/develop/
+		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=develop-test-results.xml ${test_args} integration_tests/develop/
 
 develop-tests-shell:
 	${DOCKER_COMPOSE_DEVELOP_CMD} run --rm --entrypoint bash test-runner-development-environment
