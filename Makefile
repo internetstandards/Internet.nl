@@ -431,7 +431,7 @@ DOCKER_COMPOSE_BUILD_CMD=docker compose ${compose_args} \
 	--env-file=docker/build.env
 
 build docker-compose-build:
-	${DOCKER_COMPOSE_BUILD_CMD} build ${services}
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 ${DOCKER_COMPOSE_BUILD_CMD} build ${services}
 
 # save docker images used by project to disk (for Github CI)
 images-save docker-images-save:
