@@ -1,7 +1,7 @@
 services:
   # test runner intended to run live tests against targets on public internet
   test-runner-live:
-    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner}
+    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/test-runner.Dockerfile

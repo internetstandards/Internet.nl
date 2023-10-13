@@ -26,7 +26,7 @@ services:
 
   # test runner for integration tests in isolated environment
   test-runner:
-    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner}
+    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/test-runner.Dockerfile
