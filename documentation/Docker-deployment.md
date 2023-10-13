@@ -146,12 +146,8 @@ For the "Test your connection" test the following records are required:
     en.conn.ipv6.example.com       CNAME  ipv6.example.com
     www.conn.ipv6.example.com      CNAME  ipv6.example.com
 
-    test-ns-signed.example.com     NS     ns.test-ns-signed.example.com
-    ns.test-ns-signed.example.com  A      192.0.2.1
-                                   AAAA   2001:db8:1::1001
-
-    test-ns6-signed.example.com    NS     ns.test-ns6-signed.example.com
-    ns.test-ns6-signed.example.com AAAA   2001:db8:1::1001
+    test-ns-signed.example.com     NS     example.com
+    test-ns6-signed.example.com    NS     ipv6.example.com
 
 For connectin test two signed DNS zones are created and served by the application using Unbound. For this to work properly the delegating zone must also serve the correct `DS` records.
 
