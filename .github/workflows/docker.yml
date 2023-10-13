@@ -94,11 +94,11 @@ jobs:
           tags: |
             ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
             ${{ matrix.image }}:latest
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
             ${{ matrix.image }}:main
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
 
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           build-args: |
@@ -119,7 +119,7 @@ jobs:
           # push branch/pr tagged version for manual development/staging environment deployment
           tags: |
             ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           build-args: |
             BUILDKIT_INLINE_CACHE=1
@@ -152,12 +152,24 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
-          To deploy this branch to a existing deployment run the following update commands:
 
-              RELEASE="${{ github.head_ref }}" && \\
+          To deploy this specific build to a existing deployment run the following update commands:
+
+              export BRANCH="${{ github.sha }}" && \\
+              export INTERNETNL_VERSION="${{ steps.get_version.outputs.internetnl_version }}" && \\
               cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/docker-compose.yml && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
+              env -i RELEASE="\$INTERNETNL_VERSION" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              env -i RELEASE="\$INTERNETNL_VERSION" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
+          To deploy the latest build in PR branch to a existing deployment run the following update commands:
+
+              export BRANCH="${{ github.head_ref }}" && \\
+              export RELEASE="branch-$RELEASE" && \\
+              cd /opt/Internet.nl/ && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
