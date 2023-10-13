@@ -1,7 +1,7 @@
 services:
   # environment for checks, linting and unit tests
   test:
-    image: ${DOCKER_IMAGE_LINTTEST:-ghcr.io/internetstandards/linttest}
+    image: ${DOCKER_IMAGE_LINTTEST:-ghcr.io/internetstandards/linttest:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
