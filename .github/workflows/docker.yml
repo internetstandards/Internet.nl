@@ -7,6 +7,9 @@ on:
       - main
       - release/*
 
+env:
+  registry: ghcr.io/internetstandards
+
 jobs:
   # builds all docker images in parallel
   build-docker:
@@ -17,28 +20,28 @@ jobs:
       # max-parallel: 4
       matrix:
         include:
-          - image: ghcr.io/internetstandards/internet.nl
+          - image: internet.nl
             dockerfile: docker/Dockerfile
             target: app
-          - image: ghcr.io/internetstandards/unbound
+          - image: unbound
             dockerfile: docker/Dockerfile
             target: unbound
-          - image: ghcr.io/internetstandards/linttest
+          - image: linttest
             dockerfile: docker/Dockerfile
             target: linttest
-          - image: ghcr.io/internetstandards/test-runner
+          - image: test-runner
             dockerfile: docker/test-runner.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/webserver
+          - image: webserver
             dockerfile: docker/webserver.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/rabbitmq
+          - image: rabbitmq
             dockerfile: docker/rabbitmq.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/grafana
+          - image: grafana
             dockerfile: docker/grafana.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/prometheus
+          - image: prometheus
             dockerfile: docker/prometheus.Dockerfile
             target:
 
@@ -92,13 +95,13 @@ jobs:
           # also always tag 'latest', but this is not always pushed (see below)
           # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
           tags: |
-            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:latest
-            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ env.registry }}:${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}:${{ matrix.image }}:latest
+            ${{ env.registry }}:${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
-            ${{ matrix.image }}:main
-            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ env.registry }}:${{ matrix.image }}:main
+            ${{ env.registry }}:${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
 
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
@@ -123,8 +126,8 @@ jobs:
           # push versioned image for subsequent build steps
           # push branch/pr tagged version for manual development/staging environment deployment
           tags: |
-            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ env.registry }}:${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}:${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           build-args: |
             BUILDKIT_INLINE_CACHE=1
@@ -143,7 +146,7 @@ jobs:
           target: ${{ matrix.target }}
           push: true
           tags: |
-            ${{ matrix.image }}:latest
+            ${{ env.registry }}:${{ matrix.image }}:latest
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           build-args: |
             BUILDKIT_INLINE_CACHE=1
@@ -152,7 +155,7 @@ jobs:
       - name: Save image to disk
         # trigger only for forked PR's that don't have permissions to push to the container registry
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
-        run: docker save --output "$(echo ${{ matrix.image }} | sed 's/[^a-zA-Z0-9_]/_/g').tar" ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+        run: docker save --output "$(echo ${{ matrix.image }} | sed 's/[^a-zA-Z0-9_]/_/g').tar" ${{ env.registry }}:${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Upload image as build artifact
         # trigger only for forked PR's that don't have permissions to push to the container registry
