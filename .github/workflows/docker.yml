@@ -101,11 +101,16 @@ jobs:
             ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
 
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Push ${{ matrix.image }} version and branch/pr tags
+        # trigger only on release or non-forked PR's
+        if: >-
+          (github.event_name == 'release') ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
         # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs on
         # pushing the cache
         timeout-minutes: 10
@@ -144,12 +149,25 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
+      - name: Save image to disk
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: docker save --output "$(echo ${{ matrix.image }} | sed 's/[^a-zA-Z0-9_]/_/g').tar" ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+
+      - name: Upload image as build artifact
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.image }}
+          path: "*.tar"
+
   docs:
     runs-on: ubuntu-22.04
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
@@ -199,6 +217,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download images from artifacts
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/download-artifact@v3
+        with:
+          path: .
+
+      - name: Load images from artifacts
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: ls *.tar | xargs -n1 docker load --input
 
       - name: Pull docker images
         # build env includes all images
