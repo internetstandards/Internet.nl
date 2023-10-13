@@ -7,6 +7,9 @@ on:
       - main
       - release/*
 
+env:
+  registry: ghcr.io/internetstandards
+
 jobs:
   # builds all docker images in parallel
   build-docker:
@@ -17,28 +20,28 @@ jobs:
       # max-parallel: 4
       matrix:
         include:
-          - image: ghcr.io/internetstandards/internet.nl
+          - image: internet.nl
             dockerfile: docker/Dockerfile
             target: app
-          - image: ghcr.io/internetstandards/unbound
+          - image: unbound
             dockerfile: docker/Dockerfile
             target: unbound
-          - image: ghcr.io/internetstandards/linttest
+          - image: linttest
             dockerfile: docker/Dockerfile
             target: linttest
-          - image: ghcr.io/internetstandards/test-runner
+          - image: test-runner
             dockerfile: docker/test-runner.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/webserver
+          - image: webserver
             dockerfile: docker/webserver.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/rabbitmq
+          - image: rabbitmq
             dockerfile: docker/rabbitmq.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/grafana
+          - image: grafana
             dockerfile: docker/grafana.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/prometheus
+          - image: prometheus
             dockerfile: docker/prometheus.Dockerfile
             target:
 
@@ -80,7 +83,34 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build ${{ matrix.image }}
+      - name: Build ${{ matrix.image }} (for non-forked PR's')
+        # build for non-forked PR's that are allowed to use the registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          # tag image with current setuptools_scm generated version
+          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
+          tags: |
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          # use latest build from main, or image previously build by this PR for caching
+          cache-from: |
+            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          push: true
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+
+      - name: Build ${{ matrix.image }} (for release)
+        if: github.event_name == 'release'
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
@@ -92,84 +122,99 @@ jobs:
           # also always tag 'latest', but this is not always pushed (see below)
           # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
           tags: |
-            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:latest
-            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:latest
+            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
-            ${{ matrix.image }}:main
-            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-
+            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push ${{ matrix.image }} version and branch/pr tags
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs on
-        # pushing the cache
-        timeout-minutes: 10
+      - name: Build ${{ matrix.image }} (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          push: true
-          # push versioned image for subsequent build steps
-          # push branch/pr tagged version for manual development/staging environment deployment
+          # tag image with current setuptools_scm generated version
+          # also always tag 'latest', but this is not always pushed (see below)
+          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
           tags: |
-            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+          # use latest build from main, or image previously build by this PR for caching
+          cache-from: |
+            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          load: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
           build-args: |
-            BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push ${{ matrix.image }} latest release
-        # push 'latest' only for versioned releases
-        if: github.event_name == 'release'
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs on
-        # pushing the cache
-        timeout-minutes: 10
-        uses: docker/build-push-action@v5
+      - name: Save image to disk (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: docker save ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
+
+      - name: Upload image as build artifact (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/upload-artifact@v3
         with:
-          context: .
-          file: ${{ matrix.dockerfile }}
-          target: ${{ matrix.target }}
-          push: true
-          tags: |
-            ${{ matrix.image }}:latest
-          # makes build images better usable as cache by allowing individual layers to be pulled from cache
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
-            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+          name: "${{ matrix.image }}"
+          path: "${{ matrix.image }}.tar.gz"
 
   docs:
     runs-on: ubuntu-22.04
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
           To deploy this specific build to a existing deployment run the following update commands:
 
               export BRANCH="${{ github.sha }}" && \\
-              export INTERNETNL_VERSION="${{ steps.get_version.outputs.internetnl_version }}" && \\
+              export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
               cd /opt/Internet.nl/ && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
-              env -i RELEASE="\$INTERNETNL_VERSION" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              env -i RELEASE="\$INTERNETNL_VERSION" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
-          To deploy the latest build in PR branch to a existing deployment run the following update commands:
+          To deploy the latest build in this PR's branch to a existing deployment run the following update commands:
 
               export BRANCH="${{ github.head_ref }}" && \\
-              export RELEASE="branch-$RELEASE" && \\
+              export RELEASE="branch-${{ github.head_ref }}" && \\
               cd /opt/Internet.nl/ && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
+              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+          EOF
+
+      - name: Release deployment docs
+        if: github.event_name == 'release'
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+
+          To deploy this release to an existing deployment run the following update commands:
+
+              export RELEASE="${{ github.head_ref }}" && \\
+              cd /opt/Internet.nl/ && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$RELEASE/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$RELEASE/docker/docker-compose.yml && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
@@ -200,9 +245,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
       - name: Pull docker images
         # build env includes all images
-        run: make pull env=build
+        run: make pull env=build pull_args=--ignore-buildable
 
       - name: Start test instance
         run: make up env=test
@@ -264,6 +321,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
       - name: Run check
         run: /bin/bash -o pipefail -c 'make --silent check | tee -a $GITHUB_STEP_SUMMARY'
 
@@ -289,9 +358,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
       - name: Pull docker images
         # build env includes all images
-        run: make pull env=build
+        run: make pull env=build pull_args=--ignore-buildable
 
       - name: Run test
         run: make test
@@ -321,9 +402,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
       - name: Pull docker images
         # build env includes all images
-        run: make pull env=build
+        run: make pull env=build pull_args=--ignore-buildable
 
       - name: Start development environment
         run: make up env=develop
