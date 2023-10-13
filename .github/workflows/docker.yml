@@ -88,7 +88,6 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          load: true
           # tag image with current setuptools_scm generated version
           # also always tag 'latest', but this is not always pushed (see below)
           # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
@@ -96,33 +95,54 @@ jobs:
             ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
             ${{ matrix.image }}:latest
             ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-
+          # use latest build from main, or image previously build by this PR for caching
           cache-from: |
-            type=gha
-            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:main
             ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-          cache-to: type=gha,mode=max,ignore-error=true
+
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push ${{ matrix.image }} version
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+      - name: Push ${{ matrix.image }} version and branch/pr tags
+        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs on
+        # pushing the cache
         timeout-minutes: 10
-        run: docker push ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          push: true
+          # push versioned image for subsequent build steps
+          # push branch/pr tagged version for manual development/staging environment deployment
+          tags: |
+            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Push ${{ matrix.image }} latest release
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        # push 'latest' only for versioned
+        # push 'latest' only for versioned releases
         if: github.event_name == 'release'
-        run: docker push ${{ matrix.image }}:latest
-
-      - name: Push branch/pr tag
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
+        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs on
+        # pushing the cache
         timeout-minutes: 10
-        run: docker push ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          push: true
+          tags: |
+            ${{ matrix.image }}:latest
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
   docs:
     runs-on: ubuntu-22.04
@@ -140,7 +160,6 @@ jobs:
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/docker-compose.yml && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
-
           EOF
 
   integration-test:
@@ -148,13 +167,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
       PY_COLORS: "1"
 
     steps:
@@ -224,7 +238,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -248,7 +263,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -279,13 +295,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
