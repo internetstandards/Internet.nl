@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     strategy:
-      # limit otherwise we will get timeout errors during builds
-      # max-parallel: 4
       matrix:
         include:
           - image: internet.nl
@@ -60,7 +58,7 @@ jobs:
           git fetch --prune --unshallow
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -112,7 +110,7 @@ jobs:
 
       - name: Build ${{ matrix.image }} (for main)
         # build for pushes to the main branch
-        if: github.event_name == 'push' && github.ref == 'main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
