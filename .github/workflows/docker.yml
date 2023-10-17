@@ -83,9 +83,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build ${{ matrix.image }} (for non-forked PR's')
+      - name: Build ${{ matrix.image }} (for non-forked PR's)
         # build for non-forked PR's that are allowed to use the registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && ! startsWith(github.head_ref, 'dependabot/')
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
@@ -94,7 +94,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
           # tag image with current setuptools_scm generated version
-          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
+          # and tag with PR source branch (eg: feature-x)
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
             ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
@@ -102,6 +102,33 @@ jobs:
           cache-from: |
             ${{ env.registry }}/${{ matrix.image }}:main
             ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          # push images to registry
+          push: true
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+
+      - name: Build ${{ matrix.image }} (for main)
+        # build for pushes to the main branch
+        if: github.event_name == 'push' && github.ref == 'main'
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          # tag image with current setuptools_scm generated version
+          # and tag with current branch name (eg: main)
+          tags: |
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # use latest build from main for caching
+          cache-from: |
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
@@ -110,6 +137,7 @@ jobs:
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Build ${{ matrix.image }} (for release)
+        # build for tagged releases
         if: github.event_name == 'release'
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
@@ -118,17 +146,14 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          # tag image with current setuptools_scm generated version
-          # also always tag 'latest', but this is not always pushed (see below)
-          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
+          # tag image with current setuptools_scm generated version and tag 'latest'
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
             ${{ env.registry }}/${{ matrix.image }}:latest
-            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-          # use latest build from main, or image previously build by this PR for caching
+          # use latest build from main for caching
           cache-from: |
             ${{ env.registry }}/${{ matrix.image }}:main
-            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
@@ -136,9 +161,11 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Build ${{ matrix.image }} (for forked PR's)
-        # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+      - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
+        # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
@@ -147,28 +174,30 @@ jobs:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
           # tag image with current setuptools_scm generated version
-          # also always tag 'latest', but this is not always pushed (see below)
-          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-          # use latest build from main, or image previously build by this PR for caching
+          # use latest build from main for caching
           cache-from: |
             ${{ env.registry }}/${{ matrix.image }}:main
-            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+          # don't push to registry due to permissions, but store in Docker so can be exported for artifacts below
           load: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
           build-args: |
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Save image to disk (for forked PR's)
+      - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: docker save ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
 
-      - name: Upload image as build artifact (for forked PR's)
+      - name: Upload image as build artifact (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         uses: actions/upload-artifact@v3
         with:
           name: "${{ matrix.image }}"
@@ -181,7 +210,7 @@ jobs:
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && ! startsWith(github.head_ref, 'dependabot/')
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
@@ -247,20 +276,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download images from artifacts (for forked PR's)
+      - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         uses: actions/download-artifact@v3
         with:
           path: images/
 
-      - name: Load images from artifacts (for forked PR's)
+      - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Pull docker images
-        # build env includes all images
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build or previously build images from the registry for non-forked PR builds
+        # main and release builds
         run: make pull env=build pull_args=--ignore-buildable
 
       - name: Start test instance
@@ -323,16 +358,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download images from artifacts (for forked PR's)
+      - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         uses: actions/download-artifact@v3
         with:
           path: images/
 
-      - name: Load images from artifacts (for forked PR's)
+      - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Run check
@@ -360,16 +399,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download images from artifacts (for forked PR's)
+      - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         uses: actions/download-artifact@v3
         with:
           path: images/
 
-      - name: Load images from artifacts (for forked PR's)
+      - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Pull docker images
@@ -404,16 +447,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download images from artifacts (for forked PR's)
+      - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         uses: actions/download-artifact@v3
         with:
           path: images/
 
-      - name: Load images from artifacts (for forked PR's)
+      - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Pull docker images
