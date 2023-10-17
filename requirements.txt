@@ -86,7 +86,7 @@ gevent==23.9.0
     # via -r requirements.in
 gitdb==4.0.10
     # via gitpython
-gitpython==3.1.32
+gitpython==3.1.37
     # via -r requirements.in
 greenlet==3.0.0
     # via
