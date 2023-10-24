@@ -8,8 +8,8 @@ Django<4
 
 django-redis<5
 
-# 5.3 solves redis connection leak using the 'result_backend_thread_safe' option
-celery>5.3
+# 5.3.4 solves memory leak issues 
+celery>=5.3.4
 
 setuptools-rust
 beautifulsoup4
