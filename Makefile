@@ -33,7 +33,7 @@ else
 	POFILES_TAR_ARGS+=$(TAR)
 endif
 
-pysrcdirs = internetnl tests interface checks integration_tests
+pysrcdirs = internetnl tests interface checks integration_tests load_tests
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
 bin = .venv/bin
@@ -657,3 +657,19 @@ batch-api-add-user docker-compose-batch-api-add-user:
 
 test-%: env=test
 test-up test-down test-build test-stop: test-%: %
+
+locust=docker run --interactive --volume=$$PWD/load_tests:/load_tests --workdir=/load_tests --rm locustio/locust
+locust-file=locustfile.py
+load-test-runtime=10m
+load-test-users=60
+load-test-host=https://dev-docker.internet.nl
+load-test-classes=InternetnlVisitor
+
+load-test:
+	${locust} --locustfile=${locust-file} --headless --host=${load-test-host} --run-time=${load-test-runtime} --users=${load-test-users} ${load-test-classes}
+
+load-test-workers=5
+
+load-test-distributed:
+	for i in $$(seq ${load-test-workers});do ${locust} --locustfile ${locust-file} --worker --master-host=127.0.0.1& done
+	${locust} --locustfile=${locust-file} --headless --host=${load-test-host} --run-time=${load-test-runtime} --users=${load-test-users} ${load-test-classes} --master
