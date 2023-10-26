@@ -2,6 +2,7 @@ name: Internet.nl Docker
 
 on:
   pull_request:
+  release:
   push:
     branches:
       - main
