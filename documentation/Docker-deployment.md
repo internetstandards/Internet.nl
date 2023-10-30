@@ -244,31 +244,43 @@ To update the application stack first update the `docker/defaults.env` and `dock
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
-This will update the deployment with the latest `main` branch. If you want to update to a tagged version release or follow a specific development branch, adjust the value of `RELEASE` accordingly.
+This will update the deployment with the latest `main` branch and latest `main` packages.
 
-To update to `v1.8.0`:
+If you want to update to a tagged version release, e.g. `v1.8.0`, use the following commands:
 
-    RELEASE=v1.8.0 && \
+    RELEASE=1.8.0 && \
+	TAG=v1.8.0 && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
-To update to the latest build of the `feature-x` branch:
+To update to the latest build of the Pull Request branch use:
 
-    RELEASE=feature-x && \
+    BRANCH=feature-x
+	RELEASE=branch-feature-x && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH }/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH }/docker/docker-compose.yml && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
 
-### Updating to specific release
+## Downgrading/rollback
 
-https://github.com/internetstandards/Internet.nl/blob/21baea392039ede54257f729cf951d6d6e129199/docker/docker-compose.yml
+In essence downgrading is the same procedure as upgrading: determine the branch and release version, download those versions of the configuration files and pull in those versions of the images, after which everything is restarted to that version. For example, to roll back to version `1.7.0` run:
+
+    RELEASE=1.7.0 && \
+	TAG=v1.7.0 && \
+    cd /opt/Internet.nl/ && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
+**notice**: depending on the complexity of the upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
 
 ## HTTPS/Letsencrypt
 
