@@ -144,6 +144,8 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - MATOMO_URL
+      - MATOMO_SITEID
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
