@@ -28,7 +28,17 @@ REGEX_LOGGING_EXCLUDE = "GET /static"
 
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
+    """Overwrite default context to ignore TLS errors."""
     return {**browser_context_args, "ignore_https_errors": True}
+
+
+@pytest.fixture
+def page(context):
+    """Overwrite default page to add logging of console messages and requests."""
+    page = context.new_page()
+    page.on("console", lambda msg: print(f"Console message: {msg.text}, type: {msg.type}"))
+    page.on("requestfinished", lambda request: print(f"Request: {request.url}, status: {request.response().status}"))
+    yield page
 
 
 @pytest.fixture(scope="session")
