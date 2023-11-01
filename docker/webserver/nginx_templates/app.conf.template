@@ -22,6 +22,10 @@ add_header 'X-XSS-Protection' '1; mode=block' always;
 
 root /var/www/internet.nl;
 
+# enable OSCP stapling
+ssl_stapling on;
+ssl_stapling_verify on;
+
 # default server for http, primary used for ACME and https redirect
 server {
     listen       80;
