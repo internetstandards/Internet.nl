@@ -1,0 +1,3 @@
+#!/bin/bash
+# split comma separated list into space separated
+export REDIRECT_DOMAINS_LIST=$(echo $REDIRECT_DOMAINS | sed 's/,/ /')

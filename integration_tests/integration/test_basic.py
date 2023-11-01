@@ -112,6 +112,13 @@ def test_nowww_class_b(page, app_domain, app_url):
     assert response.headers["location"] == f"{app_url}/"
 
 
+def test_additional_redirect_domains(page, app_url):
+    """Additional configured redirect subdomains should redirect to the frontpage."""
+    response = requests.get("https://platforminternet.test", allow_redirects=False, verify=False)
+    assert response.status_code == 301
+    assert response.headers["location"] == f"{app_url}/"
+
+
 def test_default_sni_none(app_domain):
     """Default vhost should 404 on any non explicitly configured domain. #894"""
 
