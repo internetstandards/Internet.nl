@@ -202,6 +202,10 @@ services:
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: $WORKER_MEMORY_LIMIT
     logging:
       driver: $LOGGING_DRIVER
       options:

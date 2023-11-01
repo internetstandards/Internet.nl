@@ -624,6 +624,7 @@ CLIENT_RATE_LIMIT = 30
 #
 ROUTINATOR_URL = getenv("ROUTINATOR_URL", "http://localhost:9556/api/v1/validity")
 
+VERSION = get_version(version_scheme="release-branch-semver")
 
 # Sentry reads SENTRY_DSN directly from environment
 # DSN is on https://sentry.io/settings/dutch-internet-standards-platform/projects/internetnl/keys/
@@ -634,9 +635,9 @@ if getenv("SENTRY_DSN"):
         send_default_pii=False,
         before_send=remove_sentry_pii,
         before_breadcrumb=remove_sentry_pii,
+        # add version number to sentry events
+        release=VERSION,
     )
-
-VERSION = get_version(version_scheme="release-branch-semver")
 
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
