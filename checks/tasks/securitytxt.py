@@ -57,6 +57,7 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
             content=None,
             url=f"https://{hostname}{path}",
             found_host=found_host,
+            found_url=None,
             errors=[{"msgid": "utf8"}],
         )
     except requests.RequestException:
