@@ -22,6 +22,7 @@ RUN touch /etc/nginx/htpasswd/batch_api.htpasswd
 RUN touch /etc/nginx/htpasswd/monitoring.htpasswd
 RUN touch /etc/nginx/htpasswd/basic_auth.htpasswd
 
+COPY docker/webserver/10-variables.envsh /docker-entrypoint.d/10-variables.envsh
 COPY docker/webserver/generate_htpasswd.sh /docker-entrypoint.d/generate_htpasswd.sh
 COPY docker/webserver/tls_init.sh /docker-entrypoint.d/tls_init.sh
 COPY docker/webserver/authentication.sh /docker-entrypoint.d/authentication.sh
