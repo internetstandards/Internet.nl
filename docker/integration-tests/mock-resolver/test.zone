@@ -32,6 +32,8 @@ ns.test-ns-signed.internet  A                    172.43.0.101
 test-ns6-signed.internet    NS                   ns.test-ns6-signed.internet
 ns.test-ns6-signed.internet AAAA                 fd00:43:1::101
 
+platforminternet            CNAME                internet
+
 
 ; configure DNS for targets that are tested by the internet.test instance
 ; normal 100% website test target

@@ -25,7 +25,7 @@ def test_index_footer_text_present(page, app_url, footer_text):
     page.goto(app_url)
     footer = page.locator("#footer")
 
-    expect(footer).to_have_text(re.compile(footer_text))
+    assert footer_text in footer.text_content()
 
 
 def test_security_txt(page, app_url_subdomain):
@@ -112,6 +112,13 @@ def test_nowww_class_b(page, app_domain, app_url):
     assert response.headers["location"] == f"{app_url}/"
 
 
+def test_additional_redirect_domains(page, app_url):
+    """Additional configured redirect subdomains should redirect to the frontpage."""
+    response = requests.get("https://platforminternet.test", allow_redirects=False, verify=False)
+    assert response.status_code == 301
+    assert response.headers["location"] == f"{app_url}/"
+
+
 def test_default_sni_none(app_domain):
     """Default vhost should 404 on any non explicitly configured domain. #894"""
 
@@ -132,3 +139,32 @@ def test_conn_over_https_no_hsts(app_domain):
     assert response.status_code == 301
     assert response.headers["Strict-Transport-Security"] == "max-age=0;"
     assert response.headers["location"] == f"http://conn.{app_domain}"
+
+
+@pytest.mark.parametrize(
+    ("from_language", "to_language", "footer_text"),
+    [("nl", "en", FOOTER_TEXT_EN), ("en", "nl", FOOTER_TEXT_NL)],
+)
+def test_change_language(page, app_domain, from_language, to_language, footer_text):
+    """Test clicking the language change button."""
+
+    page.goto(f"https://{from_language}.{app_domain}")
+    page.locator("#language-switch-header-container button:not(:disabled)").click()
+    page.wait_for_url(f"https://{to_language}.internet.test/")
+
+    footer = page.locator("#footer")
+    assert footer_text in footer.text_content()
+
+
+@pytest.mark.parametrize(
+    ("language", "footer_text"),
+    [("en", FOOTER_TEXT_EN), ("nl", FOOTER_TEXT_NL)],
+)
+def test_accept_language_header(page, app_domain, language, footer_text):
+    """Browser preferred language should be respected."""
+
+    page.set_extra_http_headers({"Accept-Language": language})
+    page.goto(f"https://{app_domain}")
+
+    footer = page.locator("#footer")
+    assert footer_text in footer.text_content()
