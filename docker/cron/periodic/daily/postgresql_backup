@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# make a daily backup dump of the database
+
+set -e
+
+PGPASSWORD=$DB_PASSWORD pg_dump --host $DB_HOST --username $DB_USER --no-password $DB_NAME > /var/lib/postgresql/backups/$DB_NAME.daily.sql

@@ -576,6 +576,10 @@ services:
       dockerfile: docker/cron.Dockerfile
     environment:
       - HOSTERS_HOF_URL
+      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
 
     restart: unless-stopped
     logging:
@@ -583,6 +587,7 @@ services:
       options:
         tag: '{{.Name}}'
     networks:
+      internal: {}
       public-internet: {}
 
     # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
@@ -593,6 +598,7 @@ services:
 
     volumes:
       - manual-hof:/app/manual-hall-of-fame/
+      - postgres-backups:/var/lib/postgresql/backups
 
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
@@ -753,6 +759,7 @@ services:
 
 volumes:
   postgres: {}
+  postgres-backups: {}
   redis: {}
   rabbitmq: {}
   routinator: {}

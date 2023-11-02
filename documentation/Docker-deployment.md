@@ -392,4 +392,6 @@ When the hostname is changed, update upstream DNSSEC keys with the new values fr
 
 All stateful date for the application stack is stored in Docker Volumes. For backup and DR purposes make sure to include all `/var/lib/docker/volumes/internetnl_*` directories in your snapshot/backup. The directory `internetnl_routinator` can be omited as it contains a cache of externally fetched data.
 
+Daily and weekly database dumps are written to the `/var/lib/docker/volumes/internetnl-prod_postgres-backups/` directory.
+
 When recovering or migrating to a new server first the "Server Setup" should be done then these directories should be restored, after which the "Application Setup" can be done.
