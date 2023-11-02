@@ -168,3 +168,17 @@ def test_accept_language_header(page, app_domain, language, footer_text):
 
     footer = page.locator("#footer")
     assert footer_text in footer.text_content()
+
+
+def test_cron_manual_hosters_hof(page, app_url, trigger_cron):
+    """Test if manual hosters file can be downloaded and parsed."""
+
+    trigger_cron("15min/download_hof")
+
+    page.goto(app_url)
+    page.get_by_role("link", name="Hall of Fame", exact=True).click()
+    page.get_by_text("Hosters").click()
+
+    hof_content = page.locator(".hof-content")
+
+    assert "The 51 hosters mentioned below" in hof_content.text_content()

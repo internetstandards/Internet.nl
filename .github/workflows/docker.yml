@@ -43,6 +43,9 @@ jobs:
           - image: prometheus
             dockerfile: docker/prometheus.Dockerfile
             target:
+          - image: cron
+            dockerfile: docker/cron.Dockerfile
+            target:
 
     outputs:
       internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}

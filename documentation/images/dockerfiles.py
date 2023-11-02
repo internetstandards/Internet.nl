@@ -28,6 +28,12 @@ graph_attr = {
 }
 
 with Diagram(NAME, show=False, direction="LR", outformat=["png"], graph_attr=graph_attr):
+    with Cluster("cron.Dockerfile"):
+        [
+            DockerHub("alpine"),
+            File("cron/periodic/*"),
+        ] >> Image("ghcr.io/internetstandards/cron")
+
     with Cluster("grafana.Dockerfile"):
         [
             DockerHub("grafana/grafana"),
@@ -129,3 +135,4 @@ with Diagram("Dockerfile", show=False, direction="LR", outformat=["png"], graph_
         build_app >> image_linttest
         build_linttest_deps >> Edge(label="dev dependencies") >>  image_linttest
         tools_dependencies >> image_linttest
+

@@ -146,6 +146,7 @@ services:
       - SENTRY_ENVIRONMENT
       - MATOMO_URL
       - MATOMO_SITEID
+      - MANUAL_HOF_PAGES
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
@@ -156,6 +157,7 @@ services:
 
     volumes:
       - batch_results:/app/batch_results
+      - manual-hof:/app/manual-hall-of-fame/
 
   db-migrate:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
@@ -567,6 +569,39 @@ services:
       start_period: 1m
       retries: 10
 
+  cron:
+    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${RELEASE:-latest}}
+    build:
+      context: ..
+      dockerfile: docker/cron.Dockerfile
+    environment:
+      - HOSTERS_HOF_URL
+
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      public-internet: {}
+
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
+
+    volumes:
+      - manual-hof:/app/manual-hall-of-fame/
+
+    healthcheck:
+      test: ["CMD", "pgrep", "crond"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:${RELEASE:-latest}}
     build:
@@ -728,6 +763,8 @@ volumes:
   prometheus-data: {}
   # permanent storage for Grafana custom dashboards
   grafana-data: {}
+  # shares hosters HoF file between cron and app
+  manual-hof: {}
 
 networks:
   # disable default network

@@ -50,11 +50,11 @@ server {
     }
 }
 
-# serve mock for publicsuffix.org in integration test environment
+# serve mock static files for integration test environment, eg: publicsuffix, manual hosters hof
 server {
     listen       80;
     listen  [::]:80;
-    server_name  publicsuffix.org;
+    server_name  static.test;
 
     location /static/ {
         alias /var/www/static/;
