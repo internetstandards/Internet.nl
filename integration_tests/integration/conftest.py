@@ -93,3 +93,19 @@ def docker_compose_logs():
 
 def print_results_url(page):
     print(f"\nResults page url: {page.url.replace(APP_URL,  INTEGRATIONTEST_APP_URL)}")
+
+
+@pytest.fixture(scope="session")
+def docker_compose_exec():
+    """Execute specific command in a service container"""
+
+    yield lambda service, command: subprocess.check_output(
+        f"docker compose --ansi=never --project-name=internetnl-test exec {service} {command}", shell=True
+    )
+
+
+@pytest.fixture(scope="session")
+def trigger_cron(docker_compose_exec):
+    """Trigger specific cron job manually"""
+
+    yield lambda cron: docker_compose_exec("cron", f"/etc/periodic/{cron}")
