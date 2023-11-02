@@ -12,6 +12,8 @@ argparse==1.4.0
     #   pythonwhois-internet-nl
 asgiref==3.7.2
     # via django
+async-timeout==4.0.3
+    # via redis
 attrs==23.1.0
     # via pytest
 beautifulsoup4==4.12.2
@@ -54,7 +56,7 @@ colorlog==6.7.0
     # via -r requirements.in
 cryptography==38.0.4
     # via -r requirements.in
-django==3.2.20
+django==3.2.23
     # via
     #   -r requirements.in
     #   django-bleach
@@ -97,7 +99,9 @@ hiredis==2.2.3
 idna==3.4
     # via requests
 importlib-metadata==4.13.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   markdown
 iniconfig==2.0.0
     # via pytest
 ip-address==1.4.2
@@ -194,8 +198,14 @@ statshog==1.0.6
     # via -r requirements.in
 toml==0.10.2
     # via pytest
+tomli==2.0.1
+    # via
+    #   setuptools-rust
+    #   setuptools-scm
 typing-extensions==4.7.1
     # via
+    #   asgiref
+    #   kombu
     #   setuptools-rust
     #   setuptools-scm
 tzdata==2023.3
