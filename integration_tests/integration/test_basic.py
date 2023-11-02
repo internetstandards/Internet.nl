@@ -182,3 +182,16 @@ def test_cron_manual_hosters_hof(page, app_url, trigger_cron):
     hof_content = page.locator(".hof-content")
 
     assert "The 51 hosters mentioned below" in hof_content.text_content()
+
+
+def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
+    """Test if database backup files are created."""
+
+    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.daily.sql")
+    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.weekly.sql")
+
+    trigger_cron("daily/postgresql_backup")
+    trigger_cron("weekly/postgresql_backup")
+
+    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql")
+    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql")
