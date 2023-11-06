@@ -4,6 +4,9 @@ import os
 import time
 
 from celery import Celery
+from django.utils.autoreload import autoreload_started
+from django.dispatch import receiver
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 
@@ -44,3 +47,9 @@ if app.conf.ENABLE_HOF:
     app.conf.beat_schedule = {
         "generate_HoF": {"task": "checks.tasks.update.update_hof", "schedule": app.conf.HOF_UPDATE_INTERVAL}
     }
+
+
+@receiver(autoreload_started)
+def restart_worker_on_autorestart(sender, **kwargs):
+    """Send all worker shutdown signal so they will be restarted."""
+    app.control.broadcast("shutdown")
