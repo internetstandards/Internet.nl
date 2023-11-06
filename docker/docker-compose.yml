@@ -757,6 +757,22 @@ services:
       - /:/host:ro
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
 
+  docker_stats_exporter:
+    # https://github.com/jan4843/docker_stats_exporter
+    image: aequitas/docker-stats-exporter:0.1.0
+    environment:
+      LABEL_state: '{{.Container.State}}'
+      LABEL_compose_project: '{{index .Container.Labels "com.docker.compose.project"}}'
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      - internal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 volumes:
   postgres: {}
   postgres-backups: {}

@@ -75,3 +75,14 @@ scrape_configs:
       - targets:
         - node-exporter:9100
 
+  - job_name: docker_stats_exporter
+    scheme: http
+    metrics_path: /metrics
+    metric_relabel_configs:
+      # drop exporter internal metrics
+      - source_labels: [ "__name__" ]
+        regex: '(go|python|process)_.+'
+        action: drop
+    static_configs:
+      - targets:
+        - docker_stats_exporter:9338
