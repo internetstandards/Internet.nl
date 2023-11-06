@@ -765,6 +765,7 @@ components:
             * `good` - HTTPS redirection is enforced.
             * `bad` - HTTPS redirection is not enforced.
             * `no_http` - No HTTP connection; test is not relevant.
+            * `no_https` - No or outdated HTTPS connection; test could not be executed.
         http_compression:
           type: boolean
           description: If HTTP compression is used.
