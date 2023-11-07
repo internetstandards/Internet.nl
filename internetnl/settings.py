@@ -618,7 +618,7 @@ if DJANGO_IS_PROXIED:
 
 # Limit the number of tests a client can perform in a while. The exact implementation is to be documented.
 # raise the roof of this number to remove this cap. 30 was a limit inherited that comes across as sane.
-CLIENT_RATE_LIMIT = 30
+CLIENT_RATE_LIMIT = int(getenv("CLIENT_RATE_LIMIT", 30))
 
 # --- Routinator settings
 #
