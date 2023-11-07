@@ -147,6 +147,7 @@ services:
       - MATOMO_URL
       - MATOMO_SITEID
       - MANUAL_HOF_PAGES
+      - CLIENT_RATE_LIMIT
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
