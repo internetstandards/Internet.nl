@@ -187,11 +187,11 @@ def test_cron_manual_hosters_hof(page, app_url, trigger_cron):
 def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
     """Test if database backup files are created."""
 
-    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.daily.sql")
-    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.weekly.sql")
+    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
+    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")
 
     trigger_cron("daily/postgresql_backup")
     trigger_cron("weekly/postgresql_backup")
 
-    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql")
-    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql")
+    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
+    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")

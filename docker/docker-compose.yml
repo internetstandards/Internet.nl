@@ -581,6 +581,8 @@ services:
       - DB_NAME=internetnl_db1
       - DB_USER=internetnl
       - DB_PASSWORD=password
+      - CRON_DAILY_POSTGRESQL_BACKUP
+      - CRON_WEEKLY_POSTGRESQL_BACKUP
 
     restart: unless-stopped
     logging:
