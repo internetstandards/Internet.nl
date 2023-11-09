@@ -37,7 +37,7 @@ from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from checks import categories, scoring
-from checks.http_client import http_get_ip
+from checks.http_client import http_get_ip, http_get
 from checks.models import (
     CipherOrderStatus,
     DaneStatus,
@@ -2975,30 +2975,25 @@ def forced_http_check(af_ip_pair, url, task):
     """
     Check if the webserver is properly configured with HTTPS redirection.
     """
-    # First connect on port 80 and see if we get refused
     try:
-        http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
-    except requests.RequestException:
-        # No HTTPS connection available
-        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
-
-    try:
-        response_http = http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False)
+        response = http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False, allow_redirects=False)
     except requests.RequestException:
         # No plain HTTP available, but HTTPS is
         return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
 
-    forced_https = ForcedHttpsStatus.bad
-    forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_BAD
-
-    for response in response_http.history + [response_http]:
-        if response.url:
-            parsed_url = urlparse(response.url)
+    try:
+        while response.headers.get("Location"):
+            parsed_url = urlparse(response.headers["Location"])
             # Requirement: in case of redirecting, a domain should firstly upgrade itself by
             # redirecting to its HTTPS version before it may redirect to another domain.
             # However, redirecting to a subdomain, e.g. www-prefix, is permitted.
-            if parsed_url.scheme == "https" and url in parsed_url.netloc:
-                forced_https = ForcedHttpsStatus.good
-                forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
+            if parsed_url.scheme == "https":
+                if url in parsed_url.netloc:
+                    return scoring.WEB_TLS_FORCED_HTTPS_GOOD, ForcedHttpsStatus.good
+                break
+            response = http_get(url=response.headers["Location"], port=80, https=False, allow_redirects=False)
+    except requests.RequestException:
+        # If any request in the chain fails before we reach a satisfactory HTTPS redir, result is bad.
+        pass
 
-    return forced_https_score, forced_https
+    return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
