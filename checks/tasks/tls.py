@@ -766,8 +766,6 @@ def build_report(dttls, category):
                 category.subtests["https_forced"].result_good()
             elif dttls.forced_https == ForcedHttpsStatus.no_http:
                 category.subtests["https_forced"].result_no_http()
-            elif dttls.forced_https == ForcedHttpsStatus.no_https:
-                category.subtests["https_forced"].result_no_https()
             elif dttls.forced_https == ForcedHttpsStatus.bad:
                 category.subtests["https_forced"].result_bad()
 
@@ -2977,12 +2975,12 @@ def forced_http_check(af_ip_pair, url, task):
     """
     Check if the webserver is properly configured with HTTPS redirection.
     """
+    # First connect on port 80 and see if we get refused
     try:
         http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
     except requests.RequestException:
-        # No HTTPS connection available to our HTTP client.
-        # Could also be too outdated config (#1130)
-        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.no_https
+        # No HTTPS connection available
+        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
 
     try:
         response_http = http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False)

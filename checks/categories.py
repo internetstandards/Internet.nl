@@ -913,11 +913,6 @@ class WebTlsHttpsForced(Subtest):
         self.verdict = "detail web tls https-forced verdict other"
         self.tech_data = "detail tech data not-applicable"
 
-    def result_no_https(self):
-        self._status(STATUS_NOT_TESTED)
-        self.verdict = "detail web tls https-forced verdict no-https"
-        self.tech_data = "detail tech data not-applicable"
-
     def result_bad(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls https-forced verdict bad"

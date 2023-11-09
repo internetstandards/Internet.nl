@@ -73,7 +73,6 @@ class ForcedHttpsStatus(Enum):
     bad = 0
     good = 1
     no_http = 2
-    no_https = 3
 
 
 class OcspStatus(Enum):
