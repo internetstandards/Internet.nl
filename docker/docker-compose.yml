@@ -146,6 +146,7 @@ services:
       - SENTRY_ENVIRONMENT
       - MATOMO_URL
       - MATOMO_SITEID
+      - MATOMO_SUBDOMAIN_TRACKING
       - MANUAL_HOF_PAGES
       - CLIENT_RATE_LIMIT
     healthcheck:
