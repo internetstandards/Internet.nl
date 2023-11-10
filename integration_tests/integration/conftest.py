@@ -109,3 +109,23 @@ def trigger_cron(docker_compose_exec):
     """Trigger specific cron job manually"""
 
     yield lambda cron: docker_compose_exec("cron", f"/etc/periodic/{cron}")
+
+
+@pytest.fixture(scope="session")
+def trigger_scheduled_task(docker_compose_exec):
+    """Run specific celery beat task"""
+
+    def _trigger_scheduled_task(beat_task):
+        command = (
+            "from internetnl.celery import app;"
+            f'task = app.signature(app.conf.beat_schedule["{beat_task}"]["task"]);'
+            "task.apply_async().get();"
+        ).replace("\n", "")
+        docker_compose_exec("beat", f"./manage.py shell --command='{command}'")
+
+    yield _trigger_scheduled_task
+
+
+@pytest.fixture(scope="function")
+def clear_webserver_cache(docker_compose_exec):
+    docker_compose_exec("webserver", "find /var/tmp/nginx_cache -delete")

@@ -195,3 +195,27 @@ def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
 
     assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
     assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")
+
+
+def test_hof_update(page, app_url, trigger_scheduled_task, unique_id, docker_compose_exec, clear_webserver_cache):
+    """Test if Hall of Fame can be updated."""
+
+    domain = f"{unique_id}.example.com"
+
+    # create new domain result
+    docker_compose_exec(
+        "app",
+        (
+            './manage.py shell -c "from checks.models import DomainTestReport;'
+            f"DomainTestReport(domain='{domain}', score=100).save()\""
+        ),
+    )
+
+    # generate hof
+    trigger_scheduled_task("generate_HoF")
+
+    page.goto(app_url)
+    page.get_by_role("link", name="Hall of Fame", exact=True).click()
+    page.get_by_text("Websites").click()
+
+    expect(page.get_by_role("listitem").filter(has_text=domain)).to_be_visible()
