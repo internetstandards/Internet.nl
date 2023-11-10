@@ -199,7 +199,7 @@ services:
       - INTERNETNL_CACHE_TTL
       - WORKER_CONCURRENCY
 
-  worker:
+  worker: &worker
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
@@ -226,9 +226,8 @@ services:
     # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
     user: root
     entrypoint: /entrypoint-worker.sh
-    command: >
-      celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,slow_db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues default,celery,db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
 
     depends_on:
       db-migrate:
@@ -288,6 +287,7 @@ services:
       # even though eventlet is used and childs are not really threads or processes, this settings reduces
       # issues with high memory usage, probably because some objects are freed?
       - CELERYD_MAX_TASKS_PER_CHILD=100
+
     volumes:
       - batch_results:/app/batch_results
 
@@ -298,6 +298,18 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+
+  # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
+  worker-slow:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    deploy:
+      resources:
+        limits:
+          memory: $WORKER_SLOW_MEMORY_LIMIT
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_CONCURRENCY
+      --queues slow_db_worker
 
   beat:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
