@@ -169,7 +169,7 @@ server {
       proxy_set_header X-Forwarded-Proto $scheme;
 
       # enable cache
-      proxy_cache            default_cache;
+      proxy_cache            ${NGINX_PROXY_CACHE};
       # have at least some cache, togetherwith use_stale this will result in visitors not hitting the backend directly
       proxy_cache_valid      200  1m;
       # server old version of files when backend experiences errors or when fetching new content
@@ -201,7 +201,7 @@ server {
     # static files served from app
     location /static {
       # enable cache
-      proxy_cache            default_cache;
+      proxy_cache            ${NGINX_PROXY_CACHE};
       # static files don't change often, cache for long
       proxy_cache_valid      200  1d;
       # server old version of files when backend experiences errors
