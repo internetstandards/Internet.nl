@@ -471,7 +471,8 @@ jobs:
         run: make pull env=build pull_args=--ignore-buildable
 
       - name: Start development environment
-        run: make up env=develop
+        # disable autoreload in CI as it makes workers unstable
+        run: DEVSERVER_ARGS=--noreload make up env=develop
 
       - name: Run development environment tests
         run: make develop-tests

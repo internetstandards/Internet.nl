@@ -21,8 +21,8 @@ services:
 
   app:
     # use Django runserver for better debug abilities during development
-    entrypoint: ["python3", "./manage.py"]
-    command: ["runserver", "0.0.0.0:8080"]
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "./manage.py runserver 0.0.0.0:8080 $DEVSERVER_ARGS"]
     volumes:
       - batch_results:/app/batch_results
       # mount sources using volumes for quicker dev cycles
