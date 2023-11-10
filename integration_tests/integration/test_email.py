@@ -22,7 +22,7 @@ def test_your_email_score(page, app_url, test_email):
     # make sure the test has been started
     page.get_by_text(f"Email test: {test_email}")
     # make sure the test is completed
-    page.wait_for_url(f"{app_url}/mail/{test_email}/*/")
+    page.wait_for_url(f"{app_url}/mail/{test_email}/*/", timeout=1000 * 60)
 
     score = page.locator("div.testresults-percentage")
 
@@ -39,7 +39,7 @@ def test_your_email_probe_success(page, app_url, probe, test_email):
     # make sure the test has been started
     page.get_by_text(f"Email test: {test_email}")
     # make sure the test is completed
-    page.wait_for_url(f"{app_url}/mail/{test_email}/*/")
+    page.wait_for_url(f"{app_url}/mail/{test_email}/*/", timeout=1000 * 60)
 
     probe_result = page.locator(f"#mail{probe}-results")
     expect(probe_result).to_have_class("passed")
