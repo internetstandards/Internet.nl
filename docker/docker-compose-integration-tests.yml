@@ -54,6 +54,8 @@ services:
         condition: service_healthy
       worker:
         condition: service_healthy
+      worker-slow:
+        condition: service_healthy
       unbound:
         condition: service_healthy
       beat:
@@ -65,6 +67,8 @@ services:
       resolver-validating:
         condition: service_healthy
       resolver-permissive:
+        condition: service_healthy
+      cron:
         condition: service_healthy
       mock-resolver:
         condition: service_healthy
