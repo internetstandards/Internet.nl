@@ -25,9 +25,7 @@ Other important resources:
 
 * [How to customize your installation](Customize.md)
 * [Batch functionality](Batch.md)
-* [Operational Changes](Operational%20Changes.md)
 * [Historic overview on scoring](scores.md)
-* More generic [deployment instructions](/Deployment.md)
 
 Documentation for specific test areas:
 
