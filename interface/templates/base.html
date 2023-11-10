@@ -37,10 +37,12 @@
   <div class="skiplink"><a href="#footer">{% include "string.html" with name='page gotofooter' %}</a></div>
   <header>
     <div class="wrap">
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
       <div id="masthead">
         <p id="site-title"><a href="/"><span class="hidden">{% include "string.html" with name='page sitetitle' %}</span></a></p>
         <p id="site-description"><span class="hidden">{% include "string.html" with name='page sitedescription' %}</span></p>
       </div>
+      {% endif %}
 
       <!-- language switch -->
       <div id="language-switch-header-container">
@@ -70,10 +72,14 @@
       <nav id="sitenav">
         <ul>
           <li class="{% ifequal pagemenu 'home' %}current{% endifequal %}"><a href="/">{% include "string.html" with name="base home" %}</a></li>
+          {% if "INTERNETNL_BRANDING"|get_settings_value %}
           <li class="{% ifequal pagemenu 'news' %}current{% endifequal %}"><a href="/news/">{% include "string.html" with name="base news" %}</a></li>
+          {% endif %}
           <li class="{% ifequal pagemenu 'faqs' %}current{% endifequal %}"><a href="/faqs/">{% include "string.html" with name="base faqs" %}</a></li>
           <li class="{% ifequal pagemenu 'halloffame' %}current{% endifequal %}"><a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a></li>
+          {% if "INTERNETNL_BRANDING"|get_settings_value %}
           <li class="{% ifequal pagemenu 'about' %}current{% endifequal %}"><a href="/about/">{% include "string.html" with name="base about" %}</a></li>
+          {% endif %}
         </ul>
       </nav>
     </div>
@@ -93,19 +99,25 @@
   <footer id="footer">
     <img id="flag" src="{% static "clear.gif" %}" alt="">
     <div class="wrap">
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
       {% include "string.html" with name="base info" %}
+      {% endif %}
       <div class="version">v{{ "VERSION"|get_settings_value }}</div>
       <hr>
       <ul>
+        {% if "INTERNETNL_BRANDING"|get_settings_value %}
         <li><a class="footlink" href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a></li>
         <li><a class="footlink" href="/privacy/">{% include "string.html" with name="base privacy" %}</a></li>
+        {% endif %}
         <li><a class="footlink" href="/copyright/">{% include "string.html" with name="base copyright" %}</a></li>
         {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
         <li><a class="footlink" href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a></li>
         {% endif %}
+        {% if "INTERNETNL_BRANDING"|get_settings_value %}
         <li class="follow-us"><a class="footlink twitterfollow" href="https://twitter.com/internet_nl">Twitter</a></li>
         <li class="follow-us"><a class="footlink linkedinfollow" href="https://www.linkedin.com/company/internet-nl/">LinkedIn</a></li>
         <li class="follow-us"><a class="footlink mastodonfollow" href="https://mastodon.nl/@internet_nl" rel="me">Mastodon</a></li>
+        {% endif %}
       </ul>
     </div>
   </footer>
