@@ -17,16 +17,18 @@ def test_index_http_ok(page, app_url):
 
 
 def test_index_footer_text_present(page, app_url):
+    """Branding is disabled on develop, so no footer text, only version"""
     page.goto(app_url)
     footer = page.locator("#footer")
 
-    expect(footer).to_have_text(re.compile(FOOTER_TEXT))
+    expect(footer).not_to_have_text(re.compile(FOOTER_TEXT))
 
 
 def test_security_txt(page, app_url):
-    page.goto(app_url + "/.well-known/security.txt")
+    """Branding is disabled on develop, also security.txt"""
+    response = page.request.get(app_url + "/.well-known/security.txt")
 
-    assert SECURITY_TXT_TEXT in page.content()
+    expect(response).not_to_be_ok()
 
 
 def test_robots_txt(page, app_url):

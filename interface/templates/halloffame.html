@@ -17,6 +17,7 @@
           </ul>
       </div>
       <div class="flexblock">
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
       {% if cpage == 'champions' %}
         <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
         <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
@@ -28,6 +29,7 @@
         {% if manual_icon and manual_icon_alt %}
         <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}">
         {% endif %}
+      {% endif %}
       {% endif %}
       </div>
     </div>

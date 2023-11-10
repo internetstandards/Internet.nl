@@ -19,26 +19,14 @@ regex_mailaddr = (
 urlpatterns = [
     url(r"^$", views.indexpage),
     url(r"^statistics/(?P<start_date>[0-9]{8})/(?P<end_date>[0-9]{8})/$", stats.statistics),
-    url(r"^disclosure/$", views.disclosurepage),
-    url(r"^contact/$", views.indexpage),
     url(r"^copyright/$", views.copyrightpage),
-    url(r"^privacy/$", views.privacypage),
     url(r"^faqs/$", views.faqindexpage),
     url(r"^faqs/report/$", views.faqreport, name="faqs_report"),
     url(r"^faqs/badges/$", views.faqbadges, name="faqs_badges"),
     url(r"^faqs/(?P<subject>[a-zA-Z0-9\-]{1,40})/$", views.faqarticlepage),
     url(r"^usage/$", views.indexpage),
-    url(r"^about/$", views.aboutpage),
     url(r"^widget-site/$", views.widgetsitepage),
     url(r"^widget-mail/$", views.widgetmailpage),
-    url(r"^blogs/$", views.blogindexpage),
-    url(r"^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
-    url(r"^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.blogarticlepage),
-    url(r"^news/$", views.newsindexpage),
-    url(r"^news/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.newsarticlepage),
-    url(r"^articles/$", views.articleindexpage),
-    url(r"^article/$", views.articlespage),
-    url(r"^article/(?P<article>[a-zA-Z0-9\.\-]{1,80})/$", views.articlepage),
     url(r"^halloffame/$", views.hofchampionspage),
     url(r"^halloffame/web/$", views.hofwebpage),
     url(r"^halloffame/mail/$", views.hofmailpage),
@@ -73,6 +61,22 @@ urlpatterns = [
     url(rf"^clear/{regex_dname}/$", views.clear),
     url(r"^change_language/$", views.change_language, name="change_language"),
 ]
+
+if settings.INTERNETNL_BRANDING:
+    urlpatterns += [
+        url(r"^contact/$", views.indexpage),
+        url(r"^blogs/$", views.blogindexpage),
+        url(r"^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
+        url(r"^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.blogarticlepage),
+        url(r"^news/$", views.newsindexpage),
+        url(r"^news/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.newsarticlepage),
+        url(r"^articles/$", views.articleindexpage),
+        url(r"^article/$", views.articlespage),
+        url(r"^article/(?P<article>[a-zA-Z0-9\.\-]{1,80})/$", views.articlepage),
+        url(r"^about/$", views.aboutpage),
+        url(r"^disclosure/$", views.disclosurepage),
+        url(r"^privacy/$", views.privacypage),
+    ]
 
 # Host-urls that are accessible by host-only, which should be approachable by developers as well during
 # development (although your DNS is probably not set correctly to deal with the tests.
