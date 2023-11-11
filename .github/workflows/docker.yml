@@ -295,11 +295,18 @@ jobs:
           (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
-      - name: Pull docker images
+      - name: Pull additional docker images
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         # build env includes all images, this will pull additional images not loaded from artifacts for
-        # forked PR's/dependabot build or previously build images from the registry for non-forked PR builds
-        # main and release builds
+        # forked PR's/dependabot build
         run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
+        run: make pull env=build
 
       - name: Start test instance
         run: make up env=test
@@ -418,9 +425,18 @@ jobs:
           (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
-      - name: Pull docker images
-        # build env includes all images
+      - name: Pull additional docker images
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build
         run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
+        run: make pull env=build
 
       - name: Run test
         run: make test
@@ -466,9 +482,18 @@ jobs:
           (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
-      - name: Pull docker images
-        # build env includes all images
+      - name: Pull additional docker images
+        if: |
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build
         run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
+        run: make pull env=build
 
       - name: Start development environment
         # disable autoreload in CI as it makes workers unstable
