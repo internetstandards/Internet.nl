@@ -180,7 +180,7 @@ For more information see: [documentation/Docker-live-tests.md](Docker-live-tests
 
 ## Logging
 
-Log output from containers can be obtained using the following command:
+Log output from containers/services can be obtained using the following command:
 
     docker compose --project-name=internetnl-prod logs -f
 
@@ -200,11 +200,19 @@ Or to view all logs related to the project use:
 
 ## Troubleshooting/mitigation
 
-When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers:
+When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers/services:
 
     docker compose --project-name=internetnl-prod  ps -a
 
-Containers should have a `STATUS` of `Up` and there should be no containers with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+Or use this command to omit the `COMMAND` and `PORTS` columns for a more compact view with only relevant information:
+
+    docker compose --project-name=internetnl-prod  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
+
+Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+
+If a container/service is not up and healthy the cause might be deduced by inspecting the container/service state, eg for the app container/service:
+
+    docker inspect internetnl-prod-app-1 --format "{{json .State}}" | jq
 
 It might be possible not all containers that should be running are running. To have Docker Compose check the running instance and bring up any missing components run:
 
@@ -219,13 +227,13 @@ If this does not work problems might lay deeper and OS level troubleshooting mig
 
 ## Autohealing
 
-Critial services/containers have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
+Critial containers/services have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
 
 ### Known issues
 
 #### Internal Docker DNS not working
 
-Docker Compose relies on an internal DNS resolver to resolve container names so the services can communicate via those names (eg: webserver to app, app to PostgreSQL). The internal DNS resolver might become unavailable. This might happen if the system is resource constrained (eg: low memory) and the resolver is OOM killed. This manifests in the application/monitoring becoming unavailable (`502` errors) and logs lines like:
+Docker Compose relies on an internal DNS resolver to resolve container/services names so the services can communicate via those names (eg: webserver to app, app to PostgreSQL). The internal DNS resolver might become unavailable. This might happen if the system is resource constrained (eg: low memory) and the resolver is OOM killed. This manifests in the application/monitoring becoming unavailable (`502` errors) and logs lines like:
 
     2023/07/24 07:39:18 [error] 53#53: recv() failed (111: Connection refused) while resolving, resolver: 127.0.0.11:53
 
@@ -326,9 +334,9 @@ Because the entire application runs in the Docker container engine it should be 
 
 This will return a 0 exit code if everything is as expected. Due to Docker being configured with `live-restore`, the daemon itself being down has no direct and immediate impact on the application. But selfhealing behaviour and further interaction with the services will be unavailable.
 
-- Critital application services/containers status
+- Critital application containers/services status
 
-All services/containers critical to the application's primary functionality have a Docker healthcheck configured. This will run at an configured interval to verify the proper operation of the service.
+All containers/services critical to the application's primary functionality have a Docker healthcheck configured. This will run at an configured interval to verify the proper operation of the service.
 
 To verify the health status of the critial services use these commands:
 
