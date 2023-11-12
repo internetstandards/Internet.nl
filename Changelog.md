@@ -16,6 +16,7 @@
 This release has API version 2.4.0:
 - The `referrer_policy_errors` and `referrer_policy_recommendations` fields were added.
   These contain errors and/or recommendations regarding the Referrer-Policy test.
+- `https_redirect` can now also have “no_https” as status, for a web server that offers either no HTTPS or HTTPS with a very outdated, insecure TLS configuration, as in this case the redirect is not evaluated.
 
 ## 1.7.1
 
