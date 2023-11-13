@@ -6,6 +6,9 @@ from playwright.sync_api import expect
 ALL_EMAIL_PROBES = {"ipv6", "dnssec", "tls", "auth", "rpki"}
 TEST_EMAIL_EXPECTED_SCORE = 100
 
+# maximum timeout is de default setting for maximum test duration + default timeout
+MAX_TIMEOUT = 1000 * (200 + 30)
+
 
 def test_your_email_score(page, app_url, test_email):
     """Runs the 'Test your email' and expects a decent result."""
@@ -17,7 +20,7 @@ def test_your_email_score(page, app_url, test_email):
 
     assert page.url == f"{app_url}/mail/{test_email}/"
 
-    page.wait_for_url(f"{app_url}/mail/{test_email}/*/")
+    page.wait_for_url(f"{app_url}/mail/{test_email}/*/", timeout=MAX_TIMEOUT)
 
     score = page.locator("div.testresults-percentage")
     expect(score).to_have_attribute("data-resultscore", str(TEST_EMAIL_EXPECTED_SCORE))
