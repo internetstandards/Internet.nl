@@ -61,11 +61,11 @@ def test_your_website_probe_success(page, app_url, test_domain, probe):
         # 100%
         ("internet.nl", 100),
         ("example.nl", 100),
+        ("ipv6.internet.nl", 100),
         # https://github.com/internetstandards/Internet.nl/issues/1061
         # IPv6 only
         ("forfun.net", 100),
         ("ipv6.google.com", 65),  # no DNSSEC, bad HTTPS
-        ("ipv6.internet.nl", 97),  # no HTTPS redirect
         # bogus DNSSEC
         ("servfail.nl", 61),
         ("brokendnssec.net", 15),
