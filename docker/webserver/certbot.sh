@@ -54,7 +54,7 @@ configure_letsencrypt() {
   fi
 
   # update certificate with subdomains if domain is configured and subdomains have changed or are not configured yet
-  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ ! "$(cat /etc/letsencrypt/.configured)" = "$subdomains" ]; then
+  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ ! "$(cat /etc/letsencrypt/.subdomains-configured)" = "$subdomains" ]; then
     # request new certificate for subdomains as well, but in a seperate step so we
     # don't fail if they are not properly setup
     /opt/certbot/bin/certbot certonly --webroot \
@@ -71,8 +71,12 @@ configure_letsencrypt() {
       -d $domain \
       -d $subdomains \
       --expand
-    # create file indicating (all new) subdomains are configured
-    echo "$subdomains" > "/etc/letsencrypt/.configured"
+    cert_acquired=$?
+
+    if [ $cert_acquired -eq 0 ];then
+      # create file indicating (all new) subdomains are configured
+      echo "$subdomains" > "/etc/letsencrypt/.subdomains-configured"
+    fi
   fi
 }
 
