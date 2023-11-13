@@ -302,6 +302,8 @@ and
 
 It may take a few minutes after starting for the Letsencrypt certificates to be registered and loaded.
 
+If the log file cannot be found this mean the Letsencrypt configuration step has not run because there are no new certificates to be configured.
+
 ## Batch API
 
 Besides the single scan webpage, the Internet.nl application also contains a Batch API. This is disabled by default on normal installations. Please refer to [Deployment Batch](Docker-deployment-batch.md) for more information.
