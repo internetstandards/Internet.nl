@@ -13,7 +13,7 @@ For an example, see internet.nl.dist.env.
 
 import os
 from os import getenv
-
+import socket
 import sentry_sdk
 
 from internetnl.settings_utils import (
@@ -637,7 +637,10 @@ if getenv("SENTRY_DSN"):
         before_breadcrumb=remove_sentry_pii,
         # add version number to sentry events
         release=VERSION,
+        # overwrite server_name to not use the container server name
+        server_name=getenv("SENTRY_SERVER_NAME"),
     )
+    sentry_sdk.set_tag("container_name", str(socket.gethostname()))
 
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
