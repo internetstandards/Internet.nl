@@ -104,7 +104,8 @@ services:
         condition: service_healthy
       resolver-permissive:
         condition: service_healthy
-
+    # set hostname for Sentry
+    hostname: app
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
       - INTERNET_NL_CHECK_SUPPORT_DNSSEC
@@ -146,6 +147,7 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - SENTRY_SERVER_NAME
       - MATOMO_URL
       - MATOMO_SITEID
       - MATOMO_SUBDOMAIN_TRACKING
@@ -251,7 +253,8 @@ services:
         condition: service_healthy
       resolver-permissive:
         condition: service_healthy
-
+    # set hostname for Sentry
+    hostname: worker
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
       - INTERNET_NL_CHECK_SUPPORT_DNSSEC
@@ -287,6 +290,7 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - SENTRY_SERVER_NAME
       # even though eventlet is used and childs are not really threads or processes, this settings reduces
       # issues with high memory usage, probably because some objects are freed?
       - CELERYD_MAX_TASKS_PER_CHILD=100
@@ -313,6 +317,8 @@ services:
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_CONCURRENCY
       --queues slow_db_worker
+    # set hostname for Sentry
+    hostname: worker-slow
 
   beat:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
@@ -378,6 +384,7 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - SENTRY_SERVER_NAME
     healthcheck:
       test: ["CMD", "pgrep", "celery"]
       interval: $HEALTHCHECK_INTERVAL
