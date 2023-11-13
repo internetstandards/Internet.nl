@@ -102,6 +102,7 @@ Use the values determined above to fill in the variables below and run the follo
     INTERNETNL_DOMAINNAME=example.com \
     IPV4_IP_PUBLIC=192.0.2.1 \
     IPV6_IP_PUBLIC=2001:db8:1::1 \
+    SENTRY_SERVER_NAME=$(hostname) \
     envsubst < docker/host-dist.env > docker/host.env
 
 After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings.
