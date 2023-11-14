@@ -7,8 +7,8 @@ server:
   local-zone: "test-ns6-signed.${CONN_TEST_DOMAIN}" transparent
   interface: 0.0.0.0
   interface: ::
-  access-control: 0.0.0.0/0 allow_setrd
-  access-control: ::/0 allow_setrd
+  access-control: 0.0.0.0/0 refuse_non_local
+  access-control: ::/0 refuse_non_local
 
   # enable module specific for connection test
   module-config: "internetnl iterator"
