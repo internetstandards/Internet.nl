@@ -13,8 +13,7 @@ server:
   chroot: ""
 
   logfile: /dev/stdout
-  verbosity: 2
-  log-queries: yes
+  ${DEBUG_LOG_UNBOUND_STATEMENTS}
 
   # include intgration test configuration (empty on production, mounted via volume in test environment)
   include: "/opt/unbound/etc/unbound/test.conf"

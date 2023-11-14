@@ -13,8 +13,7 @@ server:
   chroot: ""
 
   logfile: /dev/stdout
-  verbosity: 2
-  log-queries: yes
+  ${DEBUG_LOG_UNBOUND_STATEMENTS}
 
   auto-trust-anchor-file: "/opt/unbound/etc/unbound/root.key"
 
