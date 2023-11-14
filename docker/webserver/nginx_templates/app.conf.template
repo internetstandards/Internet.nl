@@ -31,7 +31,7 @@ server {
     listen       80 http2;
     listen  [::]:80 http2;
 
-    server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    server_name  ${INTERNETNL_DOMAINNAME} ~^(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME}$ ${REDIRECT_DOMAINS_LIST};
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
@@ -52,7 +52,7 @@ server {
     listen       80 http2;
     listen  [::]:80 http2;
 
-    server_name ~(conn|(?<subdomain>en\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
+    server_name ~^((en|nl|www)\.)?conn\.${INTERNETNL_DOMAINNAME}$;
 
     # pass specific connection test paths to backend
     # /connection/
@@ -85,20 +85,38 @@ server {
         return 301 https://${subdomain}${INTERNETNL_DOMAINNAME}$request_uri;
     }
 }
-# http server for connection test XHR requests
+# http servers for connection test XHR requests
 server {
     listen       80 http2;
     listen  [::]:80 http2;
 
     server_name
-      *.test-ns-signed.${INTERNETNL_DOMAINNAME}
-      *.test-ns6-signed.${INTERNETNL_DOMAINNAME}
-      [${IPV6_TEST_ADDR}];
+      ~^[0-9a-f]{32}\.((bogus|aaaa|a)\.conn\.test-ns-signed|a-aaaa\.conn\.test-ns6-signed)\.${INTERNETNL_DOMAINNAME}$;
 
     # pass specific connection test paths to backend
     # /
+    location = / {
+      # forward information about the connecting client to the connection test
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      # disable CSP on connection test
+      proxy_hide_header Content-Security-Policy;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+    }
+}
+server {
+    listen       80 http2;
+    listen  [::]:80 http2;
+
+    server_name [${IPV6_TEST_ADDR}];
+
+    # pass specific connection test paths to backend
     # /connection/addr-test/6330d6a09e56387e4dd59502418fa642/
-    location ~ ^(/|/connection/addr-test/.+/)$ {
+    location ~ ^/connection/addr-test/[0-9a-f]{32}/$ {
       # forward information about the connecting client to the connection test
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
@@ -117,7 +135,7 @@ server {
     listen       443 ssl http2;
     listen  [::]:443 ssl http2;
 
-    server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    server_name  www.${INTERNETNL_DOMAINNAME} ~^(nl|en|conn)\.www\.${INTERNETNL_DOMAINNAME}$ ${REDIRECT_DOMAINS_LIST};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
