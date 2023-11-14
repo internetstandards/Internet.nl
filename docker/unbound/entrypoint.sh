@@ -4,6 +4,13 @@ set -e
 
 cd /opt/unbound/etc/unbound/
 
+if [ "$DEBUG_LOG_UNBOUND" = "True" ];then
+  export DEBUG_LOG_UNBOUND_STATEMENTS="verbosity: 2
+  log-queries: yes"
+else
+  export DEBUG_LOG_UNBOUND_STATEMENTS=""
+fi
+
 envsubst < unbound.conf.template > unbound.conf
 
 # https://github.com/internetstandards/unbound/blob/internetnl/README.md#zone-signing
