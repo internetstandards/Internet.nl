@@ -450,7 +450,7 @@ services:
       - rabbitmq:/var/lib/rabbitmq
 
   postgres:
-    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.3-alpine}
+    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.5-alpine}
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
