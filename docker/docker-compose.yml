@@ -512,6 +512,7 @@ services:
       - $UNBOUND_PORT_IPV6_UDP
 
     environment:
+      - DEBUG_LOG_UNBOUND
       - IPV4_IP_PUBLIC
       - IPV6_IP_PUBLIC
       - CONN_TEST_DOMAIN
@@ -536,8 +537,8 @@ services:
       dockerfile: docker/Dockerfile
       target: unbound
 
-    entrypoint: /opt/unbound/sbin/unbound
-    command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf"]
+    entrypoint: /entrypoint-resolver.sh
+    command: ["resolver-permissive.conf"]
 
     restart: unless-stopped
     logging:
@@ -548,6 +549,9 @@ services:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       public-internet: {}
+
+    environment:
+      - DEBUG_LOG_UNBOUND
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
@@ -565,8 +569,8 @@ services:
       dockerfile: docker/Dockerfile
       target: unbound
 
-    entrypoint: /opt/unbound/sbin/unbound
-    command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf"]
+    entrypoint: /entrypoint-resolver.sh
+    command: ["resolver-validating.conf"]
 
     restart: unless-stopped
     logging:
@@ -577,6 +581,9 @@ services:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       public-internet: {}
+
+    environment:
+      - DEBUG_LOG_UNBOUND
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]
