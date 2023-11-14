@@ -11,6 +11,10 @@ on:
 
 env:
   registry: ghcr.io/internetstandards
+  # determine whether this pull request has permissions to push to registry, or artifacts
+  # should be used to transfer images between jobs. Forked and dependabot builds don't
+  # have permission to push to registry.
+  use_registry: ${{ ! (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || startsWith(github.head_ref, 'dependabot/'))) }}
 
 jobs:
   # builds all docker images in parallel
@@ -88,7 +92,7 @@ jobs:
 
       - name: Build ${{ matrix.image }} (for non-forked PR's)
         # build for non-forked PR's that are allowed to use the registry
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && ! startsWith(github.head_ref, 'dependabot/')
+        if: ${{ env.use_registry == 'true' }}
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
@@ -166,9 +170,7 @@ jobs:
 
       - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
         # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
@@ -191,16 +193,12 @@ jobs:
 
       - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         run: docker save ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
 
       - name: Upload image as build artifact (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         uses: actions/upload-artifact@v3
         with:
           name: "${{ matrix.image }}"
@@ -213,7 +211,7 @@ jobs:
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && ! startsWith(github.head_ref, 'dependabot/')
+        if: ${{ env.use_registry == 'true' }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
@@ -282,29 +280,24 @@ jobs:
 
       - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         uses: actions/download-artifact@v3
         with:
           path: images/
 
       - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Pull additional docker images
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         # build env includes all images, this will pull additional images not loaded from artifacts for
         # forked PR's/dependabot build
         run: make pull env=build pull_args=--ignore-buildable
 
       - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
         # build env includes all images, this will pull additional images from the registry for non-forked PR builds
         # main and release builds
         run: make pull env=build
@@ -371,18 +364,14 @@ jobs:
 
       - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         uses: actions/download-artifact@v3
         with:
           path: images/
 
       - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Run check
@@ -412,29 +401,24 @@ jobs:
 
       - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         uses: actions/download-artifact@v3
         with:
           path: images/
 
       - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Pull additional docker images
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         # build env includes all images, this will pull additional images not loaded from artifacts for
         # forked PR's/dependabot build
         run: make pull env=build pull_args=--ignore-buildable
 
       - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
         # build env includes all images, this will pull additional images from the registry for non-forked PR builds
         # main and release builds
         run: make pull env=build
@@ -469,29 +453,24 @@ jobs:
 
       - name: Download images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         uses: actions/download-artifact@v3
         with:
           path: images/
 
       - name: Load images from artifacts (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Pull additional docker images
-        if: |
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
-          (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/'))
+        if: ${{ env.use_registry == 'false' }}
         # build env includes all images, this will pull additional images not loaded from artifacts for
         # forked PR's/dependabot build
         run: make pull env=build pull_args=--ignore-buildable
 
       - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
         # build env includes all images, this will pull additional images from the registry for non-forked PR builds
         # main and release builds
         run: make pull env=build
@@ -533,4 +512,5 @@ jobs:
           name: Development environment test Docker Compose Logs
           path: docker-compose.log
           if-no-files-found: ignore
+
 
