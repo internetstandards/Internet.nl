@@ -232,7 +232,7 @@ services:
     user: root
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
 
     depends_on:
       db-migrate:
@@ -305,6 +305,14 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+
+  # worker for queue with potential memory leak
+  worker-nassl:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues nassl_worker
 
   # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
   worker-slow:
