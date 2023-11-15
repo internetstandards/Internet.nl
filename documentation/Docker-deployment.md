@@ -42,7 +42,7 @@ Run the following command to install required dependencies, setup Docker Apt rep
 
 
     apt update && \
-    apt install -yqq ca-certificates curl gnupg && \
+    apt install -yqq ca-certificates curl jq gnupg && \
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
@@ -209,7 +209,7 @@ Or use this command to omit the `COMMAND` and `PORTS` columns for a more compact
 
     docker compose --project-name=internetnl-prod  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
 
-Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` and `update` containers/services having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
 
 If a container/service is not up and healthy the cause might be deduced by inspecting the container/service state, eg for the app container/service:
 
@@ -270,13 +270,26 @@ To update to the latest build of the Pull Request branch use:
     BRANCH=feature-x
 	RELEASE=branch-feature-x && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH }/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH }/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH}/docker/docker-compose.yml && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
 
+### Auto update
+
+By setting the variable `AUTO_UPDATE_BRANCH` in the `/opt/Internet.nl/docker/local.env` to a branch, eg: `main`, auto upgrading will be enabled. The application will check every 15 minutes if there is a update available and deploy it automatically. This is useful for development/acceptance environments that want to stay up to date with a feature or the `main` branch. It is not recommended for production environments!
+
+Auto upgrades are performed by the `cron` container/service. Which triggers a container/service named `update` which will perform the update itself. Progress/errors can be viewed by inspecting the container's logs:
+
+    docker logs --follow internetnl-prod-update-1
+
+To manually kick off the update process use the following command:
+
+    docker compose --project-name=internetnl-prod exec cron /etc/periodic/15min/auto_update
+
+**notice**: the update logging will be cut-off at the end because the `cron` container/service will be restarted in the process. For the full logs see the `update` container/service logs, see above.
 ## Downgrading/rollback
 
 In essence downgrading is the same procedure as upgrading: determine the branch and release version, download those versions of the configuration files and pull in those versions of the images, after which everything is restarted to that version. For example, to roll back to version `1.7.0` run:

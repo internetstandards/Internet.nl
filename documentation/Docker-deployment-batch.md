@@ -126,7 +126,7 @@ This command should complete without an error, indicating the application stack 
 
 Create database indexes:
 
-    docker compose --project-name=internetnl-prodexec app ./manage.py api_create_db_indexes
+    docker compose --project-name=internetnl-prod exec app ./manage.py api_create_db_indexes
 
 ## Testing your installation
 

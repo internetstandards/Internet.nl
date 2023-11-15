@@ -621,6 +621,7 @@ services:
       - DB_PASSWORD=password
       - CRON_DAILY_POSTGRESQL_BACKUP
       - CRON_WEEKLY_POSTGRESQL_BACKUP
+      - AUTO_UPDATE_BRANCH
 
     restart: unless-stopped
     logging:
@@ -640,6 +641,9 @@ services:
     volumes:
       - manual-hof:/app/manual-hall-of-fame/
       - postgres-backups:/var/lib/postgresql/backups
+      # for auto update
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/Internet.nl:/opt/Internet.nl
 
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
@@ -648,6 +652,38 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+
+  update:
+    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${RELEASE:-latest}}
+    build:
+      context: ..
+      dockerfile: docker/cron.Dockerfile
+    environment:
+      - AUTO_UPDATE_BRANCH
+      - RELEASE
+    command: /update.sh
+    # this container runs to completion and exits with 0
+    restart: on-failure
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      internal: {}
+      public-internet: {}
+
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/Internet.nl:/opt/Internet.nl
+
+    profiles:
+      - update
 
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:${RELEASE:-latest}}

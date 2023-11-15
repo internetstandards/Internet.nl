@@ -228,6 +228,7 @@ RUN apt update && \
     make \
     python3-pip \
     docker.io \
+    shellcheck \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
 

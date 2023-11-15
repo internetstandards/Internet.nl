@@ -100,10 +100,11 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          # tag image with current setuptools_scm generated version
+          # tag image with current setuptools_scm generated version, commit sha
           # and tag with PR source branch (eg: feature-x)
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:${{ github.event.pull_request.head.sha }}
             ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
@@ -127,10 +128,11 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          # tag image with current setuptools_scm generated version
+          # tag image with current setuptools_scm generated version, commit sha
           # and tag with current branch name (eg: main)
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:${{ github.event.pull_request.head.sha }}
             ${{ env.registry }}/${{ matrix.image }}:main
           # use latest build from main for caching
           cache-from: |
@@ -153,9 +155,10 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          # tag image with current setuptools_scm generated version and tag 'latest'
+          # tag image with current setuptools_scm generated version, commit sha and tag 'latest'
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:${{ github.event.pull_request.head.sha }}
             ${{ env.registry }}/${{ matrix.image }}:latest
           # use latest build from main for caching
           cache-from: |
@@ -217,7 +220,7 @@ jobs:
 
           To deploy this specific build to a existing deployment run the following update commands:
 
-              export BRANCH="${{ github.sha }}" && \\
+              export BRANCH="${{ github.event.pull_request.head.sha }}" && \\
               export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
               cd /opt/Internet.nl/ && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\

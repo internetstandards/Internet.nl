@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+if [ -z "$AUTO_UPDATE_BRANCH" ];then
+  # auto update not configured
+  exit 0
+fi
+
+cd /opt/Internet.nl/
+
+# shellcheck disable=SC1091
+. docker/local.env
+
+CURRENT_SHA="$RELEASE"
+UPSTREAM_SHA="$(curl -sSLf "https://api.github.com/repos/internetstandards/Internet.nl/branches/$AUTO_UPDATE_BRANCH"| jq -r .commit.sha)"
+
+if [ "$CURRENT_SHA" = "$UPSTREAM_SHA" ];then
+  # no update available
+  exit 0
+fi
+
+env -i RELEASE="$UPSTREAM_SHA" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env --profile update up --no-build update
