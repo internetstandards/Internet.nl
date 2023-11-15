@@ -28,8 +28,10 @@ ssl_stapling_verify on;
 
 # default server for http, primary used for ACME and https redirect
 server {
-    listen       80 http2;
-    listen  [::]:80 http2;
+    listen       80;
+    listen  [::]:80;
+
+    http2 on;
 
     server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
@@ -49,8 +51,10 @@ server {
 
 # http server for connection test, does not redirect to https
 server {
-    listen       80 http2;
-    listen  [::]:80 http2;
+    listen       80;
+    listen  [::]:80;
+
+    http2 on;
 
     server_name ~(conn|(?<subdomain>en\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
 
@@ -87,8 +91,10 @@ server {
 }
 # http server for connection test XHR requests
 server {
-    listen       80 http2;
-    listen  [::]:80 http2;
+    listen       80;
+    listen  [::]:80;
+
+    http2 on;
 
     server_name
       *.test-ns-signed.${INTERNETNL_DOMAINNAME}
@@ -114,8 +120,10 @@ server {
 
 # No-www.org Class B compliance, see https://www.no-www.org/faq.php
 server {
-    listen       443 ssl http2;
-    listen  [::]:443 ssl http2;
+    listen       443 ssl;
+    listen  [::]:443 ssl;
+
+    http2 on;
 
     server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
@@ -149,8 +157,10 @@ server {
 
 # default https server
 server {
-    listen       443 ssl http2;
-    listen  [::]:443 ssl http2;
+    listen       443 ssl;
+    listen  [::]:443 ssl;
+
+    http2 on;
 
     server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>nl\.|en\.|www\.|ipv6\.)${INTERNETNL_DOMAINNAME};
 
@@ -275,8 +285,10 @@ server {
 # Temporary (1 year) exception for conn. subdomain to disable HSTS and redirect back to HTTP for
 # clients that accessed the HTTPS version in the past and got a HSTS set of 1 year.
 server {
-    listen       443 ssl http2;
-    listen  [::]:443 ssl http2;
+    listen       443 ssl;
+    listen  [::]:443 ssl;
+
+    http2 on;
 
     server_name  conn.${INTERNETNL_DOMAINNAME};
 
@@ -309,6 +321,8 @@ server {
     listen       443 ssl default_server;
     listen  [::]:443 ssl default_server;
 
+    http2 on;
+
     ssl_reject_handshake on;
 
     location / {
@@ -320,6 +334,8 @@ server {
 server {
     listen       80 default_server;
     listen  [::]:80 default_server;
+
+    http2 on;
 
     server_name _;
 
