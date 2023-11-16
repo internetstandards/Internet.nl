@@ -104,11 +104,9 @@ jobs:
           # and tag with PR source branch (eg: feature-x)
           tags: |
             ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
             ${{ env.registry }}/${{ matrix.image }}:main
-            ${{ env.registry }}/${{ matrix.image }}:branch-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
           # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
@@ -225,15 +223,6 @@ jobs:
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
-          To deploy the latest build in this PR's branch to a existing deployment run the following update commands:
-
-              export BRANCH="${{ github.head_ref }}" && \\
-              export RELEASE="branch-${{ github.head_ref }}" && \\
-              cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
-              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
 
       - name: Release deployment docs
