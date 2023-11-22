@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.2
+
+Release 1.8.2 fixes an issue where the connection test would fail to start in certain cases due to an incorrect HTTP downgrade (#1194, #1195).
+
 ## 1.8.1
 
 Version 1.8.1 includes a number of internal improvements, including:
