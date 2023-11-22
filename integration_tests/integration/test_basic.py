@@ -138,7 +138,7 @@ def test_conn_over_https_no_hsts(app_domain):
     response = requests.get(f"https://conn.{app_domain}", verify=False, allow_redirects=False)
     assert response.status_code == 301
     assert response.headers["Strict-Transport-Security"] == "max-age=0;"
-    assert response.headers["location"] == f"http://conn.{app_domain}"
+    assert response.headers["location"] == f"http://conn.{app_domain}/"
 
 
 @pytest.mark.parametrize(

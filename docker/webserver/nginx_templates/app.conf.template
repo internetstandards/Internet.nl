@@ -292,7 +292,7 @@ server {
 
     # redirect to non-https version for connection test
     location / {
-        return 301 http://conn.${INTERNETNL_DOMAINNAME};
+        return 301 http://conn.${INTERNETNL_DOMAINNAME}$request_uri;
     }
 }
 
