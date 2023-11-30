@@ -21,9 +21,9 @@ Below is an overview of the components involved and their connections:
 
 The server can be hardware or VM. Minimum is at least 2 cores, 4GB memory and 50GB storage. Recommended 4 cores, 8GB memory 100GB storage. Recommended OS is Ubuntu 22.04 LTS, but any recent Debian/Ubuntu should suffice. Other OS's may be supported but not tested or documented. You should have `root` access to the server.
 
-A fixed public IPv4 address is required. The address may be assigned to the server network primary interface. For example: `192.0.2.1`.
+A fixed public IPv4 address is required. The address must be assigned to the server network primary interface. For example: `192.0.2.1`.
 
-A fixed public routed IPv6 address is required. The address may be assigned to the server network primary interface. For example: `2001:db8:abcd:1234::1/64`.
+A fixed public routed IPv6 address is required. The address must be assigned to the server network primary interface. For example: `2001:db8:abcd:1234::1/64`.
 
 IPv4 and IPv6 traffic may be firewalled. Outgoing traffic should not be filtered. For incoming traffic related packets should be accepted. Incoming traffic on port `80` and `443` can be IP filtered for additional access control.
 
@@ -79,18 +79,16 @@ To create the `docker/host.env` configuration file, the following input is requi
 
   Public domain name of the application (eg: `example.com`).
 
-  This is used as domain to visit the application and as domain for the connection test subdomains.
+  This is used as domain to visit the application, it should resolve to the server IP(v6) address. Should be a public resolvable address to enable Letsencrypt HTTPS certificate.
 
 Use the value determined above to fill in the variables below and run the following command (protip: use ctrl-x ctrl-e in Bash to open a text editor to easily paste and edit the command):
 
-    cat >> docker/host.env <<EOF
-    INTERNETNL_DOMAINNAME=example.com
-    # put connection test unbound port out of the way as they are not used in batch
-    UNBOUND_PORT_TCP=127.0.0.1:5353:53/tcp
-    UNBOUND_PORT_UDP=127.0.0.1:5353:53/udp
-    UNBOUND_PORT_IPV6_TCP=[::1]:5353:53/tcp
-    UNBOUND_PORT_IPV6_UDP=[::1]:5353:53/udp
-    EOF
+The `IPV4_IP_PUBLIC` and `IPV6_IP_PUBLIC` must be configured to localhost addresses to disable the connection test DNS server which is not used in this setup.
+
+    INTERNETNL_DOMAINNAME=example.com \
+    IPV4_IP_PUBLIC=127.0.0.1 \
+    IPV6_IP_PUBLIC=::1 \
+    envsubst < docker/host-dist.env > docker/host.env
 
 After this a `docker/host.env` file is created. This file is host specific and should not have to be modified unless something changes in the domainname settings.
 
@@ -112,9 +110,13 @@ For example:
     cat >> docker/local.env <<EOF
     ENABLE_BATCH=True
     ENABLE_HOF=False
+    # user/password(s) for authenticating against Batch API
     BATCH_AUTH=user:welkom01
+    # user/password(s) for access to /grafana monitoring
     MONITORING_AUTH=user:welkom01
+    # user/password(s) for access to web interface
     BASIC_AUTH=user:welkom01
+    # allowed IP's to visit web interface without password
     ALLOW_LIST=198.51.100.1,2001:db8:2::1
     EOF
 
@@ -126,7 +128,7 @@ This command should complete without an error, indicating the application stack 
 
 Create database indexes:
 
-    docker compose --project-name=internetnl-prodexec app ./manage.py api_create_db_indexes
+    docker compose --project-name=internetnl-prod exec app ./manage.py api_create_db_indexes
 
 ## Testing your installation
 
@@ -134,8 +136,8 @@ After deployment you can visit the website on eg: `https://example.com` and perf
 
 You can also use the Live test suite to perform automated tests for the Batch API. For this run the following command from the deployed machine or anywhere else with Docker (replacing `APP_URLS` and `BATCH_API_AUTH` values with those determined above):
 
-    APP_URL=https://example.com
-    BATCH_API_AUTH=user:welkom01
+    APP_URL=https://example.com && \
+    BATCH_API_AUTH=user:welkom01 && \
     docker pull ghcr.io/internetstandards/test-runner && \
     docker run -ti --rm --env=APP_URLS=$APP_URL --env=BATCH_API_AUTH=$BATCH_API_AUTH ghcr.io/internetstandards/test-runner integration_tests/live/test_batch.py
 
