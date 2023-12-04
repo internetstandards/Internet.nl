@@ -16,6 +16,7 @@ based application, developed/tested/deployed through Docker containers.
 - [Deployment Batch](Docker-deployment-batch.md)
 - [Live tests](Docker-live-tests.md)
 - [Metrics](Docker-metrics.md)
+- [Scoring](scoring.md)
 
 
 Note that the connection test requires more moving parts than the other
@@ -25,7 +26,6 @@ Other important resources:
 
 * [How to customize your installation](Customize.md)
 * [Batch functionality](Batch.md)
-* [Historic overview on scoring](scores.md)
 
 Documentation for specific test areas:
 
