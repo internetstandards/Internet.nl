@@ -131,6 +131,7 @@ def resultscurrent(request, dname):
     addr = dname.lower()
     # Get latest test results
     checks_current = {}
+    # Names of the tests in the checks_current dictionary must be the same as the
     try:
         if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
             checks_current['ipv6'] = DomainTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
@@ -158,12 +159,24 @@ def resultscurrent(request, dname):
         for check_type, check in checks_current.items():
             if not report.id == check.domaintestreport_set.order_by("-id")[0].id:
                 # create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
-                report = create_report(addr, **checks_current)
+                report = create_report(
+                    addr,   # domain
+                    ipv6=checks_current.get('ipv6'),
+                    dnssec=checks_current.get('dnssec'), 
+                    tls=checks_current.get('tls'),
+                    appsecpriv=checks_current.get('appsecpriv'),
+                    rpki=checks_current.get('rpki'))
     except IndexError:
-        # one of the test results is not yet related to a report,
-        # create one
-        # create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
-        report = create_report(addr, **checks_current)
+        # one of the test results is not yet related to a report, create one
+        report = create_report(
+            addr, 
+            ipv6=checks_current.get('ipv6'),
+            dnssec=checks_current.get('dnssec'), 
+            tls=checks_current.get('tls'),
+            appsecpriv=checks_current.get('appsecpriv'),
+            rpki=checks_current.get('rpki')
+        )
+
     return HttpResponseRedirect(f"/site/{addr}/{report.id}/")
 
 
