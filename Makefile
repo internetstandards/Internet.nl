@@ -434,7 +434,10 @@ DOCKER_COMPOSE_BUILD_CMD=docker compose ${compose_args} \
 	--env-file=docker/build.env
 
 build docker-compose-build:
-	${DOCKER_COMPOSE_BUILD_CMD} build --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+	${DOCKER_COMPOSE_BUILD_CMD} build ${build_args} --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+
+build-no-cache docker-compose-build-no-cache: build
+build-no-cache docker-compose-build-no-cache: build_args=--no-cache
 
 docker-compose:
 	${DOCKER_COMPOSE_CMD} ${args}

@@ -12,6 +12,8 @@ argparse==1.4.0
     #   pythonwhois-internet-nl
 asgiref==3.7.2
     # via django
+async-timeout==4.0.3
+    # via redis
 attrs==23.1.0
     # via pytest
 beautifulsoup4==4.12.2
@@ -54,7 +56,7 @@ colorlog==6.7.0
     # via -r requirements.in
 cryptography==38.0.4
     # via -r requirements.in
-django==3.2.20
+django==3.2.23
     # via
     #   -r requirements.in
     #   django-bleach
@@ -82,13 +84,13 @@ eventlet==0.33.3
     # via -r requirements.in
 forcediphttpsadapter==1.1.0
     # via -r requirements.in
-gevent==22.10.1
+gevent==23.9.0
     # via -r requirements.in
 gitdb==4.0.10
     # via gitpython
-gitpython==3.1.32
+gitpython==3.1.37
     # via -r requirements.in
-greenlet==1.1.3.post0
+greenlet==3.0.0
     # via
     #   eventlet
     #   gevent
@@ -118,7 +120,6 @@ packaging==23.1
     # via
     #   bleach
     #   forcediphttpsadapter
-    #   gunicorn
     #   pytest
     #   setuptools-scm
 pathlib2==2.3.7.post1
@@ -144,13 +145,13 @@ pyrabbit2==1.0.7
 pytest==6.2.5
     # via -r requirements.in
 python-dateutil==2.8.2
-    # via sectxt
+    # via
+    #   celery
+    #   sectxt
 pythonwhois-internet-nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
     # via -r requirements.in
 pytz==2023.3
-    # via
-    #   celery
-    #   django
+    # via django
 pyyaml==6.0.1
     # via -r requirements.in
 redis==5.0.0
@@ -180,7 +181,6 @@ six==1.16.0
     # via
     #   bleach
     #   celery-statsd
-    #   click-repl
     #   eventlet
     #   pathlib2
     #   python-dateutil
@@ -199,9 +199,12 @@ statshog==1.0.6
 toml==0.10.2
     # via pytest
 tomli==2.0.1
-    # via setuptools-scm
+    # via
+    #   setuptools-rust
+    #   setuptools-scm
 typing-extensions==4.7.1
     # via
+    #   asgiref
     #   kombu
     #   setuptools-rust
     #   setuptools-scm
@@ -212,7 +215,7 @@ urllib3==2.0.4
     #   requests
     #   selenium
     #   sentry-sdk
-uwsgi==2.0.21
+uwsgi==2.0.22
     # via -r requirements.in
 vine==5.0.0
     # via
@@ -226,6 +229,7 @@ webencodings==0.5.1
 wheel==0.41.2
     # via -r requirements.in
 whitenoise==6.5.0
+    # via -r requirements.in
 zipp==3.15.0
     # via
     #   -r requirements.in

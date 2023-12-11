@@ -28,7 +28,17 @@ REGEX_LOGGING_EXCLUDE = "GET /static"
 
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
+    """Overwrite default context to ignore TLS errors."""
     return {**browser_context_args, "ignore_https_errors": True}
+
+
+@pytest.fixture
+def page(context):
+    """Overwrite default page to add logging of console messages and requests."""
+    page = context.new_page()
+    page.on("console", lambda msg: print(f"Console message: {msg.text}, type: {msg.type}"))
+    page.on("requestfinished", lambda request: print(f"Request: {request.url}, status: {request.response().status}"))
+    yield page
 
 
 @pytest.fixture(scope="session")
@@ -83,3 +93,39 @@ def docker_compose_logs():
 
 def print_results_url(page):
     print(f"\nResults page url: {page.url.replace(APP_URL,  INTEGRATIONTEST_APP_URL)}")
+
+
+@pytest.fixture(scope="session")
+def docker_compose_exec():
+    """Execute specific command in a service container"""
+
+    yield lambda service, command: subprocess.check_output(
+        f"docker compose --ansi=never --project-name=internetnl-test exec {service} {command}", shell=True
+    )
+
+
+@pytest.fixture(scope="session")
+def trigger_cron(docker_compose_exec):
+    """Trigger specific cron job manually"""
+
+    yield lambda cron: docker_compose_exec("cron", f"/etc/periodic/{cron}")
+
+
+@pytest.fixture(scope="session")
+def trigger_scheduled_task(docker_compose_exec):
+    """Run specific celery beat task"""
+
+    def _trigger_scheduled_task(beat_task):
+        command = (
+            "from internetnl.celery import app;"
+            f'task = app.signature(app.conf.beat_schedule["{beat_task}"]["task"]);'
+            "task.apply_async().get();"
+        ).replace("\n", "")
+        docker_compose_exec("beat", f"./manage.py shell --command='{command}'")
+
+    yield _trigger_scheduled_task
+
+
+@pytest.fixture(scope="function")
+def clear_webserver_cache(docker_compose_exec):
+    docker_compose_exec("webserver", "find /var/tmp/nginx_cache -delete")

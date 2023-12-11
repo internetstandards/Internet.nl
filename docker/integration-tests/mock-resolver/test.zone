@@ -32,6 +32,8 @@ ns.test-ns-signed.internet  A                    172.43.0.101
 test-ns6-signed.internet    NS                   ns.test-ns6-signed.internet
 ns.test-ns6-signed.internet AAAA                 fd00:43:1::101
 
+platforminternet            CNAME                internet
+
 
 ; configure DNS for targets that are tested by the internet.test instance
 ; normal 100% website test target
@@ -52,3 +54,6 @@ good-ns1.bad-ipv6-ns    A                    172.43.0.114
 good-ns1.bad-ipv6-ns    AAAA                 fd00:43:1::114
 bad-ns2.bad-ipv6-ns     AAAA                 fd00:90::1
 bad-ns3.bad-ipv6-ns     AAAA                 fd00:90::2
+
+; server for static assets used during test (eg, publicsuffix list, manual hosters hof from github)
+static                  A                    172.43.0.51

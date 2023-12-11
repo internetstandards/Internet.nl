@@ -4,6 +4,9 @@ import os
 import time
 
 from celery import Celery
+from django.utils.autoreload import autoreload_started
+from django.dispatch import receiver
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 
@@ -35,12 +38,20 @@ def dummy_task(number: int = 0):
 
 
 if app.conf.ENABLE_BATCH:
-    app.conf.beat_schedule = {
-        "run_batch": {"task": "interface.batch.scheduler.run", "schedule": app.conf.BATCH_SCHEDULER_INTERVAL}
+    app.conf.beat_schedule["run_batch"] = {
+        "task": "interface.batch.scheduler.run",
+        "schedule": app.conf.BATCH_SCHEDULER_INTERVAL,
     }
 
 if app.conf.ENABLE_HOF:
     # Disable HoF when on batch mode, too much DB activity.
-    app.conf.beat_schedule = {
-        "generate_HoF": {"task": "checks.tasks.update.update_hof", "schedule": app.conf.HOF_UPDATE_INTERVAL}
+    app.conf.beat_schedule["generate_HoF"] = {
+        "task": "checks.tasks.update.update_hof",
+        "schedule": app.conf.HOF_UPDATE_INTERVAL,
     }
+
+
+@receiver(autoreload_started)
+def restart_worker_on_autorestart(sender, **kwargs):
+    """Send all worker shutdown signal so they will be restarted."""
+    app.control.broadcast("shutdown")

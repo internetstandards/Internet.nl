@@ -16,6 +16,9 @@ fi
 
 domain=$INTERNETNL_DOMAINNAME
 subdomains="nl.$domain,en.$domain,www.$domain,ipv6.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
+if [ ! -z $REDIRECT_DOMAINS ];then
+  subdomains="$subdomains,$REDIRECT_DOMAINS"
+fi
 
 # configure the main domain and the subdomains in 2 steps. This makes sure a cert for the main domain is always created
 # even if the subdomains are not configured.
@@ -50,8 +53,8 @@ configure_letsencrypt() {
     fi
   fi
 
-  # skip if subdomains are already configured or is main domain is not configured
-  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ -z "$(grep www\.$domain /etc/letsencrypt/renewal/$domain.conf)" ]; then
+  # update certificate with subdomains if domain is configured and subdomains have changed or are not configured yet
+  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ ! "$(cat /etc/letsencrypt/.subdomains-configured)" = "$subdomains" ]; then
     # request new certificate for subdomains as well, but in a seperate step so we
     # don't fail if they are not properly setup
     /opt/certbot/bin/certbot certonly --webroot \
@@ -68,6 +71,12 @@ configure_letsencrypt() {
       -d $domain \
       -d $subdomains \
       --expand
+    cert_acquired=$?
+
+    if [ $cert_acquired -eq 0 ];then
+      # create file indicating (all new) subdomains are configured
+      echo "$subdomains" > "/etc/letsencrypt/.subdomains-configured"
+    fi
   fi
 }
 

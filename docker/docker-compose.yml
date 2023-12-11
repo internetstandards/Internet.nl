@@ -33,11 +33,16 @@ services:
       - MONITORING_AUTH_RAW
       - BASIC_AUTH_RAW
       - ALLOW_LIST
+      # required for authentication.sh to restrict access when debug is on
+      - DEBUG
       - IPV4_IP_APP_INTERNAL
       - IPV4_IP_GRAFANA_INTERNAL
       - IPV4_IP_PROMETHEUS_INTERNAL
       - LETSENCRYPT_STAGING
       - LETSENCRYPT_EMAIL
+      - REDIRECT_DOMAINS
+      - NGINX_PROXY_CACHE
+      - INTERNETNL_BRANDING
 
     # webserver does not depend on any of the other services directly. So it can
     # be started and kept running independently from the other services to
@@ -99,7 +104,8 @@ services:
         condition: service_healthy
       resolver-permissive:
         condition: service_healthy
-
+    # set hostname for Sentry
+    hostname: app
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
       - INTERNET_NL_CHECK_SUPPORT_DNSSEC
@@ -141,6 +147,13 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - SENTRY_SERVER_NAME
+      - MATOMO_URL
+      - MATOMO_SITEID
+      - MATOMO_SUBDOMAIN_TRACKING
+      - MANUAL_HOF_PAGES
+      - CLIENT_RATE_LIMIT
+      - INTERNETNL_BRANDING
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
@@ -151,6 +164,7 @@ services:
 
     volumes:
       - batch_results:/app/batch_results
+      - manual-hof:/app/manual-hall-of-fame/
 
   db-migrate:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
@@ -190,13 +204,17 @@ services:
       - INTERNETNL_CACHE_TTL
       - WORKER_CONCURRENCY
 
-  worker:
+  worker: &worker
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: $WORKER_MEMORY_LIMIT
     logging:
       driver: $LOGGING_DRIVER
       options:
@@ -213,9 +231,8 @@ services:
     # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
     user: root
     entrypoint: /entrypoint-worker.sh
-    command: >
-      celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,slow_db_worker,nassl_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
 
     depends_on:
       db-migrate:
@@ -236,7 +253,8 @@ services:
         condition: service_healthy
       resolver-permissive:
         condition: service_healthy
-
+    # set hostname for Sentry
+    hostname: worker
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
       - INTERNET_NL_CHECK_SUPPORT_DNSSEC
@@ -272,9 +290,11 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - SENTRY_SERVER_NAME
       # even though eventlet is used and childs are not really threads or processes, this settings reduces
       # issues with high memory usage, probably because some objects are freed?
       - CELERYD_MAX_TASKS_PER_CHILD=100
+
     volumes:
       - batch_results:/app/batch_results
 
@@ -285,6 +305,28 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+
+  # worker for queue with potential memory leak
+  worker-nassl:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues nassl_worker
+
+  # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
+  worker-slow:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    deploy:
+      resources:
+        limits:
+          memory: $WORKER_SLOW_MEMORY_LIMIT
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_CONCURRENCY
+      --queues slow_db_worker
+    # set hostname for Sentry
+    hostname: worker-slow
 
   beat:
     image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
@@ -350,6 +392,7 @@ services:
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
+      - SENTRY_SERVER_NAME
     healthcheck:
       test: ["CMD", "pgrep", "celery"]
       interval: $HEALTHCHECK_INTERVAL
@@ -407,7 +450,7 @@ services:
       - rabbitmq:/var/lib/rabbitmq
 
   postgres:
-    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.3-alpine}
+    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.5-alpine}
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -484,6 +527,7 @@ services:
       - $UNBOUND_PORT_IPV6_UDP
 
     environment:
+      - DEBUG_LOG_UNBOUND
       - IPV4_IP_PUBLIC
       - IPV6_IP_PUBLIC
       - CONN_TEST_DOMAIN
@@ -508,8 +552,8 @@ services:
       dockerfile: docker/Dockerfile
       target: unbound
 
-    entrypoint: /opt/unbound/sbin/unbound
-    command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf"]
+    entrypoint: /entrypoint-resolver.sh
+    command: ["resolver-permissive.conf"]
 
     restart: unless-stopped
     logging:
@@ -520,6 +564,9 @@ services:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       public-internet: {}
+
+    environment:
+      - DEBUG_LOG_UNBOUND
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
@@ -537,8 +584,8 @@ services:
       dockerfile: docker/Dockerfile
       target: unbound
 
-    entrypoint: /opt/unbound/sbin/unbound
-    command: ["-d", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf"]
+    entrypoint: /entrypoint-resolver.sh
+    command: ["resolver-validating.conf"]
 
     restart: unless-stopped
     logging:
@@ -550,8 +597,52 @@ services:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       public-internet: {}
 
+    environment:
+      - DEBUG_LOG_UNBOUND
+
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]
+      interval: $HEALTHCHECK_INTERVAL
+      # TODO: waiting for: https://github.com/docker/compose/issues/10830
+      # start_interval: 5s
+      start_period: 1m
+      retries: 10
+
+  cron:
+    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${RELEASE:-latest}}
+    build:
+      context: ..
+      dockerfile: docker/cron.Dockerfile
+    environment:
+      - HOSTERS_HOF_URL
+      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_NAME=internetnl_db1
+      - DB_USER=internetnl
+      - DB_PASSWORD=password
+      - CRON_DAILY_POSTGRESQL_BACKUP
+      - CRON_WEEKLY_POSTGRESQL_BACKUP
+
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      internal: {}
+      public-internet: {}
+
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
+
+    volumes:
+      - manual-hof:/app/manual-hall-of-fame/
+      - postgres-backups:/var/lib/postgresql/backups
+
+    healthcheck:
+      test: ["CMD", "pgrep", "crond"]
       interval: $HEALTHCHECK_INTERVAL
       # TODO: waiting for: https://github.com/docker/compose/issues/10830
       # start_interval: 5s
@@ -707,8 +798,25 @@ services:
       - /:/host:ro
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
 
+  docker_stats_exporter:
+    # https://github.com/jan4843/docker_stats_exporter
+    image: aequitas/docker-stats-exporter:0.1.0
+    environment:
+      LABEL_state: '{{.Container.State}}'
+      LABEL_compose_project: '{{index .Container.Labels "com.docker.compose.project"}}'
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      - internal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 volumes:
   postgres: {}
+  postgres-backups: {}
   redis: {}
   rabbitmq: {}
   routinator: {}
@@ -719,6 +827,8 @@ volumes:
   prometheus-data: {}
   # permanent storage for Grafana custom dashboards
   grafana-data: {}
+  # shares hosters HoF file between cron and app
+  manual-hof: {}
 
 networks:
   # disable default network

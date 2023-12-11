@@ -1,8 +1,23 @@
 # Change Log
 
+## 1.8.2
+
+Release 1.8.2 fixes an issue where the connection test would fail to start in certain cases due to an incorrect HTTP downgrade (#1194, #1195).
+
+## 1.8.1
+
+Version 1.8.1 includes a number of internal improvements, including:
+
+- Various improvements in the build setup, including building forks.
+- Improvements in logging quality and reducing log volume.
+- Corrections in the live tests.
+- Improved error handling in TLS certificate requests in deployments.
+
+There are no changes to functionality or requirements of the tests.
+
 ## 1.8.0
 
-- A new [Docker based deployment, development, testing and CI setup](https://github.com/internetstandards/Internet.nl/pull/890) has been added to replace all previous processes. See the [getting started guide](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-getting-started.md) for how to use this.
+- A new [Docker based deployment, development, testing and CI setup](https://github.com/internetstandards/Internet.nl/pull/890) has been added to replace all previous processes. See the [getting started guide](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker.md) for how to use this.
 - The test for Referrer-Policy has been updated to [check for a sufficiently secure and valid policy](https://github.com/internetstandards/Internet.nl/issues/357).
 - The security.txt test now [checks the Canonical field](https://github.com/internetstandards/Internet.nl/issues/772) as well.
 - Updated to [version 0.8.3 of the sectxt library](https://github.com/DigitalTrustCenter/sectxt) including validation of CSAF fields.
@@ -16,6 +31,7 @@
 This release has API version 2.4.0:
 - The `referrer_policy_errors` and `referrer_policy_recommendations` fields were added.
   These contain errors and/or recommendations regarding the Referrer-Policy test.
+- `https_redirect` can now also have “no_https” as status, for a web server that offers either no HTTPS or HTTPS with a very outdated, insecure TLS configuration, as in this case the redirect is not evaluated.
 
 ## 1.7.1
 

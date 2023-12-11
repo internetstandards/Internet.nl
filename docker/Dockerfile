@@ -110,8 +110,9 @@ RUN unbound-anchor || test $? -eq 1
 ADD docker/unbound/entrypoint.sh /entrypoint.sh
 ADD docker/unbound/unbound.conf.template /opt/unbound/etc/unbound/unbound.conf.template
 # add configuration files for the validating and permissive internal resolver services
-ADD docker/resolver/resolver-validating.conf /opt/unbound/etc/unbound/resolver-validating.conf
-ADD docker/resolver/resolver-permissive.conf /opt/unbound/etc/unbound/resolver-permissive.conf
+ADD docker/resolver/entrypoint-resolver.sh /entrypoint-resolver.sh
+ADD docker/resolver/resolver-validating.conf.template /opt/unbound/etc/unbound/resolver-validating.conf.template
+ADD docker/resolver/resolver-permissive.conf.template /opt/unbound/etc/unbound/resolver-permissive.conf.template
 # empty test config file, to be overwritten with volume mount during integration tests
 RUN touch /opt/unbound/etc/unbound/test.conf
 
@@ -198,8 +199,8 @@ RUN python3 bin/frontend.py css
 # generate language files
 RUN python3 bin/pofiles.py to_django
 
-ARG INTERNETNL_VERSION
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=$INTERNETNL_VERSION
+# use fake version to prevent building the next steps when only the version changes
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0-build0
 
 # disable secret key check and cache for commands that run standalone tasks
 RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py compilemessages
@@ -207,6 +208,9 @@ RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py collect
 RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py api_generate_doc
 
 FROM build-app as app
+
+ARG INTERNETNL_VERSION
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=$INTERNETNL_VERSION
 
 # define default entrypoint and command
 ENTRYPOINT [ "python3", "./manage.py"]

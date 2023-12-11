@@ -766,6 +766,8 @@ def build_report(dttls, category):
                 category.subtests["https_forced"].result_good()
             elif dttls.forced_https == ForcedHttpsStatus.no_http:
                 category.subtests["https_forced"].result_no_http()
+            elif dttls.forced_https == ForcedHttpsStatus.no_https:
+                category.subtests["https_forced"].result_no_https()
             elif dttls.forced_https == ForcedHttpsStatus.bad:
                 category.subtests["https_forced"].result_bad()
 
@@ -1642,10 +1644,14 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
         if mode == ChecksMode.WEB:
             # First try to connect to HTTPS. We don't care for
             # certificates in port 443 if there is no HTTPS there.
-            http_get_ip(
-                hostname=url,
-                ip=af_ip_pair[1],
+            http_fetch(
+                url,
+                af=af_ip_pair[0],
+                path="",
                 port=443,
+                ip_address=af_ip_pair[1],
+                depth=MAX_REDIRECT_DEPTH,
+                task=web_cert,
             )
             debug_cert_chain = DebugCertChain
             conn_wrapper = HTTPSConnection
@@ -1681,7 +1687,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
             verify_score, verify_result = starttls_details.trusted_score
             debug_chain = starttls_details.debug_chain
             conn_port = starttls_details.conn_port
-    except (OSError, requests.RequestException, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
+    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
         return dict(tls_cert=False)
 
     if debug_chain is None:
@@ -2971,12 +2977,12 @@ def forced_http_check(af_ip_pair, url, task):
     """
     Check if the webserver is properly configured with HTTPS redirection.
     """
-    # First connect on port 80 and see if we get refused
     try:
         http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
     except requests.RequestException:
-        # No HTTPS connection available
-        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad
+        # No HTTPS connection available to our HTTP client.
+        # Could also be too outdated config (#1130)
+        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.no_https
 
     try:
         response_http = http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False)

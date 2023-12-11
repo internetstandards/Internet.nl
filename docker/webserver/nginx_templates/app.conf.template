@@ -22,12 +22,16 @@ add_header 'X-XSS-Protection' '1; mode=block' always;
 
 root /var/www/internet.nl;
 
+# enable OSCP stapling
+ssl_stapling on;
+ssl_stapling_verify on;
+
 # default server for http, primary used for ACME and https redirect
 server {
-    listen       80;
-    listen  [::]:80;
+    listen       80 http2;
+    listen  [::]:80 http2;
 
-    server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME};
+    server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
@@ -45,8 +49,8 @@ server {
 
 # http server for connection test, does not redirect to https
 server {
-    listen       80;
-    listen  [::]:80;
+    listen       80 http2;
+    listen  [::]:80 http2;
 
     server_name ~(conn|(?<subdomain>en\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
 
@@ -83,8 +87,8 @@ server {
 }
 # http server for connection test XHR requests
 server {
-    listen       80;
-    listen  [::]:80;
+    listen       80 http2;
+    listen  [::]:80 http2;
 
     server_name
       *.test-ns-signed.${INTERNETNL_DOMAINNAME}
@@ -110,10 +114,10 @@ server {
 
 # No-www.org Class B compliance, see https://www.no-www.org/faq.php
 server {
-    listen       443 ssl;
-    listen  [::]:443 ssl;
+    listen       443 ssl http2;
+    listen  [::]:443 ssl http2;
 
-    server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME};
+    server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
@@ -137,8 +141,8 @@ server {
 
 # default https server
 server {
-    listen       443 ssl;
-    listen  [::]:443 ssl;
+    listen       443 ssl http2;
+    listen  [::]:443 ssl http2;
 
     server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>nl\.|en\.|www\.|ipv6\.)${INTERNETNL_DOMAINNAME};
 
@@ -162,6 +166,18 @@ server {
     location / {
       # pass host for Django's allowed_hosts
       proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Proto $scheme;
+
+      # enable cache
+      proxy_cache            ${NGINX_PROXY_CACHE};
+      # have at least some cache, togetherwith use_stale this will result in visitors not hitting the backend directly
+      proxy_cache_valid      200  1m;
+      # server old version of files when backend experiences errors or when fetching new content
+      proxy_cache_use_stale  updating error timeout invalid_header http_500 http_502 http_503 http_504;
+      # tell client browser to also cache these resources
+      expires 1m;
+      # make sure to cache separate for languages
+      proxy_cache_key $scheme$host$uri$is_args$args$http_accept_language;
 
       proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
@@ -174,6 +190,19 @@ server {
         allow all;
         alias /var/www/internet.nl/.well-known/;
     }
+    # disable security.txt if branding is disabled
+    set $internetnl_branding "${INTERNETNL_BRANDING}";
+    location = /.well-known/security.txt {
+      if ($internetnl_branding != "True"){
+        return 404;
+      }
+      # basic auth should not apply to this path
+      auth_basic off;
+      # IP allowlist should also not apply
+      allow all;
+      alias /var/www/internet.nl/.well-known/security.txt;
+    }
+
     # static files served from Nginx container
     location = /robots.txt {
         alias /var/www/internet.nl/robots.txt;
@@ -185,8 +214,8 @@ server {
     # static files served from app
     location /static {
       # enable cache
-      proxy_cache            default_cache;
-      # cache files for 1 day
+      proxy_cache            ${NGINX_PROXY_CACHE};
+      # static files don't change often, cache for long
       proxy_cache_valid      200  1d;
       # server old version of files when backend experiences errors
       proxy_cache_use_stale  error timeout invalid_header updating http_500 http_502 http_503 http_504;
@@ -238,8 +267,8 @@ server {
 # Temporary (1 year) exception for conn. subdomain to disable HSTS and redirect back to HTTP for
 # clients that accessed the HTTPS version in the past and got a HSTS set of 1 year.
 server {
-    listen       443 ssl;
-    listen  [::]:443 ssl;
+    listen       443 ssl http2;
+    listen  [::]:443 ssl http2;
 
     server_name  conn.${INTERNETNL_DOMAINNAME};
 
@@ -263,7 +292,7 @@ server {
 
     # redirect to non-https version for connection test
     location / {
-        return 301 http://conn.${INTERNETNL_DOMAINNAME};
+        return 301 http://conn.${INTERNETNL_DOMAINNAME}$request_uri;
     }
 }
 

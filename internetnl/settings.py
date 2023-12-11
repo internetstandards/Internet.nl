@@ -13,7 +13,7 @@ For an example, see internet.nl.dist.env.
 
 import os
 from os import getenv
-
+import socket
 import sentry_sdk
 
 from internetnl.settings_utils import (
@@ -618,12 +618,13 @@ if DJANGO_IS_PROXIED:
 
 # Limit the number of tests a client can perform in a while. The exact implementation is to be documented.
 # raise the roof of this number to remove this cap. 30 was a limit inherited that comes across as sane.
-CLIENT_RATE_LIMIT = 30
+CLIENT_RATE_LIMIT = int(getenv("CLIENT_RATE_LIMIT", 30))
 
 # --- Routinator settings
 #
 ROUTINATOR_URL = getenv("ROUTINATOR_URL", "http://localhost:9556/api/v1/validity")
 
+VERSION = get_version(version_scheme="release-branch-semver")
 
 # Sentry reads SENTRY_DSN directly from environment
 # DSN is on https://sentry.io/settings/dutch-internet-standards-platform/projects/internetnl/keys/
@@ -634,9 +635,12 @@ if getenv("SENTRY_DSN"):
         send_default_pii=False,
         before_send=remove_sentry_pii,
         before_breadcrumb=remove_sentry_pii,
+        # add version number to sentry events
+        release=VERSION,
+        # overwrite server_name to not use the container server name
+        server_name=getenv("SENTRY_SERVER_NAME"),
     )
-
-VERSION = get_version(version_scheme="release-branch-semver")
+    sentry_sdk.set_tag("container_name", str(socket.gethostname()))
 
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
@@ -654,6 +658,9 @@ if not DEBUG:
         "django_statsd.patches.db",
     ]
 
+
 INTEGRATION_TESTS = get_boolean_env("INTEGRATION_TESTS", False)
 IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE = getenv("IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE")
 IPV4_IP_RESOLVER_INTERNAL_VALIDATING = getenv("IPV4_IP_RESOLVER_INTERNAL_VALIDATING")
+
+INTERNETNL_BRANDING = get_boolean_env("INTERNETNL_BRANDING", False)

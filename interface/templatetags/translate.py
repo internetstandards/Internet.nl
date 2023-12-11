@@ -105,9 +105,6 @@ def render_details_table(tech_type, table_headers, table_content):
                     value = cell_deque.popleft()
                     if not value:
                         value = _("results empty-argument-alt-text")
-                    elif tech_type == "table_translatable":
-                        if type(value) == dict:
-                            value = _(value["msgid"]).format(**value.get("context", {}))
                     elif value in [
                         "detail tech data yes",
                         "detail tech data no",
@@ -124,6 +121,9 @@ def render_details_table(tech_type, table_headers, table_content):
                         "detail tech data insufficient",
                     ]:
                         value = _(value)
+                    elif tech_type == "table_translatable":
+                        if type(value) == dict:
+                            value = _(value["msgid"]).format(**value.get("context", {}))
                     row.append(value)
                 else:
                     if column == 0 and table_length > 1:

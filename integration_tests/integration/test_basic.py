@@ -25,7 +25,7 @@ def test_index_footer_text_present(page, app_url, footer_text):
     page.goto(app_url)
     footer = page.locator("#footer")
 
-    expect(footer).to_have_text(re.compile(footer_text))
+    assert footer_text in footer.text_content()
 
 
 def test_security_txt(page, app_url_subdomain):
@@ -112,6 +112,13 @@ def test_nowww_class_b(page, app_domain, app_url):
     assert response.headers["location"] == f"{app_url}/"
 
 
+def test_additional_redirect_domains(page, app_url):
+    """Additional configured redirect subdomains should redirect to the frontpage."""
+    response = requests.get("https://platforminternet.test", allow_redirects=False, verify=False)
+    assert response.status_code == 301
+    assert response.headers["location"] == f"{app_url}/"
+
+
 def test_default_sni_none(app_domain):
     """Default vhost should 404 on any non explicitly configured domain. #894"""
 
@@ -131,4 +138,84 @@ def test_conn_over_https_no_hsts(app_domain):
     response = requests.get(f"https://conn.{app_domain}", verify=False, allow_redirects=False)
     assert response.status_code == 301
     assert response.headers["Strict-Transport-Security"] == "max-age=0;"
-    assert response.headers["location"] == f"http://conn.{app_domain}"
+    assert response.headers["location"] == f"http://conn.{app_domain}/"
+
+
+@pytest.mark.parametrize(
+    ("from_language", "to_language", "footer_text"),
+    [("nl", "en", FOOTER_TEXT_EN), ("en", "nl", FOOTER_TEXT_NL)],
+)
+def test_change_language(page, app_domain, from_language, to_language, footer_text):
+    """Test clicking the language change button."""
+
+    page.goto(f"https://{from_language}.{app_domain}")
+    page.locator("#language-switch-header-container button:not(:disabled)").click()
+    page.wait_for_url(f"https://{to_language}.internet.test/")
+
+    footer = page.locator("#footer")
+    assert footer_text in footer.text_content()
+
+
+@pytest.mark.parametrize(
+    ("language", "footer_text"),
+    [("en", FOOTER_TEXT_EN), ("nl", FOOTER_TEXT_NL)],
+)
+def test_accept_language_header(page, app_domain, language, footer_text):
+    """Browser preferred language should be respected."""
+
+    page.set_extra_http_headers({"Accept-Language": language})
+    page.goto(f"https://{app_domain}")
+
+    footer = page.locator("#footer")
+    assert footer_text in footer.text_content()
+
+
+def test_cron_manual_hosters_hof(page, app_url, trigger_cron):
+    """Test if manual hosters file can be downloaded and parsed."""
+
+    trigger_cron("15min/download_hof")
+
+    page.goto(app_url)
+    page.get_by_role("link", name="Hall of Fame", exact=True).click()
+    page.get_by_text("Hosters").click()
+
+    hof_content = page.locator(".hof-content")
+
+    assert "The 51 hosters mentioned below" in hof_content.text_content()
+
+
+def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
+    """Test if database backup files are created."""
+
+    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
+    docker_compose_exec("cron", "rm -f /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")
+
+    trigger_cron("daily/postgresql_backup")
+    trigger_cron("weekly/postgresql_backup")
+
+    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
+    assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")
+
+
+def test_hof_update(page, app_url, trigger_scheduled_task, unique_id, docker_compose_exec, clear_webserver_cache):
+    """Test if Hall of Fame can be updated."""
+
+    domain = f"{unique_id}.example.com"
+
+    # create new domain result
+    docker_compose_exec(
+        "app",
+        (
+            './manage.py shell -c "from checks.models import DomainTestReport;'
+            f"DomainTestReport(domain='{domain}', score=100).save()\""
+        ),
+    )
+
+    # generate hof
+    trigger_scheduled_task("generate_HoF")
+
+    page.goto(app_url)
+    page.get_by_role("link", name="Hall of Fame", exact=True).click()
+    page.get_by_text("Websites").click()
+
+    expect(page.get_by_role("listitem").filter(has_text=domain)).to_be_visible()

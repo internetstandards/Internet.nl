@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+if [ -z "$HOSTERS_HOF_URL" ];then
+  exit 0
+fi
+
+cd /app/manual-hall-of-fame/
+
+curl -fsSL "$HOSTERS_HOF_URL" > /app/manual-hall-of-fame/hosters.yaml

@@ -102,6 +102,7 @@ Use the values determined above to fill in the variables below and run the follo
     INTERNETNL_DOMAINNAME=example.com \
     IPV4_IP_PUBLIC=192.0.2.1 \
     IPV6_IP_PUBLIC=2001:db8:1::1 \
+    SENTRY_SERVER_NAME=$(hostname) \
     envsubst < docker/host-dist.env > docker/host.env
 
 After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings.
@@ -146,12 +147,8 @@ For the "Test your connection" test the following records are required:
     en.conn.ipv6.example.com       CNAME  ipv6.example.com
     www.conn.ipv6.example.com      CNAME  ipv6.example.com
 
-    test-ns-signed.example.com     NS     ns.test-ns-signed.example.com
-    ns.test-ns-signed.example.com  A      192.0.2.1
-                                   AAAA   2001:db8:1::1001
-
-    test-ns6-signed.example.com    NS     ns.test-ns6-signed.example.com
-    ns.test-ns6-signed.example.com AAAA   2001:db8:1::1001
+    test-ns-signed.example.com     NS     example.com
+    test-ns6-signed.example.com    NS     ipv6.example.com
 
 For connectin test two signed DNS zones are created and served by the application using Unbound. For this to work properly the delegating zone must also serve the correct `DS` records.
 
@@ -184,7 +181,7 @@ For more information see: [documentation/Docker-live-tests.md](Docker-live-tests
 
 ## Logging
 
-Log output from containers can be obtained using the following command:
+Log output from containers/services can be obtained using the following command:
 
     docker compose --project-name=internetnl-prod logs -f
 
@@ -204,11 +201,19 @@ Or to view all logs related to the project use:
 
 ## Troubleshooting/mitigation
 
-When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers:
+When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers/services:
 
     docker compose --project-name=internetnl-prod  ps -a
 
-Containers should have a `STATUS` of `Up` and there should be no containers with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+Or use this command to omit the `COMMAND` and `PORTS` columns for a more compact view with only relevant information:
+
+    docker compose --project-name=internetnl-prod  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
+
+Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+
+If a container/service is not up and healthy the cause might be deduced by inspecting the container/service state, eg for the app container/service:
+
+    docker inspect internetnl-prod-app-1 --format "{{json .State}}" | jq
 
 It might be possible not all containers that should be running are running. To have Docker Compose check the running instance and bring up any missing components run:
 
@@ -223,13 +228,13 @@ If this does not work problems might lay deeper and OS level troubleshooting mig
 
 ## Autohealing
 
-Critial services/containers have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
+Critial containers/services have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
 
 ### Known issues
 
 #### Internal Docker DNS not working
 
-Docker Compose relies on an internal DNS resolver to resolve container names so the services can communicate via those names (eg: webserver to app, app to PostgreSQL). The internal DNS resolver might become unavailable. This might happen if the system is resource constrained (eg: low memory) and the resolver is OOM killed. This manifests in the application/monitoring becoming unavailable (`502` errors) and logs lines like:
+Docker Compose relies on an internal DNS resolver to resolve container/services names so the services can communicate via those names (eg: webserver to app, app to PostgreSQL). The internal DNS resolver might become unavailable. This might happen if the system is resource constrained (eg: low memory) and the resolver is OOM killed. This manifests in the application/monitoring becoming unavailable (`502` errors) and logs lines like:
 
     2023/07/24 07:39:18 [error] 53#53: recv() failed (111: Connection refused) while resolving, resolver: 127.0.0.11:53
 
@@ -248,31 +253,33 @@ To update the application stack first update the `docker/defaults.env` and `dock
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
-This will update the deployment with the latest `main` branch. If you want to update to a tagged version release or follow a specific development branch, adjust the value of `RELEASE` accordingly.
+This will update the deployment with the latest `main` branch and latest `main` packages.
 
-To update to `v1.8.0`:
+If you want to update to a tagged version release, e.g. `v1.8.0`, use the following commands:
 
-    RELEASE=v1.8.0 && \
+    RELEASE=1.8.0 && \
+	TAG=v1.8.0 && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
-
-To update to the latest build of the `feature-x` branch:
-
-    RELEASE=feature-x && \
-    cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
 
-### Updating to specific release
+## Downgrading/rollback
 
-https://github.com/internetstandards/Internet.nl/blob/21baea392039ede54257f729cf951d6d6e129199/docker/docker-compose.yml
+In essence downgrading is the same procedure as upgrading: determine the branch and release version, download those versions of the configuration files and pull in those versions of the images, after which everything is restarted to that version. For example, to roll back to version `1.7.0` run:
+
+    RELEASE=1.7.0 && \
+	TAG=v1.7.0 && \
+    cd /opt/Internet.nl/ && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
+**notice**: depending on the complexity of the upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
 
 ## HTTPS/Letsencrypt
 
@@ -285,6 +292,8 @@ and
     docker compose --project-name=internetnl-prod exec webserver "cat /var/log/letsencrypt/letsencrypt.log"
 
 It may take a few minutes after starting for the Letsencrypt certificates to be registered and loaded.
+
+If the log file cannot be found this mean the Letsencrypt configuration step has not run because there are no new certificates to be configured.
 
 ## Batch API
 
@@ -318,9 +327,9 @@ Because the entire application runs in the Docker container engine it should be 
 
 This will return a 0 exit code if everything is as expected. Due to Docker being configured with `live-restore`, the daemon itself being down has no direct and immediate impact on the application. But selfhealing behaviour and further interaction with the services will be unavailable.
 
-- Critital application services/containers status
+- Critital application containers/services status
 
-All services/containers critical to the application's primary functionality have a Docker healthcheck configured. This will run at an configured interval to verify the proper operation of the service.
+All containers/services critical to the application's primary functionality have a Docker healthcheck configured. This will run at an configured interval to verify the proper operation of the service.
 
 To verify the health status of the critial services use these commands:
 
@@ -383,5 +392,7 @@ When the hostname is changed, update upstream DNSSEC keys with the new values fr
 ## State/backups/restores/migration
 
 All stateful date for the application stack is stored in Docker Volumes. For backup and DR purposes make sure to include all `/var/lib/docker/volumes/internetnl_*` directories in your snapshot/backup. The directory `internetnl_routinator` can be omited as it contains a cache of externally fetched data.
+
+Daily and weekly database dumps are written to the `/var/lib/docker/volumes/internetnl-prod_postgres-backups/` directory.
 
 When recovering or migrating to a new server first the "Server Setup" should be done then these directories should be restored, after which the "Application Setup" can be done.

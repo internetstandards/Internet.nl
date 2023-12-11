@@ -20,7 +20,7 @@ django-enumfields
 django-hosts
 django-markdown_deux
 eventlet
-gevent < 22.10.2  # pinned for 3.7
+gevent < 23.9.1  # pinned for 3.7
 libsass
 markdown
 polib

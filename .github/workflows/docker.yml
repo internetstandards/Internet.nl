@@ -2,10 +2,19 @@ name: Internet.nl Docker
 
 on:
   pull_request:
+  release:
+    types: [published]
   push:
     branches:
       - main
       - release/*
+
+env:
+  registry: ghcr.io/internetstandards
+  # determine whether this pull request has permissions to push to registry, or artifacts
+  # should be used to transfer images between jobs. Forked and dependabot builds don't
+  # have permission to push to registry.
+  use_registry: ${{ ! (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || startsWith(github.head_ref, 'dependabot/'))) }}
 
 jobs:
   # builds all docker images in parallel
@@ -13,33 +22,34 @@ jobs:
     runs-on: ubuntu-22.04
 
     strategy:
-      # limit otherwise we will get timeout errors during builds
-      # max-parallel: 4
       matrix:
         include:
-          - image: ghcr.io/internetstandards/internet.nl
+          - image: internet.nl
             dockerfile: docker/Dockerfile
             target: app
-          - image: ghcr.io/internetstandards/unbound
+          - image: unbound
             dockerfile: docker/Dockerfile
             target: unbound
-          - image: ghcr.io/internetstandards/linttest
+          - image: linttest
             dockerfile: docker/Dockerfile
             target: linttest
-          - image: ghcr.io/internetstandards/test-runner
+          - image: test-runner
             dockerfile: docker/test-runner.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/webserver
+          - image: webserver
             dockerfile: docker/webserver.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/rabbitmq
+          - image: rabbitmq
             dockerfile: docker/rabbitmq.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/grafana
+          - image: grafana
             dockerfile: docker/grafana.Dockerfile
             target:
-          - image: ghcr.io/internetstandards/prometheus
+          - image: prometheus
             dockerfile: docker/prometheus.Dockerfile
+            target:
+          - image: cron
+            dockerfile: docker/cron.Dockerfile
             target:
 
     outputs:
@@ -57,7 +67,7 @@ jobs:
           git fetch --prune --unshallow
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -70,7 +80,7 @@ jobs:
           echo "internetnl_version=$(python -m setuptools_scm)" | tr '+' '-'| tee -a "$GITHUB_OUTPUT"
 
       # login to pull images from Github registry
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -80,7 +90,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build ${{ matrix.image }}
+      - name: Build ${{ matrix.image }} (for non-forked PR's)
+        # build for non-forked PR's that are allowed to use the registry
+        if: ${{ env.use_registry == 'true' }}
         # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
         timeout-minutes: 15
         uses: docker/build-push-action@v5
@@ -88,59 +100,145 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          load: true
           # tag image with current setuptools_scm generated version
-          # also always tag 'latest', but this is not always pushed (see below)
-          # and tag with current branch name (eg: main) or PR source branch (eg: feature-x)
+          # and tag with PR source branch (eg: feature-x)
           tags: |
-            ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ matrix.image }}:latest
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+          # use latest build from main, or image previously build by this PR for caching
           cache-from: |
-            type=gha
-            ${{ matrix.image }}:latest
-            ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
-          cache-to: type=gha,mode=max,ignore-error=true
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # push images to registry
+          push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push ${{ matrix.image }} version
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        run: docker push ${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+      - name: Build ${{ matrix.image }} (for main)
+        # build for pushes to the main branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          # tag image with current setuptools_scm generated version
+          # and tag with current branch name (eg: main)
+          tags: |
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # use latest build from main for caching
+          cache-from: |
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # push images to registry
+          push: true
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push ${{ matrix.image }} latest release
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        # push 'latest' only for versioned
+      - name: Build ${{ matrix.image }} (for release)
+        # build for tagged releases
         if: github.event_name == 'release'
-        run: docker push ${{ matrix.image }}:latest
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          # tag image with current setuptools_scm generated version and tag 'latest'
+          tags: |
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.registry }}/${{ matrix.image }}:latest
+          # use latest build from main for caching
+          cache-from: |
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # push images to registry
+          push: true
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
 
-      - name: Push branch/pr tag
-        # push steps should not take longer than 10 minutes, if they do it's probably because Github Actions hangs
-        timeout-minutes: 10
-        run: docker push ${{ matrix.image }}:${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name}}
+      - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
+        # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
+        if: ${{ env.use_registry == 'false' }}
+        # build steps should not take longer than 15 minutes, if they do it's probably because Github Actions hangs
+        timeout-minutes: 15
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          # tag image with current setuptools_scm generated version
+          tags: |
+            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+          # use latest build from main for caching
+          cache-from: |
+            ${{ env.registry }}/${{ matrix.image }}:main
+          # don't push to registry due to permissions, but store in Docker so can be exported for artifacts below
+          load: true
+          # makes build images better usable as cache by allowing individual layers to be pulled from cache
+          # pass in version information
+          build-args: |
+            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+
+      - name: Save image to disk (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        run: docker save ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
+
+      - name: Upload image as build artifact (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{ matrix.image }}"
+          path: "${{ matrix.image }}.tar.gz"
+          # we don't need to keep these any longer than the subsequent jobs, this is the shortest it can be configured
+          retention-days: 1
 
   docs:
     runs-on: ubuntu-22.04
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: github.event_name == 'pull_request'
+        if: ${{ env.use_registry == 'true' }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
-          To deploy this branch to a existing deployment run the following update commands:
 
-              RELEASE="${{ github.head_ref }}" && \\
+          To deploy this specific build to a existing deployment run the following update commands:
+
+              export BRANCH="${{ github.sha }}" && \\
+              export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
               cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\${RELEASE}/docker/docker-compose.yml && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
+          EOF
+
+      - name: Release deployment docs
+        if: github.event_name == 'release'
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+
+          To deploy this release to an existing deployment run the following update commands:
+
+              export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
+              export TAG="v\$RELEASE" && \\
+              cd /opt/Internet.nl/ && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$TAG/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$TAG/docker/docker-compose.yml && \\
+              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
 
   integration-test:
@@ -148,13 +246,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
       PY_COLORS: "1"
 
     steps:
@@ -167,15 +260,35 @@ jobs:
       - uses: actions/checkout@v3
 
       # login to pull images from Github registry
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull docker images
-        # build env includes all images
+      - name: Download images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
+      - name: Pull additional docker images
+        if: ${{ env.use_registry == 'false' }}
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build
+        run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
         run: make pull env=build
 
       - name: Start test instance
@@ -224,18 +337,31 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
 
       # login to pull images from Github registry
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
 
       - name: Run check
         run: /bin/bash -o pipefail -c 'make --silent check | tee -a $GITHUB_STEP_SUMMARY'
@@ -248,21 +374,42 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_LINTTEST: ghcr.io/internetstandards/linttest:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
 
       # login to pull images from Github registry
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull docker images
-        # build env includes all images
+      - name: Download images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
+      - name: Pull additional docker images
+        if: ${{ env.use_registry == 'false' }}
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build
+        run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
         run: make pull env=build
 
       - name: Run test
@@ -279,31 +426,47 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_IMAGE_APP: ghcr.io/internetstandards/internet.nl:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_UNBOUND: ghcr.io/internetstandards/unbound:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_TEST-RUNNER: ghcr.io/internetstandards/test-runner:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_WEBSERVER: ghcr.io/internetstandards/webserver:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_RABBITMQ: ghcr.io/internetstandards/rabbitmq:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_GRAFANA: ghcr.io/internetstandards/grafana:${{ needs.build-docker.outputs.internetnl_version }}
-      DOCKER_IMAGE_PROMETHEUS: ghcr.io/internetstandards/prometheus:${{ needs.build-docker.outputs.internetnl_version }}
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
       - uses: actions/checkout@v3
 
       # login to pull images from Github registry
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull docker images
-        # build env includes all images
+      - name: Download images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        uses: actions/download-artifact@v3
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
+      - name: Pull additional docker images
+        if: ${{ env.use_registry == 'false' }}
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build
+        run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
         run: make pull env=build
 
       - name: Start development environment
-        run: make up env=develop
+        # disable autoreload in CI as it makes workers unstable
+        run: DEVSERVER_ARGS=--noreload make up env=develop
 
       - name: Run development environment tests
         run: make develop-tests
@@ -338,4 +501,5 @@ jobs:
           name: Development environment test Docker Compose Logs
           path: docker-compose.log
           if-no-files-found: ignore
+
 

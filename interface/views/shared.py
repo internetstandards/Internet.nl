@@ -270,10 +270,11 @@ def get_hof_mail(count=100000):
 def get_hof_manual(manual):
     hof_entries = []
     try:
-        with open(settings.MANUAL_HOF[manual]["entries_file"]) as f:
+        with open(settings.MANUAL_HOF[manual]["entries_file"], encoding="utf-8") as f:
             hof_entries = yaml.load(f, Loader=yaml.Loader)
     except Exception:
-        pass
+        log.exception("failed to load manual hof")
+
     random.shuffle(hof_entries)
     return (len(hof_entries), hof_entries)
 

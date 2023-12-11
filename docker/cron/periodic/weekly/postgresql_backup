@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# make a daily backup dump of the database
+
+set -e
+
+if [ ! "$CRON_WEEKLY_POSTGRESQL_BACKUP" = "True" ];then
+  exit 0
+fi
+
+PGPASSWORD=$DB_PASSWORD pg_dump --host $DB_HOST --username $DB_USER --no-password $DB_NAME | gzip > /var/lib/postgresql/backups/$DB_NAME.weekly.sql.gz
