@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.3
+
+Release 1.8.3 fixes an issue where HSTS and CSP headers were missing from he www-subdomain of the main domain (#1210, #1211).
+
 ## 1.8.2
 
 Release 1.8.2 fixes an issue where the connection test would fail to start in certain cases due to an incorrect HTTP downgrade (#1194, #1195).
