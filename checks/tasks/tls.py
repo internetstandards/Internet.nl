@@ -2993,14 +2993,14 @@ def forced_http_check(af_ip_pair, url, task):
     forced_https = ForcedHttpsStatus.bad
     forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_BAD
 
-    for response in response_http.history + [response_http]:
+    for response in response_http.history[1:] + [response_http]:
         if response.url:
             parsed_url = urlparse(response.url)
             # Requirement: in case of redirecting, a domain should firstly upgrade itself by
-            # redirecting to its HTTPS version before it may redirect to another domain.
-            # However, redirecting to a subdomain, e.g. www-prefix, is permitted.
-            if parsed_url.scheme == "https" and url in parsed_url.netloc:
+            # redirecting to its HTTPS version before it may redirect to another domain (#1208)
+            if parsed_url.scheme == "https" and url == parsed_url.netloc:
                 forced_https = ForcedHttpsStatus.good
                 forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
+            break
 
     return forced_https_score, forced_https
