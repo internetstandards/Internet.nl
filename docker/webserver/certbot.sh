@@ -14,6 +14,19 @@ else
   email="--register-unsafely-without-email"
 fi
 
+if [ ! -z $CERTBOT_SERVER ]; then
+  server="--server=$CERTBOT_SERVER"
+fi
+
+
+if [ ! -z $CERTBOT_EAB_KID ]; then
+  eab_kid="--eab-kid=$CERTBOT_EAB_KID"
+fi
+
+if [ ! -z $CERTBOT_EAB_HMAC_KEY ]; then
+  eab_hmac_key="--eab-hmac-key=$CERTBOT_EAB_HMAC_KEY"
+fi
+
 domain=$INTERNETNL_DOMAINNAME
 subdomains="nl.$domain,en.$domain,www.$domain,ipv6.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
 if [ ! -z $REDIRECT_DOMAINS ];then
@@ -40,6 +53,9 @@ configure_letsencrypt() {
       --webroot \
       $staging \
       $email \
+      $server \
+      $eab_kid \
+      $eab_hmac_key \
       --cert-name $domain \
       -d $domain
     cert_acquired=$?
@@ -67,6 +83,9 @@ configure_letsencrypt() {
       --webroot \
       $staging \
       $email \
+      $server \
+      $eab_kid \
+      $eab_hmac_key \
       --cert-name $domain \
       -d $domain \
       -d $subdomains \
