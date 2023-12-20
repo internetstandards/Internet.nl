@@ -13,9 +13,9 @@ import requests
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.utils.log import get_task_logger
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.backends.openssl import rsa
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.hazmat.primitives.asymmetric import dsa, x25519, x448, ec
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import (
@@ -1034,7 +1034,7 @@ def build_summary_report(testtls, category):
     testtls.report = report
 
 
-def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, score_failed, score_validated):
+def dane(url: str, port: int, chain: List[Certificate], task, dane_cb_data, score_none, score_none_bogus, score_failed, score_validated):
     """
     Check if there are TLSA records, if they are valid and if a DANE rollover
     scheme is currently in place.
@@ -1108,9 +1108,8 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
 
     chain_pem = []
     for cert in chain:
-        chain_pem.append(cert.as_pem())
+        chain_pem.append(cert.public_bytes(Encoding.PEM).decode("ascii"))
     chain_txt = "\n".join(chain_pem)
-    res = None
     with subprocess.Popen(
         [
             settings.LDNS_DANE,
@@ -1191,74 +1190,6 @@ def get_common_name(cert):
         pass
     return value
 
-
-class DebugCertChain:
-    """
-    Class performing X509 cert checks NCSC Guidelines B3-*
-
-    """
-
-    def __new__(cls, chain):
-        """
-        In case the chain is None (ValueError from nassl) don't create an
-        instance. Instead return None and it will be handled during the
-        certificate checks.
-
-        """
-        if chain is None:
-            return None
-        return super().__new__(cls)
-
-    def __init__(self, chain):
-        self.unparsed_chain = chain
-        self.chain = [
-            load_pem_x509_certificate(cert.as_pem().encode("ascii"), backend=default_backend()) for cert in chain
-        ]
-        self.score_hostmatch_good = scoring.WEB_TLS_HOSTMATCH_GOOD
-        self.score_hostmatch_bad = scoring.WEB_TLS_HOSTMATCH_BAD
-        self.score_pubkey_good = scoring.WEB_TLS_PUBKEY_GOOD
-        self.score_pubkey_bad = scoring.WEB_TLS_PUBKEY_BAD
-        self.score_signature_good = scoring.WEB_TLS_SIGNATURE_GOOD
-        self.score_signature_bad = scoring.WEB_TLS_SIGNATURE_BAD
-        self.score_dane_none = scoring.WEB_TLS_DANE_NONE
-        self.score_dane_none_bogus = scoring.WEB_TLS_DANE_NONE_BOGUS
-        self.score_dane_failed = scoring.WEB_TLS_DANE_FAILED
-        self.score_dane_validated = scoring.WEB_TLS_DANE_VALIDATED
-
-    def check_dane(self, url, port, task, dane_cb_data=None):
-        return dane(
-            url,
-            port,
-            self.unparsed_chain,
-            task,
-            dane_cb_data,
-            self.score_dane_none,
-            self.score_dane_none_bogus,
-            self.score_dane_failed,
-            self.score_dane_validated,
-        )
-
-
-class DebugCertChainMail(DebugCertChain):
-    """
-    Subclass of DebugCertChain to define the scores used for the mailtest.
-
-    """
-
-    def __init__(self, chain):
-        super().__init__(chain)
-        self.score_hostmatch_good = scoring.MAIL_TLS_HOSTMATCH_GOOD
-        self.score_hostmatch_bad = scoring.MAIL_TLS_HOSTMATCH_BAD
-        self.score_pubkey_good = scoring.MAIL_TLS_PUBKEY_GOOD
-        self.score_pubkey_bad = scoring.MAIL_TLS_PUBKEY_BAD
-        self.score_signature_good = scoring.MAIL_TLS_SIGNATURE_GOOD
-        self.score_signature_bad = scoring.MAIL_TLS_SIGNATURE_BAD
-        self.score_dane_none = scoring.MAIL_TLS_DANE_NONE
-        self.score_dane_none_bogus = scoring.MAIL_TLS_DANE_NONE_BOGUS
-        self.score_dane_failed = scoring.MAIL_TLS_DANE_FAILED
-        self.score_dane_validated = scoring.MAIL_TLS_DANE_VALIDATED
-
-
 def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     """
     Check the web server's certificate.
@@ -1282,6 +1213,11 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     Perform certificate checks.
 
     """
+    # TODO: common property?
+    ports = {
+        ChecksMode.WEB: 443,
+        ChecksMode.MAIL: 25,
+    }
     # TODO: this does use our trust store
     if mode == ChecksMode.WEB:
         print(f"starting sslyze scan for {url} {af_ip_pair[1]} {dane_cb_data}")
@@ -1379,11 +1315,11 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     for cert in cert_deployment.received_certificate_chain:
         chain_str.append(get_common_name(cert))
 
-    # TODO: DANE
-    # if starttls_details:
-    #     dane_results = debug_chain.check_dane(url, conn_port, task, dane_cb_data=starttls_details.dane_cb_data)
-    # else:
-    #     dane_results = debug_chain.check_dane(url, conn_port, task)
+    dane_results = dane(url, ports[mode], cert_deployment.received_certificate_chain, task,
+                        dane_cb_data, scoring.WEB_TLS_DANE_NONE,
+            scoring.WEB_TLS_DANE_NONE_BOGUS,
+            scoring.WEB_TLS_DANE_FAILED,
+            scoring.WEB_TLS_DANE_VALIDATED)
 
     results = dict(
         tls_cert=True,
@@ -1398,7 +1334,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         hostmatch_bad=hostmatch_bad,
         hostmatch_score=hostmatch_score,
     )
-    # results.update(dane_results)
+    results.update(dane_results)
 
     return results
 
