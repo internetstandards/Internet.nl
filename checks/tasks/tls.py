@@ -1276,7 +1276,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     results = dict(
         tls_cert=True,
         chain=chain_str,
-        trusted="",
+        trusted=scoring.WEB_TLS_TRUSTED_GOOD,
         trusted_score=scoring.MAIL_TLS_TRUSTED_GOOD,
         pubkey_bad=pubkey_bad,
         pubkey_phase_out=pubkey_phase_out,
@@ -1473,8 +1473,8 @@ def check_mail_tls(server, dane_cb_data, task):
         ciphers_score=ciphers_score,
         # TODO, currently unsupported
         cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
-        cipher_order="TODO",
-        cipher_order_violation="TODO",
+        cipher_order=CipherOrderStatus.na,
+        cipher_order_violation=[],
         secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
         secure_reneg_score=(
             scoring.WEB_TLS_SECURE_RENEG_GOOD
@@ -1590,8 +1590,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ciphers_score=ciphers_score,
         # TODO, currently unsupported
         cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
-        cipher_order="TODO",
-        cipher_order_violation="TODO",
+        cipher_order=CipherOrderStatus.na,
+        cipher_order_violation=[],
         secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
         secure_reneg_score=(
             scoring.WEB_TLS_SECURE_RENEG_GOOD
