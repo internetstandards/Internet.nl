@@ -3,7 +3,6 @@
 import time
 from binascii import hexlify
 from enum import Enum
-from itertools import product
 from timeit import default_timer as timer
 from typing import List
 from urllib.parse import urlparse
@@ -53,7 +52,6 @@ from checks.models import (
     ZeroRttStatus,
 )
 from checks.tasks import SetupUnboundContext
-from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
     HeaderCheckerContentEncoding,
@@ -70,20 +68,6 @@ from checks.tasks.shared import (
     resolve_dane,
     results_per_domain,
 )
-from checks.tasks.tls_connection import (
-    SSLV2,
-    SSLV3,
-    SSLV23,
-    TLSV1,
-    TLSV1_1,
-    TLSV1_2,
-    TLSV1_3,
-    CipherListAction,
-    DebugConnection,
-    HTTPSConnection,
-    ModernConnection,
-)
-from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException
 from interface import batch, batch_shared_task, redis_id
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
@@ -107,64 +91,6 @@ except ImportError as e:
         raise e
 
 logger = get_task_logger(__name__)
-
-# Based on:
-# hhttps://tools.ietf.org/html/rfc5246#section-7.4.1.4.1 "Signature Algorithms"
-# https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set1_sigalgs_list.html
-# https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
-# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-16
-# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-18
-# openssl list -1 -digest-commands
-# Define signature algorithms which, if we are unable to connect using any of
-# them, constitutes a phase out warning. See NCSC 2.0 "Table 5 - Hash functions
-# for key exchange".
-# Only SHA256/384/512 based hash functions:
-KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER = [
-    "SHA512",
-    "SHA384",
-    "SHA256",
-]
-# All possible algorithms:
-KEX_TLS12_SIGALG_PREFERRED_ORDER = [
-    "RSA",
-    "RSA-PSS",
-    "DSA",
-    "ECDSA",
-]
-KEX_TLS12_SORTED_ALG_COMBINATIONS = map(
-    "+".join, product(KEX_TLS12_SIGALG_PREFERRED_ORDER, KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER)
-)
-KEX_TLS12_SHA2_SIGALG_PREFERENCE = ":".join(KEX_TLS12_SORTED_ALG_COMBINATIONS)
-
-# Based on:
-# https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-signaturescheme
-# https://www.openssl.org/docs/man1.1.0/man3/SSL_CONF_cmd.html
-# https://tools.ietf.org/html/rfc8446#section-4.2.3
-# https://tools.ietf.org/html/rfc8032 "EdDSA"
-# NCSC 2.0 Table 5 - Hash functions for key exchange
-# Only signature schemes that are SHA256/384/512 based:
-#   ed25519 is included in the table because RFC-8032 states that it is SHA-512
-#   based.
-#   ed448 is excluded from the table because RFC-8032 states that it is SHAKE256
-#   (SHA-3) based.
-KEX_TLS13_SHA2_SIGNATURE_SCHEMES = [
-    "rsa_pkcs1_sha512",
-    "rsa_pkcs1_sha384",
-    "rsa_pkcs1_sha256",
-    "ecdsa_secp256r1_sha256",
-    "ecdsa_secp384r1_sha384",
-    "ecdsa_secp521r1_sha512",
-    "rsa_pss_rsae_sha512",
-    "rsa_pss_rsae_sha384",
-    "rsa_pss_rsae_sha256",
-    "ed25519",
-    "rsa_pss_pss_sha512",
-    "rsa_pss_pss_sha384",
-    "rsa_pss_pss_sha256",
-]
-KEX_TLS13_SHA2_SIGALG_PREFERENCE = ":".join(KEX_TLS13_SHA2_SIGNATURE_SCHEMES)
-
-KEX_GOOD_HASH_FUNCS = frozenset(set(KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER) | set(KEX_TLS13_SHA2_SIGNATURE_SCHEMES))
 
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
@@ -1213,28 +1139,30 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     Perform certificate checks.
 
     """
-    # TODO: common property?
-    ports = {
-        ChecksMode.WEB: 443,
-        ChecksMode.MAIL: 25,
-    }
     # TODO: this does use our trust store
+    print(f"starting sslyze scan for {url} {af_ip_pair} {mode} {dane_cb_data}")
     if mode == ChecksMode.WEB:
-        print(f"starting sslyze scan for {url} {af_ip_pair[1]} {dane_cb_data}")
-        scans = [
-            ServerScanRequest(
-                server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1], port=443),
-                scan_commands={
-                    ScanCommand.CERTIFICATE_INFO,
-                },
-            ),
-        ]
-        scanner = Scanner(per_server_concurrent_connections_limit=1)
-        scanner.queue_scans(scans)
-        result = next(scanner.get_results())
-        print(f"scan status result {result.scan_status}")
-        if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-            raise OSError
+        port = 443
+        scan = ServerScanRequest(
+            server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1], port=port),
+            scan_commands={ScanCommand.CERTIFICATE_INFO},
+        )
+    elif mode == ChecksMode.MAIL:
+        port = 25
+        scan = ServerScanRequest(
+            server_location=ServerNetworkLocation(hostname=url, port=port),
+            network_configuration=ServerNetworkConfiguration(tls_server_name_indication=url,
+                                                             tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP),
+            scan_commands={ScanCommand.CERTIFICATE_INFO},
+        )
+    else:
+        raise ValueError
+    scanner = Scanner(per_server_concurrent_connections_limit=1)
+    scanner.queue_scans([scan])
+    result = next(scanner.get_results())
+    print(f"scan status result {result.scan_status}")
+    if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
+        raise OSError
 
         # elif mode == ChecksMode.MAIL:
         #     debug_cert_chain = DebugCertChainMail
@@ -1243,8 +1171,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         #     conn_wrapper_args["send_SNI"] = starttls_details.dane_cb_data.get(
         #         "data"
         #     ) and starttls_details.dane_cb_data.get("secure")
-    else:
-        raise ValueError
+
         #
         # if (
         #     not starttls_details
@@ -1267,12 +1194,15 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         #     debug_chain = starttls_details.debug_chain
         #     conn_port = starttls_details.conn_port
 
+    # TODO: check trust
+
     if not result.scan_result.certificate_info.result.certificate_deployments:
         return dict(tls_cert=False)
 
     cert_deployment = result.scan_result.certificate_info.result.certificate_deployments[0]
     leaf_cert = cert_deployment.received_certificate_chain[0]
 
+    # TODO: use the right scoring set
     hostmatch_bad = []
     hostmatch_score = scoring.WEB_TLS_HOSTMATCH_GOOD
     if not cert_deployment.leaf_certificate_subject_matches_hostname:
@@ -1315,7 +1245,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     for cert in cert_deployment.received_certificate_chain:
         chain_str.append(get_common_name(cert))
 
-    dane_results = dane(url, ports[mode], cert_deployment.received_certificate_chain, task,
+    dane_results = dane(url, port, cert_deployment.received_certificate_chain, task,
                         dane_cb_data, scoring.WEB_TLS_DANE_NONE,
             scoring.WEB_TLS_DANE_NONE_BOGUS,
             scoring.WEB_TLS_DANE_FAILED,
@@ -1418,7 +1348,8 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
         # TODO: re-enable this cache
-        for server, dane_cb_data, _ in mailservers:
+        # TODO: limited to 1 mailserver right now
+        for server, dane_cb_data, _ in mailservers[:1]:
             results[server] = check_mail_tls(server, dane_cb_data, task)
         # while timer() - start < cache_ttl and not all(results.values()) > 0:
         #     for server, dane_cb_data, _ in mailservers:
@@ -1449,6 +1380,7 @@ def check_mail_tls(server, dane_cb_data, task):
     Perform all the TLS related checks for this mail server in series.
 
     """
+    # TODO: SNI?
     # send_SNI = dane_cb_data.get("data") and dane_cb_data.get("secure")
     print(f"starting sslyze scan for {server} {dane_cb_data}")
     scans = [
@@ -1494,14 +1426,14 @@ def check_mail_tls(server, dane_cb_data, task):
     ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
 
     # Check the certificates.
-    # cert_results = cert_checks(server, ChecksMode.MAIL, task, starttls_details=starttls_details)
+    cert_results = cert_checks(server, ChecksMode.MAIL, task, dane_cb_data)
 
     # HACK for DANE-TA(2) and hostname mismatch!
     # Give a good hosmatch score if DANE-TA *is not* present.
-    # if cert_results["tls_cert"] and not has_daneTA(cert_results["dane_records"]) and cert_results["hostmatch_bad"]:
-    #     cert_results["hostmatch_score"] = scoring.MAIL_TLS_HOSTMATCH_GOOD
+    if cert_results["tls_cert"] and not has_daneTA(cert_results["dane_records"]) and cert_results["hostmatch_bad"]:
+        cert_results["hostmatch_score"] = scoring.MAIL_TLS_HOSTMATCH_GOOD
 
-    return dict(
+    results = dict(
         tls_enabled=True,
         tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
         prots_bad=prots_bad,
@@ -1553,6 +1485,8 @@ def check_mail_tls(server, dane_cb_data, task):
         kex_hash_func=KexHashFuncStatus.good,
         kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
+    results.update(cert_results)
+    return results
 
 
 def has_daneTA(tlsa_records):
@@ -1565,432 +1499,6 @@ def has_daneTA(tlsa_records):
             return True
     return False
 
-
-class ConnectionChecker:
-    def __init__(self, conn, checks_mode=ChecksMode.WEB):
-        self._conn = conn
-        self._debug_conn = None
-        self._seen_versions = set()
-        self._seen_ciphers = dict()
-        self._checks_mode = checks_mode
-        self._bad_ciphers = set()
-        self._phase_out_ciphers = set()
-        self._sufficient_ciphers = set()
-        self._cipher_order_violation = []
-        self._test_order_on_sslv2 = False
-        self._test_order_on_sslv23 = False
-        self._test_order_on_sslv3 = False
-        self._test_order_on_tlsv1 = False
-        self._test_order_on_tlsv1_1 = False
-        self._test_order_on_tlsv1_2 = False
-        self._test_order_on_tlsv1_3 = False
-
-        if self._checks_mode == ChecksMode.WEB:
-            self._score_compression_good = scoring.WEB_TLS_COMPRESSION_GOOD
-            self._score_compression_bad = scoring.WEB_TLS_COMPRESSION_BAD
-            self._score_secure_reneg_good = scoring.WEB_TLS_SECURE_RENEG_GOOD
-            self._score_secure_reneg_bad = scoring.WEB_TLS_SECURE_RENEG_BAD
-            self._score_client_reneg_good = scoring.WEB_TLS_CLIENT_RENEG_GOOD
-            self._score_client_reneg_bad = scoring.WEB_TLS_CLIENT_RENEG_BAD
-            self._score_trusted_good = scoring.WEB_TLS_TRUSTED_GOOD
-            self._score_trusted_bad = scoring.WEB_TLS_TRUSTED_BAD
-            self._score_tls_suites_ok = scoring.WEB_TLS_SUITES_OK
-            self._score_tls_suites_bad = scoring.WEB_TLS_SUITES_BAD
-            self._score_tls_protocols_good = scoring.WEB_TLS_PROTOCOLS_GOOD
-            self._score_tls_protocols_sufficient = scoring.WEB_TLS_PROTOCOLS_GOOD
-            self._score_tls_protocols_bad = scoring.WEB_TLS_PROTOCOLS_BAD
-            self._score_tls_fs_ok = scoring.WEB_TLS_FS_OK
-            self._score_tls_fs_bad = scoring.WEB_TLS_FS_BAD
-            self._score_zero_rtt_good = scoring.WEB_TLS_ZERO_RTT_GOOD
-            self._score_zero_rtt_bad = scoring.WEB_TLS_ZERO_RTT_BAD
-            self._score_ocsp_staping_good = scoring.WEB_TLS_OCSP_STAPLING_GOOD
-            self._score_ocsp_staping_ok = scoring.WEB_TLS_OCSP_STAPLING_OK
-            self._score_ocsp_staping_bad = scoring.WEB_TLS_OCSP_STAPLING_BAD
-            self._score_tls_cipher_order_good = scoring.WEB_TLS_CIPHER_ORDER_GOOD
-            self._score_tls_cipher_order_bad = scoring.WEB_TLS_CIPHER_ORDER_BAD
-            self._score_tls_kex_hash_func_good = scoring.WEB_TLS_KEX_HASH_FUNC_GOOD
-            self._score_tls_kex_hash_func_bad = scoring.WEB_TLS_KEX_HASH_FUNC_BAD
-        elif self._checks_mode == ChecksMode.MAIL:
-            self._score_compression_good = scoring.MAIL_TLS_COMPRESSION_GOOD
-            self._score_compression_bad = scoring.MAIL_TLS_COMPRESSION_BAD
-            self._score_secure_reneg_good = scoring.MAIL_TLS_SECURE_RENEG_GOOD
-            self._score_secure_reneg_bad = scoring.MAIL_TLS_SECURE_RENEG_BAD
-            self._score_client_reneg_good = scoring.MAIL_TLS_CLIENT_RENEG_GOOD
-            self._score_client_reneg_bad = scoring.MAIL_TLS_CLIENT_RENEG_BAD
-            self._score_trusted_good = scoring.MAIL_TLS_TRUSTED_GOOD
-            self._score_trusted_bad = scoring.MAIL_TLS_TRUSTED_BAD
-            self._score_tls_suites_ok = scoring.MAIL_TLS_SUITES_OK
-            self._score_tls_suites_bad = scoring.MAIL_TLS_SUITES_BAD
-            self._score_tls_protocols_good = scoring.MAIL_TLS_PROTOCOLS_GOOD
-            self._score_tls_protocols_sufficent = scoring.MAIL_TLS_PROTOCOLS_GOOD
-            self._score_tls_protocols_bad = scoring.MAIL_TLS_PROTOCOLS_BAD
-            self._score_tls_fs_ok = scoring.MAIL_TLS_FS_OK
-            self._score_tls_fs_bad = scoring.MAIL_TLS_FS_BAD
-            self._score_zero_rtt_good = scoring.MAIL_TLS_ZERO_RTT_GOOD
-            self._score_zero_rtt_bad = scoring.MAIL_TLS_ZERO_RTT_BAD
-            # OCSP disabled for mail.
-            # self._score_ocsp_staping_good = scoring.MAIL_TLS_OCSP_STAPLING_GOOD
-            # self._score_ocsp_staping_ok = scoring.MAIL_TLS_OCSP_STAPLING_OK
-            # self._score_ocsp_staping_bad = scoring.MAIL_TLS_OCSP_STAPLING_BAD
-            self._score_tls_cipher_order_good = scoring.MAIL_TLS_CIPHER_ORDER_GOOD
-            self._score_tls_cipher_order_bad = scoring.MAIL_TLS_CIPHER_ORDER_BAD
-            self._score_tls_kex_hash_func_good = scoring.MAIL_TLS_KEX_HASH_FUNC_GOOD
-            self._score_tls_kex_hash_func_bad = scoring.MAIL_TLS_KEX_HASH_FUNC_BAD
-        else:
-            raise ValueError
-
-        self._note_conn_details(self._conn)
-        self.record_main_connection()
-
-
-    def check_kex_hash_func(self):
-        # # Re-connect with explicit signature algorithm preferences and
-        # # determine signature related properties of the connection. Only
-        # # TLS >= 1.2 support specifying the preferred signature algorithms as
-        # # ClientHello extensions (of which SignatureAlgorithm is one) were only
-        # # introduced in TLS 1.2. Further, according to the OpenSSL 1.1.1 docs
-        # # (see: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_type_nid.html)
-        # # calls to get_peer_signature_xxx() are only supported for TLS >= 1.2.
-        def sha2_supported_or_na(v, sigalgs):
-            # We should have seen all protocol versions by the time this test
-            # is executed, so we can avoid a pointless connection attempt if
-            # the requested protocol version has not been seen already:
-            if v not in self._seen_versions:
-                return KexHashFuncStatus.good
-
-            # Unsupported TLS version or ConnectionSocketException or no
-            # hash function information available or no common signature
-            # algorithm. This could be due to lack of SHA2, but we cannot
-            # tell the difference between handshake failure due to lack of
-            # SHA2 versus lack of support for a protocol version.
-            result = KexHashFuncStatus.unknown
-
-            try:
-                # Only ModernConnection supports passing the signature
-                # algorithm preference to the server. Don't try to connect
-                # using cipher suites that use RSA for key exchange as they
-                # have no signature and thus no hash function is used.
-                with ModernConnection.from_conn(self._conn, version=v, signature_algorithms=sigalgs) as new_conn:
-                    # we were able to connect with the given SHA2 sigalgs
-                    self._note_conn_details(new_conn)
-
-                    # Ensure that the requirement in the OpenSSL docs that
-                    # the peer has signed a message is satisfied by
-                    # exchanging data with the server.
-                    if self._checks_mode == ChecksMode.WEB:
-                        http_client = HTTPSConnection.fromconn(new_conn)
-                        http_client.putrequest("GET", "/")
-                        http_client.endheaders()
-                        http_client.getresponse()
-                    elif self._checks_mode == ChecksMode.MAIL:
-                        new_conn.write(bytes(f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", "ascii"))
-                        new_conn.read(4096)
-
-                    # From: https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_signature_nid.html
-                    # "There are several possible reasons for failure:
-                    #   1. the cipher suite has no signature (e.g. it uses
-                    #      RSA key exchange or is anonymous)
-                    #   2. the TLS version is below 1.2 or
-                    #   3. the functions were called too early, e.g. before
-                    #      the peer signed a message."
-                    # We can exclude #2 and #3 as we deliberately make a
-                    # TLS 1.2 connection and exchange messages with the
-                    # server, so failure must be because "the cipher suite
-                    # has no signature" in which case there is no hash
-                    # function to check. In my testing only ciphers that
-                    # use RSA for key exchange caused the None value to be
-                    # returned, i.e. case #1.
-                    kex_hash_func = new_conn.get_peer_signature_digest()
-                    if kex_hash_func:
-                        if kex_hash_func in KEX_GOOD_HASH_FUNCS:
-                            result = KexHashFuncStatus.good
-                        else:
-                            result = KexHashFuncStatus.bad
-            except ValueError as e:
-                # The NaSSL library can raise ValueError if the given
-                # sigalgs value is unable to be set in the underlying
-                # OpenSSL library.
-                if str(e) == "Invalid or unsupported signature algorithm":
-                    # This is an unexpected internal error, not a problem
-                    # with the target server. Log it and continue.
-                    logger.warning(
-                        f"Unexpected ValueError '{e}' while setting "
-                        f"client sigalgs to '{sigalgs}' when attempting "
-                        f"to test which key exchange SHA2 hash functions "
-                        f"target server '{self._conn.server_name}' "
-                        f"supports with TLS version {v.name}"
-                    )
-                else:
-                    raise e
-            except ConnectionHandshakeException:
-                # So we've been able to connect earlier with this TLS
-                # version but now as soon as we restrict ourselves to
-                # certain SHA2 hash functions the handshake fails, implying
-                # that the server does not support them.
-                result = KexHashFuncStatus.bad
-            except ConnectionSocketException:
-                # TODO: extend to support indicating that we were unable to
-                # test in the case of ConnectionSocketException?
-                pass
-
-            return result
-
-        # Older SSL/TLS protocol versions only supported MD5 and SHA1:
-        # From: https://tools.ietf.org/html/rfc5246#section-7.4.1.4.1
-        # ---------------------------------------------------------------------
-        # If the client does not send the signature_algorithms extension, the
-        # server MUST do the following:
-        #
-        # -  If the negotiated key exchange algorithm is one of (RSA, DHE_RSA,
-        #     DH_RSA, RSA_PSK, ECDH_RSA, ECDHE_RSA), behave as if client had
-        #     sent the value {sha1,rsa}.
-        #
-        # -  If the negotiated key exchange algorithm is one of (DHE_DSS,
-        #     DH_DSS), behave as if the client had sent the value {sha1,dsa}.
-        #
-        # -  If the negotiated key exchange algorithm is one of (ECDH_ECDSA,
-        #     ECDHE_ECDSA), behave as if the client had sent value {sha1,ecdsa}.
-        #
-        # Note: this is a change from TLS 1.1 where there are no explicit
-        # rules, but as a practical matter one can assume that the peer
-        # supports MD5 and SHA-1.
-        #
-        # Note: this extension is not meaningful for TLS versions prior to 1.2.
-        # Clients MUST NOT offer it if they are offering prior versions.
-        # ---------------------------------------------------------------------
-        newest_seen_tls_version = sorted(self._seen_versions, reverse=True)[0]
-        # To be considered to have a good key exchange hash function
-        # you've got to be using at least TLS 1.2:
-        if newest_seen_tls_version >= TLSV1_2:
-            # Check TLS 1.3 SHA2 support:
-            result_tls13 = sha2_supported_or_na(TLSV1_3, KEX_TLS13_SHA2_SIGALG_PREFERENCE)
-            # TLS 1.3 without SHA2 is bad, otherwise...
-            if result_tls13 != KexHashFuncStatus.bad:
-                # Check TLS 1.2 SHA2 support:
-                result_tls12 = sha2_supported_or_na(TLSV1_2, KEX_TLS12_SHA2_SIGALG_PREFERENCE)
-                # If the available protocols > TLS 1.2 all support SHA2 for
-                # key exchange then that's good.
-                if result_tls13 == KexHashFuncStatus.good and result_tls12 == KexHashFuncStatus.good:
-                    return self._score_tls_kex_hash_func_good, KexHashFuncStatus.good
-                # But if we're unable to determine conclusively one way or the
-                # other for either TLS 1.2 or TLS 1.3, then don't penalize the
-                # server but do indicate that uncertain situation.
-                elif result_tls13 == KexHashFuncStatus.unknown or result_tls12 == KexHashFuncStatus.unknown:
-                    return self._score_tls_kex_hash_func_good, KexHashFuncStatus.unknown
-
-        # Otherwise at least one of TLS 1.2 and/or TLS 1.3 lacks support for
-        # SHA2 for key exchange which is bad.
-        return self._score_tls_kex_hash_func_bad, KexHashFuncStatus.bad
-
-    def _check_sec_score_order(self, lowest_values, curr_cipher, new_conn):
-        """
-        Check for compliance with NCSC 2.0 prescribed ordering.
-
-        """
-        # If we already have a security level violation return.
-        if self._cipher_order_violation and self._cipher_order_violation[2] == "":
-            return
-
-        ci = cipher_infos.get(curr_cipher, None)
-        score = CipherScoreAndSecLevel.calc_cipher_score(ci, new_conn) if ci else None
-        seclevel = CipherScoreAndSecLevel.determine_appendix_c_sec_level(ci) if ci else None
-
-        if not self._cipher_order_violation:
-            if score:
-                if lowest_values["score"] and not CipherScoreAndSecLevel.is_in_prescribed_order(
-                    lowest_values["score"], score
-                ):
-                    rule = CipherScoreAndSecLevel.get_violated_rule_number(score, lowest_values["score"])
-                    self._cipher_order_violation = [lowest_values["score_cipher"], curr_cipher, rule]
-                else:
-                    lowest_values["score"] = score
-                    lowest_values["score_cipher"] = curr_cipher
-
-        if not self._cipher_order_violation or self._cipher_order_violation[2] != "":
-            # There may be already a score violation but security level trumps
-            # score.
-            if seclevel:
-                if lowest_values["seclevel"] and not CipherScoreAndSecLevel.is_in_seclevel_order(
-                    lowest_values["seclevel"], seclevel
-                ):
-                    self._cipher_order_violation = [lowest_values["seclevel_cipher"], curr_cipher, ""]
-                else:
-                    lowest_values["seclevel"] = seclevel
-                    lowest_values["seclevel_cipher"] = curr_cipher
-
-
-    def check_cipher_order(self):
-        """
-        Check whether the server enforces its own cipher order or if that
-        order can be overriden by the client.
-
-        Also complete the prescribed order check: if
-        `self.check_cipher_sec_level()` found no violations in phase out or
-        insufficient ciphers, and IFF the server enforces its own cipher order,
-        then also test the order that "good" ciphers are selected by the
-        server.
-
-        """
-
-        def _test_cipher_order(a_connection, cipher_order_score):
-            # For this test we need two ciphers, one selected by the server and
-            # another selected by the server when the former was disallowed by the
-            # client. We then reverse the order of these two ciphers in the list of
-            # ciphers that the client tells the server it supports, and see if the
-            # server still selects the same cipher. We hope that the server doesn't
-            # consider both ciphers to be of equal weight and thus happy to use
-            # either irrespective of order.
-            cipher_order_tested = CipherOrderStatus.good
-            # Which ciphers seen so far during checks are relevant for self._conn?
-            relevant_ciphers = self._get_seen_ciphers_for_conn(a_connection)
-            log.debug("Retrieved ciphers: %s.", relevant_ciphers)
-            # Get the cipher name of at least one cipher that works with self._conn
-            first_cipher = relevant_ciphers[0]
-            ignore_ciphers = [first_cipher]
-            second_cipher = _get_nth_or_default(relevant_ciphers, 1, first_cipher)
-            if first_cipher == second_cipher:
-                log.debug("Returning. Conclusion: First and second cipher are the same.")
-                # only one cipher supported, order is irrelevant
-                return cipher_order_tested, cipher_order_score
-            # Try to get a non CHACHA cipher to avoid the possible
-            # PRIORITIZE_CHACHA server option.
-            # https://github.com/internetnl/Internet.nl/issues/461
-            while second_cipher:
-                ci = cipher_infos.get(second_cipher, None)
-                if ci and "CHACHA" not in ci.bulk_enc_alg:
-                    break
-                ignore_ciphers.append(second_cipher)
-                second_cipher = _get_another_cipher(self, ignore_ciphers)
-
-            if second_cipher and first_cipher != second_cipher:
-                try:
-                    # Now that we know of two ciphers that can be used to connect
-                    # to the server, one of which was chosen in preference to the
-                    # other, ask the server to use them in reverse order and
-                    # confirm that the server instead continues to impose its own
-                    # order preference on the cipher selection process:
-                    cipher_string = f"{second_cipher}:{first_cipher}"
-                    if self._conn__get_ssl_version < TLSV1_3:
-                        with a_connection.dup(ciphers=cipher_string) as new_conn:
-                            self._note_conn_details(new_conn)
-                            newly_selected_cipher = new_conn.get_current_cipher_name()
-                    else:
-                        with a_connection.dup(tls13ciphers=cipher_string) as new_conn:
-                            self._note_conn_details(new_conn)
-                            newly_selected_cipher = new_conn.get_current_cipher_name()
-
-                    if newly_selected_cipher == second_cipher:
-                        cipher_order_score = self._score_tls_cipher_order_bad
-                        cipher_order_tested = CipherOrderStatus.bad
-
-                except ConnectionHandshakeException:
-                    # Unable to connect with reversed cipher order.
-                    log.debug("Unable to connect with reversed cipher order.")
-
-
-            # The self._cipher_order_violation list will be populated if the
-            # call to self._check_ciphers() finds a prescribed order violation.
-
-            if cipher_order_tested == CipherOrderStatus.bad:
-                # Server does not respect its own preference; ignore any order
-                # violation.
-                log.debug("Server does not respect its own preference; ignore any order violation.")
-            elif self._cipher_order_violation:
-                if self._cipher_order_violation[2] == "":
-                    cipher_order_tested = CipherOrderStatus.not_seclevel
-                    cipher_order_score = self._score_tls_cipher_order_bad
-                    log.debug("Cipher not on seclevel, expected empty, got %s", self._cipher_order_violation[2])
-                else:
-                    cipher_order_tested = CipherOrderStatus.not_prescribed
-                    log.debug("Cipher not on prescribed, got %s", self._cipher_order_violation[2])
-            log.debug("Returning. order tested: %s, order score: %s", cipher_order_tested, cipher_order_score)
-            return cipher_order_tested, cipher_order_score
-
-        def _get_nth_or_default(collection, index, default):
-            return collection[index] if index < len(collection) else default
-
-        def _get_another_cipher(self, ignore_ciphers):
-            try:
-                if self._conn__get_ssl_version < TLSV1_3:
-                    with self._conn.dup(
-                        cipher_list_action=CipherListAction.PREPEND,
-                        ciphers=":".join([f"!{cipher}" for cipher in ignore_ciphers]),
-                    ) as new_conn:
-                        self._note_conn_details(new_conn)
-                        another_cipher = new_conn.get_current_cipher_name()
-                else:
-                    # OpenSSL 1.1.1 TLS 1.3 cipher preference strings do not
-                    # support '!' thus we must instead manually exclude the
-                    # current cipher using the known small set of allowed TLS
-                    # 1.3 ciphers. See '-ciphersuites' at:
-                    #   https://www.openssl.org/docs/man1.1.1/man1/ciphers.html
-                    remaining_ciphers = set(ModernConnection.ALL_TLS13_CIPHERS.split(":"))
-                    remaining_ciphers.difference_update(ignore_ciphers)
-                    cipher_string = ":".join(remaining_ciphers)
-                    with self._conn.dup(tls13ciphers=cipher_string) as new_conn:
-                        self._note_conn_details(new_conn)
-                        another_cipher = new_conn.get_current_cipher_name()
-            except ConnectionHandshakeException:
-                another_cipher = None
-            return another_cipher
-
-        cipher_order_score = self._score_tls_cipher_order_good
-        cipher_order = CipherOrderStatus.good
-
-        # If the server only supports GOOD ciphers we don't care
-        # about the cipher order.
-        if not (self._bad_ciphers or self._phase_out_ciphers or self._sufficient_ciphers):
-            self._cipher_order_violation = []
-            log.debug("Returning. Server only supports good ciphers.")
-            return (cipher_order_score, CipherOrderStatus.na, self._cipher_order_violation)
-
-        # for each connection that has ciphers other than 'good' only, test if order is enforced
-        # test only if we haven't found a order violation yet
-        log.debug(f"Current cipher_order == {cipher_order}, will only test when this is: {CipherOrderStatus.good}.")
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_3:
-            log.debug("Testing cipher order for TLS1.3")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                ModernConnection.from_conn(self._conn, version=TLSV1_3), cipher_order_score
-            )
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_2:
-            log.debug("Testing cipher order for TLS1.2")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                DebugConnection.from_conn(self._conn, version=TLSV1_2), cipher_order_score
-            )
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1_1:
-            log.debug("Testing cipher order for TLS1.1")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                DebugConnection.from_conn(self._conn, version=TLSV1_1), cipher_order_score
-            )
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_tlsv1:
-            log.debug("Testing cipher order for TLS1")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                DebugConnection.from_conn(self._conn, version=TLSV1), cipher_order_score
-            )
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_sslv3:
-            log.debug("Testing cipher order for SSL3")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                DebugConnection.from_conn(self._conn, version=SSLV3), cipher_order_score
-            )
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_sslv23:
-            log.debug("Testing cipher order for SSL23")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                DebugConnection.from_conn(self._conn, version=SSLV23), cipher_order_score
-            )
-
-        if cipher_order == CipherOrderStatus.good and self._test_order_on_sslv2:
-            log.debug("Testing cipher order for SSL2")
-            cipher_order, cipher_order_score = _test_cipher_order(
-                DebugConnection.from_conn(self._conn, version=SSLV2), cipher_order_score
-            )
-
-        return cipher_order_score, cipher_order, self._cipher_order_violation
 
 
 def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
