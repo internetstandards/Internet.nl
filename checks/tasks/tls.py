@@ -20,7 +20,7 @@ from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import (
     NameOID,
     SignatureAlgorithmOID,
-    load_pem_x509_certificate, Certificate,
+    Certificate,
 )
 from django.conf import settings
 from django.db import transaction
@@ -32,10 +32,14 @@ from sslyze import (
     ServerScanStatusEnum,
     ScanCommand,
     TlsVersionEnum,
-    CipherSuiteAcceptedByServer, ServerNetworkConfiguration, ProtocolWithOpportunisticTlsEnum,
+    CipherSuiteAcceptedByServer,
+    ServerNetworkConfiguration,
+    ProtocolWithOpportunisticTlsEnum,
 )
-from sslyze.plugins.certificate_info._certificate_utils import parse_subject_alternative_name_extension, \
-    get_common_names
+from sslyze.plugins.certificate_info._certificate_utils import (
+    parse_subject_alternative_name_extension,
+    get_common_names,
+)
 
 from checks import categories, scoring
 from checks.http_client import http_get_ip
@@ -69,6 +73,7 @@ from checks.tasks.shared import (
     results_per_domain,
 )
 from interface import batch, batch_shared_task, redis_id
+
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
 # instead of just Exception which may intervene with Celery's own exceptions.
@@ -960,7 +965,17 @@ def build_summary_report(testtls, category):
     testtls.report = report
 
 
-def dane(url: str, port: int, chain: List[Certificate], task, dane_cb_data, score_none, score_none_bogus, score_failed, score_validated):
+def dane(
+    url: str,
+    port: int,
+    chain: List[Certificate],
+    task,
+    dane_cb_data,
+    score_none,
+    score_none_bogus,
+    score_failed,
+    score_validated,
+):
     """
     Check if there are TLSA records, if they are valid and if a DANE rollover
     scheme is currently in place.
@@ -1116,6 +1131,7 @@ def get_common_name(cert):
         pass
     return value
 
+
 def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     """
     Check the web server's certificate.
@@ -1151,8 +1167,9 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         port = 25
         scan = ServerScanRequest(
             server_location=ServerNetworkLocation(hostname=url, port=port),
-            network_configuration=ServerNetworkConfiguration(tls_server_name_indication=url,
-                                                             tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP),
+            network_configuration=ServerNetworkConfiguration(
+                tls_server_name_indication=url, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
+            ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
         )
     else:
@@ -1218,7 +1235,6 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         }
         hostmatch_bad = certificate_names
 
-
     pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain)
 
     # NCSC guideline B3-2
@@ -1230,13 +1246,13 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
             sigalg = cert.signature_algorithm_oid
             # Check oids
             if sigalg not in (
-                    SignatureAlgorithmOID.RSA_WITH_SHA256,
-                    SignatureAlgorithmOID.RSA_WITH_SHA384,
-                    SignatureAlgorithmOID.RSA_WITH_SHA512,
-                    SignatureAlgorithmOID.ECDSA_WITH_SHA256,
-                    SignatureAlgorithmOID.ECDSA_WITH_SHA384,
-                    SignatureAlgorithmOID.ECDSA_WITH_SHA512,
-                    SignatureAlgorithmOID.DSA_WITH_SHA256,
+                SignatureAlgorithmOID.RSA_WITH_SHA256,
+                SignatureAlgorithmOID.RSA_WITH_SHA384,
+                SignatureAlgorithmOID.RSA_WITH_SHA512,
+                SignatureAlgorithmOID.ECDSA_WITH_SHA256,
+                SignatureAlgorithmOID.ECDSA_WITH_SHA384,
+                SignatureAlgorithmOID.ECDSA_WITH_SHA512,
+                SignatureAlgorithmOID.DSA_WITH_SHA256,
             ):
                 sigalg_bad[get_common_name(cert)] = sigalg._name
                 sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
@@ -1245,11 +1261,17 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     for cert in cert_deployment.received_certificate_chain:
         chain_str.append(get_common_name(cert))
 
-    dane_results = dane(url, port, cert_deployment.received_certificate_chain, task,
-                        dane_cb_data, scoring.WEB_TLS_DANE_NONE,
-            scoring.WEB_TLS_DANE_NONE_BOGUS,
-            scoring.WEB_TLS_DANE_FAILED,
-            scoring.WEB_TLS_DANE_VALIDATED)
+    dane_results = dane(
+        url,
+        port,
+        cert_deployment.received_certificate_chain,
+        task,
+        dane_cb_data,
+        scoring.WEB_TLS_DANE_NONE,
+        scoring.WEB_TLS_DANE_NONE_BOGUS,
+        scoring.WEB_TLS_DANE_FAILED,
+        scoring.WEB_TLS_DANE_VALIDATED,
+    )
 
     results = dict(
         tls_cert=True,
@@ -1288,11 +1310,13 @@ def check_pubkey(certificates: List[Certificate]):
         elif public_key_type is dsa.DSAPublicKey and bits < 2048:
             failed_key_type = public_key_type.__name__
         # TODO: DH type?
-        #elif public_key_type is DHPublicKey and bits < 2048:
+        # elif public_key_type is DHPublicKey and bits < 2048:
         #    failed_key_type = "DHPublicKey"
         elif public_key_type in [x25519.X25519PublicKey, x448.X448PublicKey] and bits < 224:
             failed_key_type = public_key_type.__name__
-        elif public_key_type is EllipticCurvePublicKey and (bits < 224 or public_key.curve not in [ec.SECP384R1, ec.SECP256R1]):
+        elif public_key_type is EllipticCurvePublicKey and (
+            bits < 224 or public_key.curve not in [ec.SECP384R1, ec.SECP256R1]
+        ):
             failed_key_type = public_key_type.__name__
         if failed_key_type:
             message = f"{common_name}: {failed_key_type}-{bits} bits"
@@ -1304,6 +1328,7 @@ def check_pubkey(certificates: List[Certificate]):
                 bad_pubkey.append(message)
                 pubkey_score = scoring.WEB_TLS_PUBKEY_BAD
     return pubkey_score, bad_pubkey, phase_out_pubkey
+
 
 def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     """
@@ -1386,7 +1411,9 @@ def check_mail_tls(server, dane_cb_data, task):
     scans = [
         ServerScanRequest(
             server_location=ServerNetworkLocation(hostname=server, port=25),
-            network_configuration=ServerNetworkConfiguration(tls_server_name_indication=server, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP),
+            network_configuration=ServerNetworkConfiguration(
+                tls_server_name_indication=server, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
+            ),
             scan_commands={
                 # ScanCommand.CERTIFICATE_INFO,
                 ScanCommand.SSL_2_0_CIPHER_SUITES,
@@ -1498,7 +1525,6 @@ def has_daneTA(tlsa_records):
         if tlsa.startswith("2"):
             return True
     return False
-
 
 
 def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
