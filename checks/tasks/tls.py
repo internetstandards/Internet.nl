@@ -1,41 +1,31 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import errno
-import socket
-import ssl
 import time
-from typing import List
-from urllib.parse import urlparse
-
-import requests
 from binascii import hexlify
 from enum import Enum
 from itertools import product
 from timeit import default_timer as timer
+from typing import List
+from urllib.parse import urlparse
+
 import eventlet
+import requests
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.utils.log import get_task_logger
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.backends.openssl.dh import _DHPublicKey
-from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
-from cryptography.hazmat.backends.openssl.ec import _EllipticCurvePublicKey
-from cryptography.hazmat.backends.openssl.rsa import _RSAPublicKey
+from cryptography.hazmat.backends.openssl import rsa
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dsa, x25519, x448, ec
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import (
-    DNSName,
-    ExtensionNotFound,
-    ExtensionOID,
     NameOID,
     SignatureAlgorithmOID,
-    load_pem_x509_certificate,
+    load_pem_x509_certificate, Certificate,
 )
 from django.conf import settings
-from django.core.cache import cache
 from django.db import transaction
-from nassl import _nassl
 from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum, DhEphemeralKeyInfo, OpenSslEcNidEnum, EcDhEphemeralKeyInfo
-from nassl.ocsp_response import OcspResponseNotTrustedError
 from sslyze import (
     Scanner,
     ServerScanRequest,
@@ -45,6 +35,8 @@ from sslyze import (
     TlsVersionEnum,
     CipherSuiteAcceptedByServer, ServerNetworkConfiguration, ProtocolWithOpportunisticTlsEnum,
 )
+from sslyze.plugins.certificate_info._certificate_utils import parse_subject_alternative_name_extension, \
+    get_common_names
 
 from checks import categories, scoring
 from checks.http_client import http_get_ip
@@ -61,7 +53,7 @@ from checks.models import (
     ZeroRttStatus,
 )
 from checks.tasks import SetupUnboundContext
-from checks.tasks.cipher_info import CipherScoreAndSecLevel, SecLevel, cipher_infos
+from checks.tasks.cipher_info import CipherScoreAndSecLevel, cipher_infos
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
     HeaderCheckerContentEncoding,
@@ -90,11 +82,9 @@ from checks.tasks.tls_connection import (
     DebugConnection,
     HTTPSConnection,
     ModernConnection,
-    SSLConnectionWrapper,
 )
-from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
+from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException
 from interface import batch, batch_shared_task, redis_id
-
 # Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
 # while monkey patching. That way we can still catch subprocess.TimeoutExpired
 # instead of just Exception which may intervene with Celery's own exceptions.
@@ -175,86 +165,6 @@ KEX_TLS13_SHA2_SIGNATURE_SCHEMES = [
 KEX_TLS13_SHA2_SIGALG_PREFERENCE = ":".join(KEX_TLS13_SHA2_SIGNATURE_SCHEMES)
 
 KEX_GOOD_HASH_FUNCS = frozenset(set(KEX_TLS12_SHA2_HASHALG_PREFERRED_ORDER) | set(KEX_TLS13_SHA2_SIGNATURE_SCHEMES))
-
-# Need to be lists because we want them in specific order for testing when
-# combining with other security levels i.e., more secure > less secure. The
-# cipher order test relies on that order.
-
-# These ciphers are only available on SSL2 that we need to explicitly set.
-INSUFFICIENT_CIPHERS_SSLV2 = {
-    x.name
-    for x in filter(
-        lambda x: (
-            DebugConnection in x.supported_conns and x.sec_level == SecLevel.INSUFFICIENT and x.tls_version == "SSLv2"
-        ),
-        cipher_infos.values(),
-    )
-}
-INSUFFICIENT_CIPHERS = {
-    x.name
-    for x in filter(
-        lambda x: (DebugConnection in x.supported_conns and x.sec_level == SecLevel.INSUFFICIENT), cipher_infos.values()
-    )
-} - INSUFFICIENT_CIPHERS_SSLV2
-INSUFFICIENT_CIPHERS_MODERN = list(
-    {
-        x.name
-        for x in filter(
-            lambda x: (ModernConnection in x.supported_conns and x.sec_level == SecLevel.INSUFFICIENT),
-            cipher_infos.values(),
-        )
-    }
-    - INSUFFICIENT_CIPHERS
-)
-INSUFFICIENT_CIPHERS = list(INSUFFICIENT_CIPHERS)
-INSUFFICIENT_CIPHERS_SSLV2 = list(INSUFFICIENT_CIPHERS_SSLV2)
-
-PHASE_OUT_CIPHERS = {
-    x.name
-    for x in filter(
-        lambda x: (DebugConnection in x.supported_conns and x.sec_level == SecLevel.PHASE_OUT), cipher_infos.values()
-    )
-}
-PHASE_OUT_CIPHERS_MODERN = list(
-    {
-        x.name
-        for x in filter(
-            lambda x: (ModernConnection in x.supported_conns and x.sec_level == SecLevel.PHASE_OUT),
-            cipher_infos.values(),
-        )
-    }
-    - PHASE_OUT_CIPHERS
-)
-PHASE_OUT_CIPHERS = list(PHASE_OUT_CIPHERS)
-
-SUFFICIENT_DEBUG_CIPHERS = {
-    x.name
-    for x in filter(
-        lambda x: (DebugConnection in x.supported_conns and x.sec_level == SecLevel.SUFFICIENT), cipher_infos.values()
-    )
-}
-SUFFICIENT_MODERN_CIPHERS = {
-    x.name
-    for x in filter(
-        lambda x: (ModernConnection in x.supported_conns and x.sec_level == SecLevel.SUFFICIENT), cipher_infos.values()
-    )
-}
-
-GOOD_SUFFICIENT_SEC_LEVELS = frozenset([SecLevel.GOOD, SecLevel.SUFFICIENT])
-GOOD_SUFFICIENT_DEBUG_CIPHERS = {
-    x.name
-    for x in filter(
-        lambda x: (DebugConnection in x.supported_conns and x.sec_level in GOOD_SUFFICIENT_SEC_LEVELS),
-        cipher_infos.values(),
-    )
-}
-GOOD_SUFFICIENT_MODERN_CIPHERS = {
-    x.name
-    for x in filter(
-        lambda x: (ModernConnection in x.supported_conns and x.sec_level in GOOD_SUFFICIENT_SEC_LEVELS),
-        cipher_infos.values(),
-    )
-}
 
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
@@ -1315,130 +1225,6 @@ class DebugCertChain:
         self.score_dane_failed = scoring.WEB_TLS_DANE_FAILED
         self.score_dane_validated = scoring.WEB_TLS_DANE_VALIDATED
 
-    def check_hostname(self, url):
-        """
-        Check the hostname on the leaf certificate (commonName and SANs).
-
-        """
-        bad_hostmatch = []
-        common_name = get_common_name(self.chain[0])
-        try:
-            sans = self.chain[0].extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
-            sans = sans.value.get_values_for_type(DNSName)
-        except ExtensionNotFound:
-            sans = []
-
-        ssl_cert_parts = {
-            "subject": (tuple([("commonName", common_name)]),),
-            "subjectAltName": tuple([("DNS", name) for name in sans]),
-        }
-        try:
-            ssl.match_hostname(ssl_cert_parts, url.rstrip("."))
-            hostmatch_score = self.score_hostmatch_good
-        except ssl.CertificateError:
-            hostmatch_score = self.score_hostmatch_bad
-            # bad_hostmatch was of the form list(CN, list(SAN, SAN, ..)). In
-            # the report the CN is shown on one row of the tech table and the
-            # SANs are shown as '[SAN, SAN]' on a second row. Showing the SANs
-            # in the report as the string representation of a Python list is a
-            # separate issue so ignore that for the moment. It is possible for
-            # there to be duplicates and overlap between the SANs and the CN
-            # which when shown in a report column titled 'Unmatched domains on
-            # certificate' looks odd to have duplicate entries. I have
-            # flattened this to the form list(CN, SAN, SAN, ..) while still
-            # preserving the order. As Python doesn't have an OrderedSet type
-            # and adding one is overkill I use a trick to remove duplicates in
-            # the ordered list. See:
-            # https://www.w3schools.com/python/python_howto_remove_duplicates.asp
-            # However, was anyone relying on the nested structure of this
-            # result value, e.g. perhaps via the Internet.NL batch API?
-            bad_hostmatch.append(common_name)
-            bad_hostmatch.extend(sans)
-            bad_hostmatch = list(dict.fromkeys(bad_hostmatch))  # de-dupe
-        return hostmatch_score, bad_hostmatch
-
-    # NCSC guidelines B3-3, B5-1
-    def check_pubkey(self):
-        bad_pubkey = []
-        phase_out_pubkey = []
-        pubkey_score = self.score_pubkey_good
-        for cert in self.chain:
-            common_name = get_common_name(cert)
-            public_key = cert.public_key()
-            public_key_type = type(public_key)
-            bits = public_key.key_size
-
-            failed_key_type = ""
-            curve = ""
-            if public_key_type is _RSAPublicKey and bits < 2048:
-                failed_key_type = "RSAPublicKey"
-            elif public_key_type is _DSAPublicKey and bits < 2048:
-                failed_key_type = "DSAPublicKey"
-            elif public_key_type is _DHPublicKey and bits < 2048:
-                failed_key_type = "DHPublicKey"
-            elif public_key_type is _EllipticCurvePublicKey:
-                curve = public_key.curve.name
-                if (
-                    curve
-                    not in [
-                        "secp384r1",
-                        "secp256r1",
-                        "x448",
-                        "x25519",
-                    ]
-                    or bits < 224
-                ):
-                    failed_key_type = "EllipticCurvePublicKey"
-            if failed_key_type:
-                message = f"{common_name}: {failed_key_type}-{bits} bits"
-                if curve:
-                    message += f", curve: {curve}"
-                if curve == "secp224r1":
-                    phase_out_pubkey.append(message)
-                else:
-                    bad_pubkey.append(message)
-                    pubkey_score = self.score_pubkey_bad
-        return pubkey_score, bad_pubkey, phase_out_pubkey
-
-    def check_sigalg(self):
-        """
-        Check whether the certificate is signed using a good algorithm.
-
-        Good algorithms are: sha512, sha384, sha256
-        NCSC guideline B3-2
-
-        """
-        bad_sigalg = {}
-        sigalg_score = self.score_signature_good
-        for cert in self.chain:
-            # Only validate signarture of non-root certificates
-            if not is_root_cert(cert):
-                sigalg = cert.signature_algorithm_oid
-                # Check oids
-                if sigalg not in (
-                    SignatureAlgorithmOID.RSA_WITH_SHA256,
-                    SignatureAlgorithmOID.RSA_WITH_SHA384,
-                    SignatureAlgorithmOID.RSA_WITH_SHA512,
-                    SignatureAlgorithmOID.ECDSA_WITH_SHA256,
-                    SignatureAlgorithmOID.ECDSA_WITH_SHA384,
-                    SignatureAlgorithmOID.ECDSA_WITH_SHA512,
-                    SignatureAlgorithmOID.DSA_WITH_SHA256,
-                ):
-                    bad_sigalg[get_common_name(cert)] = sigalg._name
-                    sigalg_score = self.score_signature_bad
-        return sigalg_score, bad_sigalg
-
-    def chain_str(self):
-        """
-        Return a list containing the commonNames of the certificate chain.
-
-        """
-        chain_str = []
-        for cert in self.chain:
-            chain_str.append(get_common_name(cert))
-
-        return chain_str
-
     def check_dane(self, url, port, task, dane_cb_data=None):
         return dane(
             url,
@@ -1473,151 +1259,6 @@ class DebugCertChainMail(DebugCertChain):
         self.score_dane_validated = scoring.MAIL_TLS_DANE_VALIDATED
 
 
-class SMTPConnectionCouldNotTestException(Exception):
-    """
-    Used on the SMTP STARTTLS test.
-
-    Used when we have time outs on establishing a connection or when a mail
-    server replies with an error upon connecting.
-
-    """
-
-
-def starttls_sock_setup(conn):
-    """
-    Setup socket for SMTP STARTTLS.
-
-    Retries to connect when we get an error code upon connecting.
-
-    Raises SMTPConnectionCouldNotTestException when we get no reply
-    from the server or when the server still replies with an error code
-    upon connecting after a number of retries.
-
-    """
-
-    def readline(fd, maximum_bytes=4096):
-        """
-        Read and decode one line from `fd`.
-        Try again if the line is blank (including <4 chars) for #560.
-        """
-        try:
-            for _ in range(2):
-                line = fd.readline(maximum_bytes).decode("ascii")
-                if len(line) >= 4:
-                    return line
-        except UnicodeDecodeError:
-            pass
-        raise SMTPConnectionCouldNotTestException
-
-    conn.sock = None
-
-    # If we get an error code(4xx, 5xx) in the first reply upon
-    # connecting, we will retry in case it was a one time error.
-    #
-    # From: https://www.rfc-editor.org/rfc/rfc3207.html#section-5
-    #    S: <waits for connection on TCP port 25>
-    # 1  C: <opens connection>
-    # 2  S: 220 mail.imc.org SMTP service ready
-    # 3  C: EHLO mail.example.com
-    # 4  S: 250-mail.imc.org offers a warm hug of welcome
-    # 5  S: 250-8BITMIME
-    #    S: 250-STARTTLS
-    #    S: 250 DSN
-    # 6  C: STARTTLS
-    # 7  S: 220 Go ahead
-    #    C: <starts TLS negotiation>
-    #    C & S: <negotiate a TLS session>
-    #    C & S: <check result of negotiation>
-    #    C: EHLO mail.example.com
-    #    S: 250-mail.imc.org touches your hand gently for a moment
-    #    S: 250-8BITMIME
-    #    S: 250 DSN
-    tries_left = conn.tries
-    retry = True
-    while retry and tries_left > 0:
-        retry = False
-        try:
-            # 1
-            conn.sock_connect(any_af=True)
-
-            # 2
-            fd = conn.sock.makefile("rb")
-            line = readline(fd)
-
-            if line and line[3] == " " and (line[0] == "4" or line[0] == "5"):
-                # The server replied with an error code.
-                # We will retry to connect in case it was an one time
-                # error.
-                conn.safe_shutdown()
-                tries_left -= 1
-                retry = True
-                if tries_left <= 0:
-                    raise SMTPConnectionCouldNotTestException()
-                time.sleep(1)
-                continue
-
-            while line and line[3] != " ":
-                line = readline(fd)
-
-            # 3
-            conn.sock.sendall(bytes(f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", "ascii"))
-
-            starttls = False
-
-            # 4
-            line = readline(fd)
-            while line and line[3] != " ":
-                if "STARTTLS" in line:
-                    # 5
-                    starttls = True
-                line = readline(fd)
-
-            if starttls or "STARTTLS" in line:
-                # 6
-                conn.sock.sendall(b"STARTTLS\r\n")
-                # 7
-                readline(fd)
-                fd.close()
-            else:
-                fd.close()
-                raise ConnectionHandshakeException()
-
-        except (OSError, socket.timeout, socket.gaierror):
-            # We didn't get a reply back, this means our packets
-            # are dropped. This happened in cases where a rate
-            # limiting mechanism was in place. Skip the test.
-            if conn.sock:
-                conn.safe_shutdown()
-            raise ConnectionSocketException()
-        except OSError as e:
-            # We can't reach the server.
-            if conn.sock:
-                conn.safe_shutdown()
-            if e.errno in [errno.ENETUNREACH, errno.EHOSTUNREACH, errno.ECONNREFUSED, errno.ENOEXEC]:
-                raise ConnectionSocketException()
-            raise e
-        except NoIpError:
-            raise ConnectionSocketException()
-
-
-class SMTPConnection(SSLConnectionWrapper):
-    def __init__(self, *args, port=25, timeout=24, **kwargs):
-        super().__init__(*args, timeout=timeout, port=port, sock_setup=starttls_sock_setup, **kwargs)
-
-
-class StarttlsDetails:
-    """
-    Class used to store starttls details for the mail test.
-
-    """
-
-    def __init__(self, debug_chain=None, trusted_score=None, conn_port=None, dane_cb_data=None):
-        self.debug_chain = debug_chain
-        self.trusted_score = trusted_score
-        self.conn_port = conn_port
-        self.dane_cb_data = dane_cb_data
-
-
 def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     """
     Check the web server's certificate.
@@ -1636,99 +1277,167 @@ def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     return ("cert", results)
 
 
-def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, **kwargs):
+def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kwargs):
     """
     Perform certificate checks.
 
     """
-    try:
-        # Generic arguments for web and mail.
-        conn_wrapper_args = {
-            "host": url,
-            "task": task,
-            "ciphers": "!aNULL",
-            "cipher_list_action": CipherListAction.PREPEND,
-        }
-        if mode == ChecksMode.WEB:
-            # First try to connect to HTTPS. We don't care for
-            # certificates in port 443 if there is no HTTPS there.
-            http_fetch(
-                url,
-                af=af_ip_pair[0],
-                path="",
-                port=443,
-                ip_address=af_ip_pair[1],
-                depth=MAX_REDIRECT_DEPTH,
-                task=web_cert,
-            )
-            debug_cert_chain = DebugCertChain
-            conn_wrapper = HTTPSConnection
-            conn_wrapper_args["socket_af"] = af_ip_pair[0]
-            conn_wrapper_args["ip_address"] = af_ip_pair[1]
-        elif mode == ChecksMode.MAIL:
-            debug_cert_chain = DebugCertChainMail
-            conn_wrapper = SMTPConnection
-            conn_wrapper_args["server_name"] = url
-            conn_wrapper_args["send_SNI"] = starttls_details.dane_cb_data.get(
-                "data"
-            ) and starttls_details.dane_cb_data.get("secure")
-        else:
-            raise ValueError
+    # TODO: this does use our trust store
+    if mode == ChecksMode.WEB:
+        print(f"starting sslyze scan for {url} {af_ip_pair[1]} {dane_cb_data}")
+        scans = [
+            ServerScanRequest(
+                server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1], port=443),
+                scan_commands={
+                    ScanCommand.CERTIFICATE_INFO,
+                },
+            ),
+        ]
+        scanner = Scanner(per_server_concurrent_connections_limit=1)
+        scanner.queue_scans(scans)
+        result = next(scanner.get_results())
+        print(f"scan status result {result.scan_status}")
+        if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
+            raise OSError
 
-        if (
-            not starttls_details
-            or starttls_details.debug_chain is None
-            or starttls_details.trusted_score is None
-            or starttls_details.conn_port is None
-        ):
-            # All the checks inside the smtp_starttls test are done in series.
-            # If we have all the certificate related information we need from a
-            # previous check, skip this connection.
-            # check chain validity (sort of NCSC guideline B3-4)
-
-            with conn_wrapper(**conn_wrapper_args).conn as conn:
-                with ConnectionChecker(conn, mode) as checker:
-                    verify_score, verify_result = checker.check_cert_trust()
-                    debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
-                    conn_port = conn.port
-        else:
-            verify_score, verify_result = starttls_details.trusted_score
-            debug_chain = starttls_details.debug_chain
-            conn_port = starttls_details.conn_port
-    except (OSError, http.client.BadStatusLine, NoIpError, ConnectionHandshakeException, ConnectionSocketException):
-        return dict(tls_cert=False)
-
-    if debug_chain is None:
-        return dict(tls_cert=False)
-
+        # elif mode == ChecksMode.MAIL:
+        #     debug_cert_chain = DebugCertChainMail
+        #     conn_wrapper = SMTPConnection
+        #     conn_wrapper_args["server_name"] = url
+        #     conn_wrapper_args["send_SNI"] = starttls_details.dane_cb_data.get(
+        #         "data"
+        #     ) and starttls_details.dane_cb_data.get("secure")
     else:
-        hostmatch_score, hostmatch_bad = debug_chain.check_hostname(url)
-        pubkey_score, pubkey_bad, pubkey_phase_out = debug_chain.check_pubkey()
-        sigalg_score, sigalg_bad = debug_chain.check_sigalg()
-        chain_str = debug_chain.chain_str()
+        raise ValueError
+        #
+        # if (
+        #     not starttls_details
+        #     or starttls_details.debug_chain is None
+        #     or starttls_details.trusted_score is None
+        #     or starttls_details.conn_port is None
+        # ):
+        #     # All the checks inside the smtp_starttls test are done in series.
+        #     # If we have all the certificate related information we need from a
+        #     # previous check, skip this connection.
+        #     # check chain validity (sort of NCSC guideline B3-4)
+        #
+        #     with conn_wrapper(**conn_wrapper_args).conn as conn:
+        #         with ConnectionChecker(conn, mode) as checker:
+        #             verify_score, verify_result = checker.check_cert_trust()
+        #             debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
+        #             conn_port = conn.port
+        # else:
+        #     verify_score, verify_result = starttls_details.trusted_score
+        #     debug_chain = starttls_details.debug_chain
+        #     conn_port = starttls_details.conn_port
 
-        if starttls_details:
-            dane_results = debug_chain.check_dane(url, conn_port, task, dane_cb_data=starttls_details.dane_cb_data)
-        else:
-            dane_results = debug_chain.check_dane(url, conn_port, task)
+    if not result.scan_result.certificate_info.result.certificate_deployments:
+        return dict(tls_cert=False)
 
-        results = dict(
-            tls_cert=True,
-            chain=chain_str,
-            trusted=verify_result,
-            trusted_score=verify_score,
-            pubkey_bad=pubkey_bad,
-            pubkey_phase_out=pubkey_phase_out,
-            pubkey_score=pubkey_score,
-            sigalg_bad=sigalg_bad,
-            sigalg_score=sigalg_score,
-            hostmatch_bad=hostmatch_bad,
-            hostmatch_score=hostmatch_score,
-        )
-        results.update(dane_results)
+    cert_deployment = result.scan_result.certificate_info.result.certificate_deployments[0]
+    leaf_cert = cert_deployment.received_certificate_chain[0]
 
-        return results
+    hostmatch_bad = []
+    hostmatch_score = scoring.WEB_TLS_HOSTMATCH_GOOD
+    if not cert_deployment.leaf_certificate_subject_matches_hostname:
+        hostmatch_score = scoring.WEB_TLS_HOSTMATCH_BAD
 
+        # Extract all names from a certificate, taken from sslyze' _cert_chain_analyzer.py
+        subj_alt_name_ext = parse_subject_alternative_name_extension(leaf_cert)
+        subj_alt_name_as_list = [("DNS", name) for name in subj_alt_name_ext.dns_names]
+        subj_alt_name_as_list.extend([("IP Address", ip) for ip in subj_alt_name_ext.ip_addresses])
+        certificate_names = {
+            "subject": (tuple([("commonName", name) for name in get_common_names(leaf_cert.subject)]),),
+            "subjectAltName": tuple(subj_alt_name_as_list),
+        }
+        hostmatch_bad = certificate_names
+
+
+    pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain)
+
+    # NCSC guideline B3-2
+    sigalg_bad = {}
+    sigalg_score = scoring.WEB_TLS_SIGNATURE_GOOD
+    for cert in cert_deployment.received_certificate_chain:
+        # Only validate signarture of non-root certificates
+        if not is_root_cert(cert):
+            sigalg = cert.signature_algorithm_oid
+            # Check oids
+            if sigalg not in (
+                    SignatureAlgorithmOID.RSA_WITH_SHA256,
+                    SignatureAlgorithmOID.RSA_WITH_SHA384,
+                    SignatureAlgorithmOID.RSA_WITH_SHA512,
+                    SignatureAlgorithmOID.ECDSA_WITH_SHA256,
+                    SignatureAlgorithmOID.ECDSA_WITH_SHA384,
+                    SignatureAlgorithmOID.ECDSA_WITH_SHA512,
+                    SignatureAlgorithmOID.DSA_WITH_SHA256,
+            ):
+                sigalg_bad[get_common_name(cert)] = sigalg._name
+                sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
+
+    chain_str = []
+    for cert in cert_deployment.received_certificate_chain:
+        chain_str.append(get_common_name(cert))
+
+    # TODO: DANE
+    # if starttls_details:
+    #     dane_results = debug_chain.check_dane(url, conn_port, task, dane_cb_data=starttls_details.dane_cb_data)
+    # else:
+    #     dane_results = debug_chain.check_dane(url, conn_port, task)
+
+    results = dict(
+        tls_cert=True,
+        chain=chain_str,
+        trusted="",
+        trusted_score=scoring.MAIL_TLS_TRUSTED_GOOD,
+        pubkey_bad=pubkey_bad,
+        pubkey_phase_out=pubkey_phase_out,
+        pubkey_score=pubkey_score,
+        sigalg_bad=sigalg_bad,
+        sigalg_score=sigalg_score,
+        hostmatch_bad=hostmatch_bad,
+        hostmatch_score=hostmatch_score,
+    )
+    # results.update(dane_results)
+
+    return results
+
+
+def check_pubkey(certificates: List[Certificate]):
+    # NCSC guidelines B3-3, B5-1
+    bad_pubkey = []
+    phase_out_pubkey = []
+    # TODO: use mail score where appropriate
+    pubkey_score = scoring.WEB_TLS_PUBKEY_GOOD
+    for cert in certificates:
+        common_name = get_common_name(cert)
+        public_key = cert.public_key()
+        public_key_type = type(public_key)
+        bits = public_key.key_size
+
+        failed_key_type = ""
+        curve = ""
+        if public_key_type is rsa.RSAPublicKey and bits < 2048:
+            failed_key_type = public_key_type.__name__
+        elif public_key_type is dsa.DSAPublicKey and bits < 2048:
+            failed_key_type = public_key_type.__name__
+        # TODO: DH type?
+        #elif public_key_type is DHPublicKey and bits < 2048:
+        #    failed_key_type = "DHPublicKey"
+        elif public_key_type in [x25519.X25519PublicKey, x448.X448PublicKey] and bits < 224:
+            failed_key_type = public_key_type.__name__
+        elif public_key_type is EllipticCurvePublicKey and (bits < 224 or public_key.curve not in [ec.SECP384R1, ec.SECP256R1]):
+            failed_key_type = public_key_type.__name__
+        if failed_key_type:
+            message = f"{common_name}: {failed_key_type}-{bits} bits"
+            if curve:
+                message += f", curve: {curve}"
+            if public_key.curve == ec.SECP224R1:
+                phase_out_pubkey.append(message)
+            else:
+                bad_pubkey.append(message)
+                pubkey_score = scoring.WEB_TLS_PUBKEY_BAD
+    return pubkey_score, bad_pubkey, phase_out_pubkey
 
 def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     """
@@ -1825,7 +1534,7 @@ def check_mail_tls(server, dane_cb_data, task):
             },
         ),
     ]
-    scanner = Scanner(per_server_concurrent_connections_limit=2)
+    scanner = Scanner(per_server_concurrent_connections_limit=1)
     scanner.queue_scans(scans)
     result = next(scanner.get_results())
     print(f"scan status result {result.scan_status}")
@@ -1997,389 +1706,6 @@ class ConnectionChecker:
         self._note_conn_details(self._conn)
         self.record_main_connection()
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.close()
-
-    def record_main_connection(self):
-        """
-        Records the results of methods called for the main connection
-        `self._conn`. These will be used instead of calling these methods
-        later. Useful for the mail test where the main connection will be
-        shutdown as soon as it is not needed anymore; we don't want parallel
-        connections left open and mailservers blocking connections as a result.
-
-        """
-        self._conn__get_ssl_version = self._conn.get_ssl_version()
-        self._conn__get_certificate_chain_verify_result = self._conn.get_certificate_chain_verify_result()
-        self._conn__get_tlsext_status_ocsp_resp = self._conn.get_tlsext_status_ocsp_resp()
-        self._conn__is_handshake_completed = self._conn.is_handshake_completed()
-        self._conn__get_session = self._conn.get_session()
-
-    @property
-    def debug_conn(self):
-        # Lazily create a DebugConnection on first access, if needed. The
-        # client of this class should use 'with' or .close() when finished with
-        # this checker instance in order to clean up any specially created
-        # debug connection.
-        if not self._debug_conn:
-            if isinstance(self._conn, DebugConnection):
-                # If the connection is not open, supply a new connection.
-                if not self._conn.sock:
-                    self._debug_conn = DebugConnection.from_conn(self._conn)
-                else:
-                    self._debug_conn = self._conn
-            elif isinstance(self._conn, ModernConnection) and self._conn__get_ssl_version == TLSV1_2:
-                # Don't waste time trying to connect with DebugConnection as
-                # we already know it won't work, that's how we ended up with
-                # a TLS 1.2 ModernConnection. The only other time we use
-                # ModernConnection is for TLS 1.3, but in that case the initial
-                # connection would not be TLS 1.2.
-                raise ConnectionHandshakeException()
-            else:
-                self._debug_conn = DebugConnection.from_conn(self._conn)
-        return self._debug_conn
-
-    @debug_conn.setter
-    def debug_conn(self, value):
-        self._debug_conn = value
-        self._note_conn_details(self._debug_conn)
-
-    def close(self):
-        if self._debug_conn and self._debug_conn is not self._conn:
-            self._debug_conn.safe_shutdown()
-            self._debug_conn = None
-
-    def _note_conn_details(self, conn):
-        ssl_version = conn.get_ssl_version()
-        cipher_name = conn.get_current_cipher_name()
-        conn_type = type(conn)
-
-        # create missing dict keys if needed
-        # don't use a set of ciphers because we care about the order in which
-        # the ciphers were encountered
-        self._seen_ciphers.setdefault(ssl_version, dict())
-        self._seen_ciphers[ssl_version].setdefault(conn_type, list())
-
-        # note the seen SSL version and cipher name
-        self._seen_versions.add(ssl_version)
-        ciphers = self._seen_ciphers[ssl_version][conn_type]
-        if cipher_name not in ciphers:
-            ciphers.append(cipher_name)
-
-        self._note_cipher(cipher_name, conn)
-
-    def _debug_info(self, info):
-        if hasattr(settings, "ENABLE_VERBOSE_TECHNICAL_DETAILS") and settings.ENABLE_VERBOSE_TECHNICAL_DETAILS:
-            return f" [reason: {info}] "
-        else:
-            return ""
-
-    def _get_seen_ciphers_for_conn(self, conn):
-        ssl_version = conn.get_ssl_version()
-        conn_type = type(conn)
-        return self._seen_ciphers[ssl_version][conn_type]
-
-    def _note_cipher(self, cipher, conn=None):
-        ci = cipher_infos.get(cipher, None)
-        ssl_version = conn.get_ssl_version()
-        if ci:
-            if ci.sec_level == SecLevel.GOOD:
-                return
-            elif ci.sec_level == SecLevel.INSUFFICIENT:
-                self._bad_ciphers.add(ci.name)
-            elif ci.sec_level == SecLevel.PHASE_OUT:
-                self._phase_out_ciphers.add(ci.name)
-            elif ci.sec_level == SecLevel.SUFFICIENT:
-                self._sufficient_ciphers.add(ci.name)
-            # cipher is not good, so we will need to test if server enforces order on this connection
-            if ssl_version == SSLV23:
-                self._test_order_on_sslv23 = True
-            elif ssl_version == SSLV2:
-                self._test_order_on_sslv2 = True
-            elif ssl_version == SSLV3:
-                self._test_order_on_sslv3 = True
-            elif ssl_version == TLSV1:
-                self._test_order_on_tlsv1 = True
-            elif ssl_version == TLSV1_1:
-                self._test_order_on_tlsv1_1 = True
-            elif ssl_version == TLSV1_2:
-                self._test_order_on_tlsv1_2 = True
-            elif ssl_version == TLSV1_3:
-                self._test_order_on_tlsv1_3 = True
-
-    def check_cert_trust(self):
-        """
-        Verify the certificate chain.
-
-        """
-        verify_result, _ = self._conn__get_certificate_chain_verify_result
-        if verify_result != 0:
-            return self._score_trusted_bad, verify_result
-        else:
-            return self._score_trusted_good, verify_result
-
-    def check_ocsp_stapling(self):
-        # This will only work if SNI is in use and the handshake has already
-        # been done.
-        ocsp_response = self._conn__get_tlsext_status_ocsp_resp
-        if ocsp_response is not None and ocsp_response.status == 0:
-            try:
-                ocsp_response.verify(settings.CA_CERTIFICATES)
-                return self._score_ocsp_staping_good, OcspStatus.good
-            except OcspResponseNotTrustedError:
-                return self._score_ocsp_staping_bad, OcspStatus.not_trusted
-            except _nassl.OpenSSLError:
-                return self._score_ocsp_staping_bad, OcspStatus.not_trusted
-        else:
-            return self._score_ocsp_staping_ok, OcspStatus.ok
-
-    def check_secure_reneg(self):
-        """
-        Check if secure renegotiation is supported.
-
-        Secure renegotiation should be supported, except in TLS 1.3.
-
-        """
-        # Although the test is not relevant for TLS 1.3, we're still interested
-        # in whether the server has this issue with an earlier TLS version, so
-        # we always check with DebugConnection.
-        try:
-            secure_reneg = self.debug_conn.get_secure_renegotiation_support()
-            if secure_reneg:
-                secure_reneg_score = self._score_secure_reneg_good
-            else:
-                secure_reneg_score = self._score_secure_reneg_bad
-            return secure_reneg_score, secure_reneg
-        except (ConnectionSocketException, ConnectionHandshakeException):
-            # TODO: extend to support indicating that we were unable to
-            # test in the case of ConnectionSocketException?
-            return self._score_secure_reneg_good, True
-
-    def check_client_reneg(self):
-        """
-        Check if client renegotiation is possible.
-
-        Client renegotiation should not be possible.
-
-        """
-        # Although the test is not relevant for TLS 1.3, we're still interested
-        # in whether the server has this issue with an earlier TLS version, so
-        # we always check with DebugConnection.
-        try:
-            # this check requires a new connection, otherwise we encounter:
-            # error:140940F5:SSL routines:ssl3_read_bytes:unexpected record
-            with DebugConnection.from_conn(self._conn, version=SSLV23) as new_conn:
-                self._note_conn_details(new_conn)
-                # Step 1.
-                # Send reneg on open connection
-                new_conn.do_renegotiate()
-                # Step 2.
-                # Connection should now be closed, send 2nd reneg to verify
-                new_conn.do_renegotiate()
-                # If we are still here, client reneg is supported
-                client_reneg_score = self._score_client_reneg_bad
-                client_reneg = True
-        except (ConnectionSocketException, ConnectionHandshakeException, OSError, _nassl.OpenSSLError):
-            # TODO: extend to support indicating that we were unable to
-            # test in the case of ConnectionSocketException?
-            client_reneg_score = self._score_client_reneg_good
-            client_reneg = False
-        return client_reneg_score, client_reneg
-
-    def check_compression(self):
-        """
-        Check if TLS compression is enabled.
-
-        TLS compression should not be enabled.
-
-        """
-        # Although the test is not relevant for TLS 1.3, we're still interested
-        # in whether the server has this issue with an earlier TLS version, so
-        # we always check with DebugConnection.
-        try:
-            compression = self.debug_conn.get_current_compression_method() is not None
-            if compression:
-                compression_score = self._score_compression_bad
-            else:
-                compression_score = self._score_compression_good
-            return compression_score, compression
-        except (ConnectionSocketException, ConnectionHandshakeException):
-            # TODO: extend to support indicating that we were unable to
-            # test in the case of ConnectionSocketException?
-            return self._score_compression_good, False
-
-    def check_zero_rtt(self):
-        # This check isn't relevant to anything less than TLS 1.3.
-        if self._conn__get_ssl_version < TLSV1_3:
-            return self._score_zero_rtt_good, ZeroRttStatus.na
-
-        # we require an existing connection, as 0-RTT is only possible with
-        # connections after the first so that the SSL session can be re-used.
-        # is_handshake_completed() will be false if we didn't complete the
-        # connection handshake yet or we subsequently shutdown the connection.
-        if not self._conn__is_handshake_completed:
-            raise ValueError("0-RTT test without a completed handshake")
-
-        session = self._conn__get_session
-
-        # does the server announce support for early data?
-        # assumes that at least some data was already exchanged because, with
-        # NGINX at least, get_max_early_data() will be <= 0 if no prior data
-        # has been written to and read from the connection even if early data
-        # is actually supported.
-        if session.get_max_early_data() <= 0:
-            return self._score_zero_rtt_good, ZeroRttStatus.good
-
-        # terminate the current connection and re-connect using the previous
-        # SSL session details then try and write early data to the connection
-        self._conn.safe_shutdown()
-
-        try:
-            self._conn.connect(do_handshake_on_connect=False)
-            self._conn.set_session(session)
-            if self._conn._ssl.get_early_data_status() == 0:
-                if self._checks_mode == ChecksMode.WEB:
-                    http_client = HTTPSConnection.fromconn(self._conn)
-                    http_client.putrequest("GET", "/")
-                    http_client.endheaders()
-                elif self._checks_mode == ChecksMode.MAIL:
-                    self._conn.write(bytes(f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", "ascii"))
-                    self._conn.read(4096)
-
-                if self._conn._ssl.get_early_data_status() == 1 and not self._conn.is_handshake_completed():
-                    self._conn.do_handshake()
-                    self._note_conn_details(self._conn)
-                    if self._conn._ssl.get_early_data_status() == 2:
-                        if self._checks_mode == ChecksMode.MAIL:
-                            return self._score_zero_rtt_bad, False
-                        elif self._checks_mode == ChecksMode.WEB:
-                            # 0-RTT status is bad unless the target responds with
-                            # HTTP status code 425 Too Early. See:
-                            # https://tools.ietf.org/id/draft-ietf-httpbis-replay-01.html#rfc.section.5.2
-                            if http_client.getresponse().status == 425:
-                                return self._score_zero_rtt_good, ZeroRttStatus.good
-                            else:
-                                return self._score_zero_rtt_bad, ZeroRttStatus.bad
-        except (ConnectionHandshakeException, ConnectionSocketException, OSError):
-            pass
-
-        # TODO: ensure the handshake is completed ready for the next check that
-        # uses this connection?
-        return self._score_zero_rtt_good, ZeroRttStatus.good
-
-    def check_protocol_versions(self):
-        # Test for TLS 1.1 and TLS 1.0 as these are "phase out" per NCSC 2.0
-        # Test for SSL v2 and v3 as these are "insecure" per NCSC 2.0
-        prots_good = []
-        prots_sufficient = []
-        prots_bad = []
-        prots_phase_out = []
-        prots_score = self._score_tls_protocols_good
-
-        prot_test_configs = [
-            (TLSV1_3, "TLS 1.3", prots_good, self._score_tls_protocols_good),
-            (TLSV1_2, "TLS 1.2", prots_sufficient, self._score_tls_protocols_good),
-            (TLSV1_1, "TLS 1.1", prots_phase_out, self._score_tls_protocols_good),
-            (TLSV1, "TLS 1.0", prots_phase_out, self._score_tls_protocols_good),
-            (SSLV3, "SSL 3.0", prots_bad, self._score_tls_protocols_bad),
-            (SSLV2, "SSL 2.0", prots_bad, self._score_tls_protocols_bad),
-        ]
-
-        for version, name, prot_set, score in prot_test_configs:
-            if version in self._seen_versions:
-                # No need to test for this protocol version as we already
-                # connected with it.
-                connected = True
-            else:
-                try:
-                    connection_class = DebugConnection if version < TLSV1_3 else ModernConnection
-                    with connection_class.from_conn(self._conn, version=version) as new_conn:
-                        connected = True
-                        self._note_conn_details(new_conn)
-                except (ConnectionSocketException, ConnectionHandshakeException):
-                    connected = False
-
-            if connected:
-                prot_set.append(name)
-                prots_score = score
-
-        result_dict = {
-            "good": prots_good,
-            "sufficient": prots_sufficient,
-            "bad": prots_bad,
-            "phase_out": prots_phase_out,
-        }
-
-        return prots_score, result_dict
-
-    def check_dh_params(self):
-        dh_param, ecdh_param = False, False
-        dh_ff_p, dh_ff_g = False, False
-
-        try:
-            # We have to use DebugConnection because ModernConnection doesn't
-            # have the _openssl_str_to_dic() method, but use of custom DH FF
-            # groups is not relevant for TLS 1.3/ModernConnection anyway.
-            with DebugConnection.from_conn(self._conn, ciphers="DH:DHE:!aNULL") as new_conn:
-                self._note_conn_details(new_conn)
-                dh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_dh_param())
-                try:
-                    dh_ff_p = int(dh_param["prime"], 16)  # '0x...'
-                    dh_ff_g = dh_param["generator"].partition(" ")[0]  # 'n (0xn)' or '0xn'
-                    dh_ff_g = int(dh_ff_g, 16 if dh_ff_g[0:2] == "0x" else 10)
-                    dh_param = dh_param["DH_Parameters"].strip("( bit)")  # '(n bit)'
-                except ValueError as e:
-                    logger.error(
-                        "Unexpected failure to parse DH params "
-                        f"{dh_param}' for server '{new_conn.server_name}': "
-                        f"reason='{e}'"
-                    )
-                    dh_param = False
-        except (ConnectionSocketException, ConnectionHandshakeException):
-            pass
-
-        try:
-            with DebugConnection.from_conn(self._conn, ciphers="ECDH:ECDHE:!aNULL") as new_conn:
-                self._note_conn_details(new_conn)
-                ecdh_param = new_conn._openssl_str_to_dic(new_conn._ssl.get_ecdh_param())
-                try:
-                    ecdh_param = ecdh_param["ECDSA_Parameters"].strip("( bit)")
-                except ValueError as e:
-                    logger.error(
-                        "Unexpected failure to parse ECDH params "
-                        f"'{ecdh_param}' for server '{new_conn.server_name}': "
-                        f"reason='{e}'"
-                    )
-                    ecdh_param = False
-        except (ConnectionSocketException, ConnectionHandshakeException):
-            pass
-
-        fs_bad = []
-        fs_phase_out = []
-
-        if dh_ff_p and dh_ff_g:
-            if dh_ff_g == FFDHE_GENERATOR and dh_ff_p in FFDHE_SUFFICIENT_PRIMES:
-                pass
-            elif dh_ff_g == FFDHE_GENERATOR and dh_ff_p == FFDHE2048_PRIME:
-                fs_phase_out.append("FFDHE-2048{}".format(self._debug_info("weak ff group")))
-            else:
-                fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("unknown ff group")))
-        elif dh_param and int(dh_param) < 2048:
-            fs_bad.append("DH-{}{}".format(dh_param, self._debug_info("weak bit length")))
-        if ecdh_param and int(ecdh_param) < 224:
-            fs_bad.append("ECDH-{}{}".format(ecdh_param, self._debug_info("weak bit length")))
-
-        if len(fs_bad) == 0:
-            fs_score = self._score_tls_fs_ok
-        else:
-            fs_score = self._score_tls_fs_bad
-
-        result_dict = {"bad": fs_bad, "phase_out": fs_phase_out, "dh_param": dh_param, "ecdh_param": ecdh_param}
-
-        return fs_score, result_dict
 
     def check_kex_hash_func(self):
         # # Re-connect with explicit signature algorithm preferences and
@@ -2556,59 +1882,6 @@ class ConnectionChecker:
                     lowest_values["seclevel"] = seclevel
                     lowest_values["seclevel_cipher"] = curr_cipher
 
-    def _check_ciphers(self, test_config, first_cipher_only=False):
-        done = False
-        for conn_type, tls_version, cipher_string in test_config:
-            if done:
-                break
-            # Exclude ciphers we've already seen for this connection handler
-            relevant_ciphers = self._seen_ciphers.get(tls_version, dict()).get(conn_type, frozenset())
-            reject_string = ":".join([f"!{x}" for x in relevant_ciphers])
-            if reject_string:
-                cipher_string = f"{reject_string}:{cipher_string}"
-
-            lowest_values = {
-                "score": None,
-                "score_cipher": None,
-                "seclevel": None,
-                "seclevel_cipher": None,
-            }
-
-            last_cipher = None
-            while True:
-                try:
-                    with conn_type.from_conn(self._conn, ciphers=cipher_string, version=tls_version) as new_conn:
-                        # record the cipher details and add the cipher to the
-                        # insufficient or phase out sets.
-                        self._note_conn_details(new_conn)
-
-                        # ensure we don't get stuck in an infinite loop.
-                        curr_cipher = new_conn.get_current_cipher_name()
-                        if curr_cipher == last_cipher:
-                            logger.warning(
-                                "Infinite loop breakout in "
-                                "check_cipher_sec_level "
-                                f"with cipher {curr_cipher}, "
-                                f"protocol {new_conn.get_ssl_version().name}, "
-                                f"server {new_conn.server_name}"
-                            )
-                            break
-
-                        self._check_sec_score_order(lowest_values, curr_cipher, new_conn)
-
-                        # Update the cipher string to exclude the current
-                        # cipher (not cipher suite) from the cipher suite
-                        # negotiation on the next connection.
-                        cipher_string = f"!{curr_cipher}:{cipher_string}"
-
-                        last_cipher = curr_cipher
-                except (ConnectionSocketException, ConnectionHandshakeException):
-                    break
-
-                # When checking SMTP servers only check for one bad cipher.
-                if self._checks_mode == ChecksMode.MAIL or first_cipher_only:
-                    done = True
-                    break
 
     def check_cipher_order(self):
         """
@@ -2678,17 +1951,6 @@ class ConnectionChecker:
                     # Unable to connect with reversed cipher order.
                     log.debug("Unable to connect with reversed cipher order.")
 
-            # Did a previous call to self.check_cipher_sec_level() discover a
-            # prescribed order violation?
-            if not (cipher_order_tested == CipherOrderStatus.bad or self._cipher_order_violation):
-                # Complete the prescribed order check by testing "good" ciphers.
-                # and "sufficient" ciphers.
-                self._check_ciphers(
-                    [
-                        (DebugConnection, SSLV23, ":".join(GOOD_SUFFICIENT_DEBUG_CIPHERS)),
-                        (ModernConnection, SSLV23, ":".join(GOOD_SUFFICIENT_MODERN_CIPHERS)),
-                    ]
-                )
 
             # The self._cipher_order_violation list will be populated if the
             # call to self._check_ciphers() finds a prescribed order violation.
@@ -2739,14 +2001,6 @@ class ConnectionChecker:
         cipher_order_score = self._score_tls_cipher_order_good
         cipher_order = CipherOrderStatus.good
 
-        # Check specifically for SUFFICIENT cipher support.
-        self._check_ciphers(
-            [
-                (DebugConnection, SSLV23, ":".join(SUFFICIENT_DEBUG_CIPHERS)),
-                (ModernConnection, SSLV23, ":".join(SUFFICIENT_MODERN_CIPHERS)),
-            ],
-            first_cipher_only=True,
-        )
         # If the server only supports GOOD ciphers we don't care
         # about the cipher order.
         if not (self._bad_ciphers or self._phase_out_ciphers or self._sufficient_ciphers):
@@ -2801,52 +2055,6 @@ class ConnectionChecker:
             )
 
         return cipher_order_score, cipher_order, self._cipher_order_violation
-
-    def check_cipher_sec_level(self):
-        """
-        Check whether ciphers selected by the server are phase out or
-        insufficient according to the rules set out in the NCSC "IT Security
-        Guidelines for Transport Layer Security (TLS) v2.0" document.
-
-        This is done by connecting with the "bad" TLS cipher suites then
-        re-connecting minus the last connected cipher. Ciphers that have
-        already been seen in other ConnectionChecker checks are excluded. This
-        is because the actual work of recording which ciphers are phase out or
-        insufficient is done by `self._note_cipher()`, whether in this check or
-        an earlier check, thus avoiding unnecessary connections with ciphers
-        that have already been seen.
-
-        As the prescribed order check also involves visiting lots of ciphers in
-        server order part of the prescribed order check is done in this check.
-        The check is completed and the result returned by
-        `self.check_cipher_order()` (both to better group logically related
-        results and because if no violation is detected in this check it may
-        still be the case that "Good" ciphers violate the check, but there's no
-        reason to check those if the server cipher order check fails).
-
-        Note: We do NOT test TLS 1.3 ciphers as these are "good" (when
-        excluding negotiated properites, such as the hash function, as per NCSC
-        v2.0 TLS "Appendix C - List of cipher suites").
-
-        """
-        ciphers_score = self._score_tls_suites_ok
-
-        self._check_ciphers(
-            [
-                (DebugConnection, SSLV23, ":".join(PHASE_OUT_CIPHERS + INSUFFICIENT_CIPHERS)),
-                (DebugConnection, SSLV2, ":".join(INSUFFICIENT_CIPHERS_SSLV2)),
-                (ModernConnection, SSLV23, ":".join(PHASE_OUT_CIPHERS_MODERN + INSUFFICIENT_CIPHERS_MODERN)),
-            ]
-        )
-
-        if self._bad_ciphers:
-            ciphers_score = self._score_tls_suites_bad
-        elif self._phase_out_ciphers:
-            ciphers_score = self._score_tls_suites_ok
-
-        result_dict = {"bad": list(self._bad_ciphers), "phase_out": list(self._phase_out_ciphers)}
-
-        return ciphers_score, result_dict
 
 
 def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
