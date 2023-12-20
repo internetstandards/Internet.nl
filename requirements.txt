@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+sslyze==5.2.0
+
 amqp==5.1.1
     # via kombu
 argparse==1.4.0
