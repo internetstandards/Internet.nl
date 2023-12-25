@@ -152,7 +152,7 @@ def resultscurrent(request, dname):
     # Do we already have a testreport for the latest results (needed
     # for persisent url-thingy)?
     try:
-        first_check = checks_current.values()[0]
+        first_check = list(checks_current.values())[0]
         report = first_check.domaintestreport_set.order_by("-id")[0]
         # make sure that all the checks are assigned to the same report_id
         # and create a new report if needed.
