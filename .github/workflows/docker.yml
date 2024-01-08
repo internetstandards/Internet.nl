@@ -10,7 +10,7 @@ on:
       - release/*
 
 env:
-  registry: ghcr.io/internetstandards
+  DOCKER_REGISTRY: ghcr.io/${{ github.repository_owner }}
   # determine whether this pull request has permissions to push to registry, or artifacts
   # should be used to transfer images between jobs. Forked and dependabot builds don't
   # have permission to push to registry.
@@ -65,7 +65,8 @@ jobs:
         run: |
           # https://github.com/pypa/setuptools_scm/issues/414
           git fetch --prune --unshallow
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          # don't fail on this command if there are no tags (eg, on forked repos)
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/* || true
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -103,10 +104,10 @@ jobs:
           # tag image with current setuptools_scm generated version
           # and tag with PR source branch (eg: feature-x)
           tags: |
-            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
-            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
           # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
@@ -128,11 +129,11 @@ jobs:
           # tag image with current setuptools_scm generated version
           # and tag with current branch name (eg: main)
           tags: |
-            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
           # use latest build from main for caching
           cache-from: |
-            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
           # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
@@ -153,11 +154,11 @@ jobs:
           target: ${{ matrix.target }}
           # tag image with current setuptools_scm generated version and tag 'latest'
           tags: |
-            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ env.registry }}/${{ matrix.image }}:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:latest
           # use latest build from main for caching
           cache-from: |
-            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
           # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
@@ -178,10 +179,10 @@ jobs:
           target: ${{ matrix.target }}
           # tag image with current setuptools_scm generated version
           tags: |
-            ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
           # use latest build from main for caching
           cache-from: |
-            ${{ env.registry }}/${{ matrix.image }}:main
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
           # don't push to registry due to permissions, but store in Docker so can be exported for artifacts below
           load: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
@@ -192,7 +193,7 @@ jobs:
       - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
         if: ${{ env.use_registry == 'false' }}
-        run: docker save ${{ env.registry }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
+        run: docker save ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
 
       - name: Upload image as build artifact (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
@@ -217,11 +218,12 @@ jobs:
 
               export BRANCH="${{ github.sha }}" && \\
               export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
+              export DOCKER_REGISTRY="${{env.DOCKER_REGISTRY}}" && \\
               cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$BRANCH/docker/docker-compose.yml && \\
-              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/docker-compose.yml && \\
+              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
           EOF
 
@@ -234,11 +236,12 @@ jobs:
 
               export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
               export TAG="v\$RELEASE" && \\
+              export DOCKER_REGISTRY="${{env.DOCKER_REGISTRY}}" && \\
               cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$TAG/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/\$TAG/docker/docker-compose.yml && \\
-              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              env -i RELEASE="\$RELEASE" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$TAG/docker/defaults.env && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$TAG/docker/docker-compose.yml && \\
+              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
 
   integration-test:

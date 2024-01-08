@@ -26,7 +26,7 @@ services:
 
   # test runner for integration tests in isolated environment
   test-runner:
-    image: ${DOCKER_IMAGE_TEST_RUNNER:-ghcr.io/internetstandards/test-runner:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_TEST_RUNNER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/test-runner:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/test-runner.Dockerfile
@@ -130,7 +130,7 @@ services:
 
   # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
   mock-resolver:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
