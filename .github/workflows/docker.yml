@@ -65,7 +65,7 @@ jobs:
         run: |
           # https://github.com/pypa/setuptools_scm/issues/414
           git fetch --prune --unshallow
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          # git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - name: Set up Python
         uses: actions/setup-python@v4
