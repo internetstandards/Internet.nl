@@ -210,7 +210,7 @@ typing-extensions==4.7.1
     #   setuptools-scm
 tzdata==2023.3
     # via celery
-urllib3==2.0.4
+urllib3==2.0.7
     # via
     #   requests
     #   selenium
