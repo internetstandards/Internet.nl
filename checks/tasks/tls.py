@@ -15,16 +15,15 @@ from celery.utils.log import get_task_logger
 from cryptography.hazmat.backends.openssl import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import Encoding
-from cryptography.hazmat.primitives.asymmetric import dsa, x25519, x448, ec
+from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import (
     NameOID,
-    SignatureAlgorithmOID,
     Certificate,
 )
 from django.conf import settings
 from django.db import transaction
-from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum, DhEphemeralKeyInfo, OpenSslEcNidEnum, EcDhEphemeralKeyInfo
+from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum
 from sslyze import (
     Scanner,
     ServerScanRequest,
@@ -62,6 +61,24 @@ from checks.tasks.http_headers import (
     HeaderCheckerStrictTransportSecurity,
     http_headers_check,
 )
+from checks.tasks.tls_constants import (
+    FFDHE_GENERATOR,
+    FFDHE2048_PRIME,
+    FFDHE_SUFFICIENT_PRIMES,
+    SIGALG_GOOD,
+    EC_PHASE_OUT,
+    EC_GOOD,
+    CIPHERS_PHASE_OUT,
+    CIPHERS_GOOD,
+    CIPHERS_SUFFICIENT,
+    DH_MIN_KEY_SIZE,
+    ECDH_MIN_KEY_SIZE,
+    CERT_RSA_DSA_MIN_KEY_SIZE,
+    CERT_CURVE_MIN_KEY_SIZE,
+    CERT_EC_CURVES_GOOD,
+    CERT_CURVES_GOOD,
+    CERT_EC_CURVES_PHASE_OUT,
+)
 from checks.tasks.shared import (
     aggregate_subreports,
     batch_mail_get_servers,
@@ -85,171 +102,8 @@ if eventlet.patcher.is_monkey_patched("subprocess"):
 else:
     import subprocess
 
-try:
-    from ssl import OP_NO_SSLv2, OP_NO_SSLv3
-except ImportError as e:
-    # Support for older python versions, not for use in production
-    if settings.DEBUG:
-        OP_NO_SSLv2 = 16777216
-        OP_NO_SSLv3 = 33554432
-    else:
-        raise e
 
 logger = get_task_logger(__name__)
-
-
-# Based on: https://tools.ietf.org/html/rfc7919#appendix-A
-FFDHE2048_PRIME = int(
-    (
-        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
-        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
-        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
-        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
-        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
-        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
-        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
-        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
-        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
-        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
-        "886B4238 61285C97 FFFFFFFF FFFFFFFF"
-    ).replace(" ", ""),
-    16,
-)
-FFDHE3072_PRIME = int(
-    (
-        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
-        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
-        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
-        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
-        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
-        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
-        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
-        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
-        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
-        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
-        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
-        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
-        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
-        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
-        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
-        "3C1B20EE 3FD59D7C 25E41D2B 66C62E37 FFFFFFFF FFFFFFFF"
-    ).replace(" ", ""),
-    16,
-)
-FFDHE4096_PRIME = int(
-    (
-        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
-        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
-        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
-        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
-        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
-        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
-        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
-        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
-        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
-        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
-        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
-        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
-        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
-        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
-        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
-        "3C1B20EE 3FD59D7C 25E41D2B 669E1EF1 6E6F52C3 164DF4FB"
-        "7930E9E4 E58857B6 AC7D5F42 D69F6D18 7763CF1D 55034004"
-        "87F55BA5 7E31CC7A 7135C886 EFB4318A ED6A1E01 2D9E6832"
-        "A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A"
-        "1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF"
-        "8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E655F6A"
-        "FFFFFFFF FFFFFFFF"
-    ).replace(" ", ""),
-    16,
-)
-FFDHE6144_PRIME = int(
-    (
-        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
-        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
-        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
-        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
-        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
-        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
-        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
-        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
-        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
-        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
-        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
-        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
-        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
-        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
-        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
-        "3C1B20EE 3FD59D7C 25E41D2B 669E1EF1 6E6F52C3 164DF4FB"
-        "7930E9E4 E58857B6 AC7D5F42 D69F6D18 7763CF1D 55034004"
-        "87F55BA5 7E31CC7A 7135C886 EFB4318A ED6A1E01 2D9E6832"
-        "A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A"
-        "1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF"
-        "8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E0DD902"
-        "0BFD64B6 45036C7A 4E677D2C 38532A3A 23BA4442 CAF53EA6"
-        "3BB45432 9B7624C8 917BDD64 B1C0FD4C B38E8C33 4C701C3A"
-        "CDAD0657 FCCFEC71 9B1F5C3E 4E46041F 388147FB 4CFDB477"
-        "A52471F7 A9A96910 B855322E DB6340D8 A00EF092 350511E3"
-        "0ABEC1FF F9E3A26E 7FB29F8C 183023C3 587E38DA 0077D9B4"
-        "763E4E4B 94B2BBC1 94C6651E 77CAF992 EEAAC023 2A281BF6"
-        "B3A739C1 22611682 0AE8DB58 47A67CBE F9C9091B 462D538C"
-        "D72B0374 6AE77F5E 62292C31 1562A846 505DC82D B854338A"
-        "E49F5235 C95B9117 8CCF2DD5 CACEF403 EC9D1810 C6272B04"
-        "5B3B71F9 DC6B80D6 3FDD4A8E 9ADB1E69 62A69526 D43161C1"
-        "A41D570D 7938DAD4 A40E329C D0E40E65 FFFFFFFF FFFFFFFF"
-    ).replace(" ", ""),
-    16,
-)
-FFDHE8192_PRIME = int(
-    (
-        "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
-        "D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9"
-        "7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561"
-        "2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935"
-        "984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735"
-        "30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB"
-        "B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19"
-        "0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61"
-        "9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73"
-        "3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA"
-        "886B4238 611FCFDC DE355B3B 6519035B BC34F4DE F99C0238"
-        "61B46FC9 D6E6C907 7AD91D26 91F7F7EE 598CB0FA C186D91C"
-        "AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3"
-        "64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D"
-        "ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF"
-        "3C1B20EE 3FD59D7C 25E41D2B 669E1EF1 6E6F52C3 164DF4FB"
-        "7930E9E4 E58857B6 AC7D5F42 D69F6D18 7763CF1D 55034004"
-        "87F55BA5 7E31CC7A 7135C886 EFB4318A ED6A1E01 2D9E6832"
-        "A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A"
-        "1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF"
-        "8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E0DD902"
-        "0BFD64B6 45036C7A 4E677D2C 38532A3A 23BA4442 CAF53EA6"
-        "3BB45432 9B7624C8 917BDD64 B1C0FD4C B38E8C33 4C701C3A"
-        "CDAD0657 FCCFEC71 9B1F5C3E 4E46041F 388147FB 4CFDB477"
-        "A52471F7 A9A96910 B855322E DB6340D8 A00EF092 350511E3"
-        "0ABEC1FF F9E3A26E 7FB29F8C 183023C3 587E38DA 0077D9B4"
-        "763E4E4B 94B2BBC1 94C6651E 77CAF992 EEAAC023 2A281BF6"
-        "B3A739C1 22611682 0AE8DB58 47A67CBE F9C9091B 462D538C"
-        "D72B0374 6AE77F5E 62292C31 1562A846 505DC82D B854338A"
-        "E49F5235 C95B9117 8CCF2DD5 CACEF403 EC9D1810 C6272B04"
-        "5B3B71F9 DC6B80D6 3FDD4A8E 9ADB1E69 62A69526 D43161C1"
-        "A41D570D 7938DAD4 A40E329C CFF46AAA 36AD004C F600C838"
-        "1E425A31 D951AE64 FDB23FCE C9509D43 687FEB69 EDD1CC5E"
-        "0B8CC3BD F64B10EF 86B63142 A3AB8829 555B2F74 7C932665"
-        "CB2C0F1C C01BD702 29388839 D2AF05E4 54504AC7 8B758282"
-        "2846C0BA 35C35F5C 59160CC0 46FD8251 541FC68C 9C86B022"
-        "BB709987 6A460E74 51A8A931 09703FEE 1C217E6C 3826E52C"
-        "51AA691E 0E423CFC 99E9E316 50C1217B 624816CD AD9A95F9"
-        "D5B80194 88D9C0A0 A1FE3075 A577E231 83F81D4A 3F2FA457"
-        "1EFC8CE0 BA8A4FE8 B6855DFE 72B0A66E DED2FBAB FBE58A30"
-        "FAFABE1C 5D71A87E 2F741EF8 C1FE86FE A6BBFDE5 30677F0D"
-        "97D11D49 F7A8443D 0822E506 A9F4614E 011E2A94 838FF88C"
-        "D68C8BB7 C5C6424C FFFFFFFF FFFFFFFF"
-    ).replace(" ", ""),
-    16,
-)
-FFDHE_GENERATOR = 2
-FFDHE_SUFFICIENT_PRIMES = [FFDHE8192_PRIME, FFDHE6144_PRIME, FFDHE4096_PRIME, FFDHE3072_PRIME]
 
 
 # Maximum number of tries on failure to establish a connection.
@@ -1245,15 +1099,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         if not is_root_cert(cert):
             sigalg = cert.signature_algorithm_oid
             # Check oids
-            if sigalg not in (
-                SignatureAlgorithmOID.RSA_WITH_SHA256,
-                SignatureAlgorithmOID.RSA_WITH_SHA384,
-                SignatureAlgorithmOID.RSA_WITH_SHA512,
-                SignatureAlgorithmOID.ECDSA_WITH_SHA256,
-                SignatureAlgorithmOID.ECDSA_WITH_SHA384,
-                SignatureAlgorithmOID.ECDSA_WITH_SHA512,
-                SignatureAlgorithmOID.DSA_WITH_SHA256,
-            ):
+            if sigalg not in SIGALG_GOOD:
                 sigalg_bad[get_common_name(cert)] = sigalg._name
                 sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
 
@@ -1305,24 +1151,24 @@ def check_pubkey(certificates: List[Certificate]):
 
         failed_key_type = ""
         curve = ""
-        if public_key_type is rsa.RSAPublicKey and bits < 2048:
+        if public_key_type is rsa.RSAPublicKey and bits < CERT_RSA_DSA_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
-        elif public_key_type is dsa.DSAPublicKey and bits < 2048:
+        elif public_key_type is dsa.DSAPublicKey and bits < CERT_RSA_DSA_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
         # TODO: DH type?
         # elif public_key_type is DHPublicKey and bits < 2048:
         #    failed_key_type = "DHPublicKey"
-        elif public_key_type in [x25519.X25519PublicKey, x448.X448PublicKey] and bits < 224:
+        elif public_key_type in CERT_CURVES_GOOD and bits < CERT_CURVE_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
         elif public_key_type is EllipticCurvePublicKey and (
-            bits < 224 or public_key.curve not in [ec.SECP384R1, ec.SECP256R1]
+            bits < CERT_CURVE_MIN_KEY_SIZE or public_key.curve not in CERT_EC_CURVES_GOOD
         ):
             failed_key_type = public_key_type.__name__
         if failed_key_type:
             message = f"{common_name}: {failed_key_type}-{bits} bits"
             if curve:
                 message += f", curve: {curve}"
-            if public_key.curve == ec.SECP224R1:
+            if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
                 phase_out_pubkey.append(message)
             else:
                 bad_pubkey.append(message)
@@ -1407,35 +1253,33 @@ def check_mail_tls(server, dane_cb_data, task):
     """
     # TODO: SNI?
     # send_SNI = dane_cb_data.get("data") and dane_cb_data.get("secure")
-    print(f"starting sslyze scan for {server} {dane_cb_data}")
-    scans = [
-        ServerScanRequest(
-            server_location=ServerNetworkLocation(hostname=server, port=25),
-            network_configuration=ServerNetworkConfiguration(
-                tls_server_name_indication=server, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
-            ),
-            scan_commands={
-                # ScanCommand.CERTIFICATE_INFO,
-                ScanCommand.SSL_2_0_CIPHER_SUITES,
-                ScanCommand.SSL_3_0_CIPHER_SUITES,
-                ScanCommand.TLS_1_0_CIPHER_SUITES,
-                ScanCommand.TLS_1_1_CIPHER_SUITES,
-                ScanCommand.TLS_1_2_CIPHER_SUITES,
-                ScanCommand.TLS_1_3_CIPHER_SUITES,
-                ScanCommand.TLS_COMPRESSION,
-                ScanCommand.TLS_1_3_EARLY_DATA,
-                ScanCommand.SESSION_RENEGOTIATION,
-                ScanCommand.ELLIPTIC_CURVES,
-            },
+    scan = ServerScanRequest(
+        server_location=ServerNetworkLocation(hostname=server, port=25),
+        network_configuration=ServerNetworkConfiguration(
+            tls_server_name_indication=server, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
         ),
-    ]
+        scan_commands={
+            ScanCommand.SSL_2_0_CIPHER_SUITES,
+            ScanCommand.SSL_3_0_CIPHER_SUITES,
+            ScanCommand.TLS_1_0_CIPHER_SUITES,
+            ScanCommand.TLS_1_1_CIPHER_SUITES,
+            ScanCommand.TLS_1_2_CIPHER_SUITES,
+            ScanCommand.TLS_1_3_CIPHER_SUITES,
+            ScanCommand.TLS_COMPRESSION,
+            ScanCommand.TLS_1_3_EARLY_DATA,
+            ScanCommand.SESSION_RENEGOTIATION,
+            ScanCommand.ELLIPTIC_CURVES,
+        },
+    )
+    print(f"starting sslyze scan for {server} {dane_cb_data}")
     scanner = Scanner(per_server_concurrent_connections_limit=1)
-    scanner.queue_scans(scans)
+    scanner.queue_scans([scan])
     result = next(scanner.get_results())
     print(f"scan status result {result.scan_status}")
     if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-        return dict(server_reachable=False, tls_enabled=False)
-        # return dict(tls_enabled=False) ??? # could_not_test_smtp_starttls ???
+        pass
+        # return dict(server_reachable=False, tls_enabled=False)
+        # return dict(tls_enabled=False) ??? # TODO could_not_test_smtp_starttls ???
 
     all_suites = [
         result.scan_result.ssl_2_0_cipher_suites,
@@ -1532,30 +1376,27 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     Check the webserver's TLS configuration.
 
     """
-    scans = [
-        ServerScanRequest(
-            server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
-            scan_commands={
-                ScanCommand.CERTIFICATE_INFO,
-                ScanCommand.SSL_2_0_CIPHER_SUITES,
-                ScanCommand.SSL_3_0_CIPHER_SUITES,
-                ScanCommand.TLS_1_0_CIPHER_SUITES,
-                ScanCommand.TLS_1_1_CIPHER_SUITES,
-                ScanCommand.TLS_1_2_CIPHER_SUITES,
-                ScanCommand.TLS_1_3_CIPHER_SUITES,
-                ScanCommand.TLS_COMPRESSION,
-                ScanCommand.TLS_1_3_EARLY_DATA,
-                ScanCommand.SESSION_RENEGOTIATION,
-                ScanCommand.ELLIPTIC_CURVES,
-            },
-        ),
-    ]
+    scan = ServerScanRequest(
+        server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
+        scan_commands={
+            ScanCommand.SSL_2_0_CIPHER_SUITES,
+            ScanCommand.SSL_3_0_CIPHER_SUITES,
+            ScanCommand.TLS_1_0_CIPHER_SUITES,
+            ScanCommand.TLS_1_1_CIPHER_SUITES,
+            ScanCommand.TLS_1_2_CIPHER_SUITES,
+            ScanCommand.TLS_1_3_CIPHER_SUITES,
+            ScanCommand.TLS_COMPRESSION,
+            ScanCommand.TLS_1_3_EARLY_DATA,
+            ScanCommand.SESSION_RENEGOTIATION,
+            ScanCommand.ELLIPTIC_CURVES,
+        },
+    )
     scanner = Scanner(per_server_concurrent_connections_limit=25)
-    scanner.queue_scans(scans)
+    scanner.queue_scans([scan])
     result = next(scanner.get_results())
 
     if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-        return dict(server_reachable=False, tls_enabled=False)
+        return dict(server_reachable=False, tls_enabled=False)  # TODO: ?
         # return dict(tls_enabled=False) ???
 
     all_suites = [
@@ -1673,14 +1514,6 @@ def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
     ]
     ec_param = max(ec_sizes) if ec_sizes else None
 
-    ec_good = [
-        OpenSslEcNidEnum.SECP521R1,
-        OpenSslEcNidEnum.SECP384R1,
-        OpenSslEcNidEnum.SECP256R1,
-    ]
-    ec_phase_out = [
-        OpenSslEcNidEnum.SECP224R1,
-    ]
     fs_bad = set()
     fs_phase_out = set()
     for suite in ciphers_accepted:
@@ -1688,14 +1521,14 @@ def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
         if not key:
             continue
         if isinstance(key, EcDhEphemeralKeyInfo):
-            if key.size < 224:
+            if key.size < ECDH_MIN_KEY_SIZE:
                 fs_bad.add(f"ECDH-{key.size}")
-            if key.curve in ec_phase_out:
+            if key.curve in EC_PHASE_OUT:
                 fs_phase_out.add(f"ECDH-{key.curve_name}")
-            elif key.curve not in ec_good:
+            elif key.curve not in EC_GOOD:
                 fs_bad.add(f"ECDH-{key.curve_name}")
         if isinstance(key, DhEphemeralKeyInfo):
-            if key.size < 2048:
+            if key.size < DH_MIN_KEY_SIZE:
                 fs_bad.add(f"DH-{key.size}")
             if key.generator == FFDHE_GENERATOR:
                 if key.prime == FFDHE2048_PRIME:
@@ -1707,53 +1540,13 @@ def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
 
 
 def evaluate_tls_ciphers(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
-    good = [
-        "TLS_AES_256_GCM_SHA384",
-        "TLS_CHACHA20_POLY1305_SHA256",
-        "TLS_AES_128_GCM_SHA256",
-    ]
-    sufficient = [
-        "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-        "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
-        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
-        "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-        "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
-        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
-        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
-        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
-        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
-        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
-        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
-        "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
-        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
-        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
-        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
-        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
-        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-    ]
-    phase_out = [
-        "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA",
-        "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
-        "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
-        "TLS_RSA_WITH_AES_256_GCM_SHA384",
-        "TLS_RSA_WITH_AES_128_GCM_SHA256",
-        "TLS_RSA_WITH_AES_256_CBC_SHA256",
-        "TLS_RSA_WITH_AES_256_CBC_SHA",
-        "TLS_RSA_WITH_AES_128_CBC_SHA256",
-        "TLS_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
-    ]
     ciphers_bad = []
     ciphers_phase_out = []
     for suite in ciphers_accepted:
         # TODO: remove IANA name, just here for debugging now
-        if suite.cipher_suite.name in phase_out:
+        if suite.cipher_suite.name in CIPHERS_PHASE_OUT:
             ciphers_phase_out.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
-        if suite.cipher_suite.name not in sufficient + good + phase_out:
+        if suite.cipher_suite.name not in CIPHERS_GOOD + CIPHERS_SUFFICIENT + CIPHERS_PHASE_OUT:
             ciphers_bad.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
     ciphers_score = scoring.WEB_TLS_SUITES_BAD if ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
     return ciphers_bad, ciphers_phase_out, ciphers_score
@@ -1777,7 +1570,7 @@ def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
                     forced_https=False,
                     forced_https_score=scoring.WEB_TLS_FORCED_HTTPS_BAD,
                     http_compression_enabled=True,
-                    http_compression_score=(scoring.WEB_TLS_HTTP_COMPRESSION_BAD),
+                    http_compression_score=scoring.WEB_TLS_HTTP_COMPRESSION_BAD,
                     hsts_enabled=False,
                     hsts_policies=[],
                     hsts_score=scoring.WEB_TLS_HSTS_BAD,
