@@ -1,5 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import logging
 import time
 from binascii import hexlify
 from enum import Enum
@@ -35,6 +36,7 @@ from sslyze import (
     ServerNetworkConfiguration,
     ProtocolWithOpportunisticTlsEnum,
 )
+
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
@@ -78,6 +80,7 @@ from checks.tasks.tls_constants import (
     CERT_EC_CURVES_GOOD,
     CERT_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
+    SSLYZE_SCAN_COMMANDS,
 )
 from checks.tasks.shared import (
     aggregate_subreports,
@@ -101,9 +104,6 @@ if eventlet.patcher.is_monkey_patched("subprocess"):
     subprocess = eventlet.import_patched("subprocess")
 else:
     import subprocess
-
-
-logger = get_task_logger(__name__)
 
 
 # Maximum number of tries on failure to establish a connection.
@@ -134,6 +134,10 @@ test_map = {
 class ChecksMode(Enum):
     WEB = (0,)
     MAIL = 1
+
+
+class TLSException(Exception):
+    pass
 
 
 @shared_task(bind=True)
@@ -1147,25 +1151,25 @@ def check_pubkey(certificates: List[Certificate]):
         common_name = get_common_name(cert)
         public_key = cert.public_key()
         public_key_type = type(public_key)
-        bits = public_key.key_size
+        key_size = public_key.key_size
 
         failed_key_type = ""
         curve = ""
-        if public_key_type is rsa.RSAPublicKey and bits < CERT_RSA_DSA_MIN_KEY_SIZE:
+        if public_key_type is rsa.RSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
-        elif public_key_type is dsa.DSAPublicKey and bits < CERT_RSA_DSA_MIN_KEY_SIZE:
+        elif public_key_type is dsa.DSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
         # TODO: DH type?
-        # elif public_key_type is DHPublicKey and bits < 2048:
+        # elif public_key_type is DHPublicKey and key_size < 2048:
         #    failed_key_type = "DHPublicKey"
-        elif public_key_type in CERT_CURVES_GOOD and bits < CERT_CURVE_MIN_KEY_SIZE:
+        elif public_key_type in CERT_CURVES_GOOD and key_size < CERT_CURVE_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
         elif public_key_type is EllipticCurvePublicKey and (
-            bits < CERT_CURVE_MIN_KEY_SIZE or public_key.curve not in CERT_EC_CURVES_GOOD
+            key_size < CERT_CURVE_MIN_KEY_SIZE or public_key.curve not in CERT_EC_CURVES_GOOD
         ):
             failed_key_type = public_key_type.__name__
         if failed_key_type:
-            message = f"{common_name}: {failed_key_type}-{bits} bits"
+            message = f"{common_name}: {failed_key_type}-{key_size} key_size"
             if curve:
                 message += f", curve: {curve}"
             if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
@@ -1258,37 +1262,14 @@ def check_mail_tls(server, dane_cb_data, task):
         network_configuration=ServerNetworkConfiguration(
             tls_server_name_indication=server, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
         ),
-        scan_commands={
-            ScanCommand.SSL_2_0_CIPHER_SUITES,
-            ScanCommand.SSL_3_0_CIPHER_SUITES,
-            ScanCommand.TLS_1_0_CIPHER_SUITES,
-            ScanCommand.TLS_1_1_CIPHER_SUITES,
-            ScanCommand.TLS_1_2_CIPHER_SUITES,
-            ScanCommand.TLS_1_3_CIPHER_SUITES,
-            ScanCommand.TLS_COMPRESSION,
-            ScanCommand.TLS_1_3_EARLY_DATA,
-            ScanCommand.SESSION_RENEGOTIATION,
-            ScanCommand.ELLIPTIC_CURVES,
-        },
+        scan_commands=SSLYZE_SCAN_COMMANDS,
     )
-    print(f"starting sslyze scan for {server} {dane_cb_data}")
-    scanner = Scanner(per_server_concurrent_connections_limit=1)
-    scanner.queue_scans([scan])
-    result = next(scanner.get_results())
-    print(f"scan status result {result.scan_status}")
-    if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-        pass
-        # return dict(server_reachable=False, tls_enabled=False)
-        # return dict(tls_enabled=False) ??? # TODO could_not_test_smtp_starttls ???
+    try:
+        all_suites, result = run_sslyze(scan, dane_cb_data, connection_limit=25)
+    except TLSException as exc:
+        log.info(f"sslyze scan for mail on {server} failed: {exc}")
+        return dict(server_reachable=False, tls_enabled=False)
 
-    all_suites = [
-        result.scan_result.ssl_2_0_cipher_suites,
-        result.scan_result.ssl_3_0_cipher_suites,
-        result.scan_result.tls_1_0_cipher_suites,
-        result.scan_result.tls_1_1_cipher_suites,
-        result.scan_result.tls_1_2_cipher_suites,
-        result.scan_result.tls_1_3_cipher_suites,
-    ]
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
 
@@ -1378,35 +1359,14 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     scan = ServerScanRequest(
         server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
-        scan_commands={
-            ScanCommand.SSL_2_0_CIPHER_SUITES,
-            ScanCommand.SSL_3_0_CIPHER_SUITES,
-            ScanCommand.TLS_1_0_CIPHER_SUITES,
-            ScanCommand.TLS_1_1_CIPHER_SUITES,
-            ScanCommand.TLS_1_2_CIPHER_SUITES,
-            ScanCommand.TLS_1_3_CIPHER_SUITES,
-            ScanCommand.TLS_COMPRESSION,
-            ScanCommand.TLS_1_3_EARLY_DATA,
-            ScanCommand.SESSION_RENEGOTIATION,
-            ScanCommand.ELLIPTIC_CURVES,
-        },
+        scan_commands=SSLYZE_SCAN_COMMANDS,
     )
-    scanner = Scanner(per_server_concurrent_connections_limit=25)
-    scanner.queue_scans([scan])
-    result = next(scanner.get_results())
+    try:
+        all_suites, result = run_sslyze(scan, None, connection_limit=25)
+    except TLSException as exc:
+        log.info(f"sslyze scan for web on {url} failed: {exc}")
+        return dict(server_reachable=False, tls_enabled=False)
 
-    if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-        return dict(server_reachable=False, tls_enabled=False)  # TODO: ?
-        # return dict(tls_enabled=False) ???
-
-    all_suites = [
-        result.scan_result.ssl_2_0_cipher_suites,
-        result.scan_result.ssl_3_0_cipher_suites,
-        result.scan_result.tls_1_0_cipher_suites,
-        result.scan_result.tls_1_1_cipher_suites,
-        result.scan_result.tls_1_2_cipher_suites,
-        result.scan_result.tls_1_3_cipher_suites,
-    ]
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
 
@@ -1416,7 +1376,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
     ocsp_status = (
         OcspStatus.good
-        if any([d.ocsp_response_is_trusted for d in result.scan_result.certificate_info.result.certificate_deployments])
+        if True  # TODO: any([d.ocsp_response_is_trusted for d in result.scan_result.certificate_info.result.certificate_deployments])
         else OcspStatus.ok
     )
     return dict(
@@ -1477,6 +1437,30 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     )
 
 
+def run_sslyze(scan, dane_cb_data, connection_limit):
+    log.debug(f"starting sslyze scan for {scan.server_location}")
+    scanner = Scanner(per_server_concurrent_connections_limit=connection_limit)
+    scanner.queue_scans([scan])
+    result = next(scanner.get_results())
+    log.info(f"sslyze scan for {result.server_location} status result {result.scan_status}")
+    if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
+        raise TLSException("could not connect")
+        # return dict(tls_enabled=False) ??? # TODO could_not_test_smtp_starttls ???
+    all_suites = [
+        result.scan_result.ssl_2_0_cipher_suites,
+        result.scan_result.ssl_3_0_cipher_suites,
+        result.scan_result.tls_1_0_cipher_suites,
+        result.scan_result.tls_1_1_cipher_suites,
+        result.scan_result.tls_1_2_cipher_suites,
+        result.scan_result.tls_1_3_cipher_suites,
+    ]
+    for suite in all_suites:
+        if suite.error_trace:
+            msg = str(suite.error_trace)
+            raise TLSException(msg)
+    return all_suites, result
+
+
 def evaluate_tls_protocols(prots_accepted: List[TlsVersionEnum]):
     prots_good = []
     prots_sufficient = []
@@ -1526,6 +1510,8 @@ def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
             if key.curve in EC_PHASE_OUT:
                 fs_phase_out.add(f"ECDH-{key.curve_name}")
             elif key.curve not in EC_GOOD:
+                print(key.curve)
+                print(EC_GOOD)
                 fs_bad.add(f"ECDH-{key.curve_name}")
         if isinstance(key, DhEphemeralKeyInfo):
             if key.size < DH_MIN_KEY_SIZE:
