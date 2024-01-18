@@ -59,7 +59,7 @@ TIME_ZONE = getenv("TIME_ZONE", "UTC")
 # # Application logging:
 DJANGO_LOG_LEVEL = getenv("DJANGO_LOG_LEVEL", "INFO")
 INTERNETNL_LOG_LEVEL = getenv("INTERNETNL_LOG_LEVEL", "INFO")
-CELERY_LOG_LEVEL = getenv("CELERY_LOG_LEVEL", "ERROR")
+CELERY_LOG_LEVEL = getenv("CELERY_LOG_LEVEL", "INFO")
 
 # Infrastructure
 # # Database
@@ -552,6 +552,20 @@ if "hosters" in MANUAL_HOF_PAGES:
 
 HOF_UPDATE_INTERVAL = 600  # seconds
 
+color_formatter = {
+    "()": "colorlog.ColoredFormatter",
+    # to get the name of the logger a message came from, add %(name)s.
+    "format": "%(log_color)s%(asctime)s\t%(name)s %(levelname)-8s - %(filename)s:%(lineno)-4s - " "%(funcName)s - %(message)s",
+
+    "datefmt": "%Y-%m-%d %H:%M:%S",
+    "log_colors": {
+        # "DEBUG": "white",
+        "INFO": "green",
+        "WARNING": "yellow",
+        "ERROR": "red",
+        "CRITICAL": "bold_red",
+    },
+}
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -567,22 +581,7 @@ LOGGING = {
         },
     },
     "formatters": {
-        "debug": {
-            "format": "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - " "%(funcName)20s() - %(message)s",
-        },
-        "color": {
-            "()": "colorlog.ColoredFormatter",
-            # to get the name of the logger a message came from, add %(name)s.
-            "format": "%(log_color)s%(asctime)s\t%(levelname)-8s - " "%(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-            "log_colors": {
-                "DEBUG": "green",
-                "INFO": "white",
-                "WARNING": "yellow",
-                "ERROR": "red",
-                "CRITICAL": "bold_red",
-            },
-        },
+        "color": color_formatter,
     },
     "loggers": {
         # Default Django logging, we expect django to work, and therefore only show INFO messages.
@@ -595,10 +594,22 @@ LOGGING = {
             "handlers": ["console", "file"],
             "level": INTERNETNL_LOG_LEVEL,
         },
+        "checks": {
+            "handlers": ["console", "file"],
+            "level": INTERNETNL_LOG_LEVEL,
+        },
+        "interface": {
+            "handlers": ["console", "file"],
+            "level": INTERNETNL_LOG_LEVEL,
+        },
         # ERROR disables verbose task logging (ie: "received task...", "...succeeded in...")
         "celery.app.trace": {
             "handlers": ["console"],
-            "level": CELERY_LOG_LEVEL,
+            "level": "ERROR",
+        },
+        "celery.utils.functional": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
         "celery.worker.strategy": {
             "level": "INFO" if DEBUG_LOG else "ERROR",

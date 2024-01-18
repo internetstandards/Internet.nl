@@ -1,35 +1,13 @@
 import logging
 from typing import Dict, Callable, Optional
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, tls, rpki
 
 
-def force_debug_logging():
-    debug_log = logging.getLogger(__package__)
-
-    formatter = logging.Formatter(
-        "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - %(funcName)20s() - %(message)s"
-    )
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-    stream_handler.setLevel(logging.DEBUG)
-    debug_log.addHandler(stream_handler)
-    debug_log.setLevel(logging.DEBUG)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-    logger = logging.getLogger("internetnl")
-    logger.setLevel(logging.DEBUG)
-    logger = logging.getLogger("django")
-    logger.setLevel(logging.DEBUG)
-    logger = logging.getLogger("celery")
-    logger.setLevel(logging.DEBUG)
-
-    return debug_log
-
-
-log = force_debug_logging()
+log = logging.getLogger(__package__)
 
 PROBES: Dict[str, Optional[Callable]] = {
     "ipv6_web": ipv6.web,
