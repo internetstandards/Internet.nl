@@ -228,7 +228,7 @@ If this does not work problems might lay deeper and OS level troubleshooting mig
 
 ## Autohealing
 
-Critial containers/services have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
+Critial containers/services have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for too long the Docker daemon will restart the service.
 
 ### Known issues
 
