@@ -13,6 +13,8 @@ An OCI compatible container runtime with [Compose V2](https://docs.docker.com/co
 
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
+**for arm users (eg apple m1)**: nassl will not compile on x64 architectures, so use the option to start your container engine in x86 mode. For colima this can be done with `colima start --arch x86_64`. Things will be much slower but it works.
+
 ## Building
 
 Clone this repository to a local directory:
