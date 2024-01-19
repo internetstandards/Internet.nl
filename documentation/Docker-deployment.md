@@ -363,7 +363,7 @@ Aditionally the password can already be provided as encrypted value. For this en
 
     BASIC_AUTH_RAW='example_user:$apr1$trHqgfkY$tIpKCOuSHLfYa20HVzyaX.'
 
-Both variables can be used at the same time.
+Both variables can be used at the same time, however, **do not list a user in both variables**.
 
 ### IP allow/deny lists
 
