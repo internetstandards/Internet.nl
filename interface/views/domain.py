@@ -3,6 +3,7 @@
 import json
 import re
 
+from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -129,12 +130,21 @@ def resultsrender(addr, report, request):
 def resultscurrent(request, dname):
     addr = dname.lower()
     # Get latest test results
+    checks_current = {}
+    # Names of the tests in the checks_current dictionary must be the same as the
     try:
-        ipv6 = DomainTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
-        dnssec = DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None).order_by("-id")[0]
-        tls = WebTestTls.objects.filter(domain=addr).order_by("-id")[0]
-        appsecpriv = WebTestAppsecpriv.objects.filter(domain=addr).order_by("-id")[0]
-        rpki = WebTestRpki.objects.filter(domain=addr).order_by("-id")[0]
+        if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
+            checks_current["ipv6"] = DomainTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
+        if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
+            checks_current["dnssec"] = DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None).order_by("-id")[
+                0
+            ]
+        if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
+            checks_current["tls"] = WebTestTls.objects.filter(domain=addr).order_by("-id")[0]
+        if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
+            checks_current["appsecpriv"] = WebTestAppsecpriv.objects.filter(domain=addr).order_by("-id")[0]
+        if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
+            checks_current["rpki"] = WebTestRpki.objects.filter(domain=addr).order_by("-id")[0]
 
     except IndexError:
         log.exception("Test not complete")
@@ -144,19 +154,32 @@ def resultscurrent(request, dname):
     # Do we already have a testreport for the latest results (needed
     # for persisent url-thingy)?
     try:
-        report = ipv6.domaintestreport_set.order_by("-id")[0]
-        if (
-            not report.id
-            == dnssec.domaintestreport_set.order_by("-id")[0].id
-            == tls.domaintestreport_set.order_by("-id")[0].id
-            == appsecpriv.domaintestreport_set.order_by("-id")[0].id
-            == rpki.domaintestreport_set.order_by("-id")[0].id
-        ):
-            report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
+        first_check = list(checks_current.values())[0]
+        report = first_check.domaintestreport_set.order_by("-id")[0]
+        # make sure that all the checks are assigned to the same report_id
+        # and create a new report if needed.
+        for check in checks_current.values():
+            if report.id != check.domaintestreport_set.order_by("-id")[0].id:
+                # create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
+                report = create_report(
+                    addr,  # domain
+                    ipv6=checks_current.get("ipv6"),
+                    dnssec=checks_current.get("dnssec"),
+                    tls=checks_current.get("tls"),
+                    appsecpriv=checks_current.get("appsecpriv"),
+                    rpki=checks_current.get("rpki"),
+                )
     except IndexError:
-        # one of the test results is not yet related to a report,
-        # create one
-        report = create_report(addr, ipv6, dnssec, tls, appsecpriv, rpki)
+        # one of the test results is not yet related to a report, create one
+        report = create_report(
+            addr,
+            ipv6=checks_current.get("ipv6"),
+            dnssec=checks_current.get("dnssec"),
+            tls=checks_current.get("tls"),
+            appsecpriv=checks_current.get("appsecpriv"),
+            rpki=checks_current.get("rpki"),
+        )
+
     return HttpResponseRedirect(f"/site/{addr}/{report.id}/")
 
 
