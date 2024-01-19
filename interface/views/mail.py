@@ -33,6 +33,7 @@ from interface.views.shared import (
     redirect_invalid_domain,
     update_report_with_registrar_and_score,
 )
+from internetnl import log
 
 regex_mailaddr = (
     r"([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" "(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)"
@@ -135,15 +136,15 @@ def resultscurrent(request, mailaddr):
     # Names of the tests in the checks_current dictionary must be the same as the
     try:
         if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-            checks_current['ipv6'] = MailTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["ipv6"] = MailTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-            checks_current['dnssec'] = MailTestDnssec.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["dnssec"] = MailTestDnssec.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-            checks_current['tls'] = MailTestTls.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["tls"] = MailTestTls.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
-            checks_current['rpki'] = MailTestRpki.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["rpki"] = MailTestRpki.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_MAIL:
-            checks_current['auth'] = MailTestAuth.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["auth"] = MailTestAuth.objects.filter(domain=addr).order_by("-id")[0]
     except IndexError:
         log.exception("Test not complete")
         # Domain not tested, go back to start test
@@ -156,25 +157,26 @@ def resultscurrent(request, mailaddr):
         report = first_check.mailtestreport_set.order_by("-id")[0]
         # make sure that all the checks are assigned to the same report_id
         # and create a new report if needed.
-        for check_type, check in checks_current.items():
-            if not report.id == check.mailtestreport_set.order_by("-id")[0].id:
+        for check in checks_current.values():
+            if report.id != check.mailtestreport_set.order_by("-id")[0].id:
                 # create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
                 report = create_report(
-                    addr,   # domain
-                    ipv6=checks_current.get('ipv6'),
-                    dnssec=checks_current.get('dnssec'), 
-                    tls=checks_current.get('tls'),
-                    auth=checks_current.get('auth'),
-                    rpki=checks_current.get('rpki'))
+                    addr,  # domain
+                    ipv6=checks_current.get("ipv6"),
+                    dnssec=checks_current.get("dnssec"),
+                    tls=checks_current.get("tls"),
+                    auth=checks_current.get("auth"),
+                    rpki=checks_current.get("rpki"),
+                )
     except IndexError:
         # one of the test results is not yet related to a report, create one
         report = create_report(
-            addr, 
-            ipv6=checks_current.get('ipv6'),
-            dnssec=checks_current.get('dnssec'), 
-            tls=checks_current.get('tls'),
-            auth=checks_current.get('auth'),
-            rpki=checks_current.get('rpki')
+            addr,
+            ipv6=checks_current.get("ipv6"),
+            dnssec=checks_current.get("dnssec"),
+            tls=checks_current.get("tls"),
+            auth=checks_current.get("auth"),
+            rpki=checks_current.get("rpki"),
         )
 
     return HttpResponseRedirect(f"/mail/{addr}/{report.id}/")

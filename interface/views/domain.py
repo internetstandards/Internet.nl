@@ -134,15 +134,17 @@ def resultscurrent(request, dname):
     # Names of the tests in the checks_current dictionary must be the same as the
     try:
         if settings.INTERNET_NL_CHECK_SUPPORT_IPV6:
-            checks_current['ipv6'] = DomainTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["ipv6"] = DomainTestIpv6.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
-            checks_current['dnssec'] = DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None).order_by("-id")[0]
+            checks_current["dnssec"] = DomainTestDnssec.objects.filter(domain=addr, maildomain_id=None).order_by("-id")[
+                0
+            ]
         if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-            checks_current['tls'] = WebTestTls.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["tls"] = WebTestTls.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_APPSECPRIV:
-            checks_current['appsecpriv'] = WebTestAppsecpriv.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["appsecpriv"] = WebTestAppsecpriv.objects.filter(domain=addr).order_by("-id")[0]
         if settings.INTERNET_NL_CHECK_SUPPORT_RPKI:
-            checks_current['rpki'] = WebTestRpki.objects.filter(domain=addr).order_by("-id")[0]
+            checks_current["rpki"] = WebTestRpki.objects.filter(domain=addr).order_by("-id")[0]
 
     except IndexError:
         log.exception("Test not complete")
@@ -156,25 +158,26 @@ def resultscurrent(request, dname):
         report = first_check.domaintestreport_set.order_by("-id")[0]
         # make sure that all the checks are assigned to the same report_id
         # and create a new report if needed.
-        for check_type, check in checks_current.items():
-            if not report.id == check.domaintestreport_set.order_by("-id")[0].id:
+        for check in checks_current.values():
+            if report.id != check.domaintestreport_set.order_by("-id")[0].id:
                 # create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
                 report = create_report(
-                    addr,   # domain
-                    ipv6=checks_current.get('ipv6'),
-                    dnssec=checks_current.get('dnssec'), 
-                    tls=checks_current.get('tls'),
-                    appsecpriv=checks_current.get('appsecpriv'),
-                    rpki=checks_current.get('rpki'))
+                    addr,  # domain
+                    ipv6=checks_current.get("ipv6"),
+                    dnssec=checks_current.get("dnssec"),
+                    tls=checks_current.get("tls"),
+                    appsecpriv=checks_current.get("appsecpriv"),
+                    rpki=checks_current.get("rpki"),
+                )
     except IndexError:
         # one of the test results is not yet related to a report, create one
         report = create_report(
-            addr, 
-            ipv6=checks_current.get('ipv6'),
-            dnssec=checks_current.get('dnssec'), 
-            tls=checks_current.get('tls'),
-            appsecpriv=checks_current.get('appsecpriv'),
-            rpki=checks_current.get('rpki')
+            addr,
+            ipv6=checks_current.get("ipv6"),
+            dnssec=checks_current.get("dnssec"),
+            tls=checks_current.get("tls"),
+            appsecpriv=checks_current.get("appsecpriv"),
+            rpki=checks_current.get("rpki"),
         )
 
     return HttpResponseRedirect(f"/site/{addr}/{report.id}/")
