@@ -1278,7 +1278,7 @@ def check_mail_tls(server, dane_cb_data, task):
         scan_commands=SSLYZE_SCAN_COMMANDS,
     )
     try:
-        all_suites, result = run_sslyze(scan, dane_cb_data, connection_limit=25)
+        all_suites, result = run_sslyze(scan, dane_cb_data, connection_limit=1)
     except TLSException as exc:
         log.info(f"sslyze scan for mail on {server} failed: {exc}")
         return dict(server_reachable=False, tls_enabled=False)
