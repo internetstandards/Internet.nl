@@ -12,7 +12,6 @@ import eventlet
 import requests
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.utils.log import get_task_logger
 from cryptography.hazmat.backends.openssl import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import Encoding
@@ -80,7 +79,6 @@ from checks.tasks.tls_constants import (
     CERT_EC_CURVES_GOOD,
     CERT_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
-    SSLYZE_SCAN_COMMANDS,
 )
 from checks.tasks.shared import (
     aggregate_subreports,
@@ -109,6 +107,20 @@ else:
 # Maximum number of tries on failure to establish a connection.
 # Useful on one-time errors on SMTP.
 MAX_TRIES = 3
+
+
+SSLYZE_SCAN_COMMANDS = {
+    ScanCommand.SSL_2_0_CIPHER_SUITES,
+    ScanCommand.SSL_3_0_CIPHER_SUITES,
+    ScanCommand.TLS_1_0_CIPHER_SUITES,
+    ScanCommand.TLS_1_1_CIPHER_SUITES,
+    ScanCommand.TLS_1_2_CIPHER_SUITES,
+    ScanCommand.TLS_1_3_CIPHER_SUITES,
+    ScanCommand.TLS_COMPRESSION,
+    ScanCommand.TLS_1_3_EARLY_DATA,
+    ScanCommand.SESSION_RENEGOTIATION,
+    ScanCommand.ELLIPTIC_CURVES,
+}
 
 
 root_fingerprints = None
@@ -1008,25 +1020,25 @@ def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     return ("cert", results)
 
 
-def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kwargs):
+def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kwargs):
     """
     Perform certificate checks.
 
     """
     # TODO: this does use our trust store
-    print(f"starting sslyze scan for {url} {af_ip_pair} {mode} {dane_cb_data}")
+    log.info(f"starting cert sslyze scan for {hostname} {af_ip_pair} {mode}")
     if mode == ChecksMode.WEB:
         port = 443
         scan = ServerScanRequest(
-            server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1], port=port),
+            server_location=ServerNetworkLocation(hostname=hostname, ip_address=af_ip_pair[1], port=port),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
         )
     elif mode == ChecksMode.MAIL:
         port = 25
         scan = ServerScanRequest(
-            server_location=ServerNetworkLocation(hostname=url, port=port),
+            server_location=ServerNetworkLocation(hostname=hostname, port=port),
             network_configuration=ServerNetworkConfiguration(
-                tls_server_name_indication=url, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
+                tls_server_name_indication=hostname, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
         )
@@ -1037,7 +1049,8 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
     result = next(scanner.get_results())
     print(f"scan status result {result.scan_status}")
     if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-        raise OSError
+        log.info(f"sslyze scan for mail on {hostname} failed: no connectivity")
+        return dict(tls_cert=False)
 
         # elif mode == ChecksMode.MAIL:
         #     debug_cert_chain = DebugCertChainMail
@@ -1112,7 +1125,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, dane_cb_data=None, *args, **kw
         chain_str.append(get_common_name(cert))
 
     dane_results = dane(
-        url,
+        hostname,
         port,
         cert_deployment.received_certificate_chain,
         task,

@@ -75,19 +75,6 @@ CIPHERS_PHASE_OUT = [
 ]
 
 
-SSLYZE_SCAN_COMMANDS = {
-    ScanCommand.SSL_2_0_CIPHER_SUITES,
-    ScanCommand.SSL_3_0_CIPHER_SUITES,
-    ScanCommand.TLS_1_0_CIPHER_SUITES,
-    ScanCommand.TLS_1_1_CIPHER_SUITES,
-    ScanCommand.TLS_1_2_CIPHER_SUITES,
-    ScanCommand.TLS_1_3_CIPHER_SUITES,
-    ScanCommand.TLS_COMPRESSION,
-    ScanCommand.TLS_1_3_EARLY_DATA,
-    ScanCommand.SESSION_RENEGOTIATION,
-    ScanCommand.ELLIPTIC_CURVES,
-}
-
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = int(
     (
