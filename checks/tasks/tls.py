@@ -1351,6 +1351,7 @@ def check_mail_tls(server, dane_cb_data, task):
         kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
     results.update(cert_results)
+    log.debug(f"sslyze scan for mail on {server} result: {result}")
     return results
 
 
@@ -1392,7 +1393,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         if True  # TODO: any([d.ocsp_response_is_trusted for d in result.scan_result.certificate_info.result.certificate_deployments])
         else OcspStatus.ok
     )
-    return dict(
+    probe_result = dict(
         tls_enabled=True,
         prots_bad=prots_bad,
         prots_phase_out=prots_phase_out,
@@ -1448,6 +1449,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         kex_hash_func=KexHashFuncStatus.good,
         kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
+    log.debug(f"sslyze scan for web on {url} result: {probe_result}")
+    return probe_result
 
 
 def run_sslyze(scan, dane_cb_data, connection_limit):
