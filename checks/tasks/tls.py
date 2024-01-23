@@ -68,14 +68,14 @@ from checks.tasks.tls_constants import (
     FFDHE_GENERATOR,
     FFDHE2048_PRIME,
     FFDHE_SUFFICIENT_PRIMES,
-    SIGALG_GOOD,
-    EC_PHASE_OUT,
-    EC_GOOD,
+    CERT_SIGALG_GOOD,
+    FS_EC_PHASE_OUT,
+    FS_EC_GOOD,
     CIPHERS_PHASE_OUT,
     CIPHERS_GOOD,
     CIPHERS_SUFFICIENT,
-    DH_MIN_KEY_SIZE,
-    ECDH_MIN_KEY_SIZE,
+    FS_DH_MIN_KEY_SIZE,
+    FS_ECDH_MIN_KEY_SIZE,
     CERT_RSA_DSA_MIN_KEY_SIZE,
     CERT_CURVE_MIN_KEY_SIZE,
     CERT_EC_CURVES_GOOD,
@@ -1106,7 +1106,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     for cert in cert_deployment.received_certificate_chain:
         if not is_root_cert(cert):
             sigalg = cert.signature_algorithm_oid
-            if sigalg not in SIGALG_GOOD:
+            if sigalg not in CERT_SIGALG_GOOD:
                 sigalg_bad[get_common_name(cert)] = sigalg._name
                 sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
 
@@ -1234,23 +1234,21 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # Always try to get cached results (within the allowed time frame) to
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
-        # TODO: re-enable this cache
-        # TODO: limited to 1 mailserver right now
-        for server, dane_cb_data, _ in mailservers[:1]:
+        for server, dane_cb_data, _ in mailservers:
             results[server] = check_mail_tls(server, dane_cb_data, task)
-        # while timer() - start < cache_ttl and not all(results.values()) > 0:
-        #     for server, dane_cb_data, _ in mailservers:
-        #         if results[server]:
-        #             continue
-        #         # Check if we already have cached results.
-        #         cache_id = redis_id.mail_starttls.id.format(server)
-        #         if cache.add(cache_id, False, cache_ttl):
-        #             # We do not have cached results, get them and cache them.
-        #             results[server] = check_mail_tls(server, dane_cb_data, task)
-        #             cache.set(cache_id, results[server], cache_ttl)
-        #         else:
-        #             results[server] = cache.get(cache_id, False)
-        #     time.sleep(1)
+        while timer() - start < cache_ttl and not all(results.values()) > 0:
+            for server, dane_cb_data, _ in mailservers:
+                if results[server]:
+                    continue
+                # Check if we already have cached results.
+                cache_id = redis_id.mail_starttls.id.format(server)
+                if cache.add(cache_id, False, cache_ttl):
+                    # We do not have cached results, get them and cache them.
+                    results[server] = check_mail_tls(server, dane_cb_data, task)
+                    cache.set(cache_id, results[server], cache_ttl)
+                else:
+                    results[server] = cache.get(cache_id, False)
+            time.sleep(1)
         for server in results:
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
@@ -1522,16 +1520,16 @@ def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
         if not key:
             continue
         if isinstance(key, EcDhEphemeralKeyInfo):
-            if key.size < ECDH_MIN_KEY_SIZE:
+            if key.size < FS_ECDH_MIN_KEY_SIZE:
                 fs_bad.add(f"ECDH-{key.size}")
-            if key.curve in EC_PHASE_OUT:
+            if key.curve in FS_EC_PHASE_OUT:
                 fs_phase_out.add(f"ECDH-{key.curve_name}")
-            elif key.curve not in EC_GOOD:
+            elif key.curve not in FS_EC_GOOD:
                 print(key.curve)
-                print(EC_GOOD)
+                print(FS_EC_GOOD)
                 fs_bad.add(f"ECDH-{key.curve_name}")
         if isinstance(key, DhEphemeralKeyInfo):
-            if key.size < DH_MIN_KEY_SIZE:
+            if key.size < FS_DH_MIN_KEY_SIZE:
                 fs_bad.add(f"DH-{key.size}")
             if key.generator == FFDHE_GENERATOR:
                 if key.prime == FFDHE2048_PRIME:

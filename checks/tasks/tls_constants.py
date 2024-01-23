@@ -4,7 +4,7 @@ from nassl.ephemeral_key_info import OpenSslEcNidEnum
 from sslyze import ScanCommand
 
 # NCSC guideline B3-2
-SIGALG_GOOD = [
+CERT_SIGALG_GOOD = [
     SignatureAlgorithmOID.RSA_WITH_SHA256,
     SignatureAlgorithmOID.RSA_WITH_SHA384,
     SignatureAlgorithmOID.RSA_WITH_SHA512,
@@ -19,17 +19,17 @@ CERT_CURVES_GOOD = [x25519.X25519PublicKey, x448.X448PublicKey]
 CERT_EC_CURVES_GOOD = [ec.SECP384R1, ec.SECP256R1]
 CERT_EC_CURVES_PHASE_OUT = [ec.SECP224R1]
 
-ECDH_MIN_KEY_SIZE = 224
-DH_MIN_KEY_SIZE = 2024
+FS_ECDH_MIN_KEY_SIZE = 224
+FS_DH_MIN_KEY_SIZE = 2024
 
-EC_GOOD = [
+FS_EC_GOOD = [
     OpenSslEcNidEnum.SECP521R1,
     OpenSslEcNidEnum.SECP384R1,
     OpenSslEcNidEnum.SECP256R1,
     OpenSslEcNidEnum.X25519,
     OpenSslEcNidEnum.X448,
 ]
-EC_PHASE_OUT = [
+FS_EC_PHASE_OUT = [
     OpenSslEcNidEnum.SECP224R1,
 ]
 
