@@ -4,6 +4,7 @@ import logging
 import time
 from binascii import hexlify
 from enum import Enum
+from pathlib import Path
 from timeit import default_timer as timer
 from typing import List
 from urllib.parse import urlparse
@@ -22,6 +23,7 @@ from cryptography.x509 import (
     Certificate,
 )
 from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum
 from sslyze import (
@@ -33,7 +35,7 @@ from sslyze import (
     TlsVersionEnum,
     CipherSuiteAcceptedByServer,
     ServerNetworkConfiguration,
-    ProtocolWithOpportunisticTlsEnum,
+    ProtocolWithOpportunisticTlsEnum, ScanCommandsExtraArguments, CertificateInfoExtraArgument,
 )
 
 from sslyze.plugins.certificate_info._certificate_utils import (
@@ -1032,6 +1034,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
         scan = ServerScanRequest(
             server_location=ServerNetworkLocation(hostname=hostname, ip_address=af_ip_pair[1], port=port),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
+            scan_commands_extra_arguments=ScanCommandsExtraArguments(certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))),
         )
     elif mode == ChecksMode.MAIL:
         port = 25
@@ -1041,48 +1044,36 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 tls_server_name_indication=hostname, tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
+            scan_commands_extra_arguments=ScanCommandsExtraArguments(
+                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))),
         )
     else:
         raise ValueError
     scanner = Scanner(per_server_concurrent_connections_limit=1)
     scanner.queue_scans([scan])
     result = next(scanner.get_results())
-    print(f"scan status result {result.scan_status}")
+    log.debug(f"scan status result {result.scan_status}")
     if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-        log.info(f"sslyze scan for mail on {hostname} failed: no connectivity")
+        log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: no connectivity")
         return dict(tls_cert=False)
 
-        # elif mode == ChecksMode.MAIL:
-        #     debug_cert_chain = DebugCertChainMail
-        #     conn_wrapper = SMTPConnection
+    if mode == ChecksMode.WEB:
+        trusted_score_good = scoring.WEB_TLS_TRUSTED_GOOD
+        trusted_score_bad = scoring.WEB_TLS_TRUSTED_BAD
+        hostmatch_score_good = scoring.WEB_TLS_HOSTMATCH_GOOD
+        hostmatch_score_bad = scoring.WEB_TLS_HOSTMATCH_BAD
+    elif mode == ChecksMode.MAIL:
+        trusted_score_good = scoring.MAIL_TLS_TRUSTED_GOOD
+        trusted_score_bad = scoring.MAIL_TLS_TRUSTED_BAD
+        hostmatch_score_good = scoring.MAIL_TLS_HOSTMATCH_GOOD
+        hostmatch_score_bad = scoring.MAIL_TLS_HOSTMATCH_BAD
+    else:
+        raise ValueError(f"Unknown checks mode: {mode}")
+
         #     conn_wrapper_args["server_name"] = url
         #     conn_wrapper_args["send_SNI"] = starttls_details.dane_cb_data.get(
         #         "data"
         #     ) and starttls_details.dane_cb_data.get("secure")
-
-        #
-        # if (
-        #     not starttls_details
-        #     or starttls_details.debug_chain is None
-        #     or starttls_details.trusted_score is None
-        #     or starttls_details.conn_port is None
-        # ):
-        #     # All the checks inside the smtp_starttls test are done in series.
-        #     # If we have all the certificate related information we need from a
-        #     # previous check, skip this connection.
-        #     # check chain validity (sort of NCSC guideline B3-4)
-        #
-        #     with conn_wrapper(**conn_wrapper_args).conn as conn:
-        #         with ConnectionChecker(conn, mode) as checker:
-        #             verify_score, verify_result = checker.check_cert_trust()
-        #             debug_chain = debug_cert_chain(conn.get_peer_certificate_chain())
-        #             conn_port = conn.port
-        # else:
-        #     verify_score, verify_result = starttls_details.trusted_score
-        #     debug_chain = starttls_details.debug_chain
-        #     conn_port = starttls_details.conn_port
-
-    # TODO: check trust
 
     if not result.scan_result.certificate_info.result.certificate_deployments:
         return dict(tls_cert=False)
@@ -1090,11 +1081,10 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     cert_deployment = result.scan_result.certificate_info.result.certificate_deployments[0]
     leaf_cert = cert_deployment.received_certificate_chain[0]
 
-    # TODO: use the right scoring set
     hostmatch_bad = []
-    hostmatch_score = scoring.WEB_TLS_HOSTMATCH_GOOD
+    hostmatch_score = hostmatch_score_good
     if not cert_deployment.leaf_certificate_subject_matches_hostname:
-        hostmatch_score = scoring.WEB_TLS_HOSTMATCH_BAD
+        hostmatch_score = hostmatch_score_bad
 
         # Extract all names from a certificate, taken from sslyze' _cert_chain_analyzer.py
         subj_alt_name_ext = parse_subject_alternative_name_extension(leaf_cert)
@@ -1106,19 +1096,20 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
         }
         hostmatch_bad = certificate_names
 
-    pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain)
+    trusted_score = trusted_score_good if cert_deployment.verified_certificate_chain and cert_deployment.received_chain_has_valid_order else trusted_score_bad
+
+    pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain, mode)
 
     # NCSC guideline B3-2
     sigalg_bad = {}
     sigalg_score = scoring.WEB_TLS_SIGNATURE_GOOD
     for cert in cert_deployment.received_certificate_chain:
-        # Only validate signarture of non-root certificates
         if not is_root_cert(cert):
             sigalg = cert.signature_algorithm_oid
-            # Check oids
             if sigalg not in SIGALG_GOOD:
                 sigalg_bad[get_common_name(cert)] = sigalg._name
                 sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
+
 
     chain_str = []
     for cert in cert_deployment.received_certificate_chain:
@@ -1139,8 +1130,9 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     results = dict(
         tls_cert=True,
         chain=chain_str,
-        trusted=scoring.WEB_TLS_TRUSTED_GOOD,
-        trusted_score=scoring.MAIL_TLS_TRUSTED_GOOD,
+        # The trusted value is originally an errno from the validation call
+        trusted=0 if trusted_score == scoring.MAIL_TLS_TRUSTED_GOOD else 1,
+        trusted_score=trusted_score,
         pubkey_bad=pubkey_bad,
         pubkey_phase_out=pubkey_phase_out,
         pubkey_score=pubkey_score,
@@ -1154,12 +1146,19 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     return results
 
 
-def check_pubkey(certificates: List[Certificate]):
+def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     # NCSC guidelines B3-3, B5-1
     bad_pubkey = []
     phase_out_pubkey = []
-    # TODO: use mail score where appropriate
-    pubkey_score = scoring.WEB_TLS_PUBKEY_GOOD
+    if mode == ChecksMode.WEB:
+        pubkey_score_good = scoring.WEB_TLS_PUBKEY_GOOD
+        pubkey_score_bad = scoring.WEB_TLS_PUBKEY_BAD
+    elif mode == ChecksMode.MAIL:
+        pubkey_score_good = scoring.MAIL_TLS_PUBKEY_GOOD
+        pubkey_score_bad = scoring.MAIL_TLS_PUBKEY_BAD
+    else:
+        raise ValueError(f"Unknown checks mode: {mode}")
+    pubkey_score = pubkey_score_good
     for cert in certificates:
         common_name = get_common_name(cert)
         public_key = cert.public_key()
@@ -1189,7 +1188,7 @@ def check_pubkey(certificates: List[Certificate]):
                 phase_out_pubkey.append(message)
             else:
                 bad_pubkey.append(message)
-                pubkey_score = scoring.WEB_TLS_PUBKEY_BAD
+                pubkey_score = pubkey_score_bad
     return pubkey_score, bad_pubkey, phase_out_pubkey
 
 
@@ -1260,7 +1259,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         for server in results:
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
-    return ("smtp_starttls", results)
+    return "smtp_starttls", results
 
 
 def check_mail_tls(server, dane_cb_data, task):
@@ -1373,7 +1372,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     scan = ServerScanRequest(
         server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
-        scan_commands=SSLYZE_SCAN_COMMANDS,
+        scan_commands=SSLYZE_SCAN_COMMANDS | {ScanCommand.CERTIFICATE_INFO},
+        scan_commands_extra_arguments=ScanCommandsExtraArguments(
+            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))),
     )
     try:
         all_suites, result = run_sslyze(scan, None, connection_limit=25)
@@ -1388,11 +1389,12 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
     ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
 
-    ocsp_status = (
-        OcspStatus.good
-        if True  # TODO: any([d.ocsp_response_is_trusted for d in result.scan_result.certificate_info.result.certificate_deployments])
-        else OcspStatus.ok
-    )
+    ocsp_status = OcspStatus.ok
+    if any([d.ocsp_response_is_trusted is True for d in result.scan_result.certificate_info.result.certificate_deployments]):
+        ocsp_status = OcspStatus.good
+    elif any([d.ocsp_response_is_trusted is False for d in result.scan_result.certificate_info.result.certificate_deployments]):
+        ocsp_status = OcspStatus.not_trusted
+
     probe_result = dict(
         tls_enabled=True,
         prots_bad=prots_bad,
@@ -1440,7 +1442,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        # TODO make sure this uses the same trust store
         ocsp_stapling=ocsp_status,
         ocsp_stapling_score=(
             scoring.WEB_TLS_OCSP_STAPLING_GOOD if ocsp_status == OcspStatus.good else scoring.WEB_TLS_OCSP_STAPLING_BAD
