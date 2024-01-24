@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 import eventlet
 import requests
+from OpenSSL.SSL import X509VerificationCodes
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from cryptography.hazmat.backends.openssl import rsa
@@ -1138,7 +1139,9 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
         tls_cert=True,
         chain=chain_str,
         # The trusted value is originally an errno from the validation call
-        trusted=0 if trusted_score == scoring.MAIL_TLS_TRUSTED_GOOD else 1,
+        trusted=0
+        if trusted_score == scoring.MAIL_TLS_TRUSTED_GOOD
+        else X509VerificationCodes.ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY,
         trusted_score=trusted_score,
         pubkey_bad=pubkey_bad,
         pubkey_phase_out=pubkey_phase_out,
