@@ -1,7 +1,6 @@
 import logging
 from typing import Dict, Callable, Optional
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, tls, rpki

@@ -1,6 +1,5 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import logging
 import time
 from binascii import hexlify
 from enum import Enum
@@ -35,7 +34,9 @@ from sslyze import (
     TlsVersionEnum,
     CipherSuiteAcceptedByServer,
     ServerNetworkConfiguration,
-    ProtocolWithOpportunisticTlsEnum, ScanCommandsExtraArguments, CertificateInfoExtraArgument,
+    ProtocolWithOpportunisticTlsEnum,
+    ScanCommandsExtraArguments,
+    CertificateInfoExtraArgument,
 )
 
 from sslyze.plugins.certificate_info._certificate_utils import (
@@ -1034,7 +1035,9 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
         scan = ServerScanRequest(
             server_location=ServerNetworkLocation(hostname=hostname, ip_address=af_ip_pair[1], port=port),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
-            scan_commands_extra_arguments=ScanCommandsExtraArguments(certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))),
+            scan_commands_extra_arguments=ScanCommandsExtraArguments(
+                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
+            ),
         )
     elif mode == ChecksMode.MAIL:
         port = 25
@@ -1045,7 +1048,8 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
             scan_commands_extra_arguments=ScanCommandsExtraArguments(
-                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))),
+                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
+            ),
         )
     else:
         raise ValueError
@@ -1096,7 +1100,11 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
         }
         hostmatch_bad = certificate_names
 
-    trusted_score = trusted_score_good if cert_deployment.verified_certificate_chain and cert_deployment.received_chain_has_valid_order else trusted_score_bad
+    trusted_score = (
+        trusted_score_good
+        if cert_deployment.verified_certificate_chain and cert_deployment.received_chain_has_valid_order
+        else trusted_score_bad
+    )
 
     pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain, mode)
 
@@ -1109,7 +1117,6 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
             if sigalg not in CERT_SIGALG_GOOD:
                 sigalg_bad[get_common_name(cert)] = sigalg._name
                 sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
-
 
     chain_str = []
     for cert in cert_deployment.received_certificate_chain:
@@ -1372,7 +1379,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
         scan_commands=SSLYZE_SCAN_COMMANDS | {ScanCommand.CERTIFICATE_INFO},
         scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))),
+            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
+        ),
     )
     try:
         all_suites, result = run_sslyze(scan, None, connection_limit=25)
@@ -1388,9 +1396,16 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
 
     ocsp_status = OcspStatus.ok
-    if any([d.ocsp_response_is_trusted is True for d in result.scan_result.certificate_info.result.certificate_deployments]):
+    if any(
+        [d.ocsp_response_is_trusted is True for d in result.scan_result.certificate_info.result.certificate_deployments]
+    ):
         ocsp_status = OcspStatus.good
-    elif any([d.ocsp_response_is_trusted is False for d in result.scan_result.certificate_info.result.certificate_deployments]):
+    elif any(
+        [
+            d.ocsp_response_is_trusted is False
+            for d in result.scan_result.certificate_info.result.certificate_deployments
+        ]
+    ):
         ocsp_status = OcspStatus.not_trusted
 
     probe_result = dict(

@@ -555,8 +555,8 @@ HOF_UPDATE_INTERVAL = 600  # seconds
 color_formatter = {
     "()": "colorlog.ColoredFormatter",
     # to get the name of the logger a message came from, add %(name)s.
-    "format": "%(log_color)s%(asctime)s\t%(name)s %(levelname)-8s - %(filename)s:%(lineno)-4s - " "%(funcName)s - %(message)s",
-
+    "format": "%(log_color)s%(asctime)s\t%(name)s %(levelname)-8s - %(filename)s:%(lineno)-4s - "
+    "%(funcName)s - %(message)s",
     "datefmt": "%Y-%m-%d %H:%M:%S",
     "log_colors": {
         # "DEBUG": "white",

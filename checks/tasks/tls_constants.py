@@ -1,7 +1,6 @@
 from cryptography.hazmat._oid import SignatureAlgorithmOID
 from cryptography.hazmat.primitives.asymmetric import x25519, x448, ec
 from nassl.ephemeral_key_info import OpenSslEcNidEnum
-from sslyze import ScanCommand
 
 # NCSC guideline B3-2
 CERT_SIGALG_GOOD = [
