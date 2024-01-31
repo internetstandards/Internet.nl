@@ -660,7 +660,7 @@ def http_fetch(
                 )
             conn.putrequest(http_method, path, skip_accept_encoding=True)
             # Must specify User-Agent. Some webservers return error otherwise.
-            conn.putheader("User-Agent", "internetnl/1.0")
+            conn.putheader("User-Agent", settings.USER_AGENT)
             # Set headers (eg for HTTP-compression test)
             for k, v in put_headers:
                 conn.putheader(k, v)
