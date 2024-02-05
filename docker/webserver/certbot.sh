@@ -105,4 +105,4 @@ configure_letsencrypt() {
 # check certificates for renewal twice a day, make sure the schedule is a moving window so we
 # don't accidentally fall in line with the busiest time (eg: 00:00) and get errors due to ACME
 # servers being overloaded at that moment
-while sleep 11h; do certbot renew --post-hook "nginx -s reload"; done&
+while sleep 11h; do /opt/certbot/bin/certbot renew --post-hook "nginx -s reload"; done&
