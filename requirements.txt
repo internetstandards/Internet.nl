@@ -56,7 +56,7 @@ colorlog==6.7.0
     # via -r requirements.in
 cryptography==38.0.4
     # via -r requirements.in
-django==3.2.23
+django==3.2.24
     # via
     #   -r requirements.in
     #   django-bleach
