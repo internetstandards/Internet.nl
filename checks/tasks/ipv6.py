@@ -262,6 +262,7 @@ def callback(results, addr, parent, parent_name, category):
         elif testname == "web":
             parent.web_simhash_score = result.get("simhash_score")
             web_simhash_distance = result.get("simhash_distance")
+            simhash_status_code = result.get("simhash_status_code")
             parent.web_simhash_distance = web_simhash_distance
             parent.web_score = result.get("score")
 
@@ -276,8 +277,11 @@ def callback(results, addr, parent, parent_name, category):
                     category.subtests["web_reach"].result_good()
 
                 if len(good_conn) > 0:
-                    if web_simhash_distance <= settings.SIMHASH_MAX and web_simhash_distance >= 0:
-                        category.subtests["web_ipv46"].result_good()
+                    if settings.SIMHASH_MAX >= web_simhash_distance >= 0:
+                        if 200 <= simhash_status_code <= 400:
+                            category.subtests["web_ipv46"].result_good()
+                        else:
+                            category.subtests["web_ipv46"].result_notice_status_code()
                     elif web_simhash_distance == SIMHASH_NOT_CALCULABLE:
                         category.subtests["web_ipv46"].result_bad()
                     elif web_simhash_distance >= 0:
@@ -584,18 +588,23 @@ def simhash(url, task=None):
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
             if v4_response:
-                return simhash_score, distance
+                return simhash_score, distance, None
 
-    if not v4_response:
+    if v4_response is None:
         # FAIL: Could not establish a connection on both addresses.
-        return simhash_score, distance
+        return simhash_score, distance, v6_response.status_code
+
+    # Regardless of content, status code must be identical (#1267)
+    if v4_response.status_code != v6_response.status_code:
+        # FAIL: Could not establish a connection on both addresses.
+        return scoring.WEB_IPV6_WS_SIMHASH_OK, distance, v6_response.status_code
 
     try:
         html_v4 = response_content_chunk(v4_response, SIMHASH_MAX_RESPONSE_SIZE)
         html_v6 = response_content_chunk(v6_response, SIMHASH_MAX_RESPONSE_SIZE)
     except (OSError, IOError) as exc:
         log.debug("simhash encountered exception while reading response: {exc}", exc_info=exc)
-        return simhash_score, distance
+        return simhash_score, distance, v6_response.status_code
 
     for html, response in (html_v4, v4_response), (html_v6, v6_response):
         content_length = response.headers.get("content-length", "")
@@ -609,7 +618,7 @@ def simhash(url, task=None):
     if distance <= settings.SIMHASH_MAX:
         simhash_score = scoring.WEB_IPV6_WS_SIMHASH_OK
 
-    return simhash_score, distance
+    return simhash_score, distance, v6_response.status_code
 
 
 def do_web(self, url, *args, **kwargs):
@@ -618,6 +627,8 @@ def do_web(self, url, *args, **kwargs):
         domain = []
         simhash_score = scoring.WEB_IPV6_WS_SIMHASH_FAIL
         simhash_distance = SIMHASH_NOT_CALCULABLE
+        simhash_status_code = None
+
         score = scoring.WEB_IPV6_WS_CONN_FAIL
 
         domain = get_domain_results(
@@ -641,7 +652,7 @@ def do_web(self, url, *args, **kwargs):
             simhash_score = scoring.WEB_IPV6_WS_SIMHASH_OK
             simhash_distance = -1
         elif len(v6_good) > 0 and len(v4_good) > 0 and len(v6_conn_diff) == 0:
-            simhash_score, simhash_distance = simhash(url, task=self)
+            simhash_score, simhash_distance, simhash_status_code = simhash(url, task=self)
 
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded.")
@@ -656,4 +667,13 @@ def do_web(self, url, *args, **kwargs):
                 score=scoring.WEB_IPV6_WS_CONN_FAIL,
             )
 
-    return ("web", dict(domains=[domain], simhash_score=simhash_score, simhash_distance=simhash_distance, score=score))
+    return (
+        "web",
+        dict(
+            domains=[domain],
+            simhash_score=simhash_score,
+            simhash_distance=simhash_distance,
+            simhash_status_code=simhash_status_code,
+            score=score,
+        ),
+    )
