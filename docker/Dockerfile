@@ -28,7 +28,10 @@ RUN apt update && \
       # TODO: swig3.0 hard requirements? get from oldstable
       swig \
       # nassl dependencies
-      python3-setuptools
+      python3-setuptools \
+      # unbound dependencies
+      flex \
+      bison
 
 FROM build-deps as build-unbound
 ARG PYTHON_VERSION
