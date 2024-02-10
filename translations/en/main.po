@@ -588,6 +588,25 @@ msgstr ""
 "your SPF record points to an insufficiently strict SPF policy or a non-"
 "existing SPF record."
 
+# TLS-RPT
+msgid "detail mail auth tlsrpt exp"
+msgstr ""
+"We check if your domain has a TLS-RPT record. A receiving mail server can use the addresses in your TLS record to TODO\n"
+"\n"
+"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
+
+msgid "detail mail auth tlsrpt label"
+msgstr "TLS-RPT existence"
+
+msgid "detail mail auth tlsrpt tech table"
+msgstr "TLS-RPT record"
+
+msgid "detail mail auth tlsrpt verdict bad"
+msgstr "Your domain does *not* have a TLS-RPS record."
+
+msgid "detail mail auth tlsrpt verdict good"
+msgstr "Your domain has a TLS-RPT record."
+
 msgid "detail mail dnssec exists exp"
 msgstr ""
 "We check if your domain, more specifically its SOA record, is DNSSEC signed. With a DNSSEC signature senders who validate domain signatures can verify the authenticity of the DNS reply that contains your mail server domains (MX). This prevents an attacker from manipulating the DNS answer in order to redirect mails sent to you to the attacker's mailserver domain.\n"

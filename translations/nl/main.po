@@ -592,6 +592,26 @@ msgstr ""
 "record verwijst naar een onvoldoende strikte SPF-policy of naar een niet-"
 "bestaand SPF-record."
 
+# TLS-RPT
+msgid "detail mail auth tlsrpt exp"
+msgstr ""
+"We check if your domain has a TLS-RPT record. A receiving mail server can use the address in your TLS-RPT record to TODO.\n"
+"\n"
+"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
+
+msgid "detail mail auth tlsrpt label"
+msgstr "TLS-RPT aanwezigheid"
+
+msgid "detail mail auth tlsrpt tech table"
+msgstr "TLS-RPT-record"
+
+msgid "detail mail auth tlsrpt verdict bad"
+msgstr "Je domeinnaam heeft geen geldig TLS-RPT-record."
+
+msgid "detail mail auth tlsrpt verdict good"
+msgstr "Je domein heeft een TLS-RPT-record."
+
+
 msgid "detail mail dnssec exists exp"
 msgstr ""
 "We testen of de domeinnaam in je e-mailadres, meer specifiek het SOA-record, ondertekend is met DNSSEC. De handtekening zorgt ervoor dat een verzender, die domeinhandtekeningen controleert, op een betrouwbare wijze jouw mailserverdomeinen (MX) kan opvragen. Dit voorkomt dat een aanvaller het antwoord manipuleert en aan jou gerichte mail omleidt naar een mailserverdomein dat onder controle is van de aanvaller.\n"
