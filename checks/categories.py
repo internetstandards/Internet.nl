@@ -2179,7 +2179,7 @@ class MailAuthSpf(Subtest):
             label="detail mail auth spf label",
             explanation="detail mail auth spf exp",
             tech_string="detail mail auth spf tech table",
-            worst_status=scoring.MAIL_AUTH_TLSRPT_WORST_STATUS_WORST_STATUS,
+            worst_status=scoring.MAIL_AUTH_TLSRPT_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_TLSRPT_PASS,
             model_score_field="spf_score",
         )
