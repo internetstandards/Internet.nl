@@ -2263,12 +2263,12 @@ class MailAuthTlsRptExists(Subtest):
 
     def result_good(self, tech_data):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail auth spf verdict good"
+        self.verdict = "detail mail auth tlsrpt verdict good"
         self.tech_data = [[tech_data]]
 
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail auth spf verdict bad"
+        self.verdict = "detail mail auth tlsrp verdict bad"
         if tech_data:
             # More than one spf record. Show the records.
             self.tech_data = [[tech_data]]

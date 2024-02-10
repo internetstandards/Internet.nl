@@ -217,6 +217,12 @@ def callback(results, addr, category):
 
             else:
                 subtests["spf"].result_bad(spf_record)
+        elif testname == "tlsrpt":
+            tlsrpt_available = result.get("available")
+            tlsrpt_record = result.get("record")
+            tlsrpt_score = result.get("score")
+            # TODO: Pass results to mtauth and subtests
+            print("This is the callback for TLS-RPT.")
 
     if skip_dkim_for_non_sending_domain(mtauth):
         mtauth.dkim_score = scoring.MAIL_AUTH_DKIM_PASS
