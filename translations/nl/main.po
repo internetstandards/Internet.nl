@@ -3864,7 +3864,7 @@ msgstr ""
 
 #, md-format
 msgid "faqs mailauth title"
-msgstr "Protectie tegen e-mailphishing (DMARC, DKIM en SPF)"
+msgstr "Protectie tegen e-mailphishing (DMARC, DKIM, SPF en TLS-RPT)"
 
 #, md-format
 msgid "faqs report score content"

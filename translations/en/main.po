@@ -3840,7 +3840,7 @@ msgstr ""
 
 #, md-format
 msgid "faqs mailauth title"
-msgstr "Protection against email phishing (DMARC, DKIM and SPF)"
+msgstr "Protection against email phishing (DMARC, DKIM, SPF, and TLS-RPT)"
 
 #, md-format
 msgid "faqs report score content"
