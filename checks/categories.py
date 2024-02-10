@@ -2179,8 +2179,8 @@ class MailAuthSpf(Subtest):
             label="detail mail auth spf label",
             explanation="detail mail auth spf exp",
             tech_string="detail mail auth spf tech table",
-            worst_status=scoring.MAIL_AUTH_SPF_WORST_STATUS,
-            full_score=scoring.MAIL_AUTH_SPF_PASS,
+            worst_status=scoring.MAIL_AUTH_TLSRPT_WORST_STATUS_WORST_STATUS,
+            full_score=scoring.MAIL_AUTH_TLSRPT_PASS,
             model_score_field="spf_score",
         )
         # Fix for one line, one value data.
@@ -2250,13 +2250,13 @@ class MailAuthSpfPolicy(Subtest):
 class MailAuthTlsRptExists(Subtest):
     def __init__(self):
         super().__init__(
-            name="spf",
+            name="tlsrpt",
             label="detail mail auth tlsrpt label",
             explanation="detail mail auth tlsrpt exp",
             tech_string="detail mail auth tlsrpt tech table",
             worst_status=scoring.MAIL_AUTH_SPF_WORST_STATUS,
             full_score=scoring.MAIL_AUTH_SPF_PASS,
-            model_score_field="spf_score",
+            model_score_field="tlsrpt_score",
         )
         # Fix for one line, one value data.
         self.tech_data = [[self.tech_data]]
