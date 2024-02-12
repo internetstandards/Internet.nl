@@ -195,14 +195,12 @@ def get_user_from_request(request):
     DB) return the relevant user object from the DB.
 
     """
-    user = None
-    try:
-        username = request.META.get("REMOTE_USER") or request.META.get("HTTP_REMOTE_USER")
-        if not username:
-            username = getattr(settings, "BATCH_TEST_USER", None)
-        user = BatchUser.objects.get(username=username)
-    except BatchUser.DoesNotExist:
-        pass
+    username = request.META.get("REMOTE_USER") or request.META.get("HTTP_REMOTE_USER")
+    if not username:
+        username = getattr(settings, "BATCH_TEST_USER", None)
+    user, created = BatchUser.objects.get_or_create(username=username)
+    if created:
+        log.debug("Created new user %s in database", username)
     return user
 
 
@@ -795,20 +793,6 @@ def batch_async_register(self, batch_request, test_type, domains):
     if batch_request.status != BatchRequestStatus.cancelled:
         batch_request.status = BatchRequestStatus.live
     batch_request.save()
-
-
-def create_batch_user(username, name, organization, email):
-    """
-    Create a batch user in the DB.
-
-    """
-    try:
-        user = BatchUser.objects.get(username=username)
-        return None
-    except BatchUser.DoesNotExist:
-        user = BatchUser(username=username, name=name, organization=organization, email=email)
-        user.save()
-        return user
 
 
 def get_json_data_from_request(request) -> Tuple[Optional[Exception], Dict]:
