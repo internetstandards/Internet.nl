@@ -22,7 +22,7 @@ def test_register_batch_request(db):
     # ah, and now this nonsense where there are two users on the same database at the same time because we have
     # a test-worker.
 
-    test_user = BatchUser.objects.create(name="test_user")
+    test_user = BatchUser.objects.create(username="test_user")
 
     random_name = str(uuid.uuid4())
 
