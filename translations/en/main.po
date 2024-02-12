@@ -4402,6 +4402,9 @@ msgstr "DMARC"
 msgid "results mail auth spf label"
 msgstr "SPF"
 
+msgid "results mail auth tlsrpt label"
+msgstr "TLS-RPT"
+
 msgid "results mail dnssec domain label"
 msgstr "Email address domain"
 

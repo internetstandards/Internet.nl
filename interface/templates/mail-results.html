@@ -48,7 +48,10 @@
     </div>
     {% include "details-test-item.html" with testitem=details.spf %}
     {% include "details-test-item.html" with testitem=details.spf_policy %}
-
+    <div class="test-subsection">
+      {% include "string.html" with name="results mail auth tlsrpt label" %}
+    </div>
+    {% include "details-test-item.html" with testitem=details.tlsrpt %}
   {% elif probe.name == 'mailtls' %}
     <div class="test-subsection">
       {% include "string.html" with name="results mail tls starttls label" %}
