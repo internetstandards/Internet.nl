@@ -28,7 +28,10 @@ if [ ! -z $CERTBOT_EAB_HMAC_KEY ]; then
 fi
 
 domain=$INTERNETNL_DOMAINNAME
-subdomains="nl.$domain,en.$domain,www.$domain,ipv6.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
+subdomains="nl.$domain,en.$domain,ipv6.$domain,nl.ipv6.$domain,en.ipv6.$domain"
+if [ "$ENABLE_BATCH" != True ]; then
+  subdomains="$subdomains,www.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
+fi
 if [ ! -z $REDIRECT_DOMAINS ];then
   subdomains="$subdomains,$REDIRECT_DOMAINS"
 fi
