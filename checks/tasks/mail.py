@@ -882,7 +882,7 @@ def resolve_tlsrpt_record(url, task):
     # Make sure, url does not start with a dot, then add "_smtp._tls." in front
     # of the domain name.
     tls_rpt_url = f'_smtp._tls.{url.lstrip(".")}'
-    return task.async_resolv(url, unbound.RR_TYPE_TXT, callback=tlsrpt_callback)
+    return task.async_resolv(tls_rpt_url, unbound.RR_TYPE_TXT, callback=tlsrpt_callback)
 
 
 def do_tlsrpt(self, url, *args, **kwargs):
