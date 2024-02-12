@@ -651,12 +651,5 @@ documentation-images: ${images}
 documentation/images/%.png: documentation/images/%.py | ${nwdiag}
 	docker run -it --rm -v "$${PWD}/$(@D)/":/$(@D) -w /$(@D) gtramontina/diagrams:0.23.1 $(<F)
 
-batch-api-add-user docker-compose-batch-api-add-user: name=${username}
-batch-api-add-user docker-compose-batch-api-add-user: organization=internetnl
-batch-api-add-user docker-compose-batch-api-add-user: email=${username}@example.com
-batch-api-add-user docker-compose-batch-api-add-user:
-	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_users register -u ${username} -n ${name} -o ${organization} -e ${email}
-	${DOCKER_COMPOSE_CMD} exec webserver htpasswd -b /etc/nginx/htpasswd/batch_api.htpasswd ${username} ${password}
-
 test-%: env=test
 test-up test-down test-build test-stop: test-%: %
