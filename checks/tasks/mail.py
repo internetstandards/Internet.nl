@@ -861,7 +861,7 @@ def tlsrpt_callback(data, status, r):
             score = scoring.MAIL_AUTH_TLSRPT_FAIL
             for d in r.data.data:
                 txt = as_txt(d)
-                if txt.lower().startswith("v=TLSRPTv1"):
+                if txt.lower().startswith("v=tlsrptv1"):
                     record.append(txt)
                     if available:
                         # We see more than one TLSRPT record. Fail the test.
