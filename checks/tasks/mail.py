@@ -887,7 +887,7 @@ def resolve_tlsrpt_record(url, task):
 
 def do_tlsrpt(self, url, *args, **kwargs):
     try:
-        cb_data = resolve_spf_record(url, self)
+        cb_data = resolve_tlsrpt_record(url, self)
         available = "available" in cb_data and cb_data["available"]
         score = cb_data["score"]
         record = cb_data["record"]
@@ -909,5 +909,5 @@ def do_tlsrpt(self, url, *args, **kwargs):
             score=scoring.MAIL_AUTH_TLSRPT_FAIL,
             record=[],
         )
-
-    return ("spf", result)
+    # return a tuple containing ("testname", result)
+    return ("tlsrpt", result)
