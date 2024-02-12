@@ -26,10 +26,8 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
       - IPV6_TEST_ADDR
-      - BATCH_AUTH
       - MONITORING_AUTH
       - BASIC_AUTH
-      - BATCH_AUTH_RAW
       - MONITORING_AUTH_RAW
       - BASIC_AUTH_RAW
       - ALLOW_LIST
@@ -55,6 +53,7 @@ services:
     volumes:
       # persist certbot configuration between restarts
       - certbot-config:/etc/letsencrypt
+      - htpasswd-files:/etc/nginx/htpasswd/external
 
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
@@ -143,9 +142,6 @@ services:
       - SMTP_EHLO_DOMAIN
       - IPV6_TEST_ADDR
       - CSP_DEFAULT_SRC
-      - BATCH_AUTH
-      - BATCH_USER_DEFAULT_ORGANISATION
-      - BATCH_USER_DEFAULT_EMAIL_DOMAIN
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
@@ -825,6 +821,7 @@ volumes:
   routinator: {}
   batch_results: {}
   certbot-config: {}
+  htpasswd-files: {}
   unbound-zones: {}
   # permanent storage for Prometheus metrics
   prometheus-data: {}
