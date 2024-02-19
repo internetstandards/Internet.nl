@@ -1,0 +1,25 @@
+#
+msgid ""
+msgstr ""
+
+msgid "manual halloffame hosters badge"
+msgstr "Badge with text: \"100% Internet.nl compliant hoster\""
+
+msgid "manual halloffame hosters menu"
+msgstr "Hosters"
+
+msgid "manual halloffame hosters subtitle"
+msgstr "100% Internet.nl compliant hosters"
+
+msgid "manual halloffame hosters text"
+msgstr ""
+"The {{count}} hosters mentioned below are included in the Hall of Fame for Hosters, because they meet the [criteria for listing](/faqs/halloffame/) like a double 100% score for their own domain.\n"
+"\n"
+"These hosters are alowed to use the 'Internet.nl compliant badge' that is shown on this page in their own communications.\n"
+"\n"
+"The scores of the listed hosters' own domains are automaticaly [checked and published](https://dashboard.internet.nl/#/published/103/). \n"
+"\n"
+"---"
+
+msgid "manual halloffame hosters title"
+msgstr "Hall of Fame - Hosters"
