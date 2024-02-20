@@ -26,8 +26,6 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
       - IPV6_TEST_ADDR
-      - MONITORING_AUTH
-      - BASIC_AUTH
       - MONITORING_AUTH_RAW
       - BASIC_AUTH_RAW
       - ALLOW_LIST
