@@ -134,25 +134,6 @@ SELECT
     check_indexes_in_place()
 
 
-def _batch_register_users():
-    """Register Batch API users passed through from the BATCH_AUTH environment variable."""
-    from checks.models import BatchUser
-    from interface.batch.util import create_batch_user
-
-    users = settings.BATCH_USERS
-    organization = settings.BATCH_USER_DEFAULT_ORGANISATION
-
-    for user in users:
-        try:
-            BatchUser.objects.get(username=user)
-            log.info("User %s already exists", user)
-        except BatchUser.DoesNotExist:
-            name = user
-            email = user + "@" + settings.BATCH_USER_DEFAULT_EMAIL_DOMAIN
-            create_batch_user(user, name, organization, email)
-            log.info("Created batch user %s", user)
-
-
 class InterfaceConfig(AppConfig):
     name = "interface"
 
@@ -171,5 +152,4 @@ class InterfaceConfig(AppConfig):
 
         if settings.ENABLE_BATCH:
             _batch_startup_checks()
-            _batch_register_users()
         connection.inc_thread_sharing()

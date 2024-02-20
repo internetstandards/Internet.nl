@@ -71,6 +71,8 @@ Run the following commands to install the files in the expected location:
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/batch_user.sh && \
+    chmod 755 batch_user.sh && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following input is required:
@@ -98,7 +100,6 @@ Batch installations require the following settings:
 
 - `ENABLE_BATCH`: Must be set to `True`, to enable batch API
 - `ENABLE_HOF`: Must be set to `False`, to disable Hall of Fame processing
-- `BATCH_AUTH`: Must be a comma separated list of `user:password` pairs which are allowed to access the Batch API.
 
 And optionally:
 
@@ -110,8 +111,6 @@ For example:
     cat >> docker/local.env <<EOF
     ENABLE_BATCH=True
     ENABLE_HOF=False
-    # user/password(s) for authenticating against Batch API
-    BATCH_AUTH=user:welkom01
     # user/password(s) for access to /grafana monitoring
     MONITORING_AUTH=user:welkom01
     # user/password(s) for access to web interface
@@ -129,6 +128,14 @@ This command should complete without an error, indicating the application stack 
 Create database indexes:
 
     docker compose --project-name=internetnl-prod exec app ./manage.py api_create_db_indexes
+
+## Managing users
+
+To manage users, call the `/opt/Internet.nl/docker/batch_user.sh` script. This takes two arguments: an operation
+and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
+and `verify` to verify a user's existence and password. Passwords are entered interactively.
+
+If you would like users on the host to manage batch users, set sudo access for this script. 
 
 ## Testing your installation
 
