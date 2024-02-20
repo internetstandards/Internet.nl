@@ -201,7 +201,7 @@ msgstr ""
 "## Test your email"
 
 msgid "base test mail input"
-msgstr "Your email address:"
+msgstr "Your email domain:"
 
 msgid "base test mail label"
 msgstr "Test your email"
