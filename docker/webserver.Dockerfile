@@ -27,6 +27,8 @@ COPY docker/webserver/generate_htpasswd.sh /docker-entrypoint.d/generate_htpassw
 COPY docker/webserver/tls_init.sh /docker-entrypoint.d/tls_init.sh
 COPY docker/webserver/authentication.sh /docker-entrypoint.d/authentication.sh
 
+COPY docker/webserver/batch_user_inner.sh /batch_user_inner.sh
+
 RUN mkdir -p /var/www/internet.nl/
 
 COPY robots.txt /var/www/internet.nl/

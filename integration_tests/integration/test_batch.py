@@ -40,21 +40,11 @@ def register_test_user(unique_id):
     """Register user that can login on the batch API."""
 
     username = f"int-test-{unique_id}"
-    name = f"integration-tests-user-{unique_id}"
-    organization = "integration-test"
-    email = f"{username}@internet.test"
-
-    # create test user in Django DB
-    command = (
-        'docker compose --ansi=never --project-name "internetnl-test"'
-        f" exec app ./manage.py api_users register -u {username} -n {name} -o {organization} -e {email}"
-    )
-    subprocess.check_call(command, shell=True, universal_newlines=True)
 
     # create test used in Apache2 password file
     command = (
         'docker compose --ansi=never --project-name "internetnl-test"'
-        f" exec webserver htpasswd -b /etc/nginx/htpasswd/batch_api.htpasswd {username} {username}"
+        f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/batch_api.htpasswd {username} {username}"
     )
     subprocess.check_call(command, shell=True, universal_newlines=True)
 
