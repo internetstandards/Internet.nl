@@ -1,4 +1,8 @@
 #!/bin/sh
+if [ "$ENABLE_BATCH" = True ] && [ "$BASIC_AUTH_RAW$ALLOW_LIST" != "" ]; then
+  echo "ENABLE_BATCH must not be combined with BASIC_AUTH_RAW or ALLOW_LIST"
+fi
+
 # enable basic auth when user/password is configured
 if [ ! "$BASIC_AUTH_RAW" = "" ];then
   echo 'auth_basic "Please enter your username and password";auth_basic_user_file /etc/nginx/htpasswd/basic_auth.htpasswd;' > /etc/nginx/conf.d/basic_auth.conf
