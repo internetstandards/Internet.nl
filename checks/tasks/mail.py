@@ -17,6 +17,7 @@ from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
+from checks.tasks import tlsrpt_parsing
 from interface import batch, batch_shared_task, redis_id
 from internetnl import log
 
@@ -237,8 +238,9 @@ def callback(results, addr, category):
             mtauth.tlsrpt_available = tlsrpt_available
             mtauth.tlsrpt_record = tlsrpt_record
             mtauth.tlsrpt_score = tlsrpt_score
-            #if spf_available:
-            #    subtests["tlsprt"].result_good(tlsrpt_record)
+            log.debug(f"subtests: {subtests.keys()}")
+            if spf_available:
+                subtests["tlsprt"].result_good(tlsrpt_record)
 
 
     if skip_dkim_for_non_sending_domain(mtauth):
@@ -861,8 +863,14 @@ def tlsrpt_callback(data, status, r):
             score = scoring.MAIL_AUTH_TLSRPT_FAIL
             for d in r.data.data:
                 txt = as_txt(d)
+                log.debug(f"tlsrpt: found record '{txt.lower()}'")
                 if txt.lower().startswith("v=tlsrptv1"):
                     record.append(txt)
+                    if tlsrpt_parsing.parse_silent(txt) is None:
+                        # A parsing error has occured
+                        available = False
+                        score = scoring.MAIL_AUTH_TLSRPT_FAIL
+                        break
                     if available:
                         # We see more than one TLSRPT record. Fail the test.
                         available = False
@@ -898,7 +906,7 @@ def do_tlsrpt(self, url, *args, **kwargs):
         score = cb_data["score"]
         record = cb_data["record"]
 
-        #if len(record) == 1:
+        if len(record) == 1:
         #    policy_status, policy_score, _ = spf_check_policy(url, record[0], self, policy_records=policy_records)
 
         result = dict(
