@@ -239,7 +239,7 @@ def callback(results, addr, category):
             mtauth.tlsrpt_record = tlsrpt_record
             mtauth.tlsrpt_score = tlsrpt_score
             log.debug(f"subtests: {subtests.keys()}")
-            if spf_available:
+            if tlsrpt_available:
                 subtests["tlsprt"].result_good(tlsrpt_record)
 
 
