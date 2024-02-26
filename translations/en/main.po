@@ -183,7 +183,7 @@ msgstr ""
 "\n"
 "* [IPv6](/faqs/ipv6/): reachable via modern internet address?\n"
 "* [DNSSEC](/faqs/dnssec/): domain names signed?\n"
-"* [DMARC, DKIM, SPF, and TLS-RPT](/faqs/mailauth/): authenticity marks against email phishing?\n"
+"* [DMARC, DKIM, SPF, and TLSRPT](/faqs/mailauth/): authenticity marks against email phishing?\n"
 "* [STARTTLS and DANE](/faqs/starttls): secure mail server connection?\n"
 "* [RPKI](/faqs/rpki/): route authorisation?\n"
 "\n"
@@ -588,25 +588,25 @@ msgstr ""
 "your SPF record points to an insufficiently strict SPF policy or a non-"
 "existing SPF record."
 
-# TLS-RPT
+# TLSRPT
 msgid "detail mail auth tlsrpt exp"
 msgstr ""
-"We check if your domain defines a policy for SMTP TLS Reporting – also know as TLS-RPT for short. "
-"A receiving mail server can use the address in your TLS-RPT record to send to you reports about "
+"We check if your domain defines a policy for SMTP TLS Reporting – also know as TLSRPT for short. "
+"A receiving mail server can use the address in your TLSRPT record to send to you reports about "
 "possible attacks or misconfigurations.\n"
 "\n"
 
 msgid "detail mail auth tlsrpt label"
-msgstr "TLS-RPT existence"
+msgstr "TLSRPT existence"
 
 msgid "detail mail auth tlsrpt tech table"
-msgstr "TLS-RPT record"
+msgstr "TLSRPT record"
 
 msgid "detail mail auth tlsrpt verdict bad"
 msgstr "Your domain does *not* have a TLS-RPS record."
 
 msgid "detail mail auth tlsrpt verdict good"
-msgstr "Your domain has a TLS-RPT record."
+msgstr "Your domain has a TLSRPT record."
 
 msgid "detail mail dnssec exists exp"
 msgstr ""
@@ -3837,11 +3837,11 @@ msgstr ""
 "* [RFC 7489: Domain-based Message Authentication, Reporting, and Conformance (DMARC)](https://www.rfc-editor.org/rfc/rfc7489)\n"
 "* [RFC 6376: DomainKeys Identified Mail (DKIM) Signatures](https://www.rfc-editor.org/rfc/rfc6376)\n"
 "* [RFC 7208: Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1](https://www.rfc-editor.org/rfc/rfc7208)\n"
-"* [RFC 8460: SMTP TLS Reporting (TLS-RPT)](https://www.rfc-editor.org/rfc/rfc8460)"
+"* [RFC 8460: SMTP TLS Reporting (TLSRPT)](https://www.rfc-editor.org/rfc/rfc8460)"
 
 #, md-format
 msgid "faqs mailauth title"
-msgstr "Protection against email phishing (DMARC, DKIM, SPF, and TLS-RPT)"
+msgstr "Protection against email phishing (DMARC, DKIM, SPF, and TLSRPT)"
 
 #, md-format
 msgid "faqs report score content"
@@ -4404,7 +4404,7 @@ msgid "results mail auth spf label"
 msgstr "SPF"
 
 msgid "results mail auth tlsrpt label"
-msgstr "TLS-RPT"
+msgstr "TLSRPT"
 
 msgid "results mail dnssec domain label"
 msgstr "Email address domain"
@@ -4583,14 +4583,14 @@ msgstr "*Error* during test execution!"
 msgid "test mailauth failed description"
 msgstr ""
 "Too bad! Your domain does *not* contain all authenticity marks against email\n"
-" forgery ([DMARC, DKIM and SPF](/faqs/mailauth/)). Therefore receivers are *not* able to reliably separate phishing \n"
+" forgery ([DMARC, DKIM, SPF and TLSRPT](/faqs/mailauth/)). Therefore receivers are *not* able to reliably separate phishing \n"
 "and spam emails abusing your domain in their sender address from your \n"
-"authentic emails. You should ask your mail provider to activate DMARC, DKIM \n"
-"and SPF."
+"authentic emails. You should ask your mail provider to activate DMARC, DKIM, \n"
+"SPF and TLSRPT"
 
 msgid "test mailauth failed summary"
 msgstr ""
-"*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
+"*Not* all authenticity marks against email phishing (DMARC, DKIM, SPF and TLSRPT)"
 
 msgid "test mailauth info description"
 msgstr ""
@@ -4602,10 +4602,10 @@ msgstr ""
 
 msgid "test mailauth info summary"
 msgstr ""
-"*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
+"*Not* all authenticity marks against email phishing (DMARC, DKIM, SPF and TLSRPT)"
 
 msgid "test mailauth label"
-msgstr "Authenticity marks against phishing (DMARC, DKIM and SPF)"
+msgstr "Authenticity marks against phishing (DMARC, DKIM, SPF and TLSRPT)"
 
 msgid "test mailauth passed description"
 msgstr ""

@@ -182,7 +182,7 @@ msgstr ""
 "\n"
 "* [IPv6](/faqs/ipv6/): bereikbaar via modern internetadres?\n"
 "* [DNSSEC](/faqs/dnssec/): domeinnamen ondertekend?\n"
-"* [DMARC, DKIM, SPF en TLS-RPT](/faqs/mailauth/): echtheidswaarmerken tegen e-mailphishing?\n"
+"* [DMARC, DKIM, SPF en TLSRPT](/faqs/mailauth/): echtheidswaarmerken tegen e-mailphishing?\n"
 "* [STARTTLS en DANE](/faqs/starttls/): beveiligde mailserver-verbinding?\n"
 "* [RPKI](/faqs/rpki/): route-autorisatie?\n"
 "\n"
@@ -592,25 +592,25 @@ msgstr ""
 "record verwijst naar een onvoldoende strikte SPF-policy of naar een niet-"
 "bestaand SPF-record."
 
-# TLS-RPT
+# TLSRPT
 msgid "detail mail auth tlsrpt exp"
 msgstr ""
-"We controleren of je domein een beleid definieert voor SMTP TLS-rapportage - ook bekend als TLS-RPT. "
-"Een ontvangende mailserver kan het adres in uw TLS-RPT record gebruiken om u rapporten te sturen over "
+"We controleren of je domein een beleid definieert voor SMTP TLS-rapportage - ook bekend als TLSRPT. "
+"Een ontvangende mailserver kan het adres in uw TLSRPT record gebruiken om u rapporten te sturen over "
 "mogelijke aanvallen of misconfiguraties.\n"
 "\n"
 
 msgid "detail mail auth tlsrpt label"
-msgstr "TLS-RPT aanwezigheid"
+msgstr "TLSRPT aanwezigheid"
 
 msgid "detail mail auth tlsrpt tech table"
-msgstr "TLS-RPT-record"
+msgstr "TLSRPT-record"
 
 msgid "detail mail auth tlsrpt verdict bad"
-msgstr "Je domeinnaam heeft geen geldig TLS-RPT-record."
+msgstr "Je domeinnaam heeft geen geldig TLSRPT-record."
 
 msgid "detail mail auth tlsrpt verdict good"
-msgstr "Je domein heeft een TLS-RPT-record."
+msgstr "Je domein heeft een TLSRPT-record."
 
 
 msgid "detail mail dnssec exists exp"
@@ -3861,11 +3861,11 @@ msgstr ""
 "* [RFC 7489: Domain-based Message Authentication, Reporting, and Conformance (DMARC)](https://www.rfc-editor.org/rfc/rfc7489)\n"
 "* [RFC 6376: DomainKeys Identified Mail (DKIM) Signatures](https://www.rfc-editor.org/rfc/rfc6376)\n"
 "* [RFC 7208: Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1](https://www.rfc-editor.org/rfc/rfc7208)\n"
-"* [RFC 8460: SMTP TLS Reporting (TLS-RPT)](https://www.rfc-editor.org/rfc/rfc8460)"
+"* [RFC 8460: SMTP TLS Reporting (TLSRPT)](https://www.rfc-editor.org/rfc/rfc8460)"
 
 #, md-format
 msgid "faqs mailauth title"
-msgstr "Protectie tegen e-mailphishing (DMARC, DKIM, SPF en TLS-RPT)"
+msgstr "Protectie tegen e-mailphishing (DMARC, DKIM, SPF en TLSRPT)"
 
 #, md-format
 msgid "faqs report score content"
@@ -4599,29 +4599,29 @@ msgstr "*Fout* tijdens uitvoering van test!"
 msgid "test mailauth failed description"
 msgstr ""
 "Helaas! Je domein bevat *niet* alle echtheidswaarmerken tegen \n"
-"e-mailvervalsing ([DMARC, DKIM en SPF](/faqs/mailauth/)). Ontvangers kunnen daardoor *niet* betrouwbaar phishing- of\n"
+"e-mailvervalsing ([DMARC, DKIM, SPF en TLSRPT](/faqs/mailauth/)). Ontvangers kunnen daardoor *niet* betrouwbaar phishing- of\n"
 " spammails die jouw domeinnaam in hun afzenderadres misbruiken, scheiden van\n"
-" jouw echte e-mails. Vraag je mailprovider om DMARC, DKIM en SPF te \n"
+" jouw echte e-mails. Vraag je mailprovider om DMARC, DKIM, SPF an TLSRPT te \n"
 "activeren."
 
 msgid "test mailauth failed summary"
 msgstr ""
-"*Niet* alle echtheidswaarmerken tegen e-mailphishing (DMARC, DKIM en SPF)"
+"*Niet* alle echtheidswaarmerken tegen e-mailphishing (DMARC, DKIM, SPF en TLSRPT)"
 
 msgid "test mailauth info description"
 msgstr ""
 "Helaas! Je domein bevat *niet* alle echtheidswaarmerken tegen \n"
 "e-mailvervalsing ([DMARC, DKIM en SPF](/faqs/mailauth/)). Ontvangers kunnen daardoor *niet* betrouwbaar phishing- of\n"
 " spammails die jouw domeinnaam in hun afzenderadres misbruiken, scheiden van\n"
-" jouw echte e-mails. Vraag je mailprovider om DMARC, DKIM en SPF te \n"
+" jouw echte e-mails. Vraag je mailprovider om DMARC, DKIM, SPF en TLSRPT te \n"
 "activeren."
 
 msgid "test mailauth info summary"
 msgstr ""
-"*Niet* alle echtheidswaarmerken tegen e-mailphishing (DMARC, DKIM en SPF)"
+"*Niet* alle echtheidswaarmerken tegen e-mailphishing (DMARC, DKIM, SPF en TLSRPT)"
 
 msgid "test mailauth label"
-msgstr "Echtheidswaarmerken tegen phishing (DMARC, DKIM en SPF)"
+msgstr "Echtheidswaarmerken tegen phishing (DMARC, DKIM, SPF en TLSRPT)"
 
 msgid "test mailauth passed description"
 msgstr ""
