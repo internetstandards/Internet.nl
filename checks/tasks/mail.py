@@ -241,6 +241,8 @@ def callback(results, addr, category):
             log.debug(f"subtests: {subtests.keys()}")
             if tlsrpt_available:
                 subtests["tlsrpt"].result_good(tlsrpt_record)
+            else:
+                subtests["tlsrpt"].result_bad(tlsrpt_record)
 
 
     if skip_dkim_for_non_sending_domain(mtauth):
