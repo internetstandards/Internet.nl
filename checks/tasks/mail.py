@@ -906,9 +906,6 @@ def do_tlsrpt(self, url, *args, **kwargs):
         score = cb_data["score"]
         record = cb_data["record"]
 
-        if len(record) == 1:
-        #    policy_status, policy_score, _ = spf_check_policy(url, record[0], self, policy_records=policy_records)
-
         result = dict(
             available=available,
             score=score,
