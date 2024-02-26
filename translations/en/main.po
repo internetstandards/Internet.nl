@@ -603,13 +603,10 @@ msgid "detail mail auth tlsrpt tech table"
 msgstr "TLSRPT record"
 
 msgid "detail mail auth tlsrpt verdict bad"
-msgstr "Your domain does *not* have a TLS-RPS record."
+msgstr "Your domain does have a TLSRPT record or the record is invalid."
 
 msgid "detail mail auth tlsrpt verdict good"
 msgstr "Your domain has a TLSRPT record."
-
-msgid "detail mail auth tlsrpt verdict bad"
-msgstr "Your domain does have a TLSRPT record or the record is invalid."
 
 msgid "detail mail dnssec exists exp"
 msgstr ""
