@@ -607,11 +607,10 @@ msgid "detail mail auth tlsrpt tech table"
 msgstr "TLSRPT-record"
 
 msgid "detail mail auth tlsrpt verdict bad"
-msgstr "Je domeinnaam heeft geen geldig TLSRPT-record."
+msgstr "Je domein heeft geen TLSRPT-record of het record is ongeldig."
 
 msgid "detail mail auth tlsrpt verdict good"
 msgstr "Je domein heeft een TLSRPT-record."
-
 
 msgid "detail mail dnssec exists exp"
 msgstr ""
