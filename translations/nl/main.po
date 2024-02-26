@@ -595,9 +595,10 @@ msgstr ""
 # TLS-RPT
 msgid "detail mail auth tlsrpt exp"
 msgstr ""
-"We check if your domain has a TLS-RPT record. A receiving mail server can use the address in your TLS-RPT record to TODO.\n"
+"We controleren of je domein een beleid definieert voor SMTP TLS-rapportage - ook bekend als TLS-RPT. "
+"Een ontvangende mailserver kan het adres in uw TLS-RPT record gebruiken om u rapporten te sturen over "
+"mogelijke aanvallen of misconfiguraties.\n"
 "\n"
-"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
 
 msgid "detail mail auth tlsrpt label"
 msgstr "TLS-RPT aanwezigheid"
