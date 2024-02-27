@@ -30,11 +30,11 @@
             {% include "string.html" with name="results score-description"%}
           </div>
         {% block perfectscore %}
-          {% ifequal score 100 %}
+          {% if score == 100 %}
           <div class="perfect-score">
             {% include "string.html" with name="results perfect-score" %}
           </div>
-          {% endifequal %}
+          {% endif %}
         {% endblock %}
           <div class="score-container">
             <p class="score" aria-hidden="true">{{score}}%</p>

@@ -24,7 +24,7 @@ class ActivateTranslationMiddleware(MiddlewareMixin):
         if translation.check_for_language(current_language):
             request.current_language_code = current_language
         else:
-            request.current_language_code = self.get_preferred_language(request.META.get("HTTP_ACCEPT_LANGUAGE", ""))
+            request.current_language_code = self.get_preferred_language(request.headers.get("accept-language", ""))
         translation.activate(request.current_language_code)
 
     def get_preferred_language(self, http_accept_language):
