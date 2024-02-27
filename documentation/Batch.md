@@ -4,58 +4,37 @@ The Internet.nl codebase is bundled with batch functionality, that is the
 ability to submit a number of domains at once for web or email testing.
 
 This is accomplished through a REST API.
+The API documentation of the Internet.nl API v2.0 can be found on https://batch.internet.nl/api/batch/openapi.yaml.
+A viewer, like ReDoc, can be used for generating a human readable version: http://redocly.github.io/redoc/?url=https://batch.internet.nl/api/batch/openapi.yaml.
 
-## Information for operators
+Examples of API consumer scripts:
+- Internet.nl Dashboard: https://github.com/internetstandards/Internet.nl-dashboard
+- Internet.nl batch scripts: https://github.com/poorting/internet.nl_batch_scripts
 
-### Enabling the API
+## Deploying a batch instance
 See [Deployment Batch](Docker-deployment-batch.md).
 
-### Generating the documentation
-The API follows the [OpenAPI specification](https://swagger.io/specification/).
-
-Copy `internetnl/batch_api_doc_conf_dist.py` to
-`internetnl/batch_api_doc_conf.py` and change any appropriate settings to your
-liking.
-
-Run `manage.py api_generate_doc` to generate the documentation. You
-can then visit `/api/batch/openapi.yaml` to get the documentation (also
-available in the `static` folder locally). **The documentation needs to be
-regenerated whenever anything changes in the API specification
-(`checks/batch/openapi.yaml`)**
-
-### Users
+## Users
 Any activity on the batch functionality requires a configured user.
 
 Authorization of the users is not done by the Django application itself but
 rather relies on the upfront webserver to do the necessary HTTP Auth and pass
-the authenticated user to the Django application.
+the authenticated user to the Django application. The known users can be
+managed with the `/opt/Internet.nl/docker/batch_user.sh` script, detailed
+in the batch deployment documentation.
 
-The `manage.py api_users` command helps with managing user information on the
-Django application.
+## Overview of significant differences in batch mode
 
-Management for the HTTP authenticated users needs to happen separately for the
-upfront webserver.
+* The connection test is not available.
+* DNSSEC tests do not perform a registrar lookup.
+* The REST API is only enabled in batch mode.
+* The hall of fame is not enabled.
+* Individual clients are not rate limited, as scheduling is entirely different as explained below.
+* No prechecks are performed e.g. to check whether the hostname has an A/AAAA record.
+* The database has some additional indexes.
 
-To register a new user on the current internet.nl production setup on int-prod-batch:
-```
-sudo -s -u internetnl
-cd /opt/internetnl/Internet.nl
-source ~internetnl/internet.nl.env
-make -- manage api_users register -n "$NAME" -o "$ORGNAME" -e "$EMAIL" -u "$USERNAME"
-htpasswd /etc/apache2/htpasswd $USERNAME
-# <enter API password>
-```
-
-### Forwarding resolver
-In batch operation mode it is advised to use a forwarding resolver that all the
-celery tasks are going to forward DNS queries to. This is configurable with the
-`CENTRAL_UNBOUND` option.
-
-### DB indexes
-When running in batch operation mode it is advised to run
-`manage.py api_create_db_indexes`. This creates additional DB indexes needed
-for the batch functionality.
-
+These configuration differences are automatically managed by the deployment based on `ENABLE_BATCH`,
+or is documented in the batch deployment guide.
 
 ## Information for developers
 
@@ -64,6 +43,10 @@ with some added tables to keep track of batch_[users|requests|tests] and some
 logic to submit normal tests to the main Internet.nl functionality.
 
 ### Logic
+
+Fundamentally:
+- Batch requests are processed on a FIFO basis for a particular user. This means a users can submit multiple batch requests, but they are processed sequentally. The first / current batch requests needs to finish before the next one starts. 
+- Batch requests of multiple users are run in parallel. While influenced by the number of users running simultaneous batch requests, you should assume that parallel tasks take longer to finish since server resources are being shared. 
 
 All the batch logic is being ran/managed by `checks/batch/scheduler.py` which
 is ran periodically in celery and in short:
@@ -80,7 +63,7 @@ is ran periodically in celery and in short:
 ### Relevant DB Models
 
 - `BatchUser`
-  Stores the registered users; not passwords.
+  Stores the registered users; not passwords. Automatically created.
 - `BatchRequest`
   Stores the batch requests that come through the API along with links to the
   generated result files.
