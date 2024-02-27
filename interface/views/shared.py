@@ -18,7 +18,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 import unbound
 
@@ -146,7 +146,7 @@ def get_client_ip(request):
 
     """
     if settings.DJANGO_IS_PROXIED:
-        ip = request.META.get("HTTP_X_FORWARDED_FOR", None)
+        ip = request.headers.get("x-forwarded-for", None)
     else:
         ip = request.META.get("REMOTE_ADDR")
     return ip

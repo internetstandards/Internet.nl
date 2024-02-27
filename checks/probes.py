@@ -1,7 +1,7 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from checks import categories
 from checks.categories import MailTlsStarttlsExists, WebTlsHttpsExists

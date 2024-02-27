@@ -7,7 +7,7 @@ from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils import translation
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from interface import redis_id, simple_cache_page
 from interface.views.shared import (
