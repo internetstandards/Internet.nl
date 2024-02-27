@@ -106,7 +106,7 @@ Batch installations require the following settings:
 And optionally:
 
 - `MONITORING_AUTH`: May be a comma separated list of `user:password` pairs which are allowed to access the metrics at `https://example.com/grafana/`.
-- `BASIC_AUTH`, `BASIC_AUTH_RAW` and `ALLOW_LIST`: Can be set to restrict access to the single scan webpage. See [Restricting Access](Docker-deployment.md#restricting-access) for more information.
+- `BASIC_AUTH_RAW` and `ALLOW_LIST`: Can be set to restrict access to the single scan webpage. See [Restricting Access](Docker-deployment.md#restricting-access) for more information.
 
 For example:
 
@@ -115,7 +115,7 @@ For example:
     ENABLE_HOF=False
     # user/password(s) for access to /grafana monitoring
     MONITORING_AUTH=user:welkom01
-    BASIC_AUTH=user:welkom01
+    # allowed IP's to visit web interface without password
     ALLOW_LIST=198.51.100.1,2001:db8:2::1
     EOF
 
