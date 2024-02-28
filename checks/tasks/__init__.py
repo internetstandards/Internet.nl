@@ -38,10 +38,11 @@ class SetupUnboundContext(Task):
                 self._ub_ctx.zone_add("test.", "transparent")
 
             self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
-            # Some (unknown) tests probably depend on consistent ordering in unbound responses
+            self._ub_ctx.set_option("cache-max-negative-ttl:", str(settings.CACHE_TTL * 0.9))
+            # Some may depend on consistent ordering in unbound responses
             # https://github.com/internetstandards/Internet.nl/pull/613#discussion_r892196819
+            # https://github.com/internetstandards/Internet.nl/pull/1292#discussion_r1505778673
             self._ub_ctx.set_option("rrset-roundrobin:", "no")
-            self._ub_ctx.set_option("cache-max-ttl:", str(settings.CACHE_TTL * 0.9))
             # XXX: Remove for now; inconsistency with applying settings on celery.
             # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
             self._ub_ctx.set_async(True)
