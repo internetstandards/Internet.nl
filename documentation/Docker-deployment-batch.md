@@ -127,6 +127,10 @@ Create database indexes:
 
     docker compose --project-name=internetnl-prod exec app ./manage.py api_create_db_indexes
 
+## DNS setup
+
+See the [Docker DNS setup](Docker-DNS.md).
+
 ## Managing users
 
 To manage users, call the `/opt/Internet.nl/docker/batch_user.sh` script. This takes two arguments: an operation
