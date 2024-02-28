@@ -12,6 +12,9 @@ server:
   module-config: "validator iterator"
   chroot: ""
 
+  cache-max-ttl: 60
+  cache-max-negative-ttl: 60
+  
   logfile: /dev/stdout
   ${DEBUG_LOG_UNBOUND_STATEMENTS}
 
