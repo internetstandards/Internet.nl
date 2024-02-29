@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.5
+
+Release 1.8.5 contains a hotfix for the [sectxt library failing on leap days](https://github.com/DigitalTrustCenter/sectxt/issues/66).
+
 ## 1.8.4
 
 Release 1.8.4:
@@ -8,7 +12,7 @@ Release 1.8.4:
 - Restricts HTTPS redirects to the same domain, no longer allowing directions to a subdomain first (#1208).
 - Updates a number of other dependencies.
 - Fixes an issue where certbot renewals were not correctly run.
-- 
+
 ## 1.8.3
 
 Release 1.8.3 fixes an issue where HSTS and CSP headers were missing from he www-subdomain of the main domain (#1210, #1211).
