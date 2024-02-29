@@ -28,7 +28,10 @@ if [ ! -z $CERTBOT_EAB_HMAC_KEY ]; then
 fi
 
 domain=$INTERNETNL_DOMAINNAME
-subdomains="nl.$domain,en.$domain,www.$domain,ipv6.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
+subdomains="nl.$domain,en.$domain,ipv6.$domain,nl.ipv6.$domain,en.ipv6.$domain"
+if [ "$ENABLE_BATCH" != True ]; then
+  subdomains="$subdomains,www.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
+fi
 if [ ! -z $REDIRECT_DOMAINS ];then
   subdomains="$subdomains,$REDIRECT_DOMAINS"
 fi
@@ -105,4 +108,4 @@ configure_letsencrypt() {
 # check certificates for renewal twice a day, make sure the schedule is a moving window so we
 # don't accidentally fall in line with the busiest time (eg: 00:00) and get errors due to ACME
 # servers being overloaded at that moment
-while sleep 11h; do certbot renew --post-hook "nginx -s reload"; done&
+while sleep 11h; do /opt/certbot/bin/certbot renew --post-hook "nginx -s reload"; done&

@@ -12,6 +12,7 @@ from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 from checks.tasks import SetupUnboundContext
 from checks.tasks.tls_connection import DEFAULT_TIMEOUT
 from checks.tasks.tls_connection_exceptions import NoIpError
+from django.conf import settings
 from interface.views.shared import ub_resolve_with_timeout
 from internetnl import log
 
@@ -59,7 +60,7 @@ def http_get(
 
     if not headers:
         headers = {}
-    headers["User-Agent"] = "internetnl/1.0"
+    headers["User-Agent"] = settings.USER_AGENT
     if not session:
         session = requests.session()
 

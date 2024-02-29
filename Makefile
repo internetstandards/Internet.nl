@@ -4,7 +4,6 @@ PY?=python
 TAR?=0
 
 BINDIR=bin
-POFILESEXEC=$(BINDIR)/pofiles.py
 FRONTENDEXEC=$(BINDIR)/frontend.py
 
 REMOTEDATADIR=remote_data
@@ -26,13 +25,6 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-ifeq ($(TAR), 0)
-	POFILES_TAR_ARGS=to_tar
-else
-	POFILES_TAR_ARGS=from_tar
-	POFILES_TAR_ARGS+=$(TAR)
-endif
-
 pysrcdirs = internetnl tests interface checks integration_tests
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
@@ -45,9 +37,8 @@ help:
 	@echo 'Makefile for internet.nl'
 	@echo ''
 	@echo 'Usage:'
-	@echo '   make translations                          combine the translation files to Django PO files'
-	@echo '   make translations_tar                      create a tar from the translations'
-	@echo '   make translations_tar TAR=<tar.gz file>    read the tar and update the translations'
+	@echo '   make update_content                        update the translation files from content repo.'
+	@echo '                                              Optional branch=x to use a specific content repo branch.'
 	@echo '   make frontend                              (re)generate CSS and Javascript'
 	@echo '   make update_padded_macs                    update padded MAC information'
 	@echo '   make update_cert_fingerprints              update certificate fingerpint information'
@@ -69,25 +60,18 @@ frontend:
 	. .venv/bin/activate && ${_env} python3 manage.py collectstatic --no-input
 	. .venv/bin/activate && ${_env} python3 manage.py api_generate_doc
 
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
-translate_content_to_main:
-	# Note: you may need to run this a few times to get rid of the access denied errors...
-	# This retrieves the content from the content repository and merges it with the .po files of this repo.
-	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
+branch ?= main
+update_content:
+    # This retrieves the content from the content repository and merges it with the .po files of this repo.
+    # The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
 	rm -rf tmp/locale_files/
 	rm -f tmp/content_repo.tar.gz
-	git clone git@github.com:internetstandards/Internet.nl_content/ tmp/locale_files/
-
-	# If you need a specific branch people are working on:
-	# git clone -b news-item_PLIS-meeting_on_IPv6 https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
-
-	# change dir to tmp to prevent the /tmp dir being mentioned in the resulting tar file.
-	cd tmp && tar zcvf content_repo.tar.gz locale_files/*
-	${MAKE} translations_tar TAR=tmp/content_repo.tar.gz
-	${MAKE} translations
-	. .venv/bin/activate && ${_env} python3 manage.py compilemessages --ignore=.venv
-	# Purposefully _not_ deleting things in the tmp dir so it allows inspection after execution.
-
+	mkdir -p tmp/locale_files/
+	git clone -b $(branch) git@github.com:internetstandards/Internet.nl_content/ tmp/locale_files/
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_translations.sh
+	rm -rf tmp/locale_files
 
 update_padded_macs:
 	chmod +x $(MACSDIR)/update-macs.sh
@@ -650,13 +634,6 @@ images = $(patsubst %.py,%.png,$(wildcard documentation/images/*.py))
 documentation-images: ${images}
 documentation/images/%.png: documentation/images/%.py | ${nwdiag}
 	docker run -it --rm -v "$${PWD}/$(@D)/":/$(@D) -w /$(@D) gtramontina/diagrams:0.23.1 $(<F)
-
-batch-api-add-user docker-compose-batch-api-add-user: name=${username}
-batch-api-add-user docker-compose-batch-api-add-user: organization=internetnl
-batch-api-add-user docker-compose-batch-api-add-user: email=${username}@example.com
-batch-api-add-user docker-compose-batch-api-add-user:
-	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_users register -u ${username} -n ${name} -o ${organization} -e ${email}
-	${DOCKER_COMPOSE_CMD} exec webserver htpasswd -b /etc/nginx/htpasswd/batch_api.htpasswd ${username} ${password}
 
 test-%: env=test
 test-up test-down test-build test-stop: test-%: %

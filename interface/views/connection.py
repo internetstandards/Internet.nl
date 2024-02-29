@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 
 import unbound

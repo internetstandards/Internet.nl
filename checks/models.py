@@ -1067,19 +1067,13 @@ class MailTestReport(models.Model):
 
 class BatchUser(models.Model):
     """
-    Users allowed to run batch tests.
-
-    .. note:: Must be in sync with the web authorization scheme.
-
+    Users allowed to run batch tests. Automatically created when encountering new users.
     """
 
     username = models.CharField(unique=True, max_length=255)
-    name = models.CharField(max_length=255)
-    organization = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255)
 
     def __dir__(self):
-        return ["username", "name", "organization", "email"]
+        return ["username"]
 
     @transaction.atomic
     def delete_related_data(self, delete_self=False):
