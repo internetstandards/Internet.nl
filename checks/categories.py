@@ -2271,7 +2271,7 @@ class MailAuthTlsRptExists(Subtest):
         self.tech_data = [[tech_data]]
 
     def result_bad(self, tech_data):
-        self._status(STATUS_FAIL)
+        self._status(STATUS_NOTICE)
         self.verdict = "detail mail auth tlsrpt verdict bad"
         if tech_data:
             # More than one spf record. Show the records.
