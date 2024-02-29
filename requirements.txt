@@ -163,7 +163,7 @@ requests==2.31.0
     #   sectxt
 rjsmin==1.2.1
     # via -r requirements.in
-sectxt==0.8.3
+sectxt @ https://github.com/mxsasha/sectxt/archive/refs/tags/0.8.3_leap.tar.gz
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
