@@ -2998,7 +2998,7 @@ def forced_http_check(af_ip_pair, url, task):
             parsed_url = urlparse(response.url)
             # Requirement: in case of redirecting, a domain should firstly upgrade itself by
             # redirecting to its HTTPS version before it may redirect to another domain (#1208)
-            if parsed_url.scheme == "https" and url == parsed_url.netloc:
+            if parsed_url.scheme == "https" and url == parsed_url.hostname:
                 forced_https = ForcedHttpsStatus.good
                 forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
             break

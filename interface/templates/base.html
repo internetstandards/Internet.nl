@@ -71,14 +71,14 @@
 
       <nav id="sitenav">
         <ul>
-          <li class="{% ifequal pagemenu 'home' %}current{% endifequal %}"><a href="/">{% include "string.html" with name="base home" %}</a></li>
+          <li class="{% if pagemenu == 'home' %}current{% endif %}"><a href="/">{% include "string.html" with name="base home" %}</a></li>
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
-          <li class="{% ifequal pagemenu 'news' %}current{% endifequal %}"><a href="/news/">{% include "string.html" with name="base news" %}</a></li>
+          <li class="{% if pagemenu == 'news' %}current{% endif %}"><a href="/news/">{% include "string.html" with name="base news" %}</a></li>
           {% endif %}
-          <li class="{% ifequal pagemenu 'faqs' %}current{% endifequal %}"><a href="/faqs/">{% include "string.html" with name="base faqs" %}</a></li>
-          <li class="{% ifequal pagemenu 'halloffame' %}current{% endifequal %}"><a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a></li>
+          <li class="{% if pagemenu == 'faqs' %}current{% endif %}"><a href="/faqs/">{% include "string.html" with name="base faqs" %}</a></li>
+          <li class="{% if pagemenu == 'halloffame' %}current{% endif %}"><a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a></li>
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
-          <li class="{% ifequal pagemenu 'about' %}current{% endifequal %}"><a href="/about/">{% include "string.html" with name="base about" %}</a></li>
+          <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about" %}</a></li>
           {% endif %}
         </ul>
       </nav>

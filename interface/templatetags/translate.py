@@ -6,7 +6,7 @@ import idna as IDNA
 from django import template
 from django.conf import settings
 from django.template import Template
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from checks.scoring import (
     STATUS_ERROR,
