@@ -195,7 +195,7 @@ def get_user_from_request(request):
     DB) return the relevant user object from the DB.
 
     """
-    username = request.META.get("REMOTE_USER") or request.META.get("HTTP_REMOTE_USER")
+    username = request.META.get("REMOTE_USER") or request.headers.get("remote-user")
     if not username:
         username = getattr(settings, "BATCH_TEST_USER", None)
     user, created = BatchUser.objects.get_or_create(username=username)
