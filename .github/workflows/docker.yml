@@ -19,7 +19,7 @@ env:
 jobs:
   # builds all docker images in parallel
   build-docker:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     strategy:
       matrix:
@@ -206,7 +206,7 @@ jobs:
           retention-days: 1
 
   docs:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
@@ -246,7 +246,7 @@ jobs:
 
   integration-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -337,7 +337,7 @@ jobs:
   lintcheck:
     name: lint/check
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -374,7 +374,7 @@ jobs:
 
   test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -426,7 +426,7 @@ jobs:
 
   development-environment-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
