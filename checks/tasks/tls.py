@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 import time
 from binascii import hexlify
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from timeit import default_timer as timer
-from typing import List
+from typing import List, Tuple
 from urllib.parse import urlparse
 
 import eventlet
@@ -37,7 +38,7 @@ from sslyze import (
     ServerNetworkConfiguration,
     ProtocolWithOpportunisticTlsEnum,
     ScanCommandsExtraArguments,
-    CertificateInfoExtraArgument,
+    CertificateInfoExtraArgument, CipherSuite,
 )
 
 from sslyze.plugins.certificate_info._certificate_utils import (
@@ -59,6 +60,7 @@ from checks.models import (
     WebTestTls,
     ZeroRttStatus,
 )
+from checks.scoring import Score
 from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
@@ -1295,7 +1297,7 @@ def check_mail_tls(server, dane_cb_data, task):
 
     prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
-    ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
+    cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
 
     # Check the certificates.
     cert_results = cert_checks(server, ChecksMode.MAIL, task, dane_cb_data)
@@ -1313,9 +1315,9 @@ def check_mail_tls(server, dane_cb_data, task):
         prots_good=prots_good,
         prots_sufficient=prots_sufficient,
         prots_score=prots_score,
-        ciphers_bad=ciphers_bad,
-        ciphers_phase_out=ciphers_phase_out,
-        ciphers_score=ciphers_score,
+        ciphers_bad=cipher_evaluation.ciphers_bad_str,
+        ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
+        ciphers_score=cipher_evaluation.score,
         # TODO, currently unsupported
         cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
         cipher_order=CipherOrderStatus.na,
@@ -1372,7 +1374,6 @@ def has_daneTA(tlsa_records):
             return True
     return False
 
-
 def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
@@ -1396,7 +1397,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
     prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
-    ciphers_bad, ciphers_phase_out, ciphers_score = evaluate_tls_ciphers(ciphers_accepted)
+    cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+    cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(ciphers_accepted)
 
     ocsp_status = OcspStatus.ok
     if any(
@@ -1418,13 +1420,12 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         prots_good=prots_good,
         prots_sufficient=prots_sufficient,
         prots_score=prots_score,
-        ciphers_bad=ciphers_bad,
-        ciphers_phase_out=ciphers_phase_out,
-        ciphers_score=ciphers_score,
-        # TODO, currently unsupported
-        cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
-        cipher_order=CipherOrderStatus.na,
-        cipher_order_violation=[],
+        ciphers_bad=cipher_evaluation.ciphers_bad_str,
+        ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
+        ciphers_score=cipher_evaluation.score,
+        cipher_order_score=cipher_order_score,
+        cipher_order=cipher_order_status,
+        cipher_order_violation=cipher_order_violation,
         secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
         secure_reneg_score=(
             scoring.WEB_TLS_SECURE_RENEG_GOOD
@@ -1558,17 +1559,56 @@ def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
     return dh_param, ec_param, fs_bad, fs_phase_out, fs_score
 
 
-def evaluate_tls_ciphers(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
-    ciphers_bad = []
-    ciphers_phase_out = []
-    for suite in ciphers_accepted:
+@dataclass(frozen=True)
+class TLSCipherEvaluation:
+    ciphers_good: List[CipherSuite]
+    ciphers_sufficient: List[CipherSuite]
+    ciphers_phase_out: List[CipherSuite]
+    ciphers_bad: List[CipherSuite]
+
+    ciphers_good_str: List[str]
+    ciphers_sufficient_str: List[str]
+    ciphers_phase_out_str: List[str]
+    ciphers_bad_str: List[str]
+
+    @classmethod
+    def from_ciphers_accepted(cls, ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+        ciphers_good = []
+        ciphers_sufficient = []
+        ciphers_phase_out = []
+        ciphers_bad = []
+        for suite in ciphers_accepted:
+            if suite.cipher_suite.name in CIPHERS_GOOD:
+                ciphers_good.append(suite.cipher_suite)
+            elif suite.cipher_suite.name in CIPHERS_SUFFICIENT:
+                ciphers_sufficient.append(suite.cipher_suite)
+            elif suite.cipher_suite.name in CIPHERS_PHASE_OUT:
+                ciphers_phase_out.append(suite.cipher_suite)
+            else:
+                ciphers_bad.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
+        return cls(
+            ciphers_good=ciphers_good, ciphers_sufficient=ciphers_sufficient, ciphers_phase_out=ciphers_phase_out,
+            ciphers_bad=ciphers_bad,
+            ciphers_good_str=cls._format_str(ciphers_good),
+            ciphers_sufficient_str=cls._format_str(ciphers_sufficient),
+            ciphers_phase_out_str=cls._format_str(ciphers_phase_out),
+            ciphers_bad_str=cls._format_str(ciphers_bad),
+        )
+    @staticmethod
+    def _format_str(suites: List[CipherSuite]) -> List[str]:
         # TODO: remove IANA name, just here for debugging now
-        if suite.cipher_suite.name in CIPHERS_PHASE_OUT:
-            ciphers_phase_out.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
-        if suite.cipher_suite.name not in CIPHERS_GOOD + CIPHERS_SUFFICIENT + CIPHERS_PHASE_OUT:
-            ciphers_bad.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
-    ciphers_score = scoring.WEB_TLS_SUITES_BAD if ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
-    return ciphers_bad, ciphers_phase_out, ciphers_score
+        return [f"{suite.openssl_name} ({suite.name})" for suite in suites]
+
+    @property
+    def score(self) -> scoring.Score:
+        return scoring.WEB_TLS_SUITES_BAD if self.ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
+
+
+def test_cipher_order(cipher_evaluation: TLSCipherEvaluation) -> Tuple[List[str], CipherOrderStatus, scoring.Score]:
+    cipher_order_violation = []
+    cipher_order_status = CipherOrderStatus.na
+    cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_OK
+    return cipher_order_violation, cipher_order_status, cipher_order_score
 
 
 def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
