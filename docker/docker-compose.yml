@@ -55,6 +55,7 @@ services:
       # persist certbot configuration between restarts
       - certbot-config:/etc/letsencrypt
       - htpasswd-files:/etc/nginx/htpasswd/external
+      - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
 
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
@@ -645,6 +646,7 @@ services:
     volumes:
       - manual-hof:/app/manual-hall-of-fame/
       - postgres-backups:/var/lib/postgresql/backups
+      - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
 
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
@@ -819,6 +821,24 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+  nginx_logs_exporter:
+    image: ghcr.io/martin-helmich/prometheus-nginxlog-exporter/exporter:v1
+    command:
+      - -config-file=/config.hcl
+    configs:
+      - source: nginx_logs_exporter_config
+        target: /config.hcl
+
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      - internal
+    volumes:
+      - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
+
 volumes:
   postgres: {}
   postgres-backups: {}
@@ -835,6 +855,24 @@ volumes:
   grafana-data: {}
   # shares hosters HoF file between cron and app
   manual-hof: {}
+  # shares nginx log files with log exporter
+  nginx-logs-exporter: {}
+
+configs:
+  nginx_logs_exporter_config:
+    content: |
+      namespace "nginx" {
+        format = "$$remote_addr $$host $$remote_user [$$time_local] $$proxy_host \"$$request\" $$status $$body_bytes_sent \"$$http_referer\" \"$$http_user_agent\" \"$$http_x_forwarded_for\""
+
+        source = {
+          files = ["/var/log/nginx/prometheus-nginxlog-exporter/access.log"]
+        }
+
+        relabel "proxy_host" { from = "proxy_host" }
+        relabel "remote_user" { from = "remote_user" }
+      }
+
+
 
 networks:
   # disable default network
