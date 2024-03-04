@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# truncate nginx logs that are shared with exporter so they don't fill the disk space
+
+set -e
+
+if [ ! "$CRON_DAILY_TRUNCATE_EXPORTER_LOGS" = "True" ];then
+  exit 0
+fi
+
+# logs are only used by exporter which reads then directly, no need to keep old logs around
+truncate -s0 /var/log/nginx/prometheus-nginxlog-exporter/access.log
