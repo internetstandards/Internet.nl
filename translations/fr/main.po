@@ -4075,7 +4075,7 @@ msgstr ""
 #, md-format
 msgid "home teaser"
 msgstr ""
-"Les normes Internet modernes assurent une plus grande fiabilité et une croissance future de l'Internet. \n"
+"Les normes Internet modernes assurent une plus grande fiabilité et une croissance future de l'Internet.\n"
 "Les utilisez-vous ?"
 
 msgid "mail pagetitle"
