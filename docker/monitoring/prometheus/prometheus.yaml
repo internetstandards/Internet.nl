@@ -86,3 +86,15 @@ scrape_configs:
     static_configs:
       - targets:
         - docker_stats_exporter:9338
+
+  - job_name: nginx_logs_exporter
+    scheme: http
+    metrics_path: /metrics
+    metric_relabel_configs:
+      # drop exporter internal metrics
+      - source_labels: [ "__name__" ]
+        regex: '(go|python|process)_.+'
+        action: drop
+    static_configs:
+      - targets:
+        - nginx_logs_exporter:4040
