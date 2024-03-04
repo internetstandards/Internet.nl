@@ -27,6 +27,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum
+from nassl.ssl_client import ClientCertificateRequested
 from sslyze import (
     Scanner,
     ServerScanRequest,
@@ -38,13 +39,19 @@ from sslyze import (
     ServerNetworkConfiguration,
     ProtocolWithOpportunisticTlsEnum,
     ScanCommandsExtraArguments,
-    CertificateInfoExtraArgument, CipherSuite,
+    CertificateInfoExtraArgument,
+    CipherSuite,
 )
+from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut
 
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
 )
+from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import _set_cipher_suite_string
+from sslyze.plugins.openssl_cipher_suites._tls12_workaround import WorkaroundForTls12ForCipherSuites
+from sslyze.plugins.openssl_cipher_suites.cipher_suites import CipherSuitesRepository
+from sslyze.server_connectivity import ServerConnectivityInfo
 
 from checks import categories, scoring
 from checks.http_client import http_get_ip
@@ -60,7 +67,6 @@ from checks.models import (
     WebTestTls,
     ZeroRttStatus,
 )
-from checks.scoring import Score
 from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
@@ -1374,6 +1380,7 @@ def has_daneTA(tlsa_records):
             return True
     return False
 
+
 def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
@@ -1398,7 +1405,16 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-    cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(ciphers_accepted)
+    # TODO: pick best TLS version
+    cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
+        ServerConnectivityInfo(
+            server_location=result.server_location,
+            network_configuration=result.network_configuration,
+            tls_probing_result=result.connectivity_result,
+        ),
+        prots_accepted,
+        cipher_evaluation,
+    )
 
     ocsp_status = OcspStatus.ok
     if any(
@@ -1585,15 +1601,18 @@ class TLSCipherEvaluation:
             elif suite.cipher_suite.name in CIPHERS_PHASE_OUT:
                 ciphers_phase_out.append(suite.cipher_suite)
             else:
-                ciphers_bad.append(f"{suite.cipher_suite.openssl_name} ({suite.cipher_suite.name})")
+                ciphers_bad.append(suite.cipher_suite)
         return cls(
-            ciphers_good=ciphers_good, ciphers_sufficient=ciphers_sufficient, ciphers_phase_out=ciphers_phase_out,
+            ciphers_good=ciphers_good,
+            ciphers_sufficient=ciphers_sufficient,
+            ciphers_phase_out=ciphers_phase_out,
             ciphers_bad=ciphers_bad,
             ciphers_good_str=cls._format_str(ciphers_good),
             ciphers_sufficient_str=cls._format_str(ciphers_sufficient),
             ciphers_phase_out_str=cls._format_str(ciphers_phase_out),
             ciphers_bad_str=cls._format_str(ciphers_bad),
         )
+
     @staticmethod
     def _format_str(suites: List[CipherSuite]) -> List[str]:
         # TODO: remove IANA name, just here for debugging now
@@ -1604,11 +1623,92 @@ class TLSCipherEvaluation:
         return scoring.WEB_TLS_SUITES_BAD if self.ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
 
 
-def test_cipher_order(cipher_evaluation: TLSCipherEvaluation) -> Tuple[List[str], CipherOrderStatus, scoring.Score]:
+def test_cipher_order(
+    server_connectivity_info: ServerConnectivityInfo,
+    tls_versions: List[TlsVersionEnum],
+    cipher_evaluation: TLSCipherEvaluation,
+) -> Tuple[List[str], CipherOrderStatus, scoring.Score]:
     cipher_order_violation = []
-    cipher_order_status = CipherOrderStatus.na
+    cipher_order_status = CipherOrderStatus.good
     cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_OK
+
+    if (
+        not cipher_evaluation.ciphers_bad
+        and not cipher_evaluation.ciphers_phase_out
+        and not cipher_evaluation.ciphers_sufficient
+    ) or tls_versions == [TlsVersionEnum.TLS_1_3]:
+        cipher_order_status = CipherOrderStatus.na
+        return cipher_order_violation, cipher_order_status, cipher_order_score
+
+    tls_version = sorted([t for t in tls_versions if t != TlsVersionEnum.TLS_1_3], key=lambda t: t.value)[-1]
+
+    order_tuples = [
+        (
+            cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out + cipher_evaluation.ciphers_sufficient,
+            cipher_evaluation.ciphers_good,
+        ),
+        (cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out, cipher_evaluation.ciphers_sufficient),
+        (cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
+    ]
+    for expected_less_preferred, expected_more_preferred_list in order_tuples:
+        if cipher_order_status == CipherOrderStatus.bad:
+            break
+        for expected_more_preferred in expected_more_preferred_list:
+            print(
+                f"evaluating less {[s.name for s in expected_less_preferred]} vs "
+                f"more {expected_more_preferred.name} TLS {tls_version}"
+            )
+            if not expected_less_preferred or not expected_more_preferred:
+                continue
+            preferred_suite = find_most_preferred_cipher_suite(
+                server_connectivity_info, tls_version, expected_less_preferred + [expected_more_preferred]
+            )
+            if preferred_suite != expected_more_preferred:
+                # TODO: check which name to report
+                cipher_order_violation = [preferred_suite.name, expected_more_preferred.name]
+                cipher_order_status = CipherOrderStatus.bad
+                cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_BAD
+                break
+
     return cipher_order_violation, cipher_order_status, cipher_order_score
+
+
+# TODO: maybe move to a utils module?
+# adapted from sslyze.plugins.openssl_cipher_suites._test_cipher_suite.connect_with_cipher_suite
+def find_most_preferred_cipher_suite(
+    server_connectivity_info: ServerConnectivityInfo, tls_version: TlsVersionEnum, cipher_suites: List[CipherSuite]
+) -> CipherSuite:
+    suite_names = [suite.openssl_name for suite in cipher_suites]
+    requires_legacy_openssl = True
+    if tls_version == TlsVersionEnum.TLS_1_2:
+        # For TLS 1.2, we need to pick the right version of OpenSSL depending on which cipher suite
+        requires_legacy_openssl = any(
+            [WorkaroundForTls12ForCipherSuites.requires_legacy_openssl(name) for name in suite_names]
+        )
+    elif tls_version == TlsVersionEnum.TLS_1_3:
+        requires_legacy_openssl = False
+
+    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
+        override_tls_version=tls_version, should_use_legacy_openssl=requires_legacy_openssl
+    )
+    _set_cipher_suite_string(tls_version, ":".join(suite_names), ssl_connection.ssl_client)
+
+    try:
+        ssl_connection.connect()
+    except ClientCertificateRequested:
+        pass
+    except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut) as exc:
+        raise TLSException(
+            f"Unable to connect with (previously accepted) cipher suites {suite_names} to determine cipher order: {exc}"
+        )
+    finally:
+        ssl_connection.close()
+
+    selected_cipher = CipherSuitesRepository.get_cipher_suite_with_openssl_name(
+        tls_version, ssl_connection.ssl_client.get_current_cipher_name()
+    )
+    print(f"from CS {suite_names} selected {selected_cipher}")
+    return selected_cipher
 
 
 def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
