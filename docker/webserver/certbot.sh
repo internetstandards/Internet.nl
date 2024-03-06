@@ -30,7 +30,7 @@ fi
 domain=$INTERNETNL_DOMAINNAME
 subdomains="nl.$domain,en.$domain,ipv6.$domain,nl.ipv6.$domain,en.ipv6.$domain"
 if [ "$ENABLE_BATCH" != True ]; then
-  subdomains="$subdomains,www.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain"
+  subdomains="$subdomains,www.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,www.conn.$domain,conn.ipv6.$domain,en.conn.ipv6.$domain,nl.conn.ipv6.$domain,www.conn.ipv6.$domain"
 fi
 if [ ! -z $REDIRECT_DOMAINS ];then
   subdomains="$subdomains,$REDIRECT_DOMAINS"
