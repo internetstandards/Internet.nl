@@ -14,13 +14,12 @@ In this document, `INTERNETNL_DOMAINNAME` is `example.com`.
 
 ## Common parts
 
+Note that typically, you would use `$ORIGIN example.com.` in your zone, allowing for these suffixes to be removed.
+
 For accessing the absolute minimum basic functionality of the application the following DNS records must be configured:
 
     example.com.                    A      192.0.2.1
-                                   AAAA   2001:db8:1::1
-
-The following extra records must be configured for language switching:
-
+                                    AAAA   2001:db8:1::1
     www.example.com.                CNAME  example.com.
     nl.example.com.                 CNAME  example.com.
     en.example.com.                 CNAME  example.com.
@@ -32,6 +31,9 @@ For a domain that does not otherwise send email, use:
     example.com.		           TXT	"v=spf1 a -all"	; The "a" mechanism is needed for the mail test (see rfc7208, section-2.3).
     _domainkey.example.com.	       TXT	"v=DKIM1; p="	; empty DKIM to score 100% for this non-sending subdomain that does have SPF "a" mechanism which is needed for mail test.
     _dmarc.example.com.	           TXT	"v=DMARC1; p=reject; sp=reject;"
+
+    ; optionally set an CAA record to Let's Encrypt (note that if CAA is used, Let's Encrypt must be present)
+    ; example.com.                 CAA 0 issue "letsencrypt.org;"
 
 The `INTERNETNL_DOMAINNAME` host should also have a working MX and correct FCrDNS.
 
@@ -51,7 +53,7 @@ The single test instance also has an IPv6-only host:
     nl.ipv6.example.com.            CNAME  ipv6.example.com.
     en.ipv6.example.com.            CNAME  ipv6.example.com.
 
-For the connection test the following records are also required:
+For the connection test the following records are also required (i.e., not needed for batch mode):
 
     conn.example.com.               CNAME  example.com.
     en.conn.example.com.            CNAME  example.com.
