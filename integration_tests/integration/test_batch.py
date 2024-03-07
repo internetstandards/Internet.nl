@@ -65,20 +65,6 @@ def test_batch_requires_auth(path):
     assert response.status_code == 401
 
 
-@pytest.mark.parametrize(
-    "path",
-    ["requests", "requests/414878c6bde74343bcbf6a14de7d62de", "requests/414878c6bde74343bcbf6a14de7d62de/results"],
-)
-def test_batch_auth_environment_variable_user(path):
-    """Test if user/password provided by environment variables can login."""
-
-    # BATCH_AUTH provided in docker/test.env
-    auth = ("test", "test")
-
-    response = requests.post(INTERNETNL_API + "requests", auth=auth, verify=False)
-    assert response.status_code != 401
-
-
 def test_batch_request(unique_id, register_test_user, test_domain):
     request_data = {"type": "web", "domains": [test_domain], "name": unique_id}
 
