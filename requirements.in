@@ -42,6 +42,7 @@ colorlog
 setuptools_scm
 sentry-sdk
 forcediphttpsadapter
+pytz
 
 # Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
 dnspython < 2.4.0  # dependency of eventlet
