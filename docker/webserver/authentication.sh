@@ -10,7 +10,7 @@ fi
 
 # enable basic auth when user/password is configured
 if [ ! "$BASIC_AUTH_RAW" = "" ];then
-  echo 'auth_basic "Please enter your username and password";auth_basic_user_file /etc/nginx/htpasswd/basic_auth.htpasswd;' > /etc/nginx/conf.d/basic_auth.conf
+  echo 'auth_basic "Please enter your basic access username and password";auth_basic_user_file /etc/nginx/htpasswd/basic_auth.htpasswd;' > /etc/nginx/conf.d/basic_auth.conf
 fi
 
 # create IP allow list

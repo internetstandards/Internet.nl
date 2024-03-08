@@ -293,12 +293,12 @@ server {
 
     # monitoring, requires authentication
     location /grafana {
-      auth_basic "Please enter your username and password";
+      auth_basic "Please enter your monitoring username and password";
       auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
       proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
     }
     location /prometheus {
-      auth_basic "Please enter your username and password";
+      auth_basic "Please enter your monitoring username and password";
       auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
       proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
     }
