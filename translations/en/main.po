@@ -2022,7 +2022,7 @@ msgid "detail tech data http-securitytxt requested-from"
 msgstr "security.txt requested from {hostname}."
 
 msgid "detail tech data http-securitytxt retrieved-from"
-msgstr "security.txt retrieved from {hostname}."
+msgstr "security.txt retrieved from {url}."
 
 msgid "detail tech data http-securitytxt signed_format_issue"
 msgstr ""
