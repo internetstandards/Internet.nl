@@ -81,7 +81,7 @@ msgstr ""
 
 msgid "accessibility content"
 msgstr ""
-"# Accessibility\n"
+"# Accessibilité\n"
 "\n"
 "The Dutch Internet Standards Platform pays a lot of attention to the accessibility of Internet.nl. We want to offer all information in such a way that everyone can view and use it.\n"
 "\n"
@@ -89,10 +89,10 @@ msgstr ""
 "The website Internet.nl was audited for accessibility by the Dutch Accessibility Foundation at the end of 2018. The findings are included in the [report \"WCAG 2 study www.internet.nl - level AA\"](/static/accessibility/check_6967_auto_rapport.pdf) (in Dutch) d.d. 14 November 2018. Based on these findings, the Internet Standards Platform has implemented a number of improvements for the accessibility of Internet.nl.  "
 
 msgid "base about"
-msgstr "About Internet.nl"
+msgstr "À propose de conformite-internet.fr"
 
 msgid "base accessibility"
-msgstr "Accessibility"
+msgstr "Accessibilité"
 
 msgid "base blogs"
 msgstr "Blogs"
@@ -104,33 +104,33 @@ msgid "base copyright"
 msgstr "Copyright"
 
 msgid "base disclosure"
-msgstr "Report vulnerability"
+msgstr "Signaler une vulnerabilité"
 
 msgid "base faqs"
-msgstr "Knowledge base"
+msgstr "Base de connaissances"
 
 msgid "base halloffame"
-msgstr "Hall of Fame"
+msgstr "Les meilleurs"
 
 msgid "base halloffame champions"
-msgstr "Hall of Fame - Champions!"
+msgstr "Les meilleurs - champions !"
 
 msgid "base halloffame lead"
 msgstr ""
-"{{count}} domains with 2 x 100%  \n"
+"{{count}} domaines avec 2 x 100%  \n"
 "Latest entry: {{latest|date:'d-m-Y'}}"
 
 msgid "base halloffame link"
-msgstr "To Hall of Fame - Champions!"
+msgstr "Voir les meilleurs - champions!"
 
 msgid "base halloffame mail"
-msgstr "Hall of Fame - Email"
+msgstr "Les meilleurs - Email"
 
 msgid "base halloffame web"
-msgstr "Hall of Fame - Websites"
+msgstr "Les meilleurs - Sites web"
 
 msgid "base home"
-msgstr "Home"
+msgstr "Accueil"
 
 msgid "base info"
 msgstr ""
@@ -138,13 +138,13 @@ msgstr ""
 "government."
 
 msgid "base news"
-msgstr "News"
+msgstr "Actualités"
 
 msgid "base newslink"
-msgstr "To the news overview"
+msgstr "Vers les actualités"
 
 msgid "base privacy"
-msgstr "Privacy statement"
+msgstr "Politique de confidentialité"
 
 msgid "base test connection explain"
 msgstr ""
@@ -163,18 +163,18 @@ msgstr ""
 "## Test your connection"
 
 msgid "base test connection label"
-msgstr "Test your connection"
+msgstr "Testez votre connection"
 
 msgid "base test connection text"
 msgstr ""
-"Modern addresses reachable?   \n"
-"Domain signatures validated?"
+"Joignable par une adresse Internet moderne ?   \n"
+"Signatures du domaine validées ?"
 
 msgid "base test connection title"
-msgstr "About the connection test"
+msgstr "À propos du test de la connexion"
 
 msgid "base test explain"
-msgstr "About the test"
+msgstr "À propos du test"
 
 msgid "base test mail explain"
 msgstr ""
@@ -240,32 +240,32 @@ msgstr ""
 "## Widget\n"
 "You can integrate the website test into your own website using our [widget code](/widget-site/).\n"
 "\n"
-"## Test your website"
+"## Testez votre site web"
 
 msgid "base test website input"
-msgstr "Your website domain name:"
+msgstr "Le nom de domaine de votre site :"
 
 msgid "base test website label"
-msgstr "Test your website"
+msgstr "Testez votre site web"
 
 msgid "base test website text"
 msgstr ""
-"Modern address? Signed domain? Secure connection? Route authorisation?"
+"Adresse Internet moderne ? Nom de domaine signé ? Connexion sécurisée ? Autorisation de routage ?"
 
 msgid "base test website title"
-msgstr "About the website test"
+msgstr "À propos du test de site web"
 
 msgid "base widget mail"
-msgstr "Email test widget"
+msgstr "Widget du test email"
 
 msgid "base widget site"
-msgstr "Website test widget"
+msgstr "Widget du test de site web"
 
 msgid "connection pagetitle"
-msgstr "Connection test"
+msgstr "Test de connexion"
 
 msgid "connection title"
-msgstr "Connection test"
+msgstr "Test de connexion"
 
 msgid "copyright content"
 msgstr ""
