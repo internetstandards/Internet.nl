@@ -121,7 +121,7 @@ msgstr ""
 "Dernière entrée : {{latest|date:'d/m/Y'}}"
 
 msgid "base halloffame link"
-msgstr "Voir les meilleurs - champions!"
+msgstr "Voir les meilleurs - champions !"
 
 msgid "base halloffame mail"
 msgstr "Les meilleurs - Email"
@@ -3980,22 +3980,21 @@ msgstr "Knowledge base"
 
 #, md-format
 msgid "halloffame champions menu"
-msgstr "Champions!"
+msgstr "Champions !"
 
 #, md-format
 msgid "halloffame champions subtitle"
-msgstr "100% in website *and* email test"
+msgstr "100% en site web *et* test email"
 
 #, md-format
 msgid "halloffame champions text"
 msgstr ""
-"The {{count}} domains below score 100% in both the website test and the "
-"email test. Inductees of this Hall of Fame are allowed to [use both 100% "
-"badges](/faqs/badges/)."
+"Les {{count}} domaines ci-dessous ont un de 100% avec le test site web et le"
+"test email. Ils peuvent prétendre d'utiliser [les deux badges de 100%](/faqs/badges/)."
 
 #, md-format
 msgid "halloffame champions title"
-msgstr "Hall of Fame - Champions!"
+msgstr "Les meilleurs - champions !"
 
 msgid "halloffame mail badge"
 msgstr "Badge with text: 100% score in email test"
@@ -4006,39 +4005,38 @@ msgstr "Email"
 
 #, md-format
 msgid "halloffame mail subtitle"
-msgstr "100% in email test"
+msgstr "100% en test email"
 
 #, md-format
 msgid "halloffame mail text"
 msgstr ""
-"The {{count}} domains below score 100% in the email test. Inductees of this "
-"Hall of Fame are allowed to [use the 100% mail badge](/faqs/badges/)."
+"Les {{count}} domaines ci-dessous ont un score de 100% avec le test email. Ils "
+"peuvent prétendre au [badge 100% email](/faqs/badges/)."
 
 #, md-format
 msgid "halloffame mail title"
-msgstr "Hall of Fame - Email"
+msgstr "Les meilleurs - email"
 
 msgid "halloffame web badge"
 msgstr "Badge with text: 100% score in website test"
 
 #, md-format
 msgid "halloffame web menu"
-msgstr "Websites"
+msgstr "Sites web"
 
 #, md-format
 msgid "halloffame web subtitle"
-msgstr "100% in website test"
+msgstr "100% en test site web"
 
 #, md-format
 msgid "halloffame web text"
 msgstr ""
-"The {{count}} domains below score 100% in the website test. Inductees of "
-"this Hall of Fame are allowed to [use the 100% website "
-"badge](/faqs/badges/)."
+"Les {{count}} domaines ci-dessous ont un score de 100% dans le test de site web."
+"Ils peuvent prétendre à utiliser le [badge 100% site web](/faqs/badges/)."
 
 #, md-format
 msgid "halloffame web title"
-msgstr "Hall of Fame - Websites"
+msgstr "Les meilleurs - sites web"
 
 msgid "home pagetitle"
 msgstr ""
@@ -4243,7 +4241,7 @@ msgstr ""
 
 msgid "probes auto-redirect"
 msgstr ""
-"Vous serz automatiquement redirigé vers la pages des résultats quand tout les \n"
+"Vous serez automatiquement redirigé vers la pages des résultats quand tout les \n"
 "tests sont terminés."
 
 msgid "probes no-javascript"
@@ -5006,7 +5004,7 @@ msgid "test sitednssec passed summary"
 msgstr "Domain name signed (DNSSEC)"
 
 msgid "test sitednssec title"
-msgstr "Domain name signed?"
+msgstr "Nom de domaine signé ?"
 
 msgid "test sitednssec warning description"
 msgstr ""
@@ -5053,7 +5051,7 @@ msgid "test siteipv6 passed summary"
 msgstr "Reachable via modern internet address (IPv6)"
 
 msgid "test siteipv6 title"
-msgstr "Reachable via modern address?"
+msgstr "Joignable via une adresse Internet moderne ?"
 
 msgid "test siteipv6 warning description"
 msgstr ""
