@@ -4243,8 +4243,8 @@ msgstr ""
 
 msgid "probes auto-redirect"
 msgstr ""
-"You will be automatically redirected to the results page when all tests are \n"
-"finished."
+"Vous serz automatiquement redirigé vers la pages des résultats quand tout les \n"
+"tests sont terminés."
 
 msgid "probes no-javascript"
 msgstr ""
@@ -4259,34 +4259,34 @@ msgid "probes no-redirection"
 msgstr "Test error. Please try again later, or test another domain name."
 
 msgid "probes test-finished"
-msgstr "Test finished! Results available..."
+msgstr "Test fini ! Resultats disponible..."
 
 msgid "probes test-running"
-msgstr "Running..."
+msgstr "En cours d'exécution..."
 
 msgid "probes tests-description"
-msgstr "The items below are being tested."
+msgstr "Les éléments ci-dessous sont en cours de test."
 
 msgid "probes tests-duration"
-msgstr "The duration of the test is between 5 and {{cache_ttl}} seconds."
+msgstr "La durée du test est entre 5 et {{cache_ttl}} secondes."
 
 msgid "results dated-presentation"
-msgstr "Dated result presentation. Please rerun the test."
+msgstr "Résultats expirés. Veuillez refaire le test.."
 
 msgid "results domain appsecpriv http-headers label"
-msgstr "HTTP security headers"
+msgstr "Sécurité des en-têtes HTTP"
 
 msgid "results domain appsecpriv other-options label"
-msgstr "Other security options"
+msgstr "Autres options de sécurités"
 
 msgid "results domain ipv6 web-server label"
-msgstr "Web server"
+msgstr "Serveur web"
 
 msgid "results domain rpki web-server label"
-msgstr "Web server"
+msgstr "Serveur web"
 
 msgid "results domain tls http-headers label"
-msgstr "HTTP headers"
+msgstr "En-têtes HTTP"
 
 msgid "results domain tls https label"
 msgstr "HTTP"
@@ -4295,22 +4295,22 @@ msgid "results domain tls tls label"
 msgstr "TLS"
 
 msgid "results domain-mail ipv6 name-servers label"
-msgstr "Name servers of domain"
+msgstr "Serveurs de nom du domaine"
 
 msgid "results domain-mail rpki name-servers label"
-msgstr "Name servers of domain"
+msgstr "Serveurs de nom du domaine"
 
 msgid "results domain-mail tls certificate label"
-msgstr "Certificate"
+msgstr "Certificat"
 
 msgid "results domain-mail tls dane label"
 msgstr "DANE"
 
 msgid "results empty-argument-alt-text"
-msgstr "None"
+msgstr "Aucun"
 
 msgid "results explanation label"
-msgstr "Test explanation:"
+msgstr "Explication du test :"
 
 msgid "results further-testing connection content"
 msgstr ""
@@ -4496,7 +4496,7 @@ msgid "test connipv6 passed summary"
 msgstr "Modern addresses reachable (IPv6)"
 
 msgid "test connipv6 title"
-msgstr "Modern addresses reachable?"
+msgstr "Joignable via une adresse Internet moderne ?"
 
 msgid "test connipv6 warning description"
 msgstr ""
@@ -4541,7 +4541,7 @@ msgid "test connresolver passed summary"
 msgstr "Domain signatures validated (DNSSEC)"
 
 msgid "test connresolver title"
-msgstr "Domain signatures validated?"
+msgstr "Signatures du domaine validées ?"
 
 msgid "test connresolver warning description"
 msgstr ""
@@ -4594,7 +4594,7 @@ msgid "test mailauth passed summary"
 msgstr "Authenticity marks against email phishing (DMARC, DKIM and SPF)"
 
 msgid "test mailauth title"
-msgstr "Authenticity marks against email phishing?"
+msgstr "Configuration d'authenticité contre le hameçonnage ?"
 
 msgid "test mailauth warning description"
 msgstr ""
@@ -4648,7 +4648,7 @@ msgid "test maildnssec passed summary"
 msgstr "All domain names signed (DNSSEC)"
 
 msgid "test maildnssec title"
-msgstr "Domain names signed?"
+msgstr "Nom de domaine signé ?"
 
 msgid "test maildnssec warning description"
 msgstr ""
@@ -4697,7 +4697,7 @@ msgid "test mailipv6 passed summary"
 msgstr "Reachable via modern internet address (IPv6)"
 
 msgid "test mailipv6 title"
-msgstr "Reachable via modern internet address?"
+msgstr "Joignable via une adresse Internet moderne ?"
 
 msgid "test mailipv6 warning description"
 msgstr ""
@@ -4753,7 +4753,7 @@ msgid "test mailrpki passed summary"
 msgstr "Authorised route announcement (RPKI)"
 
 msgid "test mailrpki title"
-msgstr "Route authorisation?"
+msgstr "Autorisation de routage ?"
 
 msgid "test mailrpki warning description"
 msgstr ""
@@ -4870,7 +4870,7 @@ msgid "test mailtls passed summary"
 msgstr "Mail server connection sufficiently secured (STARTTLS and DANE)"
 
 msgid "test mailtls title"
-msgstr "Secure mail server connection?"
+msgstr "Connexion sécurisée au serveur mail ?"
 
 msgid "test mailtls unreachable description"
 msgstr ""
@@ -4953,7 +4953,7 @@ msgid "test siteappsecpriv passed summary"
 msgstr "All security options set (Security options) "
 
 msgid "test siteappsecpriv title"
-msgstr "Security options set?"
+msgstr "Options de sécurité configurée ?"
 
 msgid "test siteappsecpriv warning description"
 msgstr ""
@@ -5107,7 +5107,7 @@ msgid "test siterpki passed summary"
 msgstr "Authorised route announcement (RPKI)"
 
 msgid "test siterpki title"
-msgstr "Route authorisation?"
+msgstr "Autorisation de routage ?"
 
 msgid "test siterpki warning description"
 msgstr ""
@@ -5157,7 +5157,7 @@ msgid "test sitetls passed summary"
 msgstr "Connection sufficiently secured (HTTPS)"
 
 msgid "test sitetls title"
-msgstr "Secure connection?"
+msgstr "Connexion securisée ?"
 
 msgid "test sitetls unreachable description"
 msgstr ""
