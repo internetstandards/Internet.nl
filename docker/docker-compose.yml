@@ -627,6 +627,9 @@ services:
       - DB_PASSWORD=password
       - CRON_DAILY_POSTGRESQL_BACKUP
       - CRON_WEEKLY_POSTGRESQL_BACKUP
+      - IPV4_IP_APP_INTERNAL
+      - INTERNETNL_DOMAINNAME
+      - INTERNETNL_CACHE_TTL
 
     restart: unless-stopped
     logging:
@@ -647,6 +650,7 @@ services:
       - manual-hof:/app/manual-hall-of-fame/
       - postgres-backups:/var/lib/postgresql/backups
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
+      - prometheus-textfile-directory:/prometheus-textfile-directory
 
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
@@ -793,6 +797,8 @@ services:
       - --collector.netdev.device-exclude=veth
       # ignore docker container interfaces
       - --collector.netclass.ignored-devices=veth
+      - --collector.textfile
+      - --collector.textfile.directory=/prometheus-textfile-directory
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -804,6 +810,7 @@ services:
     volumes:
       - /:/host:ro
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+      - prometheus-textfile-directory:/prometheus-textfile-directory
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
@@ -851,6 +858,8 @@ volumes:
   unbound-zones: {}
   # permanent storage for Prometheus metrics
   prometheus-data: {}
+  # prometheus metric textfile shared volume
+  prometheus-textfile-directory: {}
   # permanent storage for Grafana custom dashboards
   grafana-data: {}
   # shares hosters HoF file between cron and app
