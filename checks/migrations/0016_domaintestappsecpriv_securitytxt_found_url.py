@@ -6,7 +6,7 @@ from django.db import migrations  # , models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("checks", "0015_auto_20240212_1616"),
+        ("checks", "0015_add_rpki_scoring"),
     ]
 
     operations = [
