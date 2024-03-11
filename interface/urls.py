@@ -40,7 +40,7 @@ urlpatterns = [
     re_path(r"^(domain|site)/$", domain.index),
     re_path(rf"^(domain|site)/{regex_dname}/$", domain.siteprocess),
     re_path(rf"^(domain|site)/probes/{regex_dname}/$", domain.siteprobesstatus),
-    re_path(rf"^(domain|site)/(?P<probename>(ipv6|tls|dnssec|appsecpriv))/{regex_dname}/$", domain.siteprobeview),
+    re_path(rf"^(domain|site)/(?P<probename>(ipv6|tls|dnssec|appsecpriv|rpki))/{regex_dname}/$", domain.siteprobeview),
     re_path(rf"^(domain|site)/{regex_dname}/results$", domain.resultscurrent),
     re_path(r"^(domain|site)/(?P<dname>.*)/(?P<id>[0-9]+)/$", domain.resultsstored, name="webtest_results"),
     # Non valid domain, convert to punycode and try again

@@ -25,7 +25,7 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-pysrcdirs = internetnl tests interface checks integration_tests
+pysrcdirs = internetnl tests interface checks integration_tests docker
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
 bin = .venv/bin
