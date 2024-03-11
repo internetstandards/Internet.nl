@@ -46,9 +46,9 @@ Run the following command to install required dependencies, setup Docker Apt rep
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
-    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" > /etc/apt/sources.list.d/docker.list && \
-    apt update && \
+    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable" \
+    > /etc/apt/sources.list.d/docker.list && apt update && \
     apt install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 Configure Docker for IPv6 and Live restore:
@@ -66,9 +66,9 @@ Run the following commands to install the files in the expected location:
     RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env" && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env" && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml" && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
