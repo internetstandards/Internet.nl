@@ -40,7 +40,7 @@ urlpatterns = [
     url(r"^(domain|site)/$", domain.index),
     url(rf"^(domain|site)/{regex_dname}/$", domain.siteprocess),
     url(rf"^(domain|site)/probes/{regex_dname}/$", domain.siteprobesstatus),
-    url(rf"^(domain|site)/(?P<probename>(ipv6|tls|dnssec|appsecpriv))/{regex_dname}/$", domain.siteprobeview),
+    url(rf"^(domain|site)/(?P<probename>(ipv6|tls|dnssec|appsecpriv|rpki))/{regex_dname}/$", domain.siteprobeview),
     url(rf"^(domain|site)/{regex_dname}/results$", domain.resultscurrent),
     url(r"^(domain|site)/(?P<dname>.*)/(?P<id>[0-9]+)/$", domain.resultsstored, name="webtest_results"),
     # Non valid domain, convert to punycode and try again
