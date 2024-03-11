@@ -198,19 +198,19 @@ msgstr ""
 "## Widget\n"
 "You can integrate the email test into your own website using our [widget code](/widget-mail/).\n"
 "\n"
-"## Test your email"
+"## Testez votre domaine email"
 
 msgid "base test mail input"
-msgstr "Your email address:"
+msgstr "Votre domaine email :"
 
 msgid "base test mail label"
-msgstr "Test your email"
+msgstr "Testez votre domaine email"
 
 msgid "base test mail text"
-msgstr "Modern address? Anti-phishing? Secure transport? Route authorisation?"
+msgstr "Adresse IP moderne ? Anti-hameçonnage ? Transport sécurisé ? Autorisation du routage ?"
 
 msgid "base test mail title"
-msgstr "About the email test"
+msgstr "À propos du test"
 
 msgid "base test prechecks invalid domain"
 msgstr ""
@@ -218,7 +218,7 @@ msgstr ""
 "Explanation: An A and/or AAAA record is necessary for the website test, and a SOA record for the email test."
 
 msgid "base test start"
-msgstr "Start test"
+msgstr "Démarrer"
 
 msgid "base test website explain"
 msgstr ""
