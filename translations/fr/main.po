@@ -4042,8 +4042,8 @@ msgstr "Hall of Fame - Websites"
 
 msgid "home pagetitle"
 msgstr ""
-"Test for modern Internet Standards like IPv6, DNSSEC, HTTPS, DMARC, STARTTLS\n"
-" and DANE."
+"Test pour des standards Internet modernes tel que IPv6, DNSSEC, HTTPS, DMARC, STARTTLS\n"
+" et DANE."
 
 msgid "home stats connection"
 msgstr "connexions uniques"
