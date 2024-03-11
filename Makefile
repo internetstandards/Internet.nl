@@ -33,7 +33,7 @@ else
 	POFILES_TAR_ARGS+=$(TAR)
 endif
 
-pysrcdirs = internetnl tests interface checks integration_tests
+pysrcdirs = internetnl tests interface checks integration_tests docker
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
 bin = .venv/bin
