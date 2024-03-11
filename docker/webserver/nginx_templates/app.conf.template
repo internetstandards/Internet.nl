@@ -33,7 +33,7 @@ server {
 
     http2 on;
 
-    server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    server_name  ${INTERNETNL_DOMAINNAME} ~(en|fr|nl|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
@@ -56,7 +56,7 @@ server {
 
     http2 on;
 
-    server_name ~(conn|(?<subdomain>en\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
+    server_name ~(conn|(?<subdomain>en\.|fr\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
 
     # pass specific connection test paths to backend
     # /connection/
@@ -125,7 +125,7 @@ server {
 
     http2 on;
 
-    server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    server_name  www.${INTERNETNL_DOMAINNAME} ~(en|fr|nl|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
@@ -162,7 +162,7 @@ server {
 
     http2 on;
 
-    server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>nl\.|en\.|www\.|ipv6\.)${INTERNETNL_DOMAINNAME};
+    server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>en\.|fr\.|nl\.|www\.|ipv6\.)${INTERNETNL_DOMAINNAME};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
