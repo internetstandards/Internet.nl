@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from timeit import default_timer as timer
-from typing import List, Tuple, Set, Optional
+from typing import List, Optional
 from urllib.parse import urlparse
 
 import eventlet
@@ -26,7 +26,7 @@ from cryptography.x509 import (
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum, EphemeralKeyInfo
+from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum
 from nassl.ssl_client import ClientCertificateRequested
 from sslyze import (
     Scanner,
@@ -90,7 +90,10 @@ from checks.tasks.tls_constants import (
     CERT_CURVE_MIN_KEY_SIZE,
     CERT_EC_CURVES_GOOD,
     CERT_CURVES_GOOD,
-    CERT_EC_CURVES_PHASE_OUT, PROTOCOLS_GOOD, PROTOCOLS_SUFFICIENT, PROTOCOLS_PHASE_OUT,
+    CERT_EC_CURVES_PHASE_OUT,
+    PROTOCOLS_GOOD,
+    PROTOCOLS_SUFFICIENT,
+    PROTOCOLS_PHASE_OUT,
 )
 from checks.tasks.shared import (
     aggregate_subreports,
@@ -1669,6 +1672,7 @@ class TLSCipherOrderEvaluation:
     status: CipherOrderStatus
     score: scoring.Score
 
+
 def test_cipher_order(
     server_connectivity_info: ServerConnectivityInfo,
     tls_versions: List[TlsVersionEnum],
@@ -1686,7 +1690,7 @@ def test_cipher_order(
             score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
         )
 
-    tls_version = sorted([t for t in tls_versions if t != TlsVersionEnum.TLS_1_3], key=lambda t: t.value, reverse=True)[0]
+    tls_version = sorted([t for t in tls_versions if t != TlsVersionEnum.TLS_1_3], key=lambda t: t.value)[-1]
 
     order_tuples = [
         (
