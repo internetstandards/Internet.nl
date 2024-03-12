@@ -23,6 +23,9 @@ For accessing the absolute minimum basic functionality of the application the fo
     www.example.com.                CNAME  example.com.
     nl.example.com.                 CNAME  example.com.
     en.example.com.                 CNAME  example.com.
+    ipv6.example.com.               AAAA   2001:db8:1::1
+    nl.ipv6.example.com.            CNAME  ipv6.example.com.
+    en.ipv6.example.com.            CNAME  ipv6.example.com.
 
 The hostname (`INTERNETNL_DOMAINNAME`) should have SPF, DKIM and DMARC,
 as some mail servers may filter on this, and it could affect mail tests.
@@ -46,24 +49,15 @@ Set `IPV4_IP_PUBLIC=127.0.0.1` and `IPV6_IP_PUBLIC=::1` in `docker/host.env`.
 
 ## Specific settings for single test mode
 
-The single test instance also has an IPv6-only host:
-
-    ipv6.example.com.               AAAA   2001:db8:1::1
-    www.ipv6.example.com.           CNAME  ipv6.example.com.
-    nl.ipv6.example.com.            CNAME  ipv6.example.com.
-    en.ipv6.example.com.            CNAME  ipv6.example.com.
-
 For the connection test the following records are also required (i.e., not needed for batch mode):
 
     conn.example.com.               CNAME  example.com.
     en.conn.example.com.            CNAME  example.com.
     nl.conn.example.com.            CNAME  example.com.
-    www.conn.example.com.           CNAME  example.com.
 
     conn.ipv6.example.com.          CNAME  ipv6.example.com.
     nl.conn.ipv6.example.com.       CNAME  ipv6.example.com.
     en.conn.ipv6.example.com.       CNAME  ipv6.example.com.
-    www.conn.ipv6.example.com.      CNAME  ipv6.example.com.
 
     test-ns-signed.example.com.     NS     example.com.
     test-ns6-signed.example.com.    NS     ipv6.example.com.
