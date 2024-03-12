@@ -17,16 +17,12 @@ adding the above files.
 
 You need to translate all the strings in `main.po`.
 
-To add a new meny entry for the new language, you also need to update the file
+To add a new meny entry for the new language:
+* add the language to `internet.nl/settings.py`
+* update `webserver/nginx_templates/app.conf.template` to include the language
+* update `docker/webserver/certbot.sh` to request LE certs for the new subdomain
 
-`internet.nl/settings.py`
-
-and to have the webserver correctly route the traffic to the newly created
-language and correctly create the LE certificates the
-
-`webserver/nginx_templates/app.conf.template`
-
-needs to be updated according in various places. This also presumes you
+This presumes you
 have the corresponding DNS entries already created, such as
 
 ```
