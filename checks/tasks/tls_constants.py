@@ -1,6 +1,7 @@
 from cryptography.hazmat._oid import SignatureAlgorithmOID
 from cryptography.hazmat.primitives.asymmetric import x25519, x448, ec
 from nassl.ephemeral_key_info import OpenSslEcNidEnum
+from sslyze import TlsVersionEnum
 
 # NCSC guideline B3-2
 CERT_SIGALG_GOOD = [
@@ -77,6 +78,17 @@ CIPHERS_PHASE_OUT = [
     "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
 ]
 
+PROTOCOLS_GOOD = [
+    TlsVersionEnum.TLS_1_3,
+]
+
+PROTOCOLS_SUFFICIENT = [
+    TlsVersionEnum.TLS_1_2,
+]
+PROTOCOLS_PHASE_OUT = [
+    TlsVersionEnum.TLS_1_1,
+    TlsVersionEnum.TLS_1_0,
+]
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = int(

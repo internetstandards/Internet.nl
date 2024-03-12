@@ -90,7 +90,7 @@ from checks.tasks.tls_constants import (
     CERT_CURVE_MIN_KEY_SIZE,
     CERT_EC_CURVES_GOOD,
     CERT_CURVES_GOOD,
-    CERT_EC_CURVES_PHASE_OUT,
+    CERT_EC_CURVES_PHASE_OUT, PROTOCOLS_GOOD, PROTOCOLS_SUFFICIENT, PROTOCOLS_PHASE_OUT,
 )
 from checks.tasks.shared import (
     aggregate_subreports,
@@ -1299,8 +1299,9 @@ def check_mail_tls(server, dane_cb_data, task):
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+    prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
-    prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
+    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
@@ -1323,11 +1324,11 @@ def check_mail_tls(server, dane_cb_data, task):
     results = dict(
         tls_enabled=True,
         tls_enabled_score=scoring.MAIL_TLS_STARTTLS_EXISTS_GOOD,
-        prots_bad=prots_bad,
-        prots_phase_out=prots_phase_out,
-        prots_good=prots_good,
-        prots_sufficient=prots_sufficient,
-        prots_score=prots_score,
+        prots_bad=protocol_evaluation.bad_str,
+        prots_phase_out=protocol_evaluation.phase_out_str,
+        prots_good=protocol_evaluation.good_str,
+        prots_sufficient=protocol_evaluation.sufficient_str,
+        prots_score=protocol_evaluation.score,
         ciphers_bad=cipher_evaluation.ciphers_bad_str,
         ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
         ciphers_score=cipher_evaluation.score,
@@ -1406,8 +1407,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+    prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
-    prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
+    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
@@ -1435,11 +1437,11 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
     probe_result = dict(
         tls_enabled=True,
-        prots_bad=prots_bad,
-        prots_phase_out=prots_phase_out,
-        prots_good=prots_good,
-        prots_sufficient=prots_sufficient,
-        prots_score=prots_score,
+        prots_bad=protocol_evaluation.bad_str,
+        prots_phase_out=protocol_evaluation.phase_out_str,
+        prots_good=protocol_evaluation.good_str,
+        prots_sufficient=protocol_evaluation.sufficient_str,
+        prots_score=protocol_evaluation.score,
         ciphers_bad=cipher_evaluation.ciphers_bad_str,
         ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
         ciphers_score=cipher_evaluation.score,
@@ -1514,27 +1516,51 @@ def run_sslyze(scan, dane_cb_data, connection_limit):
     return all_suites, result
 
 
-def evaluate_tls_protocols(prots_accepted: List[TlsVersionEnum]):
-    prots_good = []
-    prots_sufficient = []
-    prots_bad = []
-    prots_phase_out = []
-    prots_score = scoring.WEB_TLS_PROTOCOLS_GOOD
+@dataclass(frozen=True)
+class TLSProtocolEvaluation:
+    good: List[TlsVersionEnum]
+    sufficient: List[TlsVersionEnum]
+    phase_out: List[TlsVersionEnum]
+    bad: List[TlsVersionEnum]
 
-    prot_test_configs = {
-        TlsVersionEnum.TLS_1_3: ("TLS 1.3", prots_good, scoring.WEB_TLS_PROTOCOLS_GOOD),
-        TlsVersionEnum.TLS_1_2: ("TLS 1.2", prots_sufficient, scoring.WEB_TLS_PROTOCOLS_GOOD),
-        TlsVersionEnum.TLS_1_1: ("TLS 1.1", prots_phase_out, scoring.WEB_TLS_PROTOCOLS_GOOD),
-        TlsVersionEnum.TLS_1_0: ("TLS 1.0", prots_phase_out, scoring.WEB_TLS_PROTOCOLS_GOOD),
-        TlsVersionEnum.SSL_3_0: ("SSL 3.0", prots_bad, scoring.WEB_TLS_PROTOCOLS_BAD),
-        TlsVersionEnum.SSL_2_0: ("SSL 2.0", prots_bad, scoring.WEB_TLS_PROTOCOLS_BAD),
-    }
-    for prot_accepted in prots_accepted:
-        name, target_list, score = prot_test_configs[prot_accepted]
-        target_list.append(name)
-        prots_score = min(prots_score, score)
+    good_str: List[str]
+    sufficient_str: List[str]
+    phase_out_str: List[str]
+    bad_str: List[str]
 
-    return prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score
+    @classmethod
+    def from_protocols_accepted(cls, protocols_accepted: List[TlsVersionEnum]):
+        good = []
+        sufficient = []
+        phase_out = []
+        bad = []
+        for protocol in protocols_accepted:
+            if protocol in PROTOCOLS_GOOD:
+                good.append(protocol)
+            elif protocol in PROTOCOLS_SUFFICIENT:
+                sufficient.append(protocol)
+            elif protocol in PROTOCOLS_PHASE_OUT:
+                phase_out.append(protocol)
+            else:
+                bad.append(protocol)
+        return cls(
+            good=good,
+            sufficient=sufficient,
+            phase_out=phase_out,
+            bad=bad,
+            good_str=cls._format_str(good),
+            sufficient_str=cls._format_str(sufficient),
+            phase_out_str=cls._format_str(phase_out),
+            bad_str=cls._format_str(bad),
+        )
+
+    @staticmethod
+    def _format_str(protocols: List[TlsVersionEnum]) -> List[str]:
+        return [p.name.replace("_", " ", 1).replace("_", ".") for p in protocols]
+
+    @property
+    def score(self) -> scoring.Score:
+        return scoring.WEB_TLS_PROTOCOLS_BAD if self.bad else scoring.WEB_TLS_PROTOCOLS_GOOD
 
 
 def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
@@ -1643,7 +1669,7 @@ def test_cipher_order(
         cipher_order_status = CipherOrderStatus.na
         return cipher_order_violation, cipher_order_status, cipher_order_score
 
-    tls_version = sorted([t for t in tls_versions if t != TlsVersionEnum.TLS_1_3], key=lambda t: t.value)[-1]
+    tls_version = sorted([t for t in tls_versions if t != TlsVersionEnum.TLS_1_3], key=lambda t: t.value, reverse=True)[0]
 
     order_tuples = [
         (
