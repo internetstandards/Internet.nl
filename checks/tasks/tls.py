@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from timeit import default_timer as timer
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Optional
 from urllib.parse import urlparse
 
 import eventlet
@@ -26,7 +26,7 @@ from cryptography.x509 import (
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum
+from nassl.ephemeral_key_info import DhEphemeralKeyInfo, EcDhEphemeralKeyInfo, OpenSslEvpPkeyEnum, EphemeralKeyInfo
 from nassl.ssl_client import ClientCertificateRequested
 from sslyze import (
     Scanner,
@@ -1277,10 +1277,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
 def check_mail_tls(server, dane_cb_data, task):
     """
     Perform all the TLS related checks for this mail server in series.
-
     """
-    # TODO: SNI?
-    # send_SNI = dane_cb_data.get("data") and dane_cb_data.get("secure")
     scan = ServerScanRequest(
         server_location=ServerNetworkLocation(hostname=server, port=25),
         network_configuration=ServerNetworkConfiguration(
@@ -1295,13 +1292,13 @@ def check_mail_tls(server, dane_cb_data, task):
         return dict(server_reachable=False, tls_enabled=False)
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
-    ciphers_accepted = {cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites}
+    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
     prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
-    dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
+    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-    cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
+    cipher_order_evaluation = test_cipher_order(
         ServerConnectivityInfo(
             server_location=result.server_location,
             network_configuration=result.network_configuration,
@@ -1310,7 +1307,6 @@ def check_mail_tls(server, dane_cb_data, task):
         prots_accepted,
         cipher_evaluation,
     )
-    # Check the certificates.
     cert_results = cert_checks(server, ChecksMode.MAIL, task, dane_cb_data)
 
     # HACK for DANE-TA(2) and hostname mismatch!
@@ -1329,9 +1325,9 @@ def check_mail_tls(server, dane_cb_data, task):
         ciphers_bad=cipher_evaluation.ciphers_bad_str,
         ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
         ciphers_score=cipher_evaluation.score,
-        cipher_order_score=cipher_order_score,
-        cipher_order=cipher_order_status,
-        cipher_order_violation=cipher_order_violation,
+        cipher_order_score=cipher_order_evaluation.score,
+        cipher_order=cipher_order_evaluation.status,
+        cipher_order_violation=cipher_order_evaluation.violation,
         secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
         secure_reneg_score=(
             scoring.WEB_TLS_SECURE_RENEG_GOOD
@@ -1350,11 +1346,11 @@ def check_mail_tls(server, dane_cb_data, task):
             if result.scan_result.tls_compression.result.supports_compression
             else scoring.WEB_TLS_COMPRESSION_GOOD
         ),
-        dh_param=dh_param,
-        ecdh_param=ec_param,
-        fs_bad=list(fs_bad),
-        fs_phase_out=list(fs_phase_out),
-        fs_score=fs_score,
+        dh_param=fs_evaluation.max_dh_size,
+        ecdh_param=fs_evaluation.max_ec_size,
+        fs_bad=list(fs_evaluation.bad_str),
+        fs_phase_out=list(fs_evaluation.phase_out_str),
+        fs_score=fs_evaluation.score,
         zero_rtt=(
             ZeroRttStatus.bad
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
@@ -1376,7 +1372,6 @@ def check_mail_tls(server, dane_cb_data, task):
 def has_daneTA(tlsa_records):
     """
     Check if any of the TLSA records is of type DANE-TA(2).
-
     """
     for tlsa in tlsa_records:
         if tlsa.startswith("2"):
@@ -1387,7 +1382,6 @@ def has_daneTA(tlsa_records):
 def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     Check the webserver's TLS configuration.
-
     """
     scan = ServerScanRequest(
         server_location=ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1]),
@@ -1403,13 +1397,13 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         return dict(server_reachable=False, tls_enabled=False)
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
-    ciphers_accepted = {cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites}
+    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
     prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
-    dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
+    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-    cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
+    cipher_order_evaluation = test_cipher_order(
         ServerConnectivityInfo(
             server_location=result.server_location,
             network_configuration=result.network_configuration,
@@ -1442,9 +1436,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ciphers_bad=cipher_evaluation.ciphers_bad_str,
         ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
         ciphers_score=cipher_evaluation.score,
-        cipher_order_score=cipher_order_score,
-        cipher_order=cipher_order_status,
-        cipher_order_violation=cipher_order_violation,
+        cipher_order_score=cipher_order_evaluation.score,
+        cipher_order=cipher_order_evaluation.status,
+        cipher_order_violation=cipher_order_evaluation.violation,
         secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
         secure_reneg_score=(
             scoring.WEB_TLS_SECURE_RENEG_GOOD
@@ -1463,11 +1457,11 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             if result.scan_result.tls_compression.result.supports_compression
             else scoring.WEB_TLS_COMPRESSION_GOOD
         ),
-        dh_param=dh_param,
-        ecdh_param=ec_param,
-        fs_bad=list(fs_bad),
-        fs_phase_out=list(fs_phase_out),
-        fs_score=fs_score,
+        dh_param=fs_evaluation.max_dh_size,
+        ecdh_param=fs_evaluation.max_ec_size,
+        fs_bad=list(fs_evaluation.bad_str),
+        fs_phase_out=list(fs_evaluation.phase_out_str),
+        fs_score=fs_evaluation.score,
         zero_rtt=(
             ZeroRttStatus.bad
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
@@ -1560,45 +1554,65 @@ class TLSProtocolEvaluation:
         return scoring.WEB_TLS_PROTOCOLS_BAD if self.bad else scoring.WEB_TLS_PROTOCOLS_GOOD
 
 
-def evaluate_tls_fs_params(ciphers_accepted: Set[CipherSuiteAcceptedByServer]):
-    dh_sizes = [
-        suite.ephemeral_key.size
-        for suite in ciphers_accepted
-        if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.DH
-    ]
-    dh_param = max(dh_sizes) if dh_sizes else None
-    ec_sizes = [
-        suite.ephemeral_key.size
-        for suite in ciphers_accepted
-        if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.EC
-    ]
-    ec_param = max(ec_sizes) if ec_sizes else None
+@dataclass(frozen=True)
+class TLSForwardSecrecyParameterEvaluation:
+    max_dh_size: Optional[int]
+    max_ec_size: Optional[int]
 
-    fs_bad = set()
-    fs_phase_out = set()
-    for suite in ciphers_accepted:
-        key = suite.ephemeral_key
-        if not key:
-            continue
-        if isinstance(key, EcDhEphemeralKeyInfo):
-            if key.size < FS_ECDH_MIN_KEY_SIZE:
-                fs_bad.add(f"ECDH-{key.size}")
-            if key.curve in FS_EC_PHASE_OUT:
-                fs_phase_out.add(f"ECDH-{key.curve_name}")
-            elif key.curve not in FS_EC_GOOD:
-                print(key.curve)
-                print(FS_EC_GOOD)
-                fs_bad.add(f"ECDH-{key.curve_name}")
-        if isinstance(key, DhEphemeralKeyInfo):
-            if key.size < FS_DH_MIN_KEY_SIZE:
-                fs_bad.add(f"DH-{key.size}")
-            if key.generator == FFDHE_GENERATOR:
-                if key.prime == FFDHE2048_PRIME:
-                    fs_phase_out.add("FFDHE-2048")
-                elif key.prime not in FFDHE_SUFFICIENT_PRIMES:
-                    fs_bad.add(f"DH-{key.size}")
-    fs_score = scoring.WEB_TLS_FS_BAD if fs_bad else scoring.WEB_TLS_FS_OK
-    return dh_param, ec_param, fs_bad, fs_phase_out, fs_score
+    good_str: List[str]
+    phase_out_str: List[str]
+    bad_str: List[str]
+
+    @classmethod
+    def from_ciphers_accepted(cls, ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+        good = []
+        phase_out = []
+        bad = []
+
+        for suite in ciphers_accepted:
+            key = suite.ephemeral_key
+            if not key:
+                continue
+
+            if isinstance(key, EcDhEphemeralKeyInfo):
+                if key.size < FS_ECDH_MIN_KEY_SIZE:
+                    bad.append(f"ECDH-{key.size}")
+                if key.curve in FS_EC_PHASE_OUT:
+                    phase_out.append(f"ECDH-{key.curve_name}")
+                elif key.curve not in FS_EC_GOOD:
+                    bad.append(f"ECDH-{key.curve_name}")
+
+            if isinstance(key, DhEphemeralKeyInfo):
+                if key.size < FS_DH_MIN_KEY_SIZE:
+                    bad.append(f"DH-{key.size}")
+                if key.generator == FFDHE_GENERATOR:
+                    if key.prime == FFDHE2048_PRIME:
+                        phase_out.append("FFDHE-2048")
+                    elif key.prime not in FFDHE_SUFFICIENT_PRIMES:
+                        bad.append(f"DH-{key.size}")
+
+        dh_sizes = [
+            suite.ephemeral_key.size
+            for suite in ciphers_accepted
+            if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.DH
+        ]
+        ec_sizes = [
+            suite.ephemeral_key.size
+            for suite in ciphers_accepted
+            if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.EC
+        ]
+
+        return cls(
+            good_str=good,
+            phase_out_str=phase_out,
+            bad_str=bad,
+            max_dh_size=max(dh_sizes) if dh_sizes else None,
+            max_ec_size=max(ec_sizes) if dh_sizes else None,
+        )
+
+    @property
+    def score(self) -> scoring.Score:
+        return scoring.WEB_TLS_FS_BAD if self.bad_str else scoring.WEB_TLS_FS_GOOD
 
 
 @dataclass(frozen=True)
@@ -1614,7 +1628,7 @@ class TLSCipherEvaluation:
     ciphers_bad_str: List[str]
 
     @classmethod
-    def from_ciphers_accepted(cls, ciphers_accepted: Set[CipherSuiteAcceptedByServer]):
+    def from_ciphers_accepted(cls, ciphers_accepted: List[CipherSuiteAcceptedByServer]):
         ciphers_good = []
         ciphers_sufficient = []
         ciphers_phase_out = []
@@ -1649,22 +1663,28 @@ class TLSCipherEvaluation:
         return scoring.WEB_TLS_SUITES_BAD if self.ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
 
 
+@dataclass(frozen=True)
+class TLSCipherOrderEvaluation:
+    violation: List[str]
+    status: CipherOrderStatus
+    score: scoring.Score
+
 def test_cipher_order(
     server_connectivity_info: ServerConnectivityInfo,
     tls_versions: List[TlsVersionEnum],
     cipher_evaluation: TLSCipherEvaluation,
-) -> Tuple[List[str], CipherOrderStatus, scoring.Score]:
+) -> TLSCipherOrderEvaluation:
     cipher_order_violation = []
-    cipher_order_status = CipherOrderStatus.good
-    cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_OK
-
     if (
         not cipher_evaluation.ciphers_bad
         and not cipher_evaluation.ciphers_phase_out
         and not cipher_evaluation.ciphers_sufficient
     ) or tls_versions == [TlsVersionEnum.TLS_1_3]:
-        cipher_order_status = CipherOrderStatus.na
-        return cipher_order_violation, cipher_order_status, cipher_order_score
+        return TLSCipherOrderEvaluation(
+            violation=[],
+            status=CipherOrderStatus.na,
+            score=scoring.WEB_TLS_CIPHER_ORDER_GOOD,
+        )
 
     tls_version = sorted([t for t in tls_versions if t != TlsVersionEnum.TLS_1_3], key=lambda t: t.value, reverse=True)[0]
 
@@ -1679,7 +1699,7 @@ def test_cipher_order(
     for expected_less_preferred, expected_more_preferred_list in order_tuples:
         # Sort CHACHA as later in the list, in case SSL_OP_PRIORITIZE_CHACHA is enabled #461
         expected_less_preferred.sort(key=lambda c: "CHACHA" in c.name)
-        if cipher_order_status == CipherOrderStatus.bad:
+        if cipher_order_violation:
             break
         for expected_more_preferred in expected_more_preferred_list:
             print(
@@ -1694,11 +1714,13 @@ def test_cipher_order(
             if preferred_suite != expected_more_preferred:
                 # TODO: check which name to report
                 cipher_order_violation = [preferred_suite.name, expected_more_preferred.name]
-                cipher_order_status = CipherOrderStatus.bad
-                cipher_order_score = scoring.WEB_TLS_CIPHER_ORDER_BAD
                 break
 
-    return cipher_order_violation, cipher_order_status, cipher_order_score
+    return TLSCipherOrderEvaluation(
+        violation=cipher_order_violation,
+        status=CipherOrderStatus.bad if cipher_order_violation else CipherOrderStatus.good,
+        score=scoring.WEB_TLS_CIPHER_ORDER_BAD if cipher_order_violation else scoring.WEB_TLS_CIPHER_ORDER_GOOD,
+    )
 
 
 # TODO: maybe move to a utils module?
