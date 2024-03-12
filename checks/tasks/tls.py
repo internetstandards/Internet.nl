@@ -1184,13 +1184,12 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
 
         failed_key_type = ""
         curve = ""
+        # Note that DH fields are checked in the key exchange already
+        # https://github.com/internetstandards/Internet.nl/pull/1218#issuecomment-1944496933
         if public_key_type is rsa.RSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
         elif public_key_type is dsa.DSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
-        # TODO: DH type?
-        # elif public_key_type is DHPublicKey and key_size < 2048:
-        #    failed_key_type = "DHPublicKey"
         elif public_key_type in CERT_CURVES_GOOD and key_size < CERT_CURVE_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
         elif public_key_type is EllipticCurvePublicKey and public_key.curve not in CERT_EC_CURVES_GOOD:
