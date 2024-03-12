@@ -27,7 +27,7 @@ have the corresponding DNS entries already created, such as
 
 ```
 [lang].example.nl
-[lang].fr.ipv6.example.nl
+[lang].ipv6.example.nl
 [lang].conn.example.nl
 [lang].conn.ipv6.example.nl
 ```
