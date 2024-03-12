@@ -48,18 +48,6 @@ RUN ./configure \
 RUN make
 RUN make install
 
-FROM build-deps as build-nassl
-
-COPY vendor/nassl /src/vendor/nassl
-WORKDIR /src/vendor/nassl
-
-ADD vendor/zlib-1.2.13.tar.gz ./
-COPY vendor/openssl-1.0.2e ./openssl-1.0.2e
-COPY vendor/openssl-master ./openssl-master
-
-RUN python3 build_from_scratch.py
-RUN python3 setup.py install
-
 # intermediate stage with apt and python dependencies
 FROM build-deps as build-app-deps
 
@@ -154,9 +142,6 @@ RUN apt update && \
 COPY --from=build-unbound /opt/unbound /opt/unbound
 COPY --from=build-unbound /usr/lib/python3/dist-packages/*unbound* /usr/lib/python3/dist-packages/
 
-# copy nassl Python module into image
-COPY --from=build-nassl /usr/local/lib/python${PYTHON_VERSION}/dist-packages/nassl-*.egg /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
-
 # copy application dependencies into image
 COPY --from=build-app-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 COPY --from=build-app-deps /usr/local/bin/* /usr/local/bin/
@@ -166,7 +151,6 @@ COPY --from=build-app-deps /usr/local/bin/* /usr/local/bin/
 # OS updates, verify we run the desired Python version.
 RUN python3 --version | grep "$PYTHON_VERSION."
 RUN /opt/unbound/sbin/unbound -V
-RUN python3 -c 'import nassl; print(nassl.__version__)'
 
 COPY docker/worker/entrypoint.sh /entrypoint-worker.sh
 
