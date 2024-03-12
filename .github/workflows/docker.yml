@@ -39,14 +39,8 @@ jobs:
           - image: webserver
             dockerfile: docker/webserver.Dockerfile
             target:
-          - image: rabbitmq
-            dockerfile: docker/rabbitmq.Dockerfile
-            target:
           - image: grafana
             dockerfile: docker/grafana.Dockerfile
-            target:
-          - image: prometheus
-            dockerfile: docker/prometheus.Dockerfile
             target:
           - image: cron
             dockerfile: docker/cron.Dockerfile
