@@ -4,7 +4,6 @@ from diagrams import Diagram, Cluster, Edge
 
 from diagrams.oci.compute import Container
 from diagrams.onprem.monitoring import Grafana, Prometheus
-from diagrams.onprem.queue import RabbitMQ
 from diagrams.onprem.database import PostgreSQL
 from diagrams.onprem.inmemory import Redis
 from diagrams.programming.framework import Django
@@ -39,18 +38,6 @@ with Diagram(NAME, show=False, direction="LR", outformat=["png"], graph_attr=gra
             DockerHub("grafana/grafana"),
             File("monitoring/grafana/*"),
         ] >> Image("ghcr.io/internetstandards/grafana")
-
-    with Cluster("prometheus.Dockerfile"):
-        [
-            DockerHub("prom/prometheus"),
-            File("monitoring/prometheus/prometheus.yaml"),
-        ] >> Image("ghcr.io/internetstandards/prometheus")
-
-    with Cluster("rabbitmq.Dockerfile"):
-        [
-            DockerHub("_/rabbitmq"),
-            Settings("rabbitmq.conf"),
-        ] >> Image("ghcr.io/internetstandards/rabbitmq")
 
     with Cluster("test-runner.Dockerfile"):
         [
