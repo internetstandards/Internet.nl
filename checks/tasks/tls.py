@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from timeit import default_timer as timer
-from typing import List, Tuple
+from typing import List, Tuple, Set
 from urllib.parse import urlparse
 
 import eventlet
@@ -1298,7 +1298,7 @@ def check_mail_tls(server, dane_cb_data, task):
         return dict(server_reachable=False, tls_enabled=False)
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
-    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+    ciphers_accepted = {cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites}
     prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
@@ -1406,7 +1406,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         return dict(server_reachable=False, tls_enabled=False)
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
-    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+    ciphers_accepted = {cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites}
     prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
@@ -1563,7 +1563,7 @@ class TLSProtocolEvaluation:
         return scoring.WEB_TLS_PROTOCOLS_BAD if self.bad else scoring.WEB_TLS_PROTOCOLS_GOOD
 
 
-def evaluate_tls_fs_params(ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+def evaluate_tls_fs_params(ciphers_accepted: Set[CipherSuiteAcceptedByServer]):
     dh_sizes = [
         suite.ephemeral_key.size
         for suite in ciphers_accepted
@@ -1617,7 +1617,7 @@ class TLSCipherEvaluation:
     ciphers_bad_str: List[str]
 
     @classmethod
-    def from_ciphers_accepted(cls, ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+    def from_ciphers_accepted(cls, ciphers_accepted: Set[CipherSuiteAcceptedByServer]):
         ciphers_good = []
         ciphers_sufficient = []
         ciphers_phase_out = []
