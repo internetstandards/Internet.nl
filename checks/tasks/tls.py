@@ -1193,9 +1193,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
         #    failed_key_type = "DHPublicKey"
         elif public_key_type in CERT_CURVES_GOOD and key_size < CERT_CURVE_MIN_KEY_SIZE:
             failed_key_type = public_key_type.__name__
-        elif public_key_type is EllipticCurvePublicKey and (
-            key_size < CERT_CURVE_MIN_KEY_SIZE or public_key.curve not in CERT_EC_CURVES_GOOD
-        ):
+        elif public_key_type is EllipticCurvePublicKey and public_key.curve not in CERT_EC_CURVES_GOOD:
             failed_key_type = public_key_type.__name__
         if failed_key_type:
             message = f"{common_name}: {failed_key_type}-{key_size} key_size"
