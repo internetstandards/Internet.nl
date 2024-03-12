@@ -5,6 +5,13 @@ log_format default '$remote_addr $host $remote_user [$time_local] "$request" '
 
 access_log /var/log/nginx/access.log default;
 
+# create seperate logfile, since the access.log file is a symlink to stdout
+# it cannot be used by prometheus-nginxlog-exporter
+log_format nginx_logs_exporter '$remote_addr $host $remote_user [$time_local] $proxy_host "$request" '
+                   '$status $body_bytes_sent "$http_referer" '
+                   '"$http_user_agent" "$http_x_forwarded_for"';
+access_log /var/log/nginx/prometheus-nginxlog-exporter/access.log nginx_logs_exporter;
+
 # disable version in server banner
 server_tokens off;
 # requires openresty
