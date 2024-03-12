@@ -1037,7 +1037,6 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     Perform certificate checks.
 
     """
-    # TODO: this does use our trust store
     log.info(f"starting cert sslyze scan for {hostname} {af_ip_pair} {mode}")
     if mode == ChecksMode.WEB:
         port = 443
@@ -1304,7 +1303,15 @@ def check_mail_tls(server, dane_cb_data, task):
     prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-
+    cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
+        ServerConnectivityInfo(
+            server_location=result.server_location,
+            network_configuration=result.network_configuration,
+            tls_probing_result=result.connectivity_result,
+        ),
+        prots_accepted,
+        cipher_evaluation,
+    )
     # Check the certificates.
     cert_results = cert_checks(server, ChecksMode.MAIL, task, dane_cb_data)
 
@@ -1324,10 +1331,9 @@ def check_mail_tls(server, dane_cb_data, task):
         ciphers_bad=cipher_evaluation.ciphers_bad_str,
         ciphers_phase_out=cipher_evaluation.ciphers_phase_out_str,
         ciphers_score=cipher_evaluation.score,
-        # TODO, currently unsupported
-        cipher_order_score=scoring.WEB_TLS_CIPHER_ORDER_OK,
-        cipher_order=CipherOrderStatus.na,
-        cipher_order_violation=[],
+        cipher_order_score=cipher_order_score,
+        cipher_order=cipher_order_status,
+        cipher_order_violation=cipher_order_violation,
         secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
         secure_reneg_score=(
             scoring.WEB_TLS_SECURE_RENEG_GOOD
@@ -1366,7 +1372,6 @@ def check_mail_tls(server, dane_cb_data, task):
         kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
     results.update(cert_results)
-    log.debug(f"sslyze scan for mail on {server} result: {result}")
     return results
 
 
@@ -1405,7 +1410,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     prots_bad, prots_phase_out, prots_good, prots_sufficient, prots_score = evaluate_tls_protocols(prots_accepted)
     dh_param, ec_param, fs_bad, fs_phase_out, fs_score = evaluate_tls_fs_params(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-    # TODO: pick best TLS version
     cipher_order_violation, cipher_order_status, cipher_order_score = test_cipher_order(
         ServerConnectivityInfo(
             server_location=result.server_location,
@@ -1483,7 +1487,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         kex_hash_func=KexHashFuncStatus.good,
         kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
-    log.debug(f"sslyze scan for web on {url} result: {probe_result}")
     return probe_result
 
 
@@ -1651,6 +1654,8 @@ def test_cipher_order(
         (cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
     ]
     for expected_less_preferred, expected_more_preferred_list in order_tuples:
+        # Sort CHACHA as later in the list, in case SSL_OP_PRIORITIZE_CHACHA is enabled #461
+        expected_less_preferred.sort(key=lambda c: "CHACHA" in c.name)
         if cipher_order_status == CipherOrderStatus.bad:
             break
         for expected_more_preferred in expected_more_preferred_list:
