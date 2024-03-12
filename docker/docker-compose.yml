@@ -320,6 +320,23 @@ services:
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues nassl_worker
 
+  # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
+  restart-nassl-worker:
+    image: alpinelinux/docker-cli:latest
+    command: crond -f -d7
+    configs:
+      - source: restart_nassl_worker_cron
+        target: /etc/periodic/hourly/restart_nassl_worker
+        mode: 0755
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    network_mode: "none"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
   worker-slow:
     # copy all attributes from 'worker' service and overwrite specific settings below
@@ -926,6 +943,13 @@ configs:
         - <<: *scrape_config
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
+
+  restart_nassl_worker_cron:
+    content: |
+      #!/bin/sh
+      set -e
+      # find nassl worker and restart the container
+      docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
 
 networks:
   # disable default network
