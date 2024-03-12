@@ -39,7 +39,7 @@ For a domain that does not otherwise send email, use:
     ; example.com.                 CAA 0 issue "letsencrypt.org;"
 
 The `INTERNETNL_DOMAINNAME` host should also have a working MX and correct FCrDNS.
-
+DANE records are recommended, but not required.
 
 ## Specific settings for batch mode
 
