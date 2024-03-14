@@ -550,6 +550,7 @@ services:
       - $UNBOUND_PORT_IPV6_UDP
 
     environment:
+      - ENABLE_BATCH
       - DEBUG_LOG_UNBOUND
       - IPV4_IP_PUBLIC
       - IPV6_IP_PUBLIC

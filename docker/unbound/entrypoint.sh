@@ -4,6 +4,10 @@ set -e
 
 cd /opt/unbound/etc/unbound/
 
+if [ "$ENABLE_BATCH" = "True" ]; then
+  exit 0;
+fi
+
 if [ "$DEBUG_LOG_UNBOUND" = "True" ];then
   export DEBUG_LOG_UNBOUND_STATEMENTS="verbosity: 2
   log-queries: yes"
