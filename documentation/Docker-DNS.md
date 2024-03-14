@@ -2,15 +2,15 @@
 
 There are several DNS components in the Docker setup:
 
-* A non-validating resolver, used for DNS resolving by almost all tests.
+1. A non-validating resolver, used for DNS resolving by almost all tests.
   As we have our own DNSSEC validation test, we want to see bogus responses as well.
-* A validating resolver, used to validate DANE records through ldns-dane.
-* An authoritative server for the connection test zone.
-* The DNS records in the zone for `INTERNETNL_DOMAINNAME`.
-  These are hosted elsewhere, but have certain requirements for the instance to work.
+2. A validating resolver, used to validate DANE records through ldns-dane.
+3. An internal authoritative name server for the connection test zone.
+4. The DNS records in the zone for `INTERNETNL_DOMAINNAME`.
+  These should be hosted elsewhere (i.e. on an external authoritative name server), but have certain requirements for the instance to work.
 
 The resolvers do not require any specific configuration.
-In this document, `INTERNETNL_DOMAINNAME` is `example.com`.
+In this document, `INTERNETNL_DOMAINNAME` is `example.com`. Furthermore, example IP addresses are used.
 
 ## Common parts
 
@@ -31,11 +31,11 @@ The hostname (`INTERNETNL_DOMAINNAME`) should have SPF, DKIM and DMARC,
 as some mail servers may filter on this, and it could affect mail tests.
 For a domain that does not otherwise send email, use:
 
-    example.com.		           TXT	"v=spf1 a -all"	; The "a" mechanism is needed for the mail test (see rfc7208, section-2.3).
-    _domainkey.example.com.	       TXT	"v=DKIM1; p="	; empty DKIM to score 100% for this non-sending subdomain that does have SPF "a" mechanism which is needed for mail test.
+    example.com.		               TXT	"v=spf1 a -all"	; The "a" mechanism is needed for the mail test (see rfc7208, section-2.3).
+    *._domainkey.example.com.	     TXT	"v=DKIM1; p="	; empty DKIM, also to score 100% for this non-sending subdomain that does have SPF "a" mechanism which is needed for mail test.
     _dmarc.example.com.	           TXT	"v=DMARC1; p=reject; sp=reject;"
 
-    ; optionally set an CAA record to Let's Encrypt (note that if CAA is used, Let's Encrypt must be present)
+    ; optionally set an CAA record to Let's Encrypt or any other used ACME supporting certificate authority (note that if CAA is used, the correct certificate authority must be present)
     ; example.com.                 CAA 0 issue "letsencrypt.org;"
 
 The `INTERNETNL_DOMAINNAME` host should also have a working MX and correct FCrDNS.
@@ -43,11 +43,10 @@ DANE records are recommended, but not required.
 
 ## Specific settings for batch mode
 
-For batch, the connection test is not used, and the authoritative server should not be publicly available.
+For batch, the connection test is not used, and the authoritative name server should not be publicly available.
 Set `IPV4_IP_PUBLIC=127.0.0.1` and `IPV6_IP_PUBLIC=::1` in `docker/host.env`.
 
-
-## Specific settings for single test mode
+## Specific settings for connection test in single test mode
 
 For the connection test the following records are also required (i.e., not needed for batch mode):
 
@@ -62,7 +61,7 @@ For the connection test the following records are also required (i.e., not neede
     test-ns-signed.example.com.     NS     example.com.
     test-ns6-signed.example.com.    NS     ipv6.example.com.
 
-The Docker image will create two DNS zones, served by the authoritative server.
+The Docker image will create two DNS zones, served by the internal authoritative name server.
 These are signed, and therefore also require the correct `DS` records.
 
 Obtain the `DS` records by inspecting the logs of the `unbound` service and
