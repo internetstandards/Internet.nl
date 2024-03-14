@@ -1,15 +1,14 @@
 # Docker DNS setup
 
-There are several DNS components in the Docker setup:
+There are several DNS components. First, there are the following three Docker containers:
 
-1. A non-validating resolver, used for DNS resolving by almost all tests.
-  As we have our own DNSSEC validation test, we want to see bogus responses as well.
+1. A non-validating resolver, used for DNS resolving by almost all tests. As we have our own DNSSEC validation test, we want to see bogus responses as well.
 2. A validating resolver, used to validate DANE records through ldns-dane.
-3. An internal authoritative name server for the connection test zone.
-4. The DNS records in the zone for `INTERNETNL_DOMAINNAME`.
-  These should be hosted elsewhere (i.e. on an external authoritative name server), but have certain requirements for the instance to work.
+3. An authoritative name server for the connection test zone.
 
-The resolvers do not require any specific configuration.
+Besides, an authoritative name server that should be hosted elsewhere, is needed for the DNS records in the zone for `INTERNETNL_DOMAINNAME`. 
+
+The resolvers (1 and 2) do not require any specific configuration.
 In this document, `INTERNETNL_DOMAINNAME` is `example.com`. Furthermore, example IP addresses are used.
 
 ## Common parts
@@ -61,7 +60,7 @@ For the connection test the following records are also required (i.e., not neede
     test-ns-signed.example.com.     NS     example.com.
     test-ns6-signed.example.com.    NS     ipv6.example.com.
 
-The Docker image will create two DNS zones, served by the internal authoritative name server.
+The Docker image will create two DNS zones, served by the authoritative name server for the connection test zone.
 These are signed, and therefore also require the correct `DS` records.
 
 Obtain the `DS` records by inspecting the logs of the `unbound` service and
