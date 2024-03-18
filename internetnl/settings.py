@@ -274,14 +274,14 @@ USE_TZ = True
 # Supported languages.
 # NOTE: Make sure that a DNS record for each language exists.
 #       More information can be found in the README file.
-###LANGUAGES = sorted(
-LANGUAGES = (
+LANGUAGES = sorted(
     [
         ("en", "English"),
         ("nl", "Dutch"),
         ("fr", "French"),
     ],
-    key=lambda x: x[0],
+    ###key=lambda x: x[0],
+    key=lambda x: x[1],
 
 )
 
