@@ -275,7 +275,7 @@ USE_TZ = True
 # NOTE: Make sure that a DNS record for each language exists.
 #       More information can be found in the README file.
 ###LANGUAGES = sorted(
-LANGUAGES =
+LANGUAGES = (
     [
         ("en", "English"),
         ("nl", "Dutch"),
@@ -283,7 +283,7 @@ LANGUAGES =
     ],
     key=lambda x: x[0],
 
-###)
+)
 
 # --- Static files (CSS, JavaScript, Images)
 #     https://docs.djangoproject.com/en/1.11/howto/static-files/
