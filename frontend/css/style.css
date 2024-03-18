@@ -429,7 +429,7 @@ header nav {
   }
   header nav li.current {
     font-weight: bold;
-    border-color: #ffab4c;
+    border-color: #FCBA0F;
   }
   header nav li.current a {
     margin: 0;
@@ -596,7 +596,7 @@ article img {
   display: block;
   margin: 0 auto .5em;
   background: #fff;
-  border: solid .3em #ffab4c;
+  border: solid .3em #FCBA0F;
   font-family: 'robotobold', arial, sans-serif;
   font-weight: bold;
   font-size: 100%;
@@ -606,7 +606,7 @@ article img {
   .block button:hover,
   .block button:focus,
   .block button:active {
-    background: #ffab4c;
+    background: #FCBA0F;
   }
   .block button:hover {
     cursor: pointer;
@@ -1224,7 +1224,7 @@ table td {
   height: 2.5em; /* 40px */
 }
 .score-container .score {
-  background: #ffab4c;
+  background: #FCBA0F;
   color: black;
   width: 2.5em; /* 40px */
   text-align: center;
@@ -1802,7 +1802,7 @@ ul.menu a:visited {
 }
 ul.menu li a[aria-current="page"] {
   font-weight: bold;
-  border-color: #ffab4c;
+  border-color: #FCBA0F;
 }
 
 /* ====================================================== */
