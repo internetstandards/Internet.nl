@@ -142,14 +142,14 @@ def test_conn_over_https_no_hsts(app_domain):
 
 
 @pytest.mark.parametrize(
-    ("from_language", "to_language", "footer_text"),
-    [("nl", "en", FOOTER_TEXT_EN), ("en", "nl", FOOTER_TEXT_NL)],
+    ("from_language", "button_text", "to_language", "footer_text"),
+    [("nl", "English", "en", FOOTER_TEXT_EN), ("en", "Nederlands", "nl", FOOTER_TEXT_NL)],
 )
-def test_change_language(page, app_domain, from_language, to_language, footer_text):
+def test_change_language(page, app_domain, from_language, button_text, to_language, footer_text):
     """Test clicking the language change button."""
 
     page.goto(f"https://{from_language}.{app_domain}")
-    page.locator("#language-switch-header-container button:not(:disabled)").click()
+    page.locator(f'#language-switch-header-container button:text("{button_text}")').click()
     page.wait_for_url(f"https://{to_language}.internet.test/")
 
     footer = page.locator("#footer")
