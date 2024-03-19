@@ -279,7 +279,6 @@ LANGUAGES = sorted(
         ("nl", "Dutch"),
         ("en", "English"),
         ("fr", "French"),
-
     ],
     key=lambda x: x[0],
 )
