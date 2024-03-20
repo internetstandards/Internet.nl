@@ -730,7 +730,7 @@ def http_headers_check(af_ip_pair, domain, header_checkers, task):
     for h in header_checkers:
         results.update(h.get_positive_values())
 
-    put_headers = {"Accept-Encoding": "compress, deflate, exi, gzip, pack200-gzip, x-compress, x-gzip"}
+    put_headers = {"Accept-Encoding": "br, compress, deflate, exi, gzip, pack200-gzip, x-compress, x-gzip, zstd"}
     try:
         response = http_get_ip(
             hostname=domain,
