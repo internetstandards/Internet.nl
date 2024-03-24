@@ -153,7 +153,7 @@ server {
     add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
     add_header 'Referrer-Policy' 'same-origin' always;
     add_header 'X-XSS-Protection' '1; mode=block' always;
-    add_header 'Strict-Transport-Security' 'max-age=31536000;' always;
+    add_header 'Strict-Transport-Security' 'max-age=31536000' always;
     add_header 'Content-Security-Policy' "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;
 
     # redirect to no-www domainname
@@ -185,7 +185,7 @@ server {
     add_header 'X-XSS-Protection' '1; mode=block' always;
     # Do *not* add includeSubdomains before https://github.com/internetstandards/Internet.nl/issues/324 is resolved,
     # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
-    add_header 'Strict-Transport-Security' 'max-age=31536000;' always;
+    add_header 'Strict-Transport-Security' 'max-age=31536000' always;
 
     # by default proxy everything to the application
     location / {
@@ -315,7 +315,7 @@ server {
     # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
     # Set max-age to 0 to effectivily disable HSTS on this subdomain to undo any HSTS settings done in the past.
     # This can be removed 1 year after initial release. See issue #894.
-    add_header 'Strict-Transport-Security' 'max-age=0;' always;
+    add_header 'Strict-Transport-Security' 'max-age=0' always;
 
     # redirect to non-https version for connection test
     location / {
