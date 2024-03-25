@@ -55,7 +55,9 @@ click-repl==0.3.0
 colorlog==6.7.0
     # via -r requirements.in
 cryptography==38.0.4
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   pgpy
 django==4.2.10
     # via
     #   -r requirements.in
@@ -124,6 +126,8 @@ packaging==23.1
     #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
+pgpy==0.6.0
+    # via sectxt
 pluggy==1.2.0
     # via
     #   -r requirements.in
@@ -136,6 +140,8 @@ psycopg2-binary==2.9.7
     # via -r requirements.in
 py==1.11.0
     # via pytest
+pyasn1==0.5.1
+    # via pgpy
 pycparser==2.21
     # via cffi
 pyparsing==3.1.1
@@ -148,7 +154,7 @@ python-dateutil==2.8.2
     # via
     #   celery
     #   sectxt
-pythonwhois-internet-nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+pythonwhois-internet.nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
     # via -r requirements.in
 pytz==2024.1
     # via -r requirements.in
@@ -165,7 +171,7 @@ requests==2.31.0
     #   sectxt
 rjsmin==1.2.1
     # via -r requirements.in
-sectxt @ https://github.com/mxsasha/sectxt/archive/refs/tags/0.8.3_leap.tar.gz
+sectxt==0.9.2
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
