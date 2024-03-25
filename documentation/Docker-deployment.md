@@ -119,55 +119,7 @@ This command will take a long time (up to 30 minutes) due to RPKI data that need
 
 ## DNS setup
 
-For accessing the absolute minimum basic functionality of the application the following DNS records must be configured:
-
-    example.com                    A      192.0.2.1
-                                   AAAA   2001:db8:1::1
-
-The following extra records must be configured for language switching and IPv6 only hostname:
-
-    www.example.com                CNAME  example.com
-    nl.example.com                 CNAME  example.com
-    en.example.com                 CNAME  example.com
-
-    ipv6.example.com               AAAA   2001:db8:1::1
-    www.ipv6.example.com           CNAME  ipv6.example.com
-    nl.ipv6.example.com            CNAME  ipv6.example.com
-    en.ipv6.example.com            CNAME  ipv6.example.com
-
-For the "Test your connection" test the following records are required:
-
-    conn.example.com               CNAME  example.com
-    en.conn.example.com            CNAME  example.com
-    nl.conn.example.com            CNAME  example.com
-    www.conn.example.com           CNAME  example.com
-
-    conn.ipv6.example.com          CNAME  ipv6.example.com
-    nl.conn.ipv6.example.com       CNAME  ipv6.example.com
-    en.conn.ipv6.example.com       CNAME  ipv6.example.com
-    www.conn.ipv6.example.com      CNAME  ipv6.example.com
-
-    test-ns-signed.example.com     NS     example.com
-    test-ns6-signed.example.com    NS     ipv6.example.com
-
-For connectin test two signed DNS zones are created and served by the application using Unbound. For this to work properly the delegating zone must also serve the correct `DS` records.
-
-Obtain the `DS` records by inspecting the logs of the `unbound` service and finding the 2 lines beneath `Please add the following DS records for domain`:
-
-    $ docker logs internetnl-prod-unbound-1 2>&1 | grep -A2 "Please add the following DS records for domain"
-    Please add the following DS records for domain example.com:
-    test-ns-signed.example.com.   IN  DS  55295 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    test-ns6-signed.example.com.  IN  DS  33292 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-Configure these two DS records:
-
-    test-ns-signed.example.com.   IN  DS  55295 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    test-ns6-signed.example.com.  IN  DS  33292 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-You can verify DNSSEC using:
-
-  - https://dnsviz.net/d/test.a.conn.test-ns-signed.example.com/dnssec/
-  - https://dnsviz.net/d/test.aaaa.conn.test-ns-signed.example.com/dnssec/
+See the [Docker DNS setup](Docker-DNS.md).
 
 ## Testing your installation
 
