@@ -18,16 +18,13 @@ RUN /opt/certbot/bin/pip install certbot==2.6
 COPY docker/webserver/certbot.sh /docker-entrypoint.d/certbot.sh
 
 RUN mkdir -p /etc/nginx/htpasswd/
-RUN touch /etc/nginx/htpasswd/batch_api.htpasswd
 RUN touch /etc/nginx/htpasswd/monitoring.htpasswd
-RUN touch /etc/nginx/htpasswd/basic_auth.htpasswd
 
 COPY docker/webserver/10-variables.envsh /docker-entrypoint.d/10-variables.envsh
-COPY docker/webserver/generate_htpasswd.sh /docker-entrypoint.d/generate_htpasswd.sh
 COPY docker/webserver/tls_init.sh /docker-entrypoint.d/tls_init.sh
 COPY docker/webserver/authentication.sh /docker-entrypoint.d/authentication.sh
 
-COPY docker/webserver/batch_user_inner.sh /batch_user_inner.sh
+COPY docker/webserver/user_manage_inner.sh /user_manage_inner.sh
 
 RUN mkdir -p /var/www/internet.nl/
 

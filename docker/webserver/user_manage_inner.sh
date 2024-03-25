@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-HTPASSWD_FILE="/etc/nginx/htpasswd/external/batch_api.htpasswd"
+HTPASSWD_FILE="/etc/nginx/htpasswd/external/users.htpasswd"
 
 if [ ! -f "$HTPASSWD_FILE" ]; then
   touch "$HTPASSWD_FILE"
@@ -15,6 +15,6 @@ elif [ "$1" = "remove" ]; then
 elif [ "$1" = "verify" ]; then
   /usr/bin/htpasswd -v "$HTPASSWD_FILE" "$2"
 else
-  echo "Usage: $0 <add_update|remove|verify> <username>"
+  echo "Usage: user_manage.sh <add_update|remove|verify> <username>"
   exit 1
 fi

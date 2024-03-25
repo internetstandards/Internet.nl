@@ -305,13 +305,13 @@ By default the installation is open to everyone. If you like to restrict access 
 
 ### HTTP Basic Authentication
 
-Site wide HTTP Basic Authentication is configured `BASIC_AUTH_RAW` variable. This should contain comma separated `user:encrypted_password` entries.
+Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable. 
 
-To allow only the user `example_user` with password `secret123` to access the site add the following in the `docker/local.env` file:
+To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
+and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
+and `verify` to verify a user's existence and password. Passwords are entered interactively.
 
-    BASIC_AUTH_RAW='example_user:$apr1$trHqgfkY$tIpKCOuSHLfYa20HVzyaX.'
-
-Make sure to enclose the value with single quotes.
+If you would like users on the host to manage batch users, set sudo access for this script. 
 
 ### IP allow/deny lists
 
@@ -323,7 +323,7 @@ For example, to only allow the IP addresses `198.51.100.1` and `2001:db8:2::1` a
 
 ### Combining HTTP Basic Authentication and IP allow lists
 
-When setting both `BASIC_AUTH_RAW` and `ALLOW_LIST`, users connecting from an IP in the allow list won't be prompted for a password.
+When adding both users and IPs in `ALLOW_LIST`, users connecting from an IP in the allow list won't be prompted for a password.
 
 ## Renewing DNSSEC after IP/hostname change
 

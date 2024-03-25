@@ -265,7 +265,7 @@ server {
     # batch API, requires authentication and passes basic auth user to Django App via headers
     location /api/batch/v2 {
       auth_basic "Please enter your batch username and password";
-      auth_basic_user_file /etc/nginx/htpasswd/external/batch_api.htpasswd;
+      auth_basic_user_file /etc/nginx/htpasswd/external/users.htpasswd;
 
       # pass logged in user to Django
       proxy_set_header REMOTE-USER $remote_user;
