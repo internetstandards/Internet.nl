@@ -157,7 +157,7 @@ def test_evaluate_securitytxt():
         "securitytxt_errors": [
             {"msgid": "invalid_line", "context": {"line_no": 1}},
             {"msgid": "no_expire", "context": {"line_no": None}},
-            {"msgid": "no_line_separators", "context": {"line_no": None}},
+            {"msgid": "no_line_separators", "context": {"line_no": 1}},
             {"msgid": "no_contact", "context": {"line_no": None}},
         ],
         "securitytxt_recommendations": [{"msgid": "not_signed", "context": {"line_no": None}}],
