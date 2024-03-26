@@ -102,6 +102,7 @@ services:
         condition: service_healthy
       unbound:
         condition: service_healthy
+        required: false
       resolver-validating:
         condition: service_healthy
       resolver-permissive:
@@ -250,6 +251,7 @@ services:
         condition: service_started
       unbound:
         condition: service_healthy
+        required: false
       resolver-validating:
         condition: service_healthy
       resolver-permissive:
@@ -564,6 +566,8 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+    profiles:
+      - default
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
