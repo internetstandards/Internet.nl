@@ -3,7 +3,7 @@ echo $MONITORING_AUTH_RAW|tr ',' '\n' >> /etc/nginx/htpasswd/monitoring.htpasswd
 
 # enable basic auth when user/password is configured
 if [ "$AUTH_ALL_URLS" != "False" ];then
-  echo 'auth_basic "Please enter your access username and password";auth_basic_user_file /etc/nginx/htpasswd/users.htpasswd;' > /etc/nginx/conf.d/basic_auth.conf
+  echo 'auth_basic "Please enter your access username and password";auth_basic_user_file /etc/nginx/htpasswd/external/users.htpasswd;' > /etc/nginx/conf.d/basic_auth.conf
 fi
 
 # create IP allow list
