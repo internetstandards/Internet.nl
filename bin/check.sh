@@ -13,7 +13,7 @@ if [ ! -z "$(git status --porcelain $requirements_files)" ];then
 fi
 
 # verify DEBUG can only be enabled when authentication is set (should exit 1 and print error message)
-command="docker run -ti --rm -e DEBUG=True -e BASIC_AUTH= -e BASIC_AUTH_RAW -e ALLOW_LIST ghcr.io/internetstandards/webserver"
+command="docker run -ti --rm -e DEBUG=True -e AUTH_ALL_URLS -e ALLOW_LIST ghcr.io/internetstandards/webserver"
 output=$($command)
 exit_code=$?
 if [ $exit_code -ne 1 ];then

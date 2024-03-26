@@ -20,7 +20,7 @@ Any activity on the batch functionality requires a configured user.
 Authorization of the users is not done by the Django application itself but
 rather relies on the upfront webserver to do the necessary HTTP Auth and pass
 the authenticated user to the Django application. The known users can be
-managed with the `/opt/Internet.nl/docker/batch_user.sh` script, detailed
+managed with the `/opt/Internet.nl/docker/user_manage.sh` script, detailed
 in the batch deployment documentation.
 
 ## Overview of significant differences in batch mode
