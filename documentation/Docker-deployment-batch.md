@@ -71,8 +71,8 @@ Run the following commands to install the files in the expected location:
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
-    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/batch_user.sh && \
-    chmod 755 batch_user.sh && \
+    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
+    chmod 755 user_manage.sh && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following input is required:
@@ -103,8 +103,8 @@ Batch installations require the following settings:
 
 And optionally:
 
-- `MONITORING_AUTH`: May be a comma separated list of `user:password` pairs which are allowed to access the metrics at `https://example.com/grafana/`.
-- `BASIC_AUTH_RAW` and `ALLOW_LIST`: Can be set to restrict access to the single scan webpage. See [Restricting Access](Docker-deployment.md#restricting-access) for more information.
+- `MONITORING_AUTH_RAW`: May be a comma separated list of `user:hashed-password` pairs which are allowed to access the metrics at `https://example.com/grafana/`.
+- `AUTH_ALL_URLS` and `ALLOW_LIST`: Can be set to restrict access to the single scan webpage. See [Restricting Access](Docker-deployment.md#restricting-access) for more information.
 
 For example:
 
@@ -112,7 +112,7 @@ For example:
     ENABLE_BATCH=True
     ENABLE_HOF=False
     # user/password(s) for access to /grafana monitoring
-    MONITORING_AUTH=user:welkom01
+    MONITORING_AUTH_RAW=user:<htpasswd hash>
     # allowed IP's to visit web interface without password
     ALLOW_LIST=198.51.100.1,2001:db8:2::1
     EOF
@@ -133,7 +133,7 @@ See the [Docker DNS setup](Docker-DNS.md).
 
 ## Managing users
 
-To manage users, call the `/opt/Internet.nl/docker/batch_user.sh` script. This takes two arguments: an operation
+To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
 and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
 and `verify` to verify a user's existence and password. Passwords are entered interactively.
 

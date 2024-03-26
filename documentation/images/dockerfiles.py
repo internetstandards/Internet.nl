@@ -51,7 +51,7 @@ with Diagram(NAME, show=False, direction="LR", outformat=["png"], graph_attr=gra
             DockerHub("_/nginx"),
             Packages("htpasswd"),
             Packages("certbot"),
-            File("webserver/generate_htpasswd.sh,webserver/tls_init.sh"),
+            File("webserver/authentication.sh,webserver/tls_init.sh"),
             File("webserver/nginx_templates"),
             File("robots.txt,.well-known/security.txt,favicon.ico"),
             File("certbot/entrypoint.sh"),

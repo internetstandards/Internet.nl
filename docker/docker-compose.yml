@@ -26,10 +26,8 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
       - IPV6_TEST_ADDR
-      - MONITORING_AUTH
-      - BASIC_AUTH
       - MONITORING_AUTH_RAW
-      - BASIC_AUTH_RAW
+      - AUTH_ALL_URLS
       - ALLOW_LIST
       # required for authentication.sh to restrict access when debug is on
       - DEBUG
