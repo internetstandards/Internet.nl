@@ -44,7 +44,7 @@ def register_test_user(unique_id):
     # create test used in Apache2 password file
     command = (
         'docker compose --ansi=never --project-name "internetnl-test"'
-        f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/batch_api.htpasswd {username} {username}"
+        f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/users.htpasswd {username} {username}"
     )
     subprocess.check_call(command, shell=True, universal_newlines=True)
 
