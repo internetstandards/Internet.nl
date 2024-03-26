@@ -5,7 +5,7 @@
 
 services:
   webserver:
-    image: ${DOCKER_IMAGE_WEBSERVER:-ghcr.io/internetstandards/webserver:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/webserver.Dockerfile
@@ -37,6 +37,9 @@ services:
       - ENABLE_BATCH
       - LETSENCRYPT_STAGING
       - LETSENCRYPT_EMAIL
+      - CERTBOT_SERVER
+      - CERTBOT_EAB_KID
+      - CERTBOT_EAB_HMAC_KEY
       - REDIRECT_DOMAINS
       - NGINX_PROXY_CACHE
       - INTERNETNL_BRANDING
@@ -61,7 +64,7 @@ services:
       retries: 10
 
   app:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -165,7 +168,7 @@ services:
       - manual-hof:/app/manual-hall-of-fame/
 
   db-migrate:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -203,7 +206,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -347,7 +350,7 @@ services:
     hostname: worker-slow
 
   beat:
-    image: ${DOCKER_IMAGE_APP:-ghcr.io/internetstandards/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -440,10 +443,10 @@ services:
       - redis:/data
 
   rabbitmq:
-    image: ${DOCKER_IMAGE_RABBITMQ:-ghcr.io/internetstandards/rabbitmq:${RELEASE:-latest}}
-    build:
-      context: ..
-      dockerfile: docker/rabbitmq.Dockerfile
+    image: ${DOCKER_IMAGE_RABBITMQ:-rabbitmq:3.12-management-alpine}
+    configs:
+      - source: rabbitmq_config
+        target: /etc/rabbitmq/rabbitmq.conf
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -468,7 +471,7 @@ services:
       - rabbitmq:/var/lib/rabbitmq
 
   postgres:
-    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.3-alpine}
+    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.5-alpine}
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -520,7 +523,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -564,7 +567,7 @@ services:
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -596,7 +599,7 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
-    image: ${DOCKER_IMAGE_UNBOUND:-ghcr.io/internetstandards/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -627,7 +630,7 @@ services:
       retries: 10
 
   cron:
-    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/cron.Dockerfile
@@ -673,7 +676,7 @@ services:
       retries: 10
 
   grafana:
-    image: ${DOCKER_IMAGE_GRAFANA:-ghcr.io/internetstandards/grafana:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/grafana.Dockerfile
@@ -710,16 +713,17 @@ services:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
   prometheus:
-    image: ${DOCKER_IMAGE_PROMETHEUS:-ghcr.io/internetstandards/prometheus:${RELEASE:-latest}}
-    build:
-      context: ..
-      dockerfile: docker/prometheus.Dockerfile
+    image: ${DOCKER_IMAGE_PROMETHEUS:-prom/prometheus:v2.44.0}
 
     command:
       - --config.file=/prometheus.yaml
       - --web.external-url=/prometheus/
       - --storage.tsdb.retention=5y
       - --web.enable-admin-api
+
+    configs:
+      - source: prometheus_config
+        target: /prometheus.yaml
 
     restart: unless-stopped
     logging:
@@ -892,7 +896,51 @@ configs:
         relabel "proxy_host" { from = "proxy_host" }
         relabel "remote_user" { from = "remote_user" }
       }
-
+  rabbitmq_config:
+    content: |
+      # RabbitMQ requires messages to be acked in 30 minutes or else it will mark  a client as stale. This conflicts
+      # with Celery tasks that have a countdown or eta set beyond 30 minutes as they are not acked before this time.
+      # Setting this timeout to 1 year here to work around this issue. Related error and info:
+      # amqp.exceptions.PreconditionFailed: (0, 0): (406) PRECONDITION_FAILED - consumer ack timed out on channel 1
+      # https://github.com/celery/celery/issues/6760
+      consumer_timeout = 31622400000
+  prometheus_config:
+    content: |
+      global:
+        scrape_interval: 10s
+        scrape_timeout: 5s
+      scrape_configs:
+        - &scrape_config
+          scheme: http
+          metrics_path: /metrics
+          metric_relabel_configs:
+            # drop exporter internal metrics
+            - source_labels: [ "__name__" ]
+              regex: '(go|python|process)_.+'
+              action: drop
+          job_name: postgresql_exporter
+          static_configs: [{targets: ["postgresql-exporter:9187"]}]
+        - <<: *scrape_config
+          job_name: redis_exporter
+          static_configs: [{targets: ["redis-exporter:9121"]}]
+        - <<: *scrape_config
+          job_name: rabbitmq_exporter
+          static_configs: [{targets: ["rabbitmq:15692"]}]
+        - <<: *scrape_config
+          job_name: statsd_exporter
+          static_configs: [{targets: ["statsd-exporter:9102"]}]
+        - <<: *scrape_config
+          job_name: celery_exporter
+          static_configs: [{targets: ["celery-exporter:9808"]}]
+        - <<: *scrape_config
+          job_name: node_exporter
+          static_configs: [{targets: ["node-exporter:9100"]}]
+        - <<: *scrape_config
+          job_name: docker_stats_exporter
+          static_configs: [{targets: ["docker_stats_exporter:9338"]}]
+        - <<: *scrape_config
+          job_name: nginx_logs_exporter
+          static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
 
   restart_nassl_worker_cron:
     content: |
