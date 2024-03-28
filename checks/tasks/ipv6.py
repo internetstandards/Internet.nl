@@ -592,7 +592,7 @@ def simhash(url, task=None):
 
     if v4_response is None:
         # FAIL: Could not establish a connection on both addresses.
-        return simhash_score, distance, v6_response.status_code
+        return simhash_score, distance, v6_response.status_code if v6_response else None
 
     # Regardless of content, status code must be identical (#1267)
     if v4_response.status_code != v6_response.status_code:
