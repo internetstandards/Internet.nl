@@ -105,7 +105,7 @@ Use the values determined above to fill in the variables below and run the follo
     SENTRY_SERVER_NAME=$(hostname) \
     envsubst < docker/host-dist.env > docker/host.env
 
-After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings.
+After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings. Note that this sets the sentry hostname for convenience, but to completely configure sentry you also need SENTRY_DSN.
 
 For instance specific configuration use the `docker/local.env` file. Please refer to the `docker/defaults.env` file which contains all configurable settings. Please **do not** modify the `docker/defaults.env` file itself as it will be overwritten in updates.
 
