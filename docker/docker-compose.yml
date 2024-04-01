@@ -5,6 +5,7 @@
 
 services:
   webserver:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE:-latest}}
     build:
       context: ..
@@ -69,6 +70,7 @@ services:
       retries: 10
 
   app:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
@@ -179,6 +181,7 @@ services:
       - manual-hof:/app/manual-hall-of-fame/
 
   db-migrate:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
@@ -217,6 +220,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
@@ -354,6 +358,7 @@ services:
       --queues slow_db_worker,batch_slow
 
   beat:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
     build:
       context: ..
@@ -542,6 +547,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
@@ -591,6 +597,7 @@ services:
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
@@ -627,6 +634,7 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
     build:
       context: ..
@@ -662,6 +670,7 @@ services:
       retries: 10
 
   cron:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE:-latest}}
     build:
       context: ..
@@ -746,6 +755,7 @@ services:
       - cron
 
   grafana:
+    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE:-latest}}
     build:
       context: ..
@@ -896,6 +906,7 @@ services:
           - statsd
 
   celery-exporter:
+    platform: "linux/amd64"
     image: aequitas/celery-exporter:0.9.1
     command:
       - --broker-url=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672/
@@ -948,6 +959,7 @@ services:
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
+    platform: "linux/amd64"
     image: aequitas/docker-stats-exporter:0.1.0
     environment:
       LABEL_state: '{{.Container.State}}'
@@ -966,6 +978,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   nginx_logs_exporter:
+    platform: "linux/amd64"
     image: ghcr.io/martin-helmich/prometheus-nginxlog-exporter/exporter:v1
     command:
       - -config-file=/config.hcl
