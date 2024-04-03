@@ -19,7 +19,7 @@ from checks.probes import Probe, ProbeSet
 from checks.scoring import STATUS_FAIL, STATUS_INFO, STATUS_NOT_TESTED, STATUS_NOTICE, STATUS_SUCCESS
 from checks.tasks.routing import TeamCymruIPtoASN, BGPSourceUnavailableError
 from interface import redis_id
-from interface.views.shared import get_client_ip, get_javascript_retries, ub_ctx
+from interface.views.shared import get_client_ip, get_javascript_retries, get_ub_ctx
 
 probe_ipv6 = Probe("ipv6", "conn", scorename="ipv6", nourl=True, maxscore=100)
 probe_resolver = Probe("resolver", "conn", scorename="dnssec", nourl=True, maxscore=100, reportfield="reportdnssec")
@@ -354,6 +354,7 @@ def find_AS_by_IP(ip):
     :returns: AS number or None on error
 
     """
+    ub_ctx = get_ub_ctx()
     try:
         asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(None, ip)
         (asn, _) = asns_prefixes[0]
@@ -407,6 +408,7 @@ def unbound_ptr(qname):
     Return the PTR records for `qname` from unbound.
 
     """
+    ub_ctx = get_ub_ctx()
     status, result = ub_ctx.resolve(qname, unbound.RR_TYPE_PTR, unbound.RR_CLASS_IN)
     if status == 0 and result.havedata:
         return result.data.domain_list

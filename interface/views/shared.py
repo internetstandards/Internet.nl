@@ -28,24 +28,38 @@ from internetnl import log
 
 from statshog.defaults.django import statsd
 
-ub_ctx = unbound.ub_ctx()
-ub_ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
+_ub_ctx = None
 
-if settings.INTEGRATION_TESTS:
-    # forward the .test zone used in integration tests
-    ub_ctx.zone_add("test.", "transparent")
 
-if settings.DEBUG_LOG_UNBOUND:
-    ub_ctx.set_option("log-queries:", "yes")
-    ub_ctx.set_option("verbosity:", "2")
+def get_ub_ctx():
+    """
+    Wrapper around ub_ctx initialisation for https://github.com/internetstandards/Internet.nl/issues/1376
+    """
+    global _ub_ctx
+    if _ub_ctx:
+        return _ub_ctx
 
-# XXX: Remove for now; inconsistency with applying settings on celery.
-# YYY: Removal caused infinite waiting on pipe to unbound. Added again.
-ub_ctx.set_async(True)
-ub_ctx.set_option("rrset-roundrobin:", "no")
+    _ub_ctx = unbound.ub_ctx()
+    _ub_ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
 
-# fire an initial DNS query to start unbound background worker and prevent race conditions that can occur
-ub_ctx.resolve_async("internet.nl", {}, lambda x, y, z: None, unbound.RR_TYPE_A, unbound.RR_CLASS_IN)
+    if settings.INTEGRATION_TESTS:
+        # forward the .test zone used in integration tests
+        _ub_ctx.zone_add("test.", "transparent")
+
+    if settings.DEBUG_LOG_UNBOUND:
+        _ub_ctx.set_option("log-queries:", "yes")
+        _ub_ctx.set_option("verbosity:", "2")
+
+    # XXX: Remove for now; inconsistency with applying settings on celery.
+    # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
+    _ub_ctx.set_async(True)
+    _ub_ctx.set_option("rrset-roundrobin:", "no")
+
+    # fire an initial DNS query to start unbound background worker and prevent race conditions that can occur
+    _ub_ctx.resolve_async("internet.nl", {}, lambda x, y, z: None, unbound.RR_TYPE_A, unbound.RR_CLASS_IN)
+
+    return _ub_ctx
+
 
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
 # RFCs and other rulings that combine to define what is a valid domain name.
@@ -286,6 +300,8 @@ def get_retest_time(report):
 
 @statsd.timer("ub_resolve_with_timeout")
 def ub_resolve_with_timeout(qname, qtype, rr_class, timeout):
+    ub_ctx = get_ub_ctx()
+
     def ub_callback(data, status, result):
         if status == 0 and result.havedata:
             data["data"] = result.data
