@@ -9,6 +9,8 @@ from django.conf import settings
 
 import unbound
 from checks.models import MxStatus
+from checks.tasks.mail import resolve_spf_record
+from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
 from checks.tasks import SetupUnboundContext
 from interface import batch_shared_task
@@ -130,9 +132,13 @@ def do_mail_get_servers(self, url, *args, **kwargs):
         mailservers.append((rdata, dane_cb_data, MxStatus.has_mx))
 
     if not mailservers:
-        if not do_resolve_a_aaaa(self, url):
-            return [(None, None, MxStatus.no_mx)]
-        return [(None, None, MxStatus.no_null_mx)]
+        if do_resolve_a_aaaa(self, url):
+            spf_data = resolve_spf_record(url, self)
+            if spf_data.get("available"):
+                spf_parsed = spf_parse(spf_data["record"][0])
+                if spf_parsed.get("terms", []) == ["-all"]:
+                    return [(None, None, MxStatus.no_null_mx)]
+        return [(None, None, MxStatus.no_mx)]
 
     # Sort the mailservers on their name so that the same ones are tested for
     # all related tests.
