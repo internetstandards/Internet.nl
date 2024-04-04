@@ -509,9 +509,11 @@ test-runner-shell integration-tests-shell docker-compose-test-runner-shell:
 batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
 	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_create_db_indexes
 
+tests ?= .
 integration-tests: env=test
 integration-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} integration_tests/integration/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/integration/
+	@echo -e "\nTo run with only specific tests use the 'tests' argument with part of the test's name, for example: make integration-tests tests=test_index_http_ok\n"
 
 integration-tests-verbose: _test_args=--verbose --verbose
 integration-tests-verbose: integration-tests
