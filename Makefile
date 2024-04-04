@@ -31,7 +31,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 _env ?= env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests batch-tests
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -430,6 +430,7 @@ up docker-compose-up:
 	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans ${services}
 	@if [ "${environment}" = "test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 	@if [ "${environment}" = "develop" ]; then echo -e "\n🚀 Running on http://localhost:8080"; fi
+	@if [ "${environment}" = "batch-test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 
 run docker-compose-run:
 	${DOCKER_COMPOSE_UP_PULL_CMD} up --no-build ${services}
@@ -512,7 +513,7 @@ batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
 tests ?= .
 integration-tests: env=test
 integration-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/integration/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/integration/
 	@echo -e "\nTo run with only specific tests use the 'tests' argument with part of the test's name, for example: make integration-tests tests=test_index_http_ok\n"
 
 integration-tests-verbose: _test_args=--verbose --verbose
@@ -523,6 +524,18 @@ integration-tests-all-browser: integration-tests
 
 integration-tests-trace: _test_args=--tracing=retain-on-failure
 integration-tests-trace: integration-tests
+
+batch-tests: env=batch-test
+batch-tests:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/batch/
+
+batch-tests-verbose: _test_args=--verbose --verbose
+batch-tests-verbose: batch-tests
+
+batch-tests-shell: env=test
+batch-tests-shell:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --entrypoint /bin/bash test-runner
+
 
 live-tests:
 	COMPOSE_FILE=docker/docker-compose-test-runner-live.yml docker compose run --rm test-runner-live \
@@ -545,6 +558,7 @@ develop-tests development-environment-tests:
 develop-tests-shell:
 	${DOCKER_COMPOSE_DEVELOP_CMD} run --rm --entrypoint bash test-runner-development-environment
 
+
 DOCKER_COMPOSE_TEST_CMD=COMPOSE_FILE=docker/docker-compose.yml:docker/docker-compose-test.yml \
 	docker compose ${compose_args} \
 	--env-file=docker/defaults.env \
@@ -566,6 +580,7 @@ test-all:
 	# bring running environments down
 	$(MAKE) down environment=develop
 	$(MAKE) down environment=test
+	$(MAKE) down environment=batch-test
 	# build all images
 	$(MAKE) build
 	# run checks
@@ -582,6 +597,10 @@ test-all:
 	$(MAKE) up environment=test
 	$(MAKE) integration-tests
 	$(MAKE) down environment=test
+	# run batch
+	$(MAKE) up environment=batch-test
+	$(MAKE) batch-tests
+	$(MAKE) down environment=batch-test
 
 DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/docker-compose-tools.yml docker compose
 

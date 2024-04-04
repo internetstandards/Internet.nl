@@ -38,19 +38,25 @@ This will take a few minutes to complete.
 
 There are 2 environment for development, the "development" and "integration test" environment. Both can be used for development but there are some differences in how they handle certain things. Please see the table below:
 
-|                     | Development               | Integration test           |
-|---------------------|---------------------------|----------------------------|
-| Focus               | Ease/speed of development | Consistency, prod-parity   |
-| Networking          | Public internet           | Isolated internal          |
-| Internet connection | Yes                       | No                         |
-| IPv6                | Native (tunneled) IPv6    | Private IPv6 network       |
-| DEBUG mode          | On                        | Off                        |
-| Debug logging       | On                        | On                         |
-| Server              | Django runserver          | uWSGI                      |
-| Python source files | Mounted                   | from build image           |
-| Website             | http://localhost:8080     | http://localhost:8081      |
-| Autoreload          | `.py` files               | No                         |
-| Tests               | Yes                       | Yes                        |
+|                     | Development               | Integration test             | Batch test                |
+| ------------------- | ------------------------- | ---------------------------- | ------------------------- |
+| Name                | develop/dev               | test                         | batch-test                |
+| Focus               | Ease/speed of development | Consistency, prod-parity     | Consistency, prod-parity, |
+|                     |                           |                              | Batch API                 |
+| Networking          | Public internet           | Isolated internal            | Isolated internal         |
+| Internet connection | Yes                       | No                           | No                        |
+| IPv6                | Native (tunneled) IPv6    | Private IPv6 network         | Private IPv6 network      |
+| DEBUG mode          | On                        | Off                          | Off                       |
+| Debug logging       | On                        | On                           | On                        |
+| Server              | Django runserver          | uWSGI                        | uWSGI                     |
+| Python source files | Mounted                   | from build image             | from build image          |
+| Website             | http://localhost:8080     | http://localhost:8081        | http://localhost:8081     |
+| Autoreload          | `.py` files               | No                           | No                        |
+| Batch API enabled   | Yes                       | No                           | Yes                       |
+| Tests               | Yes                       | Yes                          | Yes                       |
+| Test command        | `make develop-tests`      | `make integration-tests`     | `make batch-tests`        |
+| Tests files         | integration_tests/develop | integration_tests/intgration | integration_tests/batch   |
+|                     |                           | integration_tests/common     | integration_tests/common  |
 
 Both environment can be setup and run at the same time without conflict. Depending on the kind of work you wish to perform one environment might be better suited that the other.
 
@@ -110,6 +116,19 @@ To completely stop and remove all data from the instance run:
     make down-remove-volumes env=test
 
 Please refer to [Development Environment](Docker-development-environment.md) for generic information about the development environment and [Integration tests](Docker-integration-tests.md) for further reading specific to the Integration test environment.
+
+## Batch API test environment
+
+The batch API test suite test specific functionality for a Batch API deployment. These differ from a normal deployment in terms of permissions and services (ie: unbound connection test).
+
+To bring up the test environment and run the test suite use the following command:
+
+    make up env=batch-test
+    make batch-tests
+
+_notice_: the `test` and `batch-test` environments cannot be running at the same time because they use the same IP subnets, it might be needed to bring down the test first using: `make down env=test`.
+
+All other commands and the app address are the same as for integration tests above using the `env=batch-test` argument.
 
 ## Live tests
 

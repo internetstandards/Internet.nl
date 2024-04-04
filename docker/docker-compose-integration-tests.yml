@@ -39,6 +39,8 @@ services:
       - ../:/source/
       # make docker available inside the container
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - COMPOSE_PROJECT_NAME
     profiles:
       - build
       - run-tests
