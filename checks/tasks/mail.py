@@ -439,8 +439,10 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
             log.debug("Reducing max lookups per term: %s" % term)
             if term.startswith("redirect"):
                 redirect_terms.append(term)
+                left_lookups -= 1
             elif "include:" in term:
                 terms.append(term)
+                left_lookups -= 1
             elif "mx" in term:
                 log.debug("mx found in term, reducing left_lookups with 1")
                 left_lookups -= 1
