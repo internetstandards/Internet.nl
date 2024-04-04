@@ -11,6 +11,8 @@ An OCI compatible container runtime with [Compose V2](https://docs.docker.com/co
 - [Colima](https://github.com/abiosoft/colima) for Mac (recommended, tested version 0.5.5)
 - [Docker](https://docs.docker.com/get-docker/) for Windows (untested)
 
+**notice**: newer versions of Docker Compose (v2.24+) might experience issues when creating the networks required for development/testing. This is possibly a bug in Docker Compose: https://github.com/docker/compose/issues/11401
+
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
 **for arm users (eg apple m1)**: nassl will not compile on x64 architectures, so use the option to start your container engine in x86 mode. For colima this can be done with `colima start --arch x86_64`. As per the system requirements noted above, the right way to start with colima would then be: `colima start --arch x86_64 --cpu 2 --memory 4`, but giving it some room would make that: `colima start --arch x86_64 --cpu 4 --memory 8`.
