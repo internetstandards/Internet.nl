@@ -4,7 +4,7 @@
 '''
 SMTP TLS Reporting policy parser as defined by:
 
-  RFC 8460, Section "3. Reporting Policy", see: 
+  RFC 8460, Section "3. Reporting Policy", see:
   https://datatracker.ietf.org/doc/html/rfc8460#section-3
 '''
 
@@ -28,8 +28,8 @@ WSP = White(ws=' ', exact=1).suppress()   # Whitespace
 field_delim = ZeroOrMore(WSP) + Literal(';') + ZeroOrMore(WSP)   # Fields are semicolon-delimited
 ura_delim = ZeroOrMore(WSP) + Literal(',') + ZeroOrMore(WSP)   # multiple RUAs are comma-delimited
 
-tlsrpt_ext_name = Word(alphanums, alphanums+"_-.", max=32)
-tlsrpt_ext_value = Word(alphanums, alphanums+"_-.")
+tlsrpt_ext_name = Word(alphanums, alphanums + "_-.", max=32)
+tlsrpt_ext_value = Word(alphanums, alphanums + "_-.")
 tlsrpt_extension = ZeroOrMore(tlsrpt_ext_name + Literal('=') + tlsrpt_ext_value)
 
 # RegEx for parsing email.
@@ -38,8 +38,8 @@ regex_mailaddr = (
     r"(?P<mailaddr>([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" r"" + regex_tld + ")"
 )
 mail_uri = Combine(CaselessLiteral("mailto:") + Regex(regex_mailaddr))
-tlsrpt_rua = Literal("rua=") +\
-        delimitedList(mail_uri | pyparsing_common.url, delim=',').setResultsName('tlsrpt_uri')
+tlsrpt_rua = Literal("rua=") + \
+    delimitedList(mail_uri | pyparsing_common.url, delim=',').setResultsName('tlsrpt_uri')
 
 tlsrpt_field = tlsrpt_rua + ZeroOrMore(field_delim + tlsrpt_extension)
 

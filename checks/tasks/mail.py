@@ -226,9 +226,9 @@ def callback(results, addr, category):
                         subtests["spf_policy"].result_bad_include(spf_records)
                     elif spf_policy_status == SpfPolicyStatus.invalid_redirect:
                         subtests["spf_policy"].result_bad_redirect(spf_records)
-
             else:
                 subtests["spf"].result_bad(spf_record)
+
         elif testname == "tlsrpt":
             tlsrpt_available = result.get("available")
             tlsrpt_record = result.get("record")
@@ -243,8 +243,6 @@ def callback(results, addr, category):
                 subtests["tlsrpt"].result_good(tlsrpt_record)
             else:
                 subtests["tlsrpt"].result_bad(tlsrpt_record)
-
-
     if skip_dkim_for_non_sending_domain(mtauth):
         mtauth.dkim_score = scoring.MAIL_AUTH_DKIM_PASS
         subtests["dkim"].result_no_email()
