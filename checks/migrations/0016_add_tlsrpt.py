@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-         migrations.AddField(
+        migrations.AddField(
             model_name="mailtestauth",
             name="tlsrpt_score",
             field=models.IntegerField(null=True),
