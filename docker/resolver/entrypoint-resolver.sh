@@ -13,6 +13,9 @@ fi
 
 config_file="${1?"Config file not specified"}"
 
+DNS_CACHE_TTL=$(echo "0.9 $INTERNETNL_CACHE_TTL" | awk '{printf "%d",$1*$2}')
+export DNS_CACHE_TTL
+
 envsubst < "$config_file.template" > "$config_file"
 
 /opt/unbound/sbin/unbound -d -c "/opt/unbound/etc/unbound/$config_file"
