@@ -588,6 +588,7 @@ services:
 
     environment:
       - DEBUG_LOG_UNBOUND
+      - INTERNETNL_CACHE_TTL
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
@@ -620,6 +621,7 @@ services:
 
     environment:
       - DEBUG_LOG_UNBOUND
+      - INTERNETNL_CACHE_TTL
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]

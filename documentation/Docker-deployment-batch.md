@@ -94,7 +94,12 @@ Use the value determined above to fill in the variables below and run the follow
     UNBOUND_PORT_IPV6_UDP=[::1]:5353:53/udp
     EOF
 
-After this a `docker/host.env` file is created. This file is host specific and should not have to be modified unless something changes in the domainname settings.
+    INTERNETNL_DOMAINNAME=example.com \
+    IPV4_IP_PUBLIC=127.0.0.1 \
+    IPV6_IP_PUBLIC=::1 \
+    envsubst < docker/host-dist.env > docker/host.env
+
+After this a `docker/host.env` file is created. This file is host specific and should not have to be modified unless something changes in the domainname settings. For batch, you may want to set `INTERNETNL_CACHE_TTL` to e.g. half an hour, particularly to avoid frequent tests on common mailserver.
 
 For instance specific configuration use the `docker/local.env` file. Please refer to the `docker/defaults.env` file which contains all configurable settings. Please **do not** modify the `docker/defaults.env` file itself as it will be overwritten in updates.
 
