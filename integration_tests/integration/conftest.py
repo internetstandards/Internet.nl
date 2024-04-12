@@ -1,7 +1,6 @@
 import pytest
 import time
 import subprocess
-import os
 
 # primary URL for internet.nl test website
 APP_DOMAIN = "internet.test"
@@ -11,7 +10,6 @@ INTEGRATIONTEST_APP_URL = "http://localhost:8081"
 
 # additional subdomains that serve the test website
 APP_URL_SUBDOMAINS = [
-    APP_URL,
     "https://en.internet.test",
     "https://nl.internet.test",
     "https://www.internet.test",
@@ -26,8 +24,6 @@ TEST_EMAIL = "mail-target.test"
 
 # exclude lines matching this grep extended regex so debug logging is not so crowded
 REGEX_LOGGING_EXCLUDE = "GET /static"
-
-COMPOSE_PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME")
 
 
 @pytest.fixture(scope="session")
@@ -84,7 +80,7 @@ def docker_compose_logs():
 
     # tail the container logs for application container and webserver, and output to stdout to have Pytest capture it
     command = (
-        "docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME}"
+        "docker compose --ansi=never --project-name=internetnl-test"
         " logs --follow --tail=0 app worker beat resolver webserver"
         f"| grep --extended-regexp --invert-match '{REGEX_LOGGING_EXCLUDE}'"
     )
@@ -100,20 +96,11 @@ def print_results_url(page):
 
 
 @pytest.fixture(scope="session")
-def docker_compose_command():
-    """Execute specific compose command"""
-
-    yield lambda command: subprocess.check_output(
-        f"docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME} {command}", shell=True
-    )
-
-
-@pytest.fixture(scope="session")
 def docker_compose_exec():
     """Execute specific command in a service container"""
 
     yield lambda service, command: subprocess.check_output(
-        f"docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME} exec {service} {command}", shell=True
+        f"docker compose --ansi=never --project-name=internetnl-test exec {service} {command}", shell=True
     )
 
 
@@ -142,46 +129,3 @@ def trigger_scheduled_task(docker_compose_exec):
 @pytest.fixture(scope="function")
 def clear_webserver_cache(docker_compose_exec):
     docker_compose_exec("webserver", "find /var/tmp/nginx_cache -delete")
-
-
-def print_details_test_results(page):
-    """Print detail test results from the result page for debugging failed tests."""
-    try:
-        # for debugging failed tests
-        for section in page.locator("section.test-header").all():
-            section.get_by_role("button", name="Show details").click()
-        for section in page.locator("section.testresults").all():
-            print(section.inner_text())
-    except Exception:
-        # don't fail the test if we somehow failed to get the test result details debug information
-        print("Failed to gather detailed test results.")
-
-
-def pytest_report_header(config):
-    try:
-        docker_version = subprocess.check_output(
-            "docker version --format '{{.Server.Version}} {{.Server.Os}}/{{.Server.Arch}}'",
-            shell=True,
-            universal_newlines=True,
-        ).strip()
-    except Exception:
-        docker_version = "n/a"
-
-    try:
-        docker_compose_version = subprocess.check_output(
-            "    docker compose version --short", shell=True, universal_newlines=True
-        ).strip()
-    except Exception:
-        docker_compose_version = "n/a"
-
-    return [
-        f"docker_version: {docker_version}",
-        f"docker_compose_version: {docker_compose_version}",
-    ]
-
-
-def print_red(*args):
-    """Color things red to make them stand out more in test output."""
-    print("\033[91m", end=None)
-    print(*args)
-    print("\033[0m", end=None)
