@@ -82,7 +82,7 @@ dnspython==2.3.0
     # via
     #   -r requirements.in
     #   eventlet
-eventlet==0.33.3
+eventlet==0.35.2
     # via -r requirements.in
 forcediphttpsadapter==1.1.0
     # via -r requirements.in
@@ -154,7 +154,7 @@ python-dateutil==2.8.2
     # via
     #   celery
     #   sectxt
-pythonwhois-internet.nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+pythonwhois-internet-nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
     # via -r requirements.in
 pytz==2024.1
     # via -r requirements.in
@@ -187,7 +187,6 @@ six==1.16.0
     # via
     #   bleach
     #   celery-statsd
-    #   eventlet
     #   pathlib2
     #   python-dateutil
 smmap==5.0.0
