@@ -140,7 +140,7 @@ def faqarticlepage(request, subject):
     title = "faqs " + subject + " title"
     # If there is no such translated article give a 404.
     if _(title) == title:
-        return page404(request)
+        return page404(request, None)
 
     content = "faqs " + subject + " content"
     return render(
