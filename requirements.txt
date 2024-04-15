@@ -78,7 +78,7 @@ django-redis==4.12.1
     # via -r requirements.in
 django-statsd-mozilla==0.4.0
     # via -r requirements.in
-dnspython==2.3.0
+dnspython==2.6.1
     # via
     #   -r requirements.in
     #   eventlet
