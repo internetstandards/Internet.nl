@@ -189,7 +189,7 @@ smmap==5.0.0
     # via gitdb
 soupsieve==2.4.1
     # via beautifulsoup4
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via django
 statsd==4.0.0
     # via
