@@ -98,7 +98,7 @@ greenlet==3.0.0
     #   gevent
 hiredis==2.2.3
     # via -r requirements.in
-idna==3.4
+idna==3.7
     # via requests
 importlib-metadata==4.13.0
     # via
