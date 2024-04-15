@@ -45,7 +45,7 @@ forcediphttpsadapter
 pytz
 
 # Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
-dnspython < 2.4.0  # dependency of eventlet
+dnspython < 2.7.0  # dependency of eventlet
 pluggy==1.2.0  # dependency of pytest
 zipp==3.15.0  # dependency of importlib-metadata
 
