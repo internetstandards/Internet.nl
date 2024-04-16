@@ -108,7 +108,7 @@ def docker_compose_exec():
 def trigger_cron(docker_compose_exec):
     """Trigger specific cron job manually"""
 
-    yield lambda cron: docker_compose_exec("cron", f"/etc/periodic/{cron}")
+    yield lambda cron, service="cron": docker_compose_exec(service, f"/etc/periodic/{cron}")
 
 
 @pytest.fixture(scope="session")

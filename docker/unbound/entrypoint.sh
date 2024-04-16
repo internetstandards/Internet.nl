@@ -36,17 +36,14 @@ envsubst < ../test-ns6.zone.template > ../test-ns6.zone
 cat ../test-ns.zone $ns_keytag.ds > test-ns.zone
 cat ../test-ns6.zone $ns6_keytag.ds > test-ns6.zone
 
-# sign zones
-ldns-signzone -u -n -o test-ns-signed.$CONN_TEST_DOMAIN test-ns.zone $ns_keytag
-ldns-signzone -u -n -o test-ns6-signed.$CONN_TEST_DOMAIN test-ns6.zone $ns6_keytag
-
-# make bogus record
-sed -ie '/bogus.*IN\tRRSIG/d' test-ns.zone.signed
-sed -ie '/bogus.*IN\tRRSIG/d' test-ns6.zone.signed
+/signzones.sh
 
 echo "Please add the following DS records for domain $CONN_TEST_DOMAIN:"
 cat /opt/unbound/etc/unbound/zones/$ns_keytag.ds
 cat /opt/unbound/etc/unbound/zones/$ns6_keytag.ds
+
+# run cron daemon for monthly zone resign
+busybox crond -l7
 
 # start unbound
 /opt/unbound/sbin/unbound -d

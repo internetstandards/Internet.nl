@@ -26,10 +26,8 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
       - IPV6_TEST_ADDR
-      - MONITORING_AUTH
-      - BASIC_AUTH
       - MONITORING_AUTH_RAW
-      - BASIC_AUTH_RAW
+      - AUTH_ALL_URLS
       - ALLOW_LIST
       # required for authentication.sh to restrict access when debug is on
       - DEBUG
@@ -104,6 +102,7 @@ services:
         condition: service_healthy
       unbound:
         condition: service_healthy
+        required: false
       resolver-validating:
         condition: service_healthy
       resolver-permissive:
@@ -252,6 +251,7 @@ services:
         condition: service_started
       unbound:
         condition: service_healthy
+        required: false
       resolver-validating:
         condition: service_healthy
       resolver-permissive:
@@ -566,6 +566,8 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+    profiles:
+      - default
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
@@ -590,6 +592,7 @@ services:
 
     environment:
       - DEBUG_LOG_UNBOUND
+      - INTERNETNL_CACHE_TTL
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
@@ -622,6 +625,7 @@ services:
 
     environment:
       - DEBUG_LOG_UNBOUND
+      - INTERNETNL_CACHE_TTL
 
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]

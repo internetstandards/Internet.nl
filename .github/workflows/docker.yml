@@ -216,6 +216,8 @@ jobs:
               cd /opt/Internet.nl/ && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/defaults.env && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/docker-compose.yml && \\
+              curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/user_manage.sh && \\
+              chmod 755 user_manage.sh && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
@@ -234,6 +236,8 @@ jobs:
               cd /opt/Internet.nl/ && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$TAG/docker/defaults.env && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$TAG/docker/docker-compose.yml && \\
+              curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/user_manage.sh && \\
+              chmod 755 user_manage.sh && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
@@ -499,4 +503,89 @@ jobs:
           path: docker-compose.log
           if-no-files-found: ignore
 
+  batch-integration-test:
+    needs: [build-docker]
+    runs-on: ubuntu-22.04
 
+    env:
+      # used in `docker-compose.yml` files to determine version of images to pull
+      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      PY_COLORS: "1"
+
+    steps:
+      - name: Enable ip6tables in Docker
+        run: |
+          sudo bash -c 'echo "{ \"ip6tables\": true, \"experimental\":true}" > /etc/docker/daemon.json'
+          sudo systemctl restart docker.service
+          sudo ip6tables -I DOCKER-USER --dst ff00::/8 -j ACCEPT
+
+      - uses: actions/checkout@v4
+
+      # login to pull images from Github registry
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        uses: actions/download-artifact@v4
+        with:
+          path: images/
+
+      - name: Load images from artifacts (for forked PR's or dependabot)
+        # trigger only for forked PR's that don't have permissions to push to the container registry
+        if: ${{ env.use_registry == 'false' }}
+        run: find images/ -type f -name *.tar.gz -exec  sh -c 'gunzip --stdout "{}" | docker load' \;
+
+      - name: Pull additional docker images
+        if: ${{ env.use_registry == 'false' }}
+        # build env includes all images, this will pull additional images not loaded from artifacts for
+        # forked PR's/dependabot build
+        run: make pull env=build pull_args=--ignore-buildable
+
+      - name: Pull all docker images
+        if: ${{ env.use_registry == 'true' }}
+        # build env includes all images, this will pull additional images from the registry for non-forked PR builds
+        # main and release builds
+        run: make pull env=build
+
+      - name: Start test instance
+        run: make up env=batch-test
+
+      - name: Run batch tests
+        run: make batch-tests-verbose env=batch-test
+
+      - name: Collect Docker Compose logs
+        if: always()
+        run: make logs-all-dump env=test > docker-compose.log
+
+      - uses: test-summary/action@v2.3
+        with:
+          paths: test-results.xml
+        if: always()
+        continue-on-error: true
+
+      - name: Failure log
+        if: failure()
+        # log last few lines in case of failure for quick debugging
+        run: make docker-compose args="logs --tail=100" env=test
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Playwright batch test results (screenshots, video)
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Batch test Docker Compose Logs
+          path: docker-compose.log
+          if-no-files-found: ignore

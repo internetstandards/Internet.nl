@@ -37,8 +37,9 @@ platforminternet            CNAME                internet
 
 ; configure DNS for targets that are tested by the internet.test instance
 ; normal 100% website test target
-*.target                    A                    172.43.0.51
+target                      A                    172.43.0.51
                             AAAA                 fd00:43:1::51
+*.target                    CNAME                target
 
 ; normal 100% email test target
 *.mail-target           MX                   10 mx.mail-target.test.

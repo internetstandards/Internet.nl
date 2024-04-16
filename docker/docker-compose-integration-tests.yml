@@ -39,6 +39,8 @@ services:
       - ../:/source/
       # make docker available inside the container
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - COMPOSE_PROJECT_NAME
     profiles:
       - build
       - run-tests
@@ -58,6 +60,7 @@ services:
         condition: service_healthy
       unbound:
         condition: service_healthy
+        required: false
       beat:
         condition: service_healthy
       test-target:

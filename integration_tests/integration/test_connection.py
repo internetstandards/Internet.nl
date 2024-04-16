@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import expect
 from ..conftest import print_details_test_results, print_red
 
-from .conftest import print_results_url
+from ..conftest import print_results_url
 import requests
 import re
 

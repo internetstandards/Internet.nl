@@ -105,7 +105,7 @@ Use the values determined above to fill in the variables below and run the follo
     SENTRY_SERVER_NAME=$(hostname) \
     envsubst < docker/host-dist.env > docker/host.env
 
-After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings.
+After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings. Note that this sets the sentry hostname for convenience, but to completely configure sentry you also need SENTRY_DSN.
 
 For instance specific configuration use the `docker/local.env` file. Please refer to the `docker/defaults.env` file which contains all configurable settings. Please **do not** modify the `docker/defaults.env` file itself as it will be overwritten in updates.
 
@@ -119,55 +119,7 @@ This command will take a long time (up to 30 minutes) due to RPKI data that need
 
 ## DNS setup
 
-For accessing the absolute minimum basic functionality of the application the following DNS records must be configured:
-
-    example.com                    A      192.0.2.1
-                                   AAAA   2001:db8:1::1
-
-The following extra records must be configured for language switching and IPv6 only hostname:
-
-    www.example.com                CNAME  example.com
-    nl.example.com                 CNAME  example.com
-    en.example.com                 CNAME  example.com
-
-    ipv6.example.com               AAAA   2001:db8:1::1
-    www.ipv6.example.com           CNAME  ipv6.example.com
-    nl.ipv6.example.com            CNAME  ipv6.example.com
-    en.ipv6.example.com            CNAME  ipv6.example.com
-
-For the "Test your connection" test the following records are required:
-
-    conn.example.com               CNAME  example.com
-    en.conn.example.com            CNAME  example.com
-    nl.conn.example.com            CNAME  example.com
-    www.conn.example.com           CNAME  example.com
-
-    conn.ipv6.example.com          CNAME  ipv6.example.com
-    nl.conn.ipv6.example.com       CNAME  ipv6.example.com
-    en.conn.ipv6.example.com       CNAME  ipv6.example.com
-    www.conn.ipv6.example.com      CNAME  ipv6.example.com
-
-    test-ns-signed.example.com     NS     example.com
-    test-ns6-signed.example.com    NS     ipv6.example.com
-
-For connectin test two signed DNS zones are created and served by the application using Unbound. For this to work properly the delegating zone must also serve the correct `DS` records.
-
-Obtain the `DS` records by inspecting the logs of the `unbound` service and finding the 2 lines beneath `Please add the following DS records for domain`:
-
-    $ docker logs internetnl-prod-unbound-1 2>&1 | grep -A2 "Please add the following DS records for domain"
-    Please add the following DS records for domain example.com:
-    test-ns-signed.example.com.   IN  DS  55295 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    test-ns6-signed.example.com.  IN  DS  33292 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-Configure these two DS records:
-
-    test-ns-signed.example.com.   IN  DS  55295 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    test-ns6-signed.example.com.  IN  DS  33292 8 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-You can verify DNSSEC using:
-
-  - https://dnsviz.net/d/test.a.conn.test-ns-signed.example.com/dnssec/
-  - https://dnsviz.net/d/test.aaaa.conn.test-ns-signed.example.com/dnssec/
+See the [Docker DNS setup](Docker-DNS.md).
 
 ## Testing your installation
 
@@ -250,6 +202,8 @@ To update the application stack first update the `docker/defaults.env` and `dock
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
+    chmod 755 user_manage.sh && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
@@ -262,6 +216,8 @@ If you want to update to a tagged version release, e.g. `v1.8.0`, use the follow
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
+    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/user_manage.sh && \
+    chmod 755 user_manage.sh && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
@@ -276,6 +232,8 @@ In essence downgrading is the same procedure as upgrading: determine the branch 
     cd /opt/Internet.nl/ && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
     curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
+    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
+    chmod 755 user_manage.sh && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
@@ -301,7 +259,7 @@ Besides the single scan webpage, the Internet.nl application also contains a Bat
 
 ## Metrics (grafana/prometheus)
 
-The default deployment includes a metrics collection system. It consists of a Prometheus metrics server with various exporters and a Grafana frontend. To view metrics and graphs visit: `https://example.com/grafana/`. Authentication is configured using the `MONITORING_AUTH` variable.
+The default deployment includes a metrics collection system. It consists of a Prometheus metrics server with various exporters and a Grafana frontend. To view metrics and graphs visit: `https://example.com/grafana/`. Authentication is configured using the `MONITORING_AUTH_RAW` variable.
 
 Also see: [Metrics](Docker-metrics.md)
 
@@ -353,17 +311,13 @@ By default the installation is open to everyone. If you like to restrict access 
 
 ### HTTP Basic Authentication
 
-Site wide HTTP Basic Authentication is configured `BASIC_AUTH` and `BASIC_AUTH_RAW` variable. They should contain comma separated `user:password` or `user:encrypted_password` entries.
+Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable. 
 
-The allow only the user `example_user` with password `secret123` to access the site add the following in the `docker/local.env` file:
+To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
+and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
+and `verify` to verify a user's existence and password. Passwords are entered interactively.
 
-    BASIC_AUTH=example_user:secret123
-
-Aditionally the password can already be provided as encrypted value. For this encrypt the password using the `htpasswd` tool and use the `BASIC_AUTH_RAW` variable. Make sure to enclose the value with single quotes:
-
-    BASIC_AUTH_RAW='example_user:$apr1$trHqgfkY$tIpKCOuSHLfYa20HVzyaX.'
-
-Both variables can be used at the same time, however, **do not list a user in both variables**.
+If you would like users on the host to manage batch users, set sudo access for this script. 
 
 ### IP allow/deny lists
 
@@ -375,7 +329,7 @@ For example, to only allow the IP addresses `198.51.100.1` and `2001:db8:2::1` a
 
 ### Combining HTTP Basic Authentication and IP allow lists
 
-When setting boat `BASIC_AUTH(_RAW)` and `ALLOW_LIST`, users connecting from an IP in the allow list won't be prompted for a password.
+When adding both users and IPs in `ALLOW_LIST`, users connecting from an IP in the allow list won't be prompted for a password.
 
 ## Renewing DNSSEC after IP/hostname change
 

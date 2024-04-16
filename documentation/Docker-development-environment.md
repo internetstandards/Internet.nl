@@ -193,6 +193,10 @@ After which the environment can be brought up again:
 
     make up env=develop
 
+Sometimes Docker will not pick up on a change in the sourcecode and not rebuild a specific container image, for example when you pull in a big change from upstream. In this case you can rebuild all images fresh using:
+
+    make build-no-cache
+
 #### Docker factory reset
 
 If the above is not enough: "have you tried turning it on and off again?". Reboot your system. It just might help.

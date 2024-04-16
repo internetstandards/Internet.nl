@@ -1,5 +1,25 @@
 # Change Log
 
+## 1.8.6
+
+Functional changes:
+
+* Fixed an issue where redirects with an explicit port 443 were incorrectly.
+  rejected in the HTTPS redirect test (#1291).
+* 4xx and 5xx in the IPv4/6 similarity test are now permitted (#1267).
+* Changed user agent to a common format (#1224).
+* Fixed excessive caching TTLs in some DNS queries for some tests.
+* Added support for br and zstd compression in HTTP compression test.
+
+Internal changes:
+
+* Access and user management was improved with a separate command to manage users,
+  which can be applied to batch API only, or all URLS (#1267, #1274).
+* DNS configuration was documented along with several fixes in the certbot config (#1275, #1228).
+* Added a log exporter for nginx.
+* Added test probes every 15 minutes.
+* Added periodic restart for nassl worker.
+
 ## 1.8.5
 
 Release 1.8.5 contains a hotfix for the [sectxt library failing on leap days](https://github.com/DigitalTrustCenter/sectxt/issues/66).
