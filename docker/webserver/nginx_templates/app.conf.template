@@ -207,7 +207,6 @@ server {
       proxy_set_header REMOTE-USER $remote_user;
       include /etc/nginx/conf.d/basic_auth.include;
       proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
-
     }
 
     # letsencrypt/ACME and security.txt file
@@ -219,14 +218,15 @@ server {
         alias /var/www/internet.nl/.well-known/;
     }
     # Allow result URLs to be shared and always open access to the API docs
-    location ^~ (/api/batch/openapi.yaml|(/(site|mail)/[^/]+/[0-9]+/))$ {
-        auth_basic off;
-        allow all;
-        # pass host for Django's allowed_hosts
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
-    }
+#    location ~ (/api/batch/openapi.yaml|/(site|mail)/[^/]+/[0-9]+/)$ {
+#        auth_basic off;
+#        allow all;
+#        # pass host for Django's allowed_hosts
+#        proxy_set_header Host $host;
+#        proxy_set_header X-Forwarded-Proto $scheme;
+#        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+#    }
+
     # disable security.txt if branding is disabled
     set $internetnl_branding "${INTERNETNL_BRANDING}";
     location = /.well-known/security.txt {
@@ -272,6 +272,20 @@ server {
     # used named capture `subdomain` from `server_name` above as prefix
     location = /connection/ {
       return 301 http://${subdomain}conn.${INTERNETNL_DOMAINNAME}/connection/;
+    }
+
+    # batch API, requires authentication and passes basic auth user to Django App via headers
+    location /api/batch/v2 {
+      auth_basic "Please enter your batch username and password";
+      auth_basic_user_file /etc/nginx/htpasswd/external/users.htpasswd;
+
+      # pass logged in user to Django
+      proxy_set_header REMOTE-USER $remote_user;
+
+      # pass host for Django's allowed_hosts
+      proxy_set_header Host $host;
+
+      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
     # monitoring, requires authentication

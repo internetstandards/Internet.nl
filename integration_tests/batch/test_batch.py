@@ -1,6 +1,5 @@
 import requests
 import pytest
-import subprocess
 import time
 import json
 from .results import EXPECTED_DOMAIN_RESULTS, EXPECTED_DOMAIN_TECHNICAL_RESULTS
@@ -34,29 +33,6 @@ def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=N
         assert False, f"request status never reached '{expected_status}' state"
 
     return status_data
-
-
-@pytest.fixture(scope="function")
-def register_test_user(unique_id):
-    """Register user that can login on the batch API."""
-
-    username = f"int-test-{unique_id}"
-
-    # create test used in Apache2 password file
-    command = (
-        'docker compose --ansi=never --project-name "internetnl-batch-test"'
-        f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/users.htpasswd {username} {username}"
-    )
-    subprocess.check_call(command, shell=True, universal_newlines=True)
-
-    # reload nginx
-    command = (
-        'docker compose --ansi=never --project-name "internetnl-batch-test"' " exec webserver service nginx reload"
-    )
-    subprocess.check_call(command, shell=True, universal_newlines=True)
-
-    # for testing password is the same as username
-    yield (username, username)
 
 
 @pytest.mark.parametrize(
