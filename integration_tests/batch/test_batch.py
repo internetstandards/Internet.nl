@@ -37,12 +37,26 @@ def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=N
 
 @pytest.mark.parametrize(
     "path",
-    ["requests", "requests/414878c6bde74343bcbf6a14de7d62de", "requests/414878c6bde74343bcbf6a14de7d62de/results"],
+    [
+        "requests",
+        "requests/414878c6bde74343bcbf6a14de7d62de",
+        "requests/414878c6bde74343bcbf6a14de7d62de/results",
+        "/",
+        "/site",
+        "/mail",
+    ],
 )
 def test_batch_requires_auth(path):
-    """Batch API endpoints should be behind authentication."""
+    """Batch API endpoints and certain pages should be behind authentication."""
     response = requests.post(INTERNETNL_API + path, json={}, verify=False)
     assert response.status_code == 401
+
+
+def test_batch_openapi():
+    """Open API documentation should be accessible without auth."""
+
+    response = requests.get(f"https://{APP_DOMAIN}/api/batch/openapi.yaml", verify=False)
+    response.raise_for_status()
 
 
 def test_batch_request(unique_id, register_test_user, test_domain):
@@ -100,6 +114,11 @@ def test_batch_request(unique_id, register_test_user, test_domain):
     # score and status should match expectations
     assert results_response_data["domains"][test_domain]["status"] == "ok"
     assert results_response_data["domains"][test_domain]["scoring"]["percentage"] == TEST_DOMAIN_EXPECTED_SCORE
+
+    # test results page should be publicly accessible
+    report_url = results_response_data["domains"][test_domain]["report"]["url"]
+    response = requests.get(report_url, verify=False)
+    assert response.status_code == 200, "test results should be publicly accessible without authentication"
 
 
 def test_batch_no_unbound(docker_compose_command):
