@@ -74,7 +74,7 @@ def test_email(unique_id):
     return f"{unique_id}.{TEST_EMAIL}"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def unique_id():
     """Generate a unique (enough) ID so multiple test instances running at the same time don't
     conflict on resources (eg: Docker network/compose project name, etc)"""
@@ -88,7 +88,7 @@ def docker_compose_logs():
 
     # tail the container logs for application container and webserver, and output to stdout to have Pytest capture it
     command = (
-        "docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME}"
+        f"docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME}"
         " logs --follow --tail=0 app worker beat resolver webserver"
         f"| grep --extended-regexp --invert-match '{REGEX_LOGGING_EXCLUDE}'"
     )
@@ -149,25 +149,26 @@ def clear_webserver_cache(docker_compose_exec):
 
 
 @pytest.fixture(scope="session")
-def register_test_user():
+def register_test_user(unique_id):
     """Register user that can login on the batch API."""
     if os.environ.get("ENABLE_BATCH", "").upper() != "TRUE":
-        yield None, None
+        username = None
+    else:
+        username = f"int-test-{unique_id}"
 
-    username = "int-test"
+        # create test used in Apache2 password file
+        command = (
+            f'docker compose --ansi=never --project-name "{COMPOSE_PROJECT_NAME}"'
+            f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/users.htpasswd {username} {username}"
+        )
+        subprocess.check_call(command, shell=True, universal_newlines=True)
 
-    # create test used in Apache2 password file
-    command = (
-        'docker compose --ansi=never --project-name "internetnl-batch-test"'
-        f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/users.htpasswd {username} {username}"
-    )
-    subprocess.check_call(command, shell=True, universal_newlines=True)
-
-    # reload nginx
-    command = (
-        'docker compose --ansi=never --project-name "internetnl-batch-test"' " exec webserver service nginx reload"
-    )
-    subprocess.check_call(command, shell=True, universal_newlines=True)
+        # reload nginx
+        command = (
+            f'docker compose --ansi=never --project-name "{COMPOSE_PROJECT_NAME}"'
+            " exec webserver service nginx reload"
+        )
+        subprocess.check_call(command, shell=True, universal_newlines=True)
 
     # for testing password is the same as username
     yield (username, username)
