@@ -31,9 +31,13 @@ COMPOSE_PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME")
 
 
 @pytest.fixture(scope="session")
-def browser_context_args(browser_context_args):
+def browser_context_args(browser_context_args, register_test_user):
     """Overwrite default context to ignore TLS errors."""
-    return {**browser_context_args, "ignore_https_errors": True}
+    browser_context_args["ignore_https_errors"] = True
+    username, password = register_test_user
+    if username and password:
+        browser_context_args["http_credentials"] = {"username": username, "password": password}
+    return browser_context_args
 
 
 @pytest.fixture
@@ -70,7 +74,7 @@ def test_email(unique_id):
     return f"{unique_id}.{TEST_EMAIL}"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def unique_id():
     """Generate a unique (enough) ID so multiple test instances running at the same time don't
     conflict on resources (eg: Docker network/compose project name, etc)"""
@@ -84,7 +88,7 @@ def docker_compose_logs():
 
     # tail the container logs for application container and webserver, and output to stdout to have Pytest capture it
     command = (
-        "docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME}"
+        f"docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME}"
         " logs --follow --tail=0 app worker beat resolver webserver"
         f"| grep --extended-regexp --invert-match '{REGEX_LOGGING_EXCLUDE}'"
     )
@@ -142,6 +146,32 @@ def trigger_scheduled_task(docker_compose_exec):
 @pytest.fixture(scope="function")
 def clear_webserver_cache(docker_compose_exec):
     docker_compose_exec("webserver", "find /var/tmp/nginx_cache -delete")
+
+
+@pytest.fixture(scope="session")
+def register_test_user(unique_id):
+    """Register user that can login on the batch API."""
+    if os.environ.get("ENABLE_BATCH", "").upper() != "TRUE":
+        username = None
+    else:
+        username = f"int-test-{unique_id}"
+
+        # create test used in Apache2 password file
+        command = (
+            f'docker compose --ansi=never --project-name "{COMPOSE_PROJECT_NAME}"'
+            f" exec webserver htpasswd -c -b /etc/nginx/htpasswd/external/users.htpasswd {username} {username}"
+        )
+        subprocess.check_call(command, shell=True, universal_newlines=True)
+
+        # reload nginx
+        command = (
+            f'docker compose --ansi=never --project-name "{COMPOSE_PROJECT_NAME}"'
+            " exec webserver service nginx reload"
+        )
+        subprocess.check_call(command, shell=True, universal_newlines=True)
+
+    # for testing password is the same as username
+    yield (username, username)
 
 
 def print_details_test_results(page):
