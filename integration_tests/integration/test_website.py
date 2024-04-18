@@ -2,7 +2,7 @@
 import pytest
 from playwright.sync_api import expect
 from ..conftest import print_details_test_results
-from .conftest import print_results_url
+from ..conftest import print_results_url
 
 INVALID_DOMAIN = "invalid-domain.example.com"
 

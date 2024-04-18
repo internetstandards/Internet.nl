@@ -3,7 +3,7 @@ import pytest
 import re
 from playwright.sync_api import expect
 from ..conftest import print_details_test_results
-from .conftest import ipv6_available
+from ..conftest import ipv6_available
 
 ALL_CONNECTION_PROBES_NO_IPV6 = {"resolver"}
 ALL_CONNECTION_PROBES = {"ipv6", "resolver"}
