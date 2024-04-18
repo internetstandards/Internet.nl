@@ -4,7 +4,6 @@ PY?=python
 TAR?=0
 
 BINDIR=bin
-POFILESEXEC=$(BINDIR)/pofiles.py
 FRONTENDEXEC=$(BINDIR)/frontend.py
 
 REMOTEDATADIR=remote_data
@@ -26,28 +25,20 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-ifeq ($(TAR), 0)
-	POFILES_TAR_ARGS=to_tar
-else
-	POFILES_TAR_ARGS=from_tar
-	POFILES_TAR_ARGS+=$(TAR)
-endif
-
 pysrcdirs = internetnl tests interface checks integration_tests docker
 pysrc = $(shell find ${pysrcdirs} -name \*.py)
 
 bin = .venv/bin
 _env ?= env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests
+.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests batch-tests
 
 help:
 	@echo 'Makefile for internet.nl'
 	@echo ''
 	@echo 'Usage:'
-	@echo '   make translations                          combine the translation files to Django PO files'
-	@echo '   make translations_tar                      create a tar from the translations'
-	@echo '   make translations_tar TAR=<tar.gz file>    read the tar and update the translations'
+	@echo '   make update_content                        update the translation files from content repo.'
+	@echo '                                              Optional branch=x to use a specific content repo branch.'
 	@echo '   make frontend                              (re)generate CSS and Javascript'
 	@echo '   make update_padded_macs                    update padded MAC information'
 	@echo '   make update_cert_fingerprints              update certificate fingerpint information'
@@ -69,25 +60,18 @@ frontend:
 	. .venv/bin/activate && ${_env} python3 manage.py collectstatic --no-input
 	. .venv/bin/activate && ${_env} python3 manage.py api_generate_doc
 
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
-translate_content_to_main:
-	# Note: you may need to run this a few times to get rid of the access denied errors...
-	# This retrieves the content from the content repository and merges it with the .po files of this repo.
-	# The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
+branch ?= main
+update_content:
+    # This retrieves the content from the content repository and merges it with the .po files of this repo.
+    # The procedure is detailed at: https://github.com/internetstandards/Internet.nl_content/blob/master/.README.md
 	rm -rf tmp/locale_files/
 	rm -f tmp/content_repo.tar.gz
-	git clone git@github.com:internetstandards/Internet.nl_content/ tmp/locale_files/
-
-	# If you need a specific branch people are working on:
-	# git clone -b news-item_PLIS-meeting_on_IPv6 https://github.com/internetstandards/Internet.nl_content/ tmp/locale_files/
-
-	# change dir to tmp to prevent the /tmp dir being mentioned in the resulting tar file.
-	cd tmp && tar zcvf content_repo.tar.gz locale_files/*
-	${MAKE} translations_tar TAR=tmp/content_repo.tar.gz
-	${MAKE} translations
-	. .venv/bin/activate && ${_env} python3 manage.py compilemessages --ignore=.venv
-	# Purposefully _not_ deleting things in the tmp dir so it allows inspection after execution.
-
+	mkdir -p tmp/locale_files/
+	git clone -b $(branch) git@github.com:internetstandards/Internet.nl_content/ tmp/locale_files/
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_translations.sh
+	rm -rf tmp/locale_files
 
 update_padded_macs:
 	chmod +x $(MACSDIR)/update-macs.sh
@@ -446,6 +430,7 @@ up docker-compose-up:
 	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans ${services}
 	@if [ "${environment}" = "test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 	@if [ "${environment}" = "develop" ]; then echo -e "\n🚀 Running on http://localhost:8080"; fi
+	@if [ "${environment}" = "batch-test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 
 run docker-compose-run:
 	${DOCKER_COMPOSE_UP_PULL_CMD} up --no-build ${services}
@@ -525,9 +510,11 @@ test-runner-shell integration-tests-shell docker-compose-test-runner-shell:
 batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
 	${DOCKER_COMPOSE_CMD} exec app ./manage.py api_create_db_indexes
 
+tests ?= .
 integration-tests: env=test
 integration-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} integration_tests/integration/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/integration/
+	@echo -e "\nTo run with only specific tests use the 'tests' argument with part of the test's name, for example: make integration-tests tests=test_index_http_ok\n"
 
 integration-tests-verbose: _test_args=--verbose --verbose
 integration-tests-verbose: integration-tests
@@ -537,6 +524,18 @@ integration-tests-all-browser: integration-tests
 
 integration-tests-trace: _test_args=--tracing=retain-on-failure
 integration-tests-trace: integration-tests
+
+batch-tests: env=batch-test
+batch-tests:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/batch/
+
+batch-tests-verbose: _test_args=--verbose --verbose
+batch-tests-verbose: batch-tests
+
+batch-tests-shell: env=test
+batch-tests-shell:
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --entrypoint /bin/bash test-runner
+
 
 live-tests:
 	COMPOSE_FILE=docker/docker-compose-test-runner-live.yml docker compose run --rm test-runner-live \
@@ -559,6 +558,7 @@ develop-tests development-environment-tests:
 develop-tests-shell:
 	${DOCKER_COMPOSE_DEVELOP_CMD} run --rm --entrypoint bash test-runner-development-environment
 
+
 DOCKER_COMPOSE_TEST_CMD=COMPOSE_FILE=docker/docker-compose.yml:docker/docker-compose-test.yml \
 	docker compose ${compose_args} \
 	--env-file=docker/defaults.env \
@@ -580,6 +580,7 @@ test-all:
 	# bring running environments down
 	$(MAKE) down environment=develop
 	$(MAKE) down environment=test
+	$(MAKE) down environment=batch-test
 	# build all images
 	$(MAKE) build
 	# run checks
@@ -596,6 +597,10 @@ test-all:
 	$(MAKE) up environment=test
 	$(MAKE) integration-tests
 	$(MAKE) down environment=test
+	# run batch
+	$(MAKE) up environment=batch-test
+	$(MAKE) batch-tests
+	$(MAKE) down environment=batch-test
 
 DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/docker-compose-tools.yml docker compose
 
