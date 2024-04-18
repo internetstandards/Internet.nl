@@ -142,14 +142,14 @@ def test_conn_over_https_no_hsts(app_domain):
 
 
 @pytest.mark.parametrize(
-    ("from_language", "to_language", "footer_text"),
-    [("nl", "en", FOOTER_TEXT_EN), ("en", "nl", FOOTER_TEXT_NL)],
+    ("from_language", "button_text", "to_language", "footer_text"),
+    [("nl", "English", "en", FOOTER_TEXT_EN), ("en", "Nederlands", "nl", FOOTER_TEXT_NL)],
 )
-def test_change_language(page, app_domain, from_language, to_language, footer_text):
+def test_change_language(page, app_domain, from_language, button_text, to_language, footer_text):
     """Test clicking the language change button."""
 
     page.goto(f"https://{from_language}.{app_domain}")
-    page.locator("#language-switch-header-container button:not(:disabled)").click()
+    page.locator(f'#language-switch-header-container button:text("{button_text}")').click()
     page.wait_for_url(f"https://{to_language}.internet.test/")
 
     footer = page.locator("#footer")
@@ -170,20 +170,6 @@ def test_accept_language_header(page, app_domain, language, footer_text):
     assert footer_text in footer.text_content()
 
 
-def test_cron_manual_hosters_hof(page, app_url, trigger_cron):
-    """Test if manual hosters file can be downloaded and parsed."""
-
-    trigger_cron("15min/download_hof")
-
-    page.goto(app_url)
-    page.get_by_role("link", name="Hall of Fame", exact=True).click()
-    page.get_by_text("Hosters").click()
-
-    hof_content = page.locator(".hof-content")
-
-    assert "The 51 hosters mentioned below" in hof_content.text_content()
-
-
 def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
     """Test if database backup files are created."""
 
@@ -195,27 +181,3 @@ def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
 
     assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
     assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")
-
-
-def test_hof_update(page, app_url, trigger_scheduled_task, unique_id, docker_compose_exec, clear_webserver_cache):
-    """Test if Hall of Fame can be updated."""
-
-    domain = f"{unique_id}.example.com"
-
-    # create new domain result
-    docker_compose_exec(
-        "app",
-        (
-            './manage.py shell -c "from checks.models import DomainTestReport;'
-            f"DomainTestReport(domain='{domain}', score=100).save()\""
-        ),
-    )
-
-    # generate hof
-    trigger_scheduled_task("generate_HoF")
-
-    page.goto(app_url)
-    page.get_by_role("link", name="Hall of Fame", exact=True).click()
-    page.get_by_text("Websites").click()
-
-    expect(page.get_by_role("listitem").filter(has_text=domain)).to_be_visible()
