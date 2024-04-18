@@ -1,6 +1,6 @@
 services:
   tools:
-    image: ${DOCKER_IMAGE_LINTTEST:-ghcr.io/internetstandards/linttest:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:${RELEASE:-latest}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
