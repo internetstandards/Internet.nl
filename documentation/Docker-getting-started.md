@@ -11,7 +11,7 @@ An OCI compatible container runtime with [Compose V2](https://docs.docker.com/co
 - [Colima](https://github.com/abiosoft/colima) for Mac (recommended, tested version 0.5.5)
 - [Docker](https://docs.docker.com/get-docker/) for Windows (untested)
 
-**notice**: newer versions of Docker Compose (v2.24+) might experience issues when creating the networks required for development/testing. This is possibly a bug in Docker Compose: https://github.com/docker/compose/issues/11401
+**notice**: newer versions of Docker (25+) and Docker Compose (v2.24+) might experience issues with internal DNS resolver or when creating the networks required for development/testing. This is possibly a bug in Docker Compose:
 
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
