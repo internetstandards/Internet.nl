@@ -14,11 +14,13 @@ Functional changes:
 Internal changes:
 
 * Access and user management was improved with a separate command to manage users,
-  which can be applied to batch API only, or all URLS (#1267, #1274).
+  which can be applied to batch API only, or all URLS (#1267, #1274, #1396).
+* Added periodic re-signing of connection test DNS zones.
 * DNS configuration was documented along with several fixes in the certbot config (#1275, #1228).
 * Added a log exporter for nginx.
 * Added test probes every 15 minutes.
 * Added periodic restart for nassl worker.
+* Several other bugfixes.
 
 ## 1.8.5
 
