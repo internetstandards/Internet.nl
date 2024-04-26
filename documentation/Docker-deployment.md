@@ -38,6 +38,20 @@ A public domain name or subdomain is required. It should be possible to set the 
 
 After installation and basic configuration of the OS switch to `root` user.
 
+Currently Docker `>25` and Compose `>2.24` cause issues during installation. The following command will install a file that restricts the versions to supported ones:
+
+    cat > /etc/apt/preferences.d/internetnl-docker-supported-versions <<EOF
+    # pin docker and compose to supported versions
+    # https://github.com/internetstandards/Internet.nl/issues/1398
+    Package: docker-*
+    Pin: version 5:24.*
+    Pin-priority: 1001
+
+    Package: docker-compose-plugin
+    Pin: version 2.23.* release=test
+    Pin-priority: 1001
+    EOF
+
 Run the following command to install required dependencies, setup Docker Apt repository, and install Docker:
 
 
@@ -46,8 +60,10 @@ Run the following command to install required dependencies, setup Docker Apt rep
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
-    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
-    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable" \
+    echo -e "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable\n \
+    deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" test" \
     > /etc/apt/sources.list.d/docker.list && apt update && \
     apt install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
@@ -311,13 +327,13 @@ By default the installation is open to everyone. If you like to restrict access 
 
 ### HTTP Basic Authentication
 
-Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable. 
+Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable.
 
 To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
 and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
 and `verify` to verify a user's existence and password. Passwords are entered interactively.
 
-If you would like users on the host to manage batch users, set sudo access for this script. 
+If you would like users on the host to manage batch users, set sudo access for this script.
 
 ### IP allow/deny lists
 
