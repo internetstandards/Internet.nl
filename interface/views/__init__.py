@@ -1,9 +1,11 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import logging
 import re
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import DisallowedRedirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils import translation
@@ -376,9 +378,13 @@ def change_language(request):
                 no_language_host = request.get_host()
 
             language_prefix = new_language + "."
-            response = SafeHttpResponseRedirect(protocol + language_prefix + no_language_host + previous_page)
+            redirect_url = protocol + language_prefix + no_language_host + previous_page
         else:
-            response = SafeHttpResponseRedirect(previous_page)
+            redirect_url = previous_page
+        try:
+            return SafeHttpResponseRedirect(redirect_url)
+        except DisallowedRedirect as exc:
+            logging.info(f"Rejected redirect: {exc}")
+            return HttpResponseRedirect("/")
 
-        return response
     return HttpResponseRedirect("/")
