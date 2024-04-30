@@ -4,6 +4,7 @@ import json
 import re
 
 from django.core.cache import cache
+from django.core.exceptions import DisallowedRedirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
@@ -56,7 +57,11 @@ def validate_domain(request, dname):
     if valid_domain is None:
         return redirect_invalid_domain(request, "domain")
 
-    return SafeHttpResponseRedirect(f"/site/{valid_domain}/")
+    try:
+        return SafeHttpResponseRedirect(f"/site/{valid_domain}/")
+    except DisallowedRedirect as exc:
+        log.info(f"Rejected redirect: {exc}")
+        return HttpResponseRedirect("/")
 
 
 def siteprocess(request, dname):
