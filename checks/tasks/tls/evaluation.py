@@ -172,7 +172,6 @@ class TLSCipherEvaluation:
 
     @staticmethod
     def _format_str(suites: List[CipherSuite]) -> List[str]:
-        # TODO: remove IANA name, just here for debugging now
         return [f"{suite.openssl_name} ({suite.name})" for suite in suites]
 
     @property

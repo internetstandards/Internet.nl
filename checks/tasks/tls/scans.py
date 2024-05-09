@@ -546,7 +546,6 @@ def check_mail_tls(server, dane_cb_data, task):
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        # TODO appears to be currently unsupported
         kex_hash_func=KexHashFuncStatus.good,
         kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
     )
@@ -763,11 +762,11 @@ def test_cipher_order(
         (cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
     ]
     for expected_less_preferred, expected_more_preferred_list in order_tuples:
+        if cipher_order_violation:
+            break
         # Sort CHACHA as later in the list, in case SSL_OP_PRIORITIZE_CHACHA is enabled #461
         expected_less_preferred.sort(key=lambda c: "CHACHA" in c.name)
-        if cipher_order_violation:
-            print("break out, got bad")
-            break
+        print(f"checking server pref against: {[s.name for s in expected_more_preferred_list]}")
         for expected_more_preferred in expected_more_preferred_list:
             print(
                 f"evaluating less {[s.name for s in expected_less_preferred]} vs "
@@ -780,7 +779,7 @@ def test_cipher_order(
             )
             if preferred_suite != expected_more_preferred:
                 cipher_order_violation = [preferred_suite.name, expected_more_preferred.name]
-                print(f"break out, got bad inner: {cipher_order_violation}")
+                print(f"break out, got bad order: {cipher_order_violation}")
                 break
 
     return TLSCipherOrderEvaluation(
@@ -807,6 +806,7 @@ def find_most_preferred_cipher_suite(
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
         override_tls_version=tls_version, should_use_legacy_openssl=requires_legacy_openssl
     )
+    print(f"{suite_names=}")
     _set_cipher_suite_string(tls_version, ":".join(suite_names), ssl_connection.ssl_client)
 
     try:
@@ -823,5 +823,5 @@ def find_most_preferred_cipher_suite(
     selected_cipher = CipherSuitesRepository.get_cipher_suite_with_openssl_name(
         tls_version, ssl_connection.ssl_client.get_current_cipher_name()
     )
-    print(f"from CS {suite_names} selected {selected_cipher}")
+    print(f"from CS {[s.name for s in cipher_suites]} selected {selected_cipher}")
     return selected_cipher
