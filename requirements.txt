@@ -78,7 +78,7 @@ django-redis==4.12.1
     # via -r requirements.in
 django-statsd-mozilla==0.4.0
     # via -r requirements.in
-dnspython==2.3.0
+dnspython==2.6.1
     # via
     #   -r requirements.in
     #   eventlet
@@ -171,7 +171,7 @@ requests==2.31.0
     #   sectxt
 rjsmin==1.2.1
     # via -r requirements.in
-sectxt==0.9.2
+sectxt==0.9.3
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
