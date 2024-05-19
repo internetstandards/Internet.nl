@@ -7,7 +7,7 @@
     </div>
     <form action="/site/" method="POST" novalidate>
       <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-        <input id="web-url" type="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+        <input id="web-url" type="url" name="url" placeholder="www.domaine.fr" autocorrect="off" autocapitalize="none" spellcheck="false">
       </label>
       {% if request.GET.invalid != None %}
       <div class="invalid-domain">
