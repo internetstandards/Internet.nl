@@ -162,7 +162,7 @@ pyyaml==6.0.1
     # via -r requirements.in
 redis==5.0.0
     # via django-redis
-requests==2.31.0
+requests==2.32.0
     # via
     #   -r requirements.in
     #   forcediphttpsadapter
