@@ -4241,7 +4241,7 @@ msgstr ""
 
 msgid "probes auto-redirect"
 msgstr ""
-"Vous serez automatiquement redirigé vers la pages des résultats quand tout les \n"
+"Vous serez automatiquement redirigé vers la page des résultats quand tout les \n"
 "tests sont terminés."
 
 msgid "probes no-javascript"
