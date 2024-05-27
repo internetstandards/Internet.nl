@@ -222,6 +222,7 @@ class MailAuth(Category):
             MailAuthDkim,
             MailAuthSpf,
             MailAuthSpfPolicy,
+            MailAuthTlsRptExists,
         ]
         super().__init__(name, subtests)
 
@@ -2195,8 +2196,8 @@ class MailAuthSpf(Subtest):
             label="detail mail auth spf label",
             explanation="detail mail auth spf exp",
             tech_string="detail mail auth spf tech table",
-            worst_status=scoring.MAIL_AUTH_SPF_WORST_STATUS,
-            full_score=scoring.MAIL_AUTH_SPF_PASS,
+            worst_status=scoring.MAIL_AUTH_TLSRPT_WORST_STATUS,
+            full_score=scoring.MAIL_AUTH_TLSRPT_PASS,
             model_score_field="spf_score",
         )
         # Fix for one line, one value data.
@@ -2261,6 +2262,36 @@ class MailAuthSpfPolicy(Subtest):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail auth spf-policy verdict redirect"
         self.tech_data = tech_data
+
+
+class MailAuthTlsRptExists(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="tlsrpt",
+            label="detail mail auth tlsrpt label",
+            explanation="detail mail auth tlsrpt exp",
+            tech_string="detail mail auth tlsrpt tech table",
+            worst_status=scoring.MAIL_AUTH_SPF_WORST_STATUS,
+            full_score=scoring.MAIL_AUTH_SPF_PASS,
+            model_score_field="tlsrpt_score",
+        )
+        # Fix for one line, one value data.
+        self.tech_data = [[self.tech_data]]
+
+    def result_good(self, tech_data):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail auth tlsrpt verdict good"
+        self.tech_data = [[tech_data]]
+
+    def result_bad(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail auth tlsrpt verdict bad"
+        if tech_data:
+            # More than one spf record. Show the records.
+            self.tech_data = [[tech_data]]
+        else:
+            self.tech_data = ""
+            self.tech_type = ""
 
 
 # --- APPSECPRIV
