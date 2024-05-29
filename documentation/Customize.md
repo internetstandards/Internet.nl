@@ -17,13 +17,17 @@ adding the above files.
 
 You need to translate all the strings in `main.po`.
 
-To add a new meny entry for the new language:
-* add the language to `internet.nl/settings.py`
-* update `webserver/nginx_templates/app.conf.template` to include the language
-* update `docker/webserver/certbot.sh` to request LE certs for the new subdomain
+To add a new menu entry for a new language set the `LANGUAGES` setting in `local.env`. The default is `nl,en`. You can add new languages by adding languages codes supported by Django:
+- https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-LANGUAGE_CODE
+- http://www.i18nguy.com/unicode/language-identifiers.html
 
-This presumes you
-have the corresponding DNS entries already created, such as
+The first language in the list is the default langauge.
+
+So to add French and use it as the default languages set it to:
+
+    LANGUAGES=fr,nl,en
+
+This presumes you have the corresponding DNS entries already created, such as
 
 ```
 [lang].example.nl
@@ -32,7 +36,11 @@ have the corresponding DNS entries already created, such as
 [lang].conn.ipv6.example.nl
 ```
 
-where [lang] is the 2 letter ISO 639-1 language code.
+where [lang] is the language code added to LANGUAGE.
+
+You can remove languages you don't intend to support.
+
+
 
 Then, update the site using the procedure in [documentation/Docker-forked.md](Docker-forked.md) to rebuild the front accordingly.
 

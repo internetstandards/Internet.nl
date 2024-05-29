@@ -39,8 +39,8 @@ server {
     listen  [::]:80;
 
     http2 on;
-
-    server_name  ${INTERNETNL_DOMAINNAME} ~(nl|en|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
+    server_name  ${INTERNETNL_DOMAINNAME} ~(${LANGUAGES_REGEX}|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
@@ -63,7 +63,8 @@ server {
 
     http2 on;
 
-    server_name ~(conn|(?<subdomain>en\.|nl\.|www\.)conn).${INTERNETNL_DOMAINNAME};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
+    server_name ~(conn|(?<subdomain>(${LANGUAGES_REGEX}|www)\.)conn).${INTERNETNL_DOMAINNAME};
 
     # pass specific connection test paths to backend
     # /connection/
@@ -131,8 +132,8 @@ server {
     listen  [::]:443 ssl;
 
     http2 on;
-
-    server_name  www.${INTERNETNL_DOMAINNAME} ~(nl|en|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
+    server_name  www.${INTERNETNL_DOMAINNAME} ~(${LANGUAGES_REGEX}|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
@@ -169,7 +170,8 @@ server {
 
     http2 on;
 
-    server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>nl\.|en\.|www\.|ipv6\.)${INTERNETNL_DOMAINNAME};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
+    server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>(${LANGUAGES_REGEX}|www|ipv6)\.)${INTERNETNL_DOMAINNAME};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
