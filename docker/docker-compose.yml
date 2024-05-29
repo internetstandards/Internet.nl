@@ -43,6 +43,7 @@ services:
       - REDIRECT_DOMAINS
       - NGINX_PROXY_CACHE
       - INTERNETNL_BRANDING
+      - LANGUAGES
 
     # webserver does not depend on any of the other services directly. So it can
     # be started and kept running independently from the other services to
@@ -156,6 +157,8 @@ services:
       - INTERNETNL_BRANDING
       - INTERNETNL_DOMAINNAME
       - USER_AGENT_URL
+      - LANGUAGES
+
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
@@ -985,4 +988,3 @@ networks:
       - subnet: $IPV6_SUBNET_PUBLIC
         gateway: $IPV6_GATEWAY_PUBLIC
       - subnet: $IPV4_SUBNET_PUBLIC
-
