@@ -266,21 +266,16 @@ CACHE_RESET_ALLOWLIST = os.getenv("INTERNETNL_CACHE_RESET_ALLOWLIST", "").split(
 #
 # Internationalization and Locatization fixed to dutch at this time.
 # A single installation will only server one target audience.
-LANGUAGE_CODE = "en"
 USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
 # Supported languages.
-# NOTE: Make sure that a DNS record for each language exists.
-#       More information can be found in the README file.
-LANGUAGES = sorted(
-    [
-        ("nl", "Dutch"),
-        ("en", "English"),
-    ],
-    key=lambda x: x[0],
-)
+# Read languages passed in from .env files. See documentation/Customize.md
+LANGUAGES = [(landcode, "") for landcode in os.getenv("LANGUAGES", "nl,en").split(",")]
+
+# set the default language to first language in the list
+LANGUAGE_CODE = LANGUAGES[0][0]
 
 # --- Static files (CSS, JavaScript, Images)
 #     https://docs.djangoproject.com/en/1.11/howto/static-files/
