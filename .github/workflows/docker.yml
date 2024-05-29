@@ -244,7 +244,14 @@ jobs:
 
   integration-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+
+    # Due to some changes in the handling of config files in Compose, some configurations might not work
+    # on older or newer versions of Docker/Compose. Use a matrix to test both.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-22.04]
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -320,7 +327,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Playwright integration test results (screenshots, video)
+          name: Playwright integration test results (screenshots, video) ${{ matrix.os }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -328,7 +335,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Integration test Docker Compose Logs
+          name: Integration test Docker Compose Logs ${{matrix.os}}
           path: docker-compose.log
           if-no-files-found: ignore
 
@@ -505,7 +512,14 @@ jobs:
 
   batch-integration-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+
+    # Due to some changes in the handling of config files in Compose, some configurations might not work
+    # on older or newer versions of Docker/Compose. Use a matrix to test both.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-22.04]
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -578,7 +592,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Playwright batch test results (screenshots, video)
+          name: Playwright batch test results (screenshots, video) ${{ matrix.os }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -586,6 +600,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Batch test Docker Compose Logs
+          name: Batch test Docker Compose Logs ${{ matrix.os }}
           path: docker-compose.log
           if-no-files-found: ignore
