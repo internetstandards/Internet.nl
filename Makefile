@@ -470,6 +470,14 @@ run-shell: cmd=/bin/bash
 run-shell:
 	${DOCKER_COMPOSE_UP_PULL_CMD} run ${run_args} --entrypoint ${cmd} ${service}
 
+# show result of merging .yml docker compose config files
+docker-compose-config:
+	${DOCKER_COMPOSE_UP_PULL_CMD} config
+
+# dump the merged compose config to a file with the versions of docker and compose for easier comparison
+docker-compose-config-to-file:
+	${DOCKER_COMPOSE_UP_PULL_CMD} config > "config-compose-$$(docker compose version --short)-$$(docker version -f 'server-{{.Server.Version}}-client-{{.Client.Version}}').yml"
+
 docker-compose-create-superuser:
 	${DOCKER_COMPOSE_CMD} exec app ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')"
 
