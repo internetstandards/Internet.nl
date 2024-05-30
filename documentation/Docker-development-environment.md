@@ -203,6 +203,16 @@ If the above is not enough: "have you tried turning it on and off again?". Reboo
 
 Otherwise on Mac, try factory resetting Docker: https://docs.docker.com/desktop/troubleshoot/overview/
 
+### Docker compose configuration files
+
+Different versions of Docker Compose may have different ways of processing configuration files or the way they are merged. If you suspect there is an issue due to a newer version of Docker Compose, to see what the final configuration file looks like after merging for example `docker-compose.yml` and `docker-compose-intergration-test.yml` for the `test` environment run:
+
+    make docker-compose-config env=test
+
+For convenience you can store the config files in versioned files so they can be diffed, using the commands:
+
+    make docker-compose-config-to-file env=test
+
 ## IPv6 support
 
 IPv6 support in the development environment is not enabled by default and must be especially configured depending on your setup. On Linux hosts it will mostly work if you have native IPv6. On Mac all Docker runtimes are implemented using Linux VM's which means some additional setup is needed which is not supported on all runtimes.
