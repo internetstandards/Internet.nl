@@ -521,7 +521,7 @@ batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
 tests ?= .
 integration-tests: env=test
 integration-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/integration/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --browser=firefox --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/integration/
 	@echo -e "\nTo run with only specific tests use the 'tests' argument with part of the test's name, for example: make integration-tests tests=test_index_http_ok\n"
 
 integration-tests-verbose: _test_args=--verbose --verbose
@@ -535,7 +535,7 @@ integration-tests-trace: integration-tests
 
 batch-tests: env=batch-test
 batch-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/batch/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --browser=firefox --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/batch/
 
 batch-tests-verbose: _test_args=--verbose --verbose
 batch-tests-verbose: batch-tests
