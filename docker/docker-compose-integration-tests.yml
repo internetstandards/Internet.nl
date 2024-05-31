@@ -45,8 +45,11 @@ services:
     profiles:
       - build
       - run-tests
-    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_MOCK_RESOLVER_PUBLIC
+    # configure internal mock resolver for isolated network
+    dns:
+      - $IPV4_IP_MOCK_RESOLVER_PUBLIC
+      - $IPV6_IP_MOCK_RESOLVER_PUBLIC
+
     # also disable search domains and force default resolv settings
     dns_search: [.]
     dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
