@@ -36,6 +36,7 @@ services:
       - DEBUG_LOG
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+      - PY_COLORS
       # TODO: to properly isolate tests this line needs to be uncommented, see above
       # - INTEGRATION_TESTS
 
