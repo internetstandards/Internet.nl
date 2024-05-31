@@ -9,9 +9,14 @@ An OCI compatible container runtime with [Compose V2](https://docs.docker.com/co
 - [Docker](https://docs.docker.com/get-docker/) for Linux, (supported, tested version 24.0.2)
 - [Docker](https://docs.docker.com/get-docker/) for Mac (supported, tested version 4.21.0)
 - [Colima](https://github.com/abiosoft/colima) for Mac (recommended, tested version 0.5.5)
+- [OrbStack](https://orbstack.dev/download) for Mac (non open source, free, tested version 1.6.1)
 - [Docker](https://docs.docker.com/get-docker/) for Windows (untested)
 
-**notice**: newer versions of Docker (25+) might experience issues with internal DNS resolver. This is possibly a bug in Docker Compose:
+**notice**: some versions of Docker Engine might experience issues with internal DNS resolving and will cause tests to fail. Versions from and including `25.0.5` to and including `26.1.2` should be avoided.
+
+At time of writing the latest Colima version (`v0.6.9`) does not yet contain the correct Docker Engine version. To update the Docker Engine to the latest version manually for the time being run the following command:
+
+    colima ssh -- sudo /bin/sh -c 'apt update; apt install --upgrade docker-ce'
 
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
