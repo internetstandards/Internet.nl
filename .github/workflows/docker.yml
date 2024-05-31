@@ -402,6 +402,7 @@ jobs:
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      PY_COLORS: "1"
 
     steps:
       - uses: actions/checkout@v4

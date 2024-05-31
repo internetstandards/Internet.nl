@@ -42,6 +42,7 @@ services:
     environment:
       - COMPOSE_PROJECT_NAME
       - ENABLE_BATCH
+      - PY_COLORS
     profiles:
       - build
       - run-tests
