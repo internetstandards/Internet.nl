@@ -1,14 +1,13 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import ipaddress
-import json
 import socket
 import re
 
 from django import db
 from django.conf import settings
 from django.core.cache import cache
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django_redis import get_redis_connection
@@ -73,7 +72,7 @@ def gettestid(request, *arg, **kw):
     cache_id = redis_id.conn_test.id.format(ct.test_id)
     cache_ttl = redis_id.conn_test.ttl
     cache.set(cache_id, True, cache_ttl)
-    return HttpResponse(json.dumps(dict(test_id=ct.test_id)))
+    return JsonResponse(dict(test_id=ct.test_id))
 
 
 def results(request, request_id):
@@ -284,13 +283,11 @@ def finished(request, request_id):
     ct.report = report
     ct.reportdnssec = reportdnssec
     ct.save()
-    return HttpResponse(
-        json.dumps(
-            dict(
-                status="OK",
-                connipv6=connectionprobes["ipv6"].rated_results_by_model(ct),
-                connresolver=connectionprobes["resolver"].rated_results_by_model(ct),
-            )
+    return JsonResponse(
+        dict(
+            status="OK",
+            connipv6=connectionprobes["ipv6"].rated_results_by_model(ct),
+            connresolver=connectionprobes["resolver"].rated_results_by_model(ct),
         )
     )
 
@@ -454,7 +451,7 @@ def jsonp(func):
         resp = func(request, *args, **kw)
         cb = request.GET.get("callback")
         if not cb or not re.search(r"^jQuery\d+_\d+$", cb):
-            cb = ""
+            return resp  # no valid callback, return as JSON (removing this re-introduces XSS)
         resp["Content-Type"] = "application/javascript"
         resp.content = f"{cb}({resp.content.decode()})"
         return resp
@@ -509,7 +506,7 @@ def network_ipv6(request, test_id: int = 0):
     cache_ttl = redis_id.conn_test_v6.ttl
     if not cache.add(cache_id, False, cache_ttl):
         # Already have enough information, skip this
-        return HttpResponse(json.dumps(dict()))
+        return JsonResponse(dict())
     ip = get_client_ip(request)
     asn = find_AS_by_IP(ip)
 
@@ -525,7 +522,7 @@ def network_ipv6(request, test_id: int = 0):
     results = dict(ip=ip, asn=asn, reverse=reverse, mac_vendor=mac_vendor)
     cache.set(cache_id, results, settings.CACHE_TTL)
     results.update(dict(resolv=resolv))
-    return HttpResponse(json.dumps(results))
+    return JsonResponse(results)
 
 
 @jsonp
@@ -547,7 +544,7 @@ def network_ipv4(request, test_id: int = 0):
     cache_ttl = redis_id.conn_test_v4.ttl
     cache.set(cache_id, results, cache_ttl)
     results.update(dict(resolv=resolv))
-    return HttpResponse(json.dumps(results))
+    return JsonResponse(results)
 
 
 @jsonp
@@ -556,4 +553,4 @@ def network_resolver(request, test_id: int = 0):
     if hasattr(request, "test_id"):
         test_id = request.test_id
 
-    return HttpResponse(json.dumps(dict(resolv=resolv_list(request.get_host(), test_id))))
+    return JsonResponse(dict(resolv=resolv_list(request.get_host(), test_id)))
