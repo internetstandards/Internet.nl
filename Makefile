@@ -450,7 +450,7 @@ ps docker-compose-ps:
 docker-compose-app-attach:
 	${DOCKER_COMPOSE_CMD} attach -ti app
 
-logs docker-compose-logs: services=webserver app worker resolver test-target
+logs docker-compose-logs: services=webserver app worker worker-nassl worker-slow resolver test-target
 logs docker-compose-logs:
 	${DOCKER_COMPOSE_CMD} logs --follow ${services}
 
