@@ -40,13 +40,16 @@ where [lang] is the language code added to LANGUAGE.
 
 You can remove languages you don't intend to support.
 
-
-
 Then, update the site using the procedure in [documentation/Docker-forked.md](Docker-forked.md) to rebuild the front accordingly.
 
 For `news.po` you can provide your own news/blogs but you need to follow the
 existing conventions. (**FIXME**: this needs further clarification)
 
+## Security.txt
+
+To add a `.well-known/security.txt` file to your installation, create the file `.well-known/security-custom.txt` in the repository. The existing `.well-known/security.txt` file cannot be used.
+
+After which the `webserver` image should be rebuild and will serve the file under the `/.well-known/security.txt` path.
 
 ## Scores
 

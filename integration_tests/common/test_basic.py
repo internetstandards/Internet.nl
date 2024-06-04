@@ -4,9 +4,13 @@ import pytest
 import requests
 from playwright.sync_api import expect
 import socket
+import os
 
 FOOTER_TEXT_EN = "Internet.nl is an initiative of the Internet community and the Dutch"
 FOOTER_TEXT_NL = "Internet.nl is een initiatief van de internetgemeenschap en de Nederlandse"
+
+LANGUAGE_CHANGE_TEXT_EN = "Test your website"
+LANGUAGE_CHANGE_TEXT_NL = "Test je website"
 
 SECURITY_TXT_TEXT = "Policy: https://internet.nl/disclosure/"
 
@@ -15,6 +19,8 @@ ROBOTS_TXT_TEXT = "Disallow: /site/"
 WELL_KNOWN_EXTERNAL_DOMAIN = "example.nl"
 WELL_KNOWN_EXTERNAL_IP = "94.198.159.35"
 WELL_KNOWN_EXTERNAL_IPV6 = "2a00:d78:0:712:94:198:159:35"
+
+INTERNETNL_BRANDING = os.environ.get("INTERNETNL_BRANDING")
 
 
 def test_sanity_no_external_dns():
@@ -48,6 +54,7 @@ def test_index_http_ok(page, app_url_subdomain):
     expect(response).to_be_ok()
 
 
+@pytest.mark.skipif(not INTERNETNL_BRANDING, reason="internet.nl branding not enabled")
 @pytest.mark.parametrize(
     ("app_url", "footer_text"),
     [("https://en.internet.test", FOOTER_TEXT_EN), ("https://nl.internet.test", FOOTER_TEXT_NL)],
@@ -59,6 +66,7 @@ def test_index_footer_text_present(page, app_url, footer_text):
     assert footer_text in footer.text_content()
 
 
+@pytest.mark.skipif(not INTERNETNL_BRANDING, reason="internet.nl branding not enabled")
 def test_security_txt(page, app_url_subdomain):
     page.goto(app_url_subdomain + "/.well-known/security.txt")
 
@@ -174,7 +182,7 @@ def test_conn_over_https_no_hsts(app_domain):
 
 @pytest.mark.parametrize(
     ("from_language", "button_text", "to_language", "footer_text"),
-    [("nl", "English", "en", FOOTER_TEXT_EN), ("en", "Nederlands", "nl", FOOTER_TEXT_NL)],
+    [("nl", "English", "en", LANGUAGE_CHANGE_TEXT_EN), ("en", "Nederlands", "nl", LANGUAGE_CHANGE_TEXT_NL)],
 )
 def test_change_language(page, app_domain, from_language, button_text, to_language, footer_text):
     """Test clicking the language change button."""
@@ -183,13 +191,13 @@ def test_change_language(page, app_domain, from_language, button_text, to_langua
     page.locator(f'#language-switch-header-container button:text("{button_text}")').click()
     page.wait_for_url(f"https://{to_language}.internet.test/")
 
-    footer = page.locator("#footer")
+    footer = page.locator("#content")
     assert footer_text in footer.text_content()
 
 
 @pytest.mark.parametrize(
     ("language", "footer_text"),
-    [("en", FOOTER_TEXT_EN), ("nl", FOOTER_TEXT_NL)],
+    [("en", LANGUAGE_CHANGE_TEXT_EN), ("nl", LANGUAGE_CHANGE_TEXT_NL)],
 )
 def test_accept_language_header(page, app_domain, language, footer_text):
     """Browser preferred language should be respected."""
@@ -197,7 +205,7 @@ def test_accept_language_header(page, app_domain, language, footer_text):
     page.set_extra_http_headers({"Accept-Language": language})
     page.goto(f"https://{app_domain}")
 
-    footer = page.locator("#footer")
+    footer = page.locator("#content")
     assert footer_text in footer.text_content()
 
 
