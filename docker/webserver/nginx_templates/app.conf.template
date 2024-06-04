@@ -231,15 +231,17 @@ server {
 
     # disable security.txt if branding is disabled
     set $internetnl_branding "${INTERNETNL_BRANDING}";
+    if ($internetnl_branding = "True"){
+      set $security_txt "/var/www/internet.nl/.well-known/security.txt";
+    }
+    if ($internetnl_branding != "True"){
+      set $security_txt "/var/www/internet.nl/.well-known/security-custom.txt";
+    }
     location = /.well-known/security.txt {
-      if ($internetnl_branding != "True"){
-        return 404;
-      }
       # basic auth should not apply to this path
       auth_basic off;
       # IP allowlist should also not apply
-      allow all;
-      alias /var/www/internet.nl/.well-known/security.txt;
+      alias $security_txt;
     }
 
     # static files served from Nginx container

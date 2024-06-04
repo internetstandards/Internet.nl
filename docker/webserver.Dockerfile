@@ -29,7 +29,10 @@ COPY docker/webserver/user_manage_inner.sh /user_manage_inner.sh
 RUN mkdir -p /var/www/internet.nl/
 
 COPY robots.txt /var/www/internet.nl/
-COPY .well-known/ /var/www/internet.nl/.well-known/
+
+RUN mkdir -p /var/www/internet.nl/.well-known/
+# copy all security*.txt files
+COPY .well-known/security*.txt /var/www/internet.nl/.well-known/
 COPY interface/static/favicon.ico /var/www/internet.nl/
 
 COPY docker/webserver/nginx_templates/* /etc/nginx/templates/
