@@ -237,7 +237,7 @@ services:
     user: root
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
 
     depends_on:
       db-migrate:
@@ -349,8 +349,8 @@ services:
         limits:
           memory: $WORKER_SLOW_MEMORY_LIMIT
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_CONCURRENCY
-      --queues slow_db_worker
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
+      --queues slow_db_worker,batch_slow
     # set hostname for Sentry
     hostname: worker-slow
 
