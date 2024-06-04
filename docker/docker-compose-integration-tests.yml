@@ -43,6 +43,7 @@ services:
       - COMPOSE_PROJECT_NAME
       - ENABLE_BATCH
       - PY_COLORS
+      - INTERNETNL_BRANDING
     profiles:
       - build
       - run-tests
