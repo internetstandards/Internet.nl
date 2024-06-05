@@ -275,7 +275,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce
+          sudo apt install --upgrade docker-ce docker-compose-plugin
 
       - name: Enable ip6tables in Docker
         run: |
@@ -562,7 +562,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce
+          sudo apt install --upgrade docker-ce docker-compose-plugin
 
       - name: Enable ip6tables in Docker
         run: |
