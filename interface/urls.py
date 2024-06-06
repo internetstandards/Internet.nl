@@ -60,23 +60,19 @@ urlpatterns = [
     re_path(r"^mail/(?P<mailaddr>.*)/results$", mail.validate_domain),
     re_path(rf"^clear/{regex_dname}/$", views.clear),
     path("change_language/", views.change_language, name="change_language"),
+    path("contact/", views.indexpage),
+    path("blogs/", views.blogindexpage),
+    re_path(r"^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
+    re_path(r"^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.blogarticlepage),
+    path("news/", views.newsindexpage),
+    re_path(r"^news/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.newsarticlepage),
+    path("articles/", views.articleindexpage),
+    path("article/", views.articlespage),
+    re_path(r"^article/(?P<article>[a-zA-Z0-9\.\-]{1,80})/$", views.articlepage),
+    path("about/", views.aboutpage),
+    path("disclosure/", views.disclosurepage),
+    path("privacy/", views.privacypage),
 ]
-
-if settings.INTERNETNL_BRANDING:
-    urlpatterns += [
-        path("contact/", views.indexpage),
-        path("blogs/", views.blogindexpage),
-        re_path(r"^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
-        re_path(r"^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.blogarticlepage),
-        path("news/", views.newsindexpage),
-        re_path(r"^news/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.newsarticlepage),
-        path("articles/", views.articleindexpage),
-        path("article/", views.articlespage),
-        re_path(r"^article/(?P<article>[a-zA-Z0-9\.\-]{1,80})/$", views.articlepage),
-        path("about/", views.aboutpage),
-        path("disclosure/", views.disclosurepage),
-        path("privacy/", views.privacypage),
-    ]
 
 # Host-urls that are accessible by host-only, which should be approachable by developers as well during
 # development (although your DNS is probably not set correctly to deal with the tests.

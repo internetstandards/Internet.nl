@@ -3,21 +3,24 @@
 The Internet.nl tool has the ability to be customized for additional
 translations and content.
 
+## Development setup
+
+By default the repository is configured to show Internet.nl content during development and will not show some of the content you create for your fork. To show 'custom' content add the following to the `docker/local.env` file in your repository: `INTERNETNL_BRANDING=False`.
+
+For deployments the default for `INTERNETNL_BRANDING` is `False` so you should not have to add this.
 
 ## Translations
 
 Translation files are available under `translations/<locale>`.
 
-The available files are:
-- `main.po`, all the necessary strings to make internet.nl work;
-- `news.po`, all the news/blog entries.
-
 You can add new locales by creating a new folder under `translations` and
-adding the above files.
+adding `main.po`, with all the necessary strings to make internet.nl work;
 
 You need to translate all the strings in `main.po`.
 
-To add a new menu entry for a new language set the `LANGUAGES` setting in `local.env`. The default is `nl,en`. You can add new languages by adding languages codes supported by Django:
+Content specific to Internet.nl is not rendered in forked deployments. Some content (like news, about, footer, privacy, disclosure) can be added using a `custom.po` file. See the `translations/en/custom.po.dist` file for the translation strings that can be used. Rename this file to `custom.po` and add it for all locales you like to support.
+
+To add a new menu entry for a new language set the `LANGUAGES` setting in `docker/local.env` on your development repository adn deployment. The default is `nl,en`. You can add new languages by adding languages codes supported by Django:
 - https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-LANGUAGE_CODE
 - http://www.i18nguy.com/unicode/language-identifiers.html
 
