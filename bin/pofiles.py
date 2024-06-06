@@ -24,6 +24,7 @@ KNOWN_PO_FILES = [
     ("main.po", []),
     ("news.po", ['article', 'author']),
     ("manual_hof.po", ['manual halloffame']),
+    ("custom.po", []),
 ]
 PO_FILES_DIR = "translations"
 PO_FILES_LOCALES = PO_FILES_DIR + "/{}"
