@@ -1,0 +1,50 @@
+msgid "base about custom"
+msgstr "À propos"
+
+msgid "base info custom"
+msgstr "conformite-internet.fr est une initiative de la communauté d'Internet de d'Apio systems."
+
+msgid "about content custom"
+msgstr "Some about content"
+
+msgid "about contact custom"
+msgstr ""
+"# About custom\n"
+"## Email\n"
+"custom@example.com\n"
+
+msgid "privacy content custom"
+msgstr ""
+"# Privacy statement\n"
+"\n"
+"*Revised 24th of October 2023*\n"
+
+msgid "article custom .index"
+msgstr ""
+"hello-world\n"
+"lorum-ipsum\n"
+
+msgid "article hello-world date"
+msgstr "22 March 2023"
+
+msgid "article hello-world lead"
+msgstr ""
+"Hello world?"
+
+msgid "article hello-world title"
+msgstr "Hello World!"
+
+msgid "article hello-world body"
+msgstr "Hello World!"
+
+msgid "article lorum-ipsum date"
+msgstr "1 January 2024"
+
+msgid "article lorum-ipsum lead"
+msgstr "Lorem ipsum dolor sit amet, consectetuer adipiscing elit."
+
+msgid "article lorum-ipsum title"
+msgstr "Lorum ipsum"
+
+msgid "article lorum-ipsum body"
+msgstr "Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui."
