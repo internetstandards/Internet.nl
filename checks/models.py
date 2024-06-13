@@ -721,6 +721,8 @@ class DomainTestAppsecpriv(BaseTestModel):
     securitytxt_recommendations = ListField(default=[])
     securitytxt_score = models.IntegerField(null=True)
     securitytxt_found_host = models.CharField(null=True, max_length=255)
+    # 8000 from https://www.rfc-editor.org/rfc/rfc9110#section-4.1-5
+    securitytxt_found_url = models.CharField(null=True, max_length=8000)
 
     def __dir__(self):
         return [
@@ -753,6 +755,7 @@ class DomainTestAppsecpriv(BaseTestModel):
             "securitytxt_recommendations",
             "securitytxt_score",
             "securitytxt_found_host",
+            "securitytxt_found_url",
         ]
 
     def get_web_api_details(self):
@@ -772,6 +775,7 @@ class DomainTestAppsecpriv(BaseTestModel):
             "securitytxt_errors": self.securitytxt_errors,
             "securitytxt_recommendations": self.securitytxt_recommendations,
             "securitytxt_found_host": self.securitytxt_found_host,
+            "securitytxt_found_url": self.securitytxt_found_url,
         }
 
     class Meta:
