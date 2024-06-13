@@ -1,0 +1,22 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Contact: https://conformite-internet.fr/about/
+Contact: mailto:security@apio.systems
+Encryption: https://apio.systems/public/apio.systems.txt
+Expires: 2025-05-19T23:59:59.000Z
+Canonical: https://conformite-internet.fr/.well-known/security.txt
+-----BEGIN PGP SIGNATURE-----
+
+iQGzBAEBCgAdFiEEvpWN/vz2IhrBpjGHUcnk8hE9drYFAmRpMiYACgkQUcnk8hE9
+drZWSAv8DxMiPABZB0iz394Y/20LIRs/7CzVVRH8EzN8cZ/x3C2NyB8lrCJh3KxP
+Pp204880/c2yZaQi5ly+ihyhU7sq791RgYzS6Ckyw05yO4rpRCahRUZBclf4nLx2
+zvhnV2qgwpjGbXNseZy6sxGaNcqGOSgvcdT1sfQwXNvInaUPMPqU5QRJPQulOmCJ
+f8PMpsX3LO410/YKD0ELVM4nGAqgO38iCfX+rkyjLKTj0Y8nXWObPTofcVJImhyr
+rwv5e84wg5svgq3q187ZluM365aqiXWDw785QGLO2gIj7uJ5LteR7j6TSrK/ZMg4
+9LX5PKP9w9dBd17jN4jK7/FjWgA5PoF2ixhpYHxlxAEfOkNpVzLfTKNUiqrdKyhb
+UWkNgu4T7W6rJl4kcjiDVtZd653yX5GwJF/A4BjqhsxocP97izYrJiupQ3tB3gQw
+pxWe8PnNXJTwcmCEa9aSDElgG6uYccyGoJHRYsYlK+9UyP1wtD7D21etHaVmgf5R
+klCowtRU
+=YIzj
+-----END PGP SIGNATURE-----
