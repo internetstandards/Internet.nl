@@ -2,7 +2,7 @@ msgid "base about custom"
 msgstr "À propos"
 
 msgid "base info custom"
-msgstr "conformite-internet.fr est une initiative de la communauté d'Internet de d'Apio systems."
+msgstr "conformite-internet.fr est une initiative de la communauté d'Internet et de d'[Apio systems](https://apio.systems)."
 
 msgid "about content custom"
 msgstr "Some about content"
