@@ -28,10 +28,21 @@ if [ ! -z $CERTBOT_EAB_HMAC_KEY ]; then
 fi
 
 domain=$INTERNETNL_DOMAINNAME
-subdomains="fr.$domain,nl.$domain,en.$domain,www.$domain,ipv6.$domain,fr.ipv6.$domain,nl.ipv6.$domain,en.ipv6.$domain"
+subdomains="www.$domain,ipv6.$domain"
+# adds subdomain and .ipv6 subdomain for each language, eg: nl.example.com, nl.ipv6.example.com
+for language in $(echo "$LANGUAGES" | tr ',' ' '); do
+  subdomains="$subdomains,$language.$domain,$lanuge.ipv6.$domain"
+done
+
 if [ "$ENABLE_BATCH" != True ]; then
-  subdomains="$subdomains,www.$domain,conn.$domain,en.conn.$domain,nl.conn.$domain,fr.conn.$domain,www.conn.$domain,conn.ipv6.$domain,en.conn.ipv6.$domain,nl.conn.ipv6.$domain,fr.conn.ipv6.$domain,www.conn.ipv6.$domain"
+  subdomains="$subdomains,conn.$domain"
+  # adds connection test subdomains .conn and .conn.ipv6 subdomain for each language, eg:
+  # nl.conn.example.com, nl.conn.ipv6.example.com
+  for language in $(echo "$LANGUAGES" | tr ',' ' '); do
+    subdomains="$subdomains,$language.conn.$domain,$lanuage.conn.ipv6.$domain"
+  done
 fi
+
 if [ ! -z $REDIRECT_DOMAINS ];then
   subdomains="$subdomains,$REDIRECT_DOMAINS"
 fi

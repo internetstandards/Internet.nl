@@ -72,13 +72,13 @@
       <nav id="sitenav">
         <ul>
           <li class="{% if pagemenu == 'home' %}current{% endif %}"><a href="/">{% include "string.html" with name="base home" %}</a></li>
-          {% if "INTERNETNL_BRANDING"|get_settings_value %}
           <li class="{% if pagemenu == 'news' %}current{% endif %}"><a href="/news/">{% include "string.html" with name="base news" %}</a></li>
-          {% endif %}
           <li class="{% if pagemenu == 'faqs' %}current{% endif %}"><a href="/faqs/">{% include "string.html" with name="base faqs" %}</a></li>
           <li class="{% if pagemenu == 'halloffame' %}current{% endif %}"><a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a></li>
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
           <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about" %}</a></li>
+          {% else %}
+          <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about custom" %}</a></li>
           {% endif %}
         </ul>
       </nav>
@@ -101,14 +101,14 @@
     <div class="wrap">
       {% if "INTERNETNL_BRANDING"|get_settings_value %}
       {% include "string.html" with name="base info" %}
+      {% else %}
+      {% include "string.html" with name="base info custom" %}
       {% endif %}
       <div class="version">v{{ "VERSION"|get_settings_value }}</div>
       <hr>
       <ul>
-        {% if "INTERNETNL_BRANDING"|get_settings_value %}
         <li><a class="footlink" href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a></li>
         <li><a class="footlink" href="/privacy/">{% include "string.html" with name="base privacy" %}</a></li>
-        {% endif %}
         <li><a class="footlink" href="/copyright/">{% include "string.html" with name="base copyright" %}</a></li>
         {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
         <li><a class="footlink" href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a></li>

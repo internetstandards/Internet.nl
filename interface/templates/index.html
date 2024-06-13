@@ -74,7 +74,6 @@
 
 {% block maincontent %}
       <section class="block news">
-        {% if "INTERNETNL_BRANDING"|get_settings_value %}
         <h2>{% include "string.html" with name="base news" %}</h2>
         <ul>
         {% for article in articles %}
@@ -85,7 +84,6 @@
         {% endfor %}
         </ul>
         <p class="read-more"><a href="/articles/">{% include "string.html" with name="base newslink" %}</a></p>
-        {% endif %}
       </section>
       <section class="block hall-of-fame">
         <h2>{% include "string.html" with name="base halloffame" %}</h2>

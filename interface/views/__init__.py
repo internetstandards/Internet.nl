@@ -30,7 +30,10 @@ def page404(request, exception):
 
 @simple_cache_page
 def indexpage(request):
-    articles = _("article .index").split()
+    if settings.INTERNETNL_BRANDING:
+        articles = _("article .index").split()
+    else:
+        articles = _("article custom .index").split()
     articles = articles[0:6]
     cache_id = redis_id.home_stats_data.id
     novalue = "…"
@@ -173,13 +176,19 @@ def newsarticlepage(request, article):
 
 
 def articlespage(request):
-    articles = _("article .index").split()
+    if settings.INTERNETNL_BRANDING:
+        articles = _("article .index").split()
+    else:
+        articles = _("article custom .index").split()
     article = articles[0]
     return redirect("/article/" + article)
 
 
 def articleindexpage(request):
-    articles = _("article .index").split()
+    if settings.INTERNETNL_BRANDING:
+        articles = _("article .index").split()
+    else:
+        articles = _("article custom .index").split()
     if len(articles) < 1:
         articles = []
     return render(
@@ -195,7 +204,10 @@ def articlepage(request, article):
     if _(title) == title:
         return page404(request, None)
 
-    articles = _("article .index").split()
+    if settings.INTERNETNL_BRANDING:
+        articles = _("article .index").split()
+    else:
+        articles = _("article custom .index").split()
     articles = articles[0:6]
     date = "article " + article + " date"
     lead = "article " + article + " lead"

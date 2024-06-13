@@ -1,15 +1,24 @@
 {% extends "base.html" %}
 {% load static %}
+{% load translate %}
 
 {% block maincontent %}
   <article class="block wide">
     <section>
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
       {% include "content.html" with name="about content" %}
+      {% else %}
+      {% include "content.html" with name="about content custom" %}
+      {% endif %}
     </section>
   </article>
   <aside>
     <section class="block">
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
       {% include "content.html" with name="about contact" %}
+      {% else %}
+      {% include "content.html" with name="about contact custom" %}
+      {% endif %}
     </section>
   </aside>
 {% endblock %}

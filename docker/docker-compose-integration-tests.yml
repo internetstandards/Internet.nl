@@ -42,6 +42,7 @@ services:
     environment:
       - COMPOSE_PROJECT_NAME
       - ENABLE_BATCH
+      - INTERNETNL_BRANDING
     profiles:
       - build
       - run-tests

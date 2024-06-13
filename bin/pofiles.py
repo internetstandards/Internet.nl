@@ -24,6 +24,7 @@ KNOWN_PO_FILES = [
     ("main.po", []),
     ("news.po", ['article', 'author']),
     ("manual_hof.po", ['manual halloffame']),
+    ("custom.po", []),
 ]
 PO_FILES_DIR = "translations"
 PO_FILES_LOCALES = PO_FILES_DIR + "/{}"
@@ -154,8 +155,7 @@ def build_django_files(args=None):
             try:
                 merged_po = merge(merged_po, po_file)
             except ValueError as e:
-                print(f"{e} in {locale}/{filename}. Aborting...")
-                return
+                raise Exception(f"{e} in {locale}/{filename}. Aborting...")
         merged_po.sort()
         print(f"Converting '{locale}' locale to markdown...")
         for entry in merged_po:
