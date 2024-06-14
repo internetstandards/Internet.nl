@@ -209,6 +209,16 @@ For convenience you can store the config files in versioned files so they can be
 
     make docker-compose-config-to-file env=test
 
+### Known error messages
+
+#### Incompatible Docker/Compose version
+
+The following error messages indicate a Docker or Compose version which is not supported. Please refer to `documentation/Docker-getting-started.md#Prerequisites` for compatible versions.
+
+Incompatible Compose version:
+
+    no configuration file provided: not found
+
 ## IPv6 support
 
 IPv6 support in the development environment is not enabled by default and must be especially configured depending on your setup. On Linux hosts it will mostly work if you have native IPv6. On Mac all Docker runtimes are implemented using Linux VM's which means some additional setup is needed which is not supported on all runtimes.

@@ -18,6 +18,8 @@ At time of writing the latest Colima version (`v0.6.9`) does not yet contain the
 
     colima ssh -- sudo /bin/sh -c 'apt update; apt install --upgrade docker-ce'
 
+**notice**: Docker Compose Plugin versions from `2.24` up to `2.27.0` should be avoided. `2.27.0` is supported but `2.27.1` is not. At the time a newer version which is supported is to be released.
+
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
 **for arm users (eg apple m1)**: nassl will not compile on x64 architectures, so use the option to start your container engine in x86 mode. For colima this can be done with `colima start --arch x86_64`. As per the system requirements noted above, the right way to start with colima would then be: `colima start --arch x86_64 --cpu 2 --memory 4`, but giving it some room would make that: `colima start --arch x86_64 --cpu 4 --memory 8`.
