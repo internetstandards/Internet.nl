@@ -50,6 +50,11 @@ jobs:
       internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}
 
     steps:
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
         # include vendor/ submodules used to build dependencies like nassl and unbound
         with:
@@ -277,6 +282,11 @@ jobs:
           # upgrade Docker
           sudo apt install --upgrade docker-ce docker-compose-plugin
 
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - name: Enable ip6tables in Docker
         run: |
           sudo bash -c 'echo "{ \"ip6tables\": true, \"experimental\":true}" > /etc/docker/daemon.json'
@@ -367,6 +377,11 @@ jobs:
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
 
       # login to pull images from Github registry
@@ -405,6 +420,11 @@ jobs:
       PY_COLORS: "1"
 
     steps:
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
 
       # login to pull images from Github registry
@@ -457,6 +477,11 @@ jobs:
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
 
       # login to pull images from Github registry
@@ -563,6 +588,11 @@ jobs:
 
           # upgrade Docker
           sudo apt install --upgrade docker-ce docker-compose-plugin
+
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
 
       - name: Enable ip6tables in Docker
         run: |
