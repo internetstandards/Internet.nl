@@ -38,18 +38,46 @@ A public domain name or subdomain is required. It should be possible to set the 
 
 After installation and basic configuration of the OS switch to `root` user.
 
-Currently Docker `>25` and Compose `>2.24` cause issues during installation. The following command will install a file that restricts the versions to supported ones:
+Currently some Docker and Compose versions cause issues during setup (see: `documentation/Docker-getting-started.md#Prerequisites`). The following command will install a file that will prevent installing unsupported versions:
 
     cat > /etc/apt/preferences.d/internetnl-docker-supported-versions <<EOF
-    # pin docker and compose to supported versions
-    # https://github.com/internetstandards/Internet.nl/issues/1398
-    Package: docker-*
-    Pin: version 5:24.*
-    Pin-priority: 1001
+    # prevent installation of unsupported versions of Docker/Compose
+    # https://github.com/internetstandards/Internet.nl/pull/1419
+    Package: docker-ce
+    Pin: version 5:25.*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.0.*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.0-*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.1-*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.2-*
+    Pin-priority: -1
 
     Package: docker-compose-plugin
-    Pin: version 2.23.* release=test
-    Pin-priority: 1001
+    Pin: version 2.24.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.25.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.26.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.27.1-*
+    Pin-priority: -1
     EOF
 
 Run the following command to install required dependencies, setup Docker Apt repository, and install Docker:
