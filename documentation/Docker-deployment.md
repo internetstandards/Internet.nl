@@ -394,3 +394,15 @@ All stateful date for the application stack is stored in Docker Volumes. For bac
 Daily and weekly database dumps are written to the `/var/lib/docker/volumes/internetnl-prod_postgres-backups/` directory.
 
 When recovering or migrating to a new server first the "Server Setup" should be done then these directories should be restored, after which the "Application Setup" can be done.
+
+## Impact of deployment host/network on test results
+
+The IP and network on which you deploy your instance may have some impact on test results.
+Most significantly, this affects test targets hosted in an RPKI invalid prefix. While the RPKI test will always detect
+this, if your network or its upstreams do RPKI origin validation, other tests with this target will time out as they
+can not reach the target. If there is no (or partial) validation, other tests will report the target as reachable,
+even though it may not be for the many networks that now do RPKI origin validation. In either case, the RPKI test will
+show the correct result.
+
+If you use an IP address with a poor reputation, or included in block lists, this may cause some tests to show
+an unreachable target. This is most likely for email tests, but has been seen for some other tests too.
