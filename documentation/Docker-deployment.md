@@ -38,6 +38,48 @@ A public domain name or subdomain is required. It should be possible to set the 
 
 After installation and basic configuration of the OS switch to `root` user.
 
+Currently some Docker and Compose versions cause issues during setup (see: `documentation/Docker-getting-started.md#Prerequisites`). The following command will install a file that will prevent installing unsupported versions:
+
+    cat > /etc/apt/preferences.d/internetnl-docker-supported-versions <<EOF
+    # prevent installation of unsupported versions of Docker/Compose
+    # https://github.com/internetstandards/Internet.nl/pull/1419
+    Package: docker-ce
+    Pin: version 5:25.*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.0.*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.0-*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.1-*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.2-*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.24.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.25.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.26.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.27.1-*
+    Pin-priority: -1
+    EOF
+
 Run the following command to install required dependencies, setup Docker Apt repository, and install Docker:
 
 
@@ -46,9 +88,11 @@ Run the following command to install required dependencies, setup Docker Apt rep
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
-    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" > /etc/apt/sources.list.d/docker.list && \
-    apt update && \
+    echo -e "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable\n \
+    deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" test" \
+    > /etc/apt/sources.list.d/docker.list && apt update && \
     apt install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 Configure Docker for IPv6 and Live restore:
@@ -66,9 +110,9 @@ Run the following commands to install the files in the expected location:
     RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env" && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env" && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml" && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
@@ -105,7 +149,7 @@ Use the values determined above to fill in the variables below and run the follo
     SENTRY_SERVER_NAME=$(hostname) \
     envsubst < docker/host-dist.env > docker/host.env
 
-After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings.
+After this a `docker/host.env` file is created. This file is host specific and should not be modified unless something changes in the domainname or IP settings. Note that this sets the sentry hostname for convenience, but to completely configure sentry you also need SENTRY_DSN.
 
 For instance specific configuration use the `docker/local.env` file. Please refer to the `docker/defaults.env` file which contains all configurable settings. Please **do not** modify the `docker/defaults.env` file itself as it will be overwritten in updates.
 
@@ -180,7 +224,7 @@ If this does not work problems might lay deeper and OS level troubleshooting mig
 
 ## Autohealing
 
-Critial containers/services have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for to long the Docker daemon will restart the service.
+Critial containers/services have Docker healthchecks configured. These run at a configured interval to verify the correct functioning of the services. If a service is unhealthy for too long the Docker daemon will restart the service.
 
 ### Known issues
 
@@ -311,13 +355,13 @@ By default the installation is open to everyone. If you like to restrict access 
 
 ### HTTP Basic Authentication
 
-Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable. 
+Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable.
 
 To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
 and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
 and `verify` to verify a user's existence and password. Passwords are entered interactively.
 
-If you would like users on the host to manage batch users, set sudo access for this script. 
+If you would like users on the host to manage batch users, set sudo access for this script.
 
 ### IP allow/deny lists
 
