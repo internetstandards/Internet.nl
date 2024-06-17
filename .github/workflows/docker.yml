@@ -50,6 +50,11 @@ jobs:
       internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}
 
     steps:
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
         # include vendor/ submodules used to build dependencies like nassl and unbound
         with:
@@ -244,7 +249,8 @@ jobs:
 
   integration-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+
+    runs-on: ubuntu-24.04
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -252,6 +258,28 @@ jobs:
       PY_COLORS: "1"
 
     steps:
+      - name: Install specific Docker/Compose versions that are known to work
+        run: |
+          # install Docker apt repository
+          sudo apt update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+
+          # upgrade Docker
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - name: Enable ip6tables in Docker
         run: |
           sudo bash -c 'echo "{ \"ip6tables\": true, \"experimental\":true}" > /etc/docker/daemon.json'
@@ -320,7 +348,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Playwright integration test results (screenshots, video)
+          name: Playwright integration test results (screenshots, video) ${{ matrix.os }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -328,7 +356,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Integration test Docker Compose Logs
+          name: Integration test Docker Compose Logs ${{matrix.os}}
           path: docker-compose.log
           if-no-files-found: ignore
 
@@ -342,6 +370,11 @@ jobs:
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
 
       # login to pull images from Github registry
@@ -372,13 +405,36 @@ jobs:
 
   test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      PY_COLORS: "1"
 
     steps:
+      - name: Install specific Docker/Compose versions that are known to work
+        run: |
+          # install Docker apt repository
+          sudo apt update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+
+          # upgrade Docker
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
 
       # login to pull images from Github registry
@@ -424,13 +480,35 @@ jobs:
 
   development-environment-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
+      - name: Install specific Docker/Compose versions that are known to work
+        run: |
+          # install Docker apt repository
+          sudo apt update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+
+          # upgrade Docker
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - uses: actions/checkout@v4
 
       # login to pull images from Github registry
@@ -505,7 +583,8 @@ jobs:
 
   batch-integration-test:
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+
+    runs-on: ubuntu-24.04
 
     env:
       # used in `docker-compose.yml` files to determine version of images to pull
@@ -513,6 +592,28 @@ jobs:
       PY_COLORS: "1"
 
     steps:
+      - name: Install specific Docker/Compose versions that are known to work
+        run: |
+          # install Docker apt repository
+          sudo apt update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+
+          # upgrade Docker
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+
+      - name: Debug info
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version --short
+
       - name: Enable ip6tables in Docker
         run: |
           sudo bash -c 'echo "{ \"ip6tables\": true, \"experimental\":true}" > /etc/docker/daemon.json'
@@ -578,7 +679,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Playwright batch test results (screenshots, video)
+          name: Playwright batch test results (screenshots, video) ${{ matrix.os }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -586,6 +687,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Batch test Docker Compose Logs
+          name: Batch test Docker Compose Logs ${{ matrix.os }}
           path: docker-compose.log
           if-no-files-found: ignore
