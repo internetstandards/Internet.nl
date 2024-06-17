@@ -199,7 +199,7 @@ def pytest_report_header(config):
 
     try:
         docker_compose_version = subprocess.check_output(
-            "    docker compose version --short", shell=True, universal_newlines=True
+            "docker compose version --short", shell=True, universal_newlines=True
         ).strip()
     except Exception:
         docker_compose_version = "n/a"
