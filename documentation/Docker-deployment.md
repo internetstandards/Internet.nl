@@ -38,18 +38,46 @@ A public domain name or subdomain is required. It should be possible to set the 
 
 After installation and basic configuration of the OS switch to `root` user.
 
-Currently Docker `>25` and Compose `>2.24` cause issues during installation. The following command will install a file that restricts the versions to supported ones:
+Currently some Docker and Compose versions cause issues during setup (see: `documentation/Docker-getting-started.md#Prerequisites`). The following command will install a file that will prevent installing unsupported versions:
 
     cat > /etc/apt/preferences.d/internetnl-docker-supported-versions <<EOF
-    # pin docker and compose to supported versions
-    # https://github.com/internetstandards/Internet.nl/issues/1398
-    Package: docker-*
-    Pin: version 5:24.*
-    Pin-priority: 1001
+    # prevent installation of unsupported versions of Docker/Compose
+    # https://github.com/internetstandards/Internet.nl/pull/1419
+    Package: docker-ce
+    Pin: version 5:25.*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.0.*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.0-*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.1-*
+    Pin-priority: -1
+
+    Package: docker-ce
+    Pin: version 5:26.1.2-*
+    Pin-priority: -1
 
     Package: docker-compose-plugin
-    Pin: version 2.23.* release=test
-    Pin-priority: 1001
+    Pin: version 2.24.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.25.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.26.*
+    Pin-priority: -1
+
+    Package: docker-compose-plugin
+    Pin: version 2.27.1-*
+    Pin-priority: -1
     EOF
 
 Run the following command to install required dependencies, setup Docker Apt repository, and install Docker:
@@ -366,3 +394,15 @@ All stateful date for the application stack is stored in Docker Volumes. For bac
 Daily and weekly database dumps are written to the `/var/lib/docker/volumes/internetnl-prod_postgres-backups/` directory.
 
 When recovering or migrating to a new server first the "Server Setup" should be done then these directories should be restored, after which the "Application Setup" can be done.
+
+## Impact of deployment host/network on test results
+
+The IP and network on which you deploy your instance may have some impact on test results.
+Most significantly, this affects test targets hosted in an RPKI invalid prefix. While the RPKI test will always detect
+this, if your network or its upstreams do RPKI origin validation, other tests with this target will time out as they
+can not reach the target. If there is no (or partial) validation, other tests will report the target as reachable,
+even though it may not be for the many networks that now do RPKI origin validation. In either case, the RPKI test will
+show the correct result.
+
+If you use an IP address with a poor reputation, or included in block lists, this may cause some tests to show
+an unreachable target. This is most likely for email tests, but has been seen for some other tests too.
