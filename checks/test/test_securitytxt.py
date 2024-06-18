@@ -213,6 +213,7 @@ def test_evaluate_securitytxt():
             b"Expires: 2050-09-01T00:00:00.000Z\n"
             b"Contact: mailto:security@example.com\n"
             b"Canonical: https://host/.well-known/security.txt\n"
+            b"unknown-field: https://host/.well-known/security.txt\n"
         ),
         url="https://example.com/security.txt",
         found_host="host",
@@ -228,5 +229,6 @@ def test_evaluate_securitytxt():
             {"msgid": "long_expiry", "context": {"line_no": 1}},
             {"msgid": "no_encryption", "context": {"line_no": None}},
             {"msgid": "not_signed", "context": {"line_no": None}},
+            {"msgid": "unknown_field", "context": {"line_no": 4}},
         ],
     }
