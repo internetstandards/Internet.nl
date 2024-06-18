@@ -611,8 +611,11 @@ if SECRET_KEY == "secret" and not SKIP_SECRET_KEY_CHECK:
 if DJANGO_IS_PROXIED:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Limit the number of tests a client can perform in a while. The exact implementation is to be documented.
-# raise the roof of this number to remove this cap. 30 was a limit inherited that comes across as sane.
+# Limit the number of tests a client can perform in single test.
+# This is the maximum number of tasks that can be run simultaneously per client IP.
+# The counter is increased when a task starts, decreased when a task completes,
+# and the Redis entry has a 2-hour expiry. Task is an individual category, e.g. RPKI web,
+# which means one domain test is 5 tasks.
 CLIENT_RATE_LIMIT = int(getenv("CLIENT_RATE_LIMIT", 30))
 
 # --- Routinator settings
