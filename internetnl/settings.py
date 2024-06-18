@@ -649,7 +649,7 @@ STATSD_PORT = os.environ.get("STATSD_PORT", "8125")
 # add tag support via statshog
 STATSD_TELEGRAF = True
 STATSD_CLIENT = "statshog"
-STATSD_PREFIX = os.environ.get("STATSD_PREFIX", "internetnl_")
+STATSD_PREFIX = os.environ.get("STATSD_PREFIX", "internetnl")
 # celery-exporter gives better metrics
 STATSD_CELERY_SIGNALS = False
 # send database query metric (in production, in development we have debug toolbar for this)
