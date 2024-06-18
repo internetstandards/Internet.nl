@@ -42,7 +42,7 @@ echo "Please add the following DS records for domain $CONN_TEST_DOMAIN:"
 cat /opt/unbound/etc/unbound/zones/$ns_keytag.ds
 cat /opt/unbound/etc/unbound/zones/$ns6_keytag.ds
 
-# run cron daemon for monthly zone resign
+# run cron daemon for weekly zone resign
 busybox crond -l7
 
 # start unbound

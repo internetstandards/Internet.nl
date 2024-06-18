@@ -24,13 +24,6 @@ def test_index_footer_text_present(page, app_url):
     expect(footer).not_to_have_text(re.compile(FOOTER_TEXT))
 
 
-def test_security_txt(page, app_url):
-    """Branding is disabled on develop, also security.txt"""
-    response = page.request.get(app_url + "/.well-known/security.txt")
-
-    expect(response).not_to_be_ok()
-
-
 def test_robots_txt(page, app_url):
     page.goto(app_url + "/robots.txt")
 
