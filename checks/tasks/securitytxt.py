@@ -143,5 +143,5 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
         "securitytxt_score": score,
         "securitytxt_found_host": result.found_host,
         "securitytxt_errors": errors,
-        "securitytxt_recommendations": parser_format(parser.recommendations),
+        "securitytxt_recommendations": parser_format(parser.recommendations + parser.notifications),
     }
