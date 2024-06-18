@@ -2,7 +2,7 @@ msgid "base about custom"
 msgstr "À propos"
 
 msgid "base info custom"
-msgstr "conformite-internet.fr est une initiative de la communauté d'Internet et de d'[Apio systems](https://apio.systems)."
+msgstr "conformite-internet.fr est une initiative de la communauté d'Internet et d'Apio systems."
 
 msgid "about content custom"
 msgstr "Some about content"
@@ -21,30 +21,33 @@ msgstr ""
 
 msgid "article custom .index"
 msgstr ""
-"hello-world\n"
-"lorum-ipsum\n"
+"20240618\n"
+"20240101\n"
 
 msgid "article hello-world date"
-msgstr "22 March 2023"
+msgstr "18 juin 2024"
 
-msgid "article hello-world lead"
+msgid "article 20240618 lead"
 msgstr ""
-"Hello world?"
+"Apio systems publie une première version française du projet Internet.nl."
 
-msgid "article hello-world title"
-msgstr "Hello World!"
+msgid "article 20240618 title"
+msgstr "Première version française du projet Internet.nl"
 
 msgid "article hello-world body"
-msgstr "Hello World!"
+msgstr "Le projet Internet.nl est un projet Open Source (cf. ici https://github.com/internetstandards/Internet.nl) et "
+"une intiative de la communauté Internet et le GOuvernement Néerlandais. Apio systems (https://apio.systems) "
+"a créée un \"fork\" du projet afin de le mettre à disposition en langue française pour le bénéfice des "
+"entreprises, artisan ou encore des particulier souhaitant vérifier l'adoptation adéquate des standards Internet "
+"modernes pour leurs sites web, leurs serveurs de courriel ou encore la connexion de leur FAI. "
+msgid "article 20240101 date"
+msgstr "1er janvier 2024"
 
-msgid "article lorum-ipsum date"
-msgstr "1 January 2024"
-
-msgid "article lorum-ipsum lead"
+msgid "article 20240101 lead"
 msgstr "Lorem ipsum dolor sit amet, consectetuer adipiscing elit."
 
-msgid "article lorum-ipsum title"
+msgid "article 20240101 title"
 msgstr "Lorum ipsum"
 
-msgid "article lorum-ipsum body"
+msgid "article 20240101 body"
 msgstr "Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui."
