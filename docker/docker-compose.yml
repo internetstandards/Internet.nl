@@ -14,6 +14,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
@@ -74,6 +77,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_APP_INTERNAL
@@ -213,10 +219,9 @@ services:
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: $WORKER_MEMORY_LIMIT
+    mem_limit: $WORKER_MEMORY_LIMIT
+    # disable swap by setting swap to the memory limit
+    memswap_limit: $WORKER_MEMORY_LIMIT
     logging:
       driver: $LOGGING_DRIVER
       options:
@@ -333,6 +338,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -341,10 +349,9 @@ services:
   worker-slow:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
-    deploy:
-      resources:
-        limits:
-          memory: $WORKER_SLOW_MEMORY_LIMIT
+    mem_limit: $WORKER_SLOW_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $WORKER_SLOW_MEMORY_LIMIT
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
@@ -362,6 +369,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
       - public-internet
@@ -431,6 +441,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_REDIS_INTERNAL
@@ -454,6 +467,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     user: rabbitmq
     networks:
       internal:
@@ -479,6 +495,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_POSTGRES_INTERNAL
@@ -503,6 +522,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
@@ -539,6 +561,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
@@ -585,6 +610,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
@@ -618,6 +646,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
@@ -657,6 +688,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal: {}
       public-internet: {}
@@ -714,6 +748,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
@@ -736,6 +773,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_PROMETHEUS_INTERNAL
@@ -754,6 +794,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
 
@@ -768,6 +811,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
 
@@ -783,6 +829,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_STATSD_INTERNAL
@@ -801,6 +850,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     depends_on:
@@ -826,6 +878,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     pid: host
     networks:
       - internal
@@ -845,6 +900,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     volumes:
@@ -863,6 +921,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     volumes:
