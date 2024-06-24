@@ -9,7 +9,7 @@
       {% expand "author {{author}} name" as authorname %}
       <h1>Blog {% include "string.html" with name=authorname %}: {% include "string.html" with name=title %}</h1>
       <div class="nicedate">{% include "content.html" with name=date %}</div>
-      <img src="{% static '/author/' %}/{{author}}/picture.jpg" class="blogphoto" alt="[{{authorname}}]" />
+      <img src="{% static '/author/' %}{{author}}/picture.jpg" class="blogphoto" alt="[{{authorname}}]" />
     {% else %}
       <h1>{% include "string.html" with name=title %}</h1>
       <div class="nicedate">{% include "content.html" with name=date %}</div>
