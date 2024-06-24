@@ -323,7 +323,9 @@ services:
     <<: *worker
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues nassl_worker
+      --queues nassl_worker,batch_nassl
+    # set hostname for Sentry
+    hostname: worker-nassl
 
   # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
   restart-nassl-worker:
@@ -331,7 +333,7 @@ services:
     command: crond -f -d7
     configs:
       - source: restart_nassl_worker_cron
-        target: /etc/periodic/hourly/restart_nassl_worker
+        target: /etc/periodic/15min/restart_nassl_worker
         mode: 0755
     restart: unless-stopped
     logging:
@@ -355,8 +357,6 @@ services:
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
-    # set hostname for Sentry
-    hostname: worker-slow
 
   beat:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}

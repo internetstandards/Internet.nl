@@ -130,9 +130,10 @@ def is_queue_loaded(client):
     Check if we consider the monitor queue loaded.
 
     """
-    current_load = client.get_queue_depth(settings.RABBIT_VHOST, settings.RABBIT_MON_QUEUE)
-    if current_load >= settings.RABBIT_MON_THRESHOLD:
-        return True
+    for queue_name in settings.RABBIT_MON_QUEUES:
+        current_load = client.get_queue_depth(settings.RABBIT_VHOST, queue_name)
+        if current_load >= settings.RABBIT_MON_THRESHOLD:
+            return True
     return False
 
 
