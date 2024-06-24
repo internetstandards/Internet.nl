@@ -369,7 +369,7 @@ CELERY_BATCH_TASK_ROUTES = {
     "checks.tasks.ipv6.batch_mail_callback": {"queue": "batch_callback"},
     "checks.tasks.ipv6.batch_mx": {"queue": "batch_main"},
     "checks.tasks.ipv6.batch_ns": {"queue": "batch_main"},
-    "checks.tasks.ipv6.batch_web": {"queue": "batch_main"},
+    "checks.tasks.ipv6.batch_web": {"queue": "batch_nassl"},
     "checks.tasks.ipv6.batch_web_callback": {"queue": "batch_callback"},
     "checks.tasks.mail.batch_dkim": {"queue": "batch_main"},
     "checks.tasks.mail.batch_dmarc": {"queue": "batch_main"},
@@ -380,9 +380,9 @@ CELERY_BATCH_TASK_ROUTES = {
     "checks.tasks.tls.batch_mail_callback": {"queue": "batch_callback"},
     "checks.tasks.tls.batch_mail_smtp_starttls": {"queue": "batch_main"},
     "checks.tasks.tls.batch_web_callback": {"queue": "batch_callback"},
-    "checks.tasks.tls.batch_web_cert": {"queue": "batch_main"},
-    "checks.tasks.tls.batch_web_conn": {"queue": "batch_main"},
-    "checks.tasks.tls.batch_web_http": {"queue": "batch_main"},
+    "checks.tasks.tls.batch_web_cert": {"queue": "batch_nassl"},
+    "checks.tasks.tls.batch_web_conn": {"queue": "batch_nassl"},
+    "checks.tasks.tls.batch_web_http": {"queue": "batch_nassl"},
     "checks.tasks.appsecpriv.batch_web_appsecpriv": {"queue": "batch_main"},
     "checks.tasks.appsecpriv.batch_web_callback": {"queue": "batch_callback"},
     "checks.tasks.rpki.batch_mail_callback": {"queue": "batch_callback"},
@@ -400,7 +400,7 @@ CELERY_TASK_ROUTES.update(CELERY_BATCH_TASK_ROUTES)
 
 # Batch uses rabbitmq
 RABBIT_VHOST = "/"
-RABBIT_MON_QUEUE = "batch_main"
+RABBIT_MON_QUEUES = ["batch_main", "batch_nassl"]
 # Keep the queue length relatively small.
 RABBIT_MON_THRESHOLD = 80
 
