@@ -288,6 +288,7 @@ services:
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
+      - CELERY_LOG_LEVEL
       - INTEGRATION_TESTS
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL

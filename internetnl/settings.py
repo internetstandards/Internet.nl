@@ -601,7 +601,7 @@ LOGGING = {
             "level": CELERY_LOG_LEVEL,
         },
         "celery.worker.strategy": {
-            "level": "INFO" if DEBUG_LOG else "ERROR",
+            "level": CELERY_LOG_LEVEL,
         },
     },
 }
