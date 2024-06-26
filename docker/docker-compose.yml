@@ -323,18 +323,282 @@ services:
       start_period: 1m
       retries: 10
 
+  worker-batch_callback_dnssec_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_dnssec_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_dnssec_batch_mail_callback
+
+  worker-batch_main_dnssec_batch_mail_is_secure:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_dnssec_batch_mail_is_secure
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_dnssec_batch_mail_is_secure
+
+  worker-batch_callback_dnssec_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_dnssec_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_dnssec_batch_web_callback
+
+  worker-batch_main_dnssec_batch_web_is_secure:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_dnssec_batch_web_is_secure
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_dnssec_batch_web_is_secure
+
+  worker-batch_callback_ipv6_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_ipv6_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_ipv6_batch_mail_callback
+
+  worker-batch_main_ipv6_batch_mx:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_ipv6_batch_mx
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_ipv6_batch_mx
+
+  worker-batch_main_ipv6_batch_ns:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_ipv6_batch_ns
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_ipv6_batch_ns
+
+  worker-batch_main_ipv6_batch_web:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_ipv6_batch_web
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_ipv6_batch_web
+
+  worker-batch_callback_ipv6_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_ipv6_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_ipv6_batch_web_callback
+
+  worker-batch_main_mail_batch_dkim:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_mail_batch_dkim
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_mail_batch_dkim
+
+  worker-batch_main_mail_batch_dmarc:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_mail_batch_dmarc
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_mail_batch_dmarc
+
+  worker-batch_callback_mail_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_mail_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_mail_batch_mail_callback
+
+  worker-batch_main_mail_batch_spf:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_mail_batch_spf
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_mail_batch_spf
+
+  worker-batch_main_shared_batch_mail_get_servers:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_shared_batch_mail_get_servers
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_shared_batch_mail_get_servers
+
+  worker-batch_main_shared_batch_resolve_a_aaaa:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_shared_batch_resolve_a_aaaa
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_shared_batch_resolve_a_aaaa
+
+  worker-batch_callback_tls_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_tls_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_tls_batch_mail_callback
+
+  worker-batch_main_tls_batch_mail_smtp_starttls:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_tls_batch_mail_smtp_starttls
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_tls_batch_mail_smtp_starttls
+
+  worker-batch_callback_tls_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_tls_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_tls_batch_web_callback
+
+  worker-batch_nassl_tls_batch_web_cert:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_nassl_tls_batch_web_cert
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_nassl_tls_batch_web_cert
+
+  worker-batch_nassl_tls_batch_web_conn:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_nassl_tls_batch_web_conn
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_nassl_tls_batch_web_conn
+
+  worker-batch_main_tls_batch_web_http:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_tls_batch_web_http
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_tls_batch_web_http
+
+  worker-batch_main_appsecpriv_batch_web_appsecpriv:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_appsecpriv_batch_web_appsecpriv
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_appsecpriv_batch_web_appsecpriv
+
+  worker-batch_callback_appsecpriv_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_appsecpriv_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_appsecpriv_batch_web_callback
+
+  worker-batch_callback_rpki_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_rpki_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_rpki_batch_mail_callback
+
+  worker-rpki_worker_rpki_batch_mail_ns_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_mail_ns_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_mail_ns_rpki
+
+  worker-rpki_worker_rpki_batch_mail_mx_ns_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_mail_mx_ns_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_mail_mx_ns_rpki
+
+  worker-rpki_worker_rpki_batch_mail_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_mail_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_mail_rpki
+
+  worker-rpki_worker_rpki_batch_ns_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_ns_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_ns_rpki
+
+  worker-batch_callback_rpki_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_rpki_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_rpki_batch_web_callback
+
+  worker-rpki_worker_rpki_batch_web_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_web_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_web_rpki
+
+  worker-batch_slow_util_batch_async_generate_results:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_slow_util_batch_async_generate_results
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_slow_util_batch_async_generate_results
+
+  worker-batch_slow_util_batch_async_register:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_slow_util_batch_async_register
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_slow_util_batch_async_register
+
+  worker-batch_scheduler_scheduler_run:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_scheduler_scheduler_run
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_scheduler_scheduler_run
+
+
   # worker for queue with potential memory leak
   worker-nassl:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
+    hostname: worker-nassl
     mem_limit: $WORKER_NASSL_MEMORY_LIMIT
     # disable swap by settings swap to the memory limit
     memswap_limit: $WORKER_NASSL_MEMORY_LIMIT
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues nassl_worker,batch_nassl
-    # set hostname for Sentry
-    hostname: worker-nassl
 
   # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
   restart-nassl-worker:
