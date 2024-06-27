@@ -666,3 +666,38 @@ documentation/images/%.png: documentation/images/%.py | ${nwdiag}
 
 test-%: env=test
 test-up test-down test-build test-stop: test-%: %
+
+batch_user ?=
+batch_host ?= dev-docker.batch.internet.nl
+batch_api = https://${batch_host}/api/batch/v2
+TMPDIR ?= /tmp
+
+batch_submit_web_1k batch_submit_web_5k batch_submit_web_10k batch_submit_web_15k batch_submit_web_20k: batch_submit_web_%k: ${TMPDIR}/batch_request_%k_web.json
+	auth="${batch_user}:$$(keyring get internet.nl-batch ${batch_user})" ;\
+	response=$$(curl -s -u $$auth ${batch_api}/requests -H "Content-type: application/json" -d @$<) ;\
+	echo $$response ;\
+	request_id=$$(echo $$response | jq .request.request_id) ;\
+	watch "curl -s -u $$auth ${batch_api}/requests/$$request_id | jq .; curl -s -u $$auth ${batch_api}/requests/$$request_id/results | jq .request,.error" ;
+
+${TMPDIR}/batch_request_%k_web.json: ${TMPDIR}/tranco_list_%k.txt
+	# convert to json batch request file
+	jq '{domains:.|split("\n")|map(select(length>0)),name:"tranco $*k - web",type:"web"}' -Rsc $< > $@
+
+batch_submit_mail_1k batch_submit_mail_5k batch_submit_mail_10k batch_submit_mail_15k batch_submit_mail_20k: batch_submit_mail_%k: ${TMPDIR}/batch_request_%k_mail.json
+	auth="${batch_user}:$$(keyring get internet.nl-batch ${batch_user})" ;\
+	response=$$(curl -s -u $$auth ${batch_api}/requests -H "Content-type: application/json" -d @$<) ;\
+	echo $$response ;\
+	request_id=$$(echo $$response | jq .request.request_id) ;\
+	watch "curl -s -u $$auth ${batch_api}/requests/$$request_id | jq .; curl -s -u $$auth ${batch_api}/requests/$$request_id/results | jq .request,.error" ;
+
+${TMPDIR}/batch_request_%k_mail.json: ${TMPDIR}/tranco_list_%k.txt
+	# convert to json batch request file
+	jq '{domains:.|split("\n")|map(select(length>0)),name:"tranco $*k - mail",type:"mail"}' -Rsc $< > $@
+
+${TMPDIR}/tranco_list_%k.txt: ${TMPDIR}/tranco_list.txt
+	# get first $*k of domains
+	head -n$*000 $< | tr -d \r > $@
+
+${TMPDIR}/tranco_list.txt:
+	# download tranco list, unzip, convert from csv to plain list of domains
+	curl -Ls https://tranco-list.eu/download_daily/4Q39X | bsdtar -xOf - | cut -d, -f2 > $@
