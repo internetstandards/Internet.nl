@@ -1,10 +1,4 @@
-This document details the CPU and memory requirements for batch servers.
-
-# System requirements
-
-
-
-# Test results
+This document details the CPU and memory requirements for batch runs.
 
 Host: dev-docker.batch.internet.nl
 CPU: 4x Xeon 2.4Ghz

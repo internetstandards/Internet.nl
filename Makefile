@@ -666,3 +666,27 @@ documentation/images/%.png: documentation/images/%.py | ${nwdiag}
 
 test-%: env=test
 test-up test-down test-build test-stop: test-%: %
+
+batch_user ?=
+batch_host ?= dev-docker.batch.internet.nl
+TMPDIR ?= /tmp
+
+batch_submit_web_10k: ${TMPDIR}/batch_request_10k_web.json
+	response=$$(curl -u "${batch_user}:$$(keyring get internet.nl-batch ${batch_user})" \
+	 https://${batch_host}/api/batch/v2/requests -H "Content-type: application/json" -d @$<) ;\
+	echo $$response ;\
+	request_id=$$(echo $$response | jq .request.request_id) ;\
+	watch 'curl -u \"${batch_user}:$$(keyring get internet.nl-batch ${batch_user})\" \
+	 https://${batch_host}/api/batch/v2/requests/$$request_id | jq ."
+
+${TMPDIR}/batch_request_10k_web.json: ${TMPDIR}/tranco_list_10k.txt
+	# convert to json batch request file
+	jq '{domains:.|split("\n")|map(select(length>0)),name:"tranco 10k - web",type:"web"}' -Rsc $< > $@
+
+${TMPDIR}/tranco_list_10k.txt: ${TMPDIR}/tranco_list.txt
+	# get first 10k of domains
+	head -n10000 $< | tr -d \r > $@
+
+${TMPDIR}/tranco_list.txt:
+	# download tranco list, unzip, convert from csv to plain list of domains
+	curl -Ls https://tranco-list.eu/download_daily/4Q39X | bsdtar -xOf - | cut -d, -f2 > $@
