@@ -325,6 +325,9 @@ services:
   worker-nassl:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
+    mem_limit: $WORKER_NASSL_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $WORKER_NASSL_MEMORY_LIMIT
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues nassl_worker,batch_nassl
