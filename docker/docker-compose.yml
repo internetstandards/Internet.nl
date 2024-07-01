@@ -14,6 +14,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
@@ -59,8 +62,8 @@ services:
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
 
@@ -75,6 +78,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_APP_INTERNAL
@@ -162,8 +168,8 @@ services:
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
 
@@ -216,10 +222,9 @@ services:
       dockerfile: docker/Dockerfile
       target: app
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: $WORKER_MEMORY_LIMIT
+    mem_limit: $WORKER_MEMORY_LIMIT
+    # disable swap by setting swap to the memory limit
+    memswap_limit: $WORKER_MEMORY_LIMIT
     logging:
       driver: $LOGGING_DRIVER
       options:
@@ -237,7 +242,7 @@ services:
     user: root
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
 
     depends_on:
       db-migrate:
@@ -286,6 +291,7 @@ services:
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
+      - CELERY_LOG_LEVEL
       - INTEGRATION_TESTS
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
@@ -310,18 +316,287 @@ services:
     healthcheck:
       test: ["CMD", "/bin/sh", "-c", "celery --app=internetnl inspect ping --destination=celery@$(hostname)"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
+
+  worker-batch_callback_dnssec_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_dnssec_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_dnssec_batch_mail_callback
+
+  worker-batch_main_dnssec_batch_mail_is_secure:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_dnssec_batch_mail_is_secure
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_dnssec_batch_mail_is_secure
+
+  worker-batch_callback_dnssec_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_dnssec_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_dnssec_batch_web_callback
+
+  worker-batch_main_dnssec_batch_web_is_secure:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_dnssec_batch_web_is_secure
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_dnssec_batch_web_is_secure
+
+  worker-batch_callback_ipv6_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_ipv6_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_ipv6_batch_mail_callback
+
+  worker-batch_main_ipv6_batch_mx:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_ipv6_batch_mx
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_ipv6_batch_mx
+
+  worker-batch_main_ipv6_batch_ns:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_ipv6_batch_ns
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_ipv6_batch_ns
+
+  worker-batch_main_ipv6_batch_web:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_ipv6_batch_web
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_ipv6_batch_web
+
+  worker-batch_callback_ipv6_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_ipv6_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_ipv6_batch_web_callback
+
+  worker-batch_main_mail_batch_dkim:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_mail_batch_dkim
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_mail_batch_dkim
+
+  worker-batch_main_mail_batch_dmarc:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_mail_batch_dmarc
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_mail_batch_dmarc
+
+  worker-batch_callback_mail_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_mail_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_mail_batch_mail_callback
+
+  worker-batch_main_mail_batch_spf:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_mail_batch_spf
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_mail_batch_spf
+
+  worker-batch_main_shared_batch_mail_get_servers:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_shared_batch_mail_get_servers
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_shared_batch_mail_get_servers
+
+  worker-batch_main_shared_batch_resolve_a_aaaa:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_shared_batch_resolve_a_aaaa
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_shared_batch_resolve_a_aaaa
+
+  worker-batch_callback_tls_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_tls_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_tls_batch_mail_callback
+
+  worker-batch_main_tls_batch_mail_smtp_starttls:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_tls_batch_mail_smtp_starttls
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_tls_batch_mail_smtp_starttls
+
+  worker-batch_callback_tls_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_tls_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_tls_batch_web_callback
+
+  worker-batch_nassl_tls_batch_web_cert:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_nassl_tls_batch_web_cert
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_nassl_tls_batch_web_cert
+
+  worker-batch_nassl_tls_batch_web_conn:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_nassl_tls_batch_web_conn
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_nassl_tls_batch_web_conn
+
+  worker-batch_main_tls_batch_web_http:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_tls_batch_web_http
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_tls_batch_web_http
+
+  worker-batch_main_appsecpriv_batch_web_appsecpriv:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_main_appsecpriv_batch_web_appsecpriv
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_main_appsecpriv_batch_web_appsecpriv
+
+  worker-batch_callback_appsecpriv_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_appsecpriv_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_appsecpriv_batch_web_callback
+
+  worker-batch_callback_rpki_batch_mail_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_rpki_batch_mail_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_rpki_batch_mail_callback
+
+  worker-rpki_worker_rpki_batch_mail_ns_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_mail_ns_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_mail_ns_rpki
+
+  worker-rpki_worker_rpki_batch_mail_mx_ns_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_mail_mx_ns_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_mail_mx_ns_rpki
+
+  worker-rpki_worker_rpki_batch_mail_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_mail_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_mail_rpki
+
+  worker-rpki_worker_rpki_batch_ns_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_ns_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_ns_rpki
+
+  worker-batch_callback_rpki_batch_web_callback:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_callback_rpki_batch_web_callback
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_callback_rpki_batch_web_callback
+
+  worker-rpki_worker_rpki_batch_web_rpki:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-rpki_worker_rpki_batch_web_rpki
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues rpki_worker_rpki_batch_web_rpki
+
+  worker-batch_slow_util_batch_async_generate_results:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_slow_util_batch_async_generate_results
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_slow_util_batch_async_generate_results
+
+  worker-batch_slow_util_batch_async_register:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_slow_util_batch_async_register
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_slow_util_batch_async_register
+
+  worker-batch_scheduler_scheduler_run:
+    # copy all attributes from 'worker' service and overwrite specific settings below
+    <<: *worker
+    hostname: worker-batch_scheduler_scheduler_run
+
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues batch_scheduler_scheduler_run
+
 
   # worker for queue with potential memory leak
   worker-nassl:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
+    hostname: worker-nassl
+    mem_limit: $WORKER_NASSL_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $WORKER_NASSL_MEMORY_LIMIT
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues nassl_worker
+      --queues nassl_worker,batch_nassl
 
   # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
   restart-nassl-worker:
@@ -329,13 +604,16 @@ services:
     command: crond -f -d7
     configs:
       - source: restart_nassl_worker_cron
-        target: /etc/periodic/hourly/restart_nassl_worker
+        target: /etc/periodic/15min/restart_nassl_worker
         mode: 0755
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -344,13 +622,12 @@ services:
   worker-slow:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
-    deploy:
-      resources:
-        limits:
-          memory: $WORKER_SLOW_MEMORY_LIMIT
+    mem_limit: $WORKER_SLOW_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $WORKER_SLOW_MEMORY_LIMIT
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_CONCURRENCY
-      --queues slow_db_worker
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
+      --queues slow_db_worker,batch_slow
     # set hostname for Sentry
     hostname: worker-slow
 
@@ -365,6 +642,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
       - public-internet
@@ -422,8 +702,8 @@ services:
     healthcheck:
       test: ["CMD", "pgrep", "celery"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
 
@@ -434,14 +714,17 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_REDIS_INTERNAL
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
     volumes:
@@ -457,6 +740,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     user: rabbitmq
     networks:
       internal:
@@ -467,8 +753,8 @@ services:
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "--quiet", "check_running"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       # rabbitmq can initially take a long time to start
       start_period: 5m
       retries: 10
@@ -482,6 +768,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_POSTGRES_INTERNAL
@@ -492,8 +781,8 @@ services:
     healthcheck:
       test: pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
     volumes:
@@ -506,6 +795,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
@@ -520,8 +812,8 @@ services:
       # needs refactoring like splitting up the api and sync parts
       # test: wget -q -O/dev/null http://127.0.0.1:9556/api/v1/status
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       # routinator has to rsync a lot of data initally which can take a long time
       start_period: 30m
       retries: 10
@@ -542,6 +834,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
@@ -565,8 +860,8 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
     profiles:
@@ -588,6 +883,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
@@ -600,8 +898,8 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
 
@@ -621,6 +919,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
@@ -633,8 +934,8 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
 
@@ -660,6 +961,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal: {}
       public-internet: {}
@@ -679,8 +983,8 @@ services:
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      # use shorter interval during startup to speed up start process
+      start_interval: 5s
       start_period: 1m
       retries: 10
 
@@ -717,6 +1021,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
@@ -739,6 +1046,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_PROMETHEUS_INTERNAL
@@ -757,6 +1067,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
 
@@ -771,6 +1084,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
 
@@ -786,6 +1102,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_STATSD_INTERNAL
@@ -804,6 +1123,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     depends_on:
@@ -829,6 +1151,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     pid: host
     networks:
       - internal
@@ -848,6 +1173,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     volumes:
@@ -866,6 +1194,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     volumes:
