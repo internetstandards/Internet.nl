@@ -118,7 +118,12 @@ class Rabbit:
         while tries > 0:
             try:
                 return self._cl.get_queue_depth(host, queue)
-            except (AttributeError, HTTPError, NetworkError, APIError, PermissionError) as e:
+            except HTTPError as e:
+                # if queue is not created (yet) it is empty
+                if e.status == 404:
+                    return 0
+                raise e
+            except (AttributeError, NetworkError, APIError, PermissionError) as e:
                 self._get_client()
                 tries -= 1
                 if tries <= 0:
