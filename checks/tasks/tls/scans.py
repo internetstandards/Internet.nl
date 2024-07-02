@@ -33,7 +33,6 @@ from sslyze.plugins.certificate_info._certificate_utils import (
     get_common_names,
 )
 from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import _set_cipher_suite_string
-from sslyze.plugins.openssl_cipher_suites._tls12_workaround import WorkaroundForTls12ForCipherSuites
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import CipherSuitesRepository
 from sslyze.scanner.models import CipherSuitesScanAttempt
 from sslyze.server_connectivity import ServerConnectivityInfo
@@ -756,7 +755,8 @@ def test_cipher_order(
     order_tuples = [
         (
             cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out + cipher_evaluation.ciphers_sufficient,
-            cipher_evaluation.ciphers_good,
+            # Make sure we do not mix in TLS 1.3 ciphers
+            cipher_evaluation.ciphers_good_no_tls13,
         ),
         (cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out, cipher_evaluation.ciphers_sufficient),
         (cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
@@ -794,19 +794,25 @@ def find_most_preferred_cipher_suite(
     server_connectivity_info: ServerConnectivityInfo, tls_version: TlsVersionEnum, cipher_suites: List[CipherSuite]
 ) -> CipherSuite:
     suite_names = [suite.openssl_name for suite in cipher_suites]
-    requires_legacy_openssl = True
-    if tls_version == TlsVersionEnum.TLS_1_2:
-        # For TLS 1.2, we need to pick the right version of OpenSSL depending on which cipher suite
-        requires_legacy_openssl = any(
-            [WorkaroundForTls12ForCipherSuites.requires_legacy_openssl(name) for name in suite_names]
+
+    # OpenSSL is fine with invalid cipher names, as long as there are some ciphers selected it does support.
+    # This should not happen, but if it does, we prefer loud error over incorrect ordering results.
+    unavailable_suites = [c for c in cipher_suites if not _check_cipher_suite_available(tls_version, c)]
+    if unavailable_suites:
+        raise TLSException(
+            f"Unable to test {tls_version.name} cipher suite order for {suite_names} against "
+            f"{server_connectivity_info.server_location.hostname}: the following ciphers are not "
+            f"available in this client: {unavailable_suites}"
         )
-    elif tls_version == TlsVersionEnum.TLS_1_3:
-        requires_legacy_openssl = False
 
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
-        override_tls_version=tls_version, should_use_legacy_openssl=requires_legacy_openssl
+        override_tls_version=tls_version, should_use_legacy_openssl=False
     )
-    print(f"{suite_names=}")
+    print(
+        f"openssl s_client -tls1_2 -cipher {':'.join(suite_names)} -connect "
+        f"{server_connectivity_info.server_location.hostname}:443 # {tls_version.name}"
+    )
+    print(f"{ssl_connection.ssl_client.get_cipher_list()=}")
     _set_cipher_suite_string(tls_version, ":".join(suite_names), ssl_connection.ssl_client)
 
     try:
@@ -825,3 +831,11 @@ def find_most_preferred_cipher_suite(
     )
     print(f"from CS {[s.name for s in cipher_suites]} selected {selected_cipher}")
     return selected_cipher
+
+
+def _check_cipher_suite_available(tls_version: TlsVersionEnum, cipher_suite: CipherSuite) -> bool:
+    try:
+        CipherSuitesRepository.get_cipher_suite_with_openssl_name(tls_version, cipher_suite.openssl_name)
+        return True
+    except ValueError:
+        return False
