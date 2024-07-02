@@ -10,14 +10,19 @@ import urllib3
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
 from checks.tasks import SetupUnboundContext
-from checks.tasks.tls_connection import DEFAULT_TIMEOUT
-from checks.tasks.tls_connection_exceptions import NoIpError
 from django.conf import settings
 from interface.views.shared import ub_resolve_with_timeout
 from internetnl import log
 
 # Disable HTTPS warnings as we intentionally disable HTTPS verification
 urllib3.disable_warnings()
+
+
+DEFAULT_TIMEOUT = 10
+
+
+class NoIpError(Exception):
+    pass
 
 
 def _do_request(args, headers, kwargs, session, url):
