@@ -3,6 +3,7 @@ from typing import List, Optional, Any, Set
 
 from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo, OpenSslEvpPkeyEnum
 from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite
+from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
 from checks.models import KexHashFuncStatus, CipherOrderStatus
@@ -135,6 +136,7 @@ class TLSForwardSecrecyParameterEvaluation:
 @dataclass(frozen=True)
 class TLSCipherEvaluation:
     ciphers_good: List[CipherSuite]
+    ciphers_good_no_tls13: List[CipherSuite]
     ciphers_sufficient: List[CipherSuite]
     ciphers_phase_out: List[CipherSuite]
     ciphers_bad: List[CipherSuite]
@@ -161,6 +163,7 @@ class TLSCipherEvaluation:
                 ciphers_bad.append(suite.cipher_suite)
         return cls(
             ciphers_good=ciphers_good,
+            ciphers_good_no_tls13=[c for c in ciphers_good if c.name not in _TLS_1_3_CIPHER_SUITES],
             ciphers_sufficient=ciphers_sufficient,
             ciphers_phase_out=ciphers_phase_out,
             ciphers_bad=ciphers_bad,
