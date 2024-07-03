@@ -218,6 +218,8 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
+    deploy:
+      replicas: $WORKER_REPLICAS
     restart: unless-stopped
     mem_limit: $WORKER_MEMORY_LIMIT
     # disable swap by setting swap to the memory limit
@@ -358,6 +360,8 @@ services:
     mem_limit: $WORKER_SLOW_MEMORY_LIMIT
     # disable swap by settings swap to the memory limit
     memswap_limit: $WORKER_SLOW_MEMORY_LIMIT
+    deploy:
+      replicas: $WORKER_SLOW_REPLICAS
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
