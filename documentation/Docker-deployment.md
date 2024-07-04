@@ -197,7 +197,7 @@ Or to view all logs related to the project use:
 
 ### Task logging
 
-By default task start and completion is not logged. To enable this set the `CELERY_LOG_LEVEL` value to `INFO` in the `docker/local.env` file and apply the change by running the update commands. Worker containers should nog log which tasks are started `Task <task name> received` and succeeded `Task <task name and id> succeeded in <time>s:`.
+By default task start and completion is not logged. To enable this set the `CELERY_LOG_LEVEL` value to `INFO` in the `docker/local.env` file and apply the change by running the update commands. Worker containers should now log which tasks are started `Task <task name> received` and succeeded `Task <task name and id> succeeded in <time>s:`.
 
 ## Troubleshooting/mitigation
 
