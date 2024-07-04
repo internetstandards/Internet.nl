@@ -144,7 +144,7 @@ Workers use greenlets for threads, meaning they use only 1 CPU. By deploying mul
 
 Recommended: `2` (or nr. of CPUs/cores)
 
-Setting this to low will result in underutilisation of CPU resources. Setting this to high will not result in better throughput and just waste memory resources.
+Setting this to low will result in underutilisation of CPU resources. Setting this too high will not result in better throughput and just waste memory resources.
 
 ### Worker concurrency (`WORKER_CONCURRENCY`):
 
@@ -152,7 +152,7 @@ Number of concurrent threads (greenlets) for the 'normal' and 'nassl' worker, 's
 
 Recommended: `500`
 
-Setting this to low will result in low throughput of tests. Setting this to high will result in errors due to too many open files.
+Setting this to low will result in low throughput of tests. Setting this too high will result in errors due to too many open files.
 
 ### Batch scheduler interval (`BATCH_SCHEDULER_INTERVAL`):
 
