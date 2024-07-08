@@ -460,40 +460,40 @@ class HeaderCheckerContentSecurityPolicy:
             score = scoring.WEB_APPSECPRIV_CONTENT_SECURITY_POLICY_BAD
             results["content_security_policy_score"] = score
         else:
-            values = get_multiple_values_from_header(value)
-            results["content_security_policy_values"].extend(values)
+            # We only look at the last CSP value (#1199)
+            header = get_multiple_values_from_header(value)[-1]
+            results["content_security_policy_values"].append(header)
 
             self.parsed = defaultdict(list)
             self.result = self.ParseResult()
 
-            for header in values:
-                dirs = filter(None, header.split(";"))
-                for content in dirs:
-                    if len(content.strip()) == 0:
+            dirs = filter(None, header.split(";"))
+            for content in dirs:
+                if len(content.strip()) == 0:
+                    continue
+                content = content.strip().split()
+                dir = content[0]
+                values = content[1:]
+                # Only care for known directives.
+                if dir in self.directives:
+                    if not values:
+                        if not self.directives[dir].values or self.directives[dir].values_optional:
+                            # No-values allowed; keep.
+                            self.parsed[dir]
                         continue
-                    content = content.strip().split()
-                    dir = content[0]
-                    values = content[1:]
-                    # Only care for known directives.
-                    if dir in self.directives:
-                        if not values:
-                            if not self.directives[dir].values or self.directives[dir].values_optional:
-                                # No-values allowed; keep.
-                                self.parsed[dir]
-                            continue
 
-                        if self.directives[dir].values_regex_all:
-                            test_values = [" ".join(values)]
-                        else:
-                            test_values = values
+                    if self.directives[dir].values_regex_all:
+                        test_values = [" ".join(values)]
+                    else:
+                        test_values = values
 
-                        # Check the directives.
-                        for value in test_values:
-                            for value_regex in self.directives[dir].values:
-                                match = value_regex.match(value)
-                                if match:
-                                    self.parsed[dir].append(match)
-                                    break
+                    # Check the directives.
+                    for value in test_values:
+                        for value_regex in self.directives[dir].values:
+                            match = value_regex.match(value)
+                            if match:
+                                self.parsed[dir].append(match)
+                                break
 
             self._verdict(domain)
             if self.result.failed():
