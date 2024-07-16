@@ -126,6 +126,8 @@ packaging==23.1
     #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
+PGPy @ https://github.com/SecurityInnovation/PGPy/archive/09014c72b4557dd1254cf68a32e50f78515f5f32.zip
+    # via sectxt
 pluggy==1.2.0
     # via
     #   -r requirements.in
