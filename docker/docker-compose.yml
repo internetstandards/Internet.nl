@@ -333,11 +333,14 @@ services:
     # set hostname for Sentry
     hostname: worker-nassl
 
-  # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
-  restart-nassl-worker:
+  # cron daemon with access to Docker socket but no network to restart (some) workers periodically to solve memory issues
+  restart-workers:
     image: alpinelinux/docker-cli:latest
     command: crond -f -d7
     configs:
+      - source: restart_worker_cron
+        target: /etc/periodic/hourly/restart_worker
+        mode: 0755
       - source: restart_nassl_worker_cron
         target: /etc/periodic/15min/restart_nassl_worker
         mode: 0755
@@ -1017,11 +1020,18 @@ configs:
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
 
+  restart_worker_cron:
+    content: |
+      #!/bin/sh
+      set -e
+      # find worker and restart the container(s)
+      docker restart $(docker ps --filter label=com.docker.compose.service=worker --quiet)
+
   restart_nassl_worker_cron:
     content: |
       #!/bin/sh
       set -e
-      # find nassl worker and restart the container
+      # find nassl worker and restart the container(s)
       docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
 
 networks:
