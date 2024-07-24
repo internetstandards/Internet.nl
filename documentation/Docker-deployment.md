@@ -195,6 +195,10 @@ Or to view all logs related to the project use:
 
 	journalctl --follow | grep internetnl-prod-
 
+### Task logging
+
+By default task start and completion is not logged. To enable this set the `CELERY_LOG_LEVEL` value to `INFO` in the `docker/local.env` file and apply the change by running the update commands. Worker containers should now log which tasks are started `Task <task name> received` and succeeded `Task <task name and id> succeeded in <time>s:`.
+
 ## Troubleshooting/mitigation
 
 When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers/services:

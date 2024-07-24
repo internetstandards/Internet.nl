@@ -14,6 +14,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
@@ -75,6 +78,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_APP_INTERNAL
@@ -215,11 +221,12 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
-    restart: unless-stopped
     deploy:
-      resources:
-        limits:
-          memory: $WORKER_MEMORY_LIMIT
+      replicas: $WORKER_REPLICAS
+    restart: unless-stopped
+    mem_limit: $WORKER_MEMORY_LIMIT
+    # disable swap by setting swap to the memory limit
+    memswap_limit: $WORKER_MEMORY_LIMIT
     logging:
       driver: $LOGGING_DRIVER
       options:
@@ -237,7 +244,7 @@ services:
     user: root
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler,batch_slow
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
 
     depends_on:
       db-migrate:
@@ -286,6 +293,7 @@ services:
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
+      - CELERY_LOG_LEVEL
       - INTEGRATION_TESTS
       - INTERNETNL_LOG_LEVEL
       - INTERNETNL_CACHE_TTL
@@ -319,23 +327,34 @@ services:
   worker-nassl:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
+    mem_limit: $WORKER_NASSL_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $WORKER_NASSL_MEMORY_LIMIT
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues nassl_worker
+      --queues nassl_worker,batch_nassl
+    # set hostname for Sentry
+    hostname: worker-nassl
 
-  # cron daemon with access to Docker socket to restart worker-nassl periodically to solve memory issues
-  restart-nassl-worker:
+  # cron daemon with access to Docker socket but no network to restart (some) workers periodically to solve memory issues
+  restart-workers:
     image: alpinelinux/docker-cli:latest
     command: crond -f -d7
     configs:
+      - source: restart_worker_cron
+        target: /etc/periodic/hourly/restart_worker
+        mode: 0755
       - source: restart_nassl_worker_cron
-        target: /etc/periodic/hourly/restart_nassl_worker
+        target: /etc/periodic/15min/restart_nassl_worker
         mode: 0755
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -344,15 +363,14 @@ services:
   worker-slow:
     # copy all attributes from 'worker' service and overwrite specific settings below
     <<: *worker
+    mem_limit: $WORKER_SLOW_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $WORKER_SLOW_MEMORY_LIMIT
     deploy:
-      resources:
-        limits:
-          memory: $WORKER_SLOW_MEMORY_LIMIT
+      replicas: $WORKER_SLOW_REPLICAS
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_CONCURRENCY
-      --queues slow_db_worker
-    # set hostname for Sentry
-    hostname: worker-slow
+    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
+      --queues slow_db_worker,batch_slow
 
   beat:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
@@ -365,6 +383,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
       - public-internet
@@ -434,6 +455,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_REDIS_INTERNAL
@@ -457,6 +481,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     user: rabbitmq
     networks:
       internal:
@@ -482,6 +509,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_POSTGRES_INTERNAL
@@ -506,6 +536,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $HIGH_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
@@ -542,6 +575,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
@@ -588,6 +624,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
@@ -621,6 +660,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
@@ -660,6 +702,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal: {}
       public-internet: {}
@@ -717,6 +762,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
@@ -739,6 +787,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_PROMETHEUS_INTERNAL
@@ -757,6 +808,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
 
@@ -771,6 +825,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
 
@@ -786,6 +843,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
         ipv4_address: $IPV4_IP_STATSD_INTERNAL
@@ -804,6 +864,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     depends_on:
@@ -829,6 +892,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     pid: host
     networks:
       - internal
@@ -848,6 +914,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     volumes:
@@ -866,6 +935,9 @@ services:
       driver: $LOGGING_DRIVER
       options:
         tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
     volumes:
@@ -951,11 +1023,18 @@ configs:
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
 
+  restart_worker_cron:
+    content: |
+      #!/bin/sh
+      set -e
+      # find worker and restart the container(s)
+      docker restart $(docker ps --filter label=com.docker.compose.service=worker --quiet)
+
   restart_nassl_worker_cron:
     content: |
       #!/bin/sh
       set -e
-      # find nassl worker and restart the container
+      # find nassl worker and restart the container(s)
       docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
 
 networks:
