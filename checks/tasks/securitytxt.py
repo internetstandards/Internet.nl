@@ -20,7 +20,7 @@ SECURITYTXT_MAX_LENGTH = 100 * 1024
 @dataclass
 class SecuritytxtRetrieveResult:
     found: bool
-    content: Optional[str]
+    content: Optional[bytes]
     url: str
     found_host: str
     found_url: Optional[str]
@@ -50,20 +50,11 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
             found_host = urlparse(response.url).hostname
         else:
             found_host = hostname
-        content = response_content_chunk(response, SECURITYTXT_MAX_LENGTH).decode("utf-8")
-    except UnicodeDecodeError:
-        return SecuritytxtRetrieveResult(
-            found=True,
-            content=None,
-            url=f"https://{hostname}{path}",
-            found_host=found_host,
-            found_url=None,
-            errors=[{"msgid": "utf8"}],
-        )
+        content = response_content_chunk(response, SECURITYTXT_MAX_LENGTH)
     except requests.RequestException:
-        return _evaluate_response(None, None, hostname, path, "", hostname, None)
+        return _evaluate_response(None, None, hostname, path, b"", hostname, None)
     except StopIteration:  # 200 response with empty content
-        content = ""
+        content = b""
     return _evaluate_response(
         response.status_code,
         response.headers.get("Content-Type", ""),
@@ -80,7 +71,7 @@ def _evaluate_response(
     content_type: Optional[str],
     domain: str,
     path: str,
-    content: str,
+    content: bytes,
     found_host: str,
     found_url: Optional[str],
 ) -> SecuritytxtRetrieveResult:
@@ -152,5 +143,5 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
         "securitytxt_score": score,
         "securitytxt_found_host": result.found_host,
         "securitytxt_errors": errors,
-        "securitytxt_recommendations": parser_format(parser.recommendations),
+        "securitytxt_recommendations": parser_format(parser.recommendations + parser.notifications),
     }
