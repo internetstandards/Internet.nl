@@ -353,6 +353,31 @@ To verify the health status of the critial services use these commands:
 
 The services `webserver`, `app`, `postgres` and `redis` are critical for the user facing HTTP frontend, no page will show if these are not running. The services `worker`, `rabbitmq`, `routinator`, `unbound`, `resolver-permissive` and `resolver-validating` are additionally required for new tests to be performed. The `beat` service is required for updating hall-of-fame. For Batch Deployment this is however a critical service to schedule batch tests submitted via the API.
 
+### Alerting emails/alertmanager
+
+A Prometheus Alertmanager service is available but disabled by default. Enabling this will allow you to configure alert emails to be sent whenever the periodic tests fail to complete in a reasonable time, indicating an issue with the application.
+
+To enable and configure the Alertmanager add the following lines to `docker/local.env` and adjust the values to be applicable for your environment:
+
+    COMPOSE_PROFILES=default,alertmanager
+    ALERTMANAGER_MAIL_TO=rcpt1@example.com,rcpt2@example.com
+    ALERTMANAGER_MAIL_FROM=noreply@example.com
+    ALERTMANAGER_SMTP_HOST=smtp.example.com
+    ALERTMANAGER_SMTP_USER=example
+    ALERTMANAGER_SMTP_PASSWORD=example
+
+If there already is a `COMPOSE_PROFILES` entry in the configuration file, add `alertmanager` to that instead.
+
+The SMTP server is expected to use TLS, there is no way to disable this setting. The port used is `587` and can be customized using the `ALERTMANAGER_SMTP_PORT` variable.
+
+The email subject can be customized using the `ALERTMANAGER_SUBJECT` variable, see `docker/defaults.env` for details.
+
+Current alert status can seen at: https://example.com/prometheus/alerts or https://example.com/alertmanager
+
+If notification emails are not being sent even though alert status shows red see Alertmanager logging for debugging:
+
+    docker compose --project-name=internetnl-prod logs --follow alertmanager
+
 ## Restricting access
 
 By default the installation is open to everyone. If you like to restrict access you can do so by either using HTTP Basic Authentication or IP allow/deny lists.
