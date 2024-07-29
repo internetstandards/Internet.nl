@@ -339,7 +339,7 @@ services:
     command: crond -f -d7
     configs:
       - source: restart_worker_cron
-        target: /etc/periodic/hourly/restart_worker
+        target: /etc/periodic/15min/restart_worker
         mode: 0755
       - source: restart_nassl_worker_cron
         target: /etc/periodic/15min/restart_nassl_worker
@@ -1064,4 +1064,3 @@ networks:
       - subnet: $IPV6_SUBNET_PUBLIC
         gateway: $IPV6_GATEWAY_PUBLIC
       - subnet: $IPV4_SUBNET_PUBLIC
-
