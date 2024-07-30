@@ -245,6 +245,9 @@ services:
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
+    # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
+    # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
+    stop_grace_period: 10m
 
     depends_on:
       db-migrate:
