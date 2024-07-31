@@ -37,4 +37,3 @@ COPY interface/static/favicon.ico /var/www/internet.nl/
 
 COPY docker/webserver/nginx_templates/* /etc/nginx/templates/
 COPY docker/webserver/mime.types /etc/nginx/mime.types
-COPY docker/webserver/nginx.conf /etc/nginx/nginx.conf
