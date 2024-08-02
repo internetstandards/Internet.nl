@@ -305,6 +305,11 @@ server {
       auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
       proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
     }
+    location /alertmanager {
+      auth_basic "Please enter your monitoring username and password";
+      auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+      proxy_pass http://${IPV4_IP_ALERTMANAGER_INTERNAL}:9093;
+    }
 }
 
 # Temporary (1 year) exception for conn. subdomain to disable HSTS and redirect back to HTTP for
