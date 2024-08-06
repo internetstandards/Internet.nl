@@ -31,7 +31,7 @@ domain=$INTERNETNL_DOMAINNAME
 subdomains="www.$domain,ipv6.$domain"
 # adds subdomain and .ipv6 subdomain for each language, eg: nl.example.com, nl.ipv6.example.com
 for language in $(echo "$LANGUAGES" | tr ',' ' '); do
-  subdomains="$subdomains,$language.$domain,$lanuge.ipv6.$domain"
+  subdomains="$subdomains,$language.$domain,$language.ipv6.$domain"
 done
 
 if [ "$ENABLE_BATCH" != True ]; then
@@ -39,7 +39,7 @@ if [ "$ENABLE_BATCH" != True ]; then
   # adds connection test subdomains .conn and .conn.ipv6 subdomain for each language, eg:
   # nl.conn.example.com, nl.conn.ipv6.example.com
   for language in $(echo "$LANGUAGES" | tr ',' ' '); do
-    subdomains="$subdomains,$language.conn.$domain,$lanuage.conn.ipv6.$domain"
+    subdomains="$subdomains,$language.conn.$domain,$language.conn.ipv6.$domain"
   done
 fi
 
