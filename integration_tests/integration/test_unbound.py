@@ -21,7 +21,7 @@ def test_unbound_ldns_signzone_cron(trigger_cron, docker_compose_exec):
     assert expiry == new_expiry, "sanity check"
 
     # resign zones via cron script
-    print(trigger_cron("monthly/signzones", service="unbound"))
+    print(trigger_cron("weekly/signzones", service="unbound"))
 
     time.sleep(1)
 

@@ -144,7 +144,7 @@ To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This 
 and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
 and `verify` to verify a user's existence and password. Passwords are entered interactively.
 
-If you would like users on the host to manage batch users, set sudo access for this script. 
+If you would like users on the host to manage batch users, set sudo access for this script.
 
 ## Testing your installation
 
@@ -162,3 +162,21 @@ For more information see: [documentation/Docker-live-tests.md](Docker-live-tests
 ## Further reading
 
 Please refer the section [Deployment#Logging](Docker-deployment.md#logging) and the sections below that for more information about logging, troubleshooting, updating, access restriction, backups, migration, etc.
+
+## Troubleshooting
+
+Please see the generic troubleshooting documentation in [Deployment#Troubleshooting/mitigation](Docker-deployment.md#troubleshootingmitigation) as well.
+
+### Known issues
+
+#### No batch tasks being executed
+
+If batch jobs seem to be stuck, check the `Batch` dashboard in Grafana (see [Deployment#Grafana](Docker-deployment.md#metrics-grafanaprometheus)). The `Individual task completion rate` graph should show a variaty of tasks being completed per second. If this graph is empty or shows gaps this might indicate the batch jobs got stuck in a deadlock. In this case bring down the environment, remove the Redis and RabbitMQ volumes and start the environment again:
+
+    cd /opt/Internet.nl
+    docker compose --project-name=internetnl-prod down
+    docker volume rm internetnl-prod_rabbitmq
+    docker volume rm internetnl-prod_redis
+    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+
+This issue can happen on rare occasions, is you encounter this persistently please create an issue in the Internet.nl repository: https://github.com/internetstandards/Internet.nl/issues/new

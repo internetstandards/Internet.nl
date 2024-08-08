@@ -17,7 +17,7 @@ from checks.tasks.securitytxt import (
 
 
 def test_evaluate_response():
-    sectxt_content = "content"
+    sectxt_content = b"content"
 
     def _evaluate_with_valid_defaults(
         status=200,
@@ -128,7 +128,7 @@ def test_evaluate_response():
 def test_evaluate_securitytxt():
     result = SecuritytxtRetrieveResult(
         found=False,
-        content="",
+        content=b"",
         url="https://example.com/security.txt",
         found_host="host",
         found_url="https://host/.well-known/security.txt",
@@ -144,7 +144,7 @@ def test_evaluate_securitytxt():
 
     result = SecuritytxtRetrieveResult(
         found=True,
-        content="invalid content",
+        content=b"invalid content",
         url="https://example.com/security.txt",
         found_host="host",
         found_url="https://host/.well-known/security.txt",
@@ -157,7 +157,7 @@ def test_evaluate_securitytxt():
         "securitytxt_errors": [
             {"msgid": "invalid_line", "context": {"line_no": 1}},
             {"msgid": "no_expire", "context": {"line_no": None}},
-            {"msgid": "no_line_separators", "context": {"line_no": None}},
+            {"msgid": "no_line_separators", "context": {"line_no": 1}},
             {"msgid": "no_contact", "context": {"line_no": None}},
         ],
         "securitytxt_recommendations": [{"msgid": "not_signed", "context": {"line_no": None}}],
@@ -165,7 +165,7 @@ def test_evaluate_securitytxt():
 
     result = SecuritytxtRetrieveResult(
         found=True,
-        content="Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n",
+        content=b"Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n",
         url="https://example.com/security.txt",
         found_host="host",
         found_url="https://host/.well-known/security.txt",
@@ -186,9 +186,9 @@ def test_evaluate_securitytxt():
     result = SecuritytxtRetrieveResult(
         found=True,
         content=(
-            "Expires: 2050-09-01T00:00:00.000Z\n"
-            "Contact: mailto:security@example.com\n"
-            "Canonical: https://host-other/.well-known/security.txt\n"
+            b"Expires: 2050-09-01T00:00:00.000Z\n"
+            b"Contact: mailto:security@example.com\n"
+            b"Canonical: https://host-other/.well-known/security.txt\n"
         ),
         url="https://example.com/security.txt",
         found_host="host",
@@ -210,9 +210,9 @@ def test_evaluate_securitytxt():
     result = SecuritytxtRetrieveResult(
         found=True,
         content=(
-            "Expires: 2050-09-01T00:00:00.000Z\n"
-            "Contact: mailto:security@example.com\n"
-            "Canonical: https://host/.well-known/security.txt\n"
+            b"Expires: 2050-09-01T00:00:00.000Z\n"
+            b"Contact: mailto:security@example.com\n"
+            b"Canonical: https://host/.well-known/security.txt\n"
         ),
         url="https://example.com/security.txt",
         found_host="host",

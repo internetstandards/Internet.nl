@@ -12,6 +12,8 @@ from django_redis import get_redis_connection
 from interface import redis_id
 from internetnl import log
 
+from statshog.defaults.django import statsd
+
 logger = logging.getLogger(__name__)
 
 
@@ -153,3 +155,6 @@ class InterfaceConfig(AppConfig):
         if settings.ENABLE_BATCH:
             _batch_startup_checks()
         connection.inc_thread_sharing()
+
+        # push current app version to metrics collection
+        statsd.incr("version_info", tags={"version": settings.VERSION})

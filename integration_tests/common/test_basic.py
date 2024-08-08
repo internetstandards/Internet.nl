@@ -3,6 +3,7 @@ import re
 import pytest
 import requests
 from playwright.sync_api import expect
+import socket
 
 FOOTER_TEXT_EN = "Internet.nl is an initiative of the Internet community and the Dutch"
 FOOTER_TEXT_NL = "Internet.nl is een initiatief van de internetgemeenschap en de Nederlandse"
@@ -10,6 +11,36 @@ FOOTER_TEXT_NL = "Internet.nl is een initiatief van de internetgemeenschap en de
 SECURITY_TXT_TEXT = "Policy: https://internet.nl/disclosure/"
 
 ROBOTS_TXT_TEXT = "Disallow: /site/"
+
+WELL_KNOWN_EXTERNAL_DOMAIN = "example.nl"
+WELL_KNOWN_EXTERNAL_IP = "94.198.159.35"
+WELL_KNOWN_EXTERNAL_IPV6 = "2a00:d78:0:712:94:198:159:35"
+
+
+def test_sanity_no_external_dns():
+    """Integration test environment should be isolated from the internet and resolve no external DNS as it
+    can cause tests to give flaky results."""
+
+    with pytest.raises(socket.gaierror):
+        socket.gethostbyaddr(WELL_KNOWN_EXTERNAL_DOMAIN)
+        pytest.fail("Test environment not isolated, external DNS query could be made")
+
+
+def test_sanity_no_external_connections():
+    """Integration test environment should be isolated from the internet and allow no connection to external
+    networks as it can cause tests to give flaky results."""
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    with pytest.raises(OSError):
+        sock.connect((WELL_KNOWN_EXTERNAL_IP, 80))
+        pytest.fail("Test environment not isolated, connection to an external IP could be made")
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    with pytest.raises(OSError):
+        sock.connect((WELL_KNOWN_EXTERNAL_IPV6, 80))
+        pytest.fail("Test environment not isolated, connection to an external IP could be made")
 
 
 def test_index_http_ok(page, app_url_subdomain):

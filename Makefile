@@ -450,7 +450,7 @@ ps docker-compose-ps:
 docker-compose-app-attach:
 	${DOCKER_COMPOSE_CMD} attach -ti app
 
-logs docker-compose-logs: services=webserver app worker resolver test-target
+logs docker-compose-logs: services=webserver app worker worker-nassl worker-slow resolver test-target
 logs docker-compose-logs:
 	${DOCKER_COMPOSE_CMD} logs --follow ${services}
 
@@ -469,6 +469,14 @@ run-shell: service=app
 run-shell: cmd=/bin/bash
 run-shell:
 	${DOCKER_COMPOSE_UP_PULL_CMD} run ${run_args} --entrypoint ${cmd} ${service}
+
+# show result of merging .yml docker compose config files
+docker-compose-config:
+	${DOCKER_COMPOSE_UP_PULL_CMD} config
+
+# dump the merged compose config to a file with the versions of docker and compose for easier comparison
+docker-compose-config-to-file:
+	${DOCKER_COMPOSE_UP_PULL_CMD} config > "config-compose-$$(docker compose version --short)-$$(docker version -f 'server-{{.Server.Version}}-client-{{.Client.Version}}').yml"
 
 docker-compose-create-superuser:
 	${DOCKER_COMPOSE_CMD} exec app ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')"
@@ -513,7 +521,7 @@ batch-api-create-db-indexes docker-compose-batch-api-create-db-indexes:
 tests ?= .
 integration-tests: env=test
 integration-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/integration/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --browser=firefox --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/integration/
 	@echo -e "\nTo run with only specific tests use the 'tests' argument with part of the test's name, for example: make integration-tests tests=test_index_http_ok\n"
 
 integration-tests-verbose: _test_args=--verbose --verbose
@@ -527,7 +535,7 @@ integration-tests-trace: integration-tests
 
 batch-tests: env=batch-test
 batch-tests:
-	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/batch/
+	${DOCKER_COMPOSE_UP_PULL_CMD} run --rm test-runner --browser=firefox --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${_test_args} ${test_args} -k'${tests}' integration_tests/common/ integration_tests/batch/
 
 batch-tests-verbose: _test_args=--verbose --verbose
 batch-tests-verbose: batch-tests
@@ -658,3 +666,38 @@ documentation/images/%.png: documentation/images/%.py | ${nwdiag}
 
 test-%: env=test
 test-up test-down test-build test-stop: test-%: %
+
+batch_user ?=
+batch_host ?= dev-docker.batch.internet.nl
+batch_api = https://${batch_host}/api/batch/v2
+TMPDIR ?= /tmp
+
+batch_submit_web_1k batch_submit_web_5k batch_submit_web_10k batch_submit_web_15k batch_submit_web_20k: batch_submit_web_%k: ${TMPDIR}/batch_request_%k_web.json
+	auth="${batch_user}:$$(keyring get internet.nl-batch ${batch_user})" ;\
+	response=$$(curl -s -u $$auth ${batch_api}/requests -H "Content-type: application/json" -d @$<) ;\
+	echo $$response ;\
+	request_id=$$(echo $$response | jq .request.request_id) ;\
+	watch "curl -s -u $$auth ${batch_api}/requests/$$request_id | jq .; curl -s -u $$auth ${batch_api}/requests/$$request_id/results | jq .request,.error" ;
+
+${TMPDIR}/batch_request_%k_web.json: ${TMPDIR}/tranco_list_%k.txt
+	# convert to json batch request file
+	jq '{domains:.|split("\n")|map(select(length>0)),name:"tranco $*k - web",type:"web"}' -Rsc $< > $@
+
+batch_submit_mail_1k batch_submit_mail_5k batch_submit_mail_10k batch_submit_mail_15k batch_submit_mail_20k: batch_submit_mail_%k: ${TMPDIR}/batch_request_%k_mail.json
+	auth="${batch_user}:$$(keyring get internet.nl-batch ${batch_user})" ;\
+	response=$$(curl -s -u $$auth ${batch_api}/requests -H "Content-type: application/json" -d @$<) ;\
+	echo $$response ;\
+	request_id=$$(echo $$response | jq .request.request_id) ;\
+	watch "curl -s -u $$auth ${batch_api}/requests/$$request_id | jq .; curl -s -u $$auth ${batch_api}/requests/$$request_id/results | jq .request,.error" ;
+
+${TMPDIR}/batch_request_%k_mail.json: ${TMPDIR}/tranco_list_%k.txt
+	# convert to json batch request file
+	jq '{domains:.|split("\n")|map(select(length>0)),name:"tranco $*k - mail",type:"mail"}' -Rsc $< > $@
+
+${TMPDIR}/tranco_list_%k.txt: ${TMPDIR}/tranco_list.txt
+	# get first $*k of domains
+	head -n$*000 $< | tr -d \r > $@
+
+${TMPDIR}/tranco_list.txt:
+	# download tranco list, unzip, convert from csv to plain list of domains
+	curl -Ls https://tranco-list.eu/download_daily/4Q39X | bsdtar -xOf - | cut -d, -f2 > $@

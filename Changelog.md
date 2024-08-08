@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.8.7
+
+1.8.7 mainly contains various important fixes to support batch deployment.
+
+* Updated sectxt to use a patched version of PGPy with a fix for a 
+  [catastrophic regex backtracking issue](https://github.com/SecurityInnovation/PGPy/pull/467)
+* Updated nassl to fix memory leak in OCSP check.
+* Connection test zones are now re-signed every week instead of every month.
+* Support for new Docker (compose) versions and some checks for incompatible versions.
+* Many updates to the Docker setup to handle issues with large batch jobs
+* Extensions in Grafana dashboards for batch monitoring.
+* Various improvements to CI UX.
+
 ## 1.8.6
 
 Functional changes:

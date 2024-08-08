@@ -126,6 +126,8 @@ packaging==23.1
     #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
+PGPy @ https://github.com/SecurityInnovation/PGPy/archive/09014c72b4557dd1254cf68a32e50f78515f5f32.zip
+    # via sectxt
 pluggy==1.2.0
     # via
     #   -r requirements.in
@@ -150,7 +152,7 @@ python-dateutil==2.8.2
     # via
     #   celery
     #   sectxt
-pythonwhois-internet.nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+pythonwhois-internet-nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
     # via -r requirements.in
 pytz==2024.1
     # via -r requirements.in
@@ -158,7 +160,7 @@ pyyaml==6.0.1
     # via -r requirements.in
 redis==5.0.0
     # via django-redis
-requests==2.31.0
+requests==2.32.0
     # via
     #   -r requirements.in
     #   forcediphttpsadapter
@@ -167,7 +169,7 @@ requests==2.31.0
     #   sectxt
 rjsmin==1.2.1
     # via -r requirements.in
-sectxt @ https://github.com/mxsasha/sectxt/archive/refs/tags/0.8.3_leap.tar.gz
+sectxt @ https://github.com/DigitalTrustCenter/sectxt/archive/refs/tags/0.9.4.tar.gz
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
@@ -218,6 +220,8 @@ urllib3==2.0.7
     #   sentry-sdk
 uwsgi==2.0.22
     # via -r requirements.in
+validators==0.23.0
+    # via sectxt
 vine==5.0.0
     # via
     #   amqp
@@ -231,7 +235,7 @@ wheel==0.41.2
     # via -r requirements.in
 whitenoise==6.5.0
     # via -r requirements.in
-zipp==3.15.0
+zipp==3.19.1
     # via
     #   -r requirements.in
     #   importlib-metadata

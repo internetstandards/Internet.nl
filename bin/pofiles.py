@@ -154,8 +154,7 @@ def build_django_files(args=None):
             try:
                 merged_po = merge(merged_po, po_file)
             except ValueError as e:
-                print(f"{e} in {locale}/{filename}. Aborting...")
-                return
+                raise Exception(f"{e} in {locale}/{filename}. Aborting...")
         merged_po.sort()
         print(f"Converting '{locale}' locale to markdown...")
         for entry in merged_po:
