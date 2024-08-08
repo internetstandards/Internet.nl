@@ -6,6 +6,8 @@
 #
 amqp==5.1.1
     # via kombu
+annotated-types==0.6.0
+    # via pydantic
 argparse==1.4.0
     # via
     #   -r requirements.in
@@ -54,10 +56,11 @@ click-repl==0.3.0
     # via celery
 colorlog==6.7.0
     # via -r requirements.in
-cryptography==38.0.4
+cryptography==42.0.5
     # via
     #   -r requirements.in
     #   pgpy
+    #   sslyze
 django==4.2.15
     # via
     #   -r requirements.in
@@ -144,6 +147,12 @@ pyasn1==0.5.1
     # via pgpy
 pycparser==2.21
     # via cffi
+pydantic==2.6.4
+    # via sslyze
+pydantic-core==2.16.3
+    # via pydantic
+pyopenssl==24.1.0
+    # via -r requirements.in
 pyparsing==3.1.1
     # via -r requirements.in
 pyrabbit2==1.0.7
@@ -154,7 +163,7 @@ python-dateutil==2.8.2
     # via
     #   celery
     #   sectxt
-pythonwhois-internet-nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+pythonwhois-internet.nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
     # via -r requirements.in
 pytz==2024.1
     # via -r requirements.in
@@ -201,6 +210,8 @@ statsd==4.0.0
     #   django-statsd-mozilla
 statshog==1.0.6
     # via -r requirements.in
+tls-parser==2.0.1
+    # via sslyze
 toml==0.10.2
     # via pytest
 tomli==2.0.1
@@ -211,6 +222,8 @@ typing-extensions==4.7.1
     # via
     #   asgiref
     #   kombu
+    #   pydantic
+    #   pydantic-core
     #   setuptools-rust
     #   setuptools-scm
 tzdata==2023.3

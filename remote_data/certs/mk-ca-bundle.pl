@@ -395,6 +395,8 @@ while (<TXT>) {
   }
   if ($start_of_cert && /^CKA_LABEL UTF8 \"(.*)\"/) {
     $caname = $1;
+    # sslyze can't handle non-ascii chars in the cert name
+    $caname =~ s/[^[:ascii:]]/ /g;
   }
   my %trust_purposes_by_level;
   if ($start_of_cert && /^CKA_VALUE MULTILINE_OCTAL/) {
