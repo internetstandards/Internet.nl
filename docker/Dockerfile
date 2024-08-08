@@ -67,7 +67,7 @@ COPY requirements.txt /src/requirements.txt
 WORKDIR /src
 
 RUN pip3 install -r requirements.txt
-RUN pip3 install --no-deps https://github.com/mxsasha/sslyze/archive/refs/tags/6.0.0+internetnl.tar.gz
+RUN pip3 install --no-deps https://github.com/mxsasha/sslyze/archive/refs/tags/6.0.0+internetnl2.tar.gz
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps
