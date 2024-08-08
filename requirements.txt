@@ -58,7 +58,7 @@ cryptography==38.0.4
     # via
     #   -r requirements.in
     #   pgpy
-django==4.2.14
+django==4.2.15
     # via
     #   -r requirements.in
     #   django-bleach
@@ -177,7 +177,7 @@ selenium==3.141.0
     # via -r requirements.in
 semantic-version==2.10.0
     # via setuptools-rust
-sentry-sdk==1.30.0
+sentry-sdk==2.8.0
     # via -r requirements.in
 setuptools-rust==1.7.0
     # via -r requirements.in
