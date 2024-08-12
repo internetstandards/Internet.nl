@@ -24,8 +24,8 @@ Scoring is decided as follows:
   max score, in that category, with possible weight differences per subtest.
 * Aggregated categories (like TLS, which can have multiple tests per IP) will use the lowest/worst score of all the relevant IPs.
 * In the total score, each qualifying category's score counts for an equal part. E.g. if there are two categories, with
-  category X scoring 30/40 points, and Y 100/100 points, the score is (30/40 * 50%) (100/100 * 50%) = 87.5%.
-  (the 50% deriving from there being two categories).
+  category X scoring 30/40 points, and Y 100/100 points, the score is (30/40 * 50%) + (100/100 * 50%) = 87.5%.
+  (the 50% deriving from there being two categories). Notably, the score is _not_ 130/140 i.e. 92%.
 * Note in particular that the weight in points of a particular subtests influences its weight compared to
   other subtests in the same category - not to subtests in other categories.
 
