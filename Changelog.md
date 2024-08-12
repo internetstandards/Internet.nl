@@ -1,5 +1,43 @@
 # Change Log
 
+## 1.9.0
+
+1.9.0 (compared to 1.8.7) contains several testing changes, along with content improvements:
+
+- The RPKI test [is now included in the total test score](https://github.com/internetstandards/Internet.nl/issues/745)
+  and its worst score is now a failure.
+  Note that, as the score is evenly divided over all major categories, the score impact from each individual major
+  category has been reduced. Therefore, scoring success on RPKI but fail on other tests, may result in a higher score
+  than with 1.8. See the [scoring documentation](https://github.com/internetstandards/Internet.nl/blob/main/documentation/scoring.md)
+  for details on the scoring algorithm.
+- [Improvements in the null MX recommendation](https://github.com/internetstandards/Internet.nl/issues/989) based on SPF values.
+- SPF test now [correctly counts include/redirect for the 10 lookup limit](https://github.com/internetstandards/Internet.nl/issues/1336).
+- All tests, except some parts of TLS, now use a [standard User-Agent format](https://github.com/internetstandards/Internet.nl/issues/1224)
+  which can also be modified for third party deployments.
+- Update to the [latest version of sectxt](https://github.com/internetstandards/Internet.nl/issues/1046)
+  which includes detection of BOM, unknown fields, and several PGP issues.
+
+Internal changes:
+- CI now detects missing or conflicting database migrations.
+- Many documentation improvements.
+- Improvements in customisability for forked versions.
+
+For all issues, see the [1.9 milestone](https://github.com/internetstandards/Internet.nl/issues?q=milestone%3Av1.9),
+though some of those were backported to 1.8 already.
+
+## 1.8.7
+
+1.8.7 mainly contains various important fixes to support batch deployment.
+
+* Updated sectxt to use a patched version of PGPy with a fix for a 
+  [catastrophic regex backtracking issue](https://github.com/SecurityInnovation/PGPy/pull/467)
+* Updated nassl to fix memory leak in OCSP check.
+* Connection test zones are now re-signed every week instead of every month.
+* Support for new Docker (compose) versions and some checks for incompatible versions.
+* Many updates to the Docker setup to handle issues with large batch jobs
+* Extensions in Grafana dashboards for batch monitoring.
+* Various improvements to CI UX.
+
 ## 1.8.6
 
 Functional changes:
