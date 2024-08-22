@@ -42,7 +42,7 @@ from interface import batch, batch_shared_task, redis_id
 # Gevent does not have the same issue.
 from internetnl import log
 
-from checks.tasks.tls.scans import ChecksMode, cert_checks, check_mail_tls, has_daneTA, check_web_tls
+from checks.tasks.tls.scans import ChecksMode, cert_checks, has_daneTA, check_web_tls, check_mail_tls_multiple
 
 # Maximum number of tries on failure to establish a connection.
 # Useful on one-time errors on SMTP.
@@ -771,22 +771,29 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
         # Always try to get cached results (within the allowed time frame) to
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
+
         for server, dane_cb_data, _ in mailservers:
-            results[server] = check_mail_tls(server, dane_cb_data, task)
-        while timer() - start < cache_ttl and not all(results.values()) > 0:
-            for server, dane_cb_data, _ in mailservers:
-                if results[server]:
-                    continue
-                # Check if we already have cached results.
-                cache_id = redis_id.mail_starttls.id.format(server)
-                if cache.add(cache_id, False, cache_ttl):
-                    # We do not have cached results, get them and cache them.
-                    results[server] = check_mail_tls(server, dane_cb_data, task)
-                    cache.set(cache_id, results[server], cache_ttl)
-                else:
-                    results[server] = cache.get(cache_id, False)
+            # Pull in any cached results
+            cache_id = redis_id.mail_starttls.id.format(server)
+            results[server] = cache.get(cache_id, False)
+            log.debug(
+                f"=========== pulled {cache_id=} for {server=} data {results[server]}"
+            )
+        while timer() - start < cache_ttl and (not results or not all(results.values())):
+            servers_to_check = [
+                (server, dane_cb_data) for server, dane_cb_data, _ in mailservers if not results[server]
+            ]
+            log.debug(
+                f"=========== checking remaining {servers_to_check=}"
+            )
+            results.update(check_mail_tls_multiple(servers_to_check, task))
             time.sleep(1)
-        for server in results:
+        for server, server_result in results.items():
+            cache_id = redis_id.mail_starttls.id.format(server)
+            cache.set(cache_id, server_result, cache_ttl)
+            log.debug(
+                f"=========== writing to {cache_id=} for {server=}"
+            )
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
     except SoftTimeLimitExceeded:
