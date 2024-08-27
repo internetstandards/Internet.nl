@@ -776,24 +776,18 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
             # Pull in any cached results
             cache_id = redis_id.mail_starttls.id.format(server)
             results[server] = cache.get(cache_id, False)
-            log.debug(
-                f"=========== pulled {cache_id=} for {server=} data {results[server]}"
-            )
+            log.debug(f"=========== pulled {cache_id=} for {server=} data {results[server]}")
         while timer() - start < cache_ttl and (not results or not all(results.values())):
             servers_to_check = [
                 (server, dane_cb_data) for server, dane_cb_data, _ in mailservers if not results[server]
             ]
-            log.debug(
-                f"=========== checking remaining {servers_to_check=}"
-            )
+            log.debug(f"=========== checking remaining {servers_to_check=}")
             results.update(check_mail_tls_multiple(servers_to_check, task))
             time.sleep(1)
         for server, server_result in results.items():
             cache_id = redis_id.mail_starttls.id.format(server)
             cache.set(cache_id, server_result, cache_ttl)
-            log.debug(
-                f"=========== writing to {cache_id=} for {server=}"
-            )
+            log.debug(f"=========== writing to {cache_id=} for {server=}")
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
     except SoftTimeLimitExceeded:
