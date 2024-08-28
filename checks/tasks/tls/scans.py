@@ -480,7 +480,9 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
         network_configuration = ServerNetworkConfiguration(
             tls_server_name_indication=server,
             tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
+            smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
         )
+        # Catch errors from here
         supported_tls_versions = check_supported_tls_versions(
             ServerConnectivityInfo(
                 server_location=server_location,
@@ -515,7 +517,7 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
             )
     except TLSException as exc:
         log.info(f"sslyze scan for mail failed: {exc}")
-        # TODO: fix this
+        # TODO: fix this and refine it to apply to specific server
         return dict(server_reachable=False, tls_enabled=False)
     return results
 
