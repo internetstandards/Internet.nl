@@ -1,7 +1,6 @@
 services:
   # environment for checks, linting and unit tests
   test:
-    platform: "linux/amd64"
     image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:${RELEASE:-latest}}
     build:
       context: ..
@@ -60,7 +59,6 @@ services:
       - ../:/source/
 
   mock-resolver:
-    platform: "linux/amd64"
     image: strm/dnsmasq
 
     entrypoint: /entrypoint.sh
