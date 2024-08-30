@@ -58,7 +58,7 @@
         "uid": "oUXCLhCMk"
       },
       "gridPos": {
-        "h": 15,
+        "h": 19,
         "w": 12,
         "x": 0,
         "y": 1
@@ -94,7 +94,7 @@
         "uid": "oUXCLhCMk"
       },
       "gridPos": {
-        "h": 15,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 1
@@ -106,7 +106,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<ul>\n<li><a target=\"_blank\" href=\"/prometheus\">/prometheus</a>\n<li><a target=\"_blank\" href=\"/prometheus/targets\">/prometheus/targets</a>\n",
+        "content": "<ul>\n<li><a target=\"_blank\" href=\"/prometheus\">/prometheus</a>\n<li><a target=\"_blank\" href=\"/prometheus/targets\">/prometheus/targets</a>\n<li><a target=\"_blank\" href=\"/prometheus/alerts\">/prometheus/alerts</a>\n<li><a target=\"_blank\" href=\"/prometheus/rules\">/prometheus/rules</a>\n<li><a target=\"_blank\" href=\"/alertmanager\">/alertmanager</a>\n",
         "mode": "html"
       },
       "pluginVersion": "9.5.2",
@@ -121,6 +121,38 @@
       ],
       "title": "Links",
       "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 10,
+      "options": {
+        "alertInstanceLabelFilter": "",
+        "alertName": "",
+        "dashboardAlerts": false,
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 20,
+        "sortOrder": 1,
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": false,
+          "normal": false,
+          "pending": true
+        },
+        "viewMode": "list"
+      },
+      "title": "Panel Title",
+      "type": "alertlist"
     }
   ],
   "refresh": "30s",

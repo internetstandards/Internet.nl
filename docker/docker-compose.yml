@@ -37,6 +37,7 @@ services:
       - IPV4_IP_APP_INTERNAL
       - IPV4_IP_GRAFANA_INTERNAL
       - IPV4_IP_PROMETHEUS_INTERNAL
+      - IPV4_IP_ALERTMANAGER_INTERNAL
       - ENABLE_BATCH
       - LETSENCRYPT_STAGING
       - LETSENCRYPT_EMAIL
@@ -790,6 +791,8 @@ services:
     configs:
       - source: prometheus_config
         target: /prometheus.yaml
+      - source: prometheus_rules_config
+        target: /prometheus-rules.yaml
 
     restart: unless-stopped
     logging:
@@ -805,6 +808,31 @@ services:
 
     volumes:
       - prometheus-data:/prometheus
+
+  alertmanager:
+    image: ${DOCKER_IMAGE_PROMETHEUS:-prom/alertmanager:v0.27.0}
+
+    command:
+      - --config.file=/alertmanager.yaml
+      - --web.external-url=https://$INTERNETNL_DOMAINNAME/alertmanager/
+      - --cluster.listen-address=
+
+    configs:
+      - source: alertmanager_config
+        target: /alertmanager.yaml
+
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    networks:
+      internal:
+        ipv4_address: $IPV4_IP_ALERTMANAGER_INTERNAL
+      public-internet: {}
+
+    profiles:
+      - alertmanager
 
   postgresql-exporter:
     image: ${DOCKER_IMAGE_POSTGRESQL_EXPORTER:-prometheuscommunity/postgres-exporter:v0.12.0}
@@ -999,6 +1027,14 @@ configs:
       global:
         scrape_interval: 10s
         scrape_timeout: 5s
+      rule_files:
+        - /prometheus-rules.yaml
+      alerting:
+        alertmanagers:
+          - path_prefix: /alertmanager
+            static_configs:
+              - targets:
+                  - $IPV4_IP_ALERTMANAGER_INTERNAL:9093
       scrape_configs:
         - &scrape_config
           scheme: http
@@ -1031,6 +1067,35 @@ configs:
         - <<: *scrape_config
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
+  prometheus_rules_config:
+    content: |
+      groups:
+      - name: End to end monitoring
+        rules:
+        - alert: HighTestRuntime
+          expr: min(tests_test_runtime_seconds{test="site"})>=10 and max(tests_test_runtime_seconds{test="site"})>=30
+          annotations:
+            host: $INTERNETNL_DOMAINNAME
+            summary: Tests/probes take longer to complete than expected
+            dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0/periodic-tests'
+  alertmanager_config:
+    content: |
+      global:
+        smtp_from: $ALERTMANAGER_MAIL_FROM
+        smtp_smarthost: $ALERTMANAGER_SMTP_HOST:$ALERTMANAGER_SMTP_PORT
+        smtp_require_tls: true
+        smtp_auth_username: $ALERTMANAGER_SMTP_USER
+        smtp_auth_password: $ALERTMANAGER_SMTP_PASSWORD
+      route:
+        receiver: alerts
+        routes:
+          - receiver: alerts
+      receivers:
+        - name: alerts
+          email_configs:
+            - to: $ALERTMANAGER_MAIL_TO
+              headers:
+                subject: $ALERTMANAGER_SUBJECT
 
   restart_worker_cron:
     content: |
