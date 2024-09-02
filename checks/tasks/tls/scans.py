@@ -2,7 +2,7 @@ from binascii import hexlify
 from enum import Enum
 from pathlib import Path
 from ssl import match_hostname, CertificateError
-from typing import List, Tuple, Generator, Dict, Any
+from typing import List, Tuple, Generator, Dict, Any, Optional
 
 import subprocess
 from cryptography.hazmat._oid import NameOID
@@ -503,22 +503,21 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
                 scan_commands=scan_commands,
             )
         )
-    try:
-        for all_suites, result in run_sslyze(scans, connection_limit=1):
-            log.debug(
-                f"=========== sslyze complete for {result.server_location.hostname}, "
-                f"total set {dane_cb_per_server.keys()}"
-            )
-            dane_cb_data = dane_cb_per_server[result.server_location.hostname]
-            results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data, task)
-            log.debug(
-                f"=========== check_mail_tls complete for {result.server_location.hostname}, "
-                f"total set {dane_cb_per_server.keys()}"
-            )
-    except TLSException as exc:
-        log.info(f"sslyze scan for mail failed: {exc}")
-        # TODO: fix this and refine it to apply to specific server
-        return dict(server_reachable=False, tls_enabled=False)
+    for all_suites, result, error in run_sslyze(scans, connection_limit=1):
+        if error:
+            log.info(f"sslyze scan for mail failed: {error}")
+            results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
+            continue
+        log.debug(
+            f"=========== sslyze complete for {result.server_location.hostname}, "
+            f"total set {dane_cb_per_server.keys()}"
+        )
+        dane_cb_data = dane_cb_per_server[result.server_location.hostname]
+        results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data, task)
+        log.debug(
+            f"=========== check_mail_tls complete for {result.server_location.hostname}, "
+            f"total set {dane_cb_per_server.keys()}"
+        )
     return results
 
 
@@ -645,10 +644,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
         ),
     )
-    try:
-        all_suites, result = next(run_sslyze([scan], connection_limit=25))
-    except TLSException as exc:
-        log.info(f"sslyze scan for web on {url} failed: {exc}")
+    all_suites, result, error = next(run_sslyze([scan], connection_limit=25))
+    if error:
+        log.info(f"sslyze scan for web on {url} failed: {error}")
         return dict(server_reachable=False, tls_enabled=False)
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
@@ -746,14 +744,15 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
 def run_sslyze(
     scans: [ServerScanRequest], connection_limit: int
-) -> Generator[Tuple[List[CipherSuitesScanAttempt], ServerScanResult], None, None]:
+) -> Generator[Tuple[List[CipherSuitesScanAttempt], ServerScanResult, Optional[TLSException]], None, None]:
     log.debug(f"starting sslyze scan for {[scan.server_location for scan in scans]}")
     scanner = Scanner(per_server_concurrent_connections_limit=connection_limit, concurrent_server_scans_limit=10)
     scanner.queue_scans(scans)
     for result in scanner.get_results():
         log.info(f"sslyze scan for {result.server_location} status result {result.scan_status}")
         if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-            raise TLSException(f"could not connect: {''.join(result.connectivity_error_trace.format())}")
+            yield [], result, TLSException(f"could not connect: {''.join(result.connectivity_error_trace.format())}")
+            continue
         all_suites = [
             suite
             for suite in (
@@ -766,8 +765,14 @@ def run_sslyze(
             )
             if suite and suite.result
         ]
-        raise_sslyze_errors(result)
-        yield all_suites, result
+        # Error is caught and returned here, as we may be scanning many targets,
+        # and don't want to abort all scans for one failure.
+        try:
+            raise_sslyze_errors(result)
+        except TLSException as exc:
+            yield all_suites, result, exc
+            continue
+        yield all_suites, result, None
 
 
 def raise_sslyze_errors(result: ServerScanResult) -> None:
