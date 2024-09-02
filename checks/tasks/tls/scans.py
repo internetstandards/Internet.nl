@@ -29,7 +29,7 @@ from sslyze import (
     ServerTlsProbingResult,
     ClientAuthRequirementEnum,
 )
-from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerTimedOut
+from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerFailed
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
@@ -925,9 +925,13 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
-        except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerTimedOut):
-            pass
+        except ConnectionToServerFailed as exc:
+            log.debug(f"Server {server_connectivity_info.server_location.hostname} rejected {tls_version.name}: {exc}")
         finally:
             ssl_connection.close()
 
+    log.debug(
+        f"Server {server_connectivity_info.server_location.hostname} TLS version precheck found "
+        f"support for {supported_tls_versions}"
+    )
     return supported_tls_versions
