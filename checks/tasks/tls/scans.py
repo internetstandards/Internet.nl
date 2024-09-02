@@ -2,7 +2,7 @@ from binascii import hexlify
 from enum import Enum
 from pathlib import Path
 from ssl import match_hostname, CertificateError
-from typing import List, Tuple, Generator, Dict, Any
+from typing import List, Tuple, Generator, Dict, Any, Optional
 
 import subprocess
 from cryptography.hazmat._oid import NameOID
@@ -28,8 +28,10 @@ from sslyze import (
     CipherSuite,
     ServerTlsProbingResult,
     ClientAuthRequirementEnum,
+    SessionRenegotiationExtraArgument,
 )
-from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerTimedOut
+
+from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerFailed
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
@@ -278,6 +280,9 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     # and does not allow the trailing dot we get from DNS records.
     # This only affects CERTIFICATE_INFO, and only if the hostname came from DNS.
     hostname_no_trailing_dot = hostname.rstrip(".")
+    scan_commands_extra_arguments = ScanCommandsExtraArguments(
+        certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
+    )
     if mode == ChecksMode.WEB:
         port = 443
         scan = ServerScanRequest(
@@ -288,9 +293,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 tls_server_name_indication=hostname_no_trailing_dot, http_user_agent=settings.USER_AGENT
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
-            scan_commands_extra_arguments=ScanCommandsExtraArguments(
-                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
-            ),
+            scan_commands_extra_arguments=scan_commands_extra_arguments,
         )
     elif mode == ChecksMode.MAIL:
         port = 25
@@ -302,9 +305,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
-            scan_commands_extra_arguments=ScanCommandsExtraArguments(
-                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
-            ),
+            scan_commands_extra_arguments=scan_commands_extra_arguments,
         )
     else:
         raise ValueError
@@ -501,24 +502,26 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
                 server_location=server_location,
                 network_configuration=network_configuration,
                 scan_commands=scan_commands,
+                scan_commands_extra_arguments=ScanCommandsExtraArguments(
+                    session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+                ),
             )
         )
-    try:
-        for all_suites, result in run_sslyze(scans, connection_limit=1):
-            log.debug(
-                f"=========== sslyze complete for {result.server_location.hostname}, "
-                f"total set {dane_cb_per_server.keys()}"
-            )
-            dane_cb_data = dane_cb_per_server[result.server_location.hostname]
-            results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data, task)
-            log.debug(
-                f"=========== check_mail_tls complete for {result.server_location.hostname}, "
-                f"total set {dane_cb_per_server.keys()}"
-            )
-    except TLSException as exc:
-        log.info(f"sslyze scan for mail failed: {exc}")
-        # TODO: fix this and refine it to apply to specific server
-        return dict(server_reachable=False, tls_enabled=False)
+    for all_suites, result, error in run_sslyze(scans, connection_limit=1):
+        if error:
+            log.info(f"sslyze scan for mail failed: {error}")
+            results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
+            continue
+        log.debug(
+            f"=========== sslyze complete for {result.server_location.hostname}, "
+            f"total set {dane_cb_per_server.keys()}"
+        )
+        dane_cb_data = dane_cb_per_server[result.server_location.hostname]
+        results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data, task)
+        log.debug(
+            f"=========== check_mail_tls complete for {result.server_location.hostname}, "
+            f"total set {dane_cb_per_server.keys()}"
+        )
     return results
 
 
@@ -642,13 +645,13 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         network_configuration=network_configuration,
         scan_commands=scan_commands,
         scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
+            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
+            session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
         ),
     )
-    try:
-        all_suites, result = next(run_sslyze([scan], connection_limit=25))
-    except TLSException as exc:
-        log.info(f"sslyze scan for web on {url} failed: {exc}")
+    all_suites, result, error = next(run_sslyze([scan], connection_limit=25))
+    if error:
+        log.info(f"sslyze scan for web on {url} failed: {error}")
         return dict(server_reachable=False, tls_enabled=False)
 
     prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
@@ -746,14 +749,15 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
 def run_sslyze(
     scans: [ServerScanRequest], connection_limit: int
-) -> Generator[Tuple[List[CipherSuitesScanAttempt], ServerScanResult], None, None]:
+) -> Generator[Tuple[List[CipherSuitesScanAttempt], ServerScanResult, Optional[TLSException]], None, None]:
     log.debug(f"starting sslyze scan for {[scan.server_location for scan in scans]}")
     scanner = Scanner(per_server_concurrent_connections_limit=connection_limit, concurrent_server_scans_limit=10)
     scanner.queue_scans(scans)
     for result in scanner.get_results():
         log.info(f"sslyze scan for {result.server_location} status result {result.scan_status}")
         if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
-            raise TLSException(f"could not connect: {''.join(result.connectivity_error_trace.format())}")
+            yield [], result, TLSException(f"could not connect: {''.join(result.connectivity_error_trace.format())}")
+            continue
         all_suites = [
             suite
             for suite in (
@@ -766,8 +770,14 @@ def run_sslyze(
             )
             if suite and suite.result
         ]
-        raise_sslyze_errors(result)
-        yield all_suites, result
+        # Error is caught and returned here, as we may be scanning many targets,
+        # and don't want to abort all scans for one failure.
+        try:
+            raise_sslyze_errors(result)
+        except TLSException as exc:
+            yield all_suites, result, exc
+            continue
+        yield all_suites, result, None
 
 
 def raise_sslyze_errors(result: ServerScanResult) -> None:
@@ -925,9 +935,13 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
-        except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerTimedOut):
-            pass
+        except ConnectionToServerFailed as exc:
+            log.debug(f"Server {server_connectivity_info.server_location.hostname} rejected {tls_version.name}: {exc}")
         finally:
             ssl_connection.close()
 
+    log.debug(
+        f"Server {server_connectivity_info.server_location.hostname} TLS version precheck found "
+        f"support for {supported_tls_versions}"
+    )
     return supported_tls_versions
