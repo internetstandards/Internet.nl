@@ -28,7 +28,9 @@ from sslyze import (
     CipherSuite,
     ServerTlsProbingResult,
     ClientAuthRequirementEnum,
+    SessionRenegotiationExtraArgument,
 )
+
 from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerFailed
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
@@ -278,6 +280,9 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
     # and does not allow the trailing dot we get from DNS records.
     # This only affects CERTIFICATE_INFO, and only if the hostname came from DNS.
     hostname_no_trailing_dot = hostname.rstrip(".")
+    scan_commands_extra_arguments = ScanCommandsExtraArguments(
+        certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
+    )
     if mode == ChecksMode.WEB:
         port = 443
         scan = ServerScanRequest(
@@ -288,9 +293,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 tls_server_name_indication=hostname_no_trailing_dot, http_user_agent=settings.USER_AGENT
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
-            scan_commands_extra_arguments=ScanCommandsExtraArguments(
-                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
-            ),
+            scan_commands_extra_arguments=scan_commands_extra_arguments,
         )
     elif mode == ChecksMode.MAIL:
         port = 25
@@ -302,9 +305,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
-            scan_commands_extra_arguments=ScanCommandsExtraArguments(
-                certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
-            ),
+            scan_commands_extra_arguments=scan_commands_extra_arguments,
         )
     else:
         raise ValueError
@@ -501,6 +502,9 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
                 server_location=server_location,
                 network_configuration=network_configuration,
                 scan_commands=scan_commands,
+                scan_commands_extra_arguments=ScanCommandsExtraArguments(
+                    session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+                ),
             )
         )
     for all_suites, result, error in run_sslyze(scans, connection_limit=1):
@@ -641,7 +645,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         network_configuration=network_configuration,
         scan_commands=scan_commands,
         scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES))
+            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
+            session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
         ),
     )
     all_suites, result, error = next(run_sslyze([scan], connection_limit=25))
