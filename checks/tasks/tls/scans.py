@@ -69,6 +69,8 @@ from checks.tasks.tls.tls_constants import (
 )
 from internetnl import log
 
+SSLYZE_NETWORK_TIMEOUT = 10
+
 SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
     ScanCommand.TLS_1_3_EARLY_DATA,
@@ -290,7 +292,9 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 hostname=hostname_no_trailing_dot, ip_address=af_ip_pair[1], port=port
             ),
             network_configuration=ServerNetworkConfiguration(
-                tls_server_name_indication=hostname_no_trailing_dot, http_user_agent=settings.USER_AGENT
+                tls_server_name_indication=hostname_no_trailing_dot,
+                http_user_agent=settings.USER_AGENT,
+                network_timeout=SSLYZE_NETWORK_TIMEOUT,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
             scan_commands_extra_arguments=scan_commands_extra_arguments,
@@ -303,6 +307,7 @@ def cert_checks(hostname, mode, task, af_ip_pair=None, dane_cb_data=None, *args,
                 tls_server_name_indication=hostname_no_trailing_dot,
                 tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
                 smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
+                network_timeout=SSLYZE_NETWORK_TIMEOUT,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
             scan_commands_extra_arguments=scan_commands_extra_arguments,
@@ -482,6 +487,7 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
             tls_server_name_indication=server,
             tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
             smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
+            network_timeout=SSLYZE_NETWORK_TIMEOUT,
         )
         # Catch errors from here
         supported_tls_versions = check_supported_tls_versions(
@@ -625,7 +631,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     server_location = ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1])
     network_configuration = ServerNetworkConfiguration(
-        tls_server_name_indication=url, http_user_agent=settings.USER_AGENT
+        tls_server_name_indication=url,
+        http_user_agent=settings.USER_AGENT,
+        network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
     supported_tls_versions = check_supported_tls_versions(
         ServerConnectivityInfo(
