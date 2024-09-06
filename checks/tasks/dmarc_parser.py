@@ -74,9 +74,11 @@ def _check_dmarc_uri(tokens):
         uri, numeric = uri.split("!")
         dmarc_uri_numeric.parseString(numeric)
     try:
-        urlparse(uri)
+        parsed_url = urlparse(uri)
     except ValueError:
         raise ParseException("Could not parse URI.")
+    if parsed_url.scheme == '':
+        raise ParseException("URI scheme is missing (mailto:).")
     return None
 
 
