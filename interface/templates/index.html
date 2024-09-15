@@ -22,9 +22,9 @@
                 <a href="/test-site/">{% include "string.html" with name="base test explain" %}</a>
               </p>
             </div>
-            <form action="/site/" method="POST" novalidate>
+            <form action="/site/" method="POST">
               <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-              <input id="web-url" type="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+              <input id="web-url" type="text" inputmode="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
               </label>
               <div class="contains-button">
                 <button>{% include "string.html" with name="base test start" %}</button>
@@ -41,10 +41,10 @@
                 <a href="/test-mail/">{% include "string.html" with name="base test explain" %}</a>
               </p>
             </div>
-            <form action="/mail/" method="POST" novalidate>
+            <form action="/mail/" method="POST">
               <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
                 <span class="emailfield before">
-                <input id="mail-url" class="email" type="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
+                <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
                 </span>
               </label>
               <div class="contains-button">
