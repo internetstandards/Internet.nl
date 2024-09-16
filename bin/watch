@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+
+make exec env=develop "cmd=python3 bin/frontend.py css"
+
+while inotifywait -qre close_write ./frontend/css/*.css 
+do 
+	make exec env=develop "cmd=python3 bin/frontend.py css" 
+done
+
