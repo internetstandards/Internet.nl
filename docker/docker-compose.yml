@@ -710,6 +710,9 @@ services:
       start_period: 1m
       retries: 10
 
+    profiles:
+      - cron
+
   # cron daemon with access to Docker socket but no networking
   cron-docker:
     image: alpinelinux/docker-cli:latest
@@ -738,6 +741,9 @@ services:
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+    profiles:
+      - cron
 
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE:-latest}}
