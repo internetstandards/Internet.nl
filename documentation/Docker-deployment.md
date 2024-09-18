@@ -253,6 +253,8 @@ To update the application stack first update the `docker/defaults.env` and `dock
     curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
     chmod 755 user_manage.sh && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 This will update the deployment with the latest `main` branch and latest `main` packages.
@@ -267,6 +269,8 @@ If you want to update to a tagged version release, e.g. `v1.8.0`, use the follow
     curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/user_manage.sh && \
     chmod 755 user_manage.sh && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
@@ -283,6 +287,8 @@ In essence downgrading is the same procedure as upgrading: determine the branch 
     curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
     chmod 755 user_manage.sh && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
+    # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 **notice**: depending on the complexity of the upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
