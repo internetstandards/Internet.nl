@@ -226,6 +226,8 @@ jobs:
               curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/user_manage.sh && \\
               chmod 755 user_manage.sh && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \\
+              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
           EOF
@@ -246,6 +248,8 @@ jobs:
               curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/user_manage.sh && \\
               chmod 755 user_manage.sh && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
+              # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \\
+              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \\
               env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
           EOF
 
