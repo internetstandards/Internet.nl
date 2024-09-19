@@ -710,6 +710,9 @@ services:
       start_period: 1m
       retries: 10
 
+    profiles:
+      - cron
+
   # cron daemon with access to Docker socket but no networking
   cron-docker:
     image: alpinelinux/docker-cli:latest
@@ -738,6 +741,9 @@ services:
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+    profiles:
+      - cron
 
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE:-latest}}
@@ -1072,12 +1078,22 @@ configs:
       groups:
       - name: End to end monitoring
         rules:
-        - alert: HighTestRuntime
-          expr: min(tests_test_runtime_seconds{test="site"})>=10 and max(tests_test_runtime_seconds{test="site"})>=30
+        - alert: HighTestRuntimeSite
+          # when site probes for 2 or more of the test domains take longer than 30 seconds something is wrong
+          expr: count(tests_test_runtime_seconds{test="site"} >= 30) >= 2
           annotations:
             host: $INTERNETNL_DOMAINNAME
-            summary: Tests/probes take longer to complete than expected
+            summary: Two or more tests for web take longer to complete than expected
             dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0/periodic-tests'
+        - alert: HighTestRuntimeMail
+          # when mail probes for 2 or more of the oltest domains take longer than 70 seconds something is wrong
+          expr: count(tests_test_runtime_seconds{test="site"} >= 70) >= 2
+          annotations:
+            host: $INTERNETNL_DOMAINNAME
+            summary: Two or more tests for mail take longer to complete than expected
+            dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0/periodic-tests'
+
+
   alertmanager_config:
     content: |
       global:

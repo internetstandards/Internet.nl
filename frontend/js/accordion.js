@@ -41,11 +41,11 @@
     $('.pre-icon', this).text(opentext);
   });
 
-  var hash = window.location.hash;
-  if (hash!='') {
-    $(hash).attr( 'aria-expanded' , true ).addClass( 'active' ).parent().next( '.panel-content' ).slideDown(200).attr( 'aria-hidden' , 'false');
-    setPanelItemFoldText($('.pre-icon', hash), 'close');
-    refreshPanelButtonText($(hash), 'open');
+  var cphashmatch = /^#control-panel-[0-9]+/.exec(window.location.hash);
+  if (cphashmatch && $(cphashmatch[0]).length) {
+    $(cphashmatch[0]).attr( 'aria-expanded' , true ).addClass( 'active' ).parent().next( '.panel-content' ).slideDown(200).attr( 'aria-hidden' , 'false');
+    setPanelItemFoldText($('.pre-icon', cphashmatch[0]), 'close');
+    refreshPanelButtonText($(cphashmatch[0]), 'open');
   }
 
   // Now we can play with it
