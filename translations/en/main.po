@@ -204,9 +204,6 @@ msgstr ""
 msgid "base test mail input"
 msgstr "Your email domain:"
 
-msgid "base test mail placeholder"
-msgstr "example.com"
-
 msgid "base test mail label"
 msgstr "Test your email"
 
@@ -248,9 +245,6 @@ msgstr ""
 
 msgid "base test website input"
 msgstr "Your website domain name:"
-
-msgid "base test website placeholder"
-msgstr "www.example.com"
 
 msgid "base test website label"
 msgstr "Test your website"
