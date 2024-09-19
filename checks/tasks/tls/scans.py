@@ -31,7 +31,7 @@ from sslyze import (
     SessionRenegotiationExtraArgument,
 )
 
-from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerFailed
+from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerFailed, ServerHostnameCouldNotBeResolved
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
@@ -482,7 +482,12 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
     dane_cb_per_server = {}
     results = {}
     for server, dane_cb_data in server_tuples:
-        server_location = ServerNetworkLocation(hostname=server, port=25)
+        try:
+            server_location = ServerNetworkLocation(hostname=server, port=25)
+        except ServerHostnameCouldNotBeResolved:
+            log.info(f"unable to resolve MX host {server}, marking server unreachable")
+            results[server] = dict(server_reachable=False, tls_enabled=False)
+            continue
         network_configuration = ServerNetworkConfiguration(
             tls_server_name_indication=server,
             tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
@@ -497,6 +502,10 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
                 tls_probing_result=FAKE_SERVER_TLS_PROBING_RESULT,
             )
         )
+        if not supported_tls_versions:
+            log.info(f"no TLS version support found for MX host {server}, marking server unreachable")
+            results[server] = dict(server_reachable=False, tls_enabled=False)
+            continue
         scan_commands = SSLYZE_SCAN_COMMANDS | {
             SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
         }
@@ -513,6 +522,8 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
                 ),
             )
         )
+    if not scans:
+        return results
     for all_suites, result, error in run_sslyze(scans, connection_limit=1):
         if error:
             log.info(f"sslyze scan for mail failed: {error}")
