@@ -202,10 +202,10 @@ msgstr ""
 "## Test your email"
 
 msgid "base test mail input"
-msgstr "Your email domain name:"
+msgstr "Your email address:"
 
 msgid "base test mail label"
-msgstr "Test your email domain"
+msgstr "Test your email"
 
 msgid "base test mail text"
 msgstr "Modern address? Anti-phishing? Secure transport? Route authorisation?"
