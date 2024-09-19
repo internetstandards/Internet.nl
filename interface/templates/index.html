@@ -24,7 +24,7 @@
             </div>
             <form action="/site/" method="POST">
               <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-              <input id="web-url" type="text" inputmode="url" name="url" placeholder="www.example.fr" autocorrect="off" autocapitalize="none" spellcheck="false">
+              <input id="web-url" type="text" inputmode="url" name="url" placeholder="{% include "content.html" with name="base test website placeholder" %}" autocorrect="off" autocapitalize="none" spellcheck="false">
               </label>
               <div class="contains-button">
                 <button>{% include "string.html" with name="base test start" %}</button>
@@ -44,7 +44,7 @@
             <form action="/mail/" method="POST">
               <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
                 <span class="emailfield before">
-                <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="example.fr" autocorrect="off" autocapitalize="none" spellcheck="false">
+                <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="{% include "content.html" with name="base test website placeholder" %}" autocorrect="off" autocapitalize="none" spellcheck="false">
                 </span>
               </label>
               <div class="contains-button">
