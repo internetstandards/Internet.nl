@@ -898,13 +898,14 @@ def find_most_preferred_cipher_suite(
     suite_names = [suite.openssl_name for suite in cipher_suites]
 
     # OpenSSL is fine with invalid cipher names, as long as there are some ciphers selected it does support.
-    # This should not happen, but if it does, we prefer loud error over incorrect ordering results.
+    # However, this may also happen in rare cases where parts of the suite are only supported in one OpenSSL
+    # version, and another part in another. This appears very rare, so we log it and continue.
+    # In theory, this can cause a small set of obscure cipher order violations to be undetected.
     unavailable_suites = [c for c in cipher_suites if not _check_cipher_suite_available(tls_version, c)]
     if unavailable_suites:
-        raise TLSException(
-            f"Unable to test {tls_version.name} cipher suite order for {suite_names} against "
-            f"{server_connectivity_info.server_location.hostname}: the following ciphers are not "
-            f"available in this client: {unavailable_suites}"
+        log.warning(
+            f"unable to include cipher suites {unavailable_suites} in cipher order testing for {tls_version.name} on"
+            f" {server_connectivity_info.server_location.hostname} due to mix of required OpenSSL versions"
         )
 
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
