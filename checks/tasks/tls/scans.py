@@ -31,7 +31,12 @@ from sslyze import (
     SessionRenegotiationExtraArgument,
 )
 
-from sslyze.errors import ServerRejectedTlsHandshake, TlsHandshakeTimedOut, ConnectionToServerFailed, ServerHostnameCouldNotBeResolved
+from sslyze.errors import (
+    ServerRejectedTlsHandshake,
+    TlsHandshakeTimedOut,
+    ConnectionToServerFailed,
+    ServerHostnameCouldNotBeResolved,
+)
 from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
@@ -524,7 +529,7 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
         )
     if not scans:
         return results
-    for all_suites, result, error in run_sslyze(scans, connection_limit=1):
+    for all_suites, result, error in run_sslyze(scans, connection_limit=connection_limit_for_scans(scans)):
         if error:
             log.info(f"sslyze scan for mail failed: {error}")
             results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
@@ -540,6 +545,15 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
             f"total set {dane_cb_per_server.keys()}"
         )
     return results
+
+
+def connection_limit_for_scans(scans: List[ServerScanRequest]):
+    high_connlimit_hostnames = {".googlemail.com": 40, ".google.com": 40}
+    hostnames = [scan.server_location.hostname for scan in scans]
+    for hostname_substr, limit in high_connlimit_hostnames.items():
+        if any([hostname_substr in hostname for hostname in hostnames]):
+            return limit
+    return 1
 
 
 def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt], dane_cb_data, task):
@@ -767,7 +781,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
 
 def run_sslyze(
-    scans: [ServerScanRequest], connection_limit: int
+    scans: List[ServerScanRequest], connection_limit: int
 ) -> Generator[Tuple[List[CipherSuitesScanAttempt], ServerScanResult, Optional[TLSException]], None, None]:
     log.debug(f"starting sslyze scan for {[scan.server_location for scan in scans]}")
     scanner = Scanner(per_server_concurrent_connections_limit=connection_limit, concurrent_server_scans_limit=10)
