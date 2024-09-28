@@ -80,11 +80,13 @@ the matter.
 ## Sponsors
 Project sponsors are wellcome and will be listed in this README file as well as on the web interface. Several 
 sponsorships are currently being evaluated and will be added here in due time.
+This project is tested with BrowserStack.
+
 
 For now we are happy to list following sponsors:
 
 - This project is managed and maintained by [Apio systems](https://apio.systems).
-- This project is tested with BrowserStack .
+- This project is tested with [BrowserStack](https://www.browserstack.com).
 
 ## License
 
