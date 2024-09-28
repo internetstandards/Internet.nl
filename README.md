@@ -1,5 +1,6 @@
-# Internet.nl
+# conformite-internet.fr
 
+conformite-internet.fr is a fork of internet.nl as allowed by it's license.
 Internet.nl is an initiative of the Dutch Internet Standards Platform that
 helps you to check whether your website, email and internet connection use
 modern and reliable Internet Standards. And if they don’t, what can you do
@@ -76,6 +77,14 @@ project. Before starting work on something that you are not sure if it falls
 under the scope it is advised to first file an issue and start a discussion on
 the matter.
 
+## Sponsors
+Project sponsors are wellcome and will be listed in this README file as well as on the web interface. Several 
+sponsorships are currently being evaluated and will be added here in due time.
+
+For now we are happy to list following sponsors:
+
+- This project is managed and maintained by [Apio systems](https://apio.systems).
+- This project is tested with [BrowserStack](https://www.browserstack.com).
 
 ## License
 
