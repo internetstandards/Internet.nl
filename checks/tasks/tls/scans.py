@@ -1,3 +1,4 @@
+import concurrent.futures
 from binascii import hexlify
 from enum import Enum
 from pathlib import Path
@@ -487,47 +488,23 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
     scans = []
     dane_cb_per_server = {}
     results = {}
-    for server, dane_cb_data in server_tuples:
-        try:
-            server_location = ServerNetworkLocation(hostname=server, port=25)
-        except ServerHostnameCouldNotBeResolved:
-            log.info(f"unable to resolve MX host {server}, marking server unreachable")
-            results[server] = dict(server_reachable=False, tls_enabled=False)
-            continue
-        network_configuration = ServerNetworkConfiguration(
-            tls_server_name_indication=server,
-            tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
-            smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
-            network_timeout=SSLYZE_NETWORK_TIMEOUT,
-        )
-        # Catch errors from here
-        supported_tls_versions = check_supported_tls_versions(
-            ServerConnectivityInfo(
-                server_location=server_location,
-                network_configuration=network_configuration,
-                tls_probing_result=FAKE_SERVER_TLS_PROBING_RESULT,
-            )
-        )
-        if not supported_tls_versions:
-            log.info(f"no TLS version support found for MX host {server}, marking server unreachable")
-            results[server] = dict(server_reachable=False, tls_enabled=False)
-            continue
-        scan_commands = SSLYZE_SCAN_COMMANDS | {
-            SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
-        }
-        log.info(f"==== precheck on {server_location} supports {supported_tls_versions} {scan_commands=}")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_server = {}
 
-        dane_cb_per_server[server] = dane_cb_data
-        scans.append(
-            ServerScanRequest(
-                server_location=server_location,
-                network_configuration=network_configuration,
-                scan_commands=scan_commands,
-                scan_commands_extra_arguments=ScanCommandsExtraArguments(
-                    session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
-                ),
-            )
-        )
+        for server, dane_cb_data in server_tuples:
+            dane_cb_per_server[server] = dane_cb_data
+            future = executor.submit(_generate_mail_server_scan_request, server)
+            future_to_server[future] = server
+
+        for future in concurrent.futures.as_completed(future_to_server):
+            server = future_to_server[future]
+            scan_request = future.result()
+
+            if scan_request:
+                scans.append(scan_request)
+            else:
+                results[server] = dict(server_reachable=False, tls_enabled=False)
+
     if not scans:
         return results
     connection_limit = connection_limit_for_scans(scans)
@@ -558,6 +535,43 @@ def connection_limit_for_scans(scans: List[ServerScanRequest]):
             log.info(f"conn limit raised to: {limit} for {hostname_substr} found in {hostnames}")
             return limit
     return 1
+
+
+def _generate_mail_server_scan_request(server: str) -> Optional[ServerScanRequest]:
+    try:
+        server_location = ServerNetworkLocation(hostname=server, port=25)
+    except ServerHostnameCouldNotBeResolved:
+        log.info(f"unable to resolve MX host {server}, marking server unreachable")
+        return None
+    network_configuration = ServerNetworkConfiguration(
+        tls_server_name_indication=server,
+        tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
+        smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
+        network_timeout=SSLYZE_NETWORK_TIMEOUT,
+    )
+    supported_tls_versions = check_supported_tls_versions(
+        ServerConnectivityInfo(
+            server_location=server_location,
+            network_configuration=network_configuration,
+            tls_probing_result=FAKE_SERVER_TLS_PROBING_RESULT,
+        )
+    )
+    if not supported_tls_versions:
+        log.info(f"no TLS version support found for MX host {server}, marking server unreachable")
+        return None
+    scan_commands = SSLYZE_SCAN_COMMANDS | {
+        SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
+    }
+    log.info(f"==== precheck on {server_location} supports {supported_tls_versions} {scan_commands=}")
+
+    return ServerScanRequest(
+        server_location=server_location,
+        network_configuration=network_configuration,
+        scan_commands=scan_commands,
+        scan_commands_extra_arguments=ScanCommandsExtraArguments(
+            session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+        ),
+    )
 
 
 def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt], dane_cb_data, task):
