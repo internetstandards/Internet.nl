@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, dsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
+from nassl._nassl import OpenSSLError
 from nassl.ssl_client import ClientCertificateRequested
 from sslyze import (
     ScanCommand,
@@ -529,7 +530,9 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
         )
     if not scans:
         return results
-    for all_suites, result, error in run_sslyze(scans, connection_limit=connection_limit_for_scans(scans)):
+    connection_limit = connection_limit_for_scans(scans)
+    log.info(f"conn limit: {connection_limit}")
+    for all_suites, result, error in run_sslyze(scans, connection_limit=connection_limit):
         if error:
             log.info(f"sslyze scan for mail failed: {error}")
             results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
@@ -552,6 +555,7 @@ def connection_limit_for_scans(scans: List[ServerScanRequest]):
     hostnames = [scan.server_location.hostname for scan in scans]
     for hostname_substr, limit in high_connlimit_hostnames.items():
         if any([hostname_substr in hostname for hostname in hostnames]):
+            log.info(f"conn limit raised to: {limit} for {hostname_substr} found in {hostnames}")
             return limit
     return 1
 
@@ -969,7 +973,7 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
-        except ConnectionToServerFailed as exc:
+        except (ConnectionToServerFailed, OpenSSLError) as exc:
             log.debug(f"Server {server_connectivity_info.server_location.hostname} rejected {tls_version.name}: {exc}")
         finally:
             ssl_connection.close()
