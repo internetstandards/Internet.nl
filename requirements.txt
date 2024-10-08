@@ -58,7 +58,7 @@ cryptography==38.0.4
     # via
     #   -r requirements.in
     #   pgpy
-django==4.2.15
+django==4.2.16
     # via
     #   -r requirements.in
     #   django-bleach
@@ -126,7 +126,7 @@ packaging==23.1
     #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
-PGPy @ https://github.com/SecurityInnovation/PGPy/archive/09014c72b4557dd1254cf68a32e50f78515f5f32.zip
+pgpy==0.6.0
     # via sectxt
 pluggy==1.2.0
     # via
@@ -222,8 +222,6 @@ urllib3==2.0.7
     #   sentry-sdk
 uwsgi==2.0.22
     # via -r requirements.in
-validators==0.23.0
-    # via sectxt
 vine==5.0.0
     # via
     #   amqp
