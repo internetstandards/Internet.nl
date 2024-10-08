@@ -126,7 +126,7 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Build ${{ matrix.image }} (for main)
         # build for pushes to the main branch
@@ -152,7 +152,7 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Build ${{ matrix.image }} (for release)
         # build for tagged releases
@@ -177,7 +177,7 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
         # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
@@ -200,7 +200,7 @@ jobs:
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
           build-args: |
-            INTERNETNL_VERSION=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
 
       - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
@@ -222,46 +222,17 @@ jobs:
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: ${{ env.use_registry == 'true' }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
-          To deploy this specific build to a existing deployment run the following update commands:
+          To deploy this release to a existing deployment run the following update command:
 
-              export BRANCH="${{ github.sha }}" && \\
-              export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
-              export DOCKER_REGISTRY="${{env.DOCKER_REGISTRY}}" && \\
-              cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/docker-compose.yml && \\
-              curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/user_manage.sh && \\
-              chmod 755 user_manage.sh && \\
-              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \\
-              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \\
-              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
-
-          EOF
-
-      - name: Release deployment docs
-        if: github.event_name == 'release'
-        run: |
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-
-          To deploy this release to an existing deployment run the following update commands:
-
-              export RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" && \\
-              export TAG="v\$RELEASE" && \\
-              export DOCKER_REGISTRY="${{env.DOCKER_REGISTRY}}" && \\
-              cd /opt/Internet.nl/ && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$TAG/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\$TAG/docker/docker-compose.yml && \\
-              curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\$BRANCH/docker/user_manage.sh && \\
-              chmod 755 user_manage.sh && \\
-              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \\
-              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \\
-              env -i RELEASE="\$RELEASE" DOCKER_REGISTRY="\$DOCKER_REGISTRY" docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+              docker run -ti --rm --pull=always \\
+                --volume /var/run/docker.sock:/var/run/docker.sock \\
+                --volume /opt/Internet.nl:/opt/Internet.nl \\
+                --network none \\
+                ${{ env.DOCKER_REGISTRY }}/cron:${{ needs.build-docker.outputs.internetnl_version }} \\
+                /deploy.sh
           EOF
 
   integration-test:
