@@ -746,6 +746,7 @@ services:
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/Internet.nl:/opt/Internet.nl
 
     profiles:
       - cron

@@ -262,6 +262,32 @@ If you want to update to a specific tagged version release, e.g. `1.8.8`, use th
       ghcr.io/internetstandards/util:1.8.8 \
       /deploy.sh
 
+### Auto update
+
+By setting the variable `AUTO_UPDATE_TO` in the `/opt/Internet.nl/docker/local.env` auto updating will be enabled. The application will check every 15 minutes if there is a update available and deploy it automatically. This is useful for development/acceptance environments that want to stay up to date with a feature or the `main` branch. It is not recommended for production environments!
+
+This variable can be set to either of these values:
+
+- `latest`: update to latest stable release: https://github.com/internetstandards/Internet.nl/releases
+- `main`: update to latest release on the `main` branch
+- `pr-<NUMBER>`: update to the latest build of that Pull Request number
+
+Auto upgrades are performed by the `cron-docker` container/service. Progress/errors can be viewed by inspecting the container's logs:
+
+    docker compose --project-name=internetnl-prod logs --follow cron-docker
+
+To manually kick off the update process use the following command:
+
+    docker compose --project-name=internetnl-prod exec cron-docker /etc/periodic-docker/15min/auto_update
+
+**notice**: the update logging might be cut-off at the end because the `cron-docker` container/service will be restarted in the process.
+
+Every time a deploy is performed a entry is added at the bottom of the `docker/local.env` file which indicated the latest release. For example:
+
+    RELEASE='1.9.0.dev142-g118b811-auto_update' # deploy Fri Oct 11 11:42:35 UTC 2024
+
+This variable is used to determine the current version to be deployed or which image version to used when bringing container up. Earlier entries can be safely removed but the last line containing `RELEASE=` must stay in place.
+
 ## Downgrading/rollback
 
 In essence downgrading is the same procedure as upgrading. For example, to roll back to version `1.7.0` run:
