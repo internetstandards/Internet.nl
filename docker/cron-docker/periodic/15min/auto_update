@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -e
+
+if [ -z "$AUTO_UPDATE_TO" ];then
+  # auto update not configured
+  exit 0
+fi
+
+cd /opt/Internet.nl/
+
+CURRENT_RELEASE="$RELEASE"
+
+IMAGE="${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${AUTO_UPDATE_TO}"
+
+# pull latest image
+docker pull "$IMAGE"
+
+# get release info from image
+UPSTREAM_RELEASE="$(docker image inspect "$IMAGE" | jq -r '.[0].Config.Labels.release')"
+
+# check if update is required
+if [ "$CURRENT_RELEASE" = "$UPSTREAM_RELEASE" ];then
+  echo "No update available"
+  exit 0
+fi
+
+echo "Updating to: $UPSTREAM_RELEASE"
+
+# initiate update, don't remove container when done to preserve logging
+# as the initiator (cron-docker) will be killed during the deploy process
+docker run --pull=always --network none \
+  --volume /var/run/docker.sock:/var/run/docker.sock \
+  --volume /opt/Internet.nl:/opt/Internet.nl \
+  "ghcr.io/internetstandards/util:$UPSTREAM_RELEASE" \
+  /deploy.sh
