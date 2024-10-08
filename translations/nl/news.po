@@ -89,6 +89,9 @@ msgstr ""
 "\n"
 "We nodigen je van harte uit om dit jubileum met ons mee te vieren!"
 
+msgid "article 10-jarig-jubileum date"
+msgstr "8 oktober 2024"
+
 msgid "article 10-jarig-jubileum lead"
 msgstr ""
 "In oktober bestaat Platform Internetstandaarden 10 jaar. De meesten zullen niet het Platform zelf kennen, maar wel hun belangrijkste product: de Internet.nl-testportal. Deze kun je gebruiken om web-domeinen, mail-domeinen en internet-verbindingen te testen op de toepassing van moderne internet-(beveiligings-)standaarden. Het afgelopen decennium zijn via de portal miljoenen unieke tests uitgevoerd.\n"
