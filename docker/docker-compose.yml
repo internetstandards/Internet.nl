@@ -5,7 +5,7 @@
 
 services:
   webserver:
-    image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/webserver.Dockerfile
@@ -69,7 +69,7 @@ services:
       retries: 10
 
   app:
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -179,7 +179,7 @@ services:
       - manual-hof:/app/manual-hall-of-fame/
 
   db-migrate:
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -217,7 +217,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -356,7 +356,7 @@ services:
       --queues slow_db_worker,batch_slow
 
   beat:
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -549,7 +549,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -598,7 +598,7 @@ services:
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -634,7 +634,7 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -669,7 +669,7 @@ services:
       retries: 10
 
   cron:
-    image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/cron.Dockerfile
@@ -757,7 +757,7 @@ services:
       - cron
 
   grafana:
-    image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/grafana.Dockerfile
