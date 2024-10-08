@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.8
+
+1.8.8 is a release only to [add an intermediate news post](https://github.com/internetstandards/Internet.nl/pull/1516).
+
 ## 1.8.7
 
 1.8.7 mainly contains various important fixes to support batch deployment.
