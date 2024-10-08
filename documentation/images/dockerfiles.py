@@ -31,6 +31,9 @@ with Diagram(NAME, show=False, direction="LR", outformat=["png"], graph_attr=gra
         [
             DockerHub("alpine"),
             File("cron/periodic/*"),
+            File("cron-docker/periodic/*"),
+            File("deploy.sh"),
+            File("docker-compose.yml,defaults.env,host-dist.env"),
         ] >> Image("ghcr.io/internetstandards/util")
 
     with Cluster("grafana.Dockerfile"):
