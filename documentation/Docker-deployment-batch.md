@@ -65,14 +65,9 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
-    RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
-    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
-    chmod 755 user_manage.sh && \
+    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:latest cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following input is required:
@@ -119,7 +114,12 @@ For example:
 
 After configuration, spin up the instance:
 
-    env -i RELEASE=main docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    docker run -ti --rm --pull=always \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      --network none \
+      ghcr.io/internetstandards/util:latest \
+      /deploy.sh
 
 This command should complete without an error, indicating the application stack is up and running healthy.
 
@@ -148,7 +148,7 @@ You can also use the Live test suite to perform automated tests for the Batch AP
     APP_URL=https://example.com && \
     BATCH_API_AUTH=user:welkom01 && \
     docker pull ghcr.io/internetstandards/test-runner && \
-    docker run -ti --rm --env=APP_URLS=$APP_URL --env=BATCH_API_AUTH=$BATCH_API_AUTH ghcr.io/internetstandards/test-runner integration_tests/live/test_batch.py
+    docker run -ti --rm --pull=always --env=APP_URLS=$APP_URL --env=BATCH_API_AUTH=$BATCH_API_AUTH ghcr.io/internetstandards/test-runner integration_tests/live/test_batch.py
 
 For more information see: [documentation/Docker-live-tests.md](Docker-live-tests.md)
 

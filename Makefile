@@ -12,7 +12,7 @@ CERTSSDIR=$(REMOTEDATADIR)/certs
 DNSDIR=$(REMOTEDATADIR)/dns
 
 # default version if nothing is provided by environment
-INTERNETNL_VERSION ?= 0.0.0-dev0
+RELEASE ?= 0.0.0-dev0
 
 ifeq ($(shell uname -m),arm64)
 _env = env PATH="${bin}:$$PATH /usr/bin/arch -x86_64"
@@ -426,7 +426,7 @@ DOCKER_COMPOSE_BUILD_CMD=docker compose ${compose_args} \
 	--env-file=docker/build.env
 
 build docker-compose-build:
-	${DOCKER_COMPOSE_BUILD_CMD} build ${build_args} --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+	${DOCKER_COMPOSE_BUILD_CMD} build ${build_args} --build-arg=RELEASE=${RELEASE} ${services}
 
 build-no-cache docker-compose-build-no-cache: build
 build-no-cache docker-compose-build-no-cache: build_args=--no-cache
@@ -447,7 +447,7 @@ restart docker-compose-restart:
 	${DOCKER_COMPOSE_CMD} restart --no-deps ${services}
 
 docker-compose-up-build-no-deps:
-	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --build --no-deps --build-arg=INTERNETNL_VERSION=${INTERNETNL_VERSION} ${services}
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --build --no-deps --build-arg=RELEASE=${RELEASE} ${services}
 
 up-no-deps:
 	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-deps ${services}
