@@ -400,7 +400,15 @@ endif
 
 # allow overriding settings
 ifneq (,$(wildcard docker/local.env))
-	localenv=--env-file=docker/local.env
+$(info )
+$(info A `docker/local.env` exists which may override default behaviour!)
+$(info )
+$(info File contents:)
+$(info )
+$(info $(shell cat docker/local.env))
+$(info )
+
+localenv =--env-file=docker/local.env
 endif
 
 # command used to bring projects up
