@@ -662,10 +662,10 @@ services:
       retries: 10
 
   cron:
-    image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE}}
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     build:
       context: ..
-      dockerfile: docker/cron.Dockerfile
+      dockerfile: docker/util.Dockerfile
     environment:
       - HOSTERS_HOF_URL
       - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
@@ -716,7 +716,7 @@ services:
 
   # cron daemon with access to Docker socket but no networking
   cron-docker:
-    image: ${DOCKER_IMAGE_CRON_DOCKER}
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7
     configs:
       # restart worker to prevent memory issues
@@ -747,10 +747,10 @@ services:
       - cron
 
   update:
-    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${RELEASE}}
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     build:
       context: ..
-      dockerfile: docker/cron.Dockerfile
+      dockerfile: docker/util.Dockerfile
     environment:
       - AUTO_UPDATE_BRANCH
       - RELEASE
