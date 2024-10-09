@@ -1131,8 +1131,8 @@ configs:
     content: |
       #!/bin/sh
       set -e
-      # remove unused images, force to skip confirm prompt
-      docker image prune --force
+      # remove unused images, --all to remove images not used by containers, --force to skip confirm prompt
+      docker image prune --all --force
 
 networks:
   # disable default network
