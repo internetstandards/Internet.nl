@@ -107,12 +107,9 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
-    RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env" && \
-    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env" && \
-    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml" && \
+    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/main/docker/host-dist.env" && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
@@ -155,9 +152,12 @@ For instance specific configuration use the `docker/local.env` file. Please refe
 
 Spin up instance:
 
-    env -i RELEASE=main docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
-
-The `env -i` part is to ensure no environment variables that might be set in the shell overwrite values from the `.env` files (eg: the `DEBUG` variable).
+    docker run -ti --rm \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      --network none \
+      ghcr.io/internetstandards/util:latest \
+      /deploy.sh
 
 This command will take a long time (up to 30 minutes) due to RPKI data that needs to be synced initially. After that it should complete without an error, indicating the application stack is up and running healthy. You can already prepare continue with the DNS setup below in the meantime.
 

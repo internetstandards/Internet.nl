@@ -745,14 +745,15 @@ services:
 
     profiles:
       - cron
+
   update:
-    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${INTERNETNL_VERSION}}
+    image: ${DOCKER_IMAGE_CRON:-ghcr.io/internetstandards/cron:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/cron.Dockerfile
     environment:
       - AUTO_UPDATE_BRANCH
-      - INTERNETNL_VERSION
+      - RELEASE
     command: /update.sh
     # this container runs to completion and exits with 0
     restart: on-failure

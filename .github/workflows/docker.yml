@@ -214,24 +214,18 @@ jobs:
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
-        if: ${{ env.use_registry == 'true' }}
+        if: github.event_name != 'release'
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
           To deploy this specific build to a existing deployment run the following update commands:
 
-              cd /opt/Internet.nl/ && \\
-              RELEASE="${{ github.event.pull_request.head.sha }}" >> docker/local.env && \\
-              DOCKER_REGISTRY="${{env.DOCKER_REGISTRY}}" >> docker/local.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\${{ github.event.pull_request.head.sha }}/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\${{ github.event.pull_request.head.sha }}/docker/docker-compose.yml && \\
-              curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\${{ github.event.pull_request.head.sha }}/docker/user_manage.sh && \\
-              chmod 755 user_manage.sh && \\
-              docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
-              # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \\
-              docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \\
-              docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
-
+              docker run -ti --rm \\
+                --volume /var/run/docker.sock:/var/run/docker.sock \\
+                --volume /opt/Internet.nl:/opt/Internet.nl \\
+                --network none \\
+                ${{ env.DOCKER_REGISTRY }}/cron:${{ needs.build-docker.outputs.internetnl_version }} \\
+                /deploy.sh
           EOF
 
       - name: Release deployment docs
@@ -243,9 +237,8 @@ jobs:
 
               cd /opt/Internet.nl/ && \\
               RELEASE="${{ needs.build-docker.outputs.internetnl_version }}" >> docker/local.env && \\
-              DOCKER_REGISTRY="${{env.DOCKER_REGISTRY}}" >> docker/local.env && \\
               curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\${{ needs.build-docker.outputs.internetnl_version }}/docker/defaults.env && \\
-              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\${{ needs.build-docker.outputs.internetnl_version }}/docker/docker-compose.yml && \\
+              curl -sSfO --output-dir docker https://raw.githubusercontent.com/${{github.repository}}/\${{ needs.build-docker.outputs.internetnl_version }}/docker/docker-compose.yml && \\-p
               curl -sSfO https://raw.githubusercontent.com/${{github.repository}}/\${{ needs.build-docker.outputs.internetnl_version }}/docker/user_manage.sh && \\
               chmod 755 user_manage.sh && \\
               docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \\
