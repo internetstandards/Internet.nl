@@ -115,9 +115,11 @@ jobs:
           # and tag with PR source branch (eg: feature-x)
           tags: |
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:pr-${{ github.event_name == 'pull_request' && github.event.number || github.ref_name}}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:pr-${{ github.event_name == 'pull_request' && github.event.number || github.ref_name}}
           # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
