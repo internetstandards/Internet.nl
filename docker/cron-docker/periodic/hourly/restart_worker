@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+# find worker and restart the container(s)
+docker ps --filter label=com.docker.compose.service=worker --quiet | xargs --no-run-if-empty docker restart

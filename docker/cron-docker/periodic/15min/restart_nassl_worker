@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+# find nassl worker and restart the container(s)
+docker ps --filter label=com.docker.compose.service=worker-nassl --quiet |  xargs --no-run-if-empty docker restart

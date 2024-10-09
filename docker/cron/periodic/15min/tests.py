@@ -4,7 +4,7 @@
 
 # for iterative development
 # docker run -ti -e INTERNETNL_DOMAINNAME=internet.nl -v $PWD/docker/cron/periodic/15min/tests.py:/tests.py \
-# ghcr.io/internetstandards/cron:latest /tests.py --debug
+# ghcr.io/internetstandards/util:latest /tests.py --debug
 
 import sys
 import os
