@@ -669,10 +669,11 @@ services:
       retries: 10
 
   cron:
-    image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE}}
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     build:
       context: ..
-      dockerfile: docker/cron.Dockerfile
+      dockerfile: docker/util.Dockerfile
+    command: crond -f -d7
     environment:
       - HOSTERS_HOF_URL
       - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
@@ -726,21 +727,14 @@ services:
 
   # cron daemon with access to Docker socket but no networking
   cron-docker:
-    image: ${DOCKER_IMAGE_CRON_DOCKER}
-    command: crond -f -d7
-    configs:
-      # restart worker to prevent memory issues
-      - source: restart_worker_cron
-        target: /etc/periodic/hourly/restart_worker
-        mode: 0755
-      # restart nassl worker to prevent memory issues
-      - source: restart_nassl_worker_cron
-        target: /etc/periodic/15min/restart_nassl_worker
-        mode: 0755
-      # remove unused old docker images to reduce disk space usage
-      - source: docker_image_prune
-        target: /etc/periodic/weekly/docker-image-prune
-        mode: 0755
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
+    build:
+      context: ..
+      dockerfile: docker/util.Dockerfile
+    command: crond -f -d7 -c /etc/crontabs-docker
+    environment:
+      - AUTO_UPDATE_TO
+
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -1128,27 +1122,6 @@ configs:
             - to: $ALERTMANAGER_MAIL_TO
               headers:
                 subject: $ALERTMANAGER_SUBJECT
-
-  restart_worker_cron:
-    content: |
-      #!/bin/sh
-      set -e
-      # find worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker --quiet)
-
-  restart_nassl_worker_cron:
-    content: |
-      #!/bin/sh
-      set -e
-      # find nassl worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
-
-  docker_image_prune:
-    content: |
-      #!/bin/sh
-      set -e
-      # remove unused images, --all to remove images not used by containers, --force to skip confirm prompt
-      docker image prune --all --force
 
 networks:
   # disable default network

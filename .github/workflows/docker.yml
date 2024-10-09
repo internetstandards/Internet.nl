@@ -42,8 +42,8 @@ jobs:
           - image: grafana
             dockerfile: docker/grafana.Dockerfile
             target:
-          - image: cron
-            dockerfile: docker/cron.Dockerfile
+          - image: util
+            dockerfile: docker/util.Dockerfile
             target:
 
     outputs:
@@ -231,7 +231,7 @@ jobs:
                 --volume /var/run/docker.sock:/var/run/docker.sock \\
                 --volume /opt/Internet.nl:/opt/Internet.nl \\
                 --network none \\
-                ${{ env.DOCKER_REGISTRY }}/cron:${{ needs.build-docker.outputs.internetnl_version }} \\
+                ${{ env.DOCKER_REGISTRY }}/util:${{ needs.build-docker.outputs.internetnl_version }} \\
                 /deploy.sh
           EOF
 
