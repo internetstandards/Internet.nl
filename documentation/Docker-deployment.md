@@ -84,7 +84,7 @@ Run the following command to install required dependencies, setup Docker Apt rep
 
 
     apt update && \
-    apt install -yqq ca-certificates curl gnupg && \
+    apt install -yqq ca-certificates curl jq gnupg && \
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
@@ -209,7 +209,7 @@ Or use this command to omit the `COMMAND` and `PORTS` columns for a more compact
 
     docker compose --project-name=internetnl-prod  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
 
-Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` and `update` containers/services having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
 
 If a container/service is not up and healthy the cause might be deduced by inspecting the container/service state, eg for the app container/service:
 
@@ -271,6 +271,17 @@ If you want to update to a tagged version release, e.g. `v1.8.0`, use the follow
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
+To update to the latest build of the Pull Request branch use:
+
+    BRANCH=feature-x
+	RELEASE=branch-feature-x && \
+    cd /opt/Internet.nl/ && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH}/docker/defaults.env && \
+    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH}/docker/docker-compose.yml && \
+    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${BRANCH}/docker/user_manage.sh && \
+    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
     env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
 
 The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
