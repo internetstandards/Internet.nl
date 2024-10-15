@@ -2171,7 +2171,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "5s",
+  "refresh": "1m",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
