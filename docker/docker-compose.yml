@@ -674,6 +674,7 @@ services:
       - DB_PASSWORD=password
       - CRON_DAILY_POSTGRESQL_BACKUP
       - CRON_WEEKLY_POSTGRESQL_BACKUP
+      - CRON_DAILY_DELETE_BATCH_RESULTS
       - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
@@ -701,6 +702,7 @@ services:
       - postgres-backups:/var/lib/postgresql/backups
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
       - prometheus-textfile-directory:/prometheus-textfile-directory
+      - batch_results:/app/batch_results
 
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
