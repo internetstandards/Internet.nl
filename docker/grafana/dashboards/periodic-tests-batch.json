@@ -69,7 +69,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 4,
         "x": 0,
         "y": 1
       },
@@ -96,13 +96,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "quantile( 0.50, tests_test_runtime_seconds{test=~\"$test\", domain=~\"$domain\"})",
+          "expr": "quantile( 0.50, tests_batch_runtime_seconds{request_type=~\"$request_type\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Tests median runtime",
+      "title": "Batch request median runtime",
       "type": "stat"
     },
     {
@@ -137,8 +137,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 3,
+        "w": 4,
+        "x": 4,
         "y": 1
       },
       "id": 11,
@@ -164,13 +164,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(tests_test_success_total{test=~\"$test\", domain=~\"$domain\"})",
+          "expr": "sum(tests_batch_success_total{request_type=~\"$request_type\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Successfull tests",
+      "title": "Batch requests success",
       "type": "stat"
     },
     {
@@ -205,8 +205,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 6,
+        "w": 4,
+        "x": 8,
         "y": 1
       },
       "id": 13,
@@ -233,14 +233,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(tests_test_failure_total{test=~\"$test\", domain=~\"$domain\"})   ",
+          "expr": "sum(tests_batch_failure_total{request_type=~\"$request_type\"})   ",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Failed tests",
+      "title": "Batch request failure",
       "type": "stat"
     },
     {
@@ -275,8 +275,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 9,
+        "w": 4,
+        "x": 12,
         "y": 1
       },
       "id": 15,
@@ -303,14 +303,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(tests_test_timeout_total{test=~\"$test\", domain=~\"$domain\"})   ",
+          "expr": "sum(tests_batch_timeout_total{request_type=~\"$request_type\"})   ",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Timed out tests",
+      "title": "Batch request timeout",
       "type": "stat"
     },
     {
@@ -332,10 +332,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 2
               }
             ]
           },
@@ -345,11 +341,11 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 12,
+        "w": 4,
+        "x": 20,
         "y": 1
       },
-      "id": 12,
+      "id": 17,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -372,153 +368,15 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(tests_test_cached_total{test=~\"$test\", domain=~\"$domain\"})",
+          "exemplar": false,
+          "expr": "sum(tests_batch_domain_total{request_type=~\"$request_type\", domain=~\"$domain\"})   ",
+          "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Cached tests",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 50
-              },
-              {
-                "color": "green",
-                "value": 75
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 18,
-        "y": 1
-      },
-      "id": 10,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "avg(tests_probe_score{test=~\"$test\", domain=~\"$domain\", probe=~\"$probe\"})",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Probes average scores",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 21,
-        "y": 1
-      },
-      "id": 17,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "sum(tests_probe_success_total{test=~\"$test\", domain=~\"$domain\", probe=~\"$probe\"})",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Successfull probes",
+      "title": "Batch request domains",
       "type": "stat"
     },
     {
@@ -537,6 +395,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -562,7 +421,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -622,13 +481,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tests_test_runtime_seconds{test=~\"$test\", domain=~\"$domain\"}",
-          "legendFormat": "{{test}} - {{domain}}",
+          "expr": "tests_batch_runtime_seconds{request_type=~\"$request_type\"}",
+          "legendFormat": "{{request_type}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Test runtime per domain",
+      "title": "Batch request runtime",
       "type": "timeseries"
     },
     {
@@ -662,7 +521,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -722,13 +581,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tests_probe_runtime_seconds{test=~\"$test\", domain=~\"$domain\", probe=~\"$probe\"}",
-          "legendFormat": "{{test}} - {{domain}} - {{probe}}",
+          "expr": "tests_batch_stage_runtime_seconds{request_type=~\"$request_type\"}",
+          "legendFormat": "{{request_type}} - {{stage}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Probe runtimes per domain",
+      "title": "Batch request stage runtimes",
       "type": "timeseries"
     },
     {
@@ -777,7 +636,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -837,13 +696,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tests_probe_score{test=~\"$test\", domain=~\"$domain\", probe=~\"$probe\"}",
-          "legendFormat": "{{test}} - {{domain}} - {{probe}}",
+          "expr": "tests_batch_domain_score{request_type=~\"$request_type\", domain=~\"$domain\"}",
+          "legendFormat": "{{request_type}} - {{domain}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Probe scores per domain",
+      "title": "Test scores per domain",
       "type": "timeseries"
     },
     {
@@ -877,7 +736,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -939,13 +798,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(tests_probe_pass{test=~\"$test\", domain=~\"$domain\"}) by (test, domain)",
-          "legendFormat": "{{test}} - {{domain}}",
+          "expr": "sum(tests_batch_domain_total{request_type=~\"$request_type\", domain=~\"$domain\"}) by (request_type, domain) - sum(tests_batch_domain_success{request_type=~\"$request_type\", domain=~\"$domain\"}) by (request_type, domain)",
+          "legendFormat": "{{request_type}} - {{domain}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Probes passed per domain",
+      "title": "Failed tests per domain",
       "type": "timeseries"
     },
     {
@@ -992,7 +851,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1052,13 +911,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tests_test_failure_total{test=~\"$test\", domain=~\"$domain\"}",
-          "legendFormat": "{{test}} - {{domain}}",
+          "expr": "tests_batch_failure_total{request_type=~\"$request_type\"}",
+          "legendFormat": "{{request_type}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Test failures per domain",
+      "title": "Batch request failures",
       "type": "timeseries"
     },
     {
@@ -1092,7 +951,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1152,13 +1011,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tests_test_timeout_total{test=~\"$test\", domain=~\"$domain\"}",
-          "legendFormat": "{{test}} - {{domain}}",
+          "expr": "tests_batch_timeout_total{request_type=~\"$request_type\"}",
+          "legendFormat": "{{request_type}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Test timeout per domain",
+      "title": "Batch request timeouts",
       "type": "timeseries"
     }
   ],
@@ -1182,14 +1041,14 @@
           "type": "prometheus",
           "uid": "PBFA97CFB590B2093"
         },
-        "definition": "label_values(tests_test_run_total,test)",
+        "definition": "label_values(tests_batch_run_total,request_type)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
-        "name": "test",
+        "name": "request_type",
         "options": [],
         "query": {
-          "query": "label_values(tests_test_run_total,test)",
+          "query": "label_values(tests_batch_run_total,request_type)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -1212,44 +1071,14 @@
           "type": "prometheus",
           "uid": "PBFA97CFB590B2093"
         },
-        "definition": "label_values(tests_test_run_total{test=~\"$test\"},domain)",
+        "definition": "label_values(tests_batch_domain_success{request_type=~\"$request_type\"},domain)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "domain",
         "options": [],
         "query": {
-          "query": "label_values(tests_test_run_total{test=~\"$test\"},domain)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(tests_probe_done_total{test=~\"$test\", domain=~\"$domain\"},probe)",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
-        "name": "probe",
-        "options": [],
-        "query": {
-          "query": "label_values(tests_probe_done_total{test=~\"$test\", domain=~\"$domain\"},probe)",
+          "query": "label_values(tests_batch_domain_success{request_type=~\"$request_type\"},domain)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -1266,8 +1095,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Periodic tests",
-  "uid": "af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0",
-  "version": 11,
+  "title": "Periodic tests batch",
+  "uid": "b38d84a3-02c1-4066-b27b-cfc11dd3ce1e",
+  "version": 4,
   "weekStart": ""
 }
