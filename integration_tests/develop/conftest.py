@@ -19,8 +19,8 @@ def ipv6_available():
     """Test if IPv6 is available inside development environment"""
     try:
         command = (
-            "docker compose --ansi=never --project-name=internetnl-dev exec -ti app",
-            f"curl -6 --silent --show-error --fail --output /dev/null {IPV6_AVAILABILITY_DOMAIN}",
+            "docker compose --ansi=never --project-name=internetnl-develop exec -ti app "
+            + f"curl -6 --show-error --fail {IPV6_AVAILABILITY_DOMAIN}",
         )
         subprocess.check_output(command, shell=True)
     except subprocess.CalledProcessError:

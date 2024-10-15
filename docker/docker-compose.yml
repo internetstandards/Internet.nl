@@ -263,6 +263,8 @@ services:
       routinator:
         # TODO: convert to service_healthy when healthcheck is added to routinator
         condition: service_started
+        # routinator can sometimes be disabled in profiles
+        required: false
       unbound:
         condition: service_healthy
         required: false
@@ -385,6 +387,8 @@ services:
       routinator:
         # TODO: convert to service_healthy when healthcheck is added to routinator
         condition: service_started
+        # routinator can sometimes be disabled in profiles
+        required: false
     environment:
       - INTERNET_NL_CHECK_SUPPORT_IPV6
       - INTERNET_NL_CHECK_SUPPORT_DNSSEC
@@ -540,6 +544,9 @@ services:
       start_period: 30m
       retries: 10
 
+    profiles:
+      - routinator
+
   # unbound DNS server used for connection test
   unbound:
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
@@ -587,7 +594,7 @@ services:
       start_period: 1m
       retries: 10
     profiles:
-      - default
+      - connectiontest
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
