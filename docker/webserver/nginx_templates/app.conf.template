@@ -1,4 +1,4 @@
-server_names_hash_bucket_size 10240;
+server_names_hash_bucket_size 1024;
 
 # override default log format to include vhost
 log_format default '$remote_addr $host $remote_user [$time_local] "$request" '
