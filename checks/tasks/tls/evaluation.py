@@ -26,6 +26,10 @@ from checks.tasks.tls.tls_constants import (
 
 @dataclass(frozen=True)
 class TLSProtocolEvaluation:
+    """
+    Evaluate the accepted TLS protocols, i.e. SSL 3.0/TLS 1.1/etc.
+    """
+
     good: List[TlsVersionEnum]
     sufficient: List[TlsVersionEnum]
     phase_out: List[TlsVersionEnum]
@@ -42,6 +46,7 @@ class TLSProtocolEvaluation:
         sufficient = []
         phase_out = []
         bad = []
+
         for protocol in protocols_accepted:
             if protocol in PROTOCOLS_GOOD:
                 good.append(protocol)
@@ -51,6 +56,7 @@ class TLSProtocolEvaluation:
                 phase_out.append(protocol)
             else:
                 bad.append(protocol)
+
         return cls(
             good=good,
             sufficient=sufficient,
@@ -73,6 +79,10 @@ class TLSProtocolEvaluation:
 
 @dataclass(frozen=True)
 class TLSForwardSecrecyParameterEvaluation:
+    """
+    Evaluate the FS (DH/DHE/EC) params from the accepted cipher suites.
+    """
+
     max_dh_size: Optional[int]
     max_ec_size: Optional[int]
 
@@ -103,6 +113,7 @@ class TLSForwardSecrecyParameterEvaluation:
             if isinstance(key, DhEphemeralKeyInfo):
                 if key.size < FS_DH_MIN_KEY_SIZE:
                     bad.add(f"DH-{key.size}")
+                # NCSC table 10
                 if key.generator == FFDHE_GENERATOR:
                     if key.prime == FFDHE2048_PRIME:
                         phase_out.add("FFDHE-2048")
@@ -135,6 +146,10 @@ class TLSForwardSecrecyParameterEvaluation:
 
 @dataclass(frozen=True)
 class TLSCipherEvaluation:
+    """
+    Evaluate the accepted TLS ciphers (across all TLS versions).
+    """
+
     ciphers_good: List[CipherSuite]
     ciphers_good_no_tls13: List[CipherSuite]
     ciphers_sufficient: List[CipherSuite]
@@ -184,21 +199,38 @@ class TLSCipherEvaluation:
 
 @dataclass(frozen=True)
 class KeyExchangeHashFunctionEvaluation:
+    """
+    Results of "hash functions for key exchange" evaluation.
+    NCSC table 5
+    """
+
     status: KexHashFuncStatus
     score: scoring.Score
 
 
 @dataclass(frozen=True)
 class TLSCipherOrderEvaluation:
+    """
+    Results of cipher order evaluation.
+    If a violation is found, the violation attribute is a two
+    item list with first the cipher preferred by the server,
+    second the cipher we expected to be preferred above that.
+    NCSC B2-5
+    """
+
     violation: List[str]
     status: CipherOrderStatus
     score: scoring.Score
 
 
-def _unique_unhashable(ciphers: List[Any]) -> List[Any]:
-    # CipherSuite is not hashable, so can't always use set()
+def _unique_unhashable(items: List[Any]) -> List[Any]:
+    """
+    Keep only unique items from a list of unhashable types.
+    Lives here as we use it only for CipherSuite, which is
+    not hashable.
+    """
     result = []
-    for cipher in ciphers:
-        if cipher not in result:
-            result.append(cipher)
+    for item in items:
+        if item not in result:
+            result.append(item)
     return result
