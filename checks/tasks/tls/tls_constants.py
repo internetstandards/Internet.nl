@@ -137,6 +137,8 @@ SIGNATURE_ALGORITHMS_SHA2 = [
     (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.DSA),
 ]
 
+MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS = {".googlemail.com": 40, ".google.com": 40}
+
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = bytearray.fromhex(
     "FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1"
