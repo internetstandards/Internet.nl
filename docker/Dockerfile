@@ -52,7 +52,7 @@ RUN ./configure \
 RUN make
 RUN make install
 
-FROM --platform=linux/amd64 build-deps AS build-nassl
+FROM build-deps AS build-nassl
 
 COPY vendor/nassl6 /src/vendor/nassl
 WORKDIR /src/vendor/nassl
@@ -73,6 +73,9 @@ WORKDIR /src
 ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system -r requirements.txt
+# sslyze is installed from our own fork, and installed
+# without deps to avoid it trying to install nassl, when
+# we have our custom nassl
 RUN pip3 install --no-deps https://github.com/mxsasha/sslyze/archive/refs/tags/6.0.0+internetnl6.tar.gz
 
 # stage with app dependencies and lint/test depencencies
@@ -155,7 +158,6 @@ RUN apt update && \
     # healthcheck
     netcat \
     procps \
-    telnet \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
 
