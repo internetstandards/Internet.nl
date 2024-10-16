@@ -56,7 +56,7 @@ TIME_ZONE = getenv("TIME_ZONE", "UTC")
 # # Application logging:
 DJANGO_LOG_LEVEL = getenv("DJANGO_LOG_LEVEL", "INFO")
 INTERNETNL_LOG_LEVEL = getenv("INTERNETNL_LOG_LEVEL", "INFO")
-CELERY_LOG_LEVEL = getenv("CELERY_LOG_LEVEL", "INFO")
+CELERY_LOG_LEVEL = getenv("CELERY_LOG_LEVEL", "ERROR")
 
 # Infrastructure
 # # Database

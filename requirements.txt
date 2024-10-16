@@ -60,7 +60,7 @@ click-repl==0.3.0
     # via celery
 colorlog==6.9.0
     # via -r requirements.in
-cryptography==42.0.5
+cryptography==43.0.3
     # via
     #   -r requirements.in
     #   pgpy-dtc
@@ -147,10 +147,10 @@ pyasn1==0.6.1
 pycparser==2.22
     # via cffi
 pydantic==2.6.4
-    # via sslyze
+    # via -r requirements.in
 pydantic-core==2.16.3
     # via pydantic
-pyopenssl==24.1.0
+pyopenssl==24.2.1
     # via -r requirements.in
 pyparsing==3.2.1
     # via -r requirements.in
@@ -210,6 +210,7 @@ statsd==4.0.0
 statshog==1.0.6
     # via -r requirements.in
 tls-parser==2.0.1
+    # via -r requirements.in
     # via sslyze
 tinycss2==1.1.1
     # via bleach
