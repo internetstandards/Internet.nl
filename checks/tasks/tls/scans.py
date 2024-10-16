@@ -73,6 +73,7 @@ from checks.tasks.tls.tls_constants import (
     CERT_EC_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
     SIGNATURE_ALGORITHMS_SHA2,
+    MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS,
 )
 from internetnl import log
 
@@ -528,9 +529,8 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
 
 
 def connection_limit_for_scans(scans: List[ServerScanRequest]):
-    high_connlimit_hostnames = {".googlemail.com": 40, ".google.com": 40}
     hostnames = [scan.server_location.hostname for scan in scans]
-    for hostname_substr, limit in high_connlimit_hostnames.items():
+    for hostname_substr, limit in MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS.items():
         if any([hostname_substr in hostname for hostname in hostnames]):
             log.info(f"conn limit raised to: {limit} for {hostname_substr} found in {hostnames}")
             return limit
@@ -705,11 +705,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         log.info(f"sslyze scan for web on {url} failed: {error}")
         return dict(server_reachable=False, tls_enabled=False)
 
-    prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
-    prots_accepted.sort(key=lambda t: t.value, reverse=True)
-
-    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
+    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_order_evaluation = test_cipher_order(
@@ -718,7 +715,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             network_configuration=result.network_configuration,
             tls_probing_result=result.connectivity_result,
         ),
-        prots_accepted,
+        supported_tls_versions,
         cipher_evaluation,
     )
     key_exchange_hash_evaluation = test_key_exchange_hash(
@@ -996,4 +993,5 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         f"Server {server_connectivity_info.server_location.hostname} TLS version precheck found "
         f"support for {supported_tls_versions}"
     )
+    supported_tls_versions.sort(key=lambda t: t.value, reverse=True)
     return supported_tls_versions
