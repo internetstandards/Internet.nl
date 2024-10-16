@@ -122,6 +122,8 @@ PROTOCOLS_PHASE_OUT = [
 ]
 
 # NCSC table 5
+# This is eventually passed to openssl's SSL_set1_sigalgs,
+# which requires the NIDs in digest+pubkey algorithm tuples.
 SIGNATURE_ALGORITHMS_SHA2 = [
     (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.EC),
     (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.EC),
@@ -136,6 +138,12 @@ SIGNATURE_ALGORITHMS_SHA2 = [
     (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.DSA),
     (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.DSA),
 ]
+
+# Mail servers with an increased connection limit,
+# matched by substring matching on their hostname.
+# Used for servers that make connections very slow,
+# but that don't care about multiple simultaneous connections.
+MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS = {".googlemail.com": 40, ".google.com": 40}
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE2048_PRIME = bytearray.fromhex(

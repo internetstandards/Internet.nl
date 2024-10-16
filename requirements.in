@@ -44,7 +44,10 @@ pytz
 sectxt
 abnf
 pyopenssl
-sslyze
+
+# sslyze dependencies, installed from outside this file
+tls-parser>=2,<3
+pydantic>=2.2,<2.7
 
 # Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
 dnspython < 2.7.0  # dependency of eventlet
