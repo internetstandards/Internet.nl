@@ -1101,7 +1101,12 @@ configs:
             host: $INTERNETNL_DOMAINNAME
             summary: Two or more tests for mail take longer to complete than expected
             dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0/periodic-tests'
-
+        - alert: OOMKills
+          expr: increase(node_vmstat_oom_kill[5m]) > 1
+          annotations:
+            host: $INTERNETNL_DOMAINNAME
+            summary: One or more containers/processes where OOM killed
+            dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/bdd9dac3-b85a-4420-8158-bd92e06da08d/batch?viewPanel=5'
 
   alertmanager_config:
     content: |
