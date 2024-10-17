@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+# remove unused images, stoped containers, unused networks and build cache
+# --all to remove images not used by containers, --force to skip confirm prompt
+docker system prune --all --force

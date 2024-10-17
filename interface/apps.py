@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 import logging
-
+import time
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.cache import cache
@@ -157,4 +157,4 @@ class InterfaceConfig(AppConfig):
         connection.inc_thread_sharing()
 
         # push current app version to metrics collection
-        statsd.incr("version_info", tags={"version": settings.VERSION})
+        statsd.gauge("version_info", time.time(), tags={"version": settings.VERSION})

@@ -81,7 +81,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "internetnl_version_info",
+          "expr": "topk(1, internetnl_version_info)",
           "format": "table",
           "instant": false,
           "key": "Q-8aff2f4f-f2ed-4c19-a41a-e69b7c8d3e4e-0",
@@ -2179,13 +2179,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Batch",
   "uid": "bdd9dac3-b85a-4420-8158-bd92e06da08d",
-  "version": 5,
+  "version": 6,
   "weekStart": ""
 }
