@@ -373,8 +373,6 @@ def spf_check_include_redirect(
     if status == SpfPolicyStatus.valid:
         cb_data = resolve_spf_record(url, task)
         new_spf = cb_data["record"]
-        log.debug("redirect is correct, reduing left_lookups with 1")
-        left_lookups -= 1
         if not new_spf:
             status = bad_status
             score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
