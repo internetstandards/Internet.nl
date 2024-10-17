@@ -12,7 +12,7 @@ celery>5.3
 
 setuptools-rust
 beautifulsoup4
-cryptography<39.0.0
+cryptography
 django-bleach<3  # 3 and up has no Python 3.7 support
 django-csp
 django-enumfields
@@ -42,6 +42,8 @@ setuptools_scm
 sentry-sdk
 forcediphttpsadapter
 pytz
+pyopenssl
+sslyze
 
 # Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
 dnspython < 2.7.0  # dependency of eventlet
