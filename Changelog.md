@@ -12,10 +12,6 @@
   for details on the scoring algorithm.
 - [Improvements in the null MX recommendation](https://github.com/internetstandards/Internet.nl/issues/989) based on SPF values.
 - SPF test now [correctly counts include/redirect for the 10 lookup limit](https://github.com/internetstandards/Internet.nl/issues/1336).
-- All tests, except some parts of TLS, now use a [standard User-Agent format](https://github.com/internetstandards/Internet.nl/issues/1224)
-  which can also be modified for third party deployments.
-- Update to the [latest version of sectxt](https://github.com/internetstandards/Internet.nl/issues/1046)
-  which includes detection of BOM, unknown fields, and several PGP issues.
 
 Internal changes:
 - CI now detects missing or conflicting database migrations.
@@ -41,6 +37,8 @@ though some of those were backported to 1.8 already.
 * Many updates to the Docker setup to handle issues with large batch jobs
 * Extensions in Grafana dashboards for batch monitoring.
 * Various improvements to CI UX.
+* Update to the [latest version of sectxt](https://github.com/internetstandards/Internet.nl/issues/1046)
+  which includes detection of BOM, unknown fields, and several PGP issues.
 
 ## 1.8.6
 
@@ -52,6 +50,8 @@ Functional changes:
 * Changed user agent to a common format (#1224).
 * Fixed excessive caching TTLs in some DNS queries for some tests.
 * Added support for br and zstd compression in HTTP compression test.
+* All tests, except some parts of TLS, now use a [standard User-Agent format](https://github.com/internetstandards/Internet.nl/issues/1224)
+  which can also be modified for third party deployments.
 
 Internal changes:
 
