@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# delete batch result files
+
+set -e
+
+if [ ! "$CRON_DAILY_DELETE_BATCH_RESULTS" = "True" ];then
+  exit 0
+fi
+
+# Remove old compressed files
+find /app/batch_results -type f -name "*.json.gz" -mtime +13 -delete
+
+# Compress files
+find /app/batch_results -type f -name "*.json" -mtime +6 -exec pigz -f {} +

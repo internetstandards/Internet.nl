@@ -116,9 +116,12 @@ def docker_compose_command():
 def docker_compose_exec():
     """Execute specific command in a service container"""
 
-    yield lambda service, command: subprocess.check_output(
-        f"docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME} exec {service} {command}", shell=True
-    )
+    yield lambda service, command, check=True: subprocess.run(
+        f"docker compose --ansi=never --project-name={COMPOSE_PROJECT_NAME} exec {service} {command}",
+        shell=True,
+        check=check,
+        stdout=subprocess.PIPE,
+    ).stdout
 
 
 @pytest.fixture(scope="session")
