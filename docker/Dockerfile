@@ -48,7 +48,7 @@ RUN ./configure \
 RUN make
 RUN make install
 
-FROM --platform=linux/amd64 build-deps AS build-nassl
+FROM build-deps AS build-nassl
 
 COPY vendor/nassl6 /src/vendor/nassl
 WORKDIR /src/vendor/nassl
