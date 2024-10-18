@@ -21,11 +21,11 @@ def http_checks(af_ip_pair, url, task):
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
     ]
+    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
     results = {
         "forced_https": forced_https,
         "forced_https_score": forced_https_score,
     }
-    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
     results.update(header_results)
     return results
 
