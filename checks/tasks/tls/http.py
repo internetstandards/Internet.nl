@@ -15,19 +15,17 @@ from checks.tasks.http_headers import (
 def http_checks(af_ip_pair, url, task):
     """
     Perform the HTTP header and HTTPS redirection checks for this webserver.
-
     """
     forced_https_score, forced_https = forced_http_check(af_ip_pair, url, task)
     header_checkers = [
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
     ]
-    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
-
     results = {
         "forced_https": forced_https,
         "forced_https_score": forced_https_score,
     }
+    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
     results.update(header_results)
     return results
 
