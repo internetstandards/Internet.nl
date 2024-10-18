@@ -29,6 +29,7 @@ class TLSProtocolEvaluation:
     """
     Evaluate the accepted TLS protocols, i.e. SSL 3.0/TLS 1.1/etc.
     """
+
     good: List[TlsVersionEnum]
     sufficient: List[TlsVersionEnum]
     phase_out: List[TlsVersionEnum]
@@ -81,6 +82,7 @@ class TLSForwardSecrecyParameterEvaluation:
     """
     Evaluate the FS (DH/DHE/EC) params from the accepted cipher suites.
     """
+
     max_dh_size: Optional[int]
     max_ec_size: Optional[int]
 
@@ -147,6 +149,7 @@ class TLSCipherEvaluation:
     """
     Evaluate the accepted TLS ciphers (across all TLS versions).
     """
+
     ciphers_good: List[CipherSuite]
     ciphers_good_no_tls13: List[CipherSuite]
     ciphers_sufficient: List[CipherSuite]
@@ -200,6 +203,7 @@ class KeyExchangeHashFunctionEvaluation:
     Results of "hash functions for key exchange" evaluation.
     NCSC table 5
     """
+
     status: KexHashFuncStatus
     score: scoring.Score
 
@@ -213,6 +217,7 @@ class TLSCipherOrderEvaluation:
     second the cipher we expected to be preferred above that.
     NCSC B2-5
     """
+
     violation: List[str]
     status: CipherOrderStatus
     score: scoring.Score

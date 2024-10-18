@@ -152,7 +152,6 @@ RUN apt update && \
     # healthcheck
     netcat \
     procps \
-    telnet \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
 
