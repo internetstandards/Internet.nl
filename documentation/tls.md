@@ -2,7 +2,8 @@
 
 TLS is one of the more complicated tests, as there are a ton of things to check.
 The only way to find out whether a particular feature is supported by a TLS
-server is to try to negotiate it, and see if it fails or succeeds.
+server is to try to negotiate it, and see if or succeeds or the server
+drops the connection.
 This means TLS also performs many connections.
 
 The test builds heavily on
