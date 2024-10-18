@@ -249,6 +249,8 @@ services:
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
     stop_grace_period: 10m
+    # SIGTERM is default, but make it explicit
+    stop_signal: SIGTERM
 
     depends_on:
       db-migrate:
@@ -1127,15 +1129,23 @@ configs:
     content: |
       #!/bin/sh
       set -e
-      # find worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker --quiet)
+      # stop and start worker one at a time to ensure (batch) tasks are still being picked up
+      # workers are sent a TERM signal with which a 10 minute grace period before QUIT is sent
+      for worker in $(docker ps --filter label=com.docker.compose.service=worker --quiet); do
+        docker stop "$$worker"
+        docker start "$$worker"
+      done
 
   restart_nassl_worker_cron:
     content: |
       #!/bin/sh
       set -e
-      # find nassl worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
+      # stop and start worker one at a time to ensure (batch) tasks are still being picked up
+      # workers are sent a TERM signal with which a 10 minute grace period before QUIT is sent
+      for worker in $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet); do
+        docker stop "$$worker"
+        docker start "$$worker"
+      done
 
   docker_image_prune:
     content: |
