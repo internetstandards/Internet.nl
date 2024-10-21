@@ -84,7 +84,7 @@ Run the following command to install required dependencies, setup Docker Apt rep
 
 
     apt update && \
-    apt install -yqq ca-certificates curl gnupg && \
+    apt install -yqq ca-certificates curl jq gnupg && \
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
@@ -107,12 +107,9 @@ The application deployment configuration consists of a Docker Compose file (`doc
 
 Run the following commands to install the files in the expected location:
 
-    RELEASE=main && \
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env" && \
-    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/host-dist.env" && \
-    curl -sSfO --output-dir docker "https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml" && \
+    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:latest cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
@@ -155,9 +152,12 @@ For instance specific configuration use the `docker/local.env` file. Please refe
 
 Spin up instance:
 
-    env -i RELEASE=main docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
-
-The `env -i` part is to ensure no environment variables that might be set in the shell overwrite values from the `.env` files (eg: the `DEBUG` variable).
+    docker run -ti --rm --pull=always \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      --network none \
+      ghcr.io/internetstandards/util:latest \
+      /deploy.sh
 
 This command will take a long time (up to 30 minutes) due to RPKI data that needs to be synced initially. After that it should complete without an error, indicating the application stack is up and running healthy. You can already prepare continue with the DNS setup below in the meantime.
 
@@ -209,7 +209,7 @@ Or use this command to omit the `COMMAND` and `PORTS` columns for a more compact
 
     docker compose --project-name=internetnl-prod  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
 
-Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` service having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
+Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
 
 If a container/service is not up and healthy the cause might be deduced by inspecting the container/service state, eg for the app container/service:
 
@@ -244,54 +244,62 @@ The issue can be resolved by restarting the application:
 
 ## Updating
 
-To update the application stack first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components, use the following commands:
+To update the application stack to the latest release run the following command, which will first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components:
 
-    RELEASE=main && \
-    cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/docker-compose.yml && \
-    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
-    chmod 755 user_manage.sh && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
-    # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+    docker run -ti --rm --pull=always --network none \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      ghcr.io/internetstandards/util:latest \
+      /deploy.sh
 
-This will update the deployment with the latest `main` branch and latest `main` packages.
+This will update the deployment with the latest release: https://github.com/internetstandards/Internet.nl/releases
 
-If you want to update to a tagged version release, e.g. `v1.8.0`, use the following commands:
+If you want to update to a specific tagged version release, e.g. `1.8.8`, use the same update command but replace latest with the version number:
 
-    RELEASE=1.8.0 && \
-	TAG=v1.8.0 && \
-    cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
-    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/user_manage.sh && \
-    chmod 755 user_manage.sh && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
-    # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+    docker run -ti --rm --pull=always --network none \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      ghcr.io/internetstandards/util:1.8.8 \
+      /deploy.sh
 
-The `pull` command might sometimes fail with a timeout error. In that case just retry until it's working. Or check [Github Status](https://www.githubstatus.com) to see if Github is down again.
+### Auto update
+
+By setting the variable `AUTO_UPDATE_TO` in the `/opt/Internet.nl/docker/local.env` auto updating will be enabled. The application will check every 15 minutes if there is a update available and deploy it automatically. This is useful for development/acceptance environments that want to stay up to date with a feature or the `main` branch. It is not recommended for production environments!
+
+This variable can be set to either of these values:
+
+- `latest`: update to latest stable release: https://github.com/internetstandards/Internet.nl/releases
+- `main`: update to latest release on the `main` branch
+- `pr-<NUMBER>`: update to the latest build of that Pull Request number
+
+Auto upgrades are performed by the `cron-docker` container/service. Progress/errors can be viewed by inspecting the container's logs:
+
+    docker compose --project-name=internetnl-prod logs --follow cron-docker
+
+To manually kick off the update process use the following command:
+
+    docker compose --project-name=internetnl-prod exec cron-docker /etc/periodic-docker/15min/auto_update
+
+**notice**: the update logging might be cut-off at the end because the `cron-docker` container/service will be restarted in the process.
+
+Every time a deploy is performed a entry is added at the bottom of the `docker/local.env` file which indicated the latest release. For example:
+
+    RELEASE='1.9.0.dev142-g118b811-auto_update' # deploy Fri Oct 11 11:42:35 UTC 2024
+
+This variable is used to determine the current version to be deployed or which image version to used when bringing container up. Earlier entries can be safely removed but the last line containing `RELEASE=` must stay in place.
 
 ## Downgrading/rollback
 
-In essence downgrading is the same procedure as upgrading: determine the branch and release version, download those versions of the configuration files and pull in those versions of the images, after which everything is restarted to that version. For example, to roll back to version `1.7.0` run:
+In essence downgrading is the same procedure as upgrading. For example, to roll back to version `1.7.0` run:
 
-    RELEASE=1.7.0 && \
-	TAG=v1.7.0 && \
-    cd /opt/Internet.nl/ && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/defaults.env && \
-    curl -sSfO --output-dir docker https://raw.githubusercontent.com/internetstandards/Internet.nl/${TAG}/docker/docker-compose.yml && \
-    curl -sSfO https://raw.githubusercontent.com/internetstandards/Internet.nl/${RELEASE}/docker/user_manage.sh && \
-    chmod 755 user_manage.sh && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env pull && \
-    # temporary solution to recreate containers when configs change: https://github.com/internetstandards/Internet.nl/issues/1490 \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env rm --stop --force cron-docker prometheus alertmanager nginx_logs_exporter && \
-    env -i RELEASE=$RELEASE docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+docker run -ti --rm --pull=always \
+  --volume /var/run/docker.sock:/var/run/docker.sock \
+  --volume /opt/Internet.nl:/opt/Internet.nl \
+  --network none \
+  ghcr.io/internetstandards/util:1.7.0 \
+  /deploy.sh
 
-**notice**: depending on the complexity of the upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
+**notice**: depending on the complexity of the previous upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
 
 ## HTTPS/Letsencrypt
 

@@ -6,7 +6,7 @@ services:
       dockerfile: docker/Dockerfile
       target: linttest
       args:
-        INTERNETNL_VERSION: 0.0.0-dev0
+        RELEASE: 0.0.0-dev0
 
     volumes:
       - ../:/source/
