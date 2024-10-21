@@ -734,6 +734,7 @@ services:
     command: crond -f -d7 -c /etc/crontabs-docker
     environment:
       - AUTO_UPDATE_TO
+      - WORKER_SLOW_REPLICAS
 
     restart: unless-stopped
     logging:
