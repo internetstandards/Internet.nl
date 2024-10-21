@@ -1,4 +1,10 @@
 #!/bin/sh
 set -e
-# find nassl worker and restart the container(s)
-docker ps --filter label=com.docker.compose.service=worker-nassl --quiet |  xargs --no-run-if-empty docker restart
+# stop and start worker one at a time to ensure (batch) tasks are still being picked up
+# workers are sent a TERM signal with which a 10 minute grace period before QUIT is sent
+for worker in $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet); do
+  docker stop "$worker"
+  docker start "$worker"
+  # wait for container to be healthy
+  timeout 300 sh -c "while docker inspect \"$worker\"| jq --exit-status '.[0].State.Health.Status != \"healthy\"' >/dev/null;do sleep 1;done" || true
+done

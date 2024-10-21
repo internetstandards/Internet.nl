@@ -21,4 +21,4 @@ $COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$(($REPLICAS*2)
 docker rm --force "$OLD_CONTAINERS"
 
 # restore replica number to original
-$COMPOSE_CMD scale $SERVICE=$REPLICAS
+$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$REPLICAS" "$SERVICE"
