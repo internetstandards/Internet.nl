@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# restart slow worker every day to prevent slow memory leaks
+# as the slow worker can run very long tasks (eg: report generation)
+# we first start  a new container before stopping the previous one
+
+set -e
+
+cd /opt/Internet.nl
+
+SERVICE=worker-slow
+REPLICAS=$WORKER_SLOW_REPLICAS
+COMPOSE_CMD="docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env"
+
+OLD_CONTAINERS=$($COMPOSE_CMD ps --format "{{ .Name }}"|grep "$SERVICE")
+
+# bring up new containers, wait until healthy
+$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$(($REPLICAS*2))" "$SERVICE"
+
+# graceful shutdown and remove old containers
+docker rm --force "$OLD_CONTAINERS"
+
+# restore replica number to original
+$COMPOSE_CMD scale $SERVICE=$REPLICAS
