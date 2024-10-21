@@ -233,6 +233,8 @@ services:
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
     stop_grace_period: 10m
+    # SIGTERM is default, but make it explicit
+    stop_signal: SIGTERM
 
     depends_on:
       db-migrate:
@@ -702,6 +704,8 @@ services:
       - WORKER_SLOW_REPLICAS
       - DOCKER_REGISTRY
       - CRON_DAILY_DATABASE_CLEANUP
+      - WORKER_REPLICAS
+      - RELEASE
 
     restart: unless-stopped
     logging:
