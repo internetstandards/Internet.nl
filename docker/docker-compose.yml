@@ -249,6 +249,8 @@ services:
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
     stop_grace_period: 10m
+    # SIGTERM is default, but make it explicit
+    stop_signal: SIGTERM
 
     depends_on:
       db-migrate:
@@ -682,6 +684,7 @@ services:
       - CRON_DAILY_POSTGRESQL_BACKUP
       - CRON_WEEKLY_POSTGRESQL_BACKUP
       - CRON_DAILY_DELETE_BATCH_RESULTS
+      - CRON_15MIN_RUN_TESTS_BATCH
       - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
@@ -725,6 +728,9 @@ services:
   # cron daemon with access to Docker socket but no networking
   cron-docker:
     image: alpinelinux/docker-cli:latest
+    build:
+      context: ..
+      dockerfile: docker/util.Dockerfile
     command: crond -f -d7
     configs:
       # restart worker to prevent memory issues
@@ -735,10 +741,19 @@ services:
       - source: restart_nassl_worker_cron
         target: /etc/periodic/15min/restart_nassl_worker
         mode: 0755
+      - source: restart_slow_worker_cron
+        target: /etc/periodic/daily/restart_slow_worker
+        mode: 0755
       # remove unused old docker images to reduce disk space usage
       - source: docker_image_prune
         target: /etc/periodic/weekly/docker-image-prune
         mode: 0755
+    environment:
+      - AUTO_UPDATE_TO
+      - WORKER_REPLICAS
+      - WORKER_SLOW_REPLICAS
+      - RELEASE
+
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -750,6 +765,7 @@ services:
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/Internet.nl:/opt/Internet.nl
 
     profiles:
       - cron
@@ -1125,16 +1141,83 @@ configs:
   restart_worker_cron:
     content: |
       #!/bin/sh
-      set -e
-      # find worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker --quiet)
 
+      # restart slow worker every day to prevent slow memory leaks
+      # as the slow worker can run very long tasks (eg: report generation)
+      # we first start  a new container before stopping the previous one
+
+      set -e
+
+      cd /opt/Internet.nl
+
+      SERVICE=worker
+      REPLICAS=$$WORKER_REPLICAS
+      COMPOSE_CMD="docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env"
+
+      OLD_CONTAINERS=$$($$COMPOSE_CMD ps --format "{{ .Name }}"|grep "$$SERVICE")
+
+      # bring up new containers, wait until healthy
+      $$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$$SERVICE=$$(($$REPLICAS*2))" "$$SERVICE"
+
+      # graceful shutdown and remove old containers
+      docker rm --force "$$OLD_CONTAINERS"
+
+      # restore replica number to original
+      $$COMPOSE_CMD scale $$SERVICE=$$REPLICAS
   restart_nassl_worker_cron:
     content: |
       #!/bin/sh
+
+      # restart slow worker every day to prevent slow memory leaks
+      # as the slow worker can run very long tasks (eg: report generation)
+      # we first start  a new container before stopping the previous one
+
       set -e
-      # find nassl worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
+
+      cd /opt/Internet.nl
+
+      SERVICE=worker-nassl
+      REPLICAS=$$WORKER_REPLICAS
+      COMPOSE_CMD="docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env"
+
+      OLD_CONTAINERS=$$($$COMPOSE_CMD ps --format "{{ .Name }}"|grep "$$SERVICE")
+
+      # bring up new containers, wait until healthy
+      $$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$$SERVICE=$$(($$REPLICAS*2))" "$$SERVICE"
+
+      # graceful shutdown and remove old containers
+      docker rm --force "$$OLD_CONTAINERS"
+
+      # restore replica number to original
+      $$COMPOSE_CMD scale $$SERVICE=$$REPLICAS
+
+  restart_slow_worker_cron:
+    content: |
+      #!/bin/sh
+
+      # restart slow worker every day to prevent slow memory leaks
+      # as the slow worker can run very long tasks (eg: report generation)
+      # we first start  a new container before stopping the previous one
+
+      set -e
+
+      cd /opt/Internet.nl
+
+      SERVICE=worker-slow
+      REPLICAS=$$WORKER_SLOW_REPLICAS
+      COMPOSE_CMD="docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env"
+
+      OLD_CONTAINERS=$$($$COMPOSE_CMD ps --format "{{ .Name }}"|grep "$$SERVICE")
+
+      # bring up new containers, wait until healthy
+      $$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$$SERVICE=$$(($$REPLICAS*2))" "$$SERVICE"
+
+      # graceful shutdown and remove old containers
+      docker rm --force "$$OLD_CONTAINERS"
+
+      # restore replica number to original
+      $$COMPOSE_CMD scale $$SERVICE=$$REPLICAS
+
 
   docker_image_prune:
     content: |
