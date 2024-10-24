@@ -21,6 +21,10 @@ Internal changes:
 For all issues, see the [1.9 milestone](https://github.com/internetstandards/Internet.nl/issues?q=milestone%3Av1.9),
 though some of those were backported to 1.8 already.
 
+## 1.8.8.1
+
+1.8.8.1 is a release only to [add an intermediate news post](https://github.com/internetstandards/Internet.nl/pull/1535).
+
 ## 1.8.8
 
 1.8.8 is a release only to [add an intermediate news post](https://github.com/internetstandards/Internet.nl/pull/1516).
