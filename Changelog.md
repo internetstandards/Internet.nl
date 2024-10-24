@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.8.1
+
+1.8.8.1 is a release only to [add an intermediate news post](https://github.com/internetstandards/Internet.nl/pull/1535).
+
 ## 1.8.8
 
 1.8.8 is a release only to [add an intermediate news post](https://github.com/internetstandards/Internet.nl/pull/1516).
