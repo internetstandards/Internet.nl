@@ -237,6 +237,20 @@ services:
     # SIGTERM is default, but make it explicit
     stop_signal: SIGTERM
 
+celery accepts tasks during warm shutdown?????
+
+Session terminated, killing shell...
+worker: Warm shutdown (MainProcess)
+[2024-10-29 18:45:01,807: INFO/MainProcess] Task checks.tasks.ipv6.batch_web[506e07c1-a208-4a52-a578-e95cdad9fdf0] received
+ ...killed.
+celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=500 --queues nassl_worker,batch_nassl
+ENABLE_BATCH is set for this server but the database is lacking the required indexes. Consider running `manage.py api_create_db_indexes`.
+Batch enabled.
+
+hoe zit dat met healthcheck tijdens warm shutdown?????
+
+
+
     depends_on:
       db-migrate:
         # wait for DB migration to be completed
