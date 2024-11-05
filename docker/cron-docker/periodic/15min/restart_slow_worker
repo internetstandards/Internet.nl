@@ -1,24 +1,12 @@
 #!/bin/sh
-
-# restart slow worker every day to prevent slow memory leaks
-# as the slow worker can run very long tasks (eg: report generation)
-# we first start  a new container before stopping the previous one
-
 set -e
-
-cd /opt/Internet.nl
-
-SERVICE=worker-slow
-REPLICAS=$WORKER_SLOW_REPLICAS
-COMPOSE_CMD="docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env"
-
-OLD_CONTAINERS=$($COMPOSE_CMD ps --format "{{ .Name }}"|grep "$SERVICE")
-
-# bring up new containers, wait until healthy
-$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$(($REPLICAS*2))" "$SERVICE"
-
-# graceful shutdown and remove old containers
-docker rm --force "$OLD_CONTAINERS"
-
-# restore replica number to original
-$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$REPLICAS" "$SERVICE"
+# stop and start worker one at a time to ensure (batch) tasks are still being picked up
+# workers are sent a TERM signal with which a 10 minute grace period before QUIT is sent
+for worker in $(docker ps --filter label=com.docker.compose.service=worker-slow --quiet); do
+  # tell celery worker to graceful shutdown
+  docker exec "$worker" celery --app=internetnl control shutdown --destination "celery@$worker" --timeout 300 || true
+  # docker stop "$worker"
+  # docker start "$worker"
+  # wait for container to be healthy
+  timeout 300 sh -c "while docker inspect \"$worker\"| jq --exit-status '.[0].State.Health.Status != \"healthy\"' >/dev/null;do sleep 1;done" || true
+done
