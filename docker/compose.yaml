@@ -333,6 +333,7 @@ services:
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
+    hostname: worker-slow
 
   # celery task queue
   beat:
