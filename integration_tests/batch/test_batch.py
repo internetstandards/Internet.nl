@@ -125,3 +125,23 @@ def test_batch_no_unbound(docker_compose_command):
     """Unbound resolver should not be running in batch mode."""
 
     assert not docker_compose_command("ps --quiet unbound")
+
+
+def test_cron_delete_batch_results(trigger_cron, docker_compose_exec):
+    """Test if batch results are compressed and deleted."""
+
+    # create an 'old' batch results
+    docker_compose_exec("cron", "touch -d '1999-03-31' /app/batch_results/test.json")
+
+    trigger_cron("daily/delete_batch_results")
+
+    assert not docker_compose_exec("cron", "ls /app/batch_results/test.json", check=False)
+    assert docker_compose_exec("cron", "ls /app/batch_results/test.json.gz")
+
+    # make the compressed batch result old
+    docker_compose_exec("cron", "touch -d '1999-03-31' /app/batch_results/test.json.gz")
+
+    trigger_cron("daily/delete_batch_results")
+
+    assert not docker_compose_exec("cron", "ls /app/batch_results/test.json", check=False)
+    assert not docker_compose_exec("cron", "ls /app/batch_results/test.json.gz", check=False)
