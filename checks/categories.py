@@ -940,6 +940,11 @@ class WebTlsHttpsForced(Subtest):
         self.verdict = "detail web tls https-forced verdict bad"
         self.tech_data = "detail tech data no"
 
+    def result_bad_redirect(self, redirect_domain):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls https-forced verdict bad-redirect"
+        self.tech_data = f"detail tech data bad-redirect {redirect_domain}"
+
 
 class WebTlsHttpsHsts(Subtest):
     def __init__(self):

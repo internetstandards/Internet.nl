@@ -670,6 +670,7 @@ def save_results(model, results, addr, domain, category):
             elif testname == "http_checks":
                 model.forced_https = result.get("forced_https")
                 model.forced_https_score = result.get("forced_https_score")
+                model.redirect_domain = result.get("redirect_domain")
                 model.http_compression_enabled = result.get("http_compression_enabled")
                 model.http_compression_score = result.get("http_compression_score")
                 model.hsts_enabled = result.get("hsts_enabled")
@@ -770,6 +771,8 @@ def build_report(dttls, category):
                 category.subtests["https_forced"].result_no_https()
             elif dttls.forced_https == ForcedHttpsStatus.bad:
                 category.subtests["https_forced"].result_bad()
+            elif dttls.forced_https == ForcedHttpsStatus.bad_redirect:
+                category.subtests["https_forced"].result_bad_redirect(dttls.redirect_domain)
 
             if dttls.hsts_enabled:
                 if dttls.hsts_score == scoring.WEB_TLS_HSTS_GOOD:
@@ -2931,8 +2934,8 @@ def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
     Start all the HTTP related checks for the web test.
 
     """
+    results = {}
     try:
-        results = {}
         for af_ip_pair in af_ip_pairs:
             results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
 
@@ -2943,14 +2946,15 @@ def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
                 results[af_ip_pair[1]] = dict(
                     forced_https=False,
                     forced_https_score=scoring.WEB_TLS_FORCED_HTTPS_BAD,
+                    redirect_domain=None,
                     http_compression_enabled=True,
-                    http_compression_score=(scoring.WEB_TLS_HTTP_COMPRESSION_BAD),
+                    http_compression_score=scoring.WEB_TLS_HTTP_COMPRESSION_BAD,
                     hsts_enabled=False,
                     hsts_policies=[],
                     hsts_score=scoring.WEB_TLS_HSTS_BAD,
                 )
 
-    return ("http_checks", results)
+    return "http_checks", results
 
 
 def http_checks(af_ip_pair, url, task):
@@ -2958,7 +2962,7 @@ def http_checks(af_ip_pair, url, task):
     Perform the HTTP header and HTTPS redirection checks for this webserver.
 
     """
-    forced_https_score, forced_https = forced_http_check(af_ip_pair, url, task)
+    forced_https_score, forced_https, redirect_domain = forced_http_check(af_ip_pair, url, task)
     header_checkers = [
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
@@ -2968,6 +2972,7 @@ def http_checks(af_ip_pair, url, task):
     results = {
         "forced_https": forced_https,
         "forced_https_score": forced_https_score,
+        "redirect_domain": redirect_domain,
     }
     results.update(header_results)
     return results
@@ -2978,17 +2983,30 @@ def forced_http_check(af_ip_pair, url, task):
     Check if the webserver is properly configured with HTTPS redirection.
     """
     try:
-        http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
+        response_https = http_get_ip(hostname=url, ip=af_ip_pair[1], port=443, https=True)
     except requests.RequestException:
         # No HTTPS connection available to our HTTP client.
         # Could also be too outdated config (#1130)
-        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.no_https
+        return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.no_https, None
+
+    # We also check if the domain redirects to an external domain and if so store this domain.
+    # This has two purposes:
+    # 1) be able to add the redirect domain to direct tests in frontend.
+    # 2) check if there is a downgrade redirect (https > http).
+    # Note we only check based on the Location http-header (no HTML/JavaScript redirects).
+    redirect_url, redirect_domain = None, None
 
     try:
         response_http = http_get_ip(hostname=url, ip=af_ip_pair[1], port=80, https=False)
     except requests.RequestException:
         # No plain HTTP available, but HTTPS is
-        return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http
+        # Check if the HTTPS itself redirects to HTTP (downgrade redirect).
+        if response_https.headers.get("Location"):
+            redirect_url = urlparse(response_https.headers.get("Location"))
+            if redirect_url and redirect_url.scheme == "http":
+                redirect_domain = redirect_url.hostname
+                return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad_redirect, redirect_domain
+        return scoring.WEB_TLS_FORCED_HTTPS_NO_HTTP, ForcedHttpsStatus.no_http, redirect_domain
 
     forced_https = ForcedHttpsStatus.bad
     forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_BAD
@@ -2996,11 +3014,22 @@ def forced_http_check(af_ip_pair, url, task):
     for response in response_http.history[1:] + [response_http]:
         if response.url:
             parsed_url = urlparse(response.url)
+
+            if response.headers.get("Location"):
+                redirect_url = urlparse(response.headers.get("Location"))
+                if redirect_url:
+                    redirect_domain = redirect_url.hostname
+
             # Requirement: in case of redirecting, a domain should firstly upgrade itself by
             # redirecting to its HTTPS version before it may redirect to another domain (#1208)
             if parsed_url.scheme == "https" and url == parsed_url.hostname:
+
+                # Check if there is a downgrade redirect
+                if redirect_url and redirect_url.scheme == "http":
+                    return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad_redirect, redirect_domain
+
                 forced_https = ForcedHttpsStatus.good
                 forced_https_score = scoring.WEB_TLS_FORCED_HTTPS_GOOD
             break
 
-    return forced_https_score, forced_https
+    return forced_https_score, forced_https, redirect_domain
