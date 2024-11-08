@@ -22,25 +22,25 @@ server_tokens off;
 # caching settings
 proxy_cache_path  /var/tmp/nginx_cache  levels=1:2  keys_zone=default_cache:10m inactive=24h  max_size=1g;
 
-# default headers added to all responses
-add_header 'X-Frame-Options' 'SAMEORIGIN' always;
-add_header 'X-Content-Type-Options' 'nosniff' always;
-add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
-add_header 'Referrer-Policy' 'same-origin' always;
-add_header 'X-XSS-Protection' '1; mode=block' always;
+include http.headers;
 
 root /var/www/internet.nl;
 
 # enable OSCP stapling
 ssl_stapling on;
 ssl_stapling_verify on;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
+
+http2 on;
 
 # default server for http, primary used for ACME and https redirect
 server {
     listen       80;
     listen  [::]:80;
 
-    http2 on;
     # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
     server_name  ${INTERNETNL_DOMAINNAME} ~(${LANGUAGES_REGEX}|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
@@ -62,8 +62,6 @@ server {
 server {
     listen       80;
     listen  [::]:80;
-
-    http2 on;
 
     # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
     server_name ~(conn|(?<subdomain>(${LANGUAGES_REGEX}|www)\.)conn).${INTERNETNL_DOMAINNAME};
@@ -104,8 +102,6 @@ server {
     listen       80;
     listen  [::]:80;
 
-    http2 on;
-
     server_name
       *.test-ns-signed.${INTERNETNL_DOMAINNAME}
       *.test-ns6-signed.${INTERNETNL_DOMAINNAME}
@@ -133,15 +129,8 @@ server {
     listen       443 ssl;
     listen  [::]:443 ssl;
 
-    http2 on;
     # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
     server_name  www.${INTERNETNL_DOMAINNAME} ~(${LANGUAGES_REGEX}|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
-
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-
-    ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
@@ -151,12 +140,7 @@ server {
         allow all;
     }
 
-    add_header 'X-Frame-Options' 'SAMEORIGIN' always;
-    add_header 'X-Content-Type-Options' 'nosniff' always;
-    add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
-    add_header 'Referrer-Policy' 'same-origin' always;
-    add_header 'X-XSS-Protection' '1; mode=block' always;
-    add_header 'Strict-Transport-Security' 'max-age=31536000' always;
+    include all.headers;
     add_header 'Content-Security-Policy' "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;
 
     # redirect to no-www domainname
@@ -170,26 +154,10 @@ server {
     listen       443 ssl;
     listen  [::]:443 ssl;
 
-    http2 on;
-
     # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
     server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>(${LANGUAGES_REGEX}|www|ipv6)\.)${INTERNETNL_DOMAINNAME};
 
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-
-    ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
-
-    # include all default headers again and add HSTS header
-    add_header 'X-Frame-Options' 'SAMEORIGIN' always;
-    add_header 'X-Content-Type-Options' 'nosniff' always;
-    add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
-    add_header 'Referrer-Policy' 'same-origin' always;
-    add_header 'X-XSS-Protection' '1; mode=block' always;
-    # Do *not* add includeSubdomains before https://github.com/internetstandards/Internet.nl/issues/324 is resolved,
-    # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
-    add_header 'Strict-Transport-Security' 'max-age=31536000' always;
+    include all.headers;
 
     # by default proxy everything to the application
     location / {
@@ -318,24 +286,9 @@ server {
     listen       443 ssl;
     listen  [::]:443 ssl;
 
-    http2 on;
-
     server_name  conn.${INTERNETNL_DOMAINNAME};
 
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-
-    ssl_certificate /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${INTERNETNL_DOMAINNAME}/privkey.pem;
-
-    # include all default headers again and add HSTS header
-    add_header 'X-Frame-Options' 'SAMEORIGIN' always;
-    add_header 'X-Content-Type-Options' 'nosniff' always;
-    add_header 'X-Clacks-Overhead' 'GNU Terry Pratchett' always;
-    add_header 'Referrer-Policy' 'same-origin' always;
-    add_header 'X-XSS-Protection' '1; mode=block' always;
-    # Do *not* add includeSubdomains before https://github.com/internetstandards/Internet.nl/issues/324 is resolved,
-    # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
+    include http.headers;
     # Set max-age to 0 to effectivily disable HSTS on this subdomain to undo any HSTS settings done in the past.
     # This can be removed 1 year after initial release. See issue #894.
     add_header 'Strict-Transport-Security' 'max-age=0' always;
@@ -351,8 +304,6 @@ server {
     listen       443 ssl default_server;
     listen  [::]:443 ssl default_server;
 
-    http2 on;
-
     ssl_reject_handshake on;
 
     location / {
@@ -364,8 +315,6 @@ server {
 server {
     listen       80 default_server;
     listen  [::]:80 default_server;
-
-    http2 on;
 
     server_name _;
 
