@@ -3023,7 +3023,6 @@ def forced_http_check(af_ip_pair, url, task):
             # Requirement: in case of redirecting, a domain should firstly upgrade itself by
             # redirecting to its HTTPS version before it may redirect to another domain (#1208)
             if parsed_url.scheme == "https" and url == parsed_url.hostname:
-
                 # Check if there is a downgrade redirect
                 if redirect_url and redirect_url.scheme == "http":
                     return scoring.WEB_TLS_FORCED_HTTPS_BAD, ForcedHttpsStatus.bad_redirect, redirect_domain

@@ -88,8 +88,12 @@ def get_direct_domains(address, redirect_domain=None):
         webtest_direct.append(pretty_domain_name(domain))
 
     # Add redirection domain to direct web test if stored and testable
-    if (redirect_domain and get_valid_domain_web(redirect_domain) and redirect_domain != address
-            and pretty_domain_name(redirect_domain) not in webtest_direct):
+    if (
+        redirect_domain
+        and get_valid_domain_web(redirect_domain)
+        and redirect_domain != address
+        and pretty_domain_name(redirect_domain) not in webtest_direct
+    ):
         webtest_direct.append(pretty_domain_name(get_valid_domain_web(redirect_domain)))
 
     mailtest_direct = []
@@ -104,8 +108,12 @@ def get_direct_domains(address, redirect_domain=None):
         mailtest_direct.append(pretty_domain_name(domain))
 
     # Add redirection domain to direct mail test if stored and testable
-    if (redirect_domain and get_valid_domain_mail(redirect_domain) and redirect_domain != address
-            and pretty_domain_name(redirect_domain) not in mailtest_direct):
+    if (
+        redirect_domain
+        and get_valid_domain_mail(redirect_domain)
+        and redirect_domain != address
+        and pretty_domain_name(redirect_domain) not in mailtest_direct
+    ):
         mailtest_direct.append(pretty_domain_name(get_valid_domain_mail(redirect_domain)))
 
     return webtest_direct, mailtest_direct
