@@ -182,7 +182,7 @@ class Probe:
         for name, subtest in report.items():
             status = report[name]["status"]
             worst_status = report[name]["worst_status"]
-            override_mandatory = report[name]["override_mandatory"]
+            override_mandatory = report[name].get("override_mandatory")
             if worst_status == STATUS_FAIL:
                 is_mandatory = True
             elif worst_status == STATUS_NOTICE:
