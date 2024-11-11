@@ -177,26 +177,29 @@ class Probe:
             STATUS_NOT_TESTED: 0,
         }
         not_tested = False
-        has_mandatory = False
+        is_mandatory = False
         has_optional = False
         for name, subtest in report.items():
             status = report[name]["status"]
             worst_status = report[name]["worst_status"]
+            override_mandatory = report[name]["override_mandatory"]
             if worst_status == STATUS_FAIL:
-                has_mandatory = True
+                is_mandatory = True
             elif worst_status == STATUS_NOTICE:
                 has_optional = True
+            if override_mandatory is not None:
+                is_mandatory = override_mandatory
             count[status] += 1
-            if status in (STATUS_GOOD_NOT_TESTED, STATUS_NOT_TESTED):
+            if status in (STATUS_GOOD_NOT_TESTED, STATUS_NOT_TESTED) and override_mandatory is not False:
                 count[worst_status] += 1
 
         if count[STATUS_ERROR]:
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_ERROR]
         elif count[STATUS_FAIL]:
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_FAIL]
-        elif count[STATUS_NOTICE] and not has_mandatory:
+        elif count[STATUS_NOTICE] and not is_mandatory:
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_NOTICE]
-        elif count[STATUS_INFO] and not (has_mandatory or has_optional):
+        elif count[STATUS_INFO] and not (is_mandatory or has_optional):
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_INFO]
         else:
             verdict = STATUSES_HTML_CSS_TEXT_MAP[STATUS_SUCCESS]
