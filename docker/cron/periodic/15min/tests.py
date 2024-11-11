@@ -4,7 +4,7 @@
 
 # for iterative development
 # docker run -ti -e INTERNETNL_DOMAINNAME=internet.nl -v $PWD/docker/cron/periodic/15min/tests.py:/tests.py \
-# ghcr.io/internetstandards/cron:latest /tests.py --debug
+# ghcr.io/internetstandards/util:latest /tests.py --debug
 
 import sys
 import os
@@ -204,5 +204,5 @@ def main():
             f.write(generate_latest(REGISTRY).decode())
 
 
-if __name__ == "__main__" and os.environ.get("CRON_15MIN_RUN_TESTS", "True") == "True":
+if __name__ == "__main__" and os.environ.get("CRON_15MIN_RUN_TESTS", "False") == "True":
     main()

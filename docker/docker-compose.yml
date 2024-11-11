@@ -5,7 +5,7 @@
 
 services:
   webserver:
-    image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/webserver.Dockerfile
@@ -69,7 +69,7 @@ services:
       retries: 10
 
   app:
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -179,7 +179,7 @@ services:
       - manual-hof:/app/manual-hall-of-fame/
 
   db-migrate:
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -217,7 +217,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -356,7 +356,7 @@ services:
       --queues slow_db_worker,batch_slow
 
   beat:
-    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -434,7 +434,7 @@ services:
       retries: 10
 
   redis:
-    image: ${DOCKER_IMAGE_REDIS:-redis:7.0-alpine}
+    image: ${DOCKER_IMAGE_REDIS}
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -457,7 +457,7 @@ services:
       - redis:/data
 
   rabbitmq:
-    image: ${DOCKER_IMAGE_RABBITMQ:-rabbitmq:3.12-management-alpine}
+    image: ${DOCKER_IMAGE_RABBITMQ}
     configs:
       - source: rabbitmq_config
         target: /etc/rabbitmq/rabbitmq.conf
@@ -488,7 +488,7 @@ services:
       - rabbitmq:/var/lib/rabbitmq
 
   postgres:
-    image: ${DOCKER_IMAGE_POSTGRES:-postgres:15.5-alpine}
+    image: ${DOCKER_IMAGE_POSTGRES}
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -515,7 +515,7 @@ services:
       - postgres:/var/lib/postgresql/data
 
   routinator:
-    image: ${DOCKER_IMAGE_ROUTINATOR:-nlnetlabs/routinator:v0.12.1}
+    image: ${DOCKER_IMAGE_ROUTINATOR}
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -549,7 +549,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -598,7 +598,7 @@ services:
 
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -634,7 +634,7 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -669,10 +669,11 @@ services:
       retries: 10
 
   cron:
-    image: ${DOCKER_IMAGE_CRON:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/cron:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     build:
       context: ..
-      dockerfile: docker/cron.Dockerfile
+      dockerfile: docker/util.Dockerfile
+    command: crond -f -d7
     environment:
       - HOSTERS_HOF_URL
       - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
@@ -682,6 +683,8 @@ services:
       - CRON_DAILY_POSTGRESQL_BACKUP
       - CRON_WEEKLY_POSTGRESQL_BACKUP
       - CRON_DAILY_DELETE_BATCH_RESULTS
+      - CRON_15MIN_RUN_TESTS
+      - CRON_DAILY_TRUNCATE_EXPORTER_LOGS
       - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
@@ -724,21 +727,15 @@ services:
 
   # cron daemon with access to Docker socket but no networking
   cron-docker:
-    image: alpinelinux/docker-cli:latest
-    command: crond -f -d7
-    configs:
-      # restart worker to prevent memory issues
-      - source: restart_worker_cron
-        target: /etc/periodic/hourly/restart_worker
-        mode: 0755
-      # restart nassl worker to prevent memory issues
-      - source: restart_nassl_worker_cron
-        target: /etc/periodic/15min/restart_nassl_worker
-        mode: 0755
-      # remove unused old docker images to reduce disk space usage
-      - source: docker_image_prune
-        target: /etc/periodic/weekly/docker-image-prune
-        mode: 0755
+    image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
+    build:
+      context: ..
+      dockerfile: docker/util.Dockerfile
+    command: crond -f -d7 -c /etc/crontabs-docker
+    environment:
+      - AUTO_UPDATE_TO
+      - WORKER_SLOW_REPLICAS
+
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -750,12 +747,13 @@ services:
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/Internet.nl:/opt/Internet.nl
 
     profiles:
       - cron
 
   grafana:
-    image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
     build:
       context: ..
       dockerfile: docker/grafana.Dockerfile
@@ -795,7 +793,7 @@ services:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
   prometheus:
-    image: ${DOCKER_IMAGE_PROMETHEUS:-prom/prometheus:v2.44.0}
+    image: ${DOCKER_IMAGE_PROMETHEUS}
 
     command:
       - --config.file=/prometheus.yaml
@@ -825,7 +823,7 @@ services:
       - prometheus-data:/prometheus
 
   alertmanager:
-    image: ${DOCKER_IMAGE_PROMETHEUS:-prom/alertmanager:v0.27.0}
+    image: ${DOCKER_IMAGE_PROMETHEUS_ALERTMANAGER}
 
     command:
       - --config.file=/alertmanager.yaml
@@ -850,7 +848,7 @@ services:
       - alertmanager
 
   postgresql-exporter:
-    image: ${DOCKER_IMAGE_POSTGRESQL_EXPORTER:-prometheuscommunity/postgres-exporter:v0.12.0}
+    image: ${DOCKER_IMAGE_POSTGRESQL_EXPORTER}
 
     environment:
       - DATA_SOURCE_NAME=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$IPV4_IP_POSTGRES_INTERNAL:5432/$POSTGRES_DB?sslmode=disable
@@ -867,7 +865,7 @@ services:
       - internal
 
   redis-exporter:
-    image: oliver006/redis_exporter:v1.50.0
+    image: ${DOCKER_IMAGE_REDIS_EXPORTER}
 
     environment:
       - REDIS_ADDR=redis://$IPV4_IP_REDIS_INTERNAL:6379
@@ -884,7 +882,7 @@ services:
       - internal
 
   statsd-exporter:
-    image: ${DOCKER_IMAGE_STATSD_EXPORTER:-prom/statsd-exporter:v0.23.1}
+    image: ${DOCKER_IMAGE_STATSD_EXPORTER}
 
     command:
       - --statsd.listen-udp=:8125
@@ -905,7 +903,7 @@ services:
           - statsd
 
   celery-exporter:
-    image: aequitas/celery-exporter:0.9.1
+    image: ${DOCKER_IMAGE_CELERY_EXPORTER}
     command:
       - --broker-url=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672/
       - --accept-content=json,pickle
@@ -927,7 +925,7 @@ services:
 
   # https://github.com/prometheus/node_exporter#docker
   node-exporter:
-    image: quay.io/prometheus/node-exporter:v1.6.1
+    image: ${DOCKER_IMAGE_NODE_EXPORTER}
     command:
       - --path.rootfs=/host
       - --collector.systemd
@@ -957,7 +955,7 @@ services:
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
-    image: aequitas/docker-stats-exporter:0.1.0
+    image: ${DOCKER_IMAGE_DOCKER_STATSD_EXPORTER}
     environment:
       LABEL_state: '{{.Container.State}}'
       LABEL_compose_project: '{{index .Container.Labels "com.docker.compose.project"}}'
@@ -975,7 +973,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   nginx_logs_exporter:
-    image: ghcr.io/martin-helmich/prometheus-nginxlog-exporter/exporter:v1
+    image: ${DOCKER_IMAGE_NGINX_LOGS_EXPORTER}
     command:
       - -config-file=/config.hcl
     configs:
@@ -1126,27 +1124,6 @@ configs:
             - to: $ALERTMANAGER_MAIL_TO
               headers:
                 subject: $ALERTMANAGER_SUBJECT
-
-  restart_worker_cron:
-    content: |
-      #!/bin/sh
-      set -e
-      # find worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker --quiet)
-
-  restart_nassl_worker_cron:
-    content: |
-      #!/bin/sh
-      set -e
-      # find nassl worker and restart the container(s)
-      docker restart $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet)
-
-  docker_image_prune:
-    content: |
-      #!/bin/sh
-      set -e
-      # remove unused images, --all to remove images not used by containers, --force to skip confirm prompt
-      docker image prune --all --force
 
 networks:
   # disable default network
