@@ -360,7 +360,7 @@ def spf_check_include_redirect(
     left_lookups = max_lookups
     status = SpfPolicyStatus.valid
     score = scoring.MAIL_AUTH_SPF_POLICY_PASS
-    if max_lookups < 1:
+    if max_lookups < 0:
         status = SpfPolicyStatus.max_dns_lookups
         score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
 
@@ -434,7 +434,6 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
         redirect_terms = []
         all_found = False
         for term in (t.lower() for t in parsed["terms"]):
-            log.debug("Reducing max lookups per term: %s" % term)
             if term.startswith("redirect"):
                 redirect_terms.append(term)
                 left_lookups -= 1
@@ -461,6 +460,7 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
                     status = SpfPolicyStatus.invalid_all
                     score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
                 break
+            log.debug("Found term: %s, max lookups now %d" % (term, left_lookups))
 
         if status == SpfPolicyStatus.valid:
             # No 'all' and no 'redirect', the default is '?all', fail.
