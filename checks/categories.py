@@ -1,5 +1,7 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from typing import Optional
+
 from checks import scoring
 from checks.scoring import (
     ORDERED_STATUSES,
@@ -74,6 +76,9 @@ class Subtest:
         init_tech_type="table",
         init_tech_data="detail tech data not-tested",
         tech_data_translation_root="",
+        # override_mandatory overrides whether this is mandatory (True), or not mandatory (False)
+        # rather than base this on worst_status (the default, for None)
+        override_mandatory: Optional[bool] = None,
     ):
         self.name = name
         self.label = label
@@ -87,6 +92,7 @@ class Subtest:
         self.tech_type = init_tech_type
         self.tech_data = init_tech_data
         self.tech_data_translation_root = tech_data_translation_root
+        self.override_mandatory = override_mandatory
 
     def _status(self, status, override=False):
         """
@@ -117,6 +123,7 @@ class Subtest:
             "tech_type": self.tech_type,
             "tech_string": self.tech_string,
             "tech_data": self.tech_data,
+            "override_mandatory": self.override_mandatory,
         }
 
     def add_tech_data_translation_root(self, tech_data):
@@ -272,6 +279,7 @@ class RpkiExists(Subtest):
             worst_status=STATUS_FAIL,
             full_score=scoring.RPKI_EXISTS_GOOD,
             model_score_field=self._score_field,
+            override_mandatory=False,
         )
 
     def was_tested(self):
@@ -332,6 +340,7 @@ class RpkiValid(Subtest):
             init_tech_type="table",
             full_score=scoring.RPKI_VALID_GOOD,
             model_score_field=self._score_field,
+            override_mandatory=False,
         )
 
     def was_tested(self):
