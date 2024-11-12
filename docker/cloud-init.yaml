@@ -1,0 +1,77 @@
+#cloud-config
+write_files:
+  - path: /etc/apt/preferences.d/internetnl-docker-supported-versions
+    content: |
+      # prevent installation of unsupported versions of Docker/Compose
+      # https://github.com/internetstandards/Internet.nl/pull/1419
+      Package: docker-ce
+      Pin: version 5:25.*
+      Pin-priority: -1
+
+      Package: docker-ce
+      Pin: version 5:26.0.*
+      Pin-priority: -1
+
+      Package: docker-ce
+      Pin: version 5:26.1.0-*
+      Pin-priority: -1
+
+      Package: docker-ce
+      Pin: version 5:26.1.1-*
+      Pin-priority: -1
+
+      Package: docker-ce
+      Pin: version 5:26.1.2-*
+      Pin-priority: -1
+
+      Package: docker-compose-plugin
+      Pin: version 2.24.*
+      Pin-priority: -1
+
+      Package: docker-compose-plugin
+      Pin: version 2.25.*
+      Pin-priority: -1
+
+      Package: docker-compose-plugin
+      Pin: version 2.26.*
+      Pin-priority: -1
+
+      Package: docker-compose-plugin
+      Pin: version 2.27.1-*
+      Pin-priority: -1
+
+  - path: /etc/docker/daemon.json
+    content: |
+      {"experimental": true, "ip6tables": true, "live-restore": true}
+
+runcmd:
+  - |
+    apt update
+    apt install -yqq ca-certificates curl jq gnupg
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor > /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
+    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable\n \
+    deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" test" \
+    > /etc/apt/sources.list.d/docker.list && apt update
+    apt install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    mkdir -p /opt/Internet.nl/docker
+    cd /opt/Internet.nl/
+    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:pr-1155 cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env
+    touch docker/local.env
+
+    INTERNETNL_DOMAINNAME=$(hostname -f) \
+    IPV4_IP_PUBLIC=$(curl -4 ifconfig.io) \
+    IPV6_IP_PUBLIC=$(curl -6 ifconfig.io) \
+    SENTRY_SERVER_NAME=$(hostname) \
+    envsubst < docker/host-dist.env > docker/host.env
+
+    docker run --rm --pull=always \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      --network none \
+      ghcr.io/internetstandards/util:pr-1155 \
+      /deploy.sh
