@@ -43,6 +43,9 @@ def test_your_website_score_with_ipv6(page, app_url, test_domain):
     expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
+@pytest.mark.skip(
+    reason="Temporary disabled due to RPKI instability, https://github.com/internetstandards/Internet.nl/issues/1549"
+)
 @pytest.mark.skipif(ipv6_available(), reason="IPv6 networking available")
 def test_your_website_score_no_ipv6(page, app_url, test_domain):
     """Run "Test your website" from the frontpage and expect a decent result."""
