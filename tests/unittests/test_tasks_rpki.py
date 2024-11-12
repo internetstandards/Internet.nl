@@ -1,6 +1,7 @@
 import responses
 
 from django.test import SimpleTestCase, override_settings
+from unittest import skip
 
 from checks.tasks import SetupUnboundContext as Task
 from checks.tasks.rpki import do_rpki
@@ -29,6 +30,7 @@ class RpkiTestCase(SimpleTestCase):
         self.task = Task()
         return super().setUp()
 
+    @skip("Temporary disabled due to RPKI instability, https://github.com/internetstandards/Internet.nl/issues/1549")
     @override_settings(ROUTINATOR_URL="https://example.net/api/v1/validity")
     def test_do_rpki(self):
         for domain, expected_result in BEACONS.items():
