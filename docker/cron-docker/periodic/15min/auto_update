@@ -32,5 +32,6 @@ echo "Updating to: $UPSTREAM_RELEASE"
 docker run --pull=always --network none \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume /opt/Internet.nl:/opt/Internet.nl \
-  "ghcr.io/internetstandards/util:$UPSTREAM_RELEASE" \
+  --env "DOCKER_REGISTRY=$DOCKER_REGISTRY" \
+  "$DOCKER_REGISTRY/util:$UPSTREAM_RELEASE" \
   /deploy.sh

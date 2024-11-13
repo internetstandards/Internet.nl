@@ -2,9 +2,6 @@ services:
   # test runner intended to run live tests against targets on public internet
   test-runner-development-environment:
     image: ${DOCKER_IMAGE_TEST_RUNNER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/test-runner:$RELEASE}
-    build:
-      context: ..
-      dockerfile: docker/test-runner.Dockerfile
     environment:
       - APP_URLS
       - BATCH_API_AUTH
