@@ -908,6 +908,20 @@ def patch_request(request, batch_request):
         return general_server_error_response("Problem cancelling the batch request.")
 
 
+def request_already_generating(request_id):
+    """Check the cache and rabbitmq to see if there is a request for generating batch request results."""
+
+    try:
+        lock_id = redis_id.batch_results_request_lock.id.format(request_id)
+        if cache.get(lock_id):
+            log.debug("There is already a request for generating this batch request results.")
+            return True
+    except BaseException:
+        log.exception("Failed to check batch request results generating status.")
+
+    return False
+
+
 def get_request(request, batch_request, user):
     provide_progress = request.GET.get("progress")
     provide_progress = provide_progress and provide_progress.lower() == "true"
@@ -919,6 +933,15 @@ def get_request(request, batch_request, user):
         ).count()
         res["request"]["progress"] = f"{finished_domains}/{total_domains}"
         res["request"]["num_domains"] = total_domains
-    if batch_request.status == BatchRequestStatus.done and not batch_request.has_report_file():
+
+    if (
+        batch_request.status == BatchRequestStatus.done
+        and not batch_request.has_report_file()
+        and not request_already_generating(batch_request.request_id)
+    ):
         batch_async_generate_results.delay(user=user, batch_request=batch_request, site_url=get_site_url(request))
+
+        lock_id = redis_id.batch_results_request_lock.id.format(batch_request.request_id)
+        cache.add(lock_id, True)
+
     return api_response(res)
