@@ -6,9 +6,6 @@
 services:
   webserver:
     image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/webserver.Dockerfile
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -70,10 +67,6 @@ services:
 
   app:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: app
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -180,10 +173,6 @@ services:
 
   db-migrate:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: app
     networks:
       - internal
     command: migrate
@@ -218,10 +207,6 @@ services:
 
   worker: &worker
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: app
     deploy:
       replicas: $WORKER_REPLICAS
     restart: unless-stopped
@@ -357,10 +342,6 @@ services:
 
   beat:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: app
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -550,10 +531,6 @@ services:
   # unbound DNS server used for connection test
   unbound:
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: unbound
     depends_on:
       redis:
         condition: service_healthy
@@ -599,10 +576,6 @@ services:
   # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
   resolver-permissive:
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: unbound
 
     entrypoint: /entrypoint-resolver.sh
     command: ["resolver-permissive.conf"]
@@ -635,10 +608,6 @@ services:
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: unbound
 
     entrypoint: /entrypoint-resolver.sh
     command: ["resolver-validating.conf"]
@@ -670,9 +639,6 @@ services:
 
   cron:
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/util.Dockerfile
     command: crond -f -d7
     environment:
       - HOSTERS_HOF_URL
@@ -728,9 +694,6 @@ services:
   # cron daemon with access to Docker socket but no networking
   cron-docker:
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/util.Dockerfile
     command: crond -f -d7 -c /etc/crontabs-docker
     environment:
       - AUTO_UPDATE_TO
@@ -755,9 +718,6 @@ services:
 
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
-    build:
-      context: ..
-      dockerfile: docker/grafana.Dockerfile
 
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
