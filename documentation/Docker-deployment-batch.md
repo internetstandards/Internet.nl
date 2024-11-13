@@ -118,6 +118,7 @@ After configuration, spin up the instance:
       --volume /var/run/docker.sock:/var/run/docker.sock \
       --volume /opt/Internet.nl:/opt/Internet.nl \
       --network none \
+      --env DOCKER_REGISTRY=ghcr.io/internetstandards \
       ghcr.io/internetstandards/util:latest \
       /deploy.sh
 
