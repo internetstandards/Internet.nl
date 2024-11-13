@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.9
+
+1.8.9 contains a [fix for batch scheduling](https://github.com/internetstandards/Internet.nl/pull/1554) where report
+generation did not have appropriate locking. During busy moments, this caused the queue to overflow with repeated
+jobs to generate the same report over and over.
+
 ## 1.8.8.1
 
 1.8.8.1 is a release only to [add an intermediate news post](https://github.com/internetstandards/Internet.nl/pull/1535).
