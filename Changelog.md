@@ -2,7 +2,7 @@
 
 ## 1.9.0
 
-1.9.0 (compared to 1.8.7) contains several testing changes, along with content improvements:
+1.9.0 (compared to latest 1.8) contains several testing changes, along with content improvements:
 
 - The RPKI test [is now included in the total test score](https://github.com/internetstandards/Internet.nl/issues/745)
   and its worst score is now a failure.
@@ -20,6 +20,12 @@ Internal changes:
 
 For all issues, see the [1.9 milestone](https://github.com/internetstandards/Internet.nl/issues?q=milestone%3Av1.9),
 though some of those were backported to 1.8 already.
+
+## 1.8.9
+
+1.8.9 contains a [fix for batch scheduling](https://github.com/internetstandards/Internet.nl/pull/1554) where report
+generation did not have appropriate locking. During busy moments, this caused the queue to overflow with repeated
+jobs to generate the same report over and over.
 
 ## 1.8.8.1
 
