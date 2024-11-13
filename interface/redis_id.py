@@ -85,6 +85,9 @@ simple_cache_page = REDIS_RECORD("cached_page:{}:{}:{}", getattr(settings, "PAGE
 # Lock for generating batch results
 batch_results_lock = REDIS_RECORD("batch:results:gen:{}:{}", None)
 
+# Lock for requesting generate batch results, rate limit 1/h
+batch_results_request_lock = REDIS_RECORD("batch:results:req:{}", 60 * 60)
+
 # Lock for batch scheduler
 batch_scheduler_lock = REDIS_RECORD("batch:scheduler:lock", 60 * 5)
 
