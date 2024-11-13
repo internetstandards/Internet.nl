@@ -27,9 +27,6 @@ services:
   # test runner for integration tests in isolated environment
   test-runner:
     image: ${DOCKER_IMAGE_TEST_RUNNER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/test-runner:$RELEASE}
-    build:
-      context: ..
-      dockerfile: docker/test-runner.Dockerfile
     # don't run anything, just make this container available to run tests in on demand
     command: python3 -m pytest -v integration_tests/integration/
     networks:
@@ -140,10 +137,6 @@ services:
   # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
   mock-resolver:
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:$RELEASE}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: unbound
 
     entrypoint: /opt/unbound/sbin/unbound
     command: ["-d", "-c", "/opt/unbound/etc/unbound/mock.conf"]
