@@ -735,6 +735,7 @@ services:
     environment:
       - AUTO_UPDATE_TO
       - WORKER_SLOW_REPLICAS
+      - DOCKER_REGISTRY
 
     restart: unless-stopped
     logging:

@@ -156,6 +156,7 @@ Spin up instance:
       --volume /var/run/docker.sock:/var/run/docker.sock \
       --volume /opt/Internet.nl:/opt/Internet.nl \
       --network none \
+      --env DOCKER_REGISTRY=ghcr.io/internetstandards \
       ghcr.io/internetstandards/util:latest \
       /deploy.sh
 
@@ -249,6 +250,7 @@ To update the application stack to the latest release run the following command,
     docker run -ti --rm --pull=always --network none \
       --volume /var/run/docker.sock:/var/run/docker.sock \
       --volume /opt/Internet.nl:/opt/Internet.nl \
+      --env DOCKER_REGISTRY=ghcr.io/internetstandards \
       ghcr.io/internetstandards/util:latest \
       /deploy.sh
 
@@ -259,6 +261,7 @@ If you want to update to a specific tagged version release, e.g. `1.8.8`, use th
     docker run -ti --rm --pull=always --network none \
       --volume /var/run/docker.sock:/var/run/docker.sock \
       --volume /opt/Internet.nl:/opt/Internet.nl \
+      --env DOCKER_REGISTRY=ghcr.io/internetstandards \
       ghcr.io/internetstandards/util:1.8.8 \
       /deploy.sh
 
@@ -296,6 +299,7 @@ docker run -ti --rm --pull=always \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume /opt/Internet.nl:/opt/Internet.nl \
   --network none \
+  --env DOCKER_REGISTRY=ghcr.io/internetstandards \
   ghcr.io/internetstandards/util:1.7.0 \
   /deploy.sh
 
