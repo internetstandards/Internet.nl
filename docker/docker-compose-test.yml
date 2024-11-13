@@ -2,12 +2,6 @@ services:
   # environment for checks, linting and unit tests
   test:
     image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:$RELEASE}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: linttest
-      args:
-        RELEASE: 0.0.0-dev0
 
     networks:
       - internal

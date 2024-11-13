@@ -1,0 +1,105 @@
+services:
+  webserver:
+    build:
+      context: ..
+      dockerfile: docker/webserver.Dockerfile
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+
+  db-migrate:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+
+  worker: &worker
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+
+  worker-nassl:
+    <<: *worker
+
+  worker-slow:
+    <<: *worker
+
+  beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+
+  unbound:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+
+  resolver-permissive:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+
+  resolver-validating:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
+
+  cron:
+    build:
+      context: ..
+      dockerfile: docker/util.Dockerfile
+
+  cron-docker:
+    build:
+      context: ..
+      dockerfile: docker/util.Dockerfile
+
+  grafana:
+    build:
+      context: ..
+      dockerfile: docker/grafana.Dockerfile
+
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: linttest
+      args:
+        RELEASE: 0.0.0-dev0
+
+  test-runner:
+    build:
+      context: ..
+      dockerfile: docker/test-runner.Dockerfile
+
+  test-runner-development-environment:
+    build:
+      context: ..
+      dockerfile: docker/test-runner.Dockerfile
+
+  test-runner-live:
+    build:
+      context: ..
+      dockerfile: docker/test-runner.Dockerfile
+
+  tools:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: linttest
+      args:
+        RELEASE: 0.0.0-dev0
+
+  mock-resolver:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: unbound
