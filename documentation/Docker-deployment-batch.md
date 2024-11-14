@@ -116,6 +116,7 @@ After configuration, spin up the instance:
 
     docker run -ti --rm --pull=always \
       --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume $HOME/.docker:/root/.docker \
       --volume /opt/Internet.nl:/opt/Internet.nl \
       --network none \
       --env DOCKER_REGISTRY=ghcr.io/internetstandards \
