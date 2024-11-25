@@ -212,7 +212,7 @@ class KeyExchangeHashFunctionEvaluation:
 class TLSCipherOrderEvaluation:
     """
     Results of cipher order evaluation.
-    If a violation is found, the violation attribute ia s two
+    If a violation is found, the violation attribute is a two
     item list with first the cipher preferred by the server,
     second the cipher we expected to be preferred above that.
     NCSC B2-5

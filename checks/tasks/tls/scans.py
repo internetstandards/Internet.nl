@@ -93,10 +93,12 @@ SSLYZE_SCAN_COMMANDS_FOR_TLS = {
     TlsVersionEnum.TLS_1_2: ScanCommand.TLS_1_2_CIPHER_SUITES,
     TlsVersionEnum.TLS_1_3: ScanCommand.TLS_1_3_CIPHER_SUITES,
 }
-# Some code calls ServerConnectivityInfo.get_preconfigured_tls_connection
-# before any other scans are done. This requires a ServerTLSProbingResult,
-# which is never used due to explicit TLS version setting,
-# so it's contents don't matter.
+# Some of the code in this file calls
+# ServerConnectivityInfo.get_preconfigured_tls_connection
+# before any other scans are done. This call requires a ServerTLSProbingResult,
+# however, the values inside it are never used, as all our calls use an explicit
+# TLS version setting. Therefore, this shared fake is used, of which the actual
+# settings do not matter. Just a nassl API oddity.
 FAKE_SERVER_TLS_PROBING_RESULT = ServerTlsProbingResult(
     highest_tls_version_supported=TlsVersionEnum.TLS_1_3,
     cipher_suite_supported="",
@@ -509,22 +511,16 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
     if not scans:
         return results
     connection_limit = connection_limit_for_scans(scans)
-    log.info(f"conn limit: {connection_limit}")
+    log.info(f"sslyze connection limit set to {connection_limit} for this mail scan")
     for all_suites, result, error in run_sslyze(scans, connection_limit=connection_limit):
         if error:
             log.info(f"sslyze scan for mail failed: {error}")
             results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
             continue
-        log.debug(
-            f"=========== sslyze complete for {result.server_location.hostname}, "
-            f"total set {dane_cb_per_server.keys()}"
-        )
+        log.debug(f"sslyze mail scan complete for {result.server_location.hostname}, other scans may be pending")
         dane_cb_data = dane_cb_per_server[result.server_location.hostname]
         results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data, task)
-        log.debug(
-            f"=========== check_mail_tls complete for {result.server_location.hostname}, "
-            f"total set {dane_cb_per_server.keys()}"
-        )
+        log.debug(f"check_mail_tls complete for {result.server_location.hostname}")
     return results
 
 
@@ -562,7 +558,6 @@ def _generate_mail_server_scan_request(server: str) -> Optional[ServerScanReques
     scan_commands = SSLYZE_SCAN_COMMANDS | {
         SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
     }
-    log.info(f"==== precheck on {server_location} supports {supported_tls_versions} {scan_commands=}")
 
     return ServerScanRequest(
         server_location=server_location,
@@ -802,7 +797,7 @@ def run_sslyze(
     scanner = Scanner(per_server_concurrent_connections_limit=connection_limit, concurrent_server_scans_limit=10)
     scanner.queue_scans(scans)
     for result in scanner.get_results():
-        log.info(f"sslyze scan for {result.server_location} status result {result.scan_status}")
+        log.debug(f"sslyze scan for {result.server_location} result: {result.scan_status}")
         if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
             yield [], result, TLSException(f"could not connect: {''.join(result.connectivity_error_trace.format())}")
             continue
