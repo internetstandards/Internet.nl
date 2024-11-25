@@ -14,7 +14,7 @@ and
 ## Code structure
 
 The TLS testing code is all in `checks.tasks.tls`:
-* `evaluation.py` translates parameters found in testing, into an evaluation of a
+* `evaluation.py` translates facts found in testing, into an evaluation of a
   score and good/phase out/bad values for various more isolated scenarios, like the
   TLS version. It also contains dataclasses for some other evaluations.
 * `http.py` deals with HTTP header and HTTPS redirection checks.
@@ -31,8 +31,9 @@ For mail, one IPv6 and one IPv6 IP for each MX is tested.
 ## Connection limits
 
 Multiple servers are always tested in parallel. 
-For web multiple connections are used, for mail only one connection
-per IP at the same time. The mail test also has a delay of 5s to
+Web uses multiple connections per IP. Mail tests with one
+connection per IP by default, as mail servers often do
+not allow more.
 start to prevent it interfering with the IPv6 check.
 
 There is a special case: some mail servers are lenient with many
