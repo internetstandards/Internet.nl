@@ -67,6 +67,9 @@ COPY requirements.txt /src/
 WORKDIR /src
 
 RUN pip3 install -r requirements.txt
+# sslyze is installed from our own fork, and installed
+# without deps to avoid it trying to install nassl, when
+# we have our custom nassl
 RUN pip3 install --no-deps https://github.com/mxsasha/sslyze/archive/refs/tags/6.0.0+internetnl6.tar.gz
 
 # stage with app dependencies and lint/test depencencies
