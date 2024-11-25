@@ -190,7 +190,7 @@ class TLSCipherEvaluation:
 
     @staticmethod
     def _format_str(suites: List[CipherSuite]) -> List[str]:
-        return [f"{suite.openssl_name} ({suite.name})" for suite in suites]
+        return [f"{suite.name}" for suite in suites]
 
     @property
     def score(self) -> scoring.Score:
