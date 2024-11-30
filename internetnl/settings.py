@@ -50,8 +50,6 @@ ALLOWED_HOSTS = split_csv_trim(getenv("ALLOWED_HOSTS", ".internet.nl, internet.n
 ADMIN_NAME = getenv("ADMIN_NAME", "Administrator")
 ADMIN_EMAIL = getenv("ADMIN_EMAIL", "Administrator")
 SERVER_EMAIL = getenv("SERVER_EMAIL", "django@internet.nl")
-CSP_DEFAULT_SRC = split_csv_trim(getenv("CSP_DEFAULT_SRC", "'self',*.internet.nl"))
-CSP_BASE_URI = CSP_FORM_ACTION = CSP_DEFAULT_SRC
 INTERNAL_IPS = split_csv_trim(getenv("INTERNAL_IPS", ""))
 TIME_ZONE = getenv("TIME_ZONE", "UTC")
 
@@ -186,11 +184,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
     "internetnl.custom_middlewares.ActivateTranslationMiddleware",
-    "csp.middleware.CSPMiddleware",
 ]
 
 ADMINS = ((ADMIN_NAME, ADMIN_EMAIL),)
-CSP_FRAME_ANCESTORS = "'none'"
 ROOT_URLCONF = "internetnl.urls"
 ROOT_HOSTCONF = "internetnl.hosts"
 DEFAULT_HOST = "www"

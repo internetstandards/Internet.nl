@@ -77,9 +77,6 @@ server {
       # pass host for Django's allowed_hosts
       proxy_set_header Host $host;
 
-      # disable CSP on connection test
-      proxy_hide_header Content-Security-Policy;
-
       proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
@@ -117,9 +114,6 @@ server {
       # pass host for Django's allowed_hosts
       proxy_set_header Host $host;
 
-      # disable CSP on connection test
-      proxy_hide_header Content-Security-Policy;
-
       proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 }
@@ -141,7 +135,6 @@ server {
     }
 
     include all.headers;
-    add_header 'Content-Security-Policy' "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;
 
     # redirect to no-www domainname
     location ~ /(.*) {
@@ -262,18 +255,24 @@ server {
       proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
-    # monitoring, requires authentication
+    # monitoring, requires authentication, override headers, since CSP is too strict
     location /grafana {
+      include http.headers;
+      include hsts.header;
       auth_basic "Please enter your monitoring username and password";
       auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
       proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
     }
     location /prometheus {
+      include http.headers;
+      include hsts.header;
       auth_basic "Please enter your monitoring username and password";
       auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
       proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
     }
     location /alertmanager {
+      include http.headers;
+      include hsts.header;
       auth_basic "Please enter your monitoring username and password";
       auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
       proxy_pass http://${IPV4_IP_ALERTMANAGER_INTERNAL}:9093;
