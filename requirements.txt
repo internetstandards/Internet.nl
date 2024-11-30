@@ -62,11 +62,8 @@ django==4.2.16
     # via
     #   -r requirements.in
     #   django-bleach
-    #   django-csp
     #   django-redis
 django-bleach==2.0.0
-    # via -r requirements.in
-django-csp==3.7
     # via -r requirements.in
 django-enumfields==2.1.1
     # via -r requirements.in
