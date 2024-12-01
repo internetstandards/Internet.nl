@@ -241,7 +241,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      # used in `docker-compose.yml` files to determine version of images to pull
+      # used in `compose.yaml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
       PY_COLORS: "1"
 
@@ -363,7 +363,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      # used in `docker-compose.yml` files to determine version of images to pull
+      # used in `compose.yaml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
@@ -414,7 +414,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      # used in `docker-compose.yml` files to determine version of images to pull
+      # used in `compose.yaml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
       PY_COLORS: "1"
 
@@ -498,7 +498,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      # used in `docker-compose.yml` files to determine version of images to pull
+      # used in `compose.yaml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
 
     steps:
@@ -611,7 +611,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      # used in `docker-compose.yml` files to determine version of images to pull
+      # used in `compose.yaml` files to determine version of images to pull
       RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
       PY_COLORS: "1"
 

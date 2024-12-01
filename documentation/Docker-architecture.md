@@ -42,25 +42,25 @@ This project uses Docker Compose to configure/orchestrate it's containers/servic
 
 ### Main compose file
 
-The `docker/docker-compose.yml` file contains the entire application stack configuration including all dependencies and the metrics collection stack. This file is used to deploy the application in production environments (see [Deployment](Docker-deployment.md)). All runtime configuration is fed in through environment variables (see [Environment variables and files](Docker-architecture.md#environment-variables-and-files)) below.
+The `docker/compose.yaml` file contains the entire application stack configuration including all dependencies and the metrics collection stack. This file is used to deploy the application in production environments (see [Deployment](Docker-deployment.md)). All runtime configuration is fed in through environment variables (see [Environment variables and files](Docker-architecture.md#environment-variables-and-files)) below.
 
 ### Test/Development  environments
 
 There test and develop environment each use a compose file which layered on top of the main compose file.
 
-The `docker/docker-compose-integration-test.yml` file is used to create an isolated network and adds mock targets and a mock-resolver used for testing. As well as the `test-runner` service which acts inside the isolated network and performs tests against the application instance. For more information see: [Integration tests](Docker-integration-tests.md).
+The `docker/compose.integration-test.yaml` file is used to create an isolated network and adds mock targets and a mock-resolver used for testing. As well as the `test-runner` service which acts inside the isolated network and performs tests against the application instance. For more information see: [Integration tests](Docker-integration-tests.md).
 
-The `docker/docker-compose-development.yml` file enables mounted volumes for the source files of the app, worker and beat services, see: [Development Environment](Docker-development-environment.md).
+The `docker/compose.development.yaml` file enables mounted volumes for the source files of the app, worker and beat services, see: [Development Environment](Docker-development-environment.md).
 
-The `docker/docker-compose-test-runner-develop.yml` file contains a test-runner that is configured to test against a running development environment, see: [Development environment tests](Docker-development-environment.md#development-environment-tests).
+The `docker/compose.test-runner-develop.yaml` file contains a test-runner that is configured to test against a running development environment, see: [Development environment tests](Docker-development-environment.md#development-environment-tests).
 
 ### Development tools
 
-All development related tasks are performed inside of Docker containers (eg: unit tests, lint checking, rebuilding `requirements.txt` files, etc). For these purposes the `docker/docker-compose-tools.yml` and `docker/docker-compose-test.yml` exist.
+All development related tasks are performed inside of Docker containers (eg: unit tests, lint checking, rebuilding `requirements.txt` files, etc). For these purposes the `docker/compose.tools.yaml` and `docker/compose.test.yaml` exist.
 
 ### Live tests
 
-The `docker/docker-compose-test-runner-live.yml` file allows to run live tests with IPv6 enabled against a target on the public internet. See: [Live tests](Docker-live-tests.md) and [Development environment#IPv6 support](Docker-development-environment.md#ipv6-support).
+The `docker/compose.test-runner-live.yaml` file allows to run live tests with IPv6 enabled against a target on the public internet. See: [Live tests](Docker-live-tests.md) and [Development environment#IPv6 support](Docker-development-environment.md#ipv6-support).
 
 ## Environment variables and files
 

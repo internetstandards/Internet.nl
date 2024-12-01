@@ -61,7 +61,7 @@ Configure Docker for IPv6 and Live restore:
 
 ## Application setup
 
-The application deployment configuration consists of a Docker Compose file (`docker-compose.yml`) and layered environment files (`docker/defaults.env`, `docker/host.env` and `docker/local.env`).
+The application deployment configuration consists of a Docker Compose file (`compose.yaml`) and layered environment files (`docker/defaults.env`, `docker/host.env` and `docker/local.env`).
 
 Run the following commands to install the files in the expected location:
 

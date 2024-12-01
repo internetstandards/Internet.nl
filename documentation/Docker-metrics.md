@@ -4,7 +4,7 @@ The Docker deployment includes a metrics collection system which is available on
 
 To view metrics and graphs visit the `/grafana/` endpoint. Eg: `http://localhost:8080/grafana/` for development and `https://example.com/grafana/` for production. For development the user/password is set to `test/test`, for production users can be configured using the `MONITORING_AUTH_RAW` variable in `docker/local.env` (see `docker/defaults.env` for information).
 
-Metrics collection is defined in the `docker/docker-compose-monitoring.yml` file.
+Metrics collection is defined in the `docker/compose.monitoring.yaml` file.
 
 ## Overview
 
