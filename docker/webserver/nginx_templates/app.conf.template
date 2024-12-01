@@ -34,13 +34,14 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 
 http2 on;
 
+
 # default server for http, primary used for ACME and https redirect
 server {
     listen       80;
     listen  [::]:80;
 
-    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
-    server_name  ${INTERNETNL_DOMAINNAME} ~(${LANGUAGES_REGEX}|www|ipv6)\.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: `nl\.|en\.`
+    server_name ~^((${LANGUAGES_REGEX})?(ipv6\.)?|www\.)${INTERNETNL_DOMAINNAME_REGEX}$ ${REDIRECT_DOMAINS_LIST};
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
@@ -61,21 +62,21 @@ server {
     listen       80;
     listen  [::]:80;
 
-    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
-    server_name ~(conn|(?<subdomain>(${LANGUAGES_REGEX}|www)\.)conn).${INTERNETNL_DOMAINNAME};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: `nl\.|en\.`
+    server_name ~^(?<lang>${LANGUAGES_REGEX})?conn\.(?<ipv6>ipv6\.)?${INTERNETNL_DOMAINNAME_REGEX}$;
 
     # pass specific connection test paths to backend
     # /connection/
     # /connection/gettestid/
     # /connection/finished/6330d6a09e56387e4dd59502418fa642/results
     location ~ ^(/connection/?|/connection/gettestid/?|/connection/finished/.+)$ {
-      # forward information about the connecting client to the connection test
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # forward information about the connecting client to the connection test
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-      # pass host for Django's allowed_hosts
-      proxy_set_header Host $host;
+        # pass host for Django's allowed_hosts
+        proxy_set_header Host $host;
 
-      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
     # letsencrypt/ACME
@@ -87,9 +88,9 @@ server {
     }
 
     # redirect everything else to https and non conn. domain
-    # used named capture `subdomain` from `server_name` above as prefix
+    # used named capture `lang` and `ipv6` from `server_name` above as prefix
     location / {
-        return 301 https://${subdomain}${INTERNETNL_DOMAINNAME}$request_uri;
+        return 301 https://${lang}${ipv6}${INTERNETNL_DOMAINNAME}$request_uri;
     }
 }
 # http server for connection test XHR requests
@@ -106,13 +107,13 @@ server {
     # /
     # /connection/addr-test/6330d6a09e56387e4dd59502418fa642/
     location ~ ^(/|/connection/addr-test/.+/)$ {
-      # forward information about the connecting client to the connection test
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # forward information about the connecting client to the connection test
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-      # pass host for Django's allowed_hosts
-      proxy_set_header Host $host;
+        # pass host for Django's allowed_hosts
+        proxy_set_header Host $host;
 
-      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 }
 
@@ -121,21 +122,12 @@ server {
     listen       443 ssl;
     listen  [::]:443 ssl;
 
-    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
-    server_name  www.${INTERNETNL_DOMAINNAME} ~(${LANGUAGES_REGEX}|conn)\.www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
-
-    # letsencrypt/ACME
-    location /.well-known/acme-challenge/ {
-        # basic auth should not apply to this path
-        auth_basic off;
-        # IP allowlist should also not apply
-        allow all;
-    }
+    server_name  www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
 
     include all.headers;
 
     # redirect to no-www domainname
-    location ~ /(.*) {
+    location / {
         return 301 https://${INTERNETNL_DOMAINNAME}$request_uri;
     }
 }
@@ -145,34 +137,34 @@ server {
     listen       443 ssl;
     listen  [::]:443 ssl;
 
-    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: nl|en
-    server_name  ${INTERNETNL_DOMAINNAME} ~(?<subdomain>(${LANGUAGES_REGEX}|www|ipv6)\.)${INTERNETNL_DOMAINNAME};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: `nl\.|en\.`
+    server_name ~^(?<lang>${LANGUAGES_REGEX})?(?<ipv6>ipv6\.)?${INTERNETNL_DOMAINNAME_REGEX}$ ${REDIRECT_DOMAINS_LIST};
 
     include all.headers;
 
     # by default proxy everything to the application
     location / {
-      # pass host for Django's allowed_hosts
-      proxy_set_header Host $host;
-      proxy_set_header X-Forwarded-Proto $scheme;
+        # pass host for Django's allowed_hosts
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
-      # enable cache
-      proxy_cache            ${NGINX_PROXY_CACHE};
-      # have at least some cache, togetherwith use_stale this will result in visitors not hitting the backend directly
-      proxy_cache_valid      200  1m;
-      # server old version of files when backend experiences errors or when fetching new content
-      proxy_cache_use_stale  updating error timeout invalid_header http_500 http_502 http_503 http_504;
-      # tell client browser to also cache these resources
-      expires 1m;
-      # make sure to cache separate for languages
-      proxy_cache_key $scheme$host$uri$is_args$args$http_accept_language;
+        # enable cache
+        proxy_cache            ${NGINX_PROXY_CACHE};
+        # have at least some cache, togetherwith use_stale this will result in visitors not hitting the backend directly
+        proxy_cache_valid      200  1m;
+        # server old version of files when backend experiences errors or when fetching new content
+        proxy_cache_use_stale  updating error timeout invalid_header http_500 http_502 http_503 http_504;
+        # tell client browser to also cache these resources
+        expires 1m;
+        # make sure to cache separate for languages
+        proxy_cache_key $scheme$host$uri$is_args$args$http_accept_language;
 
-      proxy_set_header REMOTE-USER $remote_user;
-      include /etc/nginx/conf.d/basic_auth.include;
-      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        proxy_set_header REMOTE-USER $remote_user;
+        include /etc/nginx/conf.d/basic_auth.include;
+        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
-    # letsencrypt/ACME and security.txt file
+    # security.txt file
     location /.well-known/ {
         # basic auth should not apply to this path
         auth_basic off;
@@ -193,16 +185,16 @@ server {
     # disable security.txt if branding is disabled
     set $internetnl_branding "${INTERNETNL_BRANDING}";
     if ($internetnl_branding = "True"){
-      set $security_txt "/var/www/internet.nl/.well-known/security.txt";
+        set $security_txt "/var/www/internet.nl/.well-known/security.txt";
     }
     if ($internetnl_branding != "True"){
-      set $security_txt "/var/www/internet.nl/.well-known/security-custom.txt";
+        set $security_txt "/var/www/internet.nl/.well-known/security-custom.txt";
     }
     location = /.well-known/security.txt {
-      # basic auth should not apply to this path
-      auth_basic off;
-      # IP allowlist should also not apply
-      alias $security_txt;
+        # basic auth should not apply to this path
+        auth_basic off;
+        # IP allowlist should also not apply
+        alias $security_txt;
     }
 
     # static files served from Nginx container
@@ -215,65 +207,65 @@ server {
 
     # static files served from app
     location /static {
-      # enable cache
-      proxy_cache            ${NGINX_PROXY_CACHE};
-      # static files don't change often, cache for long
-      proxy_cache_valid      200  1d;
-      # server old version of files when backend experiences errors
-      proxy_cache_use_stale  error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      # tell client browser to also cache these resources
-      expires 1d;
+        # enable cache
+        proxy_cache            ${NGINX_PROXY_CACHE};
+        # static files don't change often, cache for long
+        proxy_cache_valid      200  1d;
+        # server old version of files when backend experiences errors
+        proxy_cache_use_stale  error timeout invalid_header updating http_500 http_502 http_503 http_504;
+        # tell client browser to also cache these resources
+        expires 1d;
 
-      # pass host for Django's allowed_hosts
-      proxy_set_header Host $host;
+        # pass host for Django's allowed_hosts
+        proxy_set_header Host $host;
 
-      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
     # redirect connection test to http subdomain to start test, needs 301 permanent
     # otherwise browsers might ignore the protocol change
     # only redirect connection test start, other connection test paths still need to
     # pass to the application
-    # used named capture `subdomain` from `server_name` above as prefix
+    # used named capture `lang` and `ipv6` from `server_name` above as prefix
     location = /connection/ {
-      return 301 http://${subdomain}conn.${INTERNETNL_DOMAINNAME}/connection/;
+        return 301 http://${lang}conn.${ipv6}${INTERNETNL_DOMAINNAME}/connection/;
     }
 
     # batch API, requires authentication and passes basic auth user to Django App via headers
     location /api/batch/v2 {
-      auth_basic "Please enter your batch username and password";
-      auth_basic_user_file /etc/nginx/htpasswd/external/users.htpasswd;
+        auth_basic "Please enter your batch username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/external/users.htpasswd;
 
-      # pass logged in user to Django
-      proxy_set_header REMOTE-USER $remote_user;
+        # pass logged in user to Django
+        proxy_set_header REMOTE-USER $remote_user;
 
-      # pass host for Django's allowed_hosts
-      proxy_set_header Host $host;
+        # pass host for Django's allowed_hosts
+        proxy_set_header Host $host;
 
-      proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
     # monitoring, requires authentication, override headers, since CSP is too strict
     location /grafana {
-      include http.headers;
-      include hsts.header;
-      auth_basic "Please enter your monitoring username and password";
-      auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
-      proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
+        include http.headers;
+        include hsts.header;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
     }
     location /prometheus {
-      include http.headers;
-      include hsts.header;
-      auth_basic "Please enter your monitoring username and password";
-      auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
-      proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
+        include http.headers;
+        include hsts.header;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
     }
     location /alertmanager {
-      include http.headers;
-      include hsts.header;
-      auth_basic "Please enter your monitoring username and password";
-      auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
-      proxy_pass http://${IPV4_IP_ALERTMANAGER_INTERNAL}:9093;
+        include http.headers;
+        include hsts.header;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        proxy_pass http://${IPV4_IP_ALERTMANAGER_INTERNAL}:9093;
     }
 }
 
@@ -283,7 +275,8 @@ server {
     listen       443 ssl;
     listen  [::]:443 ssl;
 
-    server_name  conn.${INTERNETNL_DOMAINNAME};
+    # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: `nl\.|en\.`
+    server_name ~^(?<lang>${LANGUAGES_REGEX})?conn\.(?<ipv6>ipv6\.)?${INTERNETNL_DOMAINNAME_REGEX}$;
 
     include http.headers;
     # Set max-age to 0 to effectivily disable HSTS on this subdomain to undo any HSTS settings done in the past.
@@ -291,8 +284,9 @@ server {
     add_header 'Strict-Transport-Security' 'max-age=0' always;
 
     # redirect to non-https version for connection test
+    # used named capture `lang` and `ipv6` from `server_name` above as prefix
     location / {
-        return 301 http://conn.${INTERNETNL_DOMAINNAME}$request_uri;
+        return 301 http://${lang}conn.${ipv6}${INTERNETNL_DOMAINNAME}$request_uri;
     }
 }
 
@@ -301,8 +295,11 @@ server {
     listen       443 ssl default_server;
     listen  [::]:443 ssl default_server;
 
+    server_name _;
+
     ssl_reject_handshake on;
 
+    # only reachable if a correct SNI is send, but different unknown host (see test_default_sni_none).
     location / {
         return 404;
     }

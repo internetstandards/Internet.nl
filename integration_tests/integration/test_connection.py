@@ -72,7 +72,7 @@ def test_direct_connect_browser_to_webserver(unique_id):
 
 @pytest.mark.parametrize(
     "subdomain",
-    ["en", "nl", "www"],
+    ["en", "nl"],
 )
 def test_conn_subdomain_redirects(subdomain, app_domain):
     """These subdomains should redirect to a domain without conn. in it and https."""
