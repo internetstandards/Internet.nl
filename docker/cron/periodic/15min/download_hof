@@ -8,4 +8,12 @@ fi
 
 cd /app/manual-hall-of-fame/
 
-curl -fsSL "$HOSTERS_HOF_URL" > /app/manual-hall-of-fame/hosters.yaml
+ETAG_FILE='/app/manual-hall-of-fame/hosters.etag';
+
+if [ ! -f "$ETAG_FILE" ]; then
+  touch "$ETAG_FILE"
+fi
+
+if HEADERS=$(curl --compressed -sSfL -H "If-None-Match: $(cat "$ETAG_FILE")" "$HOSTERS_HOF_URL" -o '/app/manual-hall-of-fame/hosters.yaml' -D-); then
+  echo "$HEADERS" | grep -ioE '^etag: [^\r\n]+' | cut -c6- > "$ETAG_FILE"
+fi
