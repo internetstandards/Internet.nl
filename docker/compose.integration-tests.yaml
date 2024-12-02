@@ -76,6 +76,8 @@ services:
         condition: service_healthy
       cron:
         condition: service_healthy
+      cron-docker:
+        condition: service_started
       mock-resolver:
         condition: service_healthy
       grafana:

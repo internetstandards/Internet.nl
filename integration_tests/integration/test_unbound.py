@@ -21,7 +21,7 @@ def test_unbound_ldns_signzone_cron(trigger_cron, docker_compose_exec):
     assert expiry == new_expiry, "sanity check"
 
     # resign zones via cron script
-    print(trigger_cron("weekly/signzones", service="unbound"))
+    print(trigger_cron("weekly/unbound_signzones", service="cron-docker", suffix="-docker"))
 
     time.sleep(1)
 
@@ -29,9 +29,3 @@ def test_unbound_ldns_signzone_cron(trigger_cron, docker_compose_exec):
     new_expiry = get_rrsig_expiry()
 
     assert int(expiry) < int(new_expiry)
-
-
-def test_unbound_cron_running(docker_compose_exec):
-    """Ensure cron daemon is running"""
-
-    docker_compose_exec("unbound", "pgrep -f 'busybox crond'")
