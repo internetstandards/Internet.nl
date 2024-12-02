@@ -1,12 +1,6 @@
 services:
   tools:
     image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:${RELEASE:-latest}}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: linttest
-      args:
-        RELEASE: 0.0.0-dev0
 
     volumes:
       - ../:/source/

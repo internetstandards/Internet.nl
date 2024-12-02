@@ -20,7 +20,10 @@ You are now on the "build summary" page. Everything should be green before proce
 
 ![all green](images/all-green.png)
 
-If this is the first time you deploy an Internet.nl instance please first run the normal installation producure as per the deployment documentation: [Deployment](Docker-deployment.md).
+If this is the first time you deploy an Internet.nl instance please first run the normal installation producure as per the deployment documentation: [Deployment](Docker-deployment.md). With the following changes:
+
+  - After the first step in 'Application setup' add a variable named `DOCKER_REGISTRY` for the container registry you use in `/opt/Internet.nl/docker/local.env`, eg: `DOCKER_REGISTRY=ghcr.io/<your Github organization name>`.
+  - Replace all occurances of `ghcr.io/internetstandards` in the commands to the name of the registry you use for your containers, eg: `ghcr.io/<your Github organization name>`.
 
 After this deployment is finished and verified you can proceed to deploy with your own build images.
 

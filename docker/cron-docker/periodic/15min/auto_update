@@ -31,6 +31,8 @@ echo "Updating to: $UPSTREAM_RELEASE"
 # as the initiator (cron-docker) will be killed during the deploy process
 docker run --pull=always --network none \
   --volume /var/run/docker.sock:/var/run/docker.sock \
+  --volume $HOME/.docker:/root/.docker \
   --volume /opt/Internet.nl:/opt/Internet.nl \
-  "ghcr.io/internetstandards/util:$UPSTREAM_RELEASE" \
+  --env "DOCKER_REGISTRY=$DOCKER_REGISTRY" \
+  "$DOCKER_REGISTRY/util:$UPSTREAM_RELEASE" \
   /deploy.sh
