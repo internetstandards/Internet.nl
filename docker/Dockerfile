@@ -93,8 +93,6 @@ RUN apt update && \
     expat \
     # for envsubst
     gettext \
-    # cron for ldns-signzones
-    busybox-static \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
 
@@ -114,8 +112,6 @@ RUN unbound-anchor || test $? -eq 1
 # add entrypoint and configuration for the connection test unbound service
 ADD docker/unbound/entrypoint.sh /
 ADD docker/unbound/signzones.sh /
-RUN mkdir -p /var/spool/cron/crontabs; echo "0	3	*	*	6	run-parts /etc/periodic/weekly" > /var/spool/cron/crontabs/root
-RUN mkdir -p /etc/periodic/weekly; ln -s /signzones.sh /etc/periodic/weekly/signzones
 ADD docker/unbound/unbound.conf.template /opt/unbound/etc/unbound/
 # add configuration files for the validating and permissive internal resolver services
 ADD docker/resolver/entrypoint-resolver.sh /
