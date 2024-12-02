@@ -10,7 +10,7 @@ ARG PYTHON_VERSION=3.9
 # hashes/log output prefix build command with: `DOCKER_BUILDKIT=0`
 
 # generic stage used by all build stages
-FROM debian:bullseye-20230502-slim AS build-deps
+FROM debian:bullseye-20241111-slim AS build-deps
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -78,7 +78,7 @@ COPY requirements-dev.txt /src/
 RUN pip3 install -r requirements-dev.txt
 
 # build unbound target
-FROM debian:bullseye-20230502-slim AS unbound
+FROM debian:bullseye-20241111-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
@@ -131,7 +131,7 @@ USER unbound
 ENTRYPOINT ["/entrypoint.sh"]
 
 # build main application image target
-FROM debian:bullseye-20230502-slim AS build-app
+FROM debian:bullseye-20241111-slim AS build-app
 ARG PYTHON_VERSION
 
 RUN apt update && \
