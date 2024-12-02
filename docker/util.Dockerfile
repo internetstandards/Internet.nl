@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM alpine:3.20.3
 
 RUN apk add --no-cache curl postgresql15 python3 py3-prometheus-client py3-requests jq docker-cli docker-cli-compose pigz jq
 

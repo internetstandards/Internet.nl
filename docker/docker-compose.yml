@@ -798,7 +798,7 @@ services:
     command:
       - --config.file=/prometheus.yaml
       - --web.external-url=/prometheus/
-      - --storage.tsdb.retention=5y
+      - --storage.tsdb.retention.time=5y
       - --web.enable-admin-api
 
     configs:

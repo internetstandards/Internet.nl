@@ -4,7 +4,7 @@ services:
   # from the internal network to the outside
   # also terminate tls so we don't need to have exceptions in the nginx config file for development
   port-expose:
-    image: nginx
+    image: nginx:1.27.3-alpine
     networks:
       - public-internet
       - port-expose
@@ -98,7 +98,7 @@ services:
       - $RABBITMQ_GUI
 
   test-target:
-    image: nginx
+    image: nginx:1.27.3-alpine
 
     networks:
       public-internet:
@@ -122,7 +122,7 @@ services:
       retries: 30
 
   mail-test-target:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:v1.0.1
 
     networks:
       public-internet:

@@ -1,4 +1,4 @@
-FROM nginx:1.25.1
+FROM nginx:1.27.3
 
 RUN apt-get update && apt-get install -y \
   # for htpasswd
@@ -9,12 +9,11 @@ RUN apt-get update && apt-get install -y \
 
 # install nginx config static analysis tool
 RUN python3 -m venv /opt/gixy
-# https://github.com/yandex/gixy/issues/125
-RUN /opt/gixy/bin/pip install gixy==0.1.20 pyparsing==2.4.7
+RUN /opt/gixy/bin/pip install gixy==0.1.21
 
 # install certbot
 RUN python3 -m venv /opt/certbot
-RUN /opt/certbot/bin/pip install certbot==2.6
+RUN /opt/certbot/bin/pip install certbot==3.0.1
 COPY docker/webserver/certbot.sh /docker-entrypoint.d/certbot.sh
 
 RUN mkdir -p /etc/nginx/htpasswd/
