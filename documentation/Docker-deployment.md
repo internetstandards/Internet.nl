@@ -103,7 +103,7 @@ Configure Docker for IPv6 and Live restore:
 
 ## Application setup
 
-The application deployment configuration consists of a Docker Compose file (`docker-compose.yml`) and layered environment files (`docker/defaults.env`, `docker/host.env` and `docker/local.env`).
+The application deployment configuration consists of a Docker Compose file (`compose.yaml`) and layered environment files (`docker/defaults.env`, `docker/host.env` and `docker/local.env`).
 
 Run the following commands to install the files in the expected location:
 
@@ -246,7 +246,7 @@ The issue can be resolved by restarting the application:
 
 ## Updating
 
-To update the application stack to the latest release run the following command, which will first update the `docker/defaults.env` and `docker/docker-compose.yml` files, then pull the latest versions of the prebuild images and update the application components:
+To update the application stack to the latest release run the following command, which will first update the `docker/defaults.env` and `docker/compose.yaml` files, then pull the latest versions of the prebuild images and update the application components:
 
     docker run -ti --rm --pull=always --network none \
       --volume /var/run/docker.sock:/var/run/docker.sock \
