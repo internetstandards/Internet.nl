@@ -46,6 +46,8 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) 
         if response.status_code != 200:
             http_kwargs["path"] = SECURITYTXT_LEGACY_PATH
             response = http_get_ip(**http_kwargs)
+            if response.status_code == 200:
+                path = SECURITYTXT_LEGACY_PATH
         if response.history:
             found_host = urlparse(response.url).hostname
         else:
