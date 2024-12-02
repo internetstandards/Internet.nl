@@ -9,7 +9,7 @@ def test_cron_manual_hosters_hof(page, app_url, trigger_cron):
 
     page.goto(app_url)
     page.get_by_role("link", name="Hall of Fame", exact=True).click()
-    page.get_by_text("Hosters").click()
+    page.get_by_text("Hosters", exact=True).click()
 
     hof_content = page.locator(".hof-content")
 
