@@ -2,4 +2,5 @@
 # split comma separated list into space separated
 export REDIRECT_DOMAINS_LIST=$(echo $REDIRECT_DOMAINS | sed 's/,/ /')
 
-export LANGUAGES_REGEX=$(echo $LANGUAGES | tr ',' '|')
+export LANGUAGES_REGEX=$(echo $LANGUAGES | sed -r ';s/,/\\.|/g;s/$/\\./')
+export INTERNETNL_DOMAINNAME_REGEX=$(echo $INTERNETNL_DOMAINNAME | sed 's/\./\\./g')

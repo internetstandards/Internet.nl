@@ -1,7 +1,7 @@
 services:
   # terminate tls so we don't need to have exceptions in the nginx config file for development
   port-expose:
-    image: nginx
+    image: nginx:1.27.3-alpine
     networks:
       - public-internet
       - internal

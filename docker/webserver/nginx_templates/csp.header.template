@@ -1,0 +1,1 @@
+add_header 'Content-Security-Policy' "base-uri 'self' https://*.${INTERNETNL_DOMAINNAME}; form-action 'self' https://*.${INTERNETNL_DOMAINNAME}; frame-ancestors 'none'; default-src 'self' https://*.${INTERNETNL_DOMAINNAME}";

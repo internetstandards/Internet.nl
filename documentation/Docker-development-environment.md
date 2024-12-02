@@ -79,7 +79,7 @@ Most changes to only the Python source do not require the rebuilding of images, 
 - template/translations/staticfile/js/css
 - requirements.txt files
 - sources in `vendor/`
-- Dockerfile/docker-compose.yml files
+- Dockerfile/compose.yaml files
 
 ## Debugging/introspection/troubleshooting/resettings
 
@@ -205,7 +205,7 @@ Otherwise on Mac, try factory resetting Docker: https://docs.docker.com/desktop/
 
 ### Docker compose configuration files
 
-Different versions of Docker Compose may have different ways of processing configuration files or the way they are merged. If you suspect there is an issue due to a newer version of Docker Compose, to see what the final configuration file looks like after merging for example `docker-compose.yml` and `docker-compose-intergration-test.yml` for the `test` environment run:
+Different versions of Docker Compose may have different ways of processing configuration files or the way they are merged. If you suspect there is an issue due to a newer version of Docker Compose, to see what the final configuration file looks like after merging for example `compose.yaml` and `compose.intergration-test.yaml` for the `test` environment run:
 
     make docker-compose-config env=test
 

@@ -554,7 +554,7 @@ batch-tests-shell:
 
 
 live-tests:
-	COMPOSE_FILE=docker/docker-compose-test-runner-live.yml docker compose run --rm test-runner-live \
+	COMPOSE_FILE=docker/compose.test-runner-live.yaml docker compose run --rm test-runner-live \
 		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} integration_tests/live/
 
 # use OS specific hostname for Docker host
@@ -564,7 +564,7 @@ else
 docker_host = host-gateway
 endif
 
-DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/docker-compose-test-runner-develop.yml docker compose
+DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml docker compose
 
 # this runs limited live test suite against the development environment to test its sanity
 develop-tests development-environment-tests:
@@ -575,7 +575,7 @@ develop-tests-shell:
 	${DOCKER_COMPOSE_DEVELOP_CMD} run --rm --entrypoint bash test-runner-development-environment
 
 
-DOCKER_COMPOSE_TEST_CMD=COMPOSE_FILE=docker/docker-compose.yml:docker/docker-compose-test.yml \
+DOCKER_COMPOSE_TEST_CMD=COMPOSE_FILE=docker/compose.yaml:docker/compose.test.yaml \
 	docker compose ${compose_args} \
 	--env-file=docker/defaults.env \
 	--env-file=docker/test.env \
@@ -618,7 +618,7 @@ test-all:
 	$(MAKE) batch-tests
 	$(MAKE) down environment=batch-test
 
-DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/docker-compose-tools.yml docker compose
+DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/compose.tools.yaml docker compose
 
 lint:
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}

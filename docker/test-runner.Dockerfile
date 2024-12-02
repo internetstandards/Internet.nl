@@ -1,6 +1,6 @@
 ARG PYTHON_VERSION=3.9
 
-FROM mcr.microsoft.com/playwright/python:v1.32.0-focal
+FROM mcr.microsoft.com/playwright/python:v1.49.0-noble
 ARG PYTHON_VERSION
 
 RUN python3 -m pip install pytest pytest-playwright
