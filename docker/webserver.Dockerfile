@@ -15,16 +15,16 @@ RUN /opt/gixy/bin/pip install gixy==0.1.20 pyparsing==2.4.7
 # install certbot
 RUN python3 -m venv /opt/certbot
 RUN /opt/certbot/bin/pip install certbot==2.6
-COPY docker/webserver/certbot.sh /docker-entrypoint.d/certbot.sh
+COPY docker/webserver/certbot.sh /docker-entrypoint.d/
 
 RUN mkdir -p /etc/nginx/htpasswd/
 RUN touch /etc/nginx/htpasswd/monitoring.htpasswd
 
-COPY docker/webserver/10-variables.envsh /docker-entrypoint.d/10-variables.envsh
-COPY docker/webserver/tls_init.sh /docker-entrypoint.d/tls_init.sh
-COPY docker/webserver/authentication.sh /docker-entrypoint.d/authentication.sh
+COPY docker/webserver/10-variables.envsh /docker-entrypoint.d/
+COPY docker/webserver/tls_init.sh /docker-entrypoint.d/
+COPY docker/webserver/authentication.sh /docker-entrypoint.d/
 
-COPY docker/webserver/user_manage_inner.sh /user_manage_inner.sh
+COPY docker/webserver/user_manage_inner.sh /
 
 RUN mkdir -p /var/www/internet.nl/
 
@@ -36,4 +36,4 @@ COPY .well-known/security*.txt /var/www/internet.nl/.well-known/
 COPY interface/static/favicon.ico /var/www/internet.nl/
 
 COPY docker/webserver/nginx_templates/* /etc/nginx/templates/
-COPY docker/webserver/mime.types /etc/nginx/mime.types
+COPY docker/webserver/mime.types /etc/nginx/

@@ -13,14 +13,14 @@ RUN sed -i 's/periodic/periodic-docker/' /etc/crontabs-docker/root
 COPY docker/cron-docker/periodic /etc/periodic-docker/
 
 # install deploy script
-COPY docker/deploy.sh /deploy.sh
+COPY docker/deploy.sh /
 
 # package deploy artifacts
 RUN mkdir -p /dist/docker
-COPY docker/defaults.env /dist/docker/defaults.env
-COPY docker/host-dist.env /dist/docker/host-dist.env
-COPY docker/compose.yaml /dist/docker/compose.yaml
-COPY docker/user_manage.sh /dist/docker/user_manage.sh
+COPY docker/defaults.env /dist/docker/
+COPY docker/host-dist.env /dist/docker/
+COPY docker/compose.yml /dist/docker/
+COPY docker/user_manage.sh /dist/docker/
 RUN chmod a-w /dist/docker/*
 
 # add release as label for auto_update feature

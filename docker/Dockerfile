@@ -63,7 +63,7 @@ RUN python3 setup.py install
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
-COPY requirements.txt /src/requirements.txt
+COPY requirements.txt /src/
 
 WORKDIR /src
 
@@ -73,7 +73,7 @@ RUN pip3 install -r requirements.txt
 FROM build-app-deps AS linttest-deps
 ARG PYTHON_VERSION
 
-COPY requirements-dev.txt /src/requirements-dev.txt
+COPY requirements-dev.txt /src/
 
 RUN pip3 install -r requirements-dev.txt
 
@@ -100,8 +100,8 @@ RUN apt update && \
 
 ENV PATH="/opt/unbound/sbin:$PATH"
 
-ADD docker/unbound/test-ns.zone.template /opt/unbound/etc/unbound/test-ns.zone.template
-ADD docker/unbound/test-ns6.zone.template /opt/unbound/etc/unbound/test-ns6.zone.template
+ADD docker/unbound/test-ns.zone.template /opt/unbound/etc/unbound/
+ADD docker/unbound/test-ns6.zone.template /opt/unbound/etc/unbound/
 
 RUN useradd unbound
 WORKDIR /opt/unbound/etc/unbound
@@ -112,15 +112,15 @@ RUN unbound-control-setup
 RUN unbound-anchor || test $? -eq 1
 
 # add entrypoint and configuration for the connection test unbound service
-ADD docker/unbound/entrypoint.sh /entrypoint.sh
-ADD docker/unbound/signzones.sh /signzones.sh
+ADD docker/unbound/entrypoint.sh /
+ADD docker/unbound/signzones.sh /
 RUN mkdir -p /var/spool/cron/crontabs; echo "0	3	*	*	6	run-parts /etc/periodic/weekly" > /var/spool/cron/crontabs/root
 RUN mkdir -p /etc/periodic/weekly; ln -s /signzones.sh /etc/periodic/weekly/signzones
-ADD docker/unbound/unbound.conf.template /opt/unbound/etc/unbound/unbound.conf.template
+ADD docker/unbound/unbound.conf.template /opt/unbound/etc/unbound/
 # add configuration files for the validating and permissive internal resolver services
-ADD docker/resolver/entrypoint-resolver.sh /entrypoint-resolver.sh
-ADD docker/resolver/resolver-validating.conf.template /opt/unbound/etc/unbound/resolver-validating.conf.template
-ADD docker/resolver/resolver-permissive.conf.template /opt/unbound/etc/unbound/resolver-permissive.conf.template
+ADD docker/resolver/entrypoint-resolver.sh /
+ADD docker/resolver/resolver-validating.conf.template /opt/unbound/etc/unbound/
+ADD docker/resolver/resolver-permissive.conf.template /opt/unbound/etc/unbound/
 # empty test config file, to be overwritten with volume mount during integration tests
 RUN touch /opt/unbound/etc/unbound/test.conf
 
