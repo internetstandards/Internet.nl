@@ -28,7 +28,7 @@ There are two test targets used in the integration tests. For HTTP tests `target
 
 The HTTP test target container runs a Nginx instance which can be configured for different scenarios that might be tested. The configuration file for this is located at: `docker/integration-tests/nginx_templates/test-target.conf.template`.
 
-The e-mail target run a mock mailserver and is configured in the `docker/docker-compose-integration-tests.yml` file.
+The e-mail target run a mock mailserver and is configured in the `docker/compose.integration-tests.yaml` file.
 
 ### PKI/self-signed certificate
 
