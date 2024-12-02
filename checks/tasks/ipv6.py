@@ -588,16 +588,20 @@ def simhash(url, task=None):
             # Could not connect on given port, try another port.
             # If we managed to connect on IPv4 however, fail the test.
             if v4_response:
+                log.debug("simhash unable to connect on IPv6, but IPv4 worked")
                 return simhash_score, distance, None
 
     if v4_response is None:
         # FAIL: Could not establish a connection on both addresses.
+        log.debug("simhash unable to connect on IPv4")
         return simhash_score, distance, v6_response.status_code if v6_response else None
 
     # Regardless of content, status code must be identical (#1267)
     if v4_response.status_code != v6_response.status_code:
+        log.debug(f"simhash found {v4_response.status_code=} != {v6_response.status_code=}")
         # FAIL: Could not establish a connection on both addresses.
         return scoring.WEB_IPV6_WS_SIMHASH_OK, distance, v6_response.status_code
+    log.debug(f"simhash found status code {v4_response.status_code}, consistent for IPv4 and IPv6")
 
     try:
         html_v4 = response_content_chunk(v4_response, SIMHASH_MAX_RESPONSE_SIZE)
@@ -616,6 +620,7 @@ def simhash(url, task=None):
     sim = SequenceMatcher(None, html_v4, html_v6)
     distance = 100 - sim.quick_ratio() * 100
     if distance <= settings.SIMHASH_MAX:
+        log.debug(f"simhash found distance {distance}, max is {settings.SIMHASH_MAX}")
         simhash_score = scoring.WEB_IPV6_WS_SIMHASH_OK
 
     return simhash_score, distance, v6_response.status_code
