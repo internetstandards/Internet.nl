@@ -12,6 +12,10 @@ server:
   module-config: "validator iterator"
   chroot: ""
 
+  # expire DNSSEC signatures without time skew
+  val-sig-skew-min: 0
+  val-sig-skew-max: 0
+
   cache-max-ttl: ${DNS_CACHE_TTL}
   cache-max-negative-ttl: ${DNS_CACHE_TTL}
 
