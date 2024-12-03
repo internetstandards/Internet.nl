@@ -10,9 +10,13 @@ from django.conf import settings
 from django.core.cache import cache
 
 import unbound
+from dns.exception import DNSException
+from dns.resolver import NoAnswer, NXDOMAIN
+
 from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_NON_SENDING_POLICY, categories, scoring
 from checks.http_client import http_get
 from checks.models import DmarcPolicyStatus, MailTestAuth, SpfPolicyStatus
+from checks.resolver import resolve_txt, resolve_spf
 from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
@@ -227,122 +231,54 @@ def callback(results, addr, category):
     return mtauth
 
 
-def as_txt(data):
-    try:
-        txt = "".join(unbound.ub_data.dname2str(data))
-    except UnicodeError:
-        txt = "<Non ASCII characters found>"
-    return txt
-
-
-def dkim_callback(data, status, r):
-    data["score"] = scoring.MAIL_AUTH_DKIM_FAIL
-    data["available"] = False
-    if status == 0:
-        available = False
-        if r.rcode == unbound.RCODE_NOERROR:
-            # _domainkey empty non-terminal does exist,
-            # assume there is a DKIM pubkey
-            available = True
-            score = scoring.MAIL_AUTH_DKIM_PASS
-        elif r.rcode == unbound.RCODE_NXDOMAIN:
-            # we know for sure there is no DKIM pubkey
-            score = scoring.MAIL_AUTH_DKIM_FAIL
-        else:
-            # resolving problems, servfail probably
-            score = scoring.MAIL_AUTH_DKIM_ERROR
-        data["score"] = score
-        data["available"] = available
-    data["done"] = True
-
-
 def do_dkim(self, url, *args, **kwargs):
     try:
-        cb_data = self.async_resolv(f"_domainkey.{url}", unbound.RR_TYPE_TXT, dkim_callback)
-        result = dict(available="available" in cb_data and cb_data["available"], score=cb_data["score"])
-
-    # KeyError is due to score missing, happens in case of timeout on non resolving domain
-    except (SoftTimeLimitExceeded, KeyError) as specific_exception:
-        log.debug("Soft time limit exceeded: %s", specific_exception)
-        result = dict(available=False, score=scoring.MAIL_AUTH_DKIM_FAIL)
-
-    return ("dkim", result)
-
-
-def spf_callback(data, status, r):
-    data["score"] = scoring.MAIL_AUTH_SPF_FAIL
-    data["available"] = False
-    data["record"] = []
-    if status == 0:
-        record = []
+        resolve_txt(f"_domainkey.{url}")
+        available = True
+        score = scoring.MAIL_AUTH_DKIM_PASS
+    except NoAnswer:
+        available = True
+        score = scoring.MAIL_AUTH_DKIM_PASS
+    except NXDOMAIN:
         available = False
-        if r.rcode == unbound.RCODE_NOERROR and r.havedata == 1:
-            #  TXT record(s) found, start looking for SPF
-            score = scoring.MAIL_AUTH_SPF_FAIL
-            for d in r.data.data:
-                txt = as_txt(d)
-                if txt.lower().startswith("v=spf1"):
-                    record.append(txt)
-                    if available:
-                        # We see more than one SPF record. Fail the test.
-                        available = False
-                        score = scoring.MAIL_AUTH_SPF_FAIL
-                        break
-                    else:
-                        available = True
-                        score = scoring.MAIL_AUTH_SPF_PASS
-        elif r.rcode == unbound.RCODE_NXDOMAIN or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0):
-            # we know for sure there is no SPF record
-            score = scoring.MAIL_AUTH_SPF_FAIL
-        else:
-            # resolving problems, servfail probably
-            score = scoring.MAIL_AUTH_SPF_ERROR
-
-        data["score"] = score
-        data["available"] = available
-        data["record"] = record
-    data["done"] = True
-
-
-def resolve_spf_record(url, task):
-    return task.async_resolv(url, unbound.RR_TYPE_TXT, callback=spf_callback)
+        score = scoring.MAIL_AUTH_DKIM_FAIL
+    except DNSException:
+        available = False
+        score = scoring.MAIL_AUTH_DKIM_ERROR
+    return "dkim", {"available": available, "score": score}
 
 
 def do_spf(self, url, *args, **kwargs):
     try:
-        cb_data = resolve_spf_record(url, self)
-        available = "available" in cb_data and cb_data["available"]
-        score = cb_data["score"]
-        record = cb_data["record"]
-        policy_status = None
-        policy_score = scoring.MAIL_AUTH_SPF_POLICY_FAIL
-        policy_records = []
+        spf_record, _ = resolve_spf(url)
+        available = bool(spf_record)
+        score = scoring.MAIL_AUTH_SPF_PASS if spf_record else scoring.MAIL_AUTH_SPF_FAIL
+    except NXDOMAIN:
+        spf_record = None
+        available = False
+        score = scoring.MAIL_AUTH_SPF_FAIL
+    except DNSException:
+        spf_record = None
+        available = False
+        score = scoring.MAIL_AUTH_SPF_ERROR
 
-        if len(record) == 1:
-            policy_status, policy_score, _ = spf_check_policy(url, record[0], self, policy_records=policy_records)
+    policy_status = None
+    policy_score = scoring.MAIL_AUTH_SPF_POLICY_FAIL
+    policy_records = []
 
-        result = dict(
-            available=available,
-            score=score,
-            record=record,
-            policy_status=policy_status,
-            policy_score=policy_score,
-            policy_records=policy_records,
-        )
+    if spf_record:
+        policy_status, policy_score, _ = spf_check_policy(url, spf_record[0], self, policy_records=policy_records)
 
-    # KeyError is due to score missing, happens in case of timeout on non resolving domain
-    except (SoftTimeLimitExceeded, KeyError) as specific_exception:
-        log.debug("Soft time limit exceeded: %s", specific_exception)
-        result = dict(
-            available=False,
-            score=scoring.MAIL_AUTH_SPF_FAIL,
-            record=[],
-            policy_status=None,
-            policy_score=scoring.MAIL_AUTH_SPF_POLICY_FAIL,
-            policy_records=[],
-        )
+    result = dict(
+        available=available,
+        score=score,
+        record=spf_record,
+        policy_status=policy_status,
+        policy_score=policy_score,
+        policy_records=policy_records,
+    )
 
-    return ("spf", result)
+    return "spf", result
 
 
 def spf_check_include_redirect(
@@ -371,17 +307,11 @@ def spf_check_include_redirect(
             return status, score, left_lookups
 
     if status == SpfPolicyStatus.valid:
-        cb_data = resolve_spf_record(url, task)
-        new_spf = cb_data["record"]
-        if not new_spf:
+        try:
+            new_spf, _ = resolve_spf(url)
+        except DNSException:
             status = bad_status
             score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
-
-        elif len(new_spf) > 1:
-            status = bad_status
-            score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
-            for record in new_spf:
-                policy_records.append((url, record))
 
     if status == SpfPolicyStatus.valid:
         new_spf = new_spf[0]
@@ -492,53 +422,32 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
     return status, score, left_lookups
 
 
-def dmarc_callback(data, status, r):
-    data["score"] = scoring.MAIL_AUTH_DMARC_FAIL
-    data["available"] = False
-    data["record"] = []
-    if status == 0:
-        record = []
-        available = False
-        continue_looking = False
-        if r.rcode == unbound.RCODE_NOERROR and r.havedata == 1:
-            # _dmarc TXT record found
+def _dmarc_dns_lookup(url):
+    dmarc_record = None
+    continue_looking = False
+
+    try:
+        txt_records, _ = resolve_txt(f"_dmarc.{url}")
+        dmarc_records = [t for t in txt_records if t.lower().startswith("v=dmarc1")]
+        if len(dmarc_records) == 1:
+            dmarc_record = dmarc_records[0]
+            score = scoring.MAIL_AUTH_DMARC_PASS
+        elif len(dmarc_records) > 1:
             score = scoring.MAIL_AUTH_DMARC_FAIL
-            for d in r.data.data:
-                txt = as_txt(d)
-                if txt.lower().startswith("v=dmarc1"):
-                    record.append(txt)
-                    if available:
-                        # We see more than one DMARC record. Fail the test.
-                        available = False
-                        score = scoring.MAIL_AUTH_DMARC_FAIL
-                        break
-                    else:
-                        available = True
-                        score = scoring.MAIL_AUTH_DMARC_PASS
-            # Check if we got an answer but all the TXT records were not DMARC
-            # records. In that case look for a record in the organizational
-            # domain.
-            if not record:
-                score = scoring.MAIL_AUTH_DMARC_FAIL
-                continue_looking = True
-        elif r.rcode == unbound.RCODE_NXDOMAIN or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0):
-            # we know for sure there is no DMARC policy
+        else:
             score = scoring.MAIL_AUTH_DMARC_FAIL
             continue_looking = True
-        else:
-            # resolving problems, servfail probably
-            score = scoring.MAIL_AUTH_DMARC_ERROR
+    except NXDOMAIN:
+        score = scoring.MAIL_AUTH_DMARC_FAIL
+        continue_looking = True
+    except DNSException:
+        score = scoring.MAIL_AUTH_DMARC_ERROR
 
-        data["score"] = score
-        data["available"] = available
-        data["record"] = record
-        data["cont"] = continue_looking
-    data["done"] = True
+    return dmarc_record, score, continue_looking
 
 
 def do_dmarc(self, url, *args, **kwargs):
     try:
-        cb_data = dict(cont=True)
         is_org_domain = False
         public_suffix_list = dmarc_get_public_suffix_list()
         if not public_suffix_list:
@@ -546,26 +455,25 @@ def do_dmarc(self, url, *args, **kwargs):
             # Raise SoftTimeLimitExceeded to easily fail the test.
             raise SoftTimeLimitExceeded
 
-        cb_data = self.async_resolv(f"_dmarc.{url}", unbound.RR_TYPE_TXT, dmarc_callback)
-        if cb_data.get("cont"):
+        dmarc_record, score, continue_looking = _dmarc_dns_lookup(url)
+
+        if continue_looking:
             url = dmarc_find_organizational_domain(url, public_suffix_list)
-            cb_data = self.async_resolv(f"_dmarc.{url}", unbound.RR_TYPE_TXT, dmarc_callback)
+            dmarc_record, score, continue_looking = _dmarc_dns_lookup(url)
             is_org_domain = True
 
-        available = "available" in cb_data and cb_data["available"]
-        score = cb_data["score"]
-        record = cb_data["record"]
-        policy_status = None
-        policy_score = scoring.MAIL_AUTH_DMARC_POLICY_FAIL
         org_domain = is_org_domain and url or None
 
-        if len(record) == 1:
-            policy_status, policy_score = dmarc_check_policy(record[0], url, self, is_org_domain, public_suffix_list)
+        if dmarc_record:
+            policy_status, policy_score = dmarc_check_policy(dmarc_record, url, self, is_org_domain, public_suffix_list)
+        else:
+            policy_status = None
+            policy_score = scoring.MAIL_AUTH_DMARC_POLICY_FAIL
 
         result = dict(
-            available=available,
+            available=bool(dmarc_record),
             score=score,
-            record=record,
+            record=dmarc_record,
             policy_status=policy_status,
             policy_score=policy_score,
             org_domain=org_domain,
@@ -583,7 +491,7 @@ def do_dmarc(self, url, *args, **kwargs):
             org_domain=None,
         )
 
-    return ("dmarc", result)
+    return "dmarc", result
 
 
 def dmarc_check_policy(dmarc_record, domain, task, is_org_domain, public_suffix_list):

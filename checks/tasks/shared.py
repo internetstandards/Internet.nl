@@ -8,8 +8,10 @@ from celery import shared_task
 from django.conf import settings
 
 import unbound
+from dns.exception import DNSException
+
 from checks.models import MxStatus
-from checks.tasks.mail import resolve_spf_record
+from checks.resolver import resolve_spf
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
 from checks.tasks import SetupUnboundContext
@@ -133,11 +135,14 @@ def do_mail_get_servers(self, url, *args, **kwargs):
 
     if not mailservers:
         if do_resolve_a_aaaa(self, url):
-            spf_data = resolve_spf_record(url, self)
-            if spf_data.get("available"):
-                spf_parsed = spf_parse(spf_data["record"][0])
-                if spf_parsed.get("terms", []) == ["-all"]:
-                    return [(None, None, MxStatus.no_null_mx)]
+            try:
+                spf_data = resolve_spf(url)
+                if spf_data:
+                    spf_parsed = spf_parse(spf_data)
+                    if spf_parsed.get("terms", []) == ["-all"]:
+                        return [(None, None, MxStatus.no_null_mx)]
+            except DNSException:
+                pass
         return [(None, None, MxStatus.no_mx)]
 
     # Sort the mailservers on their name so that the same ones are tested for

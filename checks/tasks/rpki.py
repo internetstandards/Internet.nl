@@ -462,7 +462,7 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
 
                 try:
                     # fetch ASN, prefixes from BGP
-                    routeview = TeamCymruIPtoASN.from_bgp(task, ip)
+                    routeview = TeamCymruIPtoASN.from_bgp(ip)
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
                     routeview = None
                     logger.error(repr(e))
@@ -472,14 +472,14 @@ def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                     if routeview:
                         # if the ip is covered by a BGP announcement
                         # try to validate corresponding Roas
-                        routeview.validate(task, Routinator)
+                        routeview.validate(Routinator)
                     else:
                         # if the ip is not covered by a BGP announcement
                         # we can still show the existence of Roas,
                         # but validation is meaningless
                         result["errors"].append(NoRoutesError.__name__)
 
-                        routeview = TeamCymruIPtoASN.from_rpki(task, Routinator, ip)
+                        routeview = TeamCymruIPtoASN.from_rpki(Routinator, ip)
                 except RelyingPartyUnvailableError as e:
                     logger.error(repr(e))
                     result["errors"].append(e.__class__.__name__)
