@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# perform cleanup maintenance on database:
+#
+# - remove dangling subtests (probe results with no report) caused by periodic test or aborted single tests
+# - remove test reports for batch periodic tests
+
+set -e
+
+if [ ! "$CRON_DAILY_DATABASE_CLEANUP" = "True" ];then
+  exit 0
+fi
+
+docker ps --filter label=com.docker.compose.service=app --quiet | xargs -I% --no-run-if-empty docker exec % ./manage.py database_cleanup -v1

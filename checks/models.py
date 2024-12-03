@@ -453,6 +453,8 @@ class DomainTestDnssec(BaseTestModel):
 
 
 class WebTestTls(DomainServersModel):
+    timestamp = models.DateTimeField(auto_now_add=True)
+
     def totalscore(self, score_fields):
         tests_subset = self.webtestset.all()
         return super().totalscore(score_fields, tests_subset)
@@ -672,6 +674,8 @@ class DomainTestTls(BaseTestModel):
 
 
 class WebTestAppsecpriv(DomainServersModel):
+    timestamp = models.DateTimeField(auto_now_add=True)
+
     def totalscore(self, score_fields):
         tests_subset = self.webtestset.all()
         return super().totalscore(score_fields, tests_subset)

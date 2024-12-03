@@ -698,6 +698,7 @@ services:
       - AUTO_UPDATE_TO
       - WORKER_SLOW_REPLICAS
       - DOCKER_REGISTRY
+      - CRON_DAILY_DATABASE_CLEANUP
 
     restart: unless-stopped
     logging:
