@@ -18,8 +18,8 @@ EXPECTED_DOMAIN_RESULTS = {
         "web_ipv6_ws_address": {"status": "passed", "verdict": "good"},
         "web_ipv6_ws_reach": {"status": "passed", "verdict": "good"},
         "web_ipv6_ws_similar": {"status": "passed", "verdict": "good"},
-        "web_dnssec_exist": {"status": "passed", "verdict": "good"},
-        "web_dnssec_valid": {"status": "failed", "verdict": "bad"},
+        "web_dnssec_exist": {"status": "failed", "verdict": "bad"},
+        "web_dnssec_valid": {"status": "not_tested", "verdict": "not-tested"},
         "web_https_http_available": {"status": "passed", "verdict": "good"},
         "web_https_http_redirect": {"status": "passed", "verdict": "good"},
         "web_https_http_hsts": {"status": "passed", "verdict": "good"},
@@ -56,7 +56,7 @@ EXPECTED_DOMAIN_RESULTS = {
 # taken verbatim from log output "domain technical results"
 EXPECTED_DOMAIN_TECHNICAL_RESULTS = {
     "status": "ok",
-    "domain": {"dnssec": {"status": "bogus"}},
+    "domain": {"dnssec": {"status": "insecure"}},
     "nameservers": {},
     "webservers": {
         "ipv4": {

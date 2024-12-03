@@ -10,7 +10,6 @@ import sectxt
 
 from checks import scoring
 from checks.http_client import http_get_ip, response_content_chunk
-from checks.tasks import SetupUnboundContext
 
 SECURITYTXT_LEGACY_PATH = "/security.txt"
 SECURITYTXT_EXPECTED_PATH = "/.well-known/security.txt"
@@ -27,12 +26,12 @@ class SecuritytxtRetrieveResult:
     errors: list[dict[str, str]]
 
 
-def securitytxt_check(af_ip_pair, domain, task):
-    result = _retrieve_securitytxt(af_ip_pair, domain, task)
+def securitytxt_check(af_ip_pair, domain):
+    result = _retrieve_securitytxt(af_ip_pair, domain)
     return _evaluate_securitytxt(result)
 
 
-def _retrieve_securitytxt(af_ip_pair, hostname: str, task: SetupUnboundContext) -> SecuritytxtRetrieveResult:
+def _retrieve_securitytxt(af_ip_pair, hostname: str) -> SecuritytxtRetrieveResult:
     path = SECURITYTXT_EXPECTED_PATH
     found_host = None
     try:

@@ -5,15 +5,14 @@ from timeit import default_timer as timer
 from typing import Optional
 
 import requests
-import unbound
 import urllib3
+from dns.resolver import NXDOMAIN
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
-from checks.tasks import SetupUnboundContext
+from checks.resolver import dns_resolve_aaaa, dns_resolve_a
 from checks.tasks.tls_connection import DEFAULT_TIMEOUT
 from checks.tasks.tls_connection_exceptions import NoIpError
 from django.conf import settings
-from interface.views.shared import ub_resolve_with_timeout
 from internetnl import log
 
 # Disable HTTPS warnings as we intentionally disable HTTPS verification
@@ -113,20 +112,19 @@ def http_get_ip(
     return http_get(url, verify=False, headers=headers, session=session, *args, **kwargs)
 
 
-def http_get_af(
-    hostname: str, port: int, af: socket.AddressFamily, task: Optional[SetupUnboundContext] = None, *args, **kwargs
-) -> requests.Response:
+def http_get_af(hostname: str, port: int, af: socket.AddressFamily, *args, **kwargs) -> requests.Response:
     """
     Perform an HTTP GET request to the given hostname/port, restricting to a certain address family.
     Other (kw)args are passed to requests.get.
     """
-    rr_type = unbound.RR_TYPE_AAAA if af == socket.AF_INET6 else unbound.RR_TYPE_A
-    if task:
-        ips = task.resolve(hostname, rr_type)
-    else:
-        cb_data = ub_resolve_with_timeout(hostname, rr_type, unbound.RR_CLASS_IN, DEFAULT_TIMEOUT)
-        ips = [socket.inet_ntop(af, rr) for rr in cb_data["data"].data]
-    exc = NoIpError(f"Unable to resolve {rr_type} record for host '{hostname}'")
+    exc = NoIpError(f"Unable to resolve {'AAAA' if af == socket.AF_INET6 else 'A'} record for host '{hostname}'")
+    try:
+        if af == socket.AF_INET6:
+            ips = dns_resolve_aaaa(hostname)
+        else:
+            ips = dns_resolve_a(hostname)
+    except (NXDOMAIN, NoIpError):
+        raise exc
     for ip in ips:
         try:
             return http_get_ip(hostname, ip, port, *args, **kwargs)

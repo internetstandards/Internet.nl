@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import ipaddress
 import socket
-import time
 from difflib import SequenceMatcher
 
 import requests
@@ -13,16 +12,18 @@ from django.conf import settings
 
 from django.core.cache import cache
 from django.db import transaction
+from dns.resolver import NoAnswer, NXDOMAIN
 
 from checks import categories, scoring
 from checks.http_client import http_get_af, response_content_chunk
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
-from checks.tasks import SetupUnboundContext, dispatcher, shared
+from checks.resolver import dns_check_ns_connectivity, dns_resolve_aaaa, dns_resolve_a
+from checks.tasks import dispatcher, shared
 from checks.tasks.dispatcher import check_registry
+from checks.tasks.shared import do_resolve_ns
 from interface import batch, batch_shared_task, redis_id
 from interface.views.shared import pretty_domain_name
 from internetnl import log
-from unbound import RR_CLASS_IN, RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS, ub_ctx
 
 SIMHASH_MAX_RESPONSE_SIZE = 500000
 SIMHASH_NOT_CALCULABLE = settings.SIMHASH_MAX + 10000
@@ -89,7 +90,6 @@ batch_mail_registered = check_registry("batch_mail_ipv6", batch_mail_callback)
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_MEDIUM,
-    base=SetupUnboundContext,
 )
 def ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
@@ -101,7 +101,6 @@ def ns(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
@@ -112,7 +111,6 @@ def batch_ns(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_MEDIUM,
-    base=SetupUnboundContext,
 )
 def mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
@@ -123,7 +121,6 @@ def mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
@@ -134,7 +131,6 @@ def batch_mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -145,7 +141,6 @@ def web(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -293,54 +288,6 @@ def callback(results, addr, parent, parent_name, category):
     return parent
 
 
-def test_ns_connectivity(ip, port, domain):
-    log.debug("Testing fallback NS connectivity")
-    # NS connectivity is first tried with TCP (in test_connectivity).
-    # If that fails, maybe the NS is not doing TCP. As a last resort
-    # (expensive) we initiate an unbound context that will ask the NS a
-    # question he can't refuse.
-
-    def ub_callback(data, status, result):
-        if status != 0:
-            data["result"] = False
-        elif result.rcode == 2:  # SERVFAIL
-            data["result"] = False
-        else:
-            data["result"] = True
-        data["done"] = True
-
-    ctx = ub_ctx()
-
-    if settings.INTEGRATION_TESTS:
-        # forward the .test zone used in integration tests
-        ctx.zone_add("test.", "transparent")
-
-    if settings.DEBUG_LOG_UNBOUND:
-        ctx.set_option("log-queries:", "yes")
-        ctx.set_option("verbosity:", "2")
-
-    # XXX: Remove for now; inconsistency with applying settings on celery.
-    # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
-    ctx.set_async(True)
-    ctx.set_fwd(ip)
-    # Some (unknown) tests probably depend on consistent ordering in unbound responses
-    ctx.set_option("rrset-roundrobin:", "no")
-    cb_data = dict(done=False)
-    try:
-        retval, async_id = ctx.resolve_async(domain, cb_data, ub_callback, RR_TYPE_NS, RR_CLASS_IN)
-        while retval == 0 and not cb_data["done"]:
-            time.sleep(0.1)
-            retval = ctx.process()
-    except SoftTimeLimitExceeded:
-        log.debug("Soft time limit exceeded.")
-        if async_id:
-            ctx.cancel(async_id)
-        raise
-
-    log.debug("Result of fallback NS connectivity: %s", cb_data["result"])
-    return cb_data["result"]
-
-
 def remove_ipv4_mapped_v6(addresses: list[str]) -> list[str]:
     """
     Filter a list of IPv6 addresses to ignore IPv4-mapped addresses.
@@ -365,33 +312,32 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
     for ip in ips:
         for port in ports:
             sock = None
-            try:
-                # The 'settimeout' of this socket is being ignored.
-                # 2022-02-18 08:20:29	DEBUG    - Testing connectivity on ['IP'], on port [53], is_ns:....
-                # 2022-02-18 08:20:51	DEBUG    - Conclusion on ['IP']:[53]: good: set(), bad: {'....
-                # Why would it take 22 seconds now.
-                log.debug("Creating socket")
-                sock = socket.socket(af, sock_type)
-                log.debug("Setting timeout to 4 seconds")
-                sock.settimeout(4)
-                log.debug("Connecting to %s on port %s", ip, port)
-                sock.connect((ip, port))
-                log.debug("Adding IP to good list")
-                good.add(ip)
-                reachable_ports.add(port)
-                continue
-            except OSError:
-                pass
-            finally:
-                if sock:
-                    log.debug("Closing socket")
-                    sock.close()
-
-            # todo: according to test_ns_connectivity this should only be called as a last result, not every
-            #  ip. When is it called? -> this works because of the continue statement above.
-            if is_ns and test_ns_connectivity(ip, port, test_domain):
-                good.add(ip)
-                reachable_ports.add(port)
+            if is_ns:
+                if dns_check_ns_connectivity(test_domain, ip, port):
+                    good.add(ip)
+                    reachable_ports.add(port)
+            else:
+                try:
+                    # The 'settimeout' of this socket is being ignored.
+                    # 2022-02-18 08:20:29	DEBUG    - Testing connectivity on ['IP'], on port [53], is_ns:....
+                    # 2022-02-18 08:20:51	DEBUG    - Conclusion on ['IP']:[53]: good: set(), bad: {'....
+                    # Why would it take 22 seconds now.
+                    log.debug("Creating socket")
+                    sock = socket.socket(af, sock_type)
+                    log.debug("Setting timeout to 4 seconds")
+                    sock.settimeout(4)
+                    log.debug("Connecting to %s on port %s", ip, port)
+                    sock.connect((ip, port))
+                    log.debug("Adding IP to good list")
+                    good.add(ip)
+                    reachable_ports.add(port)
+                    continue
+                except OSError:
+                    pass
+                finally:
+                    if sock:
+                        log.debug("Closing socket")
+                        sock.close()
 
     bad = set(ips) - set(good)
     log.debug(f"Conclusion on {ips}:{ports}: good: {good}, bad: {bad}, ports: {reachable_ports}")
@@ -405,11 +351,17 @@ def get_domain_results(
     Resolve IPv4 and IPv6 addresses and check connectivity.
 
     """
-    v6 = task.resolve(domain, RR_TYPE_AAAA)
+    try:
+        v6 = dns_resolve_aaaa(domain)
+    except (NoAnswer, NXDOMAIN):
+        v6 = []
     v6 = remove_ipv4_mapped_v6(v6)
     log.debug("V6 resolve: %s" % v6)
     v6_good, v6_bad, v6_ports = test_connectivity(v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
-    v4 = task.resolve(domain, RR_TYPE_A)
+    try:
+        v4 = dns_resolve_a(domain)
+    except (NoAnswer, NXDOMAIN):
+        v4 = []
     log.debug("V4 resolve: %s" % v4)
     v4_good, v4_bad, v4_ports = test_connectivity(v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
     v6_conn_diff = v4_ports - v6_ports
@@ -485,19 +437,16 @@ def do_ns(self, url, *args, **kwargs):
     try:
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
-        rrset = self.resolve(url, RR_TYPE_NS)
-        next_label = url
-        while not rrset and "." in next_label:
-            rrset = self.resolve(next_label, RR_TYPE_NS)
-            next_label = next_label[next_label.find(".") + 1 :]
 
-        log.debug("rrset: %s", rrset)
-        log.debug("next_label: %s", next_label)
+        ns_list, hosted_zone_name = do_resolve_ns(url)
+
+        log.debug("ns_list: %s", ns_list)
+        log.debug("hosted_zone_name: %s", hosted_zone_name)
 
         has_a = set()  # Name servers that have IPv4.
         has_aaaa = set()  # Name servers that have IPv6.
-        if rrset:
-            for domain in rrset:
+        if ns_list:
+            for domain in ns_list:
                 log.debug("Getting domain result of %s", domain)
                 d = get_domain_results(
                     domain,
@@ -508,7 +457,7 @@ def do_ns(self, url, *args, **kwargs):
                     score_bad=scoring.IPV6_NS_CONN_FAIL,
                     score_partial=scoring.IPV6_NS_CONN_PARTIAL,
                     is_ns=True,
-                    test_domain=next_label,
+                    test_domain=hosted_zone_name,
                 )
                 log.debug("Retrieved domain results; %s", d)
                 if len(d["v4_good"]) + len(d["v4_bad"]) > 0:
@@ -578,8 +527,8 @@ def simhash(url, task=None):
     v6_response = None
     for port in [80, 443]:
         try:
-            v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, task=task, https=port == 443)
-            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, task=task, https=port == 443)
+            v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, https=port == 443)
+            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, https=port == 443)
             break
         except requests.RequestException:
             pass

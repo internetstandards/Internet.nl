@@ -18,6 +18,7 @@ server:
 
   cache-max-ttl: ${DNS_CACHE_TTL}
   cache-max-negative-ttl: ${DNS_CACHE_TTL}
+  ede: yes
 
   logfile: /dev/stdout
   ${DEBUG_LOG_UNBOUND_STATEMENTS}
