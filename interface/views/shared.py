@@ -528,9 +528,11 @@ class SafeHttpResponseRedirect(HttpResponseRedirect):
         super().__init__(redirect_to, *args, **kwargs)
         allowed_hosts = []
         for host in settings.ALLOWED_HOSTS:
-            allowed_hosts.append(host)
-            for language_code, language_name in settings.LANGUAGES:
-                allowed_hosts.append(language_code + host)
+            for optionalIPv6 in ["", ".ipv6"]:
+                for optionalConn in ["", ".conn"]:
+                    allowed_hosts.append(optionalConn + optionalIPv6 + host)
+                    for language_code, language_name in settings.LANGUAGES:
+                        allowed_hosts.append(language_code + optionalConn + optionalIPv6 + host)
 
         if not settings.DEBUG and not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=allowed_hosts):
             raise DisallowedRedirect("Unsafe redirect to URL: %s" % redirect_to)
