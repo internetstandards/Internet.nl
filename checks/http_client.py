@@ -119,9 +119,9 @@ def http_get_af(
     Other (kw)args are passed to requests.get.
     """
     if af == socket.AF_INET6:
-        ips = resolve_aaaa(hostname)
+        ips, _ = resolve_aaaa(hostname)
     else:
-        ips = resolve_a(hostname)
+        ips, _ = resolve_a(hostname)
     exc = NoIpError(f"Unable to resolve {'AAAA' if af == socket.AF_INET6 else 'A'} record for host '{hostname}'")
     for ip in ips:
         try:

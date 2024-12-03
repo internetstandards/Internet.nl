@@ -27,29 +27,29 @@ class DNSSECStatus(enum.IntEnum):
         return cls(DNSSECStatus.UNSIGNED)
 
 
-def resolve_a(label: str, allow_bogus=False) -> Tuple[List[str], DNSSECStatus]:
+def resolve_a(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.A, allow_bogus)
     return [rr.address for rr in rrset], dnssec_status
 
 
-def resolve_aaaa(label: str, allow_bogus=False) -> Tuple[List[str], DNSSECStatus]:
+def resolve_aaaa(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.AAAA, allow_bogus)
     return [rr.address for rr in rrset], dnssec_status
 
 
-def resolve_txt(label: str, allow_bogus=False) -> Tuple[List[str], DNSSECStatus]:
+def resolve_txt(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.TXT, allow_bogus)
     return [rr.to_text()[1:-1] for rr in rrset], dnssec_status
 
 
-def resolve_spf(label: str, allow_bogus=False) -> Tuple[Optional[str], DNSSECStatus]:
+def resolve_spf(label: str, allow_bogus=True) -> Tuple[Optional[str], DNSSECStatus]:
     strings, dnssec_status = resolve_txt(label, allow_bogus)
     spf_records = [s for s in strings if s.lower().startswith("v=spf1")]
     result = spf_records[0] if len(spf_records) == 1 else None
     return result, dnssec_status
 
 
-def resolve(label: str, rr_type: RdataType, allow_bogus=False):
+def resolve(label: str, rr_type: RdataType, allow_bogus=True):
     answer = get_resolver().resolve(dns.name.from_text(label), rr_type)
     dnssec_status = DNSSECStatus.from_message(answer.response)
     if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
