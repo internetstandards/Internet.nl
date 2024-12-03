@@ -13,6 +13,9 @@ TEST_DOMAIN_EXPECTED_SCORE = 100
 TEST_DOMAIN_EXPECTED_SCORE = 49
 
 
+BATCH_PERIODIC_TESTS_PREFIX = "batch periodic tests"
+
+
 def wait_for_request_status(url, expected_status, timeout=10, interval=1, auth=None):
     """Poll url and parse JSON for request.status, return if value matches expected status or
     fail when timeout expires."""
@@ -145,3 +148,30 @@ def test_cron_delete_batch_results(trigger_cron, docker_compose_exec):
 
     assert not docker_compose_exec("cron", "ls /app/batch_results/test.json", check=False)
     assert not docker_compose_exec("cron", "ls /app/batch_results/test.json.gz", check=False)
+
+
+def test_batch_db_cleanup(unique_id, trigger_cron, register_test_user, test_domain):
+    """A test via the Batch API should succeed."""
+    request_data = {"type": "web", "domains": [test_domain], "name": f"{BATCH_PERIODIC_TESTS_PREFIX} {unique_id}"}
+
+    auth = register_test_user
+
+    # start batch request
+    register_response = requests.post(INTERNETNL_API + "requests", json=request_data, auth=auth, verify=False)
+    register_data = register_response.json()
+    test_id = register_data["request"]["request_id"]
+    wait_for_request_status(INTERNETNL_API + "requests/" + test_id, "done", timeout=60, auth=auth)
+
+    # generate batch results
+    results_response = requests.get(INTERNETNL_API + "requests/" + test_id + "/results", auth=auth, verify=False)
+    results_response.raise_for_status()
+    assert not results_response.json() == {}
+
+    # run db clean
+    trigger_cron("daily/database_cleanup", service="cron-docker", suffix="-docker")
+
+    # check batch results are gone
+    results_response_after_cleanup = requests.get(
+        INTERNETNL_API + "requests/" + test_id + "/results", auth=auth, verify=False
+    )
+    assert results_response_after_cleanup.json().get("error", {}).get("label", "") == "unknown-request"
