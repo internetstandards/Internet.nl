@@ -325,9 +325,7 @@ def spf_check_include_redirect(
 
 
 def spf_check_redirect(domain, term, policy_records, max_lookups):
-    return spf_check_include_redirect(
-        domain, term, policy_records, max_lookups, "=", SpfPolicyStatus.invalid_redirect
-    )
+    return spf_check_include_redirect(domain, term, policy_records, max_lookups, "=", SpfPolicyStatus.invalid_redirect)
 
 
 def spf_check_include(domain, term, policy_records, max_lookups):

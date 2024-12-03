@@ -70,7 +70,7 @@ def get_resolver():
 
 def _create_resolver() -> Resolver:
     resolver = Resolver(configure=False)
-    resolver.nameservers = [getenv("IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE")]
+    resolver.nameservers = [getenv("IPV4_IP_RESOLVER_INTERNAL_VALIDATING")]
     # TODO: revert to
     #  # resolver.nameservers = [settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING]
     resolver.edns = True
