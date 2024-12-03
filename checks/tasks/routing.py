@@ -12,6 +12,8 @@ from django.conf import settings
 
 from typing import Any, Dict, List, NewType, Tuple, Type, TypeVar
 
+from dns.exception import DNSException
+
 from checks.http_client import http_get
 from ..resolver import resolve_txt
 
@@ -155,7 +157,7 @@ class TeamCymruIPtoASN(RouteView):
             return []
         except dns.resolver.NoAnswer:
             return []
-        except dns.resolver.NoNameservers:
+        except DNSException:
             raise BGPSourceUnavailableError(
                 f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?"
             )
