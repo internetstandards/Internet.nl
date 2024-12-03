@@ -8,7 +8,7 @@ from django.db import transaction
 from checks import categories
 from checks.models import DomainTestAppsecpriv, WebTestAppsecpriv
 from checks.tasks.securitytxt import securitytxt_check
-from checks.tasks import SetupUnboundContext, shared
+from checks.tasks import shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
     HeaderCheckerContentSecurityPolicy,
@@ -83,10 +83,9 @@ batch_web_registered = check_registry("batch_web_appsecpriv", batch_web_callback
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
-    return do_web_appsecpriv(af_ip_pairs, url, self, *args, **kwargs)
+    return do_web_appsecpriv(af_ip_pairs, url, *args, **kwargs)
 
 
 @batch_web_registered
@@ -94,10 +93,9 @@ def web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
-    return do_web_appsecpriv(af_ip_pairs, url, self, *args, **kwargs)
+    return do_web_appsecpriv(af_ip_pairs, url, *args, **kwargs)
 
 
 def save_results(model, results, addr, domain):
@@ -231,7 +229,7 @@ def build_summary_report(testappsecpriv, category):
     testappsecpriv.report = appsecpriv_report
 
 
-def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
+def do_web_appsecpriv(af_ip_pairs, url, *args, **kwargs):
     try:
         results = {}
         header_checkers = [
@@ -241,8 +239,8 @@ def do_web_appsecpriv(af_ip_pairs, url, task, *args, **kwargs):
             HeaderCheckerXContentTypeOptions(),
         ]
         for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = http_headers_check(af_ip_pair, url, header_checkers, task)
-            results[af_ip_pair[1]].update(securitytxt_check(af_ip_pair, url, task))
+            results[af_ip_pair[1]] = http_headers_check(af_ip_pair, url, header_checkers)
+            results[af_ip_pair[1]].update(securitytxt_check(af_ip_pair, url))
 
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded.")

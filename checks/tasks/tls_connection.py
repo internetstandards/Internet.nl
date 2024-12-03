@@ -10,13 +10,13 @@ from urllib.parse import urlparse
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
+from dns.exception import DNSException
 from nassl import _nassl
 from nassl.legacy_ssl_client import LegacySslClient
 from nassl.ssl_client import ClientCertificateRequested, OpenSslVerifyEnum, OpenSslVersionEnum, SslClient
 
-from checks.tasks import unbound
+from checks.resolver import dns_resolve_aaaa, dns_resolve_a
 from checks.tasks.tls_connection_exceptions import ConnectionHandshakeException, ConnectionSocketException, NoIpError
-from interface.views.shared import ub_resolve_with_timeout
 from internetnl import celery_app
 
 # Use a dedicated logger as this logging can be very verbose
@@ -73,17 +73,13 @@ def sock_connect(host, ip, port, ipv6=False, task=None, timeout=DEFAULT_TIMEOUT)
     if ip:
         ips = [ip]
     else:
-        # Resolve the name to one or more IP addresses of the correct type
-        rr_type = unbound.RR_TYPE_AAAA if ipv6 else unbound.RR_TYPE_A
-        task = task if task else celery_app.current_worker_task
-        if task:
-            ips = task.resolve(host, rr_type)
-        else:
-            cb_data = ub_resolve_with_timeout(host, rr_type, unbound.RR_CLASS_IN, timeout)
-            af = socket.AF_INET6 if ipv6 else socket.AF_INET
-            ips = [socket.inet_ntop(af, rr) for rr in cb_data["data"].data]
+        resolve_function = dns_resolve_aaaa if ipv6 else dns_resolve_a
+        try:
+            ips = resolve_function(host)
+        except DNSException:
+            ips = None
         if not ips:
-            raise NoIpError(f"Unable to resolve {rr_type} record for host '{host}'")
+            raise NoIpError(f"Unable to resolve {'AAAA' if ipv6 else 'A'} record for host '{host}'")
 
     # Return the connection details for the first IP address that we can
     # successfully connect to.
