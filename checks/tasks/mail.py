@@ -271,7 +271,7 @@ def do_spf(url, *args, **kwargs):
     result = dict(
         available=available,
         score=score,
-        record=spf_record,
+        record=[spf_record] if spf_record else [],
         policy_status=policy_status,
         policy_score=policy_score,
         policy_records=policy_records,
@@ -324,19 +324,19 @@ def spf_check_include_redirect(
     return status, score, left_lookups
 
 
-def spf_check_redirect(domain, term, task, policy_records, max_lookups):
+def spf_check_redirect(domain, term, policy_records, max_lookups):
     return spf_check_include_redirect(
-        domain, term, task, policy_records, max_lookups, "=", SpfPolicyStatus.invalid_redirect
+        domain, term, policy_records, max_lookups, "=", SpfPolicyStatus.invalid_redirect
     )
 
 
-def spf_check_include(domain, term, task, policy_records, max_lookups):
+def spf_check_include(domain, term, policy_records, max_lookups):
     return spf_check_include_redirect(
-        domain, term, task, policy_records, max_lookups, ":", SpfPolicyStatus.invalid_include, is_include=True
+        domain, term, policy_records, max_lookups, ":", SpfPolicyStatus.invalid_include, is_include=True
     )
 
 
-def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, is_include=False):
+def spf_check_policy(domain, spf_record, policy_records, max_lookups=10, is_include=False):
     """
     Check the SPF policy for syntax and efficiency.
 
@@ -408,12 +408,12 @@ def spf_check_policy(domain, spf_record, task, policy_records, max_lookups=10, i
                     break
 
                 if "redirect=" in term and not all_found:
-                    status, score, left_lookups = spf_check_redirect(domain, term, task, policy_records, left_lookups)
+                    status, score, left_lookups = spf_check_redirect(domain, term, policy_records, left_lookups)
                     # Only one redirect is followed
                     break
 
                 elif "include:" in term:
-                    status, score, left_lookups = spf_check_include(domain, term, task, policy_records, left_lookups)
+                    status, score, left_lookups = spf_check_include(domain, term, policy_records, left_lookups)
 
     if status != SpfPolicyStatus.valid:
         policy_records.append((domain, spf_record))
