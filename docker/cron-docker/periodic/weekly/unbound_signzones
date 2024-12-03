@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -e
+
+# resign zones for connection test
+docker ps --filter label=com.docker.compose.service=unbound --quiet | xargs -I% --no-run-if-empty docker exec % /signzones.sh
