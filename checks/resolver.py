@@ -1,6 +1,5 @@
 import enum
 from os import getenv
-from threading import Lock
 from typing import List, cast, Tuple, Optional
 
 import dns
@@ -57,7 +56,9 @@ def resolve(label: str, rr_type: RdataType, allow_bogus=False):
         raise ValidationFailure()
     return answer.rrset, dnssec_status
 
+
 _resolver = None
+
 
 def get_resolver():
     # Resolvers are thread safe once configured
@@ -76,6 +77,7 @@ def _create_resolver() -> Resolver:
     resolver.flags = Flag.CD
     resolver.ednsflags = EDNSFlag.DO
     return resolver
+
 
 # dnspython 2.7 has this built in on Message
 def extended_errors_from_answer(message: Message) -> List[dns.edns.EDEOption]:
