@@ -9,7 +9,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.core.cache import cache
 
-import unbound
 from dns.exception import DNSException
 from dns.resolver import NoAnswer, NXDOMAIN
 
@@ -60,7 +59,7 @@ batch_mail_registered = check_registry("batch_mail_auth", batch_mail_callback)
     base=SetupUnboundContext,
 )
 def dmarc(self, url, *args, **kwargs):
-    return do_dmarc(self, url, *args, **kwargs)
+    return do_dmarc(url, *args, **kwargs)
 
 
 @batch_mail_registered
@@ -71,7 +70,7 @@ def dmarc(self, url, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_dmarc(self, url, *args, **kwargs):
-    return do_dmarc(self, url, *args, **kwargs)
+    return do_dmarc(url, *args, **kwargs)
 
 
 @mail_registered
@@ -82,7 +81,7 @@ def batch_dmarc(self, url, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def dkim(self, url, *args, **kwargs):
-    return do_dkim(self, url, *args, **kwargs)
+    return do_dkim(url, *args, **kwargs)
 
 
 @batch_mail_registered
@@ -93,7 +92,7 @@ def dkim(self, url, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_dkim(self, url, *args, **kwargs):
-    return do_dkim(self, url, *args, **kwargs)
+    return do_dkim(url, *args, **kwargs)
 
 
 @mail_registered
@@ -104,7 +103,7 @@ def batch_dkim(self, url, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def spf(self, url, *args, **kwargs):
-    return do_spf(self, url, *args, **kwargs)
+    return do_spf(url, *args, **kwargs)
 
 
 @batch_mail_registered
@@ -115,7 +114,7 @@ def spf(self, url, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_spf(self, url, *args, **kwargs):
-    return do_spf(self, url, *args, **kwargs)
+    return do_spf(url, *args, **kwargs)
 
 
 def skip_dkim_for_non_sending_domain(mtauth):
@@ -231,7 +230,7 @@ def callback(results, addr, category):
     return mtauth
 
 
-def do_dkim(self, url, *args, **kwargs):
+def do_dkim(url, *args, **kwargs):
     try:
         resolve_txt(f"_domainkey.{url}")
         available = True
@@ -248,7 +247,7 @@ def do_dkim(self, url, *args, **kwargs):
     return "dkim", {"available": available, "score": score}
 
 
-def do_spf(self, url, *args, **kwargs):
+def do_spf(url, *args, **kwargs):
     try:
         spf_record, _ = resolve_spf(url)
         available = bool(spf_record)
@@ -267,7 +266,7 @@ def do_spf(self, url, *args, **kwargs):
     policy_records = []
 
     if spf_record:
-        policy_status, policy_score, _ = spf_check_policy(url, spf_record[0], self, policy_records=policy_records)
+        policy_status, policy_score, _ = spf_check_policy(url, spf_record[0], policy_records=policy_records)
 
     result = dict(
         available=available,
@@ -282,7 +281,7 @@ def do_spf(self, url, *args, **kwargs):
 
 
 def spf_check_include_redirect(
-    domain, term, task, policy_records, max_lookups, assignment_operator, bad_status, is_include=False
+    domain, term, policy_records, max_lookups, assignment_operator, bad_status, is_include=False
 ):
     """
     Check the 'include' and 'redirect' terms.
@@ -316,7 +315,7 @@ def spf_check_include_redirect(
     if status == SpfPolicyStatus.valid:
         new_spf = new_spf[0]
         status, score, left_lookups = spf_check_policy(
-            url, new_spf, task, policy_records=policy_records, max_lookups=left_lookups, is_include=is_include
+            url, new_spf, policy_records=policy_records, max_lookups=left_lookups, is_include=is_include
         )
 
     if status != SpfPolicyStatus.valid and status != SpfPolicyStatus.max_dns_lookups:
@@ -446,7 +445,7 @@ def _dmarc_dns_lookup(url):
     return dmarc_record, score, continue_looking
 
 
-def do_dmarc(self, url, *args, **kwargs):
+def do_dmarc(url, *args, **kwargs):
     try:
         is_org_domain = False
         public_suffix_list = dmarc_get_public_suffix_list()
@@ -465,7 +464,7 @@ def do_dmarc(self, url, *args, **kwargs):
         org_domain = is_org_domain and url or None
 
         if dmarc_record:
-            policy_status, policy_score = dmarc_check_policy(dmarc_record, url, self, is_org_domain, public_suffix_list)
+            policy_status, policy_score = dmarc_check_policy(dmarc_record, url, is_org_domain, public_suffix_list)
         else:
             policy_status = None
             policy_score = scoring.MAIL_AUTH_DMARC_POLICY_FAIL
@@ -494,7 +493,7 @@ def do_dmarc(self, url, *args, **kwargs):
     return "dmarc", result
 
 
-def dmarc_check_policy(dmarc_record, domain, task, is_org_domain, public_suffix_list):
+def dmarc_check_policy(dmarc_record, domain, is_org_domain, public_suffix_list):
     """
     Check the DMARC record for syntax and efficiency.
 
@@ -508,7 +507,7 @@ def dmarc_check_policy(dmarc_record, domain, task, is_org_domain, public_suffix_
     status, score = dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list)
 
     if status == DmarcPolicyStatus.valid and parsed.get("directives"):
-        status, score = dmarc_verify_external_destinations(domain, parsed, task, public_suffix_list)
+        status, score = dmarc_verify_external_destinations(domain, parsed, public_suffix_list)
     return (status, score)
 
 
@@ -572,7 +571,7 @@ def _dmarc_get_ru_host(parsed):
                     yield host
 
 
-def dmarc_verify_external_destinations(domain, parsed, task, public_suffix_list):
+def dmarc_verify_external_destinations(domain, parsed, public_suffix_list):
     """
     Verify external destinations as per section 7.1 (RFC7489).
 
@@ -584,21 +583,24 @@ def dmarc_verify_external_destinations(domain, parsed, task, public_suffix_list)
         host_org = dmarc_find_organizational_domain(host, public_suffix_list)
         if domain_org != host_org:
             ext_qname = f"{domain}._report._dmarc.{host}"
-            txt_records = task.resolve(ext_qname, unbound.RR_TYPE_TXT)
             is_dmarc = False
-            for txt in txt_records:
-                ru_parsed = dmarc_parse(txt[0])
-                if ru_parsed:
-                    if is_dmarc:
-                        # Second valid DMARC record, abort.
-                        is_dmarc = False
-                        break
-                    # Need to check same host on rua/ruf.
-                    for ru_host in _dmarc_get_ru_host(ru_parsed):
-                        if host != ru_host:
+            try:
+                txt_records = resolve_txt(ext_qname)
+                for txt in txt_records:
+                    ru_parsed = dmarc_parse(txt[0])
+                    if ru_parsed:
+                        if is_dmarc:
+                            # Second valid DMARC record, abort.
                             is_dmarc = False
                             break
-                    is_dmarc = True
+                        # Need to check same host on rua/ruf.
+                        for ru_host in _dmarc_get_ru_host(ru_parsed):
+                            if host != ru_host:
+                                is_dmarc = False
+                                break
+                        is_dmarc = True
+            except DNSException:
+                pass
 
             if not is_dmarc:
                 status = DmarcPolicyStatus.invalid_external

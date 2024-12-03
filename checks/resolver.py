@@ -59,9 +59,10 @@ def resolve(label: str, rr_type: RdataType, allow_bogus=False):
 
 
 def get_resolver():
-    resolver = Resolver()
+    resolver = Resolver(configure=False)
     resolver.nameservers = [getenv("IPV4_IP_RESOLVER_INTERNAL_VALIDATING")]
-    # resolver.nameservers = [settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING]
+    # TODO: revert to
+    #  # resolver.nameservers = [settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING]
     resolver.edns = True
     resolver.flags = Flag.CD
     resolver.ednsflags = EDNSFlag.DO
