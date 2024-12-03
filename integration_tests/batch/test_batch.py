@@ -12,7 +12,7 @@ INTERNETNL_API = f"https://{APP_DOMAIN}/api/batch/v2/"
 TEST_DOMAIN = "target.test"
 TEST_DOMAIN_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
-TEST_DOMAIN_EXPECTED_SCORE = 49
+TEST_DOMAIN_EXPECTED_SCORE = 54
 
 
 BATCH_PERIODIC_TESTS_PREFIX = "batch periodic tests"

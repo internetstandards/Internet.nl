@@ -12,13 +12,15 @@ from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 
-import unbound
+from dns.exception import DNSException
+
 from checks.models import ASRecord, ConnectionTest, Resolver
 from checks.probes import Probe, ProbeSet
+from checks.resolver import dns_resolve_txt, dns_resolve_reverse
 from checks.scoring import STATUS_FAIL, STATUS_INFO, STATUS_NOT_TESTED, STATUS_NOTICE, STATUS_SUCCESS
 from checks.tasks.routing import TeamCymruIPtoASN, BGPSourceUnavailableError
 from interface import redis_id
-from interface.views.shared import get_client_ip, get_javascript_retries, get_ub_ctx
+from interface.views.shared import get_client_ip, get_javascript_retries
 
 probe_ipv6 = Probe("ipv6", "conn", scorename="ipv6", nourl=True, maxscore=100)
 probe_resolver = Probe("resolver", "conn", scorename="dnssec", nourl=True, maxscore=100, reportfield="reportdnssec")
@@ -351,9 +353,8 @@ def find_AS_by_IP(ip):
     :returns: AS number or None on error
 
     """
-    ub_ctx = get_ub_ctx()
     try:
-        asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(None, ip)
+        asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(ip)
         (asn, _) = asns_prefixes[0]
     except (BGPSourceUnavailableError, IndexError):
         return None
@@ -361,13 +362,14 @@ def find_AS_by_IP(ip):
     as_record = cache.get(redis_id.conn_test_as.id.format(asn))
     if not as_record:
         as_details_query = f"AS{asn}.asn.cymru.com."
-        status, result = ub_ctx.resolve(as_details_query, unbound.RR_TYPE_TXT, unbound.RR_CLASS_IN)
-        if status != 0 or result.nxdomain or not result.havedata:
+        try:
+            record = dns_resolve_txt(as_details_query)
+        except DNSException:
             return None
 
         # The values in the TXT record are separated by '|' and the description
         # of the AS is the last value.
-        txt = result.data.data[0][1:].decode("ascii")
+        txt = record[0][1:]
         description = txt.split("|")[-1].strip()
 
         # Some ASes include their ASN in the description
@@ -398,19 +400,6 @@ def find_AS_by_IP(ip):
         cache.set(cache_id, as_record, cache_ttl)
 
     return as_record.number
-
-
-def unbound_ptr(qname):
-    """
-    Return the PTR records for `qname` from unbound.
-
-    """
-    ub_ctx = get_ub_ctx()
-    status, result = ub_ctx.resolve(qname, unbound.RR_TYPE_PTR, unbound.RR_CLASS_IN)
-    if status == 0 and result.havedata:
-        return result.data.domain_list
-    else:
-        return []
 
 
 def resolv_list(host, test_id):
@@ -510,11 +499,10 @@ def network_ipv6(request, test_id: int = 0):
     ip = get_client_ip(request)
     asn = find_AS_by_IP(ip)
 
-    ipv6 = ipaddress.IPv6Address(ip)
-    reverse_pointer = ipv6.reverse_pointer
-    ptr_list = unbound_ptr(reverse_pointer)
-    reverse = ", ".join(ptr_list)
-
+    try:
+        reverse = ", ".join(dns_resolve_reverse(ip))
+    except DNSException:
+        reverse = ""
     mac_vendor = get_slaac_mac_vendor(ip)
 
     resolv = resolv_list(request.get_host(), test_id)
@@ -534,10 +522,10 @@ def network_ipv4(request, test_id: int = 0):
     if hasattr(request, "test_id"):
         test_id = request.test_id
 
-    ipv4 = ipaddress.IPv4Address(ip)
-    reverse_pointer = ipv4.reverse_pointer
-    ptr_list = unbound_ptr(reverse_pointer)
-    reverse = ", ".join(ptr_list)
+    try:
+        reverse = ", ".join(dns_resolve_reverse(ip))
+    except DNSException:
+        reverse = ""
     resolv = resolv_list(request.get_host(), test_id)
     results = dict(ip=ip, asn=asn, reverse=reverse)
     cache_id = redis_id.conn_test_v4.id.format(test_id)

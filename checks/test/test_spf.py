@@ -1,7 +1,7 @@
 import pytest
 
 from checks.models import SpfPolicyStatus
-from checks.tasks.mail import spf_check_policy, spf
+from checks.tasks.mail import spf_check_policy
 
 
 @pytest.mark.skip(reason="Other responses have not yet been mocked.")
@@ -12,13 +12,12 @@ def test_spf_check_policy():
     suite. This code should be tested with responses we know in advance.
     """
 
-    task = spf
     spf_record = (
         "v=spf1 a mx ip4:178.18.134.219 ip4:178.18.134.202 ip4:89.146.58.102 ip4:185.217.208.76 "
         "include:sendgrid.net include:spf.mailcampaigns.nl include:spf.wearehostingyou.com "
         "include:emsd1.com include:spf.afas.online -all"
     )
-    status, score, left_lookups = spf_check_policy("nac.nl", spf_record, task, policy_records=[])
+    status, score, left_lookups = spf_check_policy("nac.nl", spf_record, policy_records=[])
 
     assert status == SpfPolicyStatus.max_dns_lookups
     assert score == 2
