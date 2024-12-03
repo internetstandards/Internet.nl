@@ -1,5 +1,6 @@
 import enum
 from os import getenv
+from threading import Lock
 from typing import List, cast, Tuple, Optional
 
 import dns
@@ -10,7 +11,6 @@ from dns.message import Message
 from dns.rdatatype import RdataType
 from dns.resolver import Resolver
 
-# TODO: prevent recreation of resolver on every call
 # TODO: see how timeouts are handled
 
 
@@ -57,8 +57,17 @@ def resolve(label: str, rr_type: RdataType, allow_bogus=False):
         raise ValidationFailure()
     return answer.rrset, dnssec_status
 
+_resolver = None
 
 def get_resolver():
+    # Resolvers are thread safe once configured
+    global _resolver
+    if not _resolver:
+        _resolver = _create_resolver()
+    return _resolver
+
+
+def _create_resolver() -> Resolver:
     resolver = Resolver(configure=False)
     resolver.nameservers = [getenv("IPV4_IP_RESOLVER_INTERNAL_VALIDATING")]
     # TODO: revert to
@@ -67,7 +76,6 @@ def get_resolver():
     resolver.flags = Flag.CD
     resolver.ednsflags = EDNSFlag.DO
     return resolver
-
 
 # dnspython 2.7 has this built in on Message
 def extended_errors_from_answer(message: Message) -> List[dns.edns.EDEOption]:
