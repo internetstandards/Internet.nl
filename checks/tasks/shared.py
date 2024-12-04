@@ -7,11 +7,11 @@ from collections import defaultdict
 from celery import shared_task
 from django.conf import settings
 
-import unbound
 from dns.exception import DNSException
+from dns.resolver import NXDOMAIN, NoAnswer
 
 from checks.models import MxStatus
-from checks.resolver import resolve_spf
+from checks.resolver import resolve_spf, resolve_a, resolve_aaaa, DNSSECStatus, resolve_tlsa
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
 from checks.tasks import SetupUnboundContext
@@ -53,7 +53,7 @@ def batch_mail_get_servers(self, url, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def resolve_a_aaaa(self, qname, *args, **kwargs):
-    return do_resolve_a_aaaa(self, qname, *args, **kwargs)
+    return do_resolve_a_aaaa(qname)
 
 
 @batch_shared_task(
@@ -63,7 +63,7 @@ def resolve_a_aaaa(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
-    return do_resolve_a_aaaa(self, qname, *args, **kwargs)
+    return do_resolve_a_aaaa(qname)
 
 
 @shared_task(
@@ -93,7 +93,7 @@ def batch_resolve_mx(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def resolve_ns(self, qname, *args, **kwargs):
-    return do_resolve_ns_ips(self, qname, *args, **kwargs)
+    return do_resolve_ns_ips(qname)
 
 
 @batch_shared_task(
@@ -103,7 +103,7 @@ def resolve_ns(self, qname, *args, **kwargs):
     base=SetupUnboundContext,
 )
 def batch_resolve_ns(self, qname, *args, **kwargs):
-    return do_resolve_ns_ips(self, qname, *args, **kwargs)
+    return do_resolve_ns_ips(qname)
 
 
 def do_mail_get_servers(self, url, *args, **kwargs):
@@ -113,14 +113,15 @@ def do_mail_get_servers(self, url, *args, **kwargs):
 
     """
     mailservers = []
-    mxlist = self.resolve(url, unbound.RR_TYPE_MX)
-    for prio, rdata in mxlist:
+    mxlist, _ = resolve_mx(url)
+
+    for rdata, prio in mxlist:
         is_null_mx = prio == 0 and rdata == ""
         if is_null_mx:
             if len(mxlist) > 1:
                 # Invalid NULL MX next to other MX.
                 return [(None, None, MxStatus.null_mx_with_other_mx)]
-            elif not do_resolve_a_aaaa(self, url):
+            elif not do_resolve_a_aaaa(url):
                 return [(None, None, MxStatus.null_mx_without_a_aaaa)]
             return [(None, None, MxStatus.null_mx)]
 
@@ -130,11 +131,11 @@ def do_mail_get_servers(self, url, *args, **kwargs):
         elif re.match(MX_LOCALHOST_RE, rdata):
             # Ignore "localhost".
             continue
-        dane_cb_data = resolve_dane(self, 25, rdata)
+        dane_cb_data = resolve_dane(25, rdata)
         mailservers.append((rdata, dane_cb_data, MxStatus.has_mx))
 
     if not mailservers:
-        if do_resolve_a_aaaa(self, url):
+        if do_resolve_a_aaaa(url):
             try:
                 spf_data = resolve_spf(url)
                 if spf_data:
@@ -155,13 +156,13 @@ def get_mail_servers_mxstatus(mailservers):
     return mailservers[0][2]
 
 
-def do_resolve_a_aaaa(self, qname, *args, **kwargs):
+def do_resolve_a_aaaa(qname):
     """Resolve A and AAAA records and return a single result for each type."""
     af_ip_pairs = []
-    ip4 = self.resolve(qname, unbound.RR_TYPE_A)
+    ip4, _ = resolve_a(qname)
     if len(ip4) > 0:
         af_ip_pairs.append((socket.AF_INET, ip4[0]))
-    ip6 = self.resolve(qname, unbound.RR_TYPE_AAAA)
+    ip6, _ = resolve_aaaa(qname)
     if len(ip6) > 0:
         af_ip_pairs.append((socket.AF_INET6, ip6[0]))
     return af_ip_pairs
@@ -178,10 +179,10 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
             continue
 
         af_ip_pairs = []
-        ip4 = self.resolve(qname, unbound.RR_TYPE_A)
+        ip4, _ = resolve_a(url)
         for ip in ip4:
             af_ip_pairs.append((socket.AF_INET, ip))
-        ip6 = self.resolve(qname, unbound.RR_TYPE_AAAA)
+        ip6, _ = resolve_aaaa(url)
         for ip in ip6:
             af_ip_pairs.append((socket.AF_INET6, ip))
         mx_ips_pairs.append((qname, af_ip_pairs))
@@ -189,29 +190,40 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
     return mx_ips_pairs
 
 
-def do_resolve_ns_ips(self, url, *args, **kwargs):
+def do_resolve_ns_ips(qname):
     """Resolve the domain's nameservers
     Returns [(nameserver, af_ip_pairs)]
     """
-    rrset = self.resolve(url, unbound.RR_TYPE_NS)
-    next_label = url
-    while not rrset and "." in next_label:
-        rrset = self.resolve(next_label, unbound.RR_TYPE_NS)
+
+    ns_list = resolve_ns(qname)
+    next_label = qname
+    while not ns_list and "." in next_label:
+        ns_list = resolve_ns(next_label)
         next_label = next_label[next_label.find(".") + 1 :]
 
-    for rr in rrset:
-        yield (rr, do_resolve_a_aaaa(self, rr))
+    for ns_name in ns_list:
+        yield ns_name, do_resolve_a_aaaa(ns_name)
 
 
-def resolve_dane(task, port, dname, check_nxdomain=False):
+def resolve_dane(port, dname, check_nxdomain=False):
+    # Due to its complex use, the API of this call is backwards compatible
     qname = f"_{port}._tcp.{dname}"
-    if check_nxdomain:
-        qtype = unbound.RR_TYPE_A
-        cb_data = task.async_resolv(qname, qtype)
-    else:
-        qtype = 52  # unbound.RR_TYPE_TLSA
-        cb_data = task.resolve(qname, qtype)
-    return cb_data
+    try:
+        if check_nxdomain:
+            data, dnssec_status = resolve_a(qname)
+        else:
+            rrset, dnssec_status = resolve_tlsa(qname)
+            data = [(rr.usage, rr.selector, rr.mtype, rr.cert_str) for rr in rrset]
+    except NXDOMAIN:
+        return {"nxdomain": True}
+    except NoAnswer:
+        data = None
+        dnssec_status = None
+    return {
+        "data": data,
+        "bogus": dnssec_status == DNSSECStatus.BOGUS,
+        "secure": dnssec_status == DNSSECStatus.SECURE,
+    }
 
 
 def results_per_domain(results):

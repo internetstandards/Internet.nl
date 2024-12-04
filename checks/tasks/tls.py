@@ -1130,7 +1130,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
 
     continue_testing = False
 
-    cb_data = dane_cb_data or resolve_dane(task, port, url)
+    cb_data = dane_cb_data or resolve_dane(port, url)
 
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
@@ -1140,7 +1140,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
     elif cb_data.get("data") and cb_data.get("secure"):
         # If there is a secure TLSA record check for the existence of
         # possible bogus (unsigned) NXDOMAIN in A.
-        tmp_data = resolve_dane(task, port, url, check_nxdomain=True)
+        tmp_data = resolve_dane(port, url, check_nxdomain=True)
         if tmp_data.get("nxdomain") and tmp_data.get("bogus"):
             status = DaneStatus.none_bogus
             score = score_none_bogus

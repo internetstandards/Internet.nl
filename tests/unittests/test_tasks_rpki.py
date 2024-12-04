@@ -43,7 +43,7 @@ class RpkiTestCase(SimpleTestCase):
                         url=routinator_url,
                         json=routinator_response,
                     )
-                fqdn_ip_pairs = [(domain, do_resolve_a_aaaa(self.task, domain))]
+                fqdn_ip_pairs = [(domain, do_resolve_a_aaaa(domain))]
                 result = do_rpki(self.task, fqdn_ip_pairs)
 
                 assert result
