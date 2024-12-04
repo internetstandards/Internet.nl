@@ -50,7 +50,7 @@ def resolve_soa(label: str, allow_bogus=True) -> DNSSECStatus:
     return [rr.target for rr in rrset], dnssec_status
 
 
-def resolve_ns(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]:
+def dns_resolve_ns(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.NS, allow_bogus)
     return [rr.target for rr in rrset], dnssec_status
 

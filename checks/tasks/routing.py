@@ -152,7 +152,7 @@ class TeamCymruIPtoASN(RouteView):
         ip2asn_query = TeamCymruIPtoASN.ip_to_dns_query(ip_in)
 
         try:
-            result = resolve_txt(ip2asn_query)
+            result, _ = resolve_txt(ip2asn_query)
         except dns.resolver.NXDOMAIN:
             return []
         except dns.resolver.NoAnswer:

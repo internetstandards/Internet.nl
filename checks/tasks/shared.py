@@ -11,7 +11,7 @@ from dns.exception import DNSException
 from dns.resolver import NXDOMAIN, NoAnswer
 
 from checks.models import MxStatus
-from checks.resolver import resolve_spf, resolve_a, resolve_aaaa, DNSSECStatus, resolve_tlsa
+from checks.resolver import resolve_spf, resolve_a, resolve_aaaa, DNSSECStatus, resolve_tlsa, dns_resolve_ns
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
 from checks.tasks import SetupUnboundContext
@@ -195,10 +195,10 @@ def do_resolve_ns_ips(qname):
     Returns [(nameserver, af_ip_pairs)]
     """
 
-    ns_list = resolve_ns(qname)
+    ns_list, _ = dns_resolve_ns(qname)
     next_label = qname
     while not ns_list and "." in next_label:
-        ns_list = resolve_ns(next_label)
+        ns_list, _ = dns_resolve_ns(next_label)
         next_label = next_label[next_label.find(".") + 1 :]
 
     for ns_name in ns_list:
