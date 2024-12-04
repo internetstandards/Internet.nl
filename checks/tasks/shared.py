@@ -159,10 +159,16 @@ def get_mail_servers_mxstatus(mailservers):
 def do_resolve_a_aaaa(qname):
     """Resolve A and AAAA records and return a single result for each type."""
     af_ip_pairs = []
-    ip4, _ = resolve_a(qname)
+    try:
+        ip4, _ = resolve_a(qname)
+    except (NoAnswer, NXDOMAIN):
+        ip4 = []
     if len(ip4) > 0:
         af_ip_pairs.append((socket.AF_INET, ip4[0]))
-    ip6, _ = resolve_aaaa(qname)
+    try:
+        ip6, _ = resolve_aaaa(qname)
+    except (NoAnswer, NXDOMAIN):
+        ip6 = []
     if len(ip6) > 0:
         af_ip_pairs.append((socket.AF_INET6, ip6[0]))
     return af_ip_pairs
@@ -195,10 +201,16 @@ def do_resolve_ns_ips(qname):
     Returns [(nameserver, af_ip_pairs)]
     """
 
-    ns_list, _ = dns_resolve_ns(qname)
+    try:
+        ns_list, _ = dns_resolve_ns(qname)
+    except (NoAnswer, NXDOMAIN):
+        ns_list = None
     next_label = qname
     while not ns_list and "." in next_label:
-        ns_list, _ = dns_resolve_ns(next_label)
+        try:
+            ns_list, _ = dns_resolve_ns(next_label)
+        except (NoAnswer, NXDOMAIN):
+            ns_list = None
         next_label = next_label[next_label.find(".") + 1 :]
 
     for ns_name in ns_list:
