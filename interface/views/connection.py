@@ -13,6 +13,7 @@ from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 
 from dns.exception import DNSException
+from dns.resolver import NXDOMAIN
 
 from checks.models import ASRecord, ConnectionTest, Resolver
 from checks.probes import Probe, ProbeSet
@@ -499,7 +500,10 @@ def network_ipv6(request, test_id: int = 0):
     ip = get_client_ip(request)
     asn = find_AS_by_IP(ip)
 
-    reverse = ", ".join(resolve_reverse(ip))
+    try:
+        reverse = ", ".join(resolve_reverse(ip))
+    except DNSException:
+        reverse = ""
     mac_vendor = get_slaac_mac_vendor(ip)
 
     resolv = resolv_list(request.get_host(), test_id)
@@ -519,7 +523,10 @@ def network_ipv4(request, test_id: int = 0):
     if hasattr(request, "test_id"):
         test_id = request.test_id
 
-    reverse = ", ".join(resolve_reverse(ip))
+    try:
+        reverse = ", ".join(resolve_reverse(ip))
+    except DNSException:
+        reverse = ""
     resolv = resolv_list(request.get_host(), test_id)
     results = dict(ip=ip, asn=asn, reverse=reverse)
     cache_id = redis_id.conn_test_v4.id.format(test_id)

@@ -81,7 +81,7 @@ def resolve_reverse(label: str) -> List[str]:
 
 
 def resolve(label: str, rr_type: RdataType, allow_bogus=True):
-    answer = get_resolver().resolve(dns.name.from_text(label), rr_type)
+    answer = get_resolver().resolve(label, rr_type)
     dnssec_status = DNSSECStatus.from_message(answer.response)
     if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
         raise ValidationFailure()
