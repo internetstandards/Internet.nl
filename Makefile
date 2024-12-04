@@ -587,6 +587,7 @@ test:
 	-m pytest -vvv -ra \
 	--junit-xml=test-results.xml \
 	$(filter-out integration_tests,${pysrcdirs}) \
+    -k'${tests}' \
 	${test_args}
 
 test-shell:
@@ -619,6 +620,9 @@ test-all:
 	$(MAKE) down environment=batch-test
 
 DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/compose.tools.yaml docker compose
+
+makemigrations:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools env SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py makemigrations
 
 lint:
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
