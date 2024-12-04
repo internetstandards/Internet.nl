@@ -40,7 +40,7 @@ class Command(BaseCommand):
             #  ON ("checks_domaintestipv6"."id" = "checks_domaintestreport"."ipv6_id")
             #  WHERE "checks_domaintestreport"."id" IS NULL
 
-            # find all test probe results that have no report associated, but not to recent because
+            # find all test probe results that have no report associated, but not too recent because
             # those might be unfinished tests
             count, _ = model.objects.filter(
                 domaintestreport__isnull=True, timestamp__lt=timestamp_recent_probes
