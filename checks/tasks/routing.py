@@ -168,8 +168,8 @@ class TeamCymruIPtoASN(RouteView):
         asn_prefix_pairs = []
         for txt in result:
             try:
-                asns = txt[0].split("|")[0].strip().split(" ")
-                prefix = txt[0].split("|")[1].strip()
+                asns = txt.split("|")[0].strip().split(" ")
+                prefix = txt.split("|")[1].strip()
 
                 # Check that we didn't get any gibberish back.
                 ipaddress.ip_network(prefix)

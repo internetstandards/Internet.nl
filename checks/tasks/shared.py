@@ -1,5 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import binascii
 import re
 import socket
 from collections import defaultdict
@@ -11,7 +12,8 @@ from dns.exception import DNSException
 from dns.resolver import NXDOMAIN, NoAnswer
 
 from checks.models import MxStatus
-from checks.resolver import resolve_spf, resolve_a, resolve_aaaa, DNSSECStatus, resolve_tlsa, dns_resolve_ns
+from checks.resolver import resolve_spf, resolve_a, resolve_aaaa, DNSSECStatus, resolve_tlsa, dns_resolve_ns, \
+    dns_resolve_mx
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
 from checks.tasks import SetupUnboundContext
@@ -113,7 +115,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
 
     """
     mailservers = []
-    mxlist, _ = resolve_mx(url)
+    mxlist, _ = dns_resolve_mx(url)
 
     for rdata, prio in mxlist:
         is_null_mx = prio == 0 and rdata == ""
@@ -228,7 +230,7 @@ def resolve_dane(port, dname, check_nxdomain=False):
             data, dnssec_status = resolve_a(qname)
         else:
             rrset, dnssec_status = resolve_tlsa(qname)
-            data = [(rr.usage, rr.selector, rr.mtype, rr.cert_str) for rr in rrset]
+            data = [(rr.usage, rr.selector, rr.mtype, binascii.hexlify(rr.cert).decode('ascii')) for rr in rrset]
     except NXDOMAIN:
         return {"nxdomain": True}
     except NoAnswer:

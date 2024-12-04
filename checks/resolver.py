@@ -40,7 +40,7 @@ def resolve_aaaa(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]
     return [rr.address for rr in rrset], dnssec_status
 
 
-def resolve_mx(label: str, allow_bogus=True) -> Tuple[List[Tuple[str, int]], DNSSECStatus]:
+def dns_resolve_mx(label: str, allow_bogus=True) -> Tuple[List[Tuple[str, int]], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.MX, allow_bogus)
     return [(str(rr.exchange), rr.preference) for rr in rrset], dnssec_status
 
@@ -58,8 +58,6 @@ def dns_resolve_ns(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatu
 # TODO: try to use TLSA return type
 def resolve_tlsa(label: str, allow_bogus=True) -> Tuple[List[Any], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.TLSA, allow_bogus)
-    for rr in rrset:
-        rr.cert_str = dns.rdata._hexify(rr.cert, chunksize=128)
     return rrset, dnssec_status
 
 

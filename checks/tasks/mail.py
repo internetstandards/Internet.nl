@@ -583,7 +583,7 @@ def dmarc_verify_external_destinations(domain, parsed, public_suffix_list):
             ext_qname = f"{domain}._report._dmarc.{host}"
             is_dmarc = False
             try:
-                txt_records = resolve_txt(ext_qname)
+                txt_records, _ = resolve_txt(ext_qname)
                 for txt in txt_records:
                     ru_parsed = dmarc_parse(txt[0])
                     if ru_parsed:
