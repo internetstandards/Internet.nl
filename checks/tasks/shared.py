@@ -204,17 +204,20 @@ def do_resolve_ns_ips(qname):
     try:
         ns_list, _ = dns_resolve_ns(qname)
     except (NoAnswer, NXDOMAIN):
-        ns_list = None
+        ns_list = []
     next_label = qname
     while not ns_list and "." in next_label:
         try:
             ns_list, _ = dns_resolve_ns(next_label)
         except (NoAnswer, NXDOMAIN):
-            ns_list = None
+            ns_list = []
         next_label = next_label[next_label.find(".") + 1 :]
 
     for ns_name in ns_list:
-        yield ns_name, do_resolve_a_aaaa(ns_name)
+        try:
+            yield ns_name, do_resolve_a_aaaa(ns_name)
+        except ValueError as ve:
+            raise Exception(f"resolver failed on ns_name: {ns_name=} {ns_list=} {qname=} {ve=}")
 
 
 def resolve_dane(port, dname, check_nxdomain=False):
