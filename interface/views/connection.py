@@ -13,7 +13,6 @@ from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 
 from dns.exception import DNSException
-from dns.resolver import NXDOMAIN
 
 from checks.models import ASRecord, ConnectionTest, Resolver
 from checks.probes import Probe, ProbeSet

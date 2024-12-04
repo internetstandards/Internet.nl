@@ -42,17 +42,17 @@ def resolve_aaaa(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]
 
 def resolve_mx(label: str, allow_bogus=True) -> Tuple[List[Tuple[str, int]], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.MX, allow_bogus)
-    return [(rr.exchange, rr.preference) for rr in rrset], dnssec_status
+    return [(str(rr.exchange), rr.preference) for rr in rrset], dnssec_status
 
 
 def resolve_soa(label: str, allow_bogus=True) -> DNSSECStatus:
     rrset, dnssec_status = resolve(label, RdataType.SOA, allow_bogus)
-    return [rr.target for rr in rrset], dnssec_status
+    return dnssec_status
 
 
 def dns_resolve_ns(label: str, allow_bogus=True) -> Tuple[List[str], DNSSECStatus]:
     rrset, dnssec_status = resolve(label, RdataType.NS, allow_bogus)
-    return [rr.target for rr in rrset], dnssec_status
+    return [str(rr.target) for rr in rrset], dnssec_status
 
 
 # TODO: try to use TLSA return type
@@ -81,7 +81,7 @@ def resolve_reverse(label: str) -> List[str]:
 
 
 def resolve(label: str, rr_type: RdataType, allow_bogus=True):
-    answer = get_resolver().resolve(label, rr_type)
+    answer = get_resolver().resolve(dns.name.from_text(label), rr_type)
     dnssec_status = DNSSECStatus.from_message(answer.response)
     if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
         raise ValidationFailure()
