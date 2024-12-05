@@ -189,18 +189,24 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
     """
     mx_ips_pairs = []
 
-    for qname, _, status in do_mail_get_servers(self, url, *args, **kwargs):
+    for mx_name, _, status in do_mail_get_servers(self, url, *args, **kwargs):
         if status is not MxStatus.has_mx:
             continue
 
         af_ip_pairs = []
-        ip4, _ = resolve_a(url)
+        try:
+            ip4, _ = resolve_a(mx_name)
+        except (NoAnswer, NXDOMAIN):
+            ip4 = []
         for ip in ip4:
             af_ip_pairs.append((socket.AF_INET, ip))
-        ip6, _ = resolve_aaaa(url)
+        try:
+            ip6, _ = resolve_aaaa(mx_name)
+        except (NoAnswer, NXDOMAIN):
+            ip6 = []
         for ip in ip6:
             af_ip_pairs.append((socket.AF_INET6, ip))
-        mx_ips_pairs.append((qname, af_ip_pairs))
+        mx_ips_pairs.append((mx_name, af_ip_pairs))
 
     return mx_ips_pairs
 

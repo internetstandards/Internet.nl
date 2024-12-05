@@ -286,7 +286,7 @@ def get_valid_domain_mail(mailaddr, timeout=5):
 
     try:
         resolve_soa(dname)
-    except (NXDOMAIN, Timeout) as ex:
+    except (NXDOMAIN, Timeout):
         return None
     except NoAnswer:
         # We're fine with it if any record exists
