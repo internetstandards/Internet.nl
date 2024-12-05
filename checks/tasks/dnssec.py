@@ -373,9 +373,12 @@ def dnssec_status(domain, mx_status, score_secure, score_insecure, score_bogus, 
         DNSSECStatus.UNSIGNED: (DnssecStatus.insecure.value, score_insecure),
     }
     try:
-        answer_dnssec_status = resolve_soa(domain)
+        log.info(f"requesting SOA for {domain=} with {mx_status=}")
+        answer_dnssec_status = resolve_soa(domain, raise_on_no_answer=False)
         status, score = status_mapping[answer_dnssec_status]
-    except (NoNameservers, NoAnswer):
+        log.info(f"{answer_dnssec_status=}")
+    except NoNameservers as ax:
+        log.info(f"err {ax=}")
         status = DnssecStatus.dnserror.value
         score = score_error
 

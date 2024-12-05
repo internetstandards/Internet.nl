@@ -45,8 +45,8 @@ def dns_resolve_mx(label: str, allow_bogus=True) -> Tuple[List[Tuple[str, int]],
     return [(str(rr.exchange), rr.preference) for rr in rrset], dnssec_status
 
 
-def resolve_soa(label: str, allow_bogus=True) -> DNSSECStatus:
-    rrset, dnssec_status = resolve(label, RdataType.SOA, allow_bogus)
+def resolve_soa(label: str, allow_bogus=True, raise_on_no_answer=True) -> DNSSECStatus:
+    rrset, dnssec_status = resolve(label, RdataType.SOA, allow_bogus, raise_on_no_answer)
     return dnssec_status
 
 
@@ -78,8 +78,8 @@ def resolve_reverse(label: str) -> List[str]:
     return [rr.to_text() for rr in answer.rrset]
 
 
-def resolve(label: str, rr_type: RdataType, allow_bogus=True):
-    answer = get_resolver().resolve(dns.name.from_text(label), rr_type)
+def resolve(label: str, rr_type: RdataType, allow_bogus=True, raise_on_no_answer=True):
+    answer = get_resolver().resolve(dns.name.from_text(label), rr_type, raise_on_no_answer=raise_on_no_answer)
     dnssec_status = DNSSECStatus.from_message(answer.response)
     if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
         raise ValidationFailure()
