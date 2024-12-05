@@ -21,7 +21,7 @@ from dns.rdatatype import RdataType
 from dns.resolver import NXDOMAIN, NoAnswer
 from dns.exception import Timeout
 
-from checks.resolver import resolve
+from checks.resolver import resolve, resolve_soa
 from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
@@ -285,9 +285,12 @@ def get_valid_domain_mail(mailaddr, timeout=5):
         return None
 
     try:
-        resolve(dname, RdataType.SOA, Timeout)
-    except (NoAnswer, NXDOMAIN):
+        resolve_soa(dname)
+    except (NXDOMAIN, Timeout) as ex:
         return None
+    except NoAnswer:
+        # We're fine with it if any record exists
+        pass
 
     return dname
 
