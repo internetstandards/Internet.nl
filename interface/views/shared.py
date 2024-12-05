@@ -19,6 +19,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from dns.rdatatype import RdataType
 from dns.resolver import NXDOMAIN, NoAnswer
+from dns.exception import Timeout
 
 from checks.resolver import resolve
 from checks.tasks.dispatcher import ProbeTaskResult
@@ -272,7 +273,7 @@ def get_valid_domain_web(dname, timeout=5):
         try:
             resolve(dname, qtype)
             return dname
-        except (NoAnswer, NXDOMAIN):
+        except (NoAnswer, NXDOMAIN, Timeout):
             pass
     log.debug(f"{dname}: Could not retrieve A/AAAA record")
     return None
@@ -284,7 +285,7 @@ def get_valid_domain_mail(mailaddr, timeout=5):
         return None
 
     try:
-        resolve(dname, RdataType.SOA)
+        resolve(dname, RdataType.SOA, Timeout)
     except (NoAnswer, NXDOMAIN):
         return None
 
