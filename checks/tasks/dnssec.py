@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from dns.resolver import NoNameservers, NoAnswer
+from dns.resolver import NoNameservers
 
 from checks import categories, scoring
 from checks.models import DnssecStatus, DomainTestDnssec, MailTestDnssec, MxStatus
@@ -373,6 +373,10 @@ def dnssec_status(domain, mx_status, score_secure, score_insecure, score_bogus, 
         DNSSECStatus.UNSIGNED: (DnssecStatus.insecure.value, score_insecure),
     }
     try:
+        log.info(f"requesting SOA for {domain=} with {mx_status=}")
+        answer_dnssec_status = resolve_soa(domain, raise_on_no_answer=False)
+        status, score = status_mapping[answer_dnssec_status]
+        log.info(f"{answer_dnssec_status=}")
         log.info(f"requesting SOA for {domain=} with {mx_status=}")
         answer_dnssec_status = resolve_soa(domain, raise_on_no_answer=False)
         status, score = status_mapping[answer_dnssec_status]
