@@ -6,9 +6,11 @@ import dns
 from dns.edns import EDECode
 from dns.exception import ValidationFailure
 from dns.flags import Flag, EDNSFlag
-from dns.message import Message
+from dns.message import Message, make_query
+from dns.query import udp_with_fallback
 from dns.rdatatype import RdataType
 from dns.resolver import Resolver
+
 
 # TODO: see how timeouts are handled
 # TODO: finetune naming of calls
@@ -76,6 +78,15 @@ def resolve_spf(label: str, allow_bogus=True) -> Tuple[Optional[str], DNSSECStat
 def resolve_reverse(label: str) -> List[str]:
     answer = get_resolver().resolve_address(label)
     return [rr.to_text() for rr in answer.rrset]
+
+
+def check_connectivity(label: str, ip: str, port: int = 53) -> bool:
+    q = make_query(label, RdataType.NS, use_edns=True, flags=Flag.CD)
+    try:
+        udp_with_fallback(q, port=port, where=ip, timeout=4)
+        return True
+    except dns.exception.Timeout:
+        return False
 
 
 def resolve(label: str, rr_type: RdataType, allow_bogus=True, raise_on_no_answer=True):

@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import ipaddress
 import socket
-import time
 from difflib import SequenceMatcher
 from typing import List
 
@@ -18,12 +17,13 @@ from django.db import transaction
 from checks import categories, scoring
 from checks.http_client import http_get_af, response_content_chunk
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
+from checks.resolver import check_connectivity
 from checks.tasks import SetupUnboundContext, dispatcher, shared
 from checks.tasks.dispatcher import check_registry
 from interface import batch, batch_shared_task, redis_id
 from interface.views.shared import pretty_domain_name
 from internetnl import log
-from unbound import RR_CLASS_IN, RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS, ub_ctx
+from unbound import RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS
 
 SIMHASH_MAX_RESPONSE_SIZE = 500000
 SIMHASH_NOT_CALCULABLE = settings.SIMHASH_MAX + 10000
@@ -294,56 +294,6 @@ def callback(results, addr, parent, parent_name, category):
     return parent
 
 
-def test_ns_connectivity(ip, port, domain):
-    log.debug("Testing fallback NS connectivity")
-    # NS connectivity is first tried with TCP (in test_connectivity).
-    # If that fails, maybe the NS is not doing TCP. As a last resort
-    # (expensive) we initiate an unbound context that will ask the NS a
-    # question he can't refuse.
-
-    def ub_callback(data, status, result):
-        if status != 0:
-            data["result"] = False
-        elif result.rcode == 2:  # SERVFAIL
-            data["result"] = False
-        else:
-            data["result"] = True
-        data["done"] = True
-
-    ctx = ub_ctx()
-
-    ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
-
-    if settings.INTEGRATION_TESTS:
-        # forward the .test zone used in integration tests
-        ctx.zone_add("test.", "transparent")
-
-    if settings.DEBUG_LOG_UNBOUND:
-        ctx.set_option("log-queries:", "yes")
-        ctx.set_option("verbosity:", "2")
-
-    # XXX: Remove for now; inconsistency with applying settings on celery.
-    # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
-    ctx.set_async(True)
-    ctx.set_fwd(ip)
-    # Some (unknown) tests probably depend on consistent ordering in unbound responses
-    ctx.set_option("rrset-roundrobin:", "no")
-    cb_data = dict(done=False)
-    try:
-        retval, async_id = ctx.resolve_async(domain, cb_data, ub_callback, RR_TYPE_NS, RR_CLASS_IN)
-        while retval == 0 and not cb_data["done"]:
-            time.sleep(0.1)
-            retval = ctx.process()
-    except SoftTimeLimitExceeded:
-        log.debug("Soft time limit exceeded.")
-        if async_id:
-            ctx.cancel(async_id)
-        raise
-
-    log.debug("Result of fallback NS connectivity: %s", cb_data["result"])
-    return cb_data["result"]
-
-
 def remove_ipv4_mapped_v6(addresses: List[str]) -> List[str]:
     """
     Filter a list of IPv6 addresses to ignore IPv4-mapped addresses.
@@ -368,33 +318,32 @@ def test_connectivity(ips, af, sock_type, ports, is_ns, test_domain):
     for ip in ips:
         for port in ports:
             sock = None
-            try:
-                # The 'settimeout' of this socket is being ignored.
-                # 2022-02-18 08:20:29	DEBUG    - Testing connectivity on ['IP'], on port [53], is_ns:....
-                # 2022-02-18 08:20:51	DEBUG    - Conclusion on ['IP']:[53]: good: set(), bad: {'....
-                # Why would it take 22 seconds now.
-                log.debug("Creating socket")
-                sock = socket.socket(af, sock_type)
-                log.debug("Setting timeout to 4 seconds")
-                sock.settimeout(4)
-                log.debug("Connecting to %s on port %s", ip, port)
-                sock.connect((ip, port))
-                log.debug("Adding IP to good list")
-                good.add(ip)
-                reachable_ports.add(port)
-                continue
-            except OSError:
-                pass
-            finally:
-                if sock:
-                    log.debug("Closing socket")
-                    sock.close()
-
-            # todo: according to test_ns_connectivity this should only be called as a last result, not every
-            #  ip. When is it called? -> this works because of the continue statement above.
-            if is_ns and test_ns_connectivity(ip, port, test_domain):
-                good.add(ip)
-                reachable_ports.add(port)
+            if is_ns:
+                if check_connectivity(test_domain, ip, port):
+                    good.add(ip)
+                    reachable_ports.add(port)
+            else:
+                try:
+                    # The 'settimeout' of this socket is being ignored.
+                    # 2022-02-18 08:20:29	DEBUG    - Testing connectivity on ['IP'], on port [53], is_ns:....
+                    # 2022-02-18 08:20:51	DEBUG    - Conclusion on ['IP']:[53]: good: set(), bad: {'....
+                    # Why would it take 22 seconds now.
+                    log.debug("Creating socket")
+                    sock = socket.socket(af, sock_type)
+                    log.debug("Setting timeout to 4 seconds")
+                    sock.settimeout(4)
+                    log.debug("Connecting to %s on port %s", ip, port)
+                    sock.connect((ip, port))
+                    log.debug("Adding IP to good list")
+                    good.add(ip)
+                    reachable_ports.add(port)
+                    continue
+                except OSError:
+                    pass
+                finally:
+                    if sock:
+                        log.debug("Closing socket")
+                        sock.close()
 
     bad = set(ips) - set(good)
     log.debug(f"Conclusion on {ips}:{ports}: good: {good}, bad: {bad}, ports: {reachable_ports}")
