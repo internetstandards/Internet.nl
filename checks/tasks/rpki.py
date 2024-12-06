@@ -10,7 +10,6 @@ from django.db import transaction
 from celery.utils.log import get_task_logger
 
 from interface import batch, batch_shared_task
-from . import SetupUnboundContext
 from . import shared
 from .dispatcher import check_registry, post_callback_hook
 from .routing import (
@@ -133,11 +132,10 @@ batch_mail_registered = check_registry("batch_mail_rpki", batch_mail_callback, s
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on webservers for a domain."""
-    return do_web_rpki(af_ip_pairs, url, self, *args, **kwargs)
+    return do_web_rpki(af_ip_pairs, url, *args, **kwargs)
 
 
 @mail_registered
@@ -146,7 +144,6 @@ def web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def ns_rpki(self, _, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for a domain.
@@ -154,7 +151,7 @@ def ns_rpki(self, _, url, *args, **kwargs):
     `@web_registered` passes in af_ip_pairs, which are not needed for this test.
     `@mail_registered` passes in mx_ips_pairs, which are not needed for this test.
     """
-    return do_ns_rpki(url, self, *args, **kwargs)
+    return do_ns_rpki(url, *args, **kwargs)
 
 
 @batch_web_registered
@@ -162,11 +159,10 @@ def ns_rpki(self, _, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on webservers for a domain."""
-    return do_web_rpki(af_ip_pairs, url, self, *args, **kwargs)
+    return do_web_rpki(af_ip_pairs, url, *args, **kwargs)
 
 
 @batch_web_registered
@@ -175,7 +171,6 @@ def batch_web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_ns_rpki(self, _, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for a domain.
@@ -183,7 +178,7 @@ def batch_ns_rpki(self, _, url, *args, **kwargs):
     `@batch_web_registered` passes in af_ip_pairs, which are not needed for this test.
     `@batch_mail_registered` passes in mx_ips_pairs, which are not needed for this test.
     """
-    return do_ns_rpki(url, self, *args, **kwargs)
+    return do_ns_rpki(url, *args, **kwargs)
 
 
 @mail_registered
@@ -191,11 +186,10 @@ def batch_ns_rpki(self, _, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on mailservers for a domain."""
-    return do_mail_rpki(mx_ips_pairs, url, self, *args, **kwargs)
+    return do_mail_rpki(mx_ips_pairs, url, *args, **kwargs)
 
 
 @mail_registered
@@ -203,11 +197,10 @@ def mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for the mx records of a domain."""
-    return do_mx_ns_rpki(mx_ips_pairs, url, self, *args, **kwargs)
+    return do_mx_ns_rpki(mx_ips_pairs, url, *args, **kwargs)
 
 
 @batch_mail_registered
@@ -215,11 +208,10 @@ def mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on mailservers for a domain."""
-    return do_mail_rpki(mx_ips_pairs, url, self, *args, **kwargs)
+    return do_mail_rpki(mx_ips_pairs, url, *args, **kwargs)
 
 
 @batch_mail_registered
@@ -227,14 +219,13 @@ def batch_mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for a domain.
 
     `@mail_registered` passes in mx_ips_pairs, which are not needed for this test.
     """
-    return do_ns_rpki(url, self, *args, **kwargs)
+    return do_ns_rpki(url, *args, **kwargs)
 
 
 @batch_mail_registered
@@ -242,11 +233,10 @@ def batch_mail_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for the mx records of a domain."""
-    return do_mx_ns_rpki(mx_ips_pairs, url, self, *args, **kwargs)
+    return do_mx_ns_rpki(mx_ips_pairs, url, *args, **kwargs)
 
 
 def generate_roa_existence_report(subtestname, category, hostset) -> int:
@@ -408,22 +398,22 @@ def build_summary_report(parent, parent_name, category) -> None:
     parent.save()
 
 
-def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_web_rpki(af_ip_pairs, url, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check webservers."""
-    web = do_rpki(task, [(url, af_ip_pairs)], *args, **kwargs)
+    web = do_rpki([(url, af_ip_pairs)], *args, **kwargs)
 
     return (TestName("rpki_web"), web)
 
 
-def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_ns_rpki(url, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers."""
     ns_ips_pairs = shared.do_resolve_ns_ips(url)
-    ns = do_rpki(task, ns_ips_pairs, *args, **kwargs)
+    ns = do_rpki(ns_ips_pairs, *args, **kwargs)
 
     return (TestName("rpki_ns"), ns)
 
 
-def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_mx_ns_rpki(mx_ips_pairs, url, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check nameservers for the mx record of a domain.
 
     These may or may not be the same as the nameservers for the domain itself.
@@ -433,19 +423,19 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, T
         for ns, ips in shared.do_resolve_ns_ips(mx):
             mx_ns_ips_pairs.add((ns, tuple(ips)))
 
-    mxns = do_rpki(task, mx_ns_ips_pairs, *args, **kwargs)
+    mxns = do_rpki(mx_ns_ips_pairs, *args, **kwargs)
 
     return (TestName("rpki_mx_ns"), mxns)
 
 
-def do_mail_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_mail_rpki(mx_ips_pairs, url, *args, **kwargs) -> Tuple[TestName, TestResult]:
     """Check mailservers."""
-    mail = do_rpki(task, mx_ips_pairs, *args, **kwargs)
+    mail = do_rpki(mx_ips_pairs, *args, **kwargs)
 
     return (TestName("rpki_mail"), mail)
 
 
-def do_rpki(task, fqdn_ips_pairs, *args, **kwargs) -> TestResult:
+def do_rpki(fqdn_ips_pairs, *args, **kwargs) -> TestResult:
     """Check IP-addresses for a service for the existence of valid Roas.
 
     Arguments:

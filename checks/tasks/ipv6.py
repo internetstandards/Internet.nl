@@ -18,12 +18,11 @@ from checks import categories, scoring
 from checks.http_client import http_get_af, response_content_chunk
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
 from checks.resolver import check_connectivity
-from checks.tasks import SetupUnboundContext, dispatcher, shared
+from checks.tasks import dispatcher, shared
 from checks.tasks.dispatcher import check_registry
 from interface import batch, batch_shared_task, redis_id
 from interface.views.shared import pretty_domain_name
 from internetnl import log
-from unbound import RR_TYPE_A, RR_TYPE_AAAA, RR_TYPE_NS
 
 SIMHASH_MAX_RESPONSE_SIZE = 500000
 SIMHASH_NOT_CALCULABLE = settings.SIMHASH_MAX + 10000
@@ -90,7 +89,6 @@ batch_mail_registered = check_registry("batch_mail_ipv6", batch_mail_callback)
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_MEDIUM,
-    base=SetupUnboundContext,
 )
 def ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
@@ -102,7 +100,6 @@ def ns(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
@@ -113,7 +110,6 @@ def batch_ns(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_MEDIUM,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_MEDIUM,
-    base=SetupUnboundContext,
 )
 def mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
@@ -124,7 +120,6 @@ def mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
@@ -135,7 +130,6 @@ def batch_mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -146,7 +140,6 @@ def web(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -530,8 +523,8 @@ def simhash(url, task=None):
     v6_response = None
     for port in [80, 443]:
         try:
-            v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, task=task, https=port == 443)
-            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, task=task, https=port == 443)
+            v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, https=port == 443)
+            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, https=port == 443)
             break
         except requests.RequestException:
             # Could not connect on given port, try another port.

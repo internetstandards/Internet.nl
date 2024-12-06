@@ -16,7 +16,6 @@ from checks import DMARC_NON_SENDING_POLICY, DMARC_NON_SENDING_POLICY_ORG, SPF_N
 from checks.http_client import http_get
 from checks.models import DmarcPolicyStatus, MailTestAuth, SpfPolicyStatus
 from checks.resolver import resolve_txt, resolve_spf
-from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
@@ -56,7 +55,6 @@ batch_mail_registered = check_registry("batch_mail_auth", batch_mail_callback)
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def dmarc(self, url, *args, **kwargs):
     return do_dmarc(url, *args, **kwargs)
@@ -67,7 +65,6 @@ def dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_dmarc(self, url, *args, **kwargs):
     return do_dmarc(url, *args, **kwargs)
@@ -78,7 +75,6 @@ def batch_dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def dkim(self, url, *args, **kwargs):
     return do_dkim(url, *args, **kwargs)
@@ -89,7 +85,6 @@ def dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_dkim(self, url, *args, **kwargs):
     return do_dkim(url, *args, **kwargs)
@@ -100,7 +95,6 @@ def batch_dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)
@@ -111,7 +105,6 @@ def spf(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)

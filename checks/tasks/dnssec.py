@@ -15,7 +15,7 @@ from dns.resolver import NoNameservers
 from checks import categories, scoring
 from checks.models import DnssecStatus, DomainTestDnssec, MailTestDnssec, MxStatus
 from checks.resolver import resolve_soa, DNSSECStatus
-from checks.tasks import SetupUnboundContext, shared
+from checks.tasks import shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from interface import batch, batch_shared_task, redis_id
 from internetnl import log
@@ -80,7 +80,6 @@ batch_mail_registered = check_registry("batch_mail_dnssec", batch_mail_callback,
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
@@ -91,7 +90,6 @@ def web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
@@ -102,7 +100,6 @@ def batch_web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
@@ -113,7 +110,6 @@ def mail_is_secure(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)

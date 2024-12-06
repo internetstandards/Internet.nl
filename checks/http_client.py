@@ -9,7 +9,6 @@ import urllib3
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
 from checks.resolver import resolve_aaaa, resolve_a
-from checks.tasks import SetupUnboundContext
 from checks.tasks.tls_connection import DEFAULT_TIMEOUT
 from checks.tasks.tls_connection_exceptions import NoIpError
 from django.conf import settings
@@ -111,9 +110,7 @@ def http_get_ip(
     return http_get(url, verify=False, headers=headers, session=session, *args, **kwargs)
 
 
-def http_get_af(
-    hostname: str, port: int, af: socket.AddressFamily, task: Optional[SetupUnboundContext] = None, *args, **kwargs
-) -> requests.Response:
+def http_get_af(hostname: str, port: int, af: socket.AddressFamily, *args, **kwargs) -> requests.Response:
     """
     Perform an HTTP GET request to the given hostname/port, restricting to a certain address family.
     Other (kw)args are passed to requests.get.
