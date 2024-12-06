@@ -13,13 +13,16 @@ from django.conf import settings
 
 from django.core.cache import cache
 from django.db import transaction
+from dns.rcode import NXDOMAIN
+from dns.resolver import NoAnswer
 
 from checks import categories, scoring
 from checks.http_client import http_get_af, response_content_chunk
 from checks.models import DomainTestIpv6, MailTestIpv6, MxDomain, MxStatus, NsDomain, WebDomain
-from checks.resolver import check_connectivity
+from checks.resolver import check_connectivity, resolve_aaaa, resolve_a
 from checks.tasks import dispatcher, shared
 from checks.tasks.dispatcher import check_registry
+from checks.tasks.shared import do_resolve_ns
 from interface import batch, batch_shared_task, redis_id
 from interface.views.shared import pretty_domain_name
 from internetnl import log
@@ -350,11 +353,17 @@ def get_domain_results(
     Resolve IPv4 and IPv6 addresses and check connectivity.
 
     """
-    v6 = task.resolve(domain, RR_TYPE_AAAA)
+    try:
+        v6, _ = resolve_aaaa(domain)
+    except (NoAnswer, NXDOMAIN):
+        v6 = []
     v6 = remove_ipv4_mapped_v6(v6)
     log.debug("V6 resolve: %s" % v6)
     v6_good, v6_bad, v6_ports = test_connectivity(v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
-    v4 = task.resolve(domain, RR_TYPE_A)
+    try:
+        v4, _ = resolve_a(domain)
+    except (NoAnswer, NXDOMAIN):
+        v4 = []
     log.debug("V4 resolve: %s" % v4)
     v4_good, v4_bad, v4_ports = test_connectivity(v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
     v6_conn_diff = v4_ports - v6_ports
@@ -430,19 +439,16 @@ def do_ns(self, url, *args, **kwargs):
     try:
         domains = []
         score = scoring.IPV6_NS_CONN_FAIL
-        rrset = self.resolve(url, RR_TYPE_NS)
-        next_label = url
-        while not rrset and "." in next_label:
-            rrset = self.resolve(next_label, RR_TYPE_NS)
-            next_label = next_label[next_label.find(".") + 1 :]
 
-        log.debug("rrset: %s", rrset)
-        log.debug("next_label: %s", next_label)
+        ns_list, hosted_zone_name = do_resolve_ns(url)
+
+        log.debug("ns_list: %s", ns_list)
+        log.debug("hosted_zone_name: %s", hosted_zone_name)
 
         has_a = set()  # Name servers that have IPv4.
         has_aaaa = set()  # Name servers that have IPv6.
-        if rrset:
-            for domain in rrset:
+        if ns_list:
+            for domain in ns_list:
                 log.debug("Getting domain result of %s", domain)
                 d = get_domain_results(
                     domain,
@@ -453,7 +459,7 @@ def do_ns(self, url, *args, **kwargs):
                     score_bad=scoring.IPV6_NS_CONN_FAIL,
                     score_partial=scoring.IPV6_NS_CONN_PARTIAL,
                     is_ns=True,
-                    test_domain=next_label,
+                    test_domain=hosted_zone_name,
                 )
                 log.debug("Retrieved domain results; %s", d)
                 if len(d["v4_good"]) + len(d["v4_bad"]) > 0:

@@ -4,6 +4,7 @@ import binascii
 import re
 import socket
 from collections import defaultdict
+from typing import Tuple, List
 
 from celery import shared_task
 from django.conf import settings
@@ -202,11 +203,11 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
     return mx_ips_pairs
 
 
-def do_resolve_ns_ips(qname):
-    """Resolve the domain's nameservers
-    Returns [(nameserver, af_ip_pairs)]
+def do_resolve_ns(qname: str) -> Tuple[List[str], str]:
     """
-
+    Find the nameservers responsible for this zone.
+    Returns tuple of: list of NS names, hosted_zone_name i.e. zone for which NS was found.
+    """
     try:
         ns_list, _ = dns_resolve_ns(qname)
     except (NoAnswer, NXDOMAIN):
@@ -218,6 +219,15 @@ def do_resolve_ns_ips(qname):
         except (NoAnswer, NXDOMAIN):
             ns_list = []
         next_label = next_label[next_label.find(".") + 1 :]
+
+    return ns_list, qname
+
+
+def do_resolve_ns_ips(qname):
+    """Resolve the domain's nameservers
+    Returns [(nameserver, af_ip_pairs)]
+    """
+    ns_list, _ = do_resolve_ns(qname)
 
     for ns_name in ns_list:
         try:
