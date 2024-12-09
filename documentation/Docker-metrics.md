@@ -1,6 +1,6 @@
 # Metrics
 
-The Docker deployment includes a metrics collection system which is available on production as well as development/test environments. It consists of a Prometheus metrics server which scrapes metrics from various exporters. Grafana is provided as frontend to visualise metrics and create graphs/dashboards. The various exporters, Prometheus and Grafana containers can be disabled by not loading the `monitoring` profile, by overriding the default profiles with e.g. `COMPOSE_PROFILES=batch,cron` in `local.env`.
+The Docker deployment includes a metrics collection system which is available on production as well as development/test environments. It consists of a Prometheus metrics server which scrapes metrics from various exporters. Grafana is provided as frontend to visualise metrics and create graphs/dashboards. The various exporters, Prometheus and Grafana containers can be disabled by not loading the `monitoring` profile, by overriding the default profiles with e.g. `COMPOSE_PROFILES=cron` in `local.env`.
 
 To view metrics and graphs visit the `/grafana/` endpoint. Eg: `http://localhost:8080/grafana/` for development and `https://example.com/grafana/` for production. For development the user/password is set to `test/test`, for production users can be configured using the `MONITORING_AUTH_RAW` variable in `docker/local.env` (see `docker/defaults.env` for information).
 

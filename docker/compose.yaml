@@ -754,6 +754,7 @@ services:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
     profiles:
+      - alertmanager
       - monitoring
 
   prometheus:
@@ -787,6 +788,7 @@ services:
       - prometheus-data:/prometheus
 
     profiles:
+      - alertmanager
       - monitoring
 
   alertmanager:
@@ -832,6 +834,7 @@ services:
       - internal
 
     profiles:
+      - alertmanager
       - monitoring
 
   redis-exporter:
@@ -852,6 +855,7 @@ services:
       - internal
 
     profiles:
+      - alertmanager
       - monitoring
 
   statsd-exporter:
@@ -876,6 +880,7 @@ services:
           - statsd
 
     profiles:
+      - alertmanager
       - monitoring
 
   celery-exporter:
@@ -900,6 +905,7 @@ services:
         condition: service_healthy
 
     profiles:
+      - alertmanager
       - monitoring
 
   # https://github.com/prometheus/node_exporter#docker
@@ -933,6 +939,7 @@ services:
       - prometheus-textfile-directory:/prometheus-textfile-directory
 
     profiles:
+      - alertmanager
       - monitoring
 
   docker_stats_exporter:
@@ -955,6 +962,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
     profiles:
+      - alertmanager
       - monitoring
 
   nginx_logs_exporter:
@@ -979,6 +987,7 @@ services:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
 
     profiles:
+      - alertmanager
       - monitoring
 
 volumes:
