@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
 from nassl._nassl import OpenSSLError
-from nassl.ssl_client import ClientCertificateRequested
+from nassl.ssl_client import ClientCertificateRequested, OpenSslDigestNidEnum
 from sslyze import (
     ScanCommand,
     ServerScanRequest,
@@ -863,9 +863,15 @@ def test_key_exchange_hash(
 
     try:
         ssl_connection.connect()
+        if ssl_connection.ssl_client.get_peer_signature_nid() == OpenSslDigestNidEnum.SHA1:
+            log.info("Failed SHA2 key exchange check: negotiated SHA1 even when only offering SHA2")
+            return KeyExchangeHashFunctionEvaluation(
+                status=KexHashFuncStatus.bad,
+                score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
+            )
     except ClientCertificateRequested:
         pass
-    except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut) as exc:
+    except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError) as exc:
         log.info(f"Failed SHA2 key exchange check: {exc}")
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.bad,
