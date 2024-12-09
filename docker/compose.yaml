@@ -569,6 +569,7 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+
     profiles:
       - connectiontest
 
@@ -752,6 +753,9 @@ services:
       internal:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
+    profiles:
+      - monitoring
+
   prometheus:
     image: ${DOCKER_IMAGE_PROMETHEUS}
 
@@ -781,6 +785,9 @@ services:
 
     volumes:
       - prometheus-data:/prometheus
+
+    profiles:
+      - monitoring
 
   alertmanager:
     image: ${DOCKER_IMAGE_PROMETHEUS_ALERTMANAGER}
@@ -824,6 +831,9 @@ services:
     networks:
       - internal
 
+    profiles:
+      - monitoring
+
   redis-exporter:
     image: ${DOCKER_IMAGE_REDIS_EXPORTER}
 
@@ -840,6 +850,9 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       - internal
+
+    profiles:
+      - monitoring
 
   statsd-exporter:
     image: ${DOCKER_IMAGE_STATSD_EXPORTER}
@@ -862,6 +875,9 @@ services:
         aliases:
           - statsd
 
+    profiles:
+      - monitoring
+
   celery-exporter:
     image: ${DOCKER_IMAGE_CELERY_EXPORTER}
     command:
@@ -882,6 +898,9 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
+    profiles:
+      - monitoring
 
   # https://github.com/prometheus/node_exporter#docker
   node-exporter:
@@ -913,6 +932,9 @@ services:
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - prometheus-textfile-directory:/prometheus-textfile-directory
 
+    profiles:
+      - monitoring
+
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
     image: ${DOCKER_IMAGE_DOCKER_STATSD_EXPORTER}
@@ -931,6 +953,9 @@ services:
       - internal
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+    profiles:
+      - monitoring
 
   nginx_logs_exporter:
     image: ${DOCKER_IMAGE_NGINX_LOGS_EXPORTER}
@@ -952,6 +977,9 @@ services:
       - internal
     volumes:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
+
+    profiles:
+      - monitoring
 
 volumes:
   postgres: {}
