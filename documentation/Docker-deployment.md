@@ -317,7 +317,7 @@ By default the installation will try to request a HTTPS certificate with Letsenc
 
 and
 
-    docker compose --project-name=internetnl-prod exec webserver "cat /var/log/letsencrypt/letsencrypt.log"
+    docker compose --project-name=internetnl-prod exec webserver cat /var/log/letsencrypt/letsencrypt.log
 
 It may take a few minutes after starting for the Letsencrypt certificates to be registered and loaded.
 
