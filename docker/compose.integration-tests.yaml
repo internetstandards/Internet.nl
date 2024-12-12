@@ -61,6 +61,8 @@ services:
         condition: service_healthy
       worker-slow:
         condition: service_healthy
+      worker-nassl:
+        condition: service_healthy
       unbound:
         condition: service_healthy
         required: false
