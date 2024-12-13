@@ -312,8 +312,6 @@ def test_ns_connectivity(ip, port, domain):
 
     ctx = ub_ctx()
 
-    ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
-
     if settings.INTEGRATION_TESTS:
         # forward the .test zone used in integration tests
         ctx.zone_add("test.", "transparent")
