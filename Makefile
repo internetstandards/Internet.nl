@@ -41,7 +41,7 @@ help:
 	@echo '                                              Optional branch=x to use a specific content repo branch.'
 	@echo '   make frontend                              (re)generate CSS and Javascript'
 	@echo '   make update_padded_macs                    update padded MAC information'
-	@echo '   make update_cert_fingerprints              update certificate fingerpint information'
+	@echo '   make update_cert_fingerprints              update certificate fingerprint information'
 	@echo '   make update_root_key_file                  update DNS root key file'
 
 translations:
