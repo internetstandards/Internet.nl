@@ -67,7 +67,7 @@ Run the following commands to install the files in the expected location:
 
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:latest cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env && \
+    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:main cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following input is required:
@@ -120,7 +120,7 @@ After configuration, spin up the instance:
       --volume /opt/Internet.nl:/opt/Internet.nl \
       --network none \
       --env DOCKER_REGISTRY=ghcr.io/internetstandards \
-      ghcr.io/internetstandards/util:latest \
+      ghcr.io/internetstandards/util:main \
       /deploy.sh
 
 This command should complete without an error, indicating the application stack is up and running healthy.
