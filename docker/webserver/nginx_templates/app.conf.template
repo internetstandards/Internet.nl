@@ -218,7 +218,7 @@ server {
 
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
-
+        include /etc/nginx/conf.d/basic_auth.include;
         proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 

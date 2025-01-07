@@ -548,7 +548,7 @@ batch-tests:
 batch-tests-verbose: _test_args=--verbose --verbose
 batch-tests-verbose: batch-tests
 
-batch-tests-shell: env=test
+batch-tests-shell: env=batch-test
 batch-tests-shell:
 	${DOCKER_COMPOSE_UP_PULL_CMD} run --entrypoint /bin/bash test-runner
 
