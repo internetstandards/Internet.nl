@@ -334,6 +334,7 @@ def generate_validity_report(subtestname, category, hostset) -> int:
     invalid_count = 0  # count of validation resulting in 'invalid'
     not_valid_count = 0  # count of validations not resulting in 'valid'
     tech_data = []
+    routes_shown_for_host = []
 
     prev_host = None
     for host in hostset:
@@ -346,9 +347,17 @@ def generate_validity_report(subtestname, category, hostset) -> int:
 
             for route, validity in ip["validity"].items():
                 asn, prefix = route
+
+                first_line_for_host = host.host != prev_host
+                if first_line_for_host:
+                    routes_shown_for_host = []
+                if route in routes_shown_for_host:
+                    continue
+                routes_shown_for_host.append(route)
+
                 tech_data.append(
                     gen_tech_data(
-                        host.host if host.host != prev_host else "...",
+                        host.host if first_line_for_host else "...",
                         asn,
                         prefix,
                         validity,
