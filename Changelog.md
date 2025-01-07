@@ -21,6 +21,12 @@ Internal changes:
 For all issues, see the [1.9 milestone](https://github.com/internetstandards/Internet.nl/issues?q=milestone%3Av1.9),
 though some of those were backported to 1.8 already.
 
+## 1.8.10
+
+1.8.10 contains a [fix in IPv6 nameserver reachability](https://github.com/internetstandards/Internet.nl/issues/1597).
+The test did not correctly check connectivity to the IPv6 address, causing false good tests.
+This was likely introduced in 1.8.0.
+
 ## 1.8.9
 
 1.8.9 contains a [fix for batch scheduling](https://github.com/internetstandards/Internet.nl/pull/1554) where report
