@@ -9,48 +9,81 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   db-migrate:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   worker: &worker
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   worker-nassl:
-    <<: *worker
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   worker-slow:
-    <<: *worker
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   beat:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: app
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   unbound:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: unbound
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   resolver-permissive:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: unbound
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   resolver-validating:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: unbound
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   cron:
     build:
@@ -74,6 +107,9 @@ services:
       target: linttest
       args:
         RELEASE: 0.0.0-dev0
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   test-runner:
     build:
@@ -97,9 +133,15 @@ services:
       target: linttest
       args:
         RELEASE: 0.0.0-dev0
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
 
   mock-resolver:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       target: unbound
+      platforms:
+        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+        - "linux/amd64"
