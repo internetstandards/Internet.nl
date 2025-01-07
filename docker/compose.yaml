@@ -325,6 +325,8 @@ services:
       --queues nassl_worker,batch_nassl
     # set hostname for Sentry
     hostname: worker-nassl
+    # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
+    platform: linux/amd64
 
   # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
   worker-slow:
@@ -406,7 +408,7 @@ services:
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
     healthcheck:
-      test: ["CMD", "pgrep", "celery"]
+      test: ["CMD", "pgrep", "-f", "celery"]
       interval: $HEALTHCHECK_INTERVAL
       # TODO: waiting for: https://github.com/docker/compose/issues/10830
       # start_interval: 5s
@@ -698,6 +700,7 @@ services:
       - AUTO_UPDATE_TO
       - WORKER_SLOW_REPLICAS
       - DOCKER_REGISTRY
+      - CRON_DAILY_DATABASE_CLEANUP
 
     restart: unless-stopped
     logging:

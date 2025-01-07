@@ -41,7 +41,7 @@ help:
 	@echo '                                              Optional branch=x to use a specific content repo branch.'
 	@echo '   make frontend                              (re)generate CSS and Javascript'
 	@echo '   make update_padded_macs                    update padded MAC information'
-	@echo '   make update_cert_fingerprints              update certificate fingerpint information'
+	@echo '   make update_cert_fingerprints              update certificate fingerprint information'
 	@echo '   make update_root_key_file                  update DNS root key file'
 
 translations:
@@ -548,7 +548,7 @@ batch-tests:
 batch-tests-verbose: _test_args=--verbose --verbose
 batch-tests-verbose: batch-tests
 
-batch-tests-shell: env=test
+batch-tests-shell: env=batch-test
 batch-tests-shell:
 	${DOCKER_COMPOSE_UP_PULL_CMD} run --entrypoint /bin/bash test-runner
 
@@ -587,6 +587,7 @@ test:
 	-m pytest -vvv -ra \
 	--junit-xml=test-results.xml \
 	$(filter-out integration_tests,${pysrcdirs}) \
+    -k'${tests}' \
 	${test_args}
 
 test-shell:
@@ -619,6 +620,9 @@ test-all:
 	$(MAKE) down environment=batch-test
 
 DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/compose.tools.yaml docker compose
+
+makemigrations:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools env SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py makemigrations
 
 lint:
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
