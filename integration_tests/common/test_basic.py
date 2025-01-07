@@ -85,21 +85,21 @@ def test_favicon_ico(page, app_url_subdomain):
 
 
 def test_static_files(page, app_url_subdomain):
-    response = requests.get(app_url_subdomain + "/static/logo_en.png", verify=False)
-    response.raise_for_status()
+    response = page.request.get(app_url_subdomain + "/static/logo_en.png")
+    expect(response).to_be_ok()
 
 
 def test_generated_css_static_files(page, app_url_subdomain):
-    response = requests.get(app_url_subdomain + "/static/css/style-min.css", verify=False)
-    response.raise_for_status()
-    assert "@font-face" in response.text
+    response = page.request.get(app_url_subdomain + "/static/css/style-min.css")
+    expect(response).to_be_ok()
+    assert "@font-face" in response.text()
     assert "expires" in response.headers
 
 
 def test_generated_js_static_files(page, app_url_subdomain):
-    response = requests.get(app_url_subdomain + "/static/js/menu-min.js", verify=False)
-    response.raise_for_status()
-    assert "hideMenuButton" in response.text
+    response = page.request.get(app_url_subdomain + "/static/js/menu-min.js")
+    expect(response).to_be_ok()
+    assert "hideMenuButton" in response.text()
     assert "expires" in response.headers
 
 

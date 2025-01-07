@@ -4,6 +4,8 @@ import time
 import json
 from .results import EXPECTED_DOMAIN_RESULTS, EXPECTED_DOMAIN_TECHNICAL_RESULTS
 from ..conftest import APP_DOMAIN
+from playwright.sync_api import expect
+
 
 INTERNETNL_API = f"https://{APP_DOMAIN}/api/batch/v2/"
 
@@ -55,11 +57,11 @@ def test_batch_requires_auth(path):
     assert response.status_code == 401
 
 
-def test_batch_openapi():
+def test_batch_openapi(page):
     """Open API documentation should be accessible without auth."""
 
-    response = requests.get(f"https://{APP_DOMAIN}/api/batch/openapi.yaml", verify=False)
-    response.raise_for_status()
+    response = page.request.get(f"https://{APP_DOMAIN}/api/batch/openapi.yaml")
+    expect(response).to_be_ok()
 
 
 def test_batch_request(unique_id, register_test_user, test_domain):
