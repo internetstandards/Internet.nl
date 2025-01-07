@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.10
+
+1.8.10 contains a [fix in IPv6 nameserver reachability](https://github.com/internetstandards/Internet.nl/issues/1597).
+The test did not correctly check connectivity to the IPv6 address, causing false good tests.
+This was likely introduced in 1.8.0.
+
 ## 1.8.9
 
 1.8.9 contains a [fix for batch scheduling](https://github.com/internetstandards/Internet.nl/pull/1554) where report
