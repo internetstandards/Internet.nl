@@ -109,7 +109,7 @@ Run the following commands to install the files in the expected location:
 
     mkdir -p /opt/Internet.nl/docker && \
     cd /opt/Internet.nl/ && \
-    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:main cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env && \
+    docker run --volume /opt/Internet.nl:/opt/Internet.nl ghcr.io/internetstandards/util:latest cp /dist/docker/host-dist.env /opt/Internet.nl/docker/host-dist.env && \
     touch docker/local.env
 
 To create the `docker/host.env` configuration file, the following inputs are required:
@@ -158,7 +158,7 @@ Spin up instance:
       --volume /opt/Internet.nl:/opt/Internet.nl \
       --network none \
       --env DOCKER_REGISTRY=ghcr.io/internetstandards \
-      ghcr.io/internetstandards/util:main \
+      ghcr.io/internetstandards/util:latest \
       /deploy.sh
 
 This command will take a long time (up to 30 minutes) due to RPKI data that needs to be synced initially. After that it should complete without an error, indicating the application stack is up and running healthy. You can already prepare continue with the DNS setup below in the meantime.
@@ -253,7 +253,7 @@ To update the application stack to the latest release run the following command,
       --volume $HOME/.docker:/root/.docker \
       --volume /opt/Internet.nl:/opt/Internet.nl \
       --env DOCKER_REGISTRY=ghcr.io/internetstandards \
-      ghcr.io/internetstandards/util:main \
+      ghcr.io/internetstandards/util:latest \
       /deploy.sh
 
 This will update the deployment with the latest release: https://github.com/internetstandards/Internet.nl/releases
