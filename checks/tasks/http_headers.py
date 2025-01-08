@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import re
 from collections import defaultdict, namedtuple
-from typing import Optional, Dict
+from typing import Optional
 
 import requests
 
@@ -679,7 +679,7 @@ class HeaderCheckerReferrerPolicy:
     def __init__(self):
         self.name = "Referrer-Policy"
 
-    def check(self, value: Optional[str], results: Dict, domain: str):
+    def check(self, value: Optional[str], results: dict, domain: str):
         """
         Check if the header has any of the allowed values.
 
