@@ -131,6 +131,7 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
             "securitytxt_enabled": False,
             "securitytxt_score": scoring.WEB_APPSECPRIV_SECURITYTXT_BAD,
             "securitytxt_found_host": result.found_host,
+            "securitytxt_found_url": None,
             "securitytxt_errors": result.errors,
             "securitytxt_recommendations": [],
         }
@@ -144,6 +145,7 @@ def _evaluate_securitytxt(result: SecuritytxtRetrieveResult):
         "securitytxt_enabled": True,
         "securitytxt_score": score,
         "securitytxt_found_host": result.found_host,
+        "securitytxt_found_url": result.found_url,
         "securitytxt_errors": errors,
         "securitytxt_recommendations": parser_format(parser.recommendations + parser.notifications),
     }
