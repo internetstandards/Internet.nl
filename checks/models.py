@@ -19,7 +19,10 @@ class ListField(models.TextField):
     def from_db_value(self, value, expression, connection, context="Null"):
         if value is None:
             return value
-        return ast.literal_eval(value)
+        try:
+            return ast.literal_eval(value)
+        except ValueError:
+            raise ValueError(f"Failed literal_eval on value: {value}")
 
     def to_python(self, value):
         if not value:
