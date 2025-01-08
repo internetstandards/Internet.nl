@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Callable, Optional
+from typing import Callable, Optional
 
 from django.core.management.base import BaseCommand
 
@@ -31,7 +31,7 @@ def force_debug_logging():
 
 log = force_debug_logging()
 
-PROBES: Dict[str, Optional[Callable]] = {
+PROBES: dict[str, Optional[Callable]] = {
     "ipv6_web": ipv6.web,
     "ipv6_ns": ipv6.ns,
     "ipv6_mx": ipv6.mx,

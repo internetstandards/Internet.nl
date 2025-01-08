@@ -4,7 +4,6 @@ import ipaddress
 import socket
 import time
 from difflib import SequenceMatcher
-from typing import List
 
 import requests
 from bs4 import BeautifulSoup
@@ -342,7 +341,7 @@ def test_ns_connectivity(ip, port, domain):
     return cb_data["result"]
 
 
-def remove_ipv4_mapped_v6(addresses: List[str]) -> List[str]:
+def remove_ipv4_mapped_v6(addresses: list[str]) -> list[str]:
     """
     Filter a list of IPv6 addresses to ignore IPv4-mapped addresses.
     Logs and drops invalid addresses - they come from DNS and are expected to be valid.
@@ -604,7 +603,7 @@ def simhash(url, task=None):
     try:
         html_v4 = response_content_chunk(v4_response, SIMHASH_MAX_RESPONSE_SIZE)
         html_v6 = response_content_chunk(v6_response, SIMHASH_MAX_RESPONSE_SIZE)
-    except (OSError, IOError) as exc:
+    except OSError as exc:
         log.debug("simhash encountered exception while reading response: {exc}", exc_info=exc)
         return simhash_score, distance, v6_response.status_code
 

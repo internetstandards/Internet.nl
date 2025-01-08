@@ -10,7 +10,7 @@ from functools import wraps
 from ipaddress import ip_address
 from json.decoder import JSONDecodeError
 from time import monotonic
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from django.conf import settings
 from django.core.cache import cache
@@ -795,7 +795,7 @@ def batch_async_register(self, batch_request, test_type, domains):
     batch_request.save()
 
 
-def get_json_data_from_request(request) -> Tuple[Optional[Exception], Dict]:
+def get_json_data_from_request(request) -> tuple[Optional[Exception], dict]:
     data = {}
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -807,7 +807,7 @@ def get_json_data_from_request(request) -> Tuple[Optional[Exception], Dict]:
         return exception_data, data
 
 
-def fields_missing_in_dict(fields: List[str], data: Dict) -> List[str]:
+def fields_missing_in_dict(fields: list[str], data: dict) -> list[str]:
     # one dimensional check if the fields are at the root of the dict.
     # builds a list of fields to return and will return those in a bad client response.
     # in case of no missing fields a False is issued.
@@ -819,12 +819,12 @@ def fields_missing_in_dict(fields: List[str], data: Dict) -> List[str]:
     return missing_fields
 
 
-def missing_fields_error(fields: List[str]) -> JsonResponse:
+def missing_fields_error(fields: list[str]) -> JsonResponse:
     messages = [f"'{field}' is missing from the request." for field in fields]
     return bad_client_request_response(",".join(messages))
 
 
-def register_request(data: Dict, *args, **kwargs) -> JsonResponse:
+def register_request(data: dict, *args, **kwargs) -> JsonResponse:
     # todo: this should not return a webserver answer but json. The webserver stuff is just a wrapper.
     missing_fields = fields_missing_in_dict(["type", "domains"], data)
     if missing_fields:

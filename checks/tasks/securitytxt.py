@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from cgi import parse_header
 from dataclasses import dataclass
-from typing import List, Optional, Dict
+from typing import Optional
 from urllib.parse import urlparse
 
 import requests
@@ -24,7 +24,7 @@ class SecuritytxtRetrieveResult:
     url: str
     found_host: str
     found_url: Optional[str]
-    errors: List[Dict[str, str]]
+    errors: list[dict[str, str]]
 
 
 def securitytxt_check(af_ip_pair, domain, task):

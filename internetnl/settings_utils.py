@@ -1,6 +1,5 @@
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-from typing import List
 import logging
 
 log = logging.getLogger(__name__)
@@ -8,7 +7,7 @@ log = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-def split_csv_trim(value: str) -> List[str]:
+def split_csv_trim(value: str) -> list[str]:
     # Helper for csv values from the environment.
     # Example: "internet.nl, mysite.org" -> ["internet.nl", "mysite.org"]
 

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import socket
 from timeit import default_timer as timer
-from typing import Optional, Dict
+from typing import Optional
 
 import requests
 import unbound
@@ -50,7 +50,7 @@ def _do_request(args, headers, kwargs, session, url):
 
 
 def http_get(
-    url: str, headers: Optional[Dict] = None, session: Optional[requests.Session] = None, *args, **kwargs
+    url: str, headers: Optional[dict] = None, session: Optional[requests.Session] = None, *args, **kwargs
 ) -> requests.Response:
     """
     Perform a standard HTTP GET request. If session is given, it is used.
@@ -84,7 +84,7 @@ def http_get_ip(
     port: int,
     path: str = "/",
     https: bool = True,
-    headers: Optional[Dict] = None,
+    headers: Optional[dict] = None,
     *args,
     **kwargs,
 ) -> requests.Response:

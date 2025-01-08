@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import random
 from timeit import default_timer as timer
-from typing import Optional, Dict, Tuple, Union, Callable
+from typing import Optional, Union, Callable
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -142,7 +142,7 @@ def is_queue_loaded(client):
     return False
 
 
-def get_live_requests() -> Dict[BatchUser, BatchRequest]:
+def get_live_requests() -> dict[BatchUser, BatchRequest]:
     """
     Return a dictionary with active users as keys and their earliest
     live batch request as value.
@@ -156,7 +156,7 @@ def get_live_requests() -> Dict[BatchUser, BatchRequest]:
     return live_requests
 
 
-def get_user_and_request(live_requests) -> Tuple[Optional[BatchUser], Optional[BatchRequest]]:
+def get_user_and_request(live_requests) -> tuple[Optional[BatchUser], Optional[BatchRequest]]:
     """
     Pick a user and his request from the available live_requests.
     Users are fairly chosen regardless of the number of submitted tests.
