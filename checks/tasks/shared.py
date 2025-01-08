@@ -204,7 +204,7 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
         if status is not MxStatus.has_mx:
             continue
 
-        af_ip_pairs = do_resolve_all_a_aaaa(self, url, *args, **kwargs)
+        af_ip_pairs = do_resolve_all_a_aaaa(self, qname, *args, **kwargs)
         mx_ips_pairs.append((qname, af_ip_pairs))
 
     return mx_ips_pairs
