@@ -20,7 +20,7 @@ class Command(BaseCommand):
         domain = options.get("domain", "internet.nl")
         print(
             f"Performing ipv6 test web scan on {domain}. "
-            f"Using unbound at: {settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE}."
+            f"Using unbound at: {settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING}."
         )
         answers = web(domain)
         print(answers)
