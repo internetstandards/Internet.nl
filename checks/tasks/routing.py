@@ -11,7 +11,7 @@ from django.conf import settings
 
 from . import SetupUnboundContext
 
-from typing import Any, Dict, List, NewType, Tuple, Type, TypeVar
+from typing import Any, NewType, TypeVar
 
 from checks.http_client import http_get
 
@@ -21,7 +21,7 @@ Prefix = NewType("Prefix", str)
 Rp = TypeVar("Rp", bound="RelyingPartySoftware")
 Rv = TypeVar("Rv", bound="RouteView")
 T = TypeVar("T", bound=SetupUnboundContext)
-AsnPrefix = Tuple[Asn, Prefix]
+AsnPrefix = tuple[Asn, Prefix]
 
 
 class Error(Exception):
@@ -68,7 +68,7 @@ class RouteView(ABC):
         indexed by (asn, prefix). Used by from_rpki()
     """
 
-    def __init__(self, ip: Ip, routes: List[AsnPrefix], validity: Dict[AsnPrefix, Dict] = None) -> None:
+    def __init__(self, ip: Ip, routes: list[AsnPrefix], validity: dict[AsnPrefix, dict] = None) -> None:
         """Initialize RouteView.
 
         Args:
@@ -90,11 +90,11 @@ class RouteView(ABC):
 
     @classmethod
     @abstractmethod
-    def from_bgp(cls: Type[Rv], task: T, ip: Ip) -> Rv:
+    def from_bgp(cls: type[Rv], task: T, ip: Ip) -> Rv:
         """Construct a RouteView from a source of BGP data."""
 
     @classmethod
-    def from_rpki(cls: Type[Rv], task: T, rp: Type[Rp], ip: Ip) -> Rv:
+    def from_rpki(cls: type[Rv], task: T, rp: type[Rp], ip: Ip) -> Rv:
         """Construct a (partial) RouteView from a source of RPKI data.
 
         This looks up covering ROAs for a given ip by performing route origin
@@ -113,7 +113,7 @@ class RouteView(ABC):
         # we don't have actual routing information
         return cls(ip, [], {(0, prefix.compressed): roas})
 
-    def validate(self, task: T, rp: Type[Rp]) -> None:
+    def validate(self, task: T, rp: type[Rp]) -> None:
         """Validate pairs of asn, prefix using a provided `RelyingPartySoftware`.
 
         Raises:
@@ -132,14 +132,14 @@ class TeamCymruIPtoASN(RouteView):
     """RouteView based on the Team Cymru IP to ASN mapping service."""
 
     @classmethod
-    def from_bgp(cls: Type[Rv], task: T, ip: Ip) -> Rv:
+    def from_bgp(cls: type[Rv], task: T, ip: Ip) -> Rv:
         """Construct a RouteView based on the Team Cymru IP to ASN mapping service."""
         pairs = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(task, ip)
 
         return cls(ip, pairs)
 
     @staticmethod
-    def asn_prefix_pairs_for_ip(task: T, ip_in: Ip) -> List[AsnPrefix]:
+    def asn_prefix_pairs_for_ip(task: T, ip_in: Ip) -> list[AsnPrefix]:
         """Use the Team Cymru IP to ASN mapping service via DNS.
 
         see: https://team-cymru.com/community-services/ip-asn-mapping/#dns
@@ -237,12 +237,12 @@ class RelyingPartySoftware:
 
     @staticmethod
     @abstractmethod
-    def lookup(task: T, prefix_in: Prefix) -> Dict[str, Any]:
+    def lookup(task: T, prefix_in: Prefix) -> dict[str, Any]:
         """Look up ROAs covering a given prefix."""
 
     @staticmethod
     @abstractmethod
-    def validate(task: T, asn: Asn, prefix: Prefix) -> Dict[str, Any]:
+    def validate(task: T, asn: Asn, prefix: Prefix) -> dict[str, Any]:
         """Validate a origin ASN and prefix against published ROAs."""
 
 
@@ -250,7 +250,7 @@ class Routinator(RelyingPartySoftware):
     """Wrapper for access to the Routinator Relying Party Software for ROV."""
 
     @staticmethod
-    def lookup(task: T, prefix: Prefix) -> Dict[str, Any]:
+    def lookup(task: T, prefix: Prefix) -> dict[str, Any]:
         """Look up covering ROAs by attempting to validate against ASN0.
 
         This is a hack to fetch covering ROAs for a given prefix.
@@ -267,7 +267,7 @@ class Routinator(RelyingPartySoftware):
         return result
 
     @staticmethod
-    def validate(task: T, asn: Asn, prefix: Prefix) -> Dict[str, Any]:
+    def validate(task: T, asn: Asn, prefix: Prefix) -> dict[str, Any]:
         """Use routinator to perform Route Origin Validation.
 
         Raises:
@@ -306,7 +306,7 @@ class Routinator(RelyingPartySoftware):
         return {"state": state, "reason": reason, "vrps": vrps}
 
     @staticmethod
-    def query(task: T, asn: Asn, prefix: Prefix) -> Dict:
+    def query(task: T, asn: Asn, prefix: Prefix) -> dict:
         """Query Routinator's /api/v1/validity endpoint and return json response.
 
         Note that Routinator's API is unavailable during its initial validation run.

@@ -31,10 +31,11 @@ from ..models import (
     RpkiWebHost,
 )
 
-from typing import Dict, List, Mapping, NewType, Tuple, Union
+from typing import NewType, Union
+from collections.abc import Mapping
 
 TestName = NewType("TestName", str)
-TestResult = Dict[TestName, List[Dict[str, Union[Dict, List, str]]]]
+TestResult = dict[TestName, list[dict[str, Union[dict, list, str]]]]
 
 logger = get_task_logger(__name__)
 
@@ -122,8 +123,8 @@ def callback(results: Mapping[TestName, TestResult], domain, parent, parent_name
     return parent, results
 
 
-web_registered = check_registry("web_rpki", web_callback, shared.resolve_a_aaaa)
-batch_web_registered = check_registry("batch_web_rpki", batch_web_callback, shared.batch_resolve_a_aaaa)
+web_registered = check_registry("web_rpki", web_callback, shared.resolve_all_a_aaaa)
+batch_web_registered = check_registry("batch_web_rpki", batch_web_callback, shared.batch_resolve_all_a_aaaa)
 mail_registered = check_registry("mail_rpki", mail_callback, shared.resolve_mx)
 batch_mail_registered = check_registry("batch_mail_rpki", batch_mail_callback, shared.batch_resolve_mx)
 
@@ -252,7 +253,7 @@ def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
 def generate_roa_existence_report(subtestname, category, hostset) -> int:
     """Generate a test report for the existence of ROAs."""
 
-    def gen_tech_data(host, ip, validity) -> List[List[str]]:
+    def gen_tech_data(host, ip, validity) -> list[list[str]]:
         # Provide tech_data to generate a table of the following form
         #
         # Server     | IP address  | ROA exists
@@ -308,7 +309,7 @@ def generate_validity_report(subtestname, category, hostset) -> int:
     This compares routing data from BGP with published ROAs.
     """
 
-    def gen_tech_data(host, asn, prefix, validity, errors) -> List[str]:
+    def gen_tech_data(host, asn, prefix, validity, errors) -> list[str]:
         # Provide tech_data to generate a table of the following form
         #
         # Server     | Route          | Origin  | Validation state
@@ -334,6 +335,7 @@ def generate_validity_report(subtestname, category, hostset) -> int:
     invalid_count = 0  # count of validation resulting in 'invalid'
     not_valid_count = 0  # count of validations not resulting in 'valid'
     tech_data = []
+    routes_shown_for_host = []
 
     prev_host = None
     for host in hostset:
@@ -346,9 +348,17 @@ def generate_validity_report(subtestname, category, hostset) -> int:
 
             for route, validity in ip["validity"].items():
                 asn, prefix = route
+
+                first_line_for_host = host.host != prev_host
+                if first_line_for_host:
+                    routes_shown_for_host = []
+                if route in routes_shown_for_host:
+                    continue
+                routes_shown_for_host.append(route)
+
                 tech_data.append(
                     gen_tech_data(
-                        host.host if host.host != prev_host else "...",
+                        host.host if first_line_for_host else "...",
                         asn,
                         prefix,
                         validity,
@@ -408,14 +418,14 @@ def build_summary_report(parent, parent_name, category) -> None:
     parent.save()
 
 
-def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_web_rpki(af_ip_pairs, url, task, *args, **kwargs) -> tuple[TestName, TestResult]:
     """Check webservers."""
     web = do_rpki(task, [(url, af_ip_pairs)], *args, **kwargs)
 
     return (TestName("rpki_web"), web)
 
 
-def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_ns_rpki(url, task, *args, **kwargs) -> tuple[TestName, TestResult]:
     """Check nameservers."""
     ns_ips_pairs = shared.do_resolve_ns_ips(task, url)
     ns = do_rpki(task, ns_ips_pairs, *args, **kwargs)
@@ -423,7 +433,7 @@ def do_ns_rpki(url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
     return (TestName("rpki_ns"), ns)
 
 
-def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> tuple[TestName, TestResult]:
     """Check nameservers for the mx record of a domain.
 
     These may or may not be the same as the nameservers for the domain itself.
@@ -438,7 +448,7 @@ def do_mx_ns_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, T
     return (TestName("rpki_mx_ns"), mxns)
 
 
-def do_mail_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> Tuple[TestName, TestResult]:
+def do_mail_rpki(mx_ips_pairs, url, task, *args, **kwargs) -> tuple[TestName, TestResult]:
     """Check mailservers."""
     mail = do_rpki(task, mx_ips_pairs, *args, **kwargs)
 
