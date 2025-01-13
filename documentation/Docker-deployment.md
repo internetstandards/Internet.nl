@@ -373,7 +373,7 @@ To verify the health status of the critial services use these commands:
 	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-resolver-permissive-1|grep -qw healthy
 	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-resolver-validating-1|grep -qw healthy
 
-The services `webserver`, `app`, `postgres` and `redis` are critical for the user facing HTTP frontend, no page will show if these are not running. The services `worker`, `rabbitmq`, `routinator`, `unbound`, `resolver-permissive` and `resolver-validating` are additionally required for new tests to be performed. The `beat` service is required for updating hall-of-fame. For Batch Deployment this is however a critical service to schedule batch tests submitted via the API.
+The services `webserver`, `app`, `postgres` and `redis` are critical for the user facing HTTP frontend, no page will show if these are not running. The services `worker`, `rabbitmq`, `routinator`, `unbound` and `resolver-validating` are additionally required for new tests to be performed. The `beat` service is required for updating hall-of-fame. For Batch Deployment this is however a critical service to schedule batch tests submitted via the API.
 
 ### Alerting emails/alertmanager
 
