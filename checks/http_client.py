@@ -67,7 +67,7 @@ def http_get(
 
     try:
         response = _do_request(args, headers, kwargs, session, url)
-    except requests.RequestException:
+    except (requests.RequestException, ValueError):
         # Retry, once, then log and raise the exception
         try:
             response = _do_request(args, headers, kwargs, session, url)
