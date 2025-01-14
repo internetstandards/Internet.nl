@@ -157,13 +157,13 @@ def get_client_ip(request):
     Get the client's IP address.
 
     If the server is proxied use the X_FORWARDED_FOR content.
-
+    If the IP has multiple comma separated addresses, use the last one.
     """
     if settings.DJANGO_IS_PROXIED:
         ip = request.headers.get("x-forwarded-for", None)
     else:
         ip = request.META.get("REMOTE_ADDR")
-    return ip
+    return ip.split(",")[-1].strip() if ip else None
 
 
 def pretty_domain_name(dname):
