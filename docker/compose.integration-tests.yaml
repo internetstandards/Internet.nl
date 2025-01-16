@@ -74,8 +74,6 @@ services:
         condition: service_started
       resolver-validating:
         condition: service_healthy
-      resolver-permissive:
-        condition: service_healthy
       cron:
         condition: service_healthy
       cron-docker:
@@ -177,10 +175,6 @@ services:
         ipv6_address: $IPV6_UNBOUND_IP_PUBLIC
 
   resolver-validating:
-    volumes:
-      - ./integration-tests/resolver/test.conf:/opt/unbound/etc/unbound/test.conf
-
-  resolver-permissive:
     volumes:
       - ./integration-tests/resolver/test.conf:/opt/unbound/etc/unbound/test.conf
 

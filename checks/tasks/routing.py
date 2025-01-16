@@ -4,23 +4,24 @@
 from abc import ABC, abstractmethod
 import ipaddress
 import json
+
+import dns
 import requests
-import unbound
 
 from django.conf import settings
 
-from . import SetupUnboundContext
-
 from typing import Any, NewType, TypeVar
 
+from dns.exception import DNSException
+
 from checks.http_client import http_get
+from checks.resolver import dns_resolve_txt
 
 Asn = NewType("Asn", int)
 Ip = NewType("Ip", str)
 Prefix = NewType("Prefix", str)
 Rp = TypeVar("Rp", bound="RelyingPartySoftware")
 Rv = TypeVar("Rv", bound="RouteView")
-T = TypeVar("T", bound=SetupUnboundContext)
 AsnPrefix = tuple[Asn, Prefix]
 
 
@@ -90,11 +91,11 @@ class RouteView(ABC):
 
     @classmethod
     @abstractmethod
-    def from_bgp(cls: type[Rv], task: T, ip: Ip) -> Rv:
+    def from_bgp(cls: type[Rv], ip: Ip) -> Rv:
         """Construct a RouteView from a source of BGP data."""
 
     @classmethod
-    def from_rpki(cls: type[Rv], task: T, rp: type[Rp], ip: Ip) -> Rv:
+    def from_rpki(cls: type[Rv], rp: type[Rp], ip: Ip) -> Rv:
         """Construct a (partial) RouteView from a source of RPKI data.
 
         This looks up covering ROAs for a given ip by performing route origin
@@ -107,13 +108,13 @@ class RouteView(ABC):
             RelyingPartyUnavailableError: Relying Party Software not available.
         """
         prefix = ipaddress.ip_network(ip)
-        roas = rp.lookup(task, prefix)
+        roas = rp.lookup(prefix)
 
         # roa dict indexed by (ASN0, max length prefix),
         # we don't have actual routing information
         return cls(ip, [], {(0, prefix.compressed): roas})
 
-    def validate(self, task: T, rp: type[Rp]) -> None:
+    def validate(self, rp: type[Rp]) -> None:
         """Validate pairs of asn, prefix using a provided `RelyingPartySoftware`.
 
         Raises:
@@ -124,7 +125,7 @@ class RouteView(ABC):
             raise NoRoutesError
 
         for asn, prefix in self.routes:
-            result = rp.validate(task, asn, prefix)
+            result = rp.validate(asn, prefix)
             self.validity[(asn, prefix)] = result
 
 
@@ -132,14 +133,14 @@ class TeamCymruIPtoASN(RouteView):
     """RouteView based on the Team Cymru IP to ASN mapping service."""
 
     @classmethod
-    def from_bgp(cls: type[Rv], task: T, ip: Ip) -> Rv:
+    def from_bgp(cls: type[Rv], ip: Ip) -> Rv:
         """Construct a RouteView based on the Team Cymru IP to ASN mapping service."""
-        pairs = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(task, ip)
+        pairs = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(ip)
 
         return cls(ip, pairs)
 
     @staticmethod
-    def asn_prefix_pairs_for_ip(task: T, ip_in: Ip) -> list[AsnPrefix]:
+    def asn_prefix_pairs_for_ip(ip_in: Ip) -> list[AsnPrefix]:
         """Use the Team Cymru IP to ASN mapping service via DNS.
 
         see: https://team-cymru.com/community-services/ip-asn-mapping/#dns
@@ -148,21 +149,18 @@ class TeamCymruIPtoASN(RouteView):
             InvalidIPError: for invalid ip_in
             BGPSourceUnavailableError: when DNS resolving returns SERVFAIL
         """
-        if task is None:
-            task = SetupUnboundContext()
         ip2asn_query = TeamCymruIPtoASN.ip_to_dns_query(ip_in)
 
-        result = task.async_resolv(ip2asn_query, unbound.RR_TYPE_TXT)
-        if result["nxdomain"]:
+        try:
+            result = dns_resolve_txt(ip2asn_query)
+        except dns.resolver.NXDOMAIN:
             return []
-        elif "rcode" not in result:
+        except dns.resolver.NoAnswer:
             return []
-        elif result["rcode"] == unbound.RCODE_SERVFAIL:
+        except DNSException:
             raise BGPSourceUnavailableError(
                 f"Team Cymru IP to ASN mapping service returned SERVFAIL for {ip2asn_query} IN TXT?"
             )
-        else:
-            result = [unbound.ub_data.dname2str(d) for d in result["data"].data]
 
         # The values in the TXT record are separated by '|' and the ASN is the
         # first value. There may be more than one ASN, separated by a space.
@@ -170,8 +168,8 @@ class TeamCymruIPtoASN(RouteView):
         asn_prefix_pairs = []
         for txt in result:
             try:
-                asns = txt[0].split("|")[0].strip().split(" ")
-                prefix = txt[0].split("|")[1].strip()
+                asns = txt.split("|")[0].strip().split(" ")
+                prefix = txt.split("|")[1].strip()
 
                 # Check that we didn't get any gibberish back.
                 ipaddress.ip_network(prefix)
@@ -237,12 +235,12 @@ class RelyingPartySoftware:
 
     @staticmethod
     @abstractmethod
-    def lookup(task: T, prefix_in: Prefix) -> dict[str, Any]:
+    def lookup(prefix_in: Prefix) -> dict[str, Any]:
         """Look up ROAs covering a given prefix."""
 
     @staticmethod
     @abstractmethod
-    def validate(task: T, asn: Asn, prefix: Prefix) -> dict[str, Any]:
+    def validate(asn: Asn, prefix: Prefix) -> dict[str, Any]:
         """Validate a origin ASN and prefix against published ROAs."""
 
 
@@ -250,7 +248,7 @@ class Routinator(RelyingPartySoftware):
     """Wrapper for access to the Routinator Relying Party Software for ROV."""
 
     @staticmethod
-    def lookup(task: T, prefix: Prefix) -> dict[str, Any]:
+    def lookup(prefix: Prefix) -> dict[str, Any]:
         """Look up covering ROAs by attempting to validate against ASN0.
 
         This is a hack to fetch covering ROAs for a given prefix.
@@ -258,7 +256,7 @@ class Routinator(RelyingPartySoftware):
         Raises:
             RelyingPartyUnavailableError
         """
-        result = Routinator.validate(task, Asn(0), prefix)
+        result = Routinator.validate(Asn(0), prefix)
 
         # no routes to validate against
         result["state"] = None
@@ -267,7 +265,7 @@ class Routinator(RelyingPartySoftware):
         return result
 
     @staticmethod
-    def validate(task: T, asn: Asn, prefix: Prefix) -> dict[str, Any]:
+    def validate(asn: Asn, prefix: Prefix) -> dict[str, Any]:
         """Use routinator to perform Route Origin Validation.
 
         Raises:
@@ -277,7 +275,7 @@ class Routinator(RelyingPartySoftware):
         vrps = {}
 
         try:
-            output = Routinator.query(task, asn, prefix)
+            output = Routinator.query(asn, prefix)
             validity = output["validated_route"]["validity"]
 
             state = validity["state"].lower()
@@ -306,7 +304,7 @@ class Routinator(RelyingPartySoftware):
         return {"state": state, "reason": reason, "vrps": vrps}
 
     @staticmethod
-    def query(task: T, asn: Asn, prefix: Prefix) -> dict:
+    def query(asn: Asn, prefix: Prefix) -> dict:
         """Query Routinator's /api/v1/validity endpoint and return json response.
 
         Note that Routinator's API is unavailable during its initial validation run.

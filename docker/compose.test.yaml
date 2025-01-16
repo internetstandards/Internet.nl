@@ -29,7 +29,6 @@ services:
       - DB_PASSWORD=password
       - DEBUG_LOG
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - PY_COLORS
       # TODO: to properly isolate tests this line needs to be uncommented, see above
       # - INTEGRATION_TESTS
@@ -45,8 +44,6 @@ services:
       worker:
         condition: service_healthy
       resolver-validating:
-        condition: service_healthy
-      resolver-permissive:
         condition: service_healthy
 
     volumes:

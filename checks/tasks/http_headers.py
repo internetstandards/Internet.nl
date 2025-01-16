@@ -723,7 +723,7 @@ class HeaderCheckerReferrerPolicy:
         return self.get_result([], [], [], enabled=False)
 
 
-def http_headers_check(af_ip_pair, domain, header_checkers, task):
+def http_headers_check(af_ip_pair, domain, header_checkers):
     results = dict()
     # set defaults to positive values. Header tests return negative values if
     # a test failed.

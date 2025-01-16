@@ -50,7 +50,6 @@ from checks.models import (
     WebTestTls,
     ZeroRttStatus,
 )
-from checks.tasks import SetupUnboundContext
 from checks.tasks.cipher_info import CipherScoreAndSecLevel, SecLevel, cipher_infos
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.http_headers import (
@@ -526,7 +525,6 @@ batch_mail_registered = check_registry("batch_mail_tls", batch_mail_callback, ba
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_cert(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
@@ -537,7 +535,6 @@ def web_cert(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
@@ -548,7 +545,6 @@ def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_conn(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_conn(af_ip_pairs, url, *args, **kwargs)
@@ -559,7 +555,6 @@ def web_conn(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_conn(af_ip_pairs, url, *args, **kwargs)
@@ -570,7 +565,6 @@ def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     return do_mail_smtp_starttls(mailservers, url, self, *args, **kwargs)
@@ -581,7 +575,6 @@ def mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     return do_mail_smtp_starttls(mailservers, url, self, *args, **kwargs)
@@ -592,7 +585,6 @@ def batch_mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_http(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_http(af_ip_pairs, url, self, *args, **kwargs)
@@ -603,7 +595,6 @@ def web_http(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_http(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_http(af_ip_pairs, url, self, args, **kwargs)
@@ -1130,7 +1121,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
 
     continue_testing = False
 
-    cb_data = dane_cb_data or resolve_dane(task, port, url)
+    cb_data = dane_cb_data or resolve_dane(port, url)
 
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
@@ -1140,7 +1131,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
     elif cb_data.get("data") and cb_data.get("secure"):
         # If there is a secure TLSA record check for the existence of
         # possible bogus (unsigned) NXDOMAIN in A.
-        tmp_data = resolve_dane(task, port, url, check_nxdomain=True)
+        tmp_data = resolve_dane(port, url, check_nxdomain=True)
         if tmp_data.get("nxdomain") and tmp_data.get("bogus"):
             status = DaneStatus.none_bogus
             score = score_none_bogus
@@ -2963,7 +2954,7 @@ def http_checks(af_ip_pair, url, task):
         HeaderCheckerContentEncoding(),
         HeaderCheckerStrictTransportSecurity(),
     ]
-    header_results = http_headers_check(af_ip_pair, url, header_checkers, task)
+    header_results = http_headers_check(af_ip_pair, url, header_checkers)
 
     results = {
         "forced_https": forced_https,
