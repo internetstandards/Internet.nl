@@ -375,6 +375,16 @@ To verify the health status of the critial services use these commands:
 
 The services `webserver`, `app`, `postgres` and `redis` are critical for the user facing HTTP frontend, no page will show if these are not running. The services `worker`, `rabbitmq`, `routinator`, `unbound` and `resolver-validating` are additionally required for new tests to be performed. The `beat` service is required for updating hall-of-fame. For Batch Deployment this is however a critical service to schedule batch tests submitted via the API.
 
+### Periodic tests
+
+There is a cron available which, when enabled, will test a set of configured domains and output metrics about this (elapsed time, scores, etc). This is usefull for monitoring the overall state of the application stack. To enable and configure it for testing against for example the `example.com` domain, add the following variables to `docker/local.env`:
+
+    CRON_15MIN_RUN_TESTS=True
+    TEST_DOMAINS_SITE=example.com
+    TEST_DOMAINS_MAIL=example.com
+
+You can specify multiple domains as a comma separated list, eg: `TEST_DOMAINS_SITE=example.com,example.nl`.
+
 ### Alerting emails/alertmanager
 
 A Prometheus Alertmanager service is available but disabled by default. Enabling this will allow you to configure alert emails to be sent whenever the periodic tests fail to complete in a reasonable time, indicating an issue with the application.
