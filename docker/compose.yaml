@@ -655,6 +655,8 @@ services:
       - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
+      - TEST_DOMAINS_SITE
+      - TEST_DOMAINS_MAIL
 
     restart: unless-stopped
     logging:
