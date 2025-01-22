@@ -56,7 +56,6 @@
             <button class="active-language" disabled>{{lang.name_local}}</button>
           {% else %}
             <form action="/change_language/" method="post">
-            {% csrf_token %}
               <input type="hidden" name="previous-page" value="{{request.path}}"/>
               <input type="hidden" name="language" value="{{language.0}}"/>
               <button>{{lang.name_local}}</button>
