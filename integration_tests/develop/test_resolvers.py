@@ -26,12 +26,3 @@ def test_validating_resolver():
     print(output)
     assert "dane-validated successfully" in output
     assert returncode == 0
-
-
-def test_permissive_resolver():
-    returncode, output = docker_compose_exec(
-        "app", "ldns-dane -n -T verify internet.nl 443 -r $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE"
-    )
-    print(output)
-    assert "did not dane-validate" in output
-    assert returncode == 1

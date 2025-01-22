@@ -2,9 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import random
 import re
-import time
 from datetime import datetime
-from timeit import default_timer as timer
 from urllib.parse import urlparse
 
 import idna
@@ -19,46 +17,14 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from dns.rdatatype import RdataType
+from dns.resolver import NXDOMAIN, NoAnswer
+from dns.exception import Timeout
 
-import unbound
-
+from checks.resolver import dns_resolve, dns_resolve_soa
 from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
-
-from statshog.defaults.django import statsd
-
-_ub_ctx = None
-
-
-def get_ub_ctx():
-    """
-    Wrapper around ub_ctx initialisation for https://github.com/internetstandards/Internet.nl/issues/1376
-    """
-    global _ub_ctx
-    if _ub_ctx:
-        return _ub_ctx
-
-    _ub_ctx = unbound.ub_ctx()
-    _ub_ctx.set_fwd(settings.IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE)
-
-    if settings.INTEGRATION_TESTS:
-        # forward the .test zone used in integration tests
-        _ub_ctx.zone_add("test.", "transparent")
-
-    if settings.DEBUG_LOG_UNBOUND:
-        _ub_ctx.set_option("log-queries:", "yes")
-        _ub_ctx.set_option("verbosity:", "2")
-
-    # XXX: Remove for now; inconsistency with applying settings on celery.
-    # YYY: Removal caused infinite waiting on pipe to unbound. Added again.
-    _ub_ctx.set_async(True)
-    _ub_ctx.set_option("rrset-roundrobin:", "no")
-
-    # fire an initial DNS query to start unbound background worker and prevent race conditions that can occur
-    _ub_ctx.resolve_async("internet.nl", {}, lambda x, y, z: None, unbound.RR_TYPE_A, unbound.RR_CLASS_IN)
-
-    return _ub_ctx
 
 
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
@@ -298,42 +264,18 @@ def get_retest_time(report):
     return int(max(0, settings.CACHE_TTL - time_delta.total_seconds()))
 
 
-@statsd.timer("ub_resolve_with_timeout")
-def ub_resolve_with_timeout(qname, qtype, rr_class, timeout):
-    ub_ctx = get_ub_ctx()
-
-    def ub_callback(data, status, result):
-        if status == 0 and result.havedata:
-            data["data"] = result.data
-        data["nxdomain"] = result.nxdomain
-        data["rcode"] = result.rcode
-        data["done"] = True
-
-    cb_data = dict(done=False)
-    retval, async_id = ub_ctx.resolve_async(qname, cb_data, ub_callback, qtype, rr_class)
-
-    start = timer()
-    while retval == 0 and not cb_data["done"]:
-        time.sleep(0.1)
-        retval = ub_ctx.process()
-        if timer() - start > timeout:
-            if async_id:
-                ub_ctx.cancel(async_id)
-            cb_data["done"] = True
-    return cb_data
-
-
 def get_valid_domain_web(dname, timeout=5):
     dname = validate_dname(dname)
     if dname is None:
         return None
 
-    for qtype in (unbound.RR_TYPE_A, unbound.RR_TYPE_AAAA):
-        cb_data = ub_resolve_with_timeout(dname, qtype, unbound.RR_CLASS_IN, timeout)
-        if cb_data.get("data") and cb_data["data"].data:
+    for qtype in (RdataType.A, RdataType.AAAA):
+        try:
+            dns_resolve(dname, qtype)
             return dname
-
-    log.debug(f"{dname}: Could not retrieve RR_TYPE_A / RR_TYPE_AAAA record from unbound.")
+        except (NoAnswer, NXDOMAIN, Timeout):
+            pass
+    log.debug(f"{dname}: Could not retrieve A/AAAA record")
     return None
 
 
@@ -342,10 +284,13 @@ def get_valid_domain_mail(mailaddr, timeout=5):
     if dname is None:
         return None
 
-    cb_data = ub_resolve_with_timeout(dname, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN, timeout)
-
-    if cb_data.get("nxdomain") and cb_data["nxdomain"]:
+    try:
+        dns_resolve_soa(dname)
+    except (NXDOMAIN, Timeout):
         return None
+    except NoAnswer:
+        # We're fine with it if any record exists
+        pass
 
     return dname
 
