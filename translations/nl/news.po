@@ -4,6 +4,7 @@ msgstr ""
 
 msgid "article .index"
 msgstr ""
+"release-1.9\n"
 "terugblik-10-jarig-jubileum\n"
 "10-jarig-jubileum\n"
 "release-1.8\n"
