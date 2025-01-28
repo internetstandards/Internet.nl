@@ -13,12 +13,12 @@ celery>5.3
 setuptools-rust
 beautifulsoup4
 cryptography<39.0.0
-django-bleach<3  # 3 and up has no Python 3.7 support
+django-bleach
 django-enumfields
 django-hosts
 django-markdown_deux
 eventlet
-gevent < 23.9.1  # pinned for 3.7
+gevent
 libsass
 markdown
 polib
@@ -41,11 +41,8 @@ setuptools_scm
 sentry-sdk
 forcediphttpsadapter
 pytz
+sectxt
 
-# Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
-dnspython < 2.7.0  # dependency of eventlet
-pluggy==1.2.0  # dependency of pytest
-zipp==3.19.1  # dependency of importlib-metadata
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
@@ -58,10 +55,6 @@ whitenoise
 
 # Needed in celery/kombu, but not installed automatically?
 cached-property
-
-# sectxt from github, as the 0.9.4 on pypi can not refer to the fixed version of pgpy
-# can be fixed when https://github.com/SecurityInnovation/PGPy/pull/467 is merged and a new sectxt is released
-https://github.com/DigitalTrustCenter/sectxt/archive/refs/tags/0.9.4.tar.gz
 
 # our custom fork
 https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
