@@ -33,6 +33,6 @@ docker run --pull=always --network none \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume $HOME/.docker:/root/.docker \
   --volume /opt/Internet.nl:/opt/Internet.nl \
-  --env "DOCKER_REGISTRY=$DOCKER_REGISTRY" \
-  "$DOCKER_REGISTRY/util:$UPSTREAM_RELEASE" \
+  --env "DOCKER_REGISTRY=${DOCKER_REGISTRY:-ghcr.io/internetstandards}" \
+  "${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:$UPSTREAM_RELEASE" \
   /deploy.sh

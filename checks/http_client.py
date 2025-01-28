@@ -33,6 +33,7 @@ def _do_request(args, headers, kwargs, session, url):
         url, headers=headers, stream=True, allow_redirects=False, timeout=DEFAULT_TIMEOUT, *args, **kwargs
     )
     if response.next and user_allow_redirects:
+        headers = headers.copy()
         headers.pop("Host", None)
         initial_response = response
         response = session.get(
@@ -66,7 +67,7 @@ def http_get(
 
     try:
         response = _do_request(args, headers, kwargs, session, url)
-    except requests.RequestException:
+    except (requests.RequestException, ValueError):
         # Retry, once, then log and raise the exception
         try:
             response = _do_request(args, headers, kwargs, session, url)

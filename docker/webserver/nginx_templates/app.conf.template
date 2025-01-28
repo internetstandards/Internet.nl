@@ -69,7 +69,7 @@ server {
     # /connection/
     # /connection/gettestid/
     # /connection/finished/6330d6a09e56387e4dd59502418fa642/results
-    location ~ ^(/connection/?|/connection/gettestid/?|/connection/finished/.+)$ {
+    location ~ ^/(connection(/?|/gettestid/?|/finished/.+)|change_language/?)$ {
         # forward information about the connecting client to the connection test
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 

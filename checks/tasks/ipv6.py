@@ -582,11 +582,11 @@ def simhash(url, task=None):
             v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, task=task, https=port == 443)
             break
         except requests.RequestException:
-            # Could not connect on given port, try another port.
-            # If we managed to connect on IPv4 however, fail the test.
-            if v4_response:
-                log.debug("simhash unable to connect on IPv6, but IPv4 worked")
-                return simhash_score, distance, None
+            pass
+
+    if v4_response is not None and v6_response is None:
+        log.debug("simhash unable to connect on IPv6, but IPv4 worked")
+        return simhash_score, distance, None
 
     if v4_response is None:
         # FAIL: Could not establish a connection on both addresses.
