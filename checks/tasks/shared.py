@@ -60,7 +60,7 @@ def batch_mail_get_servers(self, url, *args, **kwargs):
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
 )
 def resolve_a_aaaa(self, qname, *args, **kwargs):
-    return do_resolve_a_aaaa(qname)
+    return do_resolve_single_a_aaaa(qname)
 
 
 @batch_shared_task(
@@ -69,7 +69,7 @@ def resolve_a_aaaa(self, qname, *args, **kwargs):
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
 )
 def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
-    return do_resolve_a_aaaa(qname)
+    return do_resolve_single_a_aaaa(qname)
 
 
 @shared_task(
@@ -141,7 +141,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
             if len(mxlist) > 1:
                 # Invalid NULL MX next to other MX.
                 return [(None, None, MxStatus.null_mx_with_other_mx)]
-            elif not do_resolve_a_aaaa(url):
+            elif not do_resolve_single_a_aaaa(url):
                 return [(None, None, MxStatus.null_mx_without_a_aaaa)]
             return [(None, None, MxStatus.null_mx)]
 
@@ -155,7 +155,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
         mailservers.append((rdata, dane_cb_data, MxStatus.has_mx))
 
     if not mailservers:
-        if do_resolve_a_aaaa(url):
+        if do_resolve_single_a_aaaa(url):
             try:
                 spf_data = dns_resolve_spf(url)
                 if spf_data:
@@ -176,7 +176,7 @@ def get_mail_servers_mxstatus(mailservers):
     return mailservers[0][2]
 
 
-def do_resolve_a_aaaa(qname):
+def do_resolve_single_a_aaaa(qname):
     """Resolve A and AAAA records and return a single result for each type."""
     af_ip_pairs = []
     try:
