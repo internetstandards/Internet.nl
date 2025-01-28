@@ -47,9 +47,6 @@ SKIP_SECRET_KEY_CHECK = bool(getenv("SKIP_SECRET_KEY_CHECK", DEBUG))
 # # and the option to Preserve the Host are set by your proxy.
 DJANGO_IS_PROXIED = get_boolean_env("DJANGO_IS_PROXIED", False)
 ALLOWED_HOSTS = split_csv_trim(getenv("ALLOWED_HOSTS", ".internet.nl, internet.nl"))
-ADMIN_NAME = getenv("ADMIN_NAME", "Administrator")
-ADMIN_EMAIL = getenv("ADMIN_EMAIL", "Administrator")
-SERVER_EMAIL = getenv("SERVER_EMAIL", "django@internet.nl")
 INTERNAL_IPS = split_csv_trim(getenv("INTERNAL_IPS", ""))
 TIME_ZONE = getenv("TIME_ZONE", "UTC")
 
@@ -135,11 +132,7 @@ else:
 ALLOWED_HOSTS = ALLOWED_HOSTS + [IPV6_TEST_ADDR, f"[{IPV6_TEST_ADDR}]"]
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_bleach",
     "markdown_deux",
@@ -156,13 +149,11 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
-                "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
             ],
             "libraries": {"translate": "interface.templatetags.translate"},
@@ -178,15 +169,11 @@ MIDDLEWARE = [
     "django_statsd.middleware.GraphiteRequestTimingMiddleware",
     "django_statsd.middleware.GraphiteMiddleware",
     "django_hosts.middleware.HostsRequestMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
     "internetnl.custom_middlewares.ActivateTranslationMiddleware",
 ]
 
-ADMINS = ((ADMIN_NAME, ADMIN_EMAIL),)
 ROOT_URLCONF = "internetnl.urls"
 ROOT_HOSTCONF = "internetnl.hosts"
 DEFAULT_HOST = "www"

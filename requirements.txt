@@ -4,70 +4,70 @@
 #
 #    pip-compile requirements.in
 #
-amqp==5.1.1
+amqp==5.3.1
     # via kombu
 argparse==1.4.0
     # via
     #   -r requirements.in
     #   pythonwhois-internet-nl
-asgiref==3.7.2
+asgiref==3.8.1
     # via django
-async-timeout==4.0.3
+async-timeout==5.0.1
     # via redis
-attrs==23.1.0
+attrs==24.3.0
     # via pytest
-beautifulsoup4==4.12.2
+beautifulsoup4==4.12.3
     # via -r requirements.in
-billiard==4.1.0
+billiard==4.2.1
     # via celery
-bleach==4.1.0
+bleach[css]==5.0.1
     # via django-bleach
-cached-property==1.5.2
+cached-property==2.0.1
     # via -r requirements.in
-celery==5.3.1
+celery==5.4.0
     # via
     #   -r requirements.in
     #   celery-statsd
 celery-statsd==1.0.0
     # via -r requirements.in
-certifi==2023.7.22
+certifi==2024.12.14
     # via
     #   requests
     #   sentry-sdk
-cffi==1.15.1
+cffi==1.17.1
     # via cryptography
 chardet==5.2.0
     # via -r requirements.in
-charset-normalizer==3.2.0
+charset-normalizer==3.4.1
     # via requests
-click==8.1.7
+click==8.1.8
     # via
     #   celery
     #   click-didyoumean
     #   click-plugins
     #   click-repl
-click-didyoumean==0.3.0
+click-didyoumean==0.3.1
     # via celery
 click-plugins==1.1.1
     # via celery
 click-repl==0.3.0
     # via celery
-colorlog==6.7.0
+colorlog==6.9.0
     # via -r requirements.in
 cryptography==38.0.4
     # via
     #   -r requirements.in
-    #   pgpy
-django==4.2.16
+    #   pgpy-dtc
+django==4.2.18
     # via
     #   -r requirements.in
     #   django-bleach
     #   django-redis
-django-bleach==2.0.0
+django-bleach==3.1.0
     # via -r requirements.in
 django-enumfields==2.1.1
     # via -r requirements.in
-django-hosts==5.2
+django-hosts==6.0
     # via -r requirements.in
 django-markdown-deux==1.0.6
     # via -r requirements.in
@@ -75,27 +75,25 @@ django-redis==4.12.1
     # via -r requirements.in
 django-statsd-mozilla==0.4.0
     # via -r requirements.in
-dnspython==2.6.1
-    # via
-    #   -r requirements.in
-    #   eventlet
-eventlet==0.35.2
+dnspython==2.7.0
+    # via eventlet
+eventlet==0.38.2
     # via -r requirements.in
 forcediphttpsadapter==1.1.0
     # via -r requirements.in
-gevent==23.9.0.post1
+gevent==24.11.1
     # via -r requirements.in
-gitdb==4.0.10
+gitdb==4.0.12
     # via gitpython
-gitpython==3.1.41
+gitpython==3.1.44
     # via -r requirements.in
-greenlet==3.0.0
+greenlet==3.1.1
     # via
     #   eventlet
     #   gevent
-hiredis==2.2.3
+hiredis==3.1.0
     # via -r requirements.in
-idna==3.7
+idna==3.10
     # via requests
 importlib-metadata==4.13.0
     # via
@@ -103,94 +101,91 @@ importlib-metadata==4.13.0
     #   markdown
 iniconfig==2.0.0
     # via pytest
-ip-address==1.4.2
+ip-address==1.5.0
     # via -r requirements.in
-kombu==5.3.1
+kombu==5.4.2
     # via celery
 langcodes==3.3.0
     # via sectxt
-libsass==0.22.0
+libsass==0.23.0
     # via -r requirements.in
-markdown==3.4.4
+markdown==3.7
     # via -r requirements.in
-markdown2==2.4.10
+markdown2==2.5.2
     # via django-markdown-deux
-packaging==23.1
+packaging==24.2
     # via
-    #   bleach
     #   forcediphttpsadapter
     #   pytest
     #   setuptools-scm
 pathlib2==2.3.7.post1
     # via -r requirements.in
-PGPy @ https://github.com/SecurityInnovation/PGPy/archive/09014c72b4557dd1254cf68a32e50f78515f5f32.zip
+pgpy-dtc==0.1.0
     # via sectxt
-pluggy==1.2.0
-    # via
-    #   -r requirements.in
-    #   pytest
+pluggy==1.5.0
+    # via pytest
 polib==1.2.0
     # via -r requirements.in
-prompt-toolkit==3.0.39
+prompt-toolkit==3.0.48
     # via click-repl
-psycopg2-binary==2.9.7
+psycopg2-binary==2.9.10
     # via -r requirements.in
 py==1.11.0
     # via pytest
-pyasn1==0.5.1
-    # via pgpy
-pycparser==2.21
+pyasn1==0.6.1
+    # via pgpy-dtc
+pycparser==2.22
     # via cffi
-pyparsing==3.1.1
+pyparsing==3.2.1
     # via -r requirements.in
 pyrabbit2==1.0.7
     # via -r requirements.in
 pytest==6.2.5
     # via -r requirements.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   celery
     #   sectxt
-pythonwhois-internet-nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
+pythonwhois-internet.nl @ https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz
     # via -r requirements.in
-pytz==2024.1
+pytz==2024.2
     # via -r requirements.in
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via -r requirements.in
-redis==5.0.0
+redis==5.2.1
     # via django-redis
-requests==2.32.0
+requests==2.31.0
     # via
     #   -r requirements.in
     #   forcediphttpsadapter
     #   ip-address
     #   pyrabbit2
     #   sectxt
-rjsmin==1.2.1
+rjsmin==1.2.3
     # via -r requirements.in
-sectxt @ https://github.com/DigitalTrustCenter/sectxt/archive/refs/tags/0.9.4.tar.gz
+sectxt==0.9.6
     # via -r requirements.in
 selenium==3.141.0
     # via -r requirements.in
 semantic-version==2.10.0
     # via setuptools-rust
-sentry-sdk==2.8.0
+sentry-sdk==2.19.2
     # via -r requirements.in
-setuptools-rust==1.7.0
+setuptools-rust==1.10.2
     # via -r requirements.in
-setuptools-scm==7.1.0
+setuptools-scm==8.1.0
     # via -r requirements.in
-six==1.16.0
+six==1.17.0
     # via
     #   bleach
     #   celery-statsd
     #   pathlib2
     #   python-dateutil
-smmap==5.0.0
+smmap==5.0.2
     # via gitdb
-soupsieve==2.4.1
+soupsieve==2.6
     # via beautifulsoup4
-sqlparse==0.5.0
+sqlparse==0.5.3
     # via django
 statsd==4.0.0
     # via
@@ -198,49 +193,50 @@ statsd==4.0.0
     #   django-statsd-mozilla
 statshog==1.0.6
     # via -r requirements.in
+tinycss2==1.1.1
+    # via bleach
 toml==0.10.2
     # via pytest
-tomli==2.0.1
-    # via
-    #   setuptools-rust
-    #   setuptools-scm
-typing-extensions==4.7.1
+tomli==2.2.1
+    # via setuptools-scm
+typing-extensions==4.12.2
     # via
     #   asgiref
     #   kombu
-    #   setuptools-rust
     #   setuptools-scm
-tzdata==2023.3
-    # via celery
-urllib3==2.0.7
+tzdata==2024.2
+    # via
+    #   celery
+    #   kombu
+urllib3==2.3.0
     # via
     #   requests
     #   selenium
     #   sentry-sdk
-uwsgi==2.0.22
+uwsgi==2.0.28
     # via -r requirements.in
-validators==0.23.0
+validators==0.32.0
     # via sectxt
-vine==5.0.0
+vine==5.1.0
     # via
     #   amqp
     #   celery
     #   kombu
-wcwidth==0.2.6
+wcwidth==0.2.13
     # via prompt-toolkit
 webencodings==0.5.1
-    # via bleach
-wheel==0.41.2
-    # via -r requirements.in
-whitenoise==6.5.0
-    # via -r requirements.in
-zipp==3.19.1
     # via
-    #   -r requirements.in
-    #   importlib-metadata
+    #   bleach
+    #   tinycss2
+wheel==0.45.1
+    # via -r requirements.in
+whitenoise==6.8.2
+    # via -r requirements.in
+zipp==3.21.0
+    # via importlib-metadata
 zope-event==5.0
     # via gevent
-zope-interface==6.0
+zope-interface==7.2
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:

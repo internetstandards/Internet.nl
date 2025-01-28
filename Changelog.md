@@ -12,6 +12,7 @@
   for details on the scoring algorithm.
 - [Improvements in the null MX recommendation](https://github.com/internetstandards/Internet.nl/issues/989) based on SPF values.
 - SPF test now [correctly counts include/redirect for the 10 lookup limit](https://github.com/internetstandards/Internet.nl/issues/1336).
+- DMARC test now [detects a missing URI scheme](https://github.com/internetstandards/Internet.nl/pull/1493).
 
 Internal changes:
 - CI now detects missing or conflicting database migrations.
