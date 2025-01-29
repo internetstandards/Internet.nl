@@ -373,7 +373,6 @@ def dnssec_status(domain, mx_status, score_secure, score_insecure, score_bogus, 
         answer_dnssec_status = dns_resolve_soa(domain, raise_on_no_answer=False)
         status, score = status_mapping[answer_dnssec_status]
     except NoNameservers:
-        pass
         status = DnssecStatus.dnserror.value
         score = score_error
 

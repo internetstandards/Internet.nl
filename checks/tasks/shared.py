@@ -10,7 +10,7 @@ from django.conf import settings
 
 from dns.exception import DNSException
 from dns.rdatatype import RdataType
-from dns.resolver import NXDOMAIN, NoAnswer
+from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers
 
 from checks.models import MxStatus
 from checks.resolver import (
@@ -273,7 +273,7 @@ def resolve_dane(port, dname, check_nxdomain=False):
             data = [(rr.usage, rr.selector, rr.mtype, binascii.hexlify(rr.cert).decode("ascii")) for rr in rrset]
     except NXDOMAIN:
         return {"nxdomain": True}
-    except NoAnswer:
+    except (NoAnswer, NoNameservers):
         data = None
         dnssec_status = None
     return {
