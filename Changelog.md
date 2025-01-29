@@ -1,5 +1,23 @@
 # Change Log
 
+## 1.10 (in progress)
+
+### Feature changes
+
+...
+
+### Internal changes
+
+- The test code no longer interfaces with libunbound, but 
+ [uses dnspython as a stub resolver](https://github.com/internetstandards/Internet.nl/pull/1578).
+
+### Deployment setup changes
+
+- The `resolver-permissive` container was obsoleted and removed.
+
+No changes to deployment settings.
+No changes to the API.
+
 ## 1.9.0
 
 1.9.0 (compared to latest 1.8) contains several testing changes, along with content improvements:
