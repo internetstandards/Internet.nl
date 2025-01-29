@@ -72,7 +72,7 @@ def dns_resolve_txt(qname: str, allow_bogus=True) -> list[str]:
 
 
 def dns_resolve_spf(qname: str, allow_bogus=True) -> Optional[str]:
-    strings, dnssec_status = dns_resolve_txt(qname, allow_bogus)
+    strings = dns_resolve_txt(qname, allow_bogus)
     spf_records = [s for s in strings if s.lower().startswith("v=spf1")]
     return spf_records[0] if len(spf_records) == 1 else None
 
