@@ -4,6 +4,7 @@
 # Hence no `version` is specified in this file.
 
 services:
+  # nginx proxy container
   webserver:
     image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
     restart: unless-stopped
@@ -65,6 +66,7 @@ services:
       start_period: 1m
       retries: 10
 
+  # django container
   app:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
@@ -167,6 +169,7 @@ services:
       - batch_results:/app/batch_results
       - manual-hof:/app/manual-hall-of-fame/
 
+  # django DB migrations
   db-migrate:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     networks:
@@ -201,6 +204,7 @@ services:
       - INTERNETNL_CACHE_TTL
       - WORKER_CONCURRENCY
 
+  # worker for queue
   worker: &worker
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     deploy:
@@ -335,6 +339,7 @@ services:
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
 
+  # celery task queue
   beat:
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
@@ -408,6 +413,7 @@ services:
       start_period: 1m
       retries: 10
 
+  # redis cache / state
   redis:
     image: ${DOCKER_IMAGE_REDIS}
     restart: unless-stopped
@@ -431,6 +437,7 @@ services:
     volumes:
       - redis:/data
 
+  # rabbitmq message-broker
   rabbitmq:
     image: ${DOCKER_IMAGE_RABBITMQ}
     configs:
@@ -462,6 +469,7 @@ services:
     volumes:
       - rabbitmq:/var/lib/rabbitmq
 
+  # PostgreSQL database
   postgres:
     image: ${DOCKER_IMAGE_POSTGRES}
     restart: unless-stopped
@@ -489,6 +497,7 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  # Routinator for RPKI
   routinator:
     image: ${DOCKER_IMAGE_ROUTINATOR}
     restart: unless-stopped
@@ -564,6 +573,7 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
+
     profiles:
       - connectiontest
 
@@ -599,6 +609,7 @@ services:
       start_period: 1m
       retries: 10
 
+  # cron with periodic tasks
   cron:
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7
@@ -681,6 +692,7 @@ services:
     profiles:
       - cron
 
+  # grafana to visualize the monitoring
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
 
@@ -718,6 +730,10 @@ services:
       internal:
         ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
+    profiles:
+      - monitoring
+
+  # prometheus for monitoring
   prometheus:
     image: ${DOCKER_IMAGE_PROMETHEUS}
 
@@ -748,6 +764,10 @@ services:
     volumes:
       - prometheus-data:/prometheus
 
+    profiles:
+      - monitoring
+
+  # alertmanager for sending monitoring alerts (also requires monitoring profile)
   alertmanager:
     image: ${DOCKER_IMAGE_PROMETHEUS_ALERTMANAGER}
 
@@ -773,6 +793,7 @@ services:
     profiles:
       - alertmanager
 
+  # provide PostgreSQL metrics for monitoring
   postgresql-exporter:
     image: ${DOCKER_IMAGE_POSTGRESQL_EXPORTER}
 
@@ -790,6 +811,10 @@ services:
     networks:
       - internal
 
+    profiles:
+      - monitoring
+
+  # provide redis metrics for monitoring
   redis-exporter:
     image: ${DOCKER_IMAGE_REDIS_EXPORTER}
 
@@ -807,6 +832,10 @@ services:
     networks:
       - internal
 
+    profiles:
+      - monitoring
+
+  # provide statsd metrics for monitoring
   statsd-exporter:
     image: ${DOCKER_IMAGE_STATSD_EXPORTER}
 
@@ -828,6 +857,10 @@ services:
         aliases:
           - statsd
 
+    profiles:
+      - monitoring
+
+  # provide celery metrics for monitoring
   celery-exporter:
     image: ${DOCKER_IMAGE_CELERY_EXPORTER}
     command:
@@ -849,8 +882,13 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  # https://github.com/prometheus/node_exporter#docker
+    profiles:
+      - monitoring
+
+
+  # provide node metrics for monitoring
   node-exporter:
+    # https://github.com/prometheus/node_exporter#docker
     image: ${DOCKER_IMAGE_NODE_EXPORTER}
     command:
       - --path.rootfs=/host
@@ -879,6 +917,10 @@ services:
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - prometheus-textfile-directory:/prometheus-textfile-directory
 
+    profiles:
+     - monitoring
+
+  # provide docker container metrics for monitoring
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
     image: ${DOCKER_IMAGE_DOCKER_STATSD_EXPORTER}
@@ -898,6 +940,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+    profiles:
+     - monitoring
+
+  # provide nginx metrics for monitoring
   nginx_logs_exporter:
     image: ${DOCKER_IMAGE_NGINX_LOGS_EXPORTER}
     command:
@@ -918,6 +964,9 @@ services:
       - internal
     volumes:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
+
+    profiles:
+      - monitoring
 
 volumes:
   postgres: {}
