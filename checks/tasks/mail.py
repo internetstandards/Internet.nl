@@ -147,7 +147,8 @@ def callback(results, addr, category):
 
         elif testname == "dmarc":
             dmarc_available = result.get("available")
-            dmarc_record = result.get("record")
+            # You'd expect a single entry, but the field dmarc_record is actually a list
+            dmarc_record = [result.get("record")]
             dmarc_score = result.get("score")
             dmarc_policy_status = result.get("policy_status")
             dmarc_policy_score = result.get("policy_score")
