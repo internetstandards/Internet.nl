@@ -154,7 +154,7 @@ services:
       - INTERNETNL_DOMAINNAME
       - USER_AGENT_URL
       - LANGUAGES
-
+      - PAGE_CACHE_TIME_SECONDS
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL

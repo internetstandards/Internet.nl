@@ -471,7 +471,7 @@ JAVASCRIPT_TIMEOUT = 3  # seconds
 PADDED_MACS = os.path.join(BASE_DIR, "remote_data/macs/padded_macs.json")
 DNS_ROOT_KEY = os.path.join(BASE_DIR, "remote_data/dns/root.key")
 # Time to cache consecutive requests to taxing pages.
-PAGE_CACHE_TIME = 60 * 5  # seconds
+PAGE_CACHE_TIME = int(os.environ.get("PAGE_CACHE_TIME_SECONDS", 60 * 5))  # seconds
 SIMHASH_MAX = 10
 PUBLIC_SUFFIX_LIST_URL = (
     os.environ.get("PUBLIC_SUFFIX_LIST_URL") or "https://publicsuffix.org/list/public_suffix_list.dat"
