@@ -11,6 +11,12 @@ server {
         proxy_ssl_verify off;
         proxy_pass https://$IPV4_IP_WEBSERVER_INTERNAL:443;
     }
+
+    location = /connection/ {
+        proxy_set_header Host conn.${INTERNETNL_DOMAINNAME};
+        proxy_pass http://$IPV4_IP_WEBSERVER_INTERNAL/connection/;
+    }
+
 }
 
 server {
