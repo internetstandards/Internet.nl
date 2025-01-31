@@ -19,7 +19,13 @@ class ListField(models.TextField):
     def from_db_value(self, value, expression, connection, context="Null"):
         if value is None:
             return value
-        return ast.literal_eval(value)
+        try:
+            return ast.literal_eval(value)
+        except SyntaxError:
+            raise SyntaxError(
+                f"Syntax error while attempting to parse value as python, in ListField,"
+                f" possibly raw value has been stored instead of valid python code: {value}"
+            )
 
     def to_python(self, value):
         if not value:
