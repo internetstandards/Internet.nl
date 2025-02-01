@@ -8,6 +8,7 @@ COPY docker/cron/periodic /etc/periodic/
 # create separate periodic config for cron-docker service
 RUN cp -r /etc/crontabs /etc/crontabs-docker
 RUN sed -i 's/periodic/periodic-docker/' /etc/crontabs-docker/root
+RUN sed -i 's/15/5/g' /etc/crontabs-docker/root
 
 # install cron tasks for cron-docker
 COPY docker/cron-docker/periodic /etc/periodic-docker/

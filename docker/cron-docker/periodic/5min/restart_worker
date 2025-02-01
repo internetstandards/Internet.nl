@@ -2,9 +2,9 @@
 set -e
 # stop and start worker one at a time to ensure (batch) tasks are still being picked up
 # workers are sent a TERM signal with which a 10 minute grace period before QUIT is sent
-for worker in $(docker ps --filter label=com.docker.compose.service=worker-nassl --quiet); do
+for worker in $(docker ps --filter label=com.docker.compose.service=worker --quiet); do
+  # tell celery worker to graceful shutdown
   docker exec "$worker" celery --app=internetnl control shutdown --destination "celery@$worker" --timeout 300 || true
-
   # docker stop "$worker"
   # docker start "$worker"
   # wait for container to be healthy
