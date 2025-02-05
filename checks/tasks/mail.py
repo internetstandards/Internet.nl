@@ -578,7 +578,7 @@ def dmarc_verify_external_destinations(domain, parsed, public_suffix_list):
             try:
                 txt_records = dns_resolve_txt(ext_qname)
                 for txt in txt_records:
-                    ru_parsed = dmarc_parse(txt[0])
+                    ru_parsed = dmarc_parse(txt)
                     if ru_parsed:
                         if is_dmarc:
                             # Second valid DMARC record, abort.
