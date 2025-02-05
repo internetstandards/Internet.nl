@@ -4,7 +4,11 @@
 
 ### Feature changes
 
-...
+- The [sectxt](https://github.com/DigitalTrustCenter/sectxt) library, used for validating security.txt files, was updated from 0.9.4 to 0.9.6.
+  This includes:
+  - A new error if a PGP signed message ends with more than one newline, named `too_many_line_separators` ([sectxt/#78](https://github.com/DigitalTrustCenter/sectxt/issues/78)).
+  - Improved detection of repeated use of fields that must only occur once. Previously, these were not always detected ([sectxt/#83](https://github.com/DigitalTrustCenter/sectxt/issues/83)).
+  - Fixed an issue with checking signatures made with AEAD keys ([sectxt/#79](https://github.com/DigitalTrustCenter/sectxt/issues/79)).
 
 ### Internal changes
 
