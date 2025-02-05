@@ -6,7 +6,7 @@ from typing import Optional
 
 import requests
 import urllib3
-from dns.resolver import NXDOMAIN
+from dns.resolver import NXDOMAIN, NoAnswer, LifetimeTimeout
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
 from checks.resolver import dns_resolve_aaaa, dns_resolve_a
@@ -123,7 +123,7 @@ def http_get_af(hostname: str, port: int, af: socket.AddressFamily, *args, **kwa
             ips = dns_resolve_aaaa(hostname)
         else:
             ips = dns_resolve_a(hostname)
-    except (NXDOMAIN, NoIpError):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout, NoIpError):
         raise exc
     for ip in ips:
         try:

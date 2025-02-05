@@ -10,7 +10,7 @@ from django.conf import settings
 
 from dns.exception import DNSException
 from dns.rdatatype import RdataType
-from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers
+from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
 
 from checks.models import MxStatus
 from checks.resolver import (
@@ -181,13 +181,13 @@ def do_resolve_single_a_aaaa(qname):
     af_ip_pairs = []
     try:
         ip4 = dns_resolve_a(qname)
-    except (NoAnswer, NXDOMAIN):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
         ip4 = []
     if len(ip4) > 0:
         af_ip_pairs.append((socket.AF_INET, ip4[0]))
     try:
         ip6 = dns_resolve_aaaa(qname)
-    except (NoAnswer, NXDOMAIN):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
         ip6 = []
     if len(ip6) > 0:
         af_ip_pairs.append((socket.AF_INET6, ip6[0]))
@@ -199,13 +199,13 @@ def do_resolve_all_a_aaaa(qname):
     af_ip_pairs = []
     try:
         ip4 = dns_resolve_a(qname)
-    except (NoAnswer, NXDOMAIN):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
         ip4 = []
     for ip in ip4:
         af_ip_pairs.append((socket.AF_INET, ip))
     try:
         ip6 = dns_resolve_aaaa(qname)
-    except (NoAnswer, NXDOMAIN):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
         ip6 = []
     for ip in ip6:
         af_ip_pairs.append((socket.AF_INET6, ip))
@@ -235,13 +235,13 @@ def do_resolve_ns(qname: str) -> tuple[list[str], str]:
     """
     try:
         ns_list = dns_resolve_ns(qname)
-    except (NoAnswer, NXDOMAIN):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
         ns_list = []
     next_label = qname
     while not ns_list and "." in next_label:
         try:
             ns_list = dns_resolve_ns(next_label)
-        except (NoAnswer, NXDOMAIN):
+        except (NoAnswer, NXDOMAIN, LifetimeTimeout):
             ns_list = []
         next_label = next_label[next_label.find(".") + 1 :]
 
