@@ -26,8 +26,6 @@ DEFAULT_TEST_TIMEOUT = 200
 TEST_TIMEOUT = int(os.environ.get("INTERNETNL_CACHE_TTL", DEFAULT_TEST_TIMEOUT))
 REQUEST_TIMEOUT = 30
 
-TESTS = ["site", "mail"]
-
 IPV4_IP_APP_INTERNAL = os.environ.get("IPV4_IP_APP_INTERNAL")
 INTERNETNL_DOMAINNAME = os.environ.get("INTERNETNL_DOMAINNAME")
 # talk directly to the internal app container as the webserver might
@@ -35,32 +33,11 @@ INTERNETNL_DOMAINNAME = os.environ.get("INTERNETNL_DOMAINNAME")
 URL_BASE = f"http://{IPV4_IP_APP_INTERNAL}:8080"
 HEADERS = {"Host": INTERNETNL_DOMAINNAME}
 
-TEST_DOMAINS = {
-    # domain's to use in website tests
-    "site": [
-        "internet.nl",
-        "example.nl",
-        "example.com",
-        "internetsociety.org",
-        "ripe.net",
-        "surf.nl",
-        "ecp.nl",
-        "forumstandaardisatie.nl",
-        "minez.nl",
-    ],
-    # domain's to use in mail tests
-    "mail": [
-        "internetsociety.org",
-        "ripe.net",
-        "surf.nl",
-        "ecp.nl",
-        # these are currently really slow and will probably improve when
-        # we switch to sslyze, for now disable these in monitoring
-        # "internet.nl",
-        # "forumstandaardisatie.nl",
-        # "minez.nl",
-    ],
-}
+TESTS = ["site", "mail"]
+
+TEST_DOMAINS = dict()
+TEST_DOMAINS["site"] = [v.strip() for v in os.environ.get("TEST_DOMAINS_SITE", "").split(",") if v]
+TEST_DOMAINS["mail"] = [v.strip() for v in os.environ.get("TEST_DOMAINS_MAIL", "").split(",") if v]
 
 METRIC_PROBE_DONE = Gauge("tests_probe_done_total", "Whether the probe completed.", ["test", "domain", "probe"])
 METRIC_PROBE_SUCCESS = Gauge("tests_probe_success_total", "Whether the probe succeeded.", ["test", "domain", "probe"])

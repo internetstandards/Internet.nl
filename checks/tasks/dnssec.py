@@ -1,7 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 import sys
-import time
 from collections import OrderedDict
 
 import pythonwhois
@@ -11,10 +10,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-import unbound
+from dns.resolver import NoNameservers
+
 from checks import categories, scoring
 from checks.models import DnssecStatus, DomainTestDnssec, MailTestDnssec, MxStatus
-from checks.tasks import SetupUnboundContext, shared
+from checks.resolver import dns_resolve_soa, DNSSECStatus
+from checks.tasks import shared
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from interface import batch, batch_shared_task, redis_id
 from internetnl import log
@@ -79,7 +80,6 @@ batch_mail_registered = check_registry("batch_mail_dnssec", batch_mail_callback,
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
@@ -90,7 +90,6 @@ def web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
@@ -101,7 +100,6 @@ def batch_web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    base=SetupUnboundContext,
 )
 def mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
@@ -112,7 +110,6 @@ def mail_is_secure(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
@@ -308,41 +305,10 @@ def get_mx_results(results, category):
     return report, status, score, log
 
 
-def unbound_callback(data, status, r):
-    """
-    Check unbound's response and record the status, score and log (if any) in
-    the callback data.
-
-    """
-    data["score"] = data["score_error"]
-    data["log"] = ""
-    if status == 0:
-        log = ""
-        if r.rcode == unbound.RCODE_SERVFAIL:
-            status = DnssecStatus.servfail.value
-            score = data["score_error"]
-        elif r.secure:
-            status = DnssecStatus.secure.value
-            score = data["score_secure"]
-        elif r.bogus:
-            status = DnssecStatus.bogus.value
-            log = r.why_bogus
-            score = data["score_bogus"]
-        else:
-            status = DnssecStatus.insecure.value
-            log = r.why_bogus
-            score = data["score_insecure"]
-        data["score"] = score
-        data["log"] = log or ""
-        data["status"] = status
-    data["done"] = True
-
-
 def do_web_is_secure(self, url, *args, **kwargs):
     try:
         dnssec_result = dnssec_status(
             url,
-            self,
             False,
             score_secure=scoring.WEB_DNSSEC_SECURE,
             score_insecure=scoring.WEB_DNSSEC_INSECURE,
@@ -370,7 +336,6 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
             if domain != "":
                 res[domain] = dnssec_status(
                     domain,
-                    self,
                     mx_status,
                     score_secure=scoring.MAIL_DNSSEC_SECURE,
                     score_insecure=scoring.MAIL_DNSSEC_INSECURE,
@@ -392,39 +357,23 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
     return ("is_secure", res)
 
 
-def dnssec_status(domain, ub_task, mx_status, score_secure, score_insecure, score_bogus, score_error):
+def dnssec_status(domain, mx_status, score_secure, score_insecure, score_bogus, score_error):
     """
     Check the DNSSEC status of the domain.
 
     """
+    # Map resolver's dnssec status to test score status
+    status_mapping = {
+        DNSSECStatus.SECURE: (DnssecStatus.secure.value, score_secure),
+        DNSSECStatus.BOGUS: (DnssecStatus.bogus.value, score_bogus),
+        DNSSECStatus.INSECURE: (DnssecStatus.insecure.value, score_insecure),
+    }
     try:
-        cb_data = dict(
-            done=False,
-            status=None,
-            log="",
-            score=score_error,
-            score_secure=score_secure,
-            score_insecure=score_insecure,
-            score_bogus=score_bogus,
-            score_error=score_error,
-        )
-        retval, async_id = ub_task.ub_ctx.resolve_async(
-            domain, cb_data, unbound_callback, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN
-        )
+        log.info(f"requesting SOA for {domain=} with {mx_status=}")
+        answer_dnssec_status = dns_resolve_soa(domain, raise_on_no_answer=False)
+        status, score = status_mapping[answer_dnssec_status]
+    except NoNameservers:
         status = DnssecStatus.dnserror.value
-        if retval == 0:
-            while not cb_data["done"]:
-                time.sleep(0.1)
-                retval = ub_task.ub_ctx.process()
-                if retval != 0:
-                    cb_data["status"] = DnssecStatus.dnserror.value
-                    break
-            status = cb_data["status"]
+        score = score_error
 
-    except SoftTimeLimitExceeded as e:
-        log.debug("Soft time limit exceeded.")
-        if async_id:
-            ub_task.ub_ctx.cancel(async_id)
-        raise e
-
-    return dict(status=status, score=cb_data["score"], log=cb_data["log"], mx_status=mx_status)
+    return dict(status=status, score=score, log=[], mx_status=mx_status)

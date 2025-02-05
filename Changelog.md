@@ -1,5 +1,25 @@
 # Change Log
 
+## 1.10 (in progress)
+
+### Feature changes
+
+...
+
+### Internal changes
+
+- The test code no longer interfaces with libunbound, but 
+ [uses dnspython as a stub resolver](https://github.com/internetstandards/Internet.nl/pull/1578).
+- Periodic tests [are no longer enabled by default](https://github.com/internetstandards/Internet.nl/pull/1628).
+
+### Deployment setup changes
+
+- The `resolver-permissive` container was obsoleted and removed.
+- Periodic tests will only run when [specifically enabled](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-deployment.md#periodic-tests)
+  with the CRON_15MIN_RUN_TESTS, TEST_DOMAINS_SITE and/or TEST_DOMAINS_MAIL settings.
+
+No changes to the API.
+
 ## 1.9.0
 
 1.9.0 (compared to latest 1.8) contains several testing changes, along with content improvements:

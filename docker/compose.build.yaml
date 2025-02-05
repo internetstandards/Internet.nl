@@ -67,15 +67,6 @@ services:
         # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
         - "linux/amd64"
 
-  resolver-permissive:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: unbound
-      platforms:
-        # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
-        - "linux/amd64"
-
   resolver-validating:
     build:
       context: ..

@@ -3,9 +3,8 @@ import responses
 from django.test import SimpleTestCase, override_settings
 from unittest import skip
 
-from checks.tasks import SetupUnboundContext as Task
 from checks.tasks.rpki import do_rpki
-from checks.tasks.shared import do_resolve_a_aaaa
+from checks.tasks.shared import do_resolve_single_a_aaaa
 
 # RIPE NCC RPKI Routing beacons
 # see: https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris/current-ris-routing-beacons
@@ -27,7 +26,6 @@ BEACONS = {
 
 class RpkiTestCase(SimpleTestCase):
     def setUp(self) -> None:
-        self.task = Task()
         return super().setUp()
 
     @skip("Temporary disabled due to RPKI instability, https://github.com/internetstandards/Internet.nl/issues/1549")
@@ -43,8 +41,8 @@ class RpkiTestCase(SimpleTestCase):
                         url=routinator_url,
                         json=routinator_response,
                     )
-                fqdn_ip_pairs = [(domain, do_resolve_a_aaaa(self.task, domain))]
-                result = do_rpki(self.task, fqdn_ip_pairs)
+                fqdn_ip_pairs = [(domain, do_resolve_single_a_aaaa(domain))]
+                result = do_rpki(fqdn_ip_pairs)
 
                 assert result
 

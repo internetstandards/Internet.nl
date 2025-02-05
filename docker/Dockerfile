@@ -113,10 +113,9 @@ RUN unbound-anchor || test $? -eq 1
 ADD docker/unbound/entrypoint.sh /
 ADD docker/unbound/signzones.sh /
 ADD docker/unbound/unbound.conf.template /opt/unbound/etc/unbound/
-# add configuration files for the validating and permissive internal resolver services
+# add configuration files for the validating internal resolver services
 ADD docker/resolver/entrypoint-resolver.sh /
 ADD docker/resolver/resolver-validating.conf.template /opt/unbound/etc/unbound/
-ADD docker/resolver/resolver-permissive.conf.template /opt/unbound/etc/unbound/
 # empty test config file, to be overwritten with volume mount during integration tests
 RUN touch /opt/unbound/etc/unbound/test.conf
 

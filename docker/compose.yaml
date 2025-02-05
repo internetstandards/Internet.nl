@@ -80,7 +80,7 @@ services:
         ipv4_address: $IPV4_IP_APP_INTERNAL
       public-internet: {}
     # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
     # also disable search domains and force default resolv settings
     dns_search: [.]
     dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
@@ -105,8 +105,6 @@ services:
         condition: service_healthy
         required: false
       resolver-validating:
-        condition: service_healthy
-      resolver-permissive:
         condition: service_healthy
     # set hostname for Sentry
     hostname: app
@@ -144,7 +142,6 @@ services:
       - SMTP_EHLO_DOMAIN
       - IPV6_TEST_ADDR
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -157,7 +154,7 @@ services:
       - INTERNETNL_DOMAINNAME
       - USER_AGENT_URL
       - LANGUAGES
-
+      - PAGE_CACHE_TIME_SECONDS
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
@@ -220,7 +217,7 @@ services:
       - internal
       - public-internet
     # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
     # also disable search domains and force default resolv settings
     dns_search: [.]
     dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
@@ -253,8 +250,6 @@ services:
         condition: service_healthy
         required: false
       resolver-validating:
-        condition: service_healthy
-      resolver-permissive:
         condition: service_healthy
     # set hostname for Sentry
     hostname: worker
@@ -294,7 +289,6 @@ services:
       - INTERNETNL_DOMAINNAME
       - USER_AGENT_URL
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -403,7 +397,6 @@ services:
       - SMTP_EHLO_DOMAIN
       - BATCH_SCHEDULER_INTERVAL
       - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-      - IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -574,38 +567,6 @@ services:
     profiles:
       - connectiontest
 
-  # unbound resolver used for all DNS queries by app, worker, etc that needs to ignore DNSSEC errors and pass them on to the client
-  resolver-permissive:
-    image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
-
-    entrypoint: /entrypoint-resolver.sh
-    command: ["resolver-permissive.conf"]
-
-    restart: unless-stopped
-    logging:
-      driver: $LOGGING_DRIVER
-      options:
-        tag: '{{.Name}}'
-    mem_limit: $DEFAULT_MEMORY_LIMIT
-    # disable swap by settings swap to the memory limit
-    memswap_limit: $DEFAULT_MEMORY_LIMIT
-    networks:
-      internal:
-        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
-      public-internet: {}
-
-    environment:
-      - DEBUG_LOG_UNBOUND
-      - INTERNETNL_CACHE_TTL
-
-    healthcheck:
-      test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-permissive.conf", "status"]
-      interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
-      start_period: 1m
-      retries: 10
-
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
@@ -655,6 +616,8 @@ services:
       - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
+      - TEST_DOMAINS_SITE
+      - TEST_DOMAINS_MAIL
 
     restart: unless-stopped
     logging:
@@ -669,7 +632,7 @@ services:
       public-internet: {}
 
     # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_RESOLVER_INTERNAL_PERMISSIVE
+    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
     # also disable search domains and force default resolv settings
     dns_search: [.]
     dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
@@ -1051,6 +1014,13 @@ configs:
         - alert: HighTestRuntimeSite
           # when site probes for 2 or more of the test domains take longer than 30 seconds something is wrong
           expr: count(tests_test_runtime_seconds{test="site"} >= 30) >= 2
+          annotations:
+            host: $INTERNETNL_DOMAINNAME
+            summary: Two or more tests for web take longer to complete than expected
+            dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0/periodic-tests'
+        - alert: StaleTestResults
+          # when the metrics for the periodic tests have not been updated for an hour
+          expr: time() - node_textfile_mtime_seconds > 3600
           annotations:
             host: $INTERNETNL_DOMAINNAME
             summary: Two or more tests for web take longer to complete than expected
