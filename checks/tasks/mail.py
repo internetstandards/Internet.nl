@@ -260,7 +260,7 @@ def do_spf(url, *args, **kwargs):
     policy_records = []
 
     if spf_record:
-        policy_status, policy_score, _ = spf_check_policy(url, spf_record[0], policy_records=policy_records)
+        policy_status, policy_score, _ = spf_check_policy(url, spf_record, policy_records=policy_records)
 
     result = dict(
         available=available,
@@ -307,7 +307,6 @@ def spf_check_include_redirect(
             score = scoring.MAIL_AUTH_SPF_POLICY_PARTIAL
 
     if status == SpfPolicyStatus.valid:
-        new_spf = new_spf[0]
         status, score, left_lookups = spf_check_policy(
             url, new_spf, policy_records=policy_records, max_lookups=left_lookups, is_include=is_include
         )
