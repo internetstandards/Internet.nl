@@ -6,6 +6,10 @@
 
 set -e
 
+if [ ! "$CRON_WORKER_RESTART" = "True" ];then
+  exit 0
+fi
+
 cd /opt/Internet.nl
 
 SERVICE=worker-slow
