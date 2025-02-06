@@ -13,9 +13,6 @@ services:
       live-tests:
     volumes:
       - ../:/source
-    profiles:
-      - build
-      - run-tests
 
 networks:
   live-tests:

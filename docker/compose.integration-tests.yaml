@@ -42,7 +42,7 @@ services:
       - PY_COLORS
       - INTERNETNL_BRANDING
     profiles:
-      - build
+      # adding a profile makes sure this service is not started during `make up env=test`
       - run-tests
     # configure internal mock resolver for isolated network
     dns:
