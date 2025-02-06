@@ -390,14 +390,12 @@ A Prometheus Alertmanager service is available but disabled by default. Enabling
 
 To enable and configure the Alertmanager add the following lines to `docker/local.env` and adjust the values to be applicable for your environment:
 
-    COMPOSE_PROFILES=connectiontest,routinator,alertmanager
+    COMPOSE_PROFILES=routinator,alertmanager
     ALERTMANAGER_MAIL_TO=rcpt1@example.com,rcpt2@example.com
     ALERTMANAGER_MAIL_FROM=noreply@example.com
     ALERTMANAGER_SMTP_HOST=smtp.example.com
     ALERTMANAGER_SMTP_USER=example
     ALERTMANAGER_SMTP_PASSWORD=example
-
-If there already is a `COMPOSE_PROFILES` entry in the configuration file, add `alertmanager` to that instead.
 
 The SMTP server is expected to use TLS, there is no way to disable this setting. The port used is `587` and can be customized using the `ALERTMANAGER_SMTP_PORT` variable.
 

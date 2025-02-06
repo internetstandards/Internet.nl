@@ -564,8 +564,6 @@ services:
       # start_interval: 5s
       start_period: 1m
       retries: 10
-    profiles:
-      - connectiontest
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
