@@ -652,9 +652,6 @@ services:
       start_period: 1m
       retries: 10
 
-    profiles:
-      - cron
-
   # cron daemon with access to Docker socket but no networking
   cron-docker:
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
@@ -664,6 +661,7 @@ services:
       - WORKER_SLOW_REPLICAS
       - DOCKER_REGISTRY
       - CRON_DAILY_DATABASE_CLEANUP
+      - CRON_WORKER_RESTART
 
     restart: unless-stopped
     logging:
@@ -677,9 +675,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/Internet.nl:/opt/Internet.nl
-
-    profiles:
-      - cron
 
   grafana:
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
