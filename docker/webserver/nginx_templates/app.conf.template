@@ -3,7 +3,7 @@ server_names_hash_bucket_size 1024;
 # override default log format to include vhost
 log_format default '$remote_addr $host $remote_user [$time_local] "$request" '
                    '$status $body_bytes_sent "$http_referer" '
-                   '"$http_user_agent" "$http_x_forwarded_for"';
+                   '"$http_user_agent" "$http_x_forwarded_for" $http3';
 
 access_log /var/log/nginx/access.log default;
 
@@ -11,7 +11,7 @@ access_log /var/log/nginx/access.log default;
 # it cannot be used by prometheus-nginxlog-exporter
 log_format nginx_logs_exporter '$remote_addr $host $remote_user [$time_local] $proxy_host "$request" '
                    '$status $body_bytes_sent "$http_referer" '
-                   '"$http_user_agent" "$http_x_forwarded_for"';
+                   '"$http_user_agent" "$http_x_forwarded_for" $http3';
 access_log /var/log/nginx/prometheus-nginxlog-exporter/access.log nginx_logs_exporter;
 
 # disable version in server banner
@@ -33,7 +33,10 @@ ssl_protocols TLSv1.2 TLSv1.3;
 ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
 
 http2 on;
-
+http3 on;
+quic_gso on;
+quic_host_key /etc/nginx/quic_host.key;
+quic_retry on;
 
 # default server for http, primary used for ACME and https redirect
 server {
@@ -119,7 +122,9 @@ server {
 
 # No-www.org Class B compliance, see https://www.no-www.org/faq.php
 server {
+    listen       443 quic reuseport;
     listen       443 ssl;
+    listen  [::]:443 quic reuseport;
     listen  [::]:443 ssl;
 
     server_name  www.${INTERNETNL_DOMAINNAME} ${REDIRECT_DOMAINS_LIST};
@@ -134,7 +139,9 @@ server {
 
 # default https server
 server {
+    listen       443 quic;
     listen       443 ssl;
+    listen  [::]:443 quic;
     listen  [::]:443 ssl;
 
     # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: `nl\.|en\.`
@@ -248,21 +255,21 @@ server {
     # monitoring, requires authentication, override headers, since CSP is too strict
     location /grafana {
         include http.headers;
-        include hsts.header;
+        include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
         auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
         proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
     }
     location /prometheus {
         include http.headers;
-        include hsts.header;
+        include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
         auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
         proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
     }
     location /alertmanager {
         include http.headers;
-        include hsts.header;
+        include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
         auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
         proxy_pass http://${IPV4_IP_ALERTMANAGER_INTERNAL}:9093;
@@ -272,7 +279,9 @@ server {
 # Temporary (1 year) exception for conn. subdomain to disable HSTS and redirect back to HTTP for
 # clients that accessed the HTTPS version in the past and got a HSTS set of 1 year.
 server {
+    listen       443 quic;
     listen       443 ssl;
+    listen  [::]:443 quic;
     listen  [::]:443 ssl;
 
     # LANGUAGES_REGEX is a list of language prefixes separated by pipes, eg: `nl\.|en\.`
@@ -292,8 +301,10 @@ server {
 
 # reject connection to any HTTPS vhost not explicitly served
 server {
-    listen       443 ssl default_server;
-    listen  [::]:443 ssl default_server;
+    listen       443 default_server quic;
+    listen       443 default_server ssl;
+    listen  [::]:443 default_server quic;
+    listen  [::]:443 default_server ssl;
 
     server_name _;
 
