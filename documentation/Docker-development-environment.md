@@ -379,7 +379,7 @@ This project uses [Django Migrations](https://docs.djangoproject.com/en/4.2/topi
 
 ## Cron jobs
 
-There are various cron jobs configured during normal deployments that perform tasks not cricital to the functionality of the application. These can however hinder development as they add additional activity to the application or cause changes like restarting workers. Because of this they are disabled in `develop` environment. You can temporary enable them by adding the line `COMPOSE_PROFILES=connectiontest,cron` to `docker/local.env`.
+There are various cron jobs configured during normal deployments that perform tasks not cricital to the functionality of the application. These can however hinder development as they add additional activity to the application or cause changes like restarting workers. Because of this they are disabled in `develop` environment. You can find the disabled cron jobs in `docker/develop.env` under `# disable backup and other crons`. You can temporary enable them for your development environment by creating or editing the `docker/local.env` file and adding `CRON_<CRON_NAME>=True`. Eg: to enable the periodic tests add: `CRON_15MIN_RUN_TESTS=True`.
 
 ## Routinator
 

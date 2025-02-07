@@ -17,7 +17,7 @@ services:
       # make docker available inside the container
       - /var/run/docker.sock:/var/run/docker.sock
     profiles:
-      - build
+      # adding a profile makes sure this service is not started during `make up env=develop`
       - run-tests
 
 networks:

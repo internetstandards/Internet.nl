@@ -298,14 +298,14 @@ This variable is used to determine the current version to be deployed or which i
 
 In essence downgrading is the same procedure as upgrading. For example, to roll back to version `1.7.0` run:
 
-docker run -ti --rm --pull=always \
-  --volume /var/run/docker.sock:/var/run/docker.sock \
-  --volume $HOME/.docker:/root/.docker \
-  --volume /opt/Internet.nl:/opt/Internet.nl \
-  --network none \
-  --env DOCKER_REGISTRY=ghcr.io/internetstandards \
-  ghcr.io/internetstandards/util:1.7.0 \
-  /deploy.sh
+    docker run -ti --rm --pull=always \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume $HOME/.docker:/root/.docker \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      --network none \
+      --env DOCKER_REGISTRY=ghcr.io/internetstandards \
+      ghcr.io/internetstandards/util:1.7.0 \
+      /deploy.sh
 
 **notice**: depending on the complexity of the previous upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
 
@@ -370,7 +370,6 @@ To verify the health status of the critial services use these commands:
 	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-rabbitmq-1|grep -qw healthy
 	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-unbound-1|grep -qw healthy
 	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-routinator-1|grep -qw healthy
-	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-resolver-permissive-1|grep -qw healthy
 	docker inspect --format='{{.State.Health.Status}}' internetnl-prod-resolver-validating-1|grep -qw healthy
 
 The services `webserver`, `app`, `postgres` and `redis` are critical for the user facing HTTP frontend, no page will show if these are not running. The services `worker`, `rabbitmq`, `routinator`, `unbound` and `resolver-validating` are additionally required for new tests to be performed. The `beat` service is required for updating hall-of-fame. For Batch Deployment this is however a critical service to schedule batch tests submitted via the API.
@@ -391,14 +390,12 @@ A Prometheus Alertmanager service is available but disabled by default. Enabling
 
 To enable and configure the Alertmanager add the following lines to `docker/local.env` and adjust the values to be applicable for your environment:
 
-    COMPOSE_PROFILES=connectiontest,cron,routinator,alertmanager
+    COMPOSE_PROFILES=routinator,alertmanager
     ALERTMANAGER_MAIL_TO=rcpt1@example.com,rcpt2@example.com
     ALERTMANAGER_MAIL_FROM=noreply@example.com
     ALERTMANAGER_SMTP_HOST=smtp.example.com
     ALERTMANAGER_SMTP_USER=example
     ALERTMANAGER_SMTP_PASSWORD=example
-
-If there already is a `COMPOSE_PROFILES` entry in the configuration file, add `alertmanager` to that instead.
 
 The SMTP server is expected to use TLS, there is no way to disable this setting. The port used is `587` and can be customized using the `ALERTMANAGER_SMTP_PORT` variable.
 
