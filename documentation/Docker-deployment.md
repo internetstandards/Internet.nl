@@ -298,14 +298,14 @@ This variable is used to determine the current version to be deployed or which i
 
 In essence downgrading is the same procedure as upgrading. For example, to roll back to version `1.7.0` run:
 
-docker run -ti --rm --pull=always \
-  --volume /var/run/docker.sock:/var/run/docker.sock \
-  --volume $HOME/.docker:/root/.docker \
-  --volume /opt/Internet.nl:/opt/Internet.nl \
-  --network none \
-  --env DOCKER_REGISTRY=ghcr.io/internetstandards \
-  ghcr.io/internetstandards/util:1.7.0 \
-  /deploy.sh
+    docker run -ti --rm --pull=always \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume $HOME/.docker:/root/.docker \
+      --volume /opt/Internet.nl:/opt/Internet.nl \
+      --network none \
+      --env DOCKER_REGISTRY=ghcr.io/internetstandards \
+      ghcr.io/internetstandards/util:1.7.0 \
+      /deploy.sh
 
 **notice**: depending on the complexity of the previous upgrade a downgrade might involve more steps. This will mostly be the case when database schema's change. In those cases, restoring a backup of the database might be required for a rollback. This will be noted in the release notes if this is the case.
 
