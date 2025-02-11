@@ -42,7 +42,7 @@ sentry-sdk
 forcediphttpsadapter
 pytz
 sectxt
-
+abnf
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
