@@ -7,6 +7,7 @@ def test_validate_caa_record():
     valid_pairs = [
         (0, "issue", ";"),
         (128, "issue", ";"),
+        (128, "ISSue", ";"),
         (0, "issue", "ca.example.com"),
         (0, "issuewild", "ca.example.com"),
         (0, "iodef", "https://report.example.com"),
