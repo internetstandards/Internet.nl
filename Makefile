@@ -31,7 +31,7 @@ pysrc = $(shell find ${pysrcdirs} -name \*.py)
 bin = .venv/bin
 _env ?= env PATH="${bin}:$$PATH"
 
-.PHONY: translations translations_tar frontend update_padded_macs update_cert_fingerprints update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests batch-tests
+.PHONY: translations translations_tar frontend update_cert_fingerprints update_container_documentation update_padded_macs update_root_key_file venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests batch-tests
 
 help:
 	@echo 'Makefile for internet.nl'
@@ -40,8 +40,9 @@ help:
 	@echo '   make update_content                        update the translation files from content repo.'
 	@echo '                                              Optional branch=x to use a specific content repo branch.'
 	@echo '   make frontend                              (re)generate CSS and Javascript'
-	@echo '   make update_padded_macs                    update padded MAC information'
 	@echo '   make update_cert_fingerprints              update certificate fingerprint information'
+	@echo '   make update_container_documentation        update container table for documentation'
+	@echo '   make update_padded_macs                    update padded MAC information'
 	@echo '   make update_root_key_file                  update DNS root key file'
 
 translations:
@@ -73,14 +74,18 @@ update_content:
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_translations.sh
 	rm -rf tmp/locale_files
 
-update_padded_macs:
-	chmod +x $(MACSDIR)/update-macs.sh
-	cd $(MACSDIR); ./update-macs.sh
-
 update_cert_fingerprints:
 	chmod +x $(CERTSSDIR)/update-certs.sh
 	chmod +x $(CERTSSDIR)/mk-ca-bundle.pl
 	cd $(CERTSSDIR); ./update-certs.sh
+
+update_container_documentation:
+	chmod +x bin/update_container_documentation.sh
+	./bin/update_container_documentation.sh
+
+update_padded_macs:
+	chmod +x $(MACSDIR)/update-macs.sh
+	cd $(MACSDIR); ./update-macs.sh
 
 update_root_key_file:
 	unbound-anchor -a $(DNSDIR)/root.key
