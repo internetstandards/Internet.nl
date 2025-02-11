@@ -1,0 +1,42 @@
+name: Auto update container documentation
+
+on:
+  pull_request:
+    paths:
+      - 'docker/compose.yaml'
+  workflow_dispatch:
+
+jobs:
+  auto-update-container-documentation:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Install git
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: git
+      - name: Cache Docker images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('.github/workflows/auto-update-container-documentation.yml') }}
+      - name: make update_container_documentation
+        id: update-container-documentation
+        run: |
+          make update_container_documentation
+          C=$(git diff -G'^\| ' documentation/Docker-container-profiles.md)
+          echo "$C"
+          if [ -z "$C" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Add commit to PR
+        if: steps.update-container-documentation.outputs.changed == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 🤖 Updated Docker-container-profiles.md after compose change by ${{ github.actor }}
