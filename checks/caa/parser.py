@@ -11,7 +11,6 @@ class CAAParseError(ValueError):
         self.msg_id = msg_id
         self.context = context
 
-# TODO: case sensitive? insensitive? check and test
 
 # TODO: consider moving this to a shared module - overlaps with SecuritytxtRetrieveResult.errors
 @dataclass
@@ -266,7 +265,7 @@ CAA_PROPERTY_VALIDATORS = {
 def validate_caa_record(tag: int, name: str, value: str):
     validate_tag(tag)
     try:
-        validator = CAA_PROPERTY_VALIDATORS[name]
+        validator = CAA_PROPERTY_VALIDATORS[name.lower()]
         if validator is None:
             raise CAAParseError(msg_id="invalid_reserved_property", context={"value": name})
         validator(value)
