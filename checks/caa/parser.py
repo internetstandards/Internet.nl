@@ -1,9 +1,10 @@
 import textwrap
-from dataclasses import dataclass
 from urllib.parse import urlparse
 
 from abnf.grammars.misc import load_grammar_rulelist
 from abnf.parser import Rule as _Rule, ParseError, NodeVisitor
+
+from checks.tasks.shared import TranslatableTechTableItem
 
 
 class CAAParseError(ValueError):
@@ -11,16 +12,8 @@ class CAAParseError(ValueError):
         self.msg_id = msg_id
         self.context = context
 
-
-# TODO: consider moving this to a shared module - overlaps with SecuritytxtRetrieveResult.errors
-@dataclass
-class TranslatableTechTableItem:
-    msg_id: str
-    context: dict[str, str]
-
-    @staticmethod
-    def from_error(error: CAAParseError):
-        return TranslatableTechTableItem(error.msg_id, error.context)
+    def to_translatable_tech_table_item(self):
+        return TranslatableTechTableItem(self.msg_id, self.context)
 
 
 def node_get_named_child_value(node, name):
