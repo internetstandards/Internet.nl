@@ -5,7 +5,7 @@ from abnf.grammars.misc import load_grammar_rulelist
 from abnf.parser import Rule as _Rule, ParseError, NodeVisitor
 
 
-def get_parse_result_named_child(node, name):
+def node_get_named_child_value(node, name):
     """Do a breadth-first search of the tree for addr-spec node.  If found,
     return its value."""
     queue = [node]
@@ -44,7 +44,7 @@ class CAAValidationMethodsGrammar(_Rule):
     grammar = textwrap.dedent(
         """
         value = [*(label ",") label]
-        label = 1*(ALPHA / DIGIT / "-") 
+        label = 1*(ALPHA / DIGIT / "-")
     """
     )
 
@@ -70,10 +70,10 @@ class CAAIssueGrammar(_Rule):
         """
         issue-value = *WSP [issuer-domain-name *WSP]
            [";" *WSP [parameters *WSP]]
-        
+
         issuer-domain-name = label *("." label)
         label = (ALPHA / DIGIT) *( *("-") (ALPHA / DIGIT))
-        
+
         parameters = (parameter *WSP ";" *WSP parameters) / parameter
         parameter = tag *WSP "=" *WSP value
         tag = (ALPHA / DIGIT) *( *("-") (ALPHA / DIGIT))
@@ -100,8 +100,8 @@ class CAAIssueVisitor(NodeVisitor):
             self.visit(child_node)
 
     def visit_parameter(self, node):
-        tag = get_parse_result_named_child(node, "tag")
-        value = get_parse_result_named_child(node, "value")
+        tag = node_get_named_child_value(node, "tag")
+        value = node_get_named_child_value(node, "value")
         self.parameters[tag] = value
 
 
@@ -120,15 +120,103 @@ def validate_property_iodef(value: str):
     except ValueError:
         raise CAAParseError(f"Invalid URL in iodef property: {value}")
     if url.scheme in ["http", "https"]:
-        # RFC refers to RFC6546, which is unclear on requirements. Let's assume a netloc is needed.
+        # RFC8659 refers to RFC6546, which is unclear on requirements. Let's assume a netloc is needed.
         if not url.netloc:
             raise CAAParseError(f"Invalid URL in iodef property: {value}")
     elif url.scheme == "mailto":
-        # RFC does not prescribe what an email address is
+        # RFC8659 does not prescribe what an email address is
         if "@" not in url.path:
             raise CAAParseError(f"Invalid email address in iodef property: {value}")
     else:
         raise CAAParseError(f"Invalid URL scheme in iodef property: {value}")
+
+
+def validate_property_contactemail(value: str):
+    """Validate contactemail per CAB BR 1.6.3, requiring a single RFC 6532 3.2 address."""
+    # TODO: the grammar is nontrivial, consider if this needs refinement
+    if "@" not in value:
+        raise CAAParseError(f"Invalid email address in contactemail property: {value}")
+
+
+@load_grammar_rulelist()
+class PhoneNumberRule(_Rule):
+    """
+    Grammar for phone numbers per RFC3966.
+    Includes https://www.rfc-editor.org/errata/eid203
+    """
+
+    grammar = textwrap.dedent(
+        """
+            telephone-uri        = "tel:" telephone-subscriber
+            telephone-subscriber = global-number / local-number
+            global-number        = global-number-digits *par
+            local-number         = local-number-digits *par context *par
+            par                  = parameter / extension / isdn-subaddress
+            isdn-subaddress      = ";isub=" 1*paramchar
+            extension            = ";ext=" 1*phonedigit
+            context              = ";phone-context=" descriptor
+            descriptor           = domainname / global-number-digits
+            global-number-digits = "+" *phonedigit DIGIT *phonedigit
+            local-number-digits  =
+            *phonedigit-hex (HEXDIG / "*" / "#")*phonedigit-hex
+            domainname           = *( domainlabel "." ) toplabel [ "." ]
+            domainlabel          = alphanum
+                              / alphanum *( alphanum / "-" ) alphanum
+            toplabel             = ALPHA / ALPHA *( alphanum / "-" ) alphanum
+            parameter            = ";" pname ["=" pvalue ]
+            pname                = 1*( alphanum / "-" )
+            pvalue               = 1*paramchar
+            paramchar            = param-unreserved / unreserved / pct-encoded
+            unreserved           = alphanum / mark
+            mark                 = "-" / "_" / "." / "!" / "~" / "*" /
+                              "'" / "(" / ")"
+            pct-encoded          = "%" HEXDIG HEXDIG
+            param-unreserved     = "[" / "]" / "/" / ":" / "&" / "+" / "$"
+            phonedigit           = DIGIT / [ visual-separator ]
+            phonedigit-hex       = HEXDIG / "*" / "#" / [ visual-separator ]
+            visual-separator     = "-" / "." / "(" / ")"
+            alphanum             = ALPHA / DIGIT
+            reserved             = ";" / "/" / "?" / ":" / "@" / "&" /
+                              "=" / "+" / "$" / ","
+            uric                 = reserved / unreserved / pct-encoded
+    """
+    )
+
+
+def validate_property_contactphone(value: str):
+    """Validate contactphone per CAB SC014, requiring an RFC3966 5.1.4 global number."""
+    parse_result = PhoneNumberRule("global-number").parse_all(value)
+    if not parse_result:
+        raise CAAParseError(f"Invalid phone number in contactphone property: {value}")
+
+
+@load_grammar_rulelist()
+class CAAIssueMailRule(_Rule):
+    """
+    Grammar for CAA issuemail property per RFC9495.
+    """
+
+    grammar = textwrap.dedent(
+        """
+        issuemail-value = *WSP [issuer-domain-name *WSP]
+            [";" *WSP [parameters *WSP]]
+
+        issuer-domain-name = label *("." label)
+        label = (ALPHA / DIGIT) *( *("-") (ALPHA / DIGIT))
+
+        parameters = (parameter *WSP ";" *WSP parameters) / parameter
+        parameter = tag *WSP "=" *WSP value
+        tag = (ALPHA / DIGIT) *( *("-") (ALPHA / DIGIT))
+        value = *(%x21-3A / %x3C-7E)
+    """
+    )
+
+
+def validate_property_issuemail(value: str):
+    """Validate issuemail property per RFC9495."""
+    parse_result = CAAIssueMailRule("issuemail-value").parse_all(value)
+    if not parse_result:
+        raise CAAParseError(f"Invalid issuemail property: {value}")
 
 
 def validate_tag(tag: int):
@@ -145,23 +233,26 @@ CAA_PROPERTY_VALIDATORS = {
     "auth": None,
     "path": None,
     "policy": None,
-    "contactemail": None,
-    "contactphone": None,
-    "issuevmc": None,
-    "issuemail": None,
+    "contactemail": validate_property_contactemail,
+    "contactphone": validate_property_contactphone,
+    "issuevmc": validate_property_issue,
+    "issuemail": validate_property_issuemail,
 }
+
 
 def validate_caa(tag: int, name: str, value: str):
     validate_tag(tag)
     try:
         validator = CAA_PROPERTY_VALIDATORS[name]
-        if validator:
-            validator(value)
+        if validator is None:
+            raise CAAParseError(f"Reserved CAA property: {name}")
+        validator(value)
     except ParseError as e:
         raise CAAParseError(f'Syntax error in {name} value "{value}" at character {e.start} ({value[e.start]})')
     except KeyError:
         raise CAAParseError(f"Invalid CAA property: {name}")
 
+
 # v = "letsencrypt.org; 💩"
 v = "example.net; accounturi=https://example.net/account/1234; validationmethods=dns-01"
-validate_caa(0, 'issue', v)
+validate_caa(0, "issue", v)
