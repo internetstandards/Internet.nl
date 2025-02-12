@@ -12,7 +12,6 @@ from checks.scoring import (
     STATUS_NOTICE,
     STATUS_SUCCESS,
 )
-from checks.tasks.shared import TranslatableTechTableItem
 
 
 # --- Base classes
