@@ -3,6 +3,7 @@ from typing import Callable, Optional
 
 from django.core.management.base import BaseCommand
 
+from checks.caa.retrieval import retrieve_parse_caa
 from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, tls, rpki
 
 
@@ -49,6 +50,7 @@ PROBES: dict[str, Optional[Callable]] = {
     "tls_mail_smtp_starttls": tls.mail_smtp_starttls,
     "mail_rpki": rpki.mail_rpki,
     "web_rpki": rpki.web_rpki,
+    "caa": retrieve_parse_caa,
     "all": None,
 }
 

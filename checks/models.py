@@ -555,6 +555,14 @@ class DomainTestTls(BaseTestModel):
     cert_hostmatch_bad = ListField(null=True)
     cert_hostmatch_score = models.IntegerField(null=True)
 
+    # CAA
+    # TODO: consider caa_found_host naming, alternatives: caa_canonical_domain, caa_domain, caa_found_domain
+    caa_enabled = models.BooleanField(null=True, default=False)
+    caa_errors = ListField(default=[])
+    caa_recommendations = ListField(default=[])
+    caa_score = models.IntegerField(null=True)
+    caa_found_host = models.CharField(null=True, max_length=255)
+
     score = models.IntegerField(null=True)
 
     def __dir__(self):
@@ -615,6 +623,11 @@ class DomainTestTls(BaseTestModel):
             "cert_signature_score",
             "cert_hostmatch_bad",
             "cert_hostmatch_score",
+            "caa_enabled",
+            "caa_errors",
+            "caa_recommendations",
+            "caa_score",
+            "caa_found_host",
             "score",
             "protocols_good",
         ]
