@@ -237,7 +237,7 @@ def validate_property_issuemail(value: str):
 def validate_tag(tag: int):
     # RFC8659 4.1
     if tag not in [0, 128]:
-        raise CAAParseError(msg_id="invalid_tag", context={"value": str(tag)})
+        raise CAAParseError(msg_id="invalid_tag_reserved_bits", context={"value": str(tag)})
 
 
 # https://www.iana.org/assignments/pkix-parameters/pkix-parameters.xhtml#caa-properties
@@ -273,4 +273,4 @@ def validate_caa_record(tag: int, name: str, value: str):
             },
         )
     except KeyError:
-        raise CAAParseError(msg_id="invalid_property", context={"value": name})
+        raise CAAParseError(msg_id="invalid_unknown_property", context={"value": name})

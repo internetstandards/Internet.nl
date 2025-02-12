@@ -342,11 +342,11 @@ def aggregate_subreports(subreports, report):
 
 @dataclass
 class TranslatableTechTableItem:
-    msg_id: str
+    msgid: str
     context: dict[str, str] = field(default_factory=dict)
 
     def __repr__(self):
-        return f"TTTI({self.msg_id}, {self.context})"
+        return f"TTTI({self.msgid}, {self.context})"
 
     def to_dict(self):
-        return {"msg_id": self.msg_id, "context": self.context}
+        return {"msgid": self.msgid, "context": self.context}

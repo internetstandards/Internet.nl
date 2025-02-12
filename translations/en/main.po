@@ -5367,3 +5367,48 @@ msgstr ""
 "# Website test widget\n"
 "Would you like visitors of your website to be able to directly start a website test?  \n"
 "Copy the HTML and CSS code from the text fields below into the source code of your website."
+
+msgid "detail web caa label"
+msgstr "CAA web"
+
+msgid "detail mail caa label"
+msgstr "CAA mail"
+
+msgid "detail web caa tech table"
+msgstr "Web server IP address|Findings"
+
+msgid "detail mail caa tech table"
+msgstr "Web server IP address|Findings"
+
+msgid "detail tech data caa invalid_property_syntax"
+msgstr "invalid_property_syntax name {property_name} value {property_value} invalid character {invalid_character} at pos {invalid_character_position}"
+
+msgid "detail tech data caa invalid_unknown_property"
+msgstr "invalid_unknown_property {value}"
+
+msgid "detail tech data caa invalid_reserved_property"
+msgstr "invalid_reserved_property {value}"
+
+msgid "detail tech data caa invalid_tag_reserved_bits"
+msgstr "invalid_tag_reserved_bits {value}"
+
+msgid "detail tech data caa invalid_property_issuemail_value"
+msgstr "invalid_property_issuemail_value {value}"
+
+msgid "detail tech data caa invalid_property_contactphone_value"
+msgstr "invalid_property_contactphone_value {value}"
+
+msgid "detail tech data caa invalid_property_contactemail_value"
+msgstr "invalid_property_contactemail_value {value}"
+
+msgid "detail tech data caa invalid_property_iodef_value"
+msgstr "invalid_property_iodef_value {value}"
+
+msgid "detail tech data caa invalid_property_issue_validation_method"
+msgstr "invalid_property_issue_validation_method {value}"
+
+msgid "detail tech data caa found_host"
+msgstr "found CAA on host {host}"
+
+msgid "detail tech data caa not_found"
+msgstr "CAA not found"
