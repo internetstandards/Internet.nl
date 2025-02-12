@@ -347,3 +347,7 @@ class TranslatableTechTableItem:
 
     def __repr__(self):
         return f"TTTI({self.msg_id}, {self.context})"
+
+    @property
+    def to_dict(self):
+        return {"msg_id": self.msg_id, "context": self.context}
