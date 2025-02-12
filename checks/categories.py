@@ -1315,6 +1315,7 @@ class WebCaa(Subtest):
             name="caa",
             label="detail web caa label",
             explanation="detail web caa exp",
+            tech_string="detail web caa tech table",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
             model_score_field="caa_score",
@@ -1325,17 +1326,17 @@ class WebCaa(Subtest):
     def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web caa verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_recommendations(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_INFO)
         self.verdict = "detail web caa verdict recommendations"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
         self.verdict = "detail web caa verdict bad"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
 class WebTlsDaneExists(Subtest):
@@ -1946,6 +1947,7 @@ class MailCaa(Subtest):
             name="caa",
             label="detail mail caa label",
             explanation="detail mail caa exp",
+            tech_string="detail web caa tech table",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
             model_score_field="caa_score",
@@ -1956,17 +1958,17 @@ class MailCaa(Subtest):
     def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail caa verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_recommendations(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_INFO)
         self.verdict = "detail mail caa verdict recommendations"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail caa verdict bad"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
 class MailTlsZeroRTT(Subtest):
