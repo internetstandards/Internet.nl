@@ -90,7 +90,7 @@ def dns_resolve_caa(qname: str) -> tuple[str, list[CAA]]:
         try:
             answer = _get_resolver().resolve(dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True)
             return answer.canonical_name, answer.rrset
-        except (NoAnswer, NXDOMAIN) as e:
+        except (NoAnswer, NXDOMAIN):
             qname = dns_climb_tree(qname)
             if qname is None:
                 raise NoAnswer()

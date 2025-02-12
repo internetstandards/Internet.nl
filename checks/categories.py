@@ -12,6 +12,7 @@ from checks.scoring import (
     STATUS_NOTICE,
     STATUS_SUCCESS,
 )
+from checks.tasks.shared import TranslatableTechTableItem
 
 
 # --- Base classes
@@ -1315,27 +1316,27 @@ class WebCaa(Subtest):
             name="cert_caa",
             label="detail web cert-caa label",
             explanation="detail web cert-caa exp",
-            tech_string="",
-            init_tech_type="",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
-            model_score_field="cert_caa_score",
+            model_score_field="caa_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data caa",
         )
 
-    def result_good(self, tech_data):
+    def result_good(self, tech_data: list[TranslatableTechTableItem]):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web cert-caa verdict good"
-        self.tech_data = ""
+        self.verdict = "detail web caa verdict good"
+        self.tech_data = [tti.to_dict() for tti in tech_data]
 
-    def result_info(self, tech_data):
+    def result_recommendations(self, tech_data: list[TranslatableTechTableItem]):
         self._status(STATUS_INFO)
-        self.verdict = "detail web cert-caa verdict warning"
-        self.tech_data = ""
+        self.verdict = "detail web caa verdict recommendations"
+        self.tech_data = [tti.to_dict() for tti in tech_data]
 
-    def result_bad(self, tech_data):
+    def result_bad(self, tech_data: list[TranslatableTechTableItem]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web cert-caa verdict bad"
-        self.tech_data = ""
+        self.verdict = "detail web caa verdict bad"
+        self.tech_data = [tti.to_dict() for tti in tech_data]
 
 
 class WebTlsDaneExists(Subtest):
