@@ -1313,9 +1313,9 @@ class WebTlsCertHostmatch(Subtest):
 class WebCaa(Subtest):
     def __init__(self):
         super(WebCaa, self).__init__(
-            name="cert_caa",
-            label="detail web cert-caa label",
-            explanation="detail web cert-caa exp",
+            name="caa",
+            label="detail web caa label",
+            explanation="detail web caa exp",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
             model_score_field="caa_score",
@@ -1323,20 +1323,20 @@ class WebCaa(Subtest):
             tech_data_translation_root="detail tech data caa",
         )
 
-    def result_good(self, tech_data: list[TranslatableTechTableItem]):
+    def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web caa verdict good"
-        self.tech_data = [tti.to_dict() for tti in tech_data]
+        self.tech_data = tech_data
 
-    def result_recommendations(self, tech_data: list[TranslatableTechTableItem]):
+    def result_recommendations(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_INFO)
         self.verdict = "detail web caa verdict recommendations"
-        self.tech_data = [tti.to_dict() for tti in tech_data]
+        self.tech_data = tech_data
 
-    def result_bad(self, tech_data: list[TranslatableTechTableItem]):
+    def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
         self.verdict = "detail web caa verdict bad"
-        self.tech_data = [tti.to_dict() for tti in tech_data]
+        self.tech_data = tech_data
 
 
 class WebTlsDaneExists(Subtest):
@@ -1943,31 +1943,31 @@ class MailTlsCertHostmatch(Subtest):
 
 class MailCaa(Subtest):
     def __init__(self):
-        super(MailCaa, self).__init__(
-            name="cert_caa",
-            label="detail mail cert-caa label",
-            explanation="detail mail cert-caa exp",
-            tech_string="detail mail cert-caa tech table",
-            init_tech_type="",
+        super().__init__(
+            name="caa",
+            label="detail mail caa label",
+            explanation="detail mail caa exp",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
-            model_score_field="cert_caa_score",
+            model_score_field="caa_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data caa",
         )
 
-    def result_good(self, tech_data):
+    def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail cert-caa verdict good"
-        self.tech_data = ""
+        self.verdict = "detail mail caa verdict good"
+        self.tech_data = tech_data
 
-    def result_info(self, tech_data):
+    def result_recommendations(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_INFO)
-        self.verdict = "detail mail cert-caa verdict warning"
-        self.tech_data = ""
+        self.verdict = "detail mail caa verdict recommendations"
+        self.tech_data = tech_data
 
-    def result_bad(self, tech_data):
+    def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail cert-caa verdict bad"
-        self.tech_data = ""
+        self.verdict = "detail mail caa verdict bad"
+        self.tech_data = tech_data
 
 
 class MailTlsZeroRTT(Subtest):
