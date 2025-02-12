@@ -67,6 +67,7 @@ from checks.tasks.shared import (
     resolve_a_aaaa,
     resolve_dane,
     results_per_domain,
+    TranslatableTechTableItem,
 )
 from checks.tasks.tls_connection import (
     MAX_REDIRECT_DEPTH,
@@ -654,8 +655,8 @@ def save_results(model, results, addr, domain, category):
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
                 model.caa_enabled = result.get("caa_result").enabled
-                model.caa_error = result.get("caa_result").errors
-                model.caa_recommendations = result.get("caa_result").recommendations
+                model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                 model.caa_score = result.get("caa_result").score
                 model.caa_found_host = result.get("caa_result").canonical_name
                 model.dane_log = result.get("dane_log")
@@ -727,8 +728,8 @@ def save_results(model, results, addr, domain, category):
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
                     model.caa_enabled = result.get("caa_result").enabled
-                    model.caa_error = result.get("caa_result").errors
-                    model.caa_recommendations = result.get("caa_result").recommendations
+                    model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                    model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                     model.caa_score = result.get("caa_result").score
                     model.caa_found_host = result.get("caa_result").canonical_name
                     model.dane_log = result.get("dane_log")
@@ -888,7 +889,9 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
-                caa_found_host_message = [{"msg_id": "found_host", "context": {"host": dttls.caa_found_host}}]
+                caa_found_host_message = [
+                    TranslatableTechTableItem(msg_id="found_host", context={"host": dttls.caa_found_host}).to_dict()
+                ]
                 caa_tech_table = caa_found_host_message + dttls.caa_errors + dttls.caa_recommendations
                 if not dttls.caa_enabled or dttls.caa_errors:
                     category.subtests["caa"].result_bad(caa_tech_table)
