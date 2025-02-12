@@ -4,7 +4,7 @@ import binascii
 import re
 import socket
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from celery import shared_task
 from django.conf import settings
@@ -343,7 +343,7 @@ def aggregate_subreports(subreports, report):
 @dataclass
 class TranslatableTechTableItem:
     msg_id: str
-    context: dict[str, str]
+    context: dict[str, str] = field(default_factory=dict)
 
     def __repr__(self):
         return f"TTTI({self.msg_id}, {self.context})"

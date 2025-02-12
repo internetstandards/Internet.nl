@@ -1,5 +1,5 @@
 import enum
-from typing import Optional
+from typing import Optional, Iterable
 
 import dns
 from django.conf import settings
@@ -81,7 +81,7 @@ def dns_resolve_soa(qname: str, allow_bogus=True, raise_on_no_answer=True) -> DN
     return dnssec_status
 
 
-def dns_resolve_caa(qname: str) -> tuple[str, list[CAA]]:
+def dns_resolve_caa(qname: str) -> tuple[str, Iterable[CAA.CAA]]:
     """
     Resolve CAA for a domain, including tree climbing per RFC8659 3.
     Returns the canonical name and the CAA records.
@@ -89,7 +89,7 @@ def dns_resolve_caa(qname: str) -> tuple[str, list[CAA]]:
     while True:
         try:
             answer = _get_resolver().resolve(dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True)
-            return answer.canonical_name, answer.rrset
+            return str(answer.canonical_name), answer.rrset
         except (NoAnswer, NXDOMAIN):
             qname = dns_climb_tree(qname)
             if qname is None:

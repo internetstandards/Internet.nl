@@ -7,6 +7,7 @@ from dns.resolver import NoAnswer, NXDOMAIN, LifetimeTimeout, NoNameservers
 from checks import scoring
 from checks.caa.parser import validate_caa_record, CAAParseError
 from checks.resolver import dns_resolve_caa
+from checks.tasks.rpki import logger
 from checks.tasks.shared import TranslatableTechTableItem
 
 
@@ -29,10 +30,11 @@ def retrieve_parse_caa(target_domain: str) -> CAAResult:
     except (NoAnswer, NXDOMAIN, LifetimeTimeout, NoNameservers):
         return CAAResult(enabled=False)
 
-    result = CAAResult(enabled=True, canonical_name=canonical_name, caa_records=rrset)
+    result = CAAResult(enabled=True, canonical_name=canonical_name, caa_records=[caa.to_text() for caa in rrset])
     for caa in rrset:
         try:
             validate_caa_record(caa.flags, caa.tag.decode("ascii"), caa.value.decode("ascii"))
         except CAAParseError as cpe:
             result.errors.append(TranslatableTechTableItem(cpe.msg_id, cpe.context))
+    logger.critical("⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️ " + str(result))
     return result

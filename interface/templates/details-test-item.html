@@ -21,6 +21,11 @@
         <h4>
           {% include "string.html" with name="results tech-details label" %}
         </h4>
+            <code>
+            {{ testitem }}<br>
+            {{ testitem.tech_type }}<br>
+            {{ testitem.tech_data }}
+            </code>
           {% if testitem.tech_type == 'table' or testitem.tech_type == 'table_multi_col' or testitem.tech_type == 'table_translatable' %}
             {% render_details_table tech_type=testitem.tech_type table_headers=testitem.tech_string table_content=testitem.tech_data %}
           {% endif %}

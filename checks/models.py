@@ -623,8 +623,11 @@ class DomainTestTls(BaseTestModel):
             "cert_signature_score",
             "cert_hostmatch_bad",
             "cert_hostmatch_score",
-            "cert_caa_score",
-            "cert_caa_record",
+            "caa_enabled",
+            "caa_errors",
+            "caa_recommendations",
+            "caa_score",
+            "caa_found_host",
             "score",
             "protocols_good",
         ]
@@ -657,7 +660,6 @@ class DomainTestTls(BaseTestModel):
             "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
             "cert_signature_bad": self.cert_signature_bad,
             "cert_hostmatch_bad": self.cert_hostmatch_bad,
-            "cert_caa_bad": self.cert_caa_bad,
         }
 
     def get_mail_api_details(self):
@@ -684,7 +686,6 @@ class DomainTestTls(BaseTestModel):
             "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
             "cert_signature_bad": self.cert_signature_bad,
             "cert_hostmatch_bad": self.cert_hostmatch_bad,
-            "cert_caa_bad": self.cert_caa_bad,
         }
 
     class Meta:

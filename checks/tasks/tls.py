@@ -889,10 +889,13 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
-                caa_found_host_message = [
-                    TranslatableTechTableItem(msg_id="found_host", context={"host": dttls.caa_found_host}).to_dict()
-                ]
-                caa_tech_table = caa_found_host_message + dttls.caa_errors + dttls.caa_recommendations
+                if dttls.caa_enabled:
+                    caa_host_message = [
+                        TranslatableTechTableItem(msg_id="found_host", context={"host": dttls.caa_found_host}).to_dict()
+                    ]
+                else:
+                    caa_host_message = [TranslatableTechTableItem(msg_id="not_found").to_dict()]
+                caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
                 if not dttls.caa_enabled or dttls.caa_errors:
                     category.subtests["caa"].result_bad(caa_tech_table)
                 elif dttls.caa_recommendations:
