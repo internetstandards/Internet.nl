@@ -42,7 +42,12 @@ class Command(BaseCommand):
 
             # find all test probe results that have no report associated, but not too recent because
             # those might be unfinished tests
-            count, _ = model.objects.filter(
+            # Using iterator, as delete() loads all objects into memory (for signals, cascades) and can cause a OOM kill
+            # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#delete
+            count = 0
+            for obj in model.objects.filter(
                 domaintestreport__isnull=True, timestamp__lt=timestamp_recent_probes
-            ).delete()
-            log.info("Deleted %s probes that don't have an associated report.", count)
+            ).iterator():
+                obj.delete()
+                count += 1
+            log.info("Deleted %s %s probes that don't have an associated report.", model._meta.object_name, count)
