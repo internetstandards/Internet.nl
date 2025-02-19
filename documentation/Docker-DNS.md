@@ -40,6 +40,16 @@ For a domain that does not otherwise send email, use:
 The `INTERNETNL_DOMAINNAME` host should also have a working MX and correct FCrDNS.
 DANE records are recommended, but not required.
 
+For modern HTTP3 support a HTTPS resource record should be added for each domain:
+
+    example.com.                    HTTPS  1 . alpn=h2,h3
+    www.example.com.                HTTPS  1 . alpn=h2,h3
+    nl.example.com.                 HTTPS  1 . alpn=h2,h3
+    en.example.com.                 HTTPS  1 . alpn=h2,h3
+    ipv6.example.com.               HTTPS  1 . alpn=h2,h3
+    nl.ipv6.example.com.            HTTPS  1 . alpn=h2,h3
+    en.ipv6.example.com.            HTTPS  1 . alpn=h2,h3
+
 ## Specific settings for batch mode
 
 For batch, the connection test is not used, and the authoritative name server should not be publicly available.

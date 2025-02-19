@@ -1,3 +1,3 @@
 include http.headers;
-include hsts.header;
+include hsts_h3.headers;
 include conf.d/csp.header;
