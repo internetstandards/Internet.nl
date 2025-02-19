@@ -2,6 +2,8 @@
 
 ## 1.10 (in progress)
 
+_Compared to the latest 1.9 release._
+
 ### Feature changes
 
 - The [sectxt](https://github.com/DigitalTrustCenter/sectxt) library, used for validating security.txt files, was updated from 0.9.4 to 0.9.6.
@@ -23,6 +25,10 @@
   with the CRON_15MIN_RUN_TESTS, TEST_DOMAINS_SITE and/or TEST_DOMAINS_MAIL settings.
 
 No changes to the API.
+
+## 1.9.1
+
+- Fixed an issue where the database cleanup would use excessive memory and get an OOM kill (#1670)
 
 ## 1.9.0
 
