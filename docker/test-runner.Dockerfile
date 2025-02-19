@@ -3,7 +3,7 @@ ARG PYTHON_VERSION=3.9
 FROM mcr.microsoft.com/playwright/python:v1.50.0-noble
 ARG PYTHON_VERSION
 
-RUN python3 -m pip install pytest pytest-playwright==0.6.2 playwright==1.49.0
+RUN python3 -m pip install pytest pytest-playwright==0.6.2 playwright==1.50.0
 
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
