@@ -9,6 +9,7 @@ code changes for the next release are already in the main branch.
 3. Run all the update scripts:
    ```
    make update_cert_fingerprints
+   make update_container_documentation
    make update_padded_macs
    make update_root_key_file
    make translate_content_to_main
