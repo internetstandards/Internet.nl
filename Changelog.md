@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.1
+
+- Fixed an issue where the database cleanup would use excessive memory and get an OOM kill (#1670)
+
 ## 1.9.0
 
 1.9.0 (compared to latest 1.8) contains several testing changes, along with content improvements:
