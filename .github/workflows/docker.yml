@@ -2,12 +2,16 @@ name: Internet.nl Docker
 
 on:
   pull_request:
+    paths-ignore:
+      - 'documentation/**'
   release:
     types: [published]
   push:
     branches:
       - main
       - release/*
+    paths-ignore:
+      - 'documentation/**'
 
 env:
   DOCKER_REGISTRY: ghcr.io/${{ github.repository_owner }}
