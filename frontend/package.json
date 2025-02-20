@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "css:lint": "stylelint css/*.css",
+    "css:build": "postcss css/*.css --dir build",
+    "css:build:watch": "postcss css/*.css --dir build --watch --poll"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "cssnano": "^7.0.6",
+    "postcss": "^8.5.2",
+    "postcss-cli": "^11.0.0",
+    "postcss-preset-env": "^10.1.4",
+    "stylelint": "^16.14.1",
+    "stylelint-config-standard": "^37.0.0"
+  },
+  "browserslist": [
+    "defaults"
+  ]
+}
