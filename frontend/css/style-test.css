@@ -10,7 +10,7 @@ body {
 
 input {
   /* styles for input not in a label  */
-  border: tomato 2px solid;
+  border: white 2px solid;
 }
 
 label {
