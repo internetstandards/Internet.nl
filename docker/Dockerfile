@@ -125,6 +125,17 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+FROM debian:bullseye-20241111-slim AS frontend
+
+# install npm from official image, to be similar to the app-dev method for consistency
+COPY --from=node:20-slim /usr/local/bin/ /usr/local/bin/
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+ADD frontend/ /src/frontend
+WORKDIR /src/frontend
+RUN npm install
+RUN npm run css:build
+
 # build main application image target
 FROM debian:bullseye-20241111-slim AS build-app
 ARG PYTHON_VERSION
@@ -197,7 +208,8 @@ RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
 # storage these in a place for django to find
 RUN mkdir -p /app/static_frontend
 RUN python3 bin/frontend.py js
-RUN python3 bin/frontend.py css
+
+COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/css/*.css /app/static_frontend/css/
 
 # generate language files
 RUN python3 bin/pofiles.py to_django
