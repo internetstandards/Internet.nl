@@ -231,6 +231,29 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
+# app image with development tools for better live reloading
+FROM app AS app-dev
+
+USER root
+
+# copy development dependencies
+COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
+
+# install npm and node in exisiting debian OS for CSS build
+COPY --from=node:20-slim /usr/local/bin/ /usr/local/bin/
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+# install postcss CSS build tool
+ADD frontend/ /src/frontend
+
+WORKDIR /src/frontend
+USER root
+RUN npm install
+
+# restore 'app' environment
+USER nobody:nogroup
+WORKDIR /app
+
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest
 ARG PYTHON_VERSION

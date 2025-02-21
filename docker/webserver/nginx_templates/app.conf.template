@@ -164,6 +164,22 @@ server {
         proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
+    # disable buffering on event stream for CSS development
+    location /__reload__/events/ {
+        # disable this location when not in development
+        set $debug "${DEBUG}";
+        if ($debug != "True"){
+            return 404;
+        }
+
+        # same as / above, but only with things required in development
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # disable buffering for streaming response
+        proxy_buffering off;
+    }
+
     # security.txt file
     location /.well-known/ {
         # basic auth should not apply to this path

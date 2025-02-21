@@ -20,15 +20,32 @@ services:
       - IPV4_IP_RABBITMQ_INTERNAL
 
   app:
+    # use image with npm included for CSS build
+    build:
+      target: app-dev
     # use Django runserver for better debug abilities during development
-    entrypoint: ["/bin/sh"]
-    command: ["-c", "./manage.py runserver 0.0.0.0:8080 $DEVSERVER_ARGS"]
+    entrypoint: ["/bin/bash"]
+    # run CSS auto rebuild in the background and start devserver
+    command:
+      - "-c"
+      - >
+        if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
+          cd /src/frontend;
+          npm run css:build:watch &
+          cd /app;
+        fi;
+        ./manage.py runserver 0.0.0.0:8080 $DEVSERVER_ARGS
+    environment:
+      - INTERNETNL_AUTORELOAD
+      - DEVSERVER_ARGS
     volumes:
       - batch_results:/app/batch_results
       # mount sources using volumes for quicker dev cycles
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+      # only mount CSS files, not entire frontend, as it override the node_modules
+      - ../frontend/css:/src/frontend/css
 
   worker:
     volumes:
