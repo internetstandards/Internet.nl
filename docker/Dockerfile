@@ -219,6 +219,15 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
+# app image with development tools for better live reloading
+FROM app AS app-dev
+
+# required for compose `develop` mode file sync/copy
+USER root
+
+# browser reload
+COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
+
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest
 ARG PYTHON_VERSION

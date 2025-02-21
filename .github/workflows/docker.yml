@@ -267,7 +267,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
@@ -440,7 +440,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
@@ -523,7 +523,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
@@ -575,7 +575,7 @@ jobs:
 
       - name: Start development environment
         # disable autoreload in CI as it makes workers unstable
-        run: DEVSERVER_ARGS=--noreload make up env=develop
+        run: INTERNETNL_AUTORELOAD=False make up env=develop
 
       - name: Run development environment tests
         run: make develop-tests
@@ -637,7 +637,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
