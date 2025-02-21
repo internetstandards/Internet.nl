@@ -22,11 +22,11 @@ services:
     develop:
       watch:
         # auto rebuild/reload when CSS/JS changes
-        - path: ../frontend/
+        - path: ../frontend/js
           action: sync+exec
-          target: /app/frontend
+          target: /app/frontend/js
           exec:
-            command: /bin/sh -c "python3 bin/frontend.py js;python3 bin/frontend.py css;"
+            command: python3 bin/frontend.py js
     # use Django runserver for better debug abilities during development
     entrypoint: ["/bin/bash"]
     # run CSS auto rebuild in the background and start devserver
@@ -34,6 +34,11 @@ services:
       - "-c"
       - >
         if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
+          # watch CSS files for rebuild
+          cd /app/frontend;
+          npm run css:build:watch &
+          cd /app;
+          # start development server with auto reloading
           ./manage.py runserver 0.0.0.0:8080
         else
           ./manage.py runserver 0.0.0.0:8080 --noreload
@@ -46,6 +51,8 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+      # mount CSS files so `css:build:watch` can detect changes an rebuild
+      - ../frontend/css:/app/frontend/css
 
   worker:
     volumes:
