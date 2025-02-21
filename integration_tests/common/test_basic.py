@@ -90,7 +90,7 @@ def test_static_files(page, app_url_subdomain):
 
 
 def test_generated_css_static_files(page, app_url_subdomain):
-    response = page.request.get(app_url_subdomain + "/static/css/style-min.css")
+    response = page.request.get(app_url_subdomain + "/static/css/style.css")
     expect(response).to_be_ok()
     assert "@font-face" in response.text()
     assert "expires" in response.headers
