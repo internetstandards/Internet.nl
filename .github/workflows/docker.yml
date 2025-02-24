@@ -76,10 +76,10 @@ jobs:
         id: get_version
         run: |
           pip -q install setuptools_scm
-          # '+' is not supported in Docker Image tags
+          # '+' and '/' is not supported in Docker Image tags
           scm_version=$(echo 'from setuptools_scm import get_version; print(get_version(version_scheme="release-branch-semver"))' | python)
           branch_version_suffix=${GITHUB_HEAD_REF:+-$GITHUB_HEAD_REF}
-          echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tee -a "$GITHUB_OUTPUT"
+          echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
 
       # login to pull images from Github registry
       - name: Login to GitHub Container Registry
