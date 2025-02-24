@@ -64,6 +64,28 @@ Multiple services can be specified like so:
 
 Using a Docker runtime with more memory and CPU cores improves rebuild/restart speed.
 
+### Auto reload
+
+Once the development environment is up and running it will autotically rebuild/restart/reload when certain parts of the source code change. Currently changes to the following files will be detected and acted upon:
+
+- Python sources in  `checks/`, `internetnl/`, `interface/`: will reload `app` and `worker*` using Django autoreload, when needed open browser sessions will reload.
+- CSS files in `frontend/css/`: will rebuild CSS files and open browser sessions will reload.
+- Django template files (`.html`) in `interface/templates/`: open browser sessions will reload.
+
+### Foreground development
+
+Instead of running in the background the application stack can also be started in foreground mode using the command:
+
+    make develop
+
+This convenience command will build all relevant services, start the entire stack and show log output for the most relevant services. The Docker Compose application will keep running in the foreground. Terminating it (with `ctrl-c`) will shutdown all running services and bring down the entire application stack.
+
+#### Frontend development
+
+When only developing on frontend parts of the application (eg: `html`, `css`, `javascript`, Django templates/views), a smaller subset of the application can be started using:
+
+    make develop_frontend
+
 ### Running/debugging individual probes
 
 It is possible to run individual probes with debug logging using a manage command. This provides a quick way to iterate over changes regarding test/probe code without having to go through the web interface. For this run the following command:

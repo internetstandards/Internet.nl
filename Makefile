@@ -399,6 +399,7 @@ qa: fix check test
 env ?=
 environment ?= ${env}
 test_args ?= ${testargs}
+services ?= ${service}
 ifeq (${environment},dev)
 	environment = develop
 endif
@@ -440,13 +441,16 @@ docker-compose:
 	${DOCKER_COMPOSE_CMD} ${args}
 
 up docker-compose-up:
-	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans ${services}
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans --timeout=0 ${services}
 	@if [ "${environment}" = "test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 	@if [ "${environment}" = "develop" ]; then echo -e "\n🚀 Running on http://localhost:8080"; fi
 	@if [ "${environment}" = "batch-test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 
+up-no-wait:
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --detach --no-build --remove-orphans --timeout=0 ${services}
+
 run docker-compose-run:
-	${DOCKER_COMPOSE_UP_PULL_CMD} up --no-build ${services}
+	${DOCKER_COMPOSE_UP_PULL_CMD} up --watch --remove-orphans --timeout=0 ${services}
 
 restart docker-compose-restart:
 	${DOCKER_COMPOSE_CMD} restart --no-deps ${services}
@@ -512,7 +516,7 @@ stop docker-compose-stop:
 
 # stop and remove all containers, but keep volumes (eg: routinator cache, databases)
 down docker-compose-down:
-	${DOCKER_COMPOSE_CMD} down
+	${DOCKER_COMPOSE_CMD} down --timeout=0
 
 down-remove-volumes docker-compose-down-remove-volumes:
 	${DOCKER_COMPOSE_CMD} down --volumes
@@ -718,3 +722,21 @@ ${TMPDIR}/tranco_list_%k.txt: ${TMPDIR}/tranco_list.txt
 ${TMPDIR}/tranco_list.txt:
 	# download tranco list, unzip, convert from csv to plain list of domains
 	curl -Ls https://tranco-list.eu/download_daily/4Q39X | bsdtar -xOf - | cut -d, -f2 > $@
+
+# convenience target, will build and run all services for development and output logs for the relevant ones
+develop:
+	# (re)build all services
+	${MAKE} build env=develop
+	# bring entire environment up
+	${MAKE} up-no-wait env=develop
+	# wait and log on relevant services
+	${MAKE} run env=develop services='app webserver worker worker-slow worker-nassl'
+	# shut everything down
+	${MAKE} down env=develop
+
+# same as develop, but focus on frontend only
+develop_frontend:
+	# only bring up what is needed for frontend development
+	${MAKE} build run env=develop services='app webserver port-expose'
+	# shut everything down
+	${MAKE} down env=develop
