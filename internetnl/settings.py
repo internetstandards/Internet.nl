@@ -117,6 +117,8 @@ RABBIT_PASS = getenv("RABBIT_PASS", "guest")
 
 ENABLE_HOF = get_boolean_env("ENABLE_HOF", True)
 
+AUTORELOAD = get_boolean_env("INTERNETNL_AUTORELOAD", False)
+
 # -- End of manual configuration
 
 """
@@ -141,6 +143,8 @@ INSTALLED_APPS = [
     "django_hosts",
     "django_statsd",
 ]
+if AUTORELOAD:
+    INSTALLED_APPS += ["django_browser_reload"]
 
 TEMPLATES = [
     {
@@ -173,6 +177,10 @@ MIDDLEWARE = [
     "django_hosts.middleware.HostsResponseMiddleware",
     "internetnl.custom_middlewares.ActivateTranslationMiddleware",
 ]
+if AUTORELOAD:
+    MIDDLEWARE += [
+        "django_browser_reload.middleware.BrowserReloadMiddleware",
+    ]
 
 ROOT_URLCONF = "internetnl.urls"
 ROOT_HOSTCONF = "internetnl.hosts"

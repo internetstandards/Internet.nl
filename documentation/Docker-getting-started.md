@@ -58,7 +58,7 @@ There are 2 environment for development, the "development" and "integration test
 | Server              | Django runserver          | uWSGI                        | uWSGI                     |
 | Python source files | Mounted                   | from build image             | from build image          |
 | Website             | http://localhost:8080     | http://localhost:8081        | http://localhost:8081     |
-| Autoreload          | `.py` files               | No                           | No                        |
+| Autoreload          | `.py`, `css` files        | No                           | No                        |
 | Batch API enabled   | Yes                       | No                           | Yes                       |
 | Tests               | Yes                       | Yes                          | Yes                       |
 | Test command        | `make develop-tests`      | `make integration-tests`     | `make batch-tests`        |
