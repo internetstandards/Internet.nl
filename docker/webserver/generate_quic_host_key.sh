@@ -5,6 +5,8 @@
 #    By default, a random key is generated on each reload. Tokens generated with old keys are not accepted.
 
 # The default NGX_QUIC_DEFAULT_HOST_KEY_LEN is 32 bytes (ngx_event_quic.h)
-# Since reloads happen due to Certbot, set a static persistent host key per release.
+# This script updates it on restart of the container, which is not too frequent,
+# but persists it access reloads, which happen for certbot, user change, and
+# possibly other reasons.
 
 openssl rand 32 > /etc/nginx/quic_host.key
