@@ -1,0 +1,185 @@
+:root {
+    --heading-font-xs: 700 14px/22px Montserrat, sans-serif;
+    --heading-font-s: 700 14px/22px Montserrat, sans-serif;
+    --heading-font-m: 700 20px/28px Montserrat, sans-serif;
+    --heading-font-l: 700 20px/28px Montserrat, sans-serif;
+    --heading-font-xl: 700 24px/32px Montserrat, sans-serif;
+  
+    --body-font-xs: 400 14px/22px Roboto, sans-serif;
+    --body-font-s: 400 14px/24px Roboto, sans-serif;
+    --body-font-m: 400 16px/20px Roboto, sans-serif;
+  
+    --button-font-xs: 700 14px/22px Montserrat, sans-serif;
+    --button-font-s: 700 14px/28px Montserrat, sans-serif;
+    --button-font-m: 700 16px/36px Montserrat, sans-serif;
+    --button-font-l: 700 16px/24px Montserrat, sans-serif;
+  
+    @media (min-width: 900px) {
+      --heading-font-xs: 700 14px/28px Montserrat, sans-serif;
+      --heading-font-s: 700 16px/24px Montserrat, sans-serif;
+      --heading-font-m: 700 24px/32px Montserrat, sans-serif;
+      --heading-font-l: 700 32px/40px Montserrat, sans-serif;
+      --heading-font-xl: 700 40px/48px Montserrat, sans-serif;
+  
+      --body-font-xs: 400 14px/22px Roboto, sans-serif;
+      --body-font-s: 400 16px/24px Roboto, sans-serif;
+      --body-font-m: 400 18px/32px Roboto, sans-serif;
+  
+      --button-font-xs: 700 14px/22px Montserrat, sans-serif;
+      --button-font-s: 700 16px/32px Montserrat, sans-serif;
+      --button-font-m: 700 18px/36px Montserrat, sans-serif;
+      --button-font-l: 700 20px/28px Montserrat, sans-serif;
+    }
+  }
+  
+  @media (prefers-color-scheme: light) {
+    :root {
+      --primary-bg-color: #FFFFFF;
+      --secondary-bg-color: #EEF6F9;
+      --tertiary-bg-color: #FFAC40;
+      --quaternary-bg-color: #037584;
+      --quinary-bg-color: #FFFFFF;
+      --senary-bg-color: #E3F0F5;
+      --octonary-bg-color: #E3F0F5;
+      --nonary-bg-color: #FFC170;
+      --denary-bg-color: #037584;
+      --undenary-bg-color: #34545F;
+  
+      --primary-text-color: #34545F;
+      --secondary-text-color: #037584;
+      --tertiary-text-color: #191919;
+      --quaternary-text-color: #FFFFFF;
+      --quinary-text-color: #037584;
+      --senary-text-color: #34545F;
+  
+      --primary-button-bg-color: #FFAC40;
+      --secondary-button-bg-color: transparent;
+      
+      --primary-button-text-color: #191919;
+      --secondary-button-text-color: #34545F;
+  
+      --primary-logo-color: #34545F;
+      --secondary-logo-color: #E98400;
+      --tertiary-logo-color: #FFFFFF;
+      --quaternary-logo-color: #FFFFFF;
+      --quinary-logo-color: #34545F;
+  
+      --image-visible: block;
+      --image-hidden: none;
+  
+      --ellipse-color: linear-gradient(135deg,#FFFFFF,#E3F0F500) border-box;
+    }
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary-bg-color: #191919;
+      --secondary-bg-color: #22363C;
+      --tertiary-bg-color: #22363C;
+      --quaternary-bg-color: #22363C;
+      --quinary-bg-color: #34545F;
+      --senary-bg-color: #191919;
+      --octonary-bg-color: #22363C;
+      --nonary-bg-color: #22363C;
+      --denary-bg-color: #34545F;
+      --undenary-bg-color: #191919;
+  
+      --primary-text-color: #FFFFFF;
+      --secondary-text-color: #FFFFFF;
+      --tertiary-text-color: #FFFFFF;
+      --quaternary-text-color: #FFFFFF;
+      --quinary-text-color: #8BF1FF;
+      --senary-text-color: #22363C;
+  
+      --primary-button-bg-color: #FFAC40;
+      --secondary-button-bg-color: transparent;
+  
+      --primary-button-text-color: #191919;
+      --secondary-button-text-color: #FFFFFF;
+  
+      --primary-logo-color: #FFFFFF;
+      --secondary-logo-color: #FFFFFF;
+      --tertiary-logo-color: #FFFFFF;
+      --quaternary-logo-color: #34545F;
+      --quinary-logo-color: #34545F;
+  
+      --image-visible: none;
+      --image-hidden: block;
+  
+      --ellipse-color: linear-gradient(135deg,#34545F ,#22364C) border-box;
+    }
+  }
+  
+  [data-theme="light"] {
+    --primary-bg-color: #FFFFFF;
+    --secondary-bg-color: #EEF6F9;
+    --tertiary-bg-color: #FFAC40;
+    --quaternary-bg-color: #037584;
+    --quinary-bg-color: #FFFFFF;
+    --senary-bg-color: #E3F0F5;
+    --octonary-bg-color: #E3F0F5;
+    --nonary-bg-color: #FFC170;
+    --denary-bg-color: #037584;
+    --undenary-bg-color: #34545F;
+  
+    --primary-text-color: #34545F;
+    --secondary-text-color: #037584;
+    --tertiary-text-color: #191919;
+    --quaternary-text-color: #FFFFFF;
+    --quinary-text-color: #037584;
+    --senary-text-color: #34545F;
+  
+    --primary-button-bg-color: #FFAC40;
+    --secondary-button-bg-color: transparent;
+    
+    --primary-button-text-color: #191919;
+    --secondary-button-text-color: #34545F;
+  
+    --primary-logo-color: #34545F;
+    --secondary-logo-color: #E98400;
+    --tertiary-logo-color: #FFFFFF;
+    --quaternary-logo-color: #FFFFFF;
+    --quinary-logo-color: #34545F;
+  
+    --image-visible: block;
+    --image-hidden: none;
+  
+    --ellipse-color: linear-gradient(135deg,#FFFFFF,#E3F0F500) border-box;
+  }
+  
+  [data-theme="dark"] {
+    --primary-bg-color: #191919;
+    --secondary-bg-color: #22363C;
+    --tertiary-bg-color: #22363C;
+    --quaternary-bg-color: #22363C;
+    --quinary-bg-color: #34545F;
+    --senary-bg-color: #191919;
+    --octonary-bg-color: #22363C;
+    --nonary-bg-color: #22363C;
+    --denary-bg-color: #34545F;
+    --undenary-bg-color: #191919;
+  
+    --primary-text-color: #FFFFFF;
+    --secondary-text-color: #FFFFFF;
+    --tertiary-text-color: #FFFFFF;
+    --quaternary-text-color: #FFFFFF;
+    --quinary-text-color: #8BF1FF;
+    --senary-text-color: #22363C;
+  
+    --primary-button-bg-color: #FFAC40;
+    --secondary-button-bg-color: transparent;
+  
+    --primary-button-text-color: #191919;
+    --secondary-button-text-color: #FFFFFF;
+  
+    --primary-logo-color: #FFFFFF;
+    --secondary-logo-color: #FFFFFF;
+    --tertiary-logo-color: #FFFFFF;
+    --quaternary-logo-color: #34545F;
+    --quinary-logo-color: #34545F;
+  
+    --image-visible: none;
+    --image-hidden: block;
+  
+    --ellipse-color: linear-gradient(135deg,#34545F ,#22364C) border-box;
+  }
