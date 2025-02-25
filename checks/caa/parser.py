@@ -1,8 +1,9 @@
 import textwrap
+from typing import Optional
 from urllib.parse import urlparse
 
 from abnf.grammars.misc import load_grammar_rulelist
-from abnf.parser import Rule as _Rule, ParseError, NodeVisitor
+from abnf.parser import Rule as _Rule, ParseError, NodeVisitor, Node
 
 from checks.tasks.shared import TranslatableTechTableItem
 
@@ -16,9 +17,8 @@ class CAAParseError(ValueError):
         return TranslatableTechTableItem(self.msg_id, self.context)
 
 
-def node_get_named_child_value(node, name):
-    """Do a breadth-first search of the tree for addr-spec node.  If found,
-    return its value."""
+def node_get_named_child_value(node: Node, name: str) -> Optional[str]:
+    """Search the tree from the node for a node with a certain name, return value."""
     queue = [node]
     while queue:
         n, queue = queue[0], queue[1:]
@@ -62,7 +62,7 @@ class CAAValidationMethodsGrammar(_Rule):
 def validate_issue_validation_methods(parameter_value: str) -> set[str]:
     """Validate the validationmethods parameter value for the issue/issuewild CAA property."""
     parse_result = CAAValidationMethodsGrammar("value").parse_all(parameter_value)
-    # Careful: label/value are used as properties of the parse tree, but also as properties
+    # Careful: terms label/value are used as properties of the parse tree, but also as properties
     # in the original ABNF grammer, in opposite roles. Not confusing at all.
     validation_methods = {label.value for label in parse_result.children if label.name == "label"}
     for validation_method in validation_methods:
@@ -78,7 +78,6 @@ class CAAPropertyIssueGrammar(_Rule):
     """
     Grammar for issue/issuewild CAA property values.
     Per RFC8659 4.2
-    # TODO: consider https://www.rfc-editor.org/errata/eid7139
     """
 
     grammar = textwrap.dedent(
@@ -130,7 +129,6 @@ def validate_property_issue(value: str):
 
 def validate_property_iodef(value: str):
     """Validate iodef value per RFC8659 4.4"""
-    # TODO: do we want different translations for the various sub-errors?
     try:
         url = urlparse(value)
     except ValueError:
