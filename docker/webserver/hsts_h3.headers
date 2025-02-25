@@ -1,4 +1,5 @@
  # Do *not* add includeSubdomains before https://github.com/internetstandards/Internet.nl/issues/324 is resolved,
  # adding includeSubdomains without adding the wildcard SSL certificates will otherwise break the connection test.
- add_header 'Strict-Transport-Security' 'max-age=31536000;' always;
+ add_header 'Strict-Transport-Security' 'max-age=31536000' always;
+ add_header 'Alt-Svc' 'h3=":443"; ma=86400' always;
  
