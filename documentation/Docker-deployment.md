@@ -276,7 +276,7 @@ This variable can be set to either of these values:
 
 - `latest`: update to latest stable release: https://github.com/internetstandards/Internet.nl/releases
 - `main`: update to latest release on the `main` branch
-- `pr-<NUMBER>`: update to the latest build of that Pull Request number
+- `<NUMBER>-merge`: update to the latest build of that Pull Request number
 
 Auto upgrades are performed by the `cron-docker` container/service. Progress/errors can be viewed by inspecting the container's logs:
 
