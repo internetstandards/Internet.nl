@@ -10,3 +10,13 @@ toggleMenu.addEventListener('click', () => {
   main.toggleAttribute('inert', menu.classList.contains('active'));
   footer.toggleAttribute('inert', menu.classList.contains('active'));
 });
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    if (menu.classList.contains('active')) {
+      menu.classList.remove('active');
+      main.removeAttribute('inert');
+      footer.removeAttribute('inert');
+    }
+  }
+});

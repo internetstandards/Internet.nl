@@ -153,6 +153,7 @@ header nav {
     gap: 16px;
     color: var(--primary-text-color);
     font: var(--button-font-s);
+    width: 100%;
     
     @media (scripting: enabled) {
       font-size: 24px;
