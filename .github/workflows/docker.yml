@@ -80,6 +80,8 @@ jobs:
           scm_version=$(echo 'from setuptools_scm import get_version; print(get_version(version_scheme="release-branch-semver"))' | python)
           branch_version_suffix=${GITHUB_HEAD_REF:+-$GITHUB_HEAD_REF}
           echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
+          # generate docker image tag used for PR specific caching and PR specific auto deploy
+          echo "github_ref_name_slug=${{github.ref_name}}" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
 
       # login to pull images from Github registry
       - name: Login to GitHub Container Registry
@@ -115,11 +117,11 @@ jobs:
           # and tag with PR source branch (eg: feature-x)
           tags: |
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
-            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:pr-${{ github.event_name == 'pull_request' && github.event.number || github.ref_name}}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.github_ref_name_slug }}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
-            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:pr-${{ github.event_name == 'pull_request' && github.event.number || github.ref_name}}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.github_ref_name_slug }}
           # push images to registry
           push: true
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
