@@ -10,6 +10,7 @@ from checks.resolver import dns_resolve_caa
 from checks.tasks.shared import TranslatableTechTableItem
 
 CAA_TAGS_REQUIRED = {"issue"}
+CAA_MAX_RECORDS = 1000
 
 
 @dataclass
@@ -23,7 +24,7 @@ class CAAEvaluation:
     caa_tags: set[str] = field(default_factory=set)
 
     def __post_init__(self):
-        self.caa_records = list(self.caa_records)
+        self.caa_records = list(self.caa_records[:CAA_MAX_RECORDS])
         self.caa_records_str = [caa.to_text() for caa in self.caa_records]
         self.cca_tags = {caa.tag.decode("ascii") for caa in self.caa_records}
         for caa in self.caa_records:
