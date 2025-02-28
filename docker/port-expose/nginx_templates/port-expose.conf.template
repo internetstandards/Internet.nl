@@ -17,6 +17,14 @@ server {
         proxy_pass http://$IPV4_IP_WEBSERVER_INTERNAL/connection/;
     }
 
+    location /__reload__/events/ {
+        proxy_set_header Host ${INTERNETNL_DOMAINNAME};
+        proxy_ssl_name ${INTERNETNL_DOMAINNAME};
+        proxy_ssl_server_name on;
+        proxy_ssl_verify off;
+        proxy_pass https://$IPV4_IP_WEBSERVER_INTERNAL:443;
+        proxy_buffering off;
+    }
 }
 
 server {

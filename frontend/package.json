@@ -1,8 +1,8 @@
 {
   "scripts": {
     "css:lint": "stylelint css/*.css",
-    "css:build": "postcss css/*.css --dir build",
-    "css:build:watch": "postcss css/*.css --dir build --watch --poll"
+    "css:build": "postcss css/*.css --dir /app/static_frontend/css/",
+    "css:build:watch": "postcss css/*.css --dir /app/static_frontend/css/ --watch --poll"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

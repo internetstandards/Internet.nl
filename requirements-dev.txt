@@ -4,9 +4,14 @@
 #
 #    pip-compile requirements-dev.in
 #
-attrs==23.1.0
+asgiref==3.8.1
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
+    #   django
+    #   django-browser-reload
+attrs==24.3.0
+    # via
+    #   -c /source/requirements.txt
     #   pytest
 autoflake==2.0.1
     # via -r requirements-dev.in
@@ -14,42 +19,48 @@ black==23.1.0
     # via -r requirements-dev.in
 build==0.10.0
     # via pip-tools
-certifi==2023.7.22
+certifi==2024.12.14
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   requests
-charset-normalizer==3.2.0
+charset-normalizer==3.4.1
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   requests
-click==8.1.7
+click==8.1.8
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   black
     #   pip-tools
 coverage[toml]==7.1.0
     # via
     #   -r requirements-dev.in
     #   pytest-cov
+django==4.2.18
+    # via
+    #   -c /source/requirements.txt
+    #   django-browser-reload
+django-browser-reload==1.18.0
+    # via -r requirements-dev.in
 django-coverage==1.2.4
     # via -r requirements-dev.in
 freezegun==1.2.2
     # via -r requirements-dev.in
-idna==3.7
+idna==3.10
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   requests
 iniconfig==2.0.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pytest
 mccabe==0.7.0
     # via pylama
 mypy-extensions==1.0.0
     # via black
-packaging==23.1
+packaging==24.2
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   black
     #   build
     #   pytest
@@ -59,13 +70,13 @@ pip-tools==6.14.0
     # via -r requirements-dev.in
 platformdirs==3.0.0
     # via black
-pluggy==1.2.0
+pluggy==1.5.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pytest
 py==1.11.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pytest
     #   pytest-html
 pycodestyle==2.10.0
@@ -82,7 +93,7 @@ pyproject-hooks==1.0.0
     # via build
 pytest==6.2.5
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   -r requirements-dev.in
     #   pytest-base-url
     #   pytest-cov
@@ -116,13 +127,13 @@ pytest-selenium==3.0.0
     # via -r requirements-dev.in
 pytest-variables==1.9.0
     # via pytest-selenium
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   freezegun
-requests==2.32.0
+requests==2.31.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pytest-base-url
     #   pytest-selenium
     #   requests-mock
@@ -133,47 +144,51 @@ responses==0.22.0
     # via pytest-responses
 selenium==3.141.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pytest-selenium
-six==1.16.0
+six==1.17.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   python-dateutil
     #   requests-mock
     #   tenacity
 snowballstemmer==2.2.0
     # via pydocstyle
+sqlparse==0.5.3
+    # via
+    #   -c /source/requirements.txt
+    #   django
 tenacity==6.3.1
     # via pytest-selenium
 toml==0.10.2
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pytest
     #   responses
-tomli==2.0.1
+tomli==2.2.1
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   autoflake
     #   black
     #   build
     #   coverage
     #   pip-tools
-    #   pyproject-hooks
 types-toml==0.10.8.3
     # via responses
-typing-extensions==4.7.1
+typing-extensions==4.12.2
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
+    #   asgiref
     #   black
-urllib3==2.0.7
+urllib3==2.3.0
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   requests
     #   responses
     #   selenium
-wheel==0.41.2
+wheel==0.45.1
     # via
-    #   -c requirements.txt
+    #   -c /source/requirements.txt
     #   pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:

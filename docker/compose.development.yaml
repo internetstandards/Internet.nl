@@ -20,15 +20,42 @@ services:
       - IPV4_IP_RABBITMQ_INTERNAL
 
   app:
+    build:
+      target: app-dev
+    develop:
+      watch:
+        # auto rebuild/reload when CSS/JS changes
+        - path: ../frontend/js
+          action: sync+exec
+          target: /app/frontend/js
+          exec:
+            command: python3 bin/frontend.py js
     # use Django runserver for better debug abilities during development
-    entrypoint: ["/bin/sh"]
-    command: ["-c", "./manage.py runserver 0.0.0.0:8080 $DEVSERVER_ARGS"]
+    entrypoint: ["/bin/bash"]
+    # run CSS auto rebuild in the background and start devserver
+    command:
+      - "-c"
+      - >
+        if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
+          # watch CSS files for rebuild
+          cd /app/frontend;
+          npm run css:build:watch &
+          cd /app;
+          # start development server with auto reloading
+          ./manage.py runserver 0.0.0.0:8080
+        else
+          ./manage.py runserver 0.0.0.0:8080 --noreload
+        fi;
+    environment:
+      - INTERNETNL_AUTORELOAD
     volumes:
       - batch_results:/app/batch_results
       # mount sources using volumes for quicker dev cycles
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+      # mount CSS files so `css:build:watch` can detect changes an rebuild
+      - ../frontend/css:/app/frontend/css
 
   worker:
     volumes:

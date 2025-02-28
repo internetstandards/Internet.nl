@@ -80,10 +80,10 @@ jobs:
         id: get_version
         run: |
           pip -q install setuptools_scm
-          # '+' is not supported in Docker Image tags
+          # '+' and '/' is not supported in Docker Image tags
           scm_version=$(echo 'from setuptools_scm import get_version; print(get_version(version_scheme="release-branch-semver"))' | python)
           branch_version_suffix=${GITHUB_HEAD_REF:+-$GITHUB_HEAD_REF}
-          echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tee -a "$GITHUB_OUTPUT"
+          echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
 
       # login to pull images from Github registry
       - name: Login to GitHub Container Registry
@@ -267,7 +267,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
@@ -440,7 +440,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
@@ -523,7 +523,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |
@@ -575,7 +575,7 @@ jobs:
 
       - name: Start development environment
         # disable autoreload in CI as it makes workers unstable
-        run: DEVSERVER_ARGS=--noreload make up env=develop
+        run: INTERNETNL_AUTORELOAD=False make up env=develop
 
       - name: Run development environment tests
         run: make develop-tests
@@ -637,7 +637,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.27.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
 
       - name: Debug info
         run: |

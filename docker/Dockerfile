@@ -125,6 +125,17 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+FROM debian:bullseye-20241111-slim AS frontend
+
+# install npm from official image
+COPY --from=node:20-slim /usr/local/bin/ /usr/local/bin/
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+ADD frontend/ /app/frontend
+WORKDIR /app/frontend
+RUN npm install
+RUN npm run css:build
+
 # build main application image target
 FROM debian:bullseye-20241111-slim AS build-app
 ARG PYTHON_VERSION
@@ -196,8 +207,10 @@ RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
 # some js/css files use a separate script to generate minimized versions
 # storage these in a place for django to find
 RUN mkdir -p /app/static_frontend
+# minimize JS files
 RUN python3 bin/frontend.py js
-RUN python3 bin/frontend.py css
+# copy build/minimized CSS files from frontand stage
+COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/css/*.css /app/static_frontend/css/
 
 # generate language files
 RUN python3 bin/pofiles.py to_django
@@ -218,6 +231,19 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 # define default entrypoint and command
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
+
+# app image with development tools for better live reloading
+FROM app AS app-dev
+
+# required for compose `develop` mode file sync/copy
+USER root
+
+# copy dependencies to rebuild CSS (postcss)
+COPY --from=frontend /usr/local/bin/ /usr/local/bin/
+COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+# copy browser reload module
+COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
 
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest
