@@ -126,6 +126,12 @@ def test_batch_request(unique_id, register_test_user, test_domain):
     assert response.status_code == 200, "test results should be publicly accessible without authentication"
 
 
+def test_batch_static_requires_no_auth():
+    """Static files should be available without authentication for viewing batch results."""
+    response = requests.get(f"https://{APP_DOMAIN}/static/js/menu-min.js", json={}, verify=False)
+    assert response.status_code == 200
+
+
 def test_cron_delete_batch_results(trigger_cron, docker_compose_exec):
     """Test if batch results are compressed and deleted."""
 
