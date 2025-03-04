@@ -207,6 +207,10 @@ server {
 
     # static files served from app
     location /static {
+        # these are unauthenticated as they are used for batch results as well
+        auth_basic off;
+        allow all;
+
         # enable cache
         proxy_cache            ${NGINX_PROXY_CACHE};
         # static files don't change often, cache for long
@@ -218,7 +222,6 @@ server {
 
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
-        include /etc/nginx/conf.d/basic_auth.include;
         proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
     }
 
