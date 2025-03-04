@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.2
+
+- Fixed an issue where static files incorrectly required authentication (#1676)
+
 ## 1.9.1
 
 - Fixed an issue where the database cleanup would use excessive memory and get an OOM kill (#1670)
