@@ -659,6 +659,10 @@ class DomainTestTls(BaseTestModel):
             "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
             "cert_signature_bad": self.cert_signature_bad,
             "cert_hostmatch_bad": self.cert_hostmatch_bad,
+            "caa_enabled": self.caa_enabled,
+            "caa_errors": self.caa_errors,
+            "caa_recommendations": self.caa_recommendations,
+            "caa_found_on_domain": self.caa_found_on_domain,
         }
 
     def get_mail_api_details(self):
