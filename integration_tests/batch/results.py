@@ -94,7 +94,7 @@ EXPECTED_DOMAIN_TECHNICAL_RESULTS = {
                 "caa_enabled": False,
                 "caa_errors": [],
                 "caa_recommendations": [],
-                "caa_found_on_domain": "",
+                "caa_found_on_domain": None,
                 "content_security_policy_enabled": False,
                 "content_security_policy_values": ["default-src 'self'; frame-src 'none'; frame-ancestors 'none';"],
                 "content_security_policy_errors": [
@@ -150,7 +150,7 @@ EXPECTED_DOMAIN_TECHNICAL_RESULTS = {
                 "caa_enabled": False,
                 "caa_errors": [],
                 "caa_recommendations": [],
-                "caa_found_on_domain": "",
+                "caa_found_on_domain": None,
                 "content_security_policy_enabled": False,
                 "content_security_policy_values": ["default-src 'self'; frame-src 'none'; frame-ancestors 'none';"],
                 "content_security_policy_errors": [
