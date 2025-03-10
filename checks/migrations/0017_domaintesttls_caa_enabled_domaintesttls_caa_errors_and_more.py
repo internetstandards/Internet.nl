@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="domaintesttls",
-            name="caa_found_host",
+            name="caa_found_on_domain",
             field=models.CharField(max_length=255, null=True),
         ),
         migrations.AddField(

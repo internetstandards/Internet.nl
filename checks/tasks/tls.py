@@ -658,7 +658,7 @@ def save_results(model, results, addr, domain, category):
                 model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                 model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                 model.caa_score = result.get("caa_result").score
-                model.caa_found_host = result.get("caa_result").canonical_name
+                model.caa_found_on_domain = result.get("caa_result").canonical_name
                 model.dane_log = result.get("dane_log")
                 model.dane_score = result.get("dane_score")
                 model.dane_status = result.get("dane_status")
@@ -731,7 +731,7 @@ def save_results(model, results, addr, domain, category):
                     model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                     model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                     model.caa_score = result.get("caa_result").score
-                    model.caa_found_host = result.get("caa_result").canonical_name
+                    model.caa_found_on_domain = result.get("caa_result").canonical_name
                     model.dane_log = result.get("dane_log")
                     model.dane_score = result.get("dane_score")
                     model.dane_status = result.get("dane_status")
@@ -891,7 +891,7 @@ def build_report(dttls, category):
 
                 if dttls.caa_enabled:
                     caa_host_message = [
-                        TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_host}).to_dict()
+                        TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
                     ]
                 else:
                     caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
@@ -1061,7 +1061,7 @@ def build_report(dttls, category):
 
             if dttls.caa_enabled:
                 caa_host_message = [
-                    TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_host}).to_dict()
+                    TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
                 ]
             else:
                 caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]

@@ -556,12 +556,11 @@ class DomainTestTls(BaseTestModel):
     cert_hostmatch_score = models.IntegerField(null=True)
 
     # CAA
-    # TODO: consider caa_found_host naming, alternatives: caa_canonical_domain, caa_domain, caa_found_domain
     caa_enabled = models.BooleanField(null=True, default=False)
     caa_errors = ListField(default=[])
     caa_recommendations = ListField(default=[])
     caa_score = models.IntegerField(null=True)
-    caa_found_host = models.CharField(null=True, max_length=255)
+    caa_found_on_domain = models.CharField(null=True, max_length=255)
 
     score = models.IntegerField(null=True)
 
@@ -627,7 +626,7 @@ class DomainTestTls(BaseTestModel):
             "caa_errors",
             "caa_recommendations",
             "caa_score",
-            "caa_found_host",
+            "caa_found_on_domain",
             "score",
             "protocols_good",
         ]
