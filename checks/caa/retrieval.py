@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import Optional, Iterable
 
 from dns.rdtypes.ANY.CAA import CAA
@@ -19,15 +19,16 @@ class CAAEvaluation:
     canonical_name: Optional[str] = None
     errors: list[TranslatableTechTableItem] = field(default_factory=list)
     recommendations: list[TranslatableTechTableItem] = field(default_factory=list)
-    caa_records: Iterable[CAA] = field(default_factory=list)
     caa_records_str: list[str] = field(default_factory=list)
     caa_tags: set[str] = field(default_factory=set)
+    caa_records: InitVar[Iterable[CAA]] = None
 
-    def __post_init__(self):
-        self.caa_records = list(self.caa_records[:CAA_MAX_RECORDS])
-        self.caa_records_str = [caa.to_text() for caa in self.caa_records]
-        self.cca_tags = {caa.tag.decode("ascii") for caa in self.caa_records}
-        for caa in self.caa_records:
+    def __post_init__(self, caa_records: Iterable[CAA]):
+        caa_records = list(caa_records[:CAA_MAX_RECORDS]) if caa_records else []
+        self.caa_records_str = [caa.to_text() for caa in caa_records]
+        self.cca_tags = {caa.tag.decode("ascii") for caa in caa_records}
+
+        for caa in caa_records:
             try:
                 validate_caa_record(caa.flags, caa.tag.decode("ascii"), caa.value.decode("ascii"))
             except CAAParseError as cpe:
