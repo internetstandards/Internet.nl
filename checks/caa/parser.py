@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from abnf.grammars.misc import load_grammar_rulelist
 from abnf.parser import Rule as _Rule, ParseError, NodeVisitor, Node
 
-from checks.tasks.shared import TranslatableTechTableItem
+from checks.tasks.shared import TranslatableTechTableItem, validate_email
 
 
 class CAAParseError(ValueError):
@@ -138,8 +138,7 @@ def validate_property_iodef(value: str):
         if not url.netloc:
             raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
     elif url.scheme == "mailto":
-        # RFC8659 does not prescribe what an email address is
-        if "@" not in url.path:
+        if not validate_email(url.path):
             raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
     else:
         raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
@@ -147,8 +146,7 @@ def validate_property_iodef(value: str):
 
 def validate_property_contactemail(value: str):
     """Validate contactemail per CAB BR 1.6.3, requiring a single RFC 6532 3.2 address."""
-    # TODO: the grammar is nontrivial, consider if this needs refinement
-    if "@" not in value:
+    if not validate_email(value):
         raise CAAParseError(msg_id="invalid_property_contactemail_value", context={"value": value})
 
 

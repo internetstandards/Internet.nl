@@ -30,7 +30,8 @@ from interface import batch_shared_task
 
 MAX_MAILSERVERS = 10
 MX_LOCALHOST_RE = re.compile(r"^localhost\.?$")
-
+EMAIL_RE = re.compile(r"^[^@]+@[^@]+$")
+EMAIL_MAX_LEN = 254
 
 root_fingerprints = None
 with open(settings.CA_FINGERPRINTS) as f:
@@ -350,3 +351,11 @@ class TranslatableTechTableItem:
 
     def to_dict(self):
         return {"msgid": self.msgid, "context": self.context}
+
+
+def validate_email(email: str) -> bool:
+    if len(email) > EMAIL_MAX_LEN:
+        return False
+    if EMAIL_RE.match(email):
+        return True
+    return False
