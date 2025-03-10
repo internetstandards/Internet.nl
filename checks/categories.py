@@ -1947,7 +1947,7 @@ class MailCaa(Subtest):
             name="caa",
             label="detail mail caa label",
             explanation="detail mail caa exp",
-            tech_string="detail web caa tech table",
+            tech_string="detail mail caa tech table",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
             model_score_field="caa_score",
