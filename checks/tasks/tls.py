@@ -891,7 +891,9 @@ def build_report(dttls, category):
 
                 if dttls.caa_enabled:
                     caa_host_message = [
-                        TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
+                        TranslatableTechTableItem(
+                            msgid="found_host", context={"host": dttls.caa_found_on_domain}
+                        ).to_dict()
                     ]
                 else:
                     caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
