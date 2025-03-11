@@ -115,6 +115,7 @@ class Subtest:
 
         """
         return {
+            "name": self.name,
             "label": self.label,
             "status": self.status,
             "worst_status": self.worst_status,
@@ -1312,7 +1313,7 @@ class WebTlsCertHostmatch(Subtest):
 class WebCaa(Subtest):
     def __init__(self):
         super(WebCaa, self).__init__(
-            name="caa",
+            name="web_caa",
             label="detail web caa label",
             explanation="detail web caa exp",
             tech_string="detail web caa tech table",
@@ -1944,7 +1945,7 @@ class MailTlsCertHostmatch(Subtest):
 class MailCaa(Subtest):
     def __init__(self):
         super().__init__(
-            name="caa",
+            name="mail_caa",
             label="detail mail caa label",
             explanation="detail mail caa exp",
             tech_string="detail mail caa tech table",

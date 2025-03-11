@@ -329,7 +329,12 @@ def aggregate_subreports(subreports, report):
                     report[test_item]["tech_type"] = tech_type
 
                 subtechdata = subreport[test_item]["tech_data"]
-                if subreport[test_item]["tech_type"] == "table_multi_col" and isinstance(subtechdata, list):
+                # This is a small hack to allow running CAA along with all other tests,
+                # i.e. once per webserver IP, while it only applies once per target domain.
+                if subreport[test_item]["name"] == "web_caa":
+                    report[test_item]["tech_data"] = [subtechdata]
+                    continue
+                elif subreport[test_item]["tech_type"] == "table_multi_col" and isinstance(subtechdata, list):
                     # Enable more columns in the aggregated tech table.
                     data = (server, *subtechdata)
                 else:

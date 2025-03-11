@@ -899,11 +899,11 @@ def build_report(dttls, category):
                     caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
                 caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
                 if not dttls.caa_enabled or dttls.caa_errors:
-                    category.subtests["caa"].result_bad(caa_tech_table)
+                    category.subtests["web_caa"].result_bad(caa_tech_table)
                 elif dttls.caa_recommendations:
-                    category.subtests["caa"].result_recommendations(caa_tech_table)
+                    category.subtests["web_caa"].result_recommendations(caa_tech_table)
                 else:
-                    category.subtests["caa"].result_good(caa_tech_table)
+                    category.subtests["web_caa"].result_good(caa_tech_table)
 
             if dttls.dane_status == DaneStatus.none:
                 category.subtests["dane_exists"].result_bad()
@@ -1069,11 +1069,11 @@ def build_report(dttls, category):
                 caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
             caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
             if not dttls.caa_enabled or dttls.caa_errors:
-                category.subtests["caa"].result_bad(caa_tech_table)
+                category.subtests["mail_caa"].result_bad(caa_tech_table)
             elif dttls.caa_recommendations:
-                category.subtests["caa"].result_recommendations(caa_tech_table)
+                category.subtests["mail_caa"].result_recommendations(caa_tech_table)
             else:
-                category.subtests["caa"].result_good(caa_tech_table)
+                category.subtests["mail_caa"].result_good(caa_tech_table)
 
             if dttls.dane_status == DaneStatus.none:
                 category.subtests["dane_exists"].result_bad()
