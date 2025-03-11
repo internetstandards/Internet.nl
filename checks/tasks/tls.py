@@ -654,7 +654,7 @@ def save_results(model, results, addr, domain, category):
                 model.cert_signature_score = result.get("sigalg_score")
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
-                model.caa_enabled = result.get("caa_result").enabled
+                model.caa_enabled = result.get("caa_result").caa_found
                 model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                 model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                 model.caa_score = result.get("caa_result").score
@@ -727,7 +727,7 @@ def save_results(model, results, addr, domain, category):
                     model.cert_signature_score = result.get("sigalg_score")
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
-                    model.caa_enabled = result.get("caa_result").enabled
+                    model.caa_enabled = result.get("caa_result").caa_found
                     model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                     model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                     model.caa_score = result.get("caa_result").score

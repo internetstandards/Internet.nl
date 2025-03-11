@@ -5389,8 +5389,8 @@ msgstr "invalid_unknown_property {value}"
 msgid "detail tech data caa invalid_reserved_property"
 msgstr "invalid_reserved_property {value}"
 
-msgid "detail tech data caa invalid_tag_reserved_bits"
-msgstr "invalid_tag_reserved_bits {value}"
+msgid "detail tech data caa invalid_flags_reserved_bits"
+msgstr "invalid_flags_reserved_bits {value}"
 
 msgid "detail tech data caa invalid_property_issuemail_value"
 msgstr "invalid_property_issuemail_value {value}"

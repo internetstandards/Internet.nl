@@ -15,7 +15,11 @@ CAA_MAX_RECORDS = 1000
 
 @dataclass
 class CAAEvaluation:
-    enabled: bool
+    """
+    The evaluation of a set of CAA records.
+    """
+
+    caa_found: bool
     canonical_name: Optional[str] = None
     errors: list[TranslatableTechTableItem] = field(default_factory=list)
     recommendations: list[TranslatableTechTableItem] = field(default_factory=list)
@@ -40,13 +44,17 @@ class CAAEvaluation:
 
     @property
     def score(self) -> int:
-        return scoring.CAA_GOOD if self.enabled and not self.errors else scoring.CAA_BAD
+        return scoring.CAA_GOOD if self.caa_found and not self.errors else scoring.CAA_BAD
 
 
 def retrieve_parse_caa(target_domain: str) -> CAAEvaluation:
+    """
+    Retrieve and parse the CAA record(s) for a given domain.
+    Looks up the DNS tree if needed, always returns a CAAEvaluation with results.
+    """
     try:
         canonical_name, rrset = dns_resolve_caa(target_domain)
     except (NoAnswer, NXDOMAIN, LifetimeTimeout, NoNameservers):
-        return CAAEvaluation(enabled=False)
+        return CAAEvaluation(caa_found=False)
 
-    return CAAEvaluation(enabled=True, canonical_name=canonical_name, caa_records=rrset)
+    return CAAEvaluation(caa_found=True, canonical_name=canonical_name, caa_records=rrset)

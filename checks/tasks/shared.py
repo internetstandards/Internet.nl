@@ -329,8 +329,9 @@ def aggregate_subreports(subreports, report):
                     report[test_item]["tech_type"] = tech_type
 
                 subtechdata = subreport[test_item]["tech_data"]
-                # This is a small hack to allow running CAA along with all other tests,
+                # This is a small hack to allow running CAA along with all other tests in web,
                 # i.e. once per webserver IP, while it only applies once per target domain.
+                # Therefore, the tech table is flattened to only include one result, and no server column.
                 if subreport[test_item]["name"] == "web_caa":
                     report[test_item]["tech_data"] = [subtechdata]
                     continue
@@ -348,6 +349,14 @@ def aggregate_subreports(subreports, report):
 
 @dataclass
 class TranslatableTechTableItem:
+    """
+    A representation of a message in a tech table, with an ID
+    matching translations, and optional context variables.
+
+    At time of introduction, this is small scope, but it is intended
+    to be slowly used more widely to reduce typing ambiguity.
+    """
+
     msgid: str
     context: dict[str, str] = field(default_factory=dict)
 
@@ -359,6 +368,11 @@ class TranslatableTechTableItem:
 
 
 def validate_email(email: str) -> bool:
+    """
+    Validate an email address, based on max length and an RE.
+    Goal is to detect cases that definitely are not an email address,
+    while not rejecting obscure syntax options. Hence, simplicity.
+    """
     if len(email) > EMAIL_MAX_LEN:
         return False
     if EMAIL_RE.match(email):

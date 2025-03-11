@@ -9,6 +9,11 @@ from checks.tasks.shared import TranslatableTechTableItem, validate_email
 
 
 class CAAParseError(ValueError):
+    """
+    Error thrown for any CAA parsing issues,
+    with a message ID and context dict.
+    """
+
     def __init__(self, msg_id: str, context: dict[str, str]):
         self.msg_id = msg_id
         self.context = context
@@ -18,7 +23,7 @@ class CAAParseError(ValueError):
 
 
 def node_get_named_child_value(node: Node, name: str) -> Optional[str]:
-    """Search the tree from the node for a node with a certain name, return value."""
+    """Search an ABNF tree from a node, for a node with a certain name, return the value of first match."""
     queue = [node]
     while queue:
         n, queue = queue[0], queue[1:]
@@ -60,7 +65,10 @@ class CAAValidationMethodsGrammar(_Rule):
 
 
 def validate_issue_validation_methods(parameter_value: str) -> set[str]:
-    """Validate the validationmethods parameter value for the issue/issuewild CAA property."""
+    """
+    Validate the validationmethods parameter value for the issue/issuewild CAA property.
+    Called from the issue/issuewild parser, once it extracted validationmethods.
+    """
     parse_result = CAAValidationMethodsGrammar("value").parse_all(parameter_value)
     # Careful: terms label/value are used as properties of the parse tree, but also as properties
     # in the original ABNF grammer, in opposite roles. Not confusing at all.
@@ -97,6 +105,11 @@ class CAAPropertyIssueGrammar(_Rule):
 
 
 class CAAPropertyIssueVisitor(NodeVisitor):
+    """
+    This ABNF visitor walks over the tree of a CAAPropertyIssueGrammar
+    parsed value to extract field values in a relatively simple way.
+    """
+
     def __init__(self):
         super().__init__()
         self.issuer_domain_name = None
@@ -120,6 +133,7 @@ class CAAPropertyIssueVisitor(NodeVisitor):
 
 
 def validate_property_issue(value: str):
+    """Validate the value of issue/issuewild, using the ABNF grammar/visitor."""
     parse_result = CAAPropertyIssueGrammar("issue-value").parse_all(value)
     visitor = CAAPropertyIssueVisitor()
     visitor.visit(parse_result)
@@ -230,10 +244,10 @@ def validate_property_issuemail(value: str):
         raise CAAParseError(msg_id="invalid_property_issuemail_value", context={"value": value})
 
 
-def validate_tag(tag: int):
-    # RFC8659 4.1
-    if tag not in [0, 128]:
-        raise CAAParseError(msg_id="invalid_tag_reserved_bits", context={"value": str(tag)})
+def validate_flags(flags: int):
+    """Validate the flags per RFC8659 4.1, i.e. only allow 0/128"""
+    if flags not in [0, 128]:
+        raise CAAParseError(msg_id="invalid_flags_reserved_bits", context={"value": str(flags)})
 
 
 # https://www.iana.org/assignments/pkix-parameters/pkix-parameters.xhtml#caa-properties
@@ -251,22 +265,26 @@ CAA_PROPERTY_VALIDATORS = {
 }
 
 
-def validate_caa_record(tag: int, name: str, value: str):
-    validate_tag(tag)
+def validate_caa_record(flags: int, tag: str, value: str) -> None:
+    """
+    Validate a CAA record.
+    Returns None if the record is valid, raises CAAParseError when invalid.
+    """
+    validate_flags(flags)
     try:
-        validator = CAA_PROPERTY_VALIDATORS[name.lower()]
+        validator = CAA_PROPERTY_VALIDATORS[tag.lower()]
         if validator is None:
-            raise CAAParseError(msg_id="invalid_reserved_property", context={"value": name})
+            raise CAAParseError(msg_id="invalid_reserved_property", context={"value": tag})
         validator(value)
     except ParseError as e:
         raise CAAParseError(
             msg_id="invalid_property_syntax",
             context={
-                "property_name": name,
+                "property_name": tag,
                 "property_value": value,
                 "invalid_character_position": e.start,
                 "invalid_character": value[e.start],
             },
         )
     except KeyError:
-        raise CAAParseError(msg_id="invalid_unknown_property", context={"value": name})
+        raise CAAParseError(msg_id="invalid_unknown_property", context={"value": tag})

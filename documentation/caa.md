@@ -1,6 +1,6 @@
 # CAA check
 
-The CAA test looks for the existence and validity of a CAA record. This is
+The CAA test looks for the existence and validity of CAA records. This is
 done on the test target domain for web, and each mail server name for mail.
 
 It is part of the TLS certificate tests.
