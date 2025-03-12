@@ -735,6 +735,25 @@ components:
           items:
             type: string
 
+        caa_enabled:
+          type: bool
+          description: Whether CAA records were found.
+          items:
+            type: string
+        caa_errors:
+          type: array
+          description: Errors found in the parsing and evaluation of the CAA records.
+          items:
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
+        caa_recommendations:
+          type: array
+          description: Recommendations found in the parsing and evaluation of the CAA records.
+          items:
+            $ref: '#/components/schemas/TechnicalMessagesWithContext'
+        caa_found_on_domain:
+          type: string
+          description: Domain name under which the CAA record was found.
+
         dane_status:
           type: string
           enumClass: DaneStatus

@@ -1,5 +1,5 @@
 import enum
-from typing import Optional
+from typing import Optional, Iterable
 
 import dns
 from django.conf import settings
@@ -9,9 +9,8 @@ from dns.flags import Flag, EDNSFlag
 from dns.message import Message, make_query
 from dns.query import udp_with_fallback
 from dns.rdatatype import RdataType
-from dns.rdtypes.ANY import TLSA
-from dns.resolver import Resolver
-
+from dns.rdtypes.ANY import TLSA, CAA
+from dns.resolver import Resolver, NXDOMAIN, NoAnswer
 
 DNS_TIMEOUT = 5
 
@@ -82,6 +81,21 @@ def dns_resolve_soa(qname: str, allow_bogus=True, raise_on_no_answer=True) -> DN
     return dnssec_status
 
 
+def dns_resolve_caa(qname: str) -> tuple[str, Iterable[CAA.CAA]]:
+    """
+    Resolve CAA for a domain, including tree climbing per RFC8659 3.
+    Returns the canonical name and the CAA records.
+    """
+    while True:
+        try:
+            answer = _get_resolver().resolve(dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True)
+            return str(answer.canonical_name), answer.rrset
+        except (NoAnswer, NXDOMAIN):
+            qname = dns_climb_tree(qname)
+            if qname is None:
+                raise NoAnswer()
+
+
 def dns_resolve_reverse(ipaddr: str) -> list[str]:
     answer = _get_resolver().resolve_address(ipaddr)
     return [rr.to_text() for rr in answer.rrset]
@@ -102,6 +116,13 @@ def dns_resolve(qname: str, rr_type: RdataType, allow_bogus=True, raise_on_no_an
     if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
         raise ValidationFailure()
     return answer.rrset, dnssec_status
+
+
+def dns_climb_tree(qname: str) -> Optional[str]:
+    parent = dns.name.from_text(qname).parent()
+    if parent == dns.name.root:
+        return None
+    return parent.to_text()
 
 
 _resolver = None
