@@ -6,6 +6,8 @@ _Compared to the latest 1.9 release._
 
 ### Feature changes
 
+- A test for CAA records was added for web and mail tests. This checks for the presence of one or more correctly
+  formatted CAA records, of which one must have an `issue` tag. This test is not required, i.e. does not affect scoring.
 - The [sectxt](https://github.com/DigitalTrustCenter/sectxt) library, used for validating security.txt files, was updated from 0.9.4 to 0.9.6.
   This includes:
   - A new error if a PGP signed message ends with more than one newline, named `too_many_line_separators` ([sectxt/#78](https://github.com/DigitalTrustCenter/sectxt/issues/78)).
@@ -24,7 +26,10 @@ _Compared to the latest 1.9 release._
 - Periodic tests will only run when [specifically enabled](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-deployment.md#periodic-tests)
   with the CRON_15MIN_RUN_TESTS, TEST_DOMAINS_SITE and/or TEST_DOMAINS_MAIL settings.
 
-No changes to the API.
+### API changes
+
+- The API version was updated to version 2.5.0.
+- The fields `caa_enabled`, `caa_errors`, `caa_recommendations` and `caa_found_on_domain` have been added.
 
 ## 1.9.2
 
