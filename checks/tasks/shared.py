@@ -4,6 +4,7 @@ import binascii
 import re
 import socket
 from collections import defaultdict
+from dataclasses import dataclass, field
 
 from celery import shared_task
 from django.conf import settings
@@ -29,7 +30,8 @@ from interface import batch_shared_task
 
 MAX_MAILSERVERS = 10
 MX_LOCALHOST_RE = re.compile(r"^localhost\.?$")
-
+EMAIL_RE = re.compile(r"^[^@]+@[^@]+$")
+EMAIL_MAX_LEN = 254
 
 root_fingerprints = None
 with open(settings.CA_FINGERPRINTS) as f:
@@ -327,7 +329,13 @@ def aggregate_subreports(subreports, report):
                     report[test_item]["tech_type"] = tech_type
 
                 subtechdata = subreport[test_item]["tech_data"]
-                if subreport[test_item]["tech_type"] == "table_multi_col" and isinstance(subtechdata, list):
+                # This is a small hack to allow running CAA along with all other tests in web,
+                # i.e. once per webserver IP, while it only applies once per target domain.
+                # Therefore, the tech table is flattened to only include one result, and no server column.
+                if subreport[test_item]["name"] == "web_caa":
+                    report[test_item]["tech_data"] = [subtechdata]
+                    continue
+                elif subreport[test_item]["tech_type"] == "table_multi_col" and isinstance(subtechdata, list):
                     # Enable more columns in the aggregated tech table.
                     data = (server, *subtechdata)
                 else:
@@ -337,3 +345,36 @@ def aggregate_subreports(subreports, report):
     else:
         for test_name, test_item in report.items():
             test_item["tech_type"] = ""
+
+
+@dataclass
+class TranslatableTechTableItem:
+    """
+    A representation of a message in a tech table, with an ID
+    matching translations, and optional context variables.
+
+    At time of introduction, this is small scope, but it is intended
+    to be slowly used more widely to reduce typing ambiguity.
+    """
+
+    msgid: str
+    context: dict[str, str] = field(default_factory=dict)
+
+    def __repr__(self):
+        return f"TTTI({self.msgid}, {self.context})"
+
+    def to_dict(self):
+        return {"msgid": self.msgid, "context": self.context}
+
+
+def validate_email(email: str) -> bool:
+    """
+    Validate an email address, based on max length and an RE.
+    Goal is to detect cases that definitely are not an email address,
+    while not rejecting obscure syntax options. Hence, simplicity.
+    """
+    if len(email) > EMAIL_MAX_LEN:
+        return False
+    if EMAIL_RE.match(email):
+        return True
+    return False

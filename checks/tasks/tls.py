@@ -37,6 +37,7 @@ from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from checks import categories, scoring
+from checks.caa.retrieval import retrieve_parse_caa
 from checks.http_client import http_get_ip
 from checks.models import (
     CipherOrderStatus,
@@ -66,6 +67,7 @@ from checks.tasks.shared import (
     resolve_a_aaaa,
     resolve_dane,
     results_per_domain,
+    TranslatableTechTableItem,
 )
 from checks.tasks.tls_connection import (
     MAX_REDIRECT_DEPTH,
@@ -652,6 +654,11 @@ def save_results(model, results, addr, domain, category):
                 model.cert_signature_score = result.get("sigalg_score")
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
+                model.caa_enabled = result.get("caa_result").caa_found
+                model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
+                model.caa_score = result.get("caa_result").score
+                model.caa_found_on_domain = result.get("caa_result").canonical_name
                 model.dane_log = result.get("dane_log")
                 model.dane_score = result.get("dane_score")
                 model.dane_status = result.get("dane_status")
@@ -720,6 +727,11 @@ def save_results(model, results, addr, domain, category):
                     model.cert_signature_score = result.get("sigalg_score")
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
+                    model.caa_enabled = result.get("caa_result").caa_found
+                    model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                    model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
+                    model.caa_score = result.get("caa_result").score
+                    model.caa_found_on_domain = result.get("caa_result").canonical_name
                     model.dane_log = result.get("dane_log")
                     model.dane_score = result.get("dane_score")
                     model.dane_status = result.get("dane_status")
@@ -877,6 +889,22 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
+                if dttls.caa_enabled:
+                    caa_host_message = [
+                        TranslatableTechTableItem(
+                            msgid="found_host", context={"host": dttls.caa_found_on_domain}
+                        ).to_dict()
+                    ]
+                else:
+                    caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+                caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+                if not dttls.caa_enabled or dttls.caa_errors:
+                    category.subtests["web_caa"].result_bad(caa_tech_table)
+                elif dttls.caa_recommendations:
+                    category.subtests["web_caa"].result_recommendations(caa_tech_table)
+                else:
+                    category.subtests["web_caa"].result_good(caa_tech_table)
+
             if dttls.dane_status == DaneStatus.none:
                 category.subtests["dane_exists"].result_bad()
             elif dttls.dane_status == DaneStatus.none_bogus:
@@ -1032,6 +1060,20 @@ def build_report(dttls, category):
                         category.subtests["cert_hostmatch"].result_bad(dttls.cert_hostmatch_bad)
                 else:
                     category.subtests["cert_hostmatch"].result_good()
+
+            if dttls.caa_enabled:
+                caa_host_message = [
+                    TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
+                ]
+            else:
+                caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+            caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+            if not dttls.caa_enabled or dttls.caa_errors:
+                category.subtests["mail_caa"].result_bad(caa_tech_table)
+            elif dttls.caa_recommendations:
+                category.subtests["mail_caa"].result_recommendations(caa_tech_table)
+            else:
+                category.subtests["mail_caa"].result_good(caa_tech_table)
 
             if dttls.dane_status == DaneStatus.none:
                 category.subtests["dane_exists"].result_bad()
@@ -1689,6 +1731,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
         pubkey_score, pubkey_bad, pubkey_phase_out = debug_chain.check_pubkey()
         sigalg_score, sigalg_bad = debug_chain.check_sigalg()
         chain_str = debug_chain.chain_str()
+        caa_result = retrieve_parse_caa(url)
 
         if starttls_details:
             dane_results = debug_chain.check_dane(url, conn_port, task, dane_cb_data=starttls_details.dane_cb_data)
@@ -1707,6 +1750,7 @@ def cert_checks(url, mode, task, af_ip_pair=None, starttls_details=None, *args, 
             sigalg_score=sigalg_score,
             hostmatch_bad=hostmatch_bad,
             hostmatch_score=hostmatch_score,
+            caa_result=caa_result,
         )
         results.update(dane_results)
 
