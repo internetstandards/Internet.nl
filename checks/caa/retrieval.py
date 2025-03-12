@@ -30,7 +30,7 @@ class CAAEvaluation:
     def __post_init__(self, caa_records: Iterable[CAA]):
         caa_records = list(caa_records[:CAA_MAX_RECORDS]) if caa_records else []
         self.caa_records_str = [caa.to_text() for caa in caa_records]
-        self.cca_tags = {caa.tag.decode("ascii") for caa in caa_records}
+        self.caa_tags = {caa.tag.decode("ascii") for caa in caa_records}
 
         for caa in caa_records:
             try:
