@@ -6,12 +6,12 @@
 #
 asgiref==3.8.1
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   django
     #   django-browser-reload
 attrs==24.3.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest
 autoflake==2.0.1
     # via -r requirements-dev.in
@@ -21,24 +21,24 @@ build==0.10.0
     # via pip-tools
 certifi==2024.12.14
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   requests
 charset-normalizer==3.4.1
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   requests
 click==8.1.8
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   black
     #   pip-tools
 coverage[toml]==7.1.0
     # via
     #   -r requirements-dev.in
     #   pytest-cov
-django==4.2.18
+django==4.2.20
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   django-browser-reload
 django-browser-reload==1.18.0
     # via -r requirements-dev.in
@@ -48,11 +48,11 @@ freezegun==1.2.2
     # via -r requirements-dev.in
 idna==3.10
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   requests
 iniconfig==2.0.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest
 mccabe==0.7.0
     # via pylama
@@ -60,7 +60,7 @@ mypy-extensions==1.0.0
     # via black
 packaging==24.2
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   black
     #   build
     #   pytest
@@ -72,11 +72,11 @@ platformdirs==3.0.0
     # via black
 pluggy==1.5.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest
 py==1.11.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest
     #   pytest-html
 pycodestyle==2.10.0
@@ -93,7 +93,7 @@ pyproject-hooks==1.0.0
     # via build
 pytest==6.2.5
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   -r requirements-dev.in
     #   pytest-base-url
     #   pytest-cov
@@ -129,11 +129,11 @@ pytest-variables==1.9.0
     # via pytest-selenium
 python-dateutil==2.9.0.post0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   freezegun
 requests==2.31.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest-base-url
     #   pytest-selenium
     #   requests-mock
@@ -144,11 +144,11 @@ responses==0.22.0
     # via pytest-responses
 selenium==3.141.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest-selenium
 six==1.17.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   python-dateutil
     #   requests-mock
     #   tenacity
@@ -156,39 +156,40 @@ snowballstemmer==2.2.0
     # via pydocstyle
 sqlparse==0.5.3
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   django
 tenacity==6.3.1
     # via pytest-selenium
 toml==0.10.2
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pytest
     #   responses
 tomli==2.2.1
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   autoflake
     #   black
     #   build
     #   coverage
     #   pip-tools
+    #   pyproject-hooks
 types-toml==0.10.8.3
     # via responses
 typing-extensions==4.12.2
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   asgiref
     #   black
 urllib3==2.3.0
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   requests
     #   responses
     #   selenium
 wheel==0.45.1
     # via
-    #   -c /source/requirements.txt
+    #   -c requirements.txt
     #   pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
