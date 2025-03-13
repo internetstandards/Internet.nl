@@ -66,3 +66,6 @@ django-statsd-mozilla
 
 # let celery push metrics to statsd
 celery-statsd
+
+# for automatic css reload
+django-browser-reload

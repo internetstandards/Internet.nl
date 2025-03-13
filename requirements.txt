@@ -13,7 +13,9 @@ argparse==1.4.0
     #   -r requirements.in
     #   pythonwhois-internet-nl
 asgiref==3.8.1
-    # via django
+    # via
+    #   django
+    #   django-browser-reload
 async-timeout==5.0.1
     # via redis
 attrs==24.3.0
@@ -64,8 +66,11 @@ django==4.2.18
     # via
     #   -r requirements.in
     #   django-bleach
+    #   django-browser-reload
     #   django-redis
 django-bleach==3.1.0
+    # via -r requirements.in
+django-browser-reload==1.18.0
     # via -r requirements.in
 django-enumfields==2.1.1
     # via -r requirements.in

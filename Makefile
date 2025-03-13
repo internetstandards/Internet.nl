@@ -573,7 +573,7 @@ else
 docker_host = host-gateway
 endif
 
-DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml docker compose
+DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml RELEASE=latest docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
 
 # this runs limited live test suite against the development environment to test its sanity
 develop-tests development-environment-tests:
@@ -611,10 +611,6 @@ test-all:
 	$(MAKE) build
 	# run checks
 	$(MAKE) check
-	# run unittests
-	$(MAKE) up environment=test
-	$(MAKE) test
-	$(MAKE) down environment=test
 	# run development environment tests
 	$(MAKE) up environment=develop
 	$(MAKE) develop-tests
@@ -627,6 +623,9 @@ test-all:
 	$(MAKE) up environment=batch-test
 	$(MAKE) batch-tests
 	$(MAKE) down environment=batch-test
+	# run unittests
+	$(MAKE) test
+	$(MAKE) down environment=test
 
 DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/compose.tools.yaml docker compose
 

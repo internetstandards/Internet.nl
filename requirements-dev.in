@@ -23,6 +23,3 @@ pylama
 
 # requirements management
 pip-tools
-
-# for automatic css reload
-django-browser-reload
