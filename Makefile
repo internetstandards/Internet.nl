@@ -655,10 +655,10 @@ linttest-shell:
 requirements: requirements.txt requirements-dev.txt
 
 requirements.txt: requirements.in
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile requirements.in
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile --resolver=backtracking requirements.in
 
 requirements-dev.txt: requirements-dev.in
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile requirements-dev.in
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile --resolver=backtracking requirements-dev.in
 
 integration-tests-debug:
 	${_env} pytest --setup-show -v --capture=no integration-tests ${test_args}
