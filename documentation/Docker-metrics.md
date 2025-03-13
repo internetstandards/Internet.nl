@@ -27,3 +27,7 @@ The Grafana service is used because Prometheus does not include curl. The URL's 
 **notice**: Please note that Grafana (and the rest of the monitoring containers) are not connected to the public interface and don't have internet access. So adding Dashboards via "Import via grafana.com" does not work. Dashboard from grafana.com can be imported using the JSON model.
 
 Dashboard can be manually created through the Grafana web interface and can be saved there. Existing Dashboard cannot be modified this way as they are provisioned from the Docker image. Either duplicate the Dashboard with your own modifications or export the Dashboard JSON Model and update the files at: https://github.com/internetstandards/Internet.nl/tree/docker/docker/monitoring/grafana/dashboards
+
+## Retention time
+
+By default metrics are retained for 5 years. This can be changed by settings the `PROMETHEUS_RETENTION_TIME` in the `docker/local.env` file. Optionally you can also set the `PROMETHEUS_RETENTION_SIZE` to limit the disk space used.
