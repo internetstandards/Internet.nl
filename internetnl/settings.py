@@ -24,7 +24,9 @@ from internetnl.settings_utils import (
 )
 from setuptools_scm import get_version
 from django.core.management.utils import get_random_secret_key
+import logging
 
+log = logging.getLogger(__name__)
 
 # Infrastructure
 # # Generic / Django Framework
@@ -634,6 +636,14 @@ if getenv("SENTRY_DSN"):
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
 STATSD_HOST = os.environ.get("STATSD_HOST", "127.0.0.1")
+try:
+    # try and resolv the statsd host here, because the statsd module will try to
+    # connect to resolve is during import and will fail cryptically if it can't.
+    socket.gethostbyname(STATSD_HOST)
+except socket.gaierror:
+    log.exception("Failed to resolve statsd host, disabling statsd metrics collection.")
+    # set to localhost so import of statsd client does not fail
+    STATSD_HOST = "127.0.0.1"
 STATSD_PORT = os.environ.get("STATSD_PORT", "8125")
 # add tag support via statshog
 STATSD_TELEGRAF = True
