@@ -160,8 +160,7 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/mock.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 

@@ -63,8 +63,7 @@ services:
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -163,8 +162,7 @@ services:
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -310,8 +308,7 @@ services:
     healthcheck:
       test: ["CMD", "/bin/sh", "-c", "celery --app=internetnl inspect ping --destination=celery@$(hostname)"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -413,8 +410,7 @@ services:
     healthcheck:
       test: ["CMD", "pgrep", "-f", "celery"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -438,8 +434,7 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
     volumes:
@@ -469,8 +464,7 @@ services:
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "--quiet", "check_running"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       # rabbitmq can initially take a long time to start
       start_period: 5m
       retries: 10
@@ -498,8 +492,7 @@ services:
     healthcheck:
       test: pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
     volumes:
@@ -530,8 +523,7 @@ services:
       # needs refactoring like splitting up the api and sync parts
       # test: wget -q -O/dev/null http://127.0.0.1:9556/api/v1/status
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       # routinator has to rsync a lot of data initally which can take a long time
       start_period: 30m
       retries: 10
@@ -578,8 +570,7 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -611,8 +602,7 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -666,8 +656,7 @@ services:
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
