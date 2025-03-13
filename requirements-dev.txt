@@ -4,11 +4,6 @@
 #
 #    pip-compile requirements-dev.in
 #
-asgiref==3.8.1
-    # via
-    #   -c /source/requirements.txt
-    #   django
-    #   django-browser-reload
 attrs==24.3.0
     # via
     #   -c /source/requirements.txt
@@ -36,12 +31,6 @@ coverage[toml]==7.1.0
     # via
     #   -r requirements-dev.in
     #   pytest-cov
-django==4.2.18
-    # via
-    #   -c /source/requirements.txt
-    #   django-browser-reload
-django-browser-reload==1.18.0
-    # via -r requirements-dev.in
 django-coverage==1.2.4
     # via -r requirements-dev.in
 freezegun==1.2.2
@@ -154,10 +143,6 @@ six==1.17.0
     #   tenacity
 snowballstemmer==2.2.0
     # via pydocstyle
-sqlparse==0.5.3
-    # via
-    #   -c /source/requirements.txt
-    #   django
 tenacity==6.3.1
     # via pytest-selenium
 toml==0.10.2
@@ -178,7 +163,6 @@ types-toml==0.10.8.3
 typing-extensions==4.12.2
     # via
     #   -c /source/requirements.txt
-    #   asgiref
     #   black
 urllib3==2.3.0
     # via
