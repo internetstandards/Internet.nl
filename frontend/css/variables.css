@@ -82,6 +82,7 @@
   --card-header-5: var(--heading-font-xxs);
   --card-body-1: var(--body-font-xxs);
   --card-body-2: var(--body-font-xxs);
+  --card-body-3: var(--body-font-xs);
   --card-input-1: var(--body-font-s);
 
   /* ACCORDION FONTS MOBILE */
@@ -122,6 +123,7 @@
     --card-header-5: var(--heading-font-xxs);
     --card-body-1: var(--body-font-xs);
     --card-body-2: var(--body-font-xxs);
+    --card-body-3: var(--body-font-xs);
     --card-input-1: var(--body-font-s);
 
     /* ACCORDION FONTS DESKTOP */
@@ -166,8 +168,10 @@
 
     /* BUTTON COLORS LIGHTMODE */
     --button-bg-color-1: var(--orange-300);
+    --button-bg-color-hover-1: var(--orange-200);
     --button-text-color-1: var(--black-200);
     --button-bg-color-2: var(--transparent-100);
+    --button-bg-color-hover-2: var(--green-400);
     --button-text-color-2: var(--green-500);
     --button-bg-color-3: var(--green-500);
     --button-text-color-3: var(--white-100);
@@ -250,8 +254,10 @@
 
     /* BUTTON COLORS DARKMODE */
     --button-bg-color-1: var(--orange-300);
+    --button-bg-color-hover-1: var(--orange-200);
     --button-text-color-1: var(--black-200);
     --button-bg-color-2: var(--transparent-100);
+    --button-bg-color-hover-2: var(--green-400);
     --button-text-color-2: var(--white-100);
     --button-bg-color-3: var(--black-200);
     --button-text-color-3: var(--white-100);
@@ -278,7 +284,7 @@
     --card-body-color-4: var(--white-100);
     
     /* ELLIPSES DARKMODE */
-    --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+    --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
     --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
     --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
 
@@ -333,8 +339,10 @@
 
   /* BUTTON COLORS LIGHTMODE */
   --button-bg-color-1: var(--orange-300);
+  --button-bg-color-hover-1: var(--orange-200);
   --button-text-color-1: var(--black-200);
   --button-bg-color-2: var(--transparent-100);
+  --button-bg-color-hover-2: var(--green-400);
   --button-text-color-2: var(--green-500);
   --button-bg-color-3: var(--green-500);
   --button-text-color-3: var(--white-100);
@@ -379,7 +387,7 @@
 
   /* IMAGE VISIBILITY LIGHTMODE */
   --image-visible: block;
-  --image-hidden: hidden;
+  --image-hidden: none;
 }
 
 [data-theme="dark"] {
@@ -415,8 +423,10 @@
 
   /* BUTTON COLORS DARKMODE */
   --button-bg-color-1: var(--orange-300);
+  --button-bg-color-hover-1: var(--orange-200);
   --button-text-color-1: var(--black-200);
   --button-bg-color-2: var(--transparent-100);
+  --button-bg-color-hover-2: var(--green-400);
   --button-text-color-2: var(--white-100);
   --button-bg-color-3: var(--black-200);
   --button-text-color-3: var(--white-100);
@@ -443,7 +453,7 @@
   --card-body-color-4: var(--white-100);
   
   /* ELLIPSES DARKMODE */
-  --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+  --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
   --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
 
@@ -453,7 +463,7 @@
   --logo-color-3: var(--white-100);
   --logo-color-4: var(--white-100);
   --logo-color-5: var(--green-500);
-
+  
   /* ACCORDION COLORS DARKMODE */
   --accordion-bg-color: var(--black-200);
   --accordion-heading-color: var(--white-100);
