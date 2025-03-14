@@ -21,8 +21,6 @@ services:
 
     environment:
       - INTERNETNL_DOMAINNAME
-      - IPV4_IP_WEBSERVER_INTERNAL
-      - IPV4_IP_RABBITMQ_INTERNAL
 
   # test runner for integration tests in isolated environment
   test-runner:
@@ -137,6 +135,27 @@ services:
 
     environment:
       MH_SMTP_BIND_ADDR: 0.0.0.0:25
+
+  static:
+    image: nginx:1.27.3-alpine
+
+    restart: unless-stopped
+
+    ports:
+      - 80
+      - 443
+
+    networks:
+      public-internet:
+
+    volumes:
+      - ./integration-tests/nginx_templates/static.conf.template:/etc/nginx/templates/static.conf.template
+      - ./integration-tests/www:/var/www/
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
 
   # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
   mock-resolver:
