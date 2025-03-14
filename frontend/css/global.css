@@ -63,6 +63,21 @@ body {
   background-color: var(--primary-bg-color);
 }
 
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+
+  @media (min-width: 900px) {
+    gap: 80px;
+  }
+}
+
+section {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
 ul {
   list-style: none;
 }
