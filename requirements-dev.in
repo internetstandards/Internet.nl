@@ -22,7 +22,5 @@ black
 pylama
 
 # requirements management
-pip-tools
-
-# for automatic css reload
-django-browser-reload
+pip-tools>7
+uv

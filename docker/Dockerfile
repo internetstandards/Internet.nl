@@ -33,6 +33,8 @@ RUN apt update && \
       flex \
       bison
 
+RUN pip3 install uv
+
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
 
@@ -67,7 +69,9 @@ COPY requirements.txt /src/
 
 WORKDIR /src
 
-RUN pip3 install -r requirements.txt
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system -r requirements.txt
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps
@@ -75,7 +79,9 @@ ARG PYTHON_VERSION
 
 COPY requirements-dev.txt /src/
 
-RUN pip3 install -r requirements-dev.txt
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system -r requirements-dev.txt
 
 # build unbound target
 FROM debian:bullseye-20241111-slim AS unbound
@@ -219,21 +225,13 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
-# app image with development tools for better live reloading
-FROM app AS app-dev
-
-# required for compose `develop` mode file sync/copy
-USER root
-
-# browser reload
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
-
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest
 ARG PYTHON_VERSION
 
 USER root
 
+# install additional development dependencies
 RUN apt update && \
     apt install --no-install-recommends -yqq \
     git \
