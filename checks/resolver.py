@@ -11,6 +11,7 @@ from dns.query import udp_with_fallback
 from dns.rdatatype import RdataType
 from dns.rdtypes.ANY import TLSA, CAA
 from dns.resolver import Resolver, NXDOMAIN, NoAnswer
+import socket
 
 DNS_TIMEOUT = 5
 
@@ -138,7 +139,7 @@ def _get_resolver():
 
 def _create_resolver() -> Resolver:
     resolver = Resolver(configure=False)
-    resolver.nameservers = [settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING]
+    resolver.nameservers = [socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)]
     resolver.edns = True
     resolver.flags = Flag.CD
     resolver.ednsflags = EDNSFlag.DO

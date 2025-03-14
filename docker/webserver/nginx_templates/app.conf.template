@@ -24,6 +24,12 @@ proxy_cache_path  /var/tmp/nginx_cache  levels=1:2  keys_zone=default_cache:10m 
 
 include http.headers;
 
+# resolve proxy_pass hostnames using Docker resolver, use only IPv4 for simplicity
+# cache is set to 5s, this reduces the amount of DNS queries
+# ideally we would not cache at all as any time a container (eg: app) is restarted it's
+# IP address might change causing proxy requests to fail
+resolver 127.0.0.11 ipv6=off valid=5s;
+
 root /var/www/internet.nl;
 
 # enable OSCP stapling
@@ -79,7 +85,9 @@ server {
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
 
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
     }
 
     # letsencrypt/ACME
@@ -116,7 +124,9 @@ server {
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
 
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
     }
 }
 
@@ -168,7 +178,9 @@ server {
 
         proxy_set_header REMOTE-USER $remote_user;
         include /etc/nginx/conf.d/basic_auth.include;
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
     }
 
     # disable buffering on event stream for CSS development
@@ -182,7 +194,9 @@ server {
         # same as / above, but only with things required in development
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
         # disable buffering for streaming response
         proxy_buffering off;
     }
@@ -202,7 +216,9 @@ server {
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
     }
 
     # disable security.txt if branding is disabled
@@ -245,7 +261,9 @@ server {
 
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
     }
 
     # redirect connection test to http subdomain to start test, needs 301 permanent
@@ -268,7 +286,9 @@ server {
         # pass host for Django's allowed_hosts
         proxy_set_header Host $host;
 
-        proxy_pass http://${IPV4_IP_APP_INTERNAL}:8080;
+        # set proxy_pass argument for 'app' container as variable, this way nginx doesn't fail when 'app' is unresolvable at startup
+        set $app http://app:8080;
+        proxy_pass $app;
     }
 
     # monitoring, requires authentication, override headers, since CSP is too strict
@@ -277,21 +297,27 @@ server {
         include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
         auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
-        proxy_pass http://${IPV4_IP_GRAFANA_INTERNAL}:3000;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $grafana http://grafana:3000;
+        proxy_pass $grafana;
     }
     location /prometheus {
         include http.headers;
         include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
         auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
-        proxy_pass http://${IPV4_IP_PROMETHEUS_INTERNAL}:9090;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $prometheus http://prometheus:9090;
+        proxy_pass $prometheus;
     }
     location /alertmanager {
         include http.headers;
         include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
         auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
-        proxy_pass http://${IPV4_IP_ALERTMANAGER_INTERNAL}:9093;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $alertmanager http://alertmanager:9093;
+        proxy_pass $alertmanager;
     }
 }
 

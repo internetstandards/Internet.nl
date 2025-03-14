@@ -26,11 +26,10 @@ DEFAULT_TEST_TIMEOUT = 200
 TEST_TIMEOUT = int(os.environ.get("INTERNETNL_CACHE_TTL", DEFAULT_TEST_TIMEOUT))
 REQUEST_TIMEOUT = 30
 
-IPV4_IP_APP_INTERNAL = os.environ.get("IPV4_IP_APP_INTERNAL")
 INTERNETNL_DOMAINNAME = os.environ.get("INTERNETNL_DOMAINNAME")
 # talk directly to the internal app container as the webserver might
 # have access restrictions in place
-URL_BASE = f"http://{IPV4_IP_APP_INTERNAL}:8080"
+URL_BASE = "http://app:8080"
 HEADERS = {"Host": INTERNETNL_DOMAINNAME}
 
 TESTS = ["site", "mail"]
