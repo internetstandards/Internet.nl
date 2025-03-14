@@ -15,13 +15,20 @@
   <link rel="icon" href="{% static "favicon.png" %}" sizes="192x192" />
   <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
   <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" /> -->
-  <link rel="stylesheet" type="text/css" href="{% static 'css/print.css' %}" media="print" />
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style-min.css' %}" /> -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/print-min.css' %}" media="print" />
 
   <link rel="stylesheet" href="{% static 'css/global.css' %}" />
   <link rel="stylesheet" href="{% static 'css/variables.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
   <link rel="stylesheet" href="{% static 'css/header.css' %}" />
   <link rel="stylesheet" href="{% static 'css/footer.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/test-section.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/explanation-section.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/hall-of-fame-section.css' %}" /> 
+  <link rel="stylesheet" href="{% static 'css/about-section.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/news-section.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/faq-section.css' %}" />  
 
   <script src="{% static "js/jquery-3.5.1.min.js" %}"></script>
   <script type="text/javascript" src="{% static "js/headroom-min.js" %}"></script>
@@ -31,6 +38,7 @@
   <script type="text/javascript" src="{% static 'js/initial-min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/header-min.js' %}" defer></script>
   <script type="text/javascript" src="{% static 'js/language-switch-min.js' %}" defer></script>
+  <script type="text/javascript" src="{% static 'js/carrousel-min.js' %}" defer></script>
 
   {% block scripting %}
   {% endblock %}
@@ -207,16 +215,12 @@
     </div>
   </header>
 
+  <main id="main-content">
+    {% block introcontent %}
+    {% endblock %}
 
-  <main id="content" class="clearfix" tabindex="-1">
-    <div class="mainwrap">
-      {% block introcontent %}
-      {% endblock %}
-    </div>
-    <div class="wrap">
-      {% block maincontent %}
-      {% endblock %}
-    </div>
+    {% block maincontent %}
+    {% endblock %}
   </main>
 
   <footer>

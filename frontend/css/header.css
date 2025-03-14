@@ -18,7 +18,7 @@ header {
     gap: 16px;
 
     @media (width >= 900px) {
-      padding-block: 36px;
+      padding: 36px 16px;
     }
 
     &:has(.active) {
