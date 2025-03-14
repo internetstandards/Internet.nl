@@ -7,6 +7,7 @@ import ssl
 import time
 from urllib.parse import urlparse
 
+
 import requests
 from binascii import hexlify
 from enum import Enum
@@ -1226,6 +1227,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
         chain_pem.append(cert.as_pem())
     chain_txt = "\n".join(chain_pem)
     res = None
+    resolver = socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)
     with subprocess.Popen(
         [
             settings.LDNS_DANE,
@@ -1234,7 +1236,7 @@ def dane(url, port, chain, task, dane_cb_data, score_none, score_none_bogus, sco
             "-n",  # Do not validate hostname
             "-T",  # Exit status 2 for PKIX without (secure) TLSA records
             "-r",
-            settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING,  # Use internal unbound resolver
+            resolver,  # Use internal unbound resolver
             "-f",
             settings.CA_CERTIFICATES,  # CA file
             "verify",

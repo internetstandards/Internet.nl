@@ -49,14 +49,3 @@ server {
         root   /usr/share/nginx/html;
     }
 }
-
-# serve mock static files for integration test environment, eg: publicsuffix, manual hosters hof
-server {
-    listen       80;
-    listen  [::]:80;
-    server_name  static.test;
-
-    location /static/ {
-        alias /var/www/static/;
-    }
-}

@@ -16,5 +16,6 @@ good-ns1  AAAA fd00:43:1::114
 bad-ns1  AAAA fd00:90::1
 bad-ns2  AAAA fd00:90::2
 
+; IPV4_IP_TEST_TARGET_PUBLIC
 * A 172.43.0.51
   AAAA fd00:43:1::51

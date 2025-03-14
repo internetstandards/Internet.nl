@@ -9,12 +9,12 @@ server {
         proxy_ssl_name ${INTERNETNL_DOMAINNAME};
         proxy_ssl_server_name on;
         proxy_ssl_verify off;
-        proxy_pass https://$IPV4_IP_WEBSERVER_INTERNAL:443;
+        proxy_pass https://webserver:443;
     }
 
     location = /connection/ {
         proxy_set_header Host conn.${INTERNETNL_DOMAINNAME};
-        proxy_pass http://$IPV4_IP_WEBSERVER_INTERNAL/connection/;
+        proxy_pass http://webserver/connection/;
     }
 
     location /__reload__/events/ {
@@ -22,7 +22,7 @@ server {
         proxy_ssl_name ${INTERNETNL_DOMAINNAME};
         proxy_ssl_server_name on;
         proxy_ssl_verify off;
-        proxy_pass https://$IPV4_IP_WEBSERVER_INTERNAL:443;
+        proxy_pass https://webserver:443;
         proxy_buffering off;
     }
 }
@@ -33,6 +33,6 @@ server {
     server_name  _;
 
     location / {
-        proxy_pass http://$IPV4_IP_RABBITMQ_INTERNAL:15672;
+        proxy_pass http://rabbitmq:15672;
     }
 }
