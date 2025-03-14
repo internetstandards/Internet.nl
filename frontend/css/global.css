@@ -4,7 +4,7 @@
   font-family: Montserrat;
   font-style: normal;
   font-weight: 400;
-  src: url('/assets/fonts/montserrat-400.woff2') format('woff2');
+  src: url('/static/fonts/montserrat-400.woff2') format('woff2');
 }
 
 /* Montserrat-500 */
@@ -13,7 +13,7 @@
   font-family: Montserrat;
   font-style: normal;
   font-weight: 500;
-  src: url('/assets/fonts/montserrat-500.woff2') format('woff2');
+  src: url('/static/fonts/montserrat-500.woff2') format('woff2');
 }
 
 /* Montserrat-700 */
@@ -22,7 +22,7 @@
   font-family: Montserrat;
   font-style: normal;
   font-weight: 700;
-  src: url('/assets/fonts/montserrat-700.woff2') format('woff2');
+  src: url('/static/fonts/montserrat-700.woff2') format('woff2');
 }
 
 /* Roboto-400 */
@@ -31,7 +31,7 @@
   font-family: Roboto;
   font-style: normal;
   font-weight: 400;
-  src: url('/assets/fonts/roboto-400.woff2') format('woff2');
+  src: url('/static/fonts/roboto-400.woff2') format('woff2');
 }
 
 /* Roboto-500 */
@@ -40,7 +40,7 @@
   font-family: Roboto;
   font-style: normal;
   font-weight: 500;
-  src: url('/assets/fonts/roboto-500.woff2') format('woff2');
+  src: url('/static/fonts/roboto-500.woff2') format('woff2');
 }
 
 /* Roboto-700 */
@@ -49,7 +49,7 @@
   font-family: Roboto;
   font-style: normal;
   font-weight: 700;
-  src: url('/assets/fonts/roboto-700.woff2') format('woff2');
+  src: url('/static/fonts/roboto-700.woff2') format('woff2');
 }
 
 * {
@@ -60,7 +60,7 @@
 
 body {
   font-family: Montserrat, sans-serif;
-  background-color: var(--primary-bg-color);
+  background-color: var(--bg-color-1);
 }
 
 main {
@@ -68,14 +68,9 @@ main {
   flex-direction: column;
   gap: 40px;
 
-  @media (min-width: 900px) {
+  @media (width >= 900px) {
     gap: 80px;
   }
-}
-
-section {
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
 ul {
@@ -109,7 +104,7 @@ section > .container {
   left: -9999px;
   z-index: 999;
   padding: 16px;
-  background-color: #000;
+  background-color: var(--black-100);
   color: #FFF;
   opacity: 0;
 }
@@ -128,4 +123,13 @@ body:has(.nav-controls.active) {
   @media (scripting: enabled) and (width <= 900px) {
       overflow: clip;
   }
+}
+
+svg {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.block.wide {
+  display: none;
 }
