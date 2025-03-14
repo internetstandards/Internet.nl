@@ -22,4 +22,5 @@ black
 pylama
 
 # requirements management
-pip-tools
+pip-tools>7
+uv

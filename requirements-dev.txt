@@ -55,7 +55,7 @@ packaging==24.2
     #   pytest
 pathspec==0.11.0
     # via black
-pip-tools==6.14.0
+pip-tools==7.3.0
     # via -r requirements-dev.in
 platformdirs==3.0.0
     # via black
@@ -158,6 +158,7 @@ tomli==2.2.1
     #   build
     #   coverage
     #   pip-tools
+    #   pyproject-hooks
 types-toml==0.10.8.3
     # via responses
 typing-extensions==4.12.2
@@ -170,6 +171,8 @@ urllib3==2.3.0
     #   requests
     #   responses
     #   selenium
+uv==0.6.6
+    # via -r requirements-dev.in
 wheel==0.45.1
     # via
     #   -c /source/requirements.txt
