@@ -59,13 +59,13 @@
   --footer-bar-link: var(--button-link-font-xxs);
 
   /* SECTION FONTS MOBILE */
-  --page-title: var(--heading-font-m);
-  --section-header-1: var(--heading-font-s);
+  --section-header-1: var(--heading-font-m);
   --section-header-2: var(--heading-font-s);
-  --section-header-3: var(--heading-font-xs);
+  --section-header-3: var(--heading-font-s);
   --section-header-4: var(--heading-font-xs);
-  --section-header-5: var(--heading-font-xxs);
+  --section-header-5: var(--heading-font-xs);
   --section-header-6: var(--heading-font-xxs);
+  --section-header-7: var(--heading-font-xxs);
   --section-body-1: var(--body-font-xs);
   --section-body-2: var(--body-font-xxs);
   --section-body-3: var(--body-font-xxs);
@@ -100,13 +100,13 @@
     --footer-bar-link: var(--button-link-font-xs);
 
     /* SECTION FONTS DESKTOP */
-    --page-title: var(--heading-font-xl);
-    --section-header-1: var(--heading-font-l);
-    --section-header-2: var(--heading-font-m);
+    --section-header-1: var(--heading-font-xl);
+    --section-header-2: var(--heading-font-l);
     --section-header-3: var(--heading-font-m);
-    --section-header-4: var(--heading-font-s);
-    --section-header-5: var(--heading-font-m);
-    --section-header-6: var(--heading-font-xs);
+    --section-header-4: var(--heading-font-m);
+    --section-header-5: var(--heading-font-s);
+    --section-header-6: var(--heading-font-m);
+    --section-header-7: var(--heading-font-xs);
     --section-body-1: var(--body-font-s);
     --section-body-2: var(--body-font-s);
     --section-body-3: var(--body-font-xs);
@@ -139,16 +139,16 @@
     /* HEADER COLORS LIGHTMODE */
     --nav-bg-color: var(--white-100);
     --nav-text-color: var(--green-500);
-    --mobile-nav-bg-color: var(--green-200);
-    --mobile-nav-border: 0.5px solid var(--green-400);
-    --dropdown-bg-color: var(--green-200);
+    --nav-mobile-bg-color: var(--green-200);
+    --nav-mobile-border: 0.5px solid var(--green-400);
+    --nav-dropdown-bg-color: var(--green-200);
     --nav-sticky-border: 1.5px solid var(--green-400);
     --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
-    --lang-bg-color: var(--green-200);
-    --mobile-lang-bg-color: var(--white-100);
-    --mobile-lang-text-color: var(--green-500);
-    --theme-button-bg-color: var(--orange-500);
-    --theme-button-color: var(--white-100);
+    --nav-lang-bg-color: var(--green-200);
+    --nav-mobile-lang-bg-color: var(--white-100);
+    --nav-mobile-lang-text-color: var(--green-500);
+    --nav-theme-button-bg-color: var(--orange-500);
+    --nav-theme-button-color: var(--white-100);
 
     /* FOOTER COLORS LIGHTMODE */
     --footer-bg-color: var(--green-400);
@@ -201,6 +201,7 @@
     --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
     --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
     --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+    --ellipse-color-4: linear-gradient(135deg,var(--transparent-200),var(--white-100)) border-box;
 
     /* LOGO COLORS LIGHTMODE */
     --logo-color-1: var(--white-100);
@@ -225,16 +226,16 @@
     /* HEADER COLORS DARKMODE */
     --nav-bg-color: var(--black-200);
     --nav-text-color: var(--white-100);
-    --mobile-nav-bg-color: var(--green-600);
-    --mobile-nav-border: 0.5px solid var(--black-100);
-    --dropdown-bg-color: var(--green-600);
+    --nav-mobile-bg-color: var(--green-600);
+    --nav-mobile-border: 0.5px solid var(--black-100);
+    --nav-dropdown-bg-color: var(--green-600);
     --nav-sticky-border: 1.5px solid var(--green-400);
     --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
-    --lang-bg-color: var(--green-600);
-    --mobile-lang-bg-color: var(--white-100);
-    --mobile-lang-text-color: var(--green-500);
-    --theme-button-bg-color: var(--green-500);
-    --theme-button-color: var(--white-100);
+    --nav-lang-bg-color: var(--green-600);
+    --nav-mobile-lang-bg-color: var(--white-100);
+    --nav-mobile-lang-text-color: var(--green-500);
+    --nav-theme-button-bg-color: var(--green-500);
+    --nav-theme-button-color: var(--white-100);
 
     /* FOOTER COLORS DARKMODE */
     --footer-bg-color: var(--green-600);
@@ -287,6 +288,7 @@
     --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
     --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
     --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+    --ellipse-color-4: linear-gradient(45deg,var(--green-600),var(--green-500)) border-box;
 
     /* LOGO COLORS DARKMODE */
     --logo-color-1: var(--black-100);
@@ -310,16 +312,16 @@
   /* HEADER COLORS LIGHTMODE */
   --nav-bg-color: var(--white-100);
   --nav-text-color: var(--green-500);
-  --mobile-nav-bg-color: var(--green-200);
-  --mobile-nav-border: 0.5px solid var(--green-400);
-  --dropdown-bg-color: var(--green-200);
+  --nav-mobile-bg-color: var(--green-200);
+  --nav-mobile-border: 0.5px solid var(--green-400);
+  --nav-dropdown-bg-color: var(--green-200);
   --nav-sticky-border: 1.5px solid var(--green-400);
   --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
-  --lang-bg-color: var(--green-200);
-  --mobile-lang-bg-color: var(--white-100);
-  --mobile-lang-text-color: var(--green-500);
-  --theme-button-bg-color: var(--orange-500);
-  --theme-button-color: var(--white-100);
+  --nav-lang-bg-color: var(--green-200);
+  --nav-mobile-lang-bg-color: var(--white-100);
+  --nav-mobile-lang-text-color: var(--green-500);
+  --nav-theme-button-bg-color: var(--orange-500);
+  --nav-theme-button-color: var(--white-100);
 
   /* FOOTER COLORS LIGHTMODE */
   --footer-bg-color: var(--green-400);
@@ -372,6 +374,7 @@
   --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
   --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+  --ellipse-color-4: linear-gradient(45deg,var(--transparent-200),var(--white-100)) border-box;
 
   /* LOGO COLORS LIGHTMODE */
   --logo-color-1: var(--white-100);
@@ -394,16 +397,16 @@
   /* HEADER COLORS DARKMODE */
   --nav-bg-color: var(--black-200);
   --nav-text-color: var(--white-100);
-  --mobile-nav-bg-color: var(--green-600);
-  --mobile-nav-border: 0.5px solid var(--black-100);
-  --dropdown-bg-color: var(--green-600);
+  --nav-mobile-bg-color: var(--green-600);
+  --nav-mobile-border: 0.5px solid var(--black-100);
+  --nav-dropdown-bg-color: var(--green-600);
   --nav-sticky-border: 1.5px solid var(--green-400);
   --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
-  --lang-bg-color: var(--green-600);
-  --mobile-lang-bg-color: var(--white-100);
-  --mobile-lang-text-color: var(--green-500);
-  --theme-button-bg-color: var(--green-500);
-  --theme-button-color: var(--white-100);
+  --nav-lang-bg-color: var(--green-600);
+  --nav-mobile-lang-bg-color: var(--white-100);
+  --nav-mobile-lang-text-color: var(--green-500);
+  --nav-theme-button-bg-color: var(--green-500);
+  --nav-theme-button-color: var(--white-100);
 
   /* FOOTER COLORS DARKMODE */
   --footer-bg-color: var(--green-600);
@@ -456,6 +459,7 @@
   --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
   --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+  --ellipse-color-4: linear-gradient(45deg,var(--green-600),var(--green-500)) border-box;
 
   /* LOGO COLORS DARKMODE */
   --logo-color-1: var(--black-100);
