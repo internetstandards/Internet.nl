@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% load translate %}
+<html lang="{{request.current_language_code}}" >
+
+<head>
+  <meta charset="utf-8">
+  <title>{{pagetitle}}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="description" content="{{_("page metadescription")}}">
+  <meta name="keywords" content="{{_("page metakeywords")}}">
+  <meta name="author" content="Platform Internetstandaarden / Internet Standards Platform">
+  <link rel="icon" href="{% static "favicon.png" %}" sizes="32x32" />
+  <link rel="icon" href="{% static "favicon.png" %}" sizes="192x192" />
+  <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
+  <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style-min.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/print-min.css' %}" media="print" />
+
+  <script src="{% static "js/jquery-3.5.1.min.js" %}"></script>
+
+  <script src="{% static 'js/imagecheck-min.js' %}" type="text/javascript" defer></script>
+  <script type="text/javascript" src="{% static "js/headroom-min.js" %}"></script>
+  <script type="text/javascript" src="{% static "js/functions-min.js" %}"></script>
+  {% block scripting %}
+  {% endblock %}
+</head>
+<body class="{{pageclass}}">
+  <div class="hidethis" aria-hidden="true">
+    <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
+    <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
+    <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
+  </div>
+  <div class="skiplink"><a href="#content">{% include "string.html" with name='page gotocontents' %}</a></div>
+  <div class="skiplink" id="skiplink-sitenav"><a href="#sitenav">{% include "string.html" with name='page gotomainmenu' %}</a></div>
+  <div class="skiplink"><a href="#footer">{% include "string.html" with name='page gotofooter' %}</a></div>
+  <header>
+    <div class="wrap">
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
+      <div id="masthead">
+        <p id="site-title"><a href="/"><span class="hidden">{% include "string.html" with name='page sitetitle' %}</span></a></p>
+        <p id="site-description"><span class="hidden">{% include "string.html" with name='page sitedescription' %}</span></p>
+      </div>
+      {% endif %}
+
+      <!-- language switch -->
+      <div id="language-switch-header-container">
+        <ul class="language-switch-list">
+
+      {% with user_language=request.current_language_code %}
+        {% for language in LANGUAGES %}
+        {% get_language_info for language.0 as lang %}
+          <li>
+          {% if language.0 == user_language %}
+            <button class="active-language" disabled>{{lang.name_local}}</button>
+          {% else %}
+            <form action="/change_language/" method="post">
+              <input type="hidden" name="previous-page" value="{{request.path}}"/>
+              <input type="hidden" name="language" value="{{language.0}}"/>
+              <button>{{lang.name_local}}</button>
+            </form>
+          {% endif %}
+          </li>
+        {% endfor %}
+      {% endwith %}
+
+        </ul>
+      </div>
+
+      <nav id="sitenav">
+        <ul>
+          <li class="{% if pagemenu == 'home' %}current{% endif %}"><a href="/">{% include "string.html" with name="base home" %}</a></li>
+          <li class="{% if pagemenu == 'news' %}current{% endif %}"><a href="/news/">{% include "string.html" with name="base news" %}</a></li>
+          <li class="{% if pagemenu == 'faqs' %}current{% endif %}"><a href="/faqs/">{% include "string.html" with name="base faqs" %}</a></li>
+          <li class="{% if pagemenu == 'halloffame' %}current{% endif %}"><a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a></li>
+          {% if "INTERNETNL_BRANDING"|get_settings_value %}
+          <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about" %}</a></li>
+          {% else %}
+          <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about custom" %}</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" class="clearfix" tabindex="-1">
+    <div class="mainwrap">
+      {% block introcontent %}
+      {% endblock %}
+    </div>
+    <div class="wrap">
+      {% block maincontent %}
+      {% endblock %}
+    </div>
+  </main>
+
+  <footer id="footer">
+    <img id="flag" src="{% static "clear.gif" %}" alt="">
+    <div class="wrap">
+      {% if "INTERNETNL_BRANDING"|get_settings_value %}
+      {% include "string.html" with name="base info" %}
+      {% else %}
+      {% include "string.html" with name="base info custom" %}
+      {% endif %}
+      <div class="version">v{{ "VERSION"|get_settings_value }}</div>
+      <hr>
+      <ul>
+        <li><a class="footlink" href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a></li>
+        <li><a class="footlink" href="/privacy/">{% include "string.html" with name="base privacy" %}</a></li>
+        <li><a class="footlink" href="/copyright/">{% include "string.html" with name="base copyright" %}</a></li>
+        {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
+        <li><a class="footlink" href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a></li>
+        {% endif %}
+        {% if "INTERNETNL_BRANDING"|get_settings_value %}
+        <li class="follow-us"><a class="footlink linkedinfollow" href="https://www.linkedin.com/company/internet-nl/">LinkedIn</a></li>
+        <li class="follow-us"><a class="footlink mastodonfollow" href="https://mastodon.nl/@internet_nl" rel="me">Mastodon</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </footer>
+  <script type="text/javascript" src="{% static "js/menu-min.js" %}" defer></script>
+  <script type="text/javascript" src="{% static "js/accordion-min.js" %}" defer></script>
+  <script type="text/javascript" src="{% static "js/matomo-min.js" %}"></script>
+</body>
+</html>
