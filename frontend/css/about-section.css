@@ -1,8 +1,6 @@
 .about-section {
   h2 {
     grid-column: span 12;
-    font: var(--section-header-6);
-    color: var(--heading-color-2);
     padding-bottom: 8px;
 
     @media (width >= 900px) {
@@ -12,16 +10,12 @@
 
   p {
     grid-column: span 12;
-    color: var(--heading-color-3);
-    font: var(--section-header-3);
 
     @media (width >= 900px) {
       grid-column: 1 / 7;
     }
 
     &:nth-of-type(2) {
-      font: var(--section-body-1);
-      color: var(--body-color-2);
       padding-top: 16px;
 
       @media (width >= 900px) {

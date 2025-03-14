@@ -52,7 +52,9 @@
   src: url('/static/fonts/roboto-700.woff2') format('woff2');
 }
 
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -61,6 +63,7 @@
 body {
   font-family: Montserrat, sans-serif;
   background-color: var(--bg-color-1);
+  interpolate-size: allow-keywords;
 }
 
 main {
@@ -121,7 +124,117 @@ body:has(.nav-controls.active) .skip-link {
 
 body:has(.nav-controls.active) {
   @media (scripting: enabled) and (width <= 900px) {
-      overflow: clip;
+    overflow: clip;
+  }
+}
+
+svg {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.block.wide {
+  display: none;
+}
+
+section:has(.ellipse-container) {
+  overflow: clip;
+
+  .container {
+    z-index: 0;
+    position: relative;
+  }
+}
+
+.heading-accent-color {
+  color: var(--heading-color-2);
+}
+
+.section-header-1 {
+  font: var(--section-header-1);
+
+  &.color-1 {
+    color: var(--heading-color-1);
+  }
+
+  &.color-2 {
+    color: var(--heading-color-3);
+  }
+}
+
+.section-header-2 {
+  font: var(--section-header-2);
+
+  &.color-1 {
+    color: var(--heading-color-1);
+  }
+
+  &.color-2 {
+    color: var(--heading-color-3);
+  }
+}
+
+.section-header-3 {
+  font: var(--section-header-3);
+  color: var(--heading-color-1);
+}
+
+.section-header-4 {
+  font: var(--section-header-4);
+
+  &.color-1 {
+    color: var(--heading-color-1);
+  }
+
+  &.color-2 {
+    color: var(--heading-color-3);
+  }
+}
+
+.section-header-6 {
+  font: var(--section-header-6);
+  color: var(--heading-color-3);
+}
+
+.section-header-7 {
+  font: var(--section-header-7);
+  color: var(--heading-color-2);
+}
+
+.section-body-1 {
+  font: var(--section-body-1);
+
+  &.color-1 {
+    color: var(--body-color-1);
+  }
+
+  &.color-2 {
+    color: var(--body-color-2);
+  }
+}
+
+.section-body-2 {
+  font: var(--section-body-1);
+  color: var(--body-color-1);
+}
+
+.colored-section {
+  @media (width >= 900px) {
+    border-radius: 16px;
+    margin: 16px 16px 0;
+  }
+
+  &.not-full-width {
+    margin: 0 16px;
+    border-radius: 16px;
+  }
+
+  &.bg-1 {
+    background-color: var(--bg-color-2);
+  }
+
+  &.bg-2 {
+    background-color: var(--bg-color-3);
   }
 }
 
