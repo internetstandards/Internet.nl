@@ -1,0 +1,465 @@
+:root {
+  /* COLORS */
+  --black-100: #000;
+  --black-200: #191919;
+  --green-100: #E3F0F5;
+  --green-200: #EEF6F9;
+  --green-300: #8BF1FF;
+  --green-400: #037584;
+  --green-500: #34545F;
+  --green-600: #22363C;
+  --orange-100: #FFEBD2;
+  --orange-200: #FFC170;
+  --orange-300: #FFAC40;
+  --orange-400: #E98400;
+  --orange-500: #BC6D07;
+  --orange-600: #CF7604;
+  --red-100: #E03030;
+  --white-100: #FFF;
+  --transparent-100: transparent;
+  --transparent-200: #E3F0F500;
+  --transparent-300: #0000001A;
+  --transparent-400: #FFC17014;
+  --transparent-500: #FFFFFF80;
+
+  /* FONT FAMILIES */
+  --montserrat: 'Montserrat', sans-serif;
+  --roboto: 'Roboto', sans-serif;
+
+  /* HEADING FONTS */
+  --heading-font-xxs: 700 0.875rem/1.5 var(--montserrat); /* 14px */
+  --heading-font-xxs-semibold: 500 0.875rem/1.5 var(--montserrat); /* 14px */
+  --heading-font-xs: 700 1rem/1.5 var(--montserrat); /* 16px */
+  --heading-font-s: 700 1.25rem/1.5 var(--montserrat); /* 20px */
+  --heading-font-m: 700 1.5rem/1.3 var(--montserrat); /* 24px */
+  --heading-font-l: 700 2rem/1.3 var(--montserrat); /* 32px */
+  --heading-font-xl: 700 2.5rem/1.3 var(--montserrat); /* 40px */
+
+  /* BODY FONTS */
+  --body-font-xxs: 400 0.875rem/1.5 var(--roboto); /* 14px */
+  --body-font-xxs-bold: 700 0.875rem/1.5 var(--roboto); /* 14px */
+  --body-font-xs: 400 1rem/1.5 var(--roboto); /* 16px */
+  --body-font-xs-bold: 700 1rem/1.5 var(--roboto); /* 16px */
+  --body-font-s: 400 1.125rem/1.75 var(--roboto); /* 18px */
+  --body-font-s-bold: 700 1.125rem/1.75 var(--roboto); /* 18px */
+
+  /* BUTTON FONTS */
+  --button-link-font-xxs: 700 0.875rem/2 var(--montserrat); /* 14px */
+  --button-link-font-xxs-semibold: 500 0.875rem/2 var(--montserrat); /* 14x */
+  --button-link-font-xs: 700 1rem/2 var(--montserrat); /* 16px */
+  --button-link-font-s: 700 1.125rem/2 var(--montserrat); /* 18px */
+  --button-link-font-m: 700 1.25rem/2 var(--montserrat); /* 20px */
+  --button-link-font-l: 700 1.5rem/2 var(--montserrat); /* 24px */
+
+  /* NAV FONTS MOBILE */
+  --nav-link: var(--button-link-font-m);
+  --nav-button: var(--button-link-font-xs);
+  --subnav-link: var(--button-link-font-xs);
+  --footer-link: var(--button-link-font-xs);
+  --footer-bar-link: var(--button-link-font-xxs);
+
+  /* SECTION FONTS MOBILE */
+  --page-title: var(--heading-font-m);
+  --section-header-1: var(--heading-font-s);
+  --section-header-2: var(--heading-font-s);
+  --section-header-3: var(--heading-font-xs);
+  --section-header-4: var(--heading-font-xs);
+  --section-header-5: var(--heading-font-xxs);
+  --section-header-6: var(--heading-font-xxs);
+  --section-body-1: var(--body-font-xs);
+  --section-body-2: var(--body-font-xxs);
+  --section-body-3: var(--body-font-xxs);
+  --section-body-4: var(--body-font-xxs);
+  --section-button-1: var(--button-link-font-xxs);
+  --section-link-1: var(--button-link-font-s);
+  --section-link-2: var(--button-link-font-xxs-semibold);
+
+  /* CARD FONTS MOBILE */
+  --card-header-1: var(--heading-font-s);
+  --card-header-2: var(--heading-font-xs);
+  --card-header-3: var(--heading-font-xs);
+  --card-header-4: var(--heading-font-xxs);
+  --card-header-5: var(--heading-font-xxs);
+  --card-body-1: var(--body-font-xxs);
+  --card-body-2: var(--body-font-xxs);
+  --card-input-1: var(--body-font-s);
+
+  /* ACCORDION FONTS MOBILE */
+  --accordion-header-1: var(--heading-font-xxs);
+  --accordion-header-2: var(--heading-font-xxs-semibold);
+  --accordion-body-1: var(--body-font-xxs);
+  --accordion-body-2: var(--body-font-xxs-semibold);
+
+  @media (width >= 900px) {
+    /* NAV FONTS DESKTOP */
+    --nav-link: var(--button-link-font-xs);
+    --nav-button: var(--button-link-font-xs);
+    --subnav-link: var(--button-link-font-xs);
+    --footer-link: var(--button-link-font-m);
+    --footer-bar-link: var(--button-link-font-xs);
+
+    /* SECTION FONTS DESKTOP */
+    --page-title: var(--heading-font-xl);
+    --section-header-1: var(--heading-font-l);
+    --section-header-2: var(--heading-font-m);
+    --section-header-3: var(--heading-font-m);
+    --section-header-4: var(--heading-font-s);
+    --section-header-5: var(--heading-font-m);
+    --section-header-6: var(--heading-font-xs);
+    --section-body-1: var(--body-font-s);
+    --section-body-2: var(--body-font-s);
+    --section-body-3: var(--body-font-xs);
+    --section-body-4: var(--body-font-xxs);
+    --section-button-1: var(--button-link-font-xs);
+    --section-link-1: var(--button-link-font-s);
+    --section-link-2: var(--button-link-font-xxs-semibold);
+
+    /* CARD FONTS DESKTOP */
+    --card-header-1: var(--heading-font-m);
+    --card-header-2: var(--heading-font-s);
+    --card-header-3: var(--heading-font-xs);
+    --card-header-4: var(--heading-font-xs);
+    --card-header-5: var(--heading-font-xxs);
+    --card-body-1: var(--body-font-xs);
+    --card-body-2: var(--body-font-xxs);
+    --card-input-1: var(--body-font-s);
+
+    /* ACCORDION FONTS DESKTOP */
+    --accordion-header-1: var(--heading-font-xs);
+    --accordion-header-2: var(--heading-font-xxs-semibold);
+    --accordion-body-1: var(--body-font-xxs);
+    --accordion-body-2: var(--body-font-xxs-semibold);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    /* HEADER COLORS LIGHTMODE */
+    --nav-bg-color: var(--white-100);
+    --nav-text-color: var(--green-500);
+    --mobile-nav-bg-color: var(--green-200);
+    --mobile-nav-border: 0.5px solid var(--green-400);
+    --dropdown-bg-color: var(--green-200);
+    --nav-sticky-border: 1.5px solid var(--green-400);
+    --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
+    --lang-bg-color: var(--green-200);
+    --mobile-lang-bg-color: var(--white-100);
+    --mobile-lang-text-color: var(--green-500);
+    --theme-button-bg-color: var(--orange-500);
+    --theme-button-color: var(--white-100);
+
+    /* FOOTER COLORS LIGHTMODE */
+    --footer-bg-color: var(--green-400);
+    --footer-text-color: var(--white-100);
+    --footer-bar-bg-color: var(--white-100);
+    --footer-bar-text-color: var(--green-500);
+
+    /* GENERAL COLORS LIGHTMODE */
+    --bg-color-1: var(--white-100);
+    --bg-color-2: var(--green-200);
+    --bg-color-3: var(--orange-100);
+    --heading-color-1: var(--green-500);
+    --heading-color-2: var(--green-400);
+    --heading-color-3: var(--black-200);
+    --body-color-1: var(--black-200);
+    --body-color-2: var(--green-500);
+
+    /* BUTTON COLORS LIGHTMODE */
+    --button-bg-color-1: var(--orange-300);
+    --button-text-color-1: var(--black-200);
+    --button-bg-color-2: var(--transparent-100);
+    --button-text-color-2: var(--green-500);
+    --button-bg-color-3: var(--green-500);
+    --button-text-color-3: var(--white-100);
+    --button-bg-color-4: var(--green-200);
+    --button-text-color-4: var(--green-500);
+    --button-bg-color-5: var(--white-100);
+    --button-text-color-5: var(--black-100);
+    --button-bg-color-6: var(--green-100);
+    --button-text-color-6: var(--green-500);
+
+    /* CARD COLORS LIGHTMODE */
+    --card-bg-color-1: var(--white-100);
+    --card-heading-color-1: var(--green-400);
+    --card-body-color-1: var(--green-500);
+    --card-input-bg-color-1: var(--green-200);
+    --card-bg-color-2: var(--orange-200);
+    --card-heading-color-2: var(--black-200);
+    --card-body-color-2: var(--black-200);
+    --card-bg-color-3: var(--green-100);
+    --card-heading-color-3: var(--green-500);
+    --card-body-color-3: var(--green-500);
+    --card-bg-color-4: var(--green-400);
+    --card-heading-color-4: var(--white-100);
+    --card-body-color-4: var(--white-100);
+    
+    /* ELLIPSES LIGHTMODE */
+    --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+    --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
+    --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+
+    /* LOGO COLORS LIGHTMODE */
+    --logo-color-1: var(--white-100);
+    --logo-color-2: var(--orange-400);
+    --logo-color-3: var(--green-500);
+    --logo-color-4: var(--white-100);
+    --logo-color-5: var(--green-500);
+
+    /* ACCORDION COLORS LIGHTMODE */
+    --accordion-bg-color: var(--white-100);
+    --accordion-heading-color: var(--green-500);
+    --accordion-body-color: var(--green-500);
+
+    /* IMAGE VISIBILITY LIGHTMODE */
+    --image-visible: block;
+    --image-hidden: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* HEADER COLORS DARKMODE */
+    --nav-bg-color: var(--black-200);
+    --nav-text-color: var(--white-100);
+    --mobile-nav-bg-color: var(--green-600);
+    --mobile-nav-border: 0.5px solid var(--black-100);
+    --dropdown-bg-color: var(--green-600);
+    --nav-sticky-border: 1.5px solid var(--green-400);
+    --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
+    --lang-bg-color: var(--green-600);
+    --mobile-lang-bg-color: var(--white-100);
+    --mobile-lang-text-color: var(--green-500);
+    --theme-button-bg-color: var(--green-500);
+    --theme-button-color: var(--white-100);
+
+    /* FOOTER COLORS DARKMODE */
+    --footer-bg-color: var(--green-600);
+    --footer-text-color: var(--white-100);
+    --footer-bar-bg-color: var(--green-500);
+    --footer-bar-text-color: var(--white-100);
+
+    /* GENERAL COLORS DARKMODE */
+    --bg-color-1: var(--black-100);
+    --bg-color-2: var(--green-600);
+    --bg-color-3: var(--orange-100);
+    --heading-color-1: var(--white-100);
+    --heading-color-2: var(--green-300);
+    --heading-color-3: var(--white-100);
+    --body-color-1: var(--white-100);
+    --body-color-2: var(--white-100);
+
+    /* BUTTON COLORS DARKMODE */
+    --button-bg-color-1: var(--orange-300);
+    --button-text-color-1: var(--black-200);
+    --button-bg-color-2: var(--transparent-100);
+    --button-text-color-2: var(--white-100);
+    --button-bg-color-3: var(--black-200);
+    --button-text-color-3: var(--white-100);
+    --button-bg-color-4: var(--green-200);
+    --button-text-color-4: var(--green-500);
+    --button-bg-color-5: var(--white-100);
+    --button-text-color-5: var(--black-100);
+    --button-bg-color-6: var(--black-200);
+    --button-text-color-6: var(--white-100);
+
+    /* CARD COLORS DARKMODE */
+    --card-bg-color-1: var(--black-100);
+    --card-heading-color-1: var(--white-100);
+    --card-body-color-1: var(--white-100);
+    --card-input-bg-color-1: var(--green-500);
+    --card-bg-color-2: var(--green-600);
+    --card-heading-color-2: var(--white-100);
+    --card-body-color-2: var(--white-100);
+    --card-bg-color-3: var(--green-600);
+    --card-heading-color-3: var(--white-100);
+    --card-body-color-3: var(--white-100);
+    --card-bg-color-4: var(--green-500);
+    --card-heading-color-4: var(--white-100);
+    --card-body-color-4: var(--white-100);
+    
+    /* ELLIPSES DARKMODE */
+    --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+    --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
+    --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+
+    /* LOGO COLORS DARKMODE */
+    --logo-color-1: var(--black-100);
+    --logo-color-2: var(--white-100);
+    --logo-color-3: var(--white-100);
+    --logo-color-4: var(--white-100);
+    --logo-color-5: var(--green-500);
+    
+    /* ACCORDION COLORS DARKMODE */
+    --accordion-bg-color: var(--black-200);
+    --accordion-heading-color: var(--white-100);
+    --accordion-body-color: var(--white-100);
+
+    /* IMAGE VISIBILITY DARKMODE */
+    --image-visible: none;
+    --image-hidden: block;
+  }
+}
+
+[data-theme="light"] {
+  /* HEADER COLORS LIGHTMODE */
+  --nav-bg-color: var(--white-100);
+  --nav-text-color: var(--green-500);
+  --mobile-nav-bg-color: var(--green-200);
+  --mobile-nav-border: 0.5px solid var(--green-400);
+  --dropdown-bg-color: var(--green-200);
+  --nav-sticky-border: 1.5px solid var(--green-400);
+  --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
+  --lang-bg-color: var(--green-200);
+  --mobile-lang-bg-color: var(--white-100);
+  --mobile-lang-text-color: var(--green-500);
+  --theme-button-bg-color: var(--orange-500);
+  --theme-button-color: var(--white-100);
+
+  /* FOOTER COLORS LIGHTMODE */
+  --footer-bg-color: var(--green-400);
+  --footer-text-color: var(--white-100);
+  --footer-bar-bg-color: var(--white-100);
+  --footer-bar-text-color: var(--green-500);
+
+  /* GENERAL COLORS LIGHTMODE */
+  --bg-color-1: var(--white-100);
+  --bg-color-2: var(--green-200);
+  --bg-color-3: var(--orange-100);
+  --heading-color-1: var(--green-500);
+  --heading-color-2: var(--green-400);
+  --heading-color-3: var(--black-200);
+  --body-color-1: var(--black-200);
+  --body-color-2: var(--green-500);
+
+  /* BUTTON COLORS LIGHTMODE */
+  --button-bg-color-1: var(--orange-300);
+  --button-text-color-1: var(--black-200);
+  --button-bg-color-2: var(--transparent-100);
+  --button-text-color-2: var(--green-500);
+  --button-bg-color-3: var(--green-500);
+  --button-text-color-3: var(--white-100);
+  --button-bg-color-4: var(--green-200);
+  --button-text-color-4: var(--green-500);
+  --button-bg-color-5: var(--white-100);
+  --button-text-color-5: var(--black-100);
+  --button-bg-color-6: var(--green-100);
+  --button-text-color-6: var(--green-500);
+
+  /* CARD COLORS LIGHTMODE */
+  --card-bg-color-1: var(--white-100);
+  --card-heading-color-1: var(--green-400);
+  --card-body-color-1: var(--green-500);
+  --card-input-bg-color-1: var(--green-200);
+  --card-bg-color-2: var(--orange-200);
+  --card-heading-color-2: var(--black-200);
+  --card-body-color-2: var(--black-200);
+  --card-bg-color-3: var(--green-100);
+  --card-heading-color-3: var(--green-500);
+  --card-body-color-3: var(--green-500);
+  --card-bg-color-4: var(--green-400);
+  --card-heading-color-4: var(--white-100);
+  --card-body-color-4: var(--white-100);
+  
+  /* ELLIPSES LIGHTMODE */
+  --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+  --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
+  --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+
+  /* LOGO COLORS LIGHTMODE */
+  --logo-color-1: var(--white-100);
+  --logo-color-2: var(--orange-400);
+  --logo-color-3: var(--green-500);
+  --logo-color-4: var(--white-100);
+  --logo-color-5: var(--green-500);
+
+  /* ACCORDION COLORS LIGHTMODE */
+  --accordion-bg-color: var(--white-100);
+  --accordion-heading-color: var(--green-500);
+  --accordion-body-color: var(--green-500);
+
+  /* IMAGE VISIBILITY LIGHTMODE */
+  --image-visible: block;
+  --image-hidden: hidden;
+}
+
+[data-theme="dark"] {
+  /* HEADER COLORS DARKMODE */
+  --nav-bg-color: var(--black-200);
+  --nav-text-color: var(--white-100);
+  --mobile-nav-bg-color: var(--green-600);
+  --mobile-nav-border: 0.5px solid var(--black-100);
+  --dropdown-bg-color: var(--green-600);
+  --nav-sticky-border: 1.5px solid var(--green-400);
+  --nav-sticky-shadow: 0px 4px 32px 0px var(--transparent-300);
+  --lang-bg-color: var(--green-600);
+  --mobile-lang-bg-color: var(--white-100);
+  --mobile-lang-text-color: var(--green-500);
+  --theme-button-bg-color: var(--green-500);
+  --theme-button-color: var(--white-100);
+
+  /* FOOTER COLORS DARKMODE */
+  --footer-bg-color: var(--green-600);
+  --footer-text-color: var(--white-100);
+  --footer-bar-bg-color: var(--green-500);
+  --footer-bar-text-color: var(--white-100);
+
+  /* GENERAL COLORS DARKMODE */
+  --bg-color-1: var(--black-100);
+  --bg-color-2: var(--green-600);
+  --bg-color-3: var(--orange-100);
+  --heading-color-1: var(--white-100);
+  --heading-color-2: var(--green-300);
+  --heading-color-3: var(--white-100);
+  --body-color-1: var(--white-100);
+  --body-color-2: var(--white-100);
+
+  /* BUTTON COLORS DARKMODE */
+  --button-bg-color-1: var(--orange-300);
+  --button-text-color-1: var(--black-200);
+  --button-bg-color-2: var(--transparent-100);
+  --button-text-color-2: var(--white-100);
+  --button-bg-color-3: var(--black-200);
+  --button-text-color-3: var(--white-100);
+  --button-bg-color-4: var(--green-200);
+  --button-text-color-4: var(--green-500);
+  --button-bg-color-5: var(--white-100);
+  --button-text-color-5: var(--black-100);
+  --button-bg-color-6: var(--black-200);
+  --button-text-color-6: var(--white-100);
+
+  /* CARD COLORS DARKMODE */
+  --card-bg-color-1: var(--black-100);
+  --card-heading-color-1: var(--white-100);
+  --card-body-color-1: var(--white-100);
+  --card-input-bg-color-1: var(--green-500);
+  --card-bg-color-2: var(--green-600);
+  --card-heading-color-2: var(--white-100);
+  --card-body-color-2: var(--white-100);
+  --card-bg-color-3: var(--green-600);
+  --card-heading-color-3: var(--white-100);
+  --card-body-color-3: var(--white-100);
+  --card-bg-color-4: var(--green-500);
+  --card-heading-color-4: var(--white-100);
+  --card-body-color-4: var(--white-100);
+  
+  /* ELLIPSES DARKMODE */
+  --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+  --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
+  --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+
+  /* LOGO COLORS DARKMODE */
+  --logo-color-1: var(--black-100);
+  --logo-color-2: var(--white-100);
+  --logo-color-3: var(--white-100);
+  --logo-color-4: var(--white-100);
+  --logo-color-5: var(--green-500);
+
+  /* ACCORDION COLORS DARKMODE */
+  --accordion-bg-color: var(--black-200);
+  --accordion-heading-color: var(--white-100);
+  --accordion-body-color: var(--white-100);
+
+  /* IMAGE VISIBILITY DARKMODE */
+  --image-visible: none;
+  --image-hidden: block;
+}
