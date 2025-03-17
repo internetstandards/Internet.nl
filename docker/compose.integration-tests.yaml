@@ -26,6 +26,7 @@ services:
 
   # test runner for integration tests in isolated environment
   test-runner:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_TEST_RUNNER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/test-runner:$RELEASE}
     # don't run anything, just make this container available to run tests in on demand
     command: python3 -m pytest -v integration_tests/integration/
@@ -121,6 +122,7 @@ services:
       retries: 30
 
   mail-test-target:
+    platform: linux/amd64
     image: mailhog/mailhog:v1.0.1
 
     networks:
@@ -138,6 +140,7 @@ services:
 
   # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
   mock-resolver:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:$RELEASE}
 
     entrypoint: /opt/unbound/sbin/unbound

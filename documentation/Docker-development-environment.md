@@ -283,7 +283,7 @@ Stop and delete potential previous Colima instance:
 
 Create new Colima instance with `shared` network (adjust `memory` to as much GB as you can spare):
 
-    colima start --memory=4 --network-address --network-driver=slirp --arch=x86_64 --edit
+    colima start --memory=4 --network-address --arch=aarch64 --vz-rosetta --edit
 
 This will also open an editor in which the following changes need to be applied:
 
