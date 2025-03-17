@@ -6,6 +6,7 @@
 services:
   # nginx proxy container, also runs certbot
   webserver:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -69,6 +70,7 @@ services:
 
   # django container
   app:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -172,6 +174,7 @@ services:
 
   # django DB migrations, runs to completion and exits with 0
   db-migrate:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     networks:
       - internal
@@ -206,6 +209,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     deploy:
       replicas: $WORKER_REPLICAS
@@ -341,6 +345,7 @@ services:
 
   # celery task queue
   beat:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -536,6 +541,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     depends_on:
       redis:
@@ -579,6 +585,7 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
 
     entrypoint: /entrypoint-resolver.sh
@@ -611,6 +618,7 @@ services:
 
   # cron with periodic tasks
   cron:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7
     environment:
@@ -665,6 +673,7 @@ services:
 
   # cron daemon with access to Docker socket but no networking
   cron-docker:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7 -c /etc/crontabs-docker
     environment:
@@ -688,6 +697,7 @@ services:
       - /opt/Internet.nl:/opt/Internet.nl
 
   grafana:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
 
     environment:
@@ -851,6 +861,7 @@ services:
       - monitoring
 
   celery-exporter:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_CELERY_EXPORTER}
     command:
       - --broker-url=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672/
@@ -909,6 +920,7 @@ services:
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_DOCKER_STATSD_EXPORTER}
     environment:
       LABEL_state: '{{.Container.State}}'
@@ -930,6 +942,7 @@ services:
       - monitoring
 
   nginx_logs_exporter:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_NGINX_LOGS_EXPORTER}
     command:
       - -config-file=/config.hcl

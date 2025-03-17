@@ -10,7 +10,9 @@ ARG PYTHON_VERSION=3.9
 # hashes/log output prefix build command with: `DOCKER_BUILDKIT=0`
 
 # generic stage used by all build stages
-FROM debian:bullseye-20241111-slim AS build-deps
+# explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
+# platform can probably be removed after #1218
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-deps
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -78,7 +80,7 @@ COPY requirements-dev.txt /src/
 RUN pip3 install -r requirements-dev.txt
 
 # build unbound target
-FROM debian:bullseye-20241111-slim AS unbound
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
@@ -126,7 +128,7 @@ USER unbound
 ENTRYPOINT ["/entrypoint.sh"]
 
 # build main application image target
-FROM debian:bullseye-20241111-slim AS build-app
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-app
 ARG PYTHON_VERSION
 
 RUN apt update && \
