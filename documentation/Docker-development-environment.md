@@ -22,6 +22,8 @@ The metrics collection system is accessible via `http://localhost:8080/grafana/`
 
 For requirements and setup of the development environment please first refer to the [Getting started](Docker-getting-started.md) document.
 
+For development a Docker Compose version of at least `3.32.0` is required. Which is included in Orbstack `v1.9.4` or can be installed manually using these [instructions](https://docs.docker.com/compose/install/linux/#install-the-plugin-manually):
+
 ## Development cycle
 
 There are multiple to iterate over changes and rebuilding/restarting the development environment depending on what kind of changes are made. Some will be quicker than others because not everything is rebuild. Others are more complete/safe as they rebuild everything but might be a little slower.
