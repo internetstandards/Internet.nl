@@ -10,8 +10,6 @@ from dns.resolver import NXDOMAIN, NoAnswer, LifetimeTimeout
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
 from checks.resolver import dns_resolve_aaaa, dns_resolve_a
-from checks.tasks.tls_connection import DEFAULT_TIMEOUT
-from checks.tasks.tls_connection_exceptions import NoIpError
 from django.conf import settings
 from internetnl import log
 
