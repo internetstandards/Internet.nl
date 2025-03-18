@@ -49,6 +49,7 @@ from sslyze.scanner.models import CipherSuitesScanAttempt
 from sslyze.server_connectivity import ServerConnectivityInfo
 
 from checks import scoring
+from checks.caa.retrieval import retrieve_parse_caa
 from checks.models import (
     DaneStatus,
     ZeroRttStatus,
@@ -390,6 +391,8 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, dane_cb_data=N
         scoring.WEB_TLS_DANE_VALIDATED,
     )
 
+    caa_result = retrieve_parse_caa(hostname)
+
     results = dict(
         tls_cert=True,
         chain=chain_str,
@@ -405,6 +408,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, dane_cb_data=N
         sigalg_score=sigalg_score,
         hostmatch_bad=hostmatch_bad,
         hostmatch_score=hostmatch_score,
+        caa_result=caa_result,
     )
     results.update(dane_results)
 
