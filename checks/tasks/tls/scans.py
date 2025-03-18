@@ -49,6 +49,7 @@ from sslyze.scanner.models import CipherSuitesScanAttempt
 from sslyze.server_connectivity import ServerConnectivityInfo
 
 from checks import scoring
+from checks.caa.retrieval import retrieve_parse_caa
 from checks.models import (
     DaneStatus,
     ZeroRttStatus,
@@ -119,8 +120,6 @@ def dane(
     url: str,
     port: int,
     chain: List[Certificate],
-    task,
-    dane_cb_data,
     score_none: scoring.Score,
     score_none_bogus: scoring.Score,
     score_failed: scoring.Score,
@@ -139,7 +138,7 @@ def dane(
 
     continue_testing = False
 
-    cb_data = dane_cb_data or resolve_dane(task, port, url)
+    cb_data = resolve_dane(port, url)
 
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
@@ -149,7 +148,7 @@ def dane(
     elif cb_data.get("data") and cb_data.get("secure"):
         # If there is a secure TLSA record check for the existence of
         # possible bogus (unsigned) NXDOMAIN in A.
-        tmp_data = resolve_dane(task, port, url, check_nxdomain=True)
+        tmp_data = resolve_dane(port, url, check_nxdomain=True)
         if tmp_data.get("nxdomain") and tmp_data.get("bogus"):
             status = DaneStatus.none_bogus
             score = score_none_bogus
@@ -280,7 +279,7 @@ def get_common_name(cert: Certificate) -> str:
     return value
 
 
-def cert_checks(hostname: str, mode: ChecksMode, task, af_ip_pair=None, dane_cb_data=None, *args, **kwargs):
+def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwargs):
     """
     Perform certificate checks, such as trust, name match. Also scans the server.
     """
@@ -384,13 +383,13 @@ def cert_checks(hostname: str, mode: ChecksMode, task, af_ip_pair=None, dane_cb_
         hostname,
         port,
         cert_deployment.received_certificate_chain,
-        task,
-        dane_cb_data,
         scoring.WEB_TLS_DANE_NONE,
         scoring.WEB_TLS_DANE_NONE_BOGUS,
         scoring.WEB_TLS_DANE_FAILED,
         scoring.WEB_TLS_DANE_VALIDATED,
     )
+
+    caa_result = retrieve_parse_caa(hostname)
 
     results = dict(
         tls_cert=True,
@@ -407,6 +406,7 @@ def cert_checks(hostname: str, mode: ChecksMode, task, af_ip_pair=None, dane_cb_
         sigalg_score=sigalg_score,
         hostmatch_bad=hostmatch_bad,
         hostmatch_score=hostmatch_score,
+        caa_result=caa_result,
     )
     results.update(dane_results)
 
@@ -484,7 +484,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     return pubkey_score, bad_pubkey, phase_out_pubkey
 
 
-def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
+def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
     """
     Perform sslyze probing on all mail servers, in parallel.
     """
@@ -518,7 +518,7 @@ def check_mail_tls_multiple(server_tuples, task) -> Dict[str, Dict[str, Any]]:
             continue
         log.debug(f"sslyze mail scan complete for {result.server_location.hostname}, other scans may be pending")
         dane_cb_data = dane_cb_per_server[result.server_location.hostname]
-        results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data, task)
+        results[result.server_location.hostname] = check_mail_tls(result, all_suites, dane_cb_data)
         log.debug(f"check_mail_tls complete for {result.server_location.hostname}")
     return results
 
@@ -576,7 +576,7 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
     )
 
 
-def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt], dane_cb_data, task):
+def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt], dane_cb_data):
     """
     Perform evaluation and additional probes for a single mail server.
     This happens after sslyze has already been run on it.
@@ -597,7 +597,7 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
         prots_accepted,
         cipher_evaluation,
     )
-    cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL, task, dane_cb_data)
+    cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL, dane_cb_data)
 
     # HACK for DANE-TA(2) and hostname mismatch!
     # Give a good hosmatch score if DANE-TA *is not* present.
