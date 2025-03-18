@@ -30,7 +30,7 @@ from checks.tasks.shared import (
     get_mail_servers_mxstatus,
     mail_get_servers,
     resolve_a_aaaa,
-    results_per_domain,
+    results_per_domain, TranslatableTechTableItem,
 )
 from checks.tasks.tls.http import http_checks
 from interface import batch, batch_shared_task, redis_id
@@ -284,6 +284,11 @@ def save_results(model, results, addr, domain, category):
                 model.cert_signature_score = result.get("sigalg_score")
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
+                model.caa_enabled = result.get("caa_result").caa_found
+                model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
+                model.caa_score = result.get("caa_result").score
+                model.caa_found_on_domain = result.get("caa_result").canonical_name
                 model.dane_log = result.get("dane_log")
                 model.dane_score = result.get("dane_score")
                 model.dane_status = result.get("dane_status")
@@ -352,6 +357,11 @@ def save_results(model, results, addr, domain, category):
                     model.cert_signature_score = result.get("sigalg_score")
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
+                    model.caa_enabled = result.get("caa_result").caa_found
+                    model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                    model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
+                    model.caa_score = result.get("caa_result").score
+                    model.caa_found_on_domain = result.get("caa_result").canonical_name
                     model.dane_log = result.get("dane_log")
                     model.dane_score = result.get("dane_score")
                     model.dane_status = result.get("dane_status")
@@ -491,6 +501,22 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
+                if dttls.caa_enabled:
+                    caa_host_message = [
+                        TranslatableTechTableItem(
+                            msgid="found_host", context={"host": dttls.caa_found_on_domain}
+                        ).to_dict()
+                    ]
+                else:
+                    caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+                caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+                if not dttls.caa_enabled or dttls.caa_errors:
+                    category.subtests["web_caa"].result_bad(caa_tech_table)
+                elif dttls.caa_recommendations:
+                    category.subtests["web_caa"].result_recommendations(caa_tech_table)
+                else:
+                    category.subtests["web_caa"].result_good(caa_tech_table)
+
             if dttls.dane_status == DaneStatus.none:
                 category.subtests["dane_exists"].result_bad()
             elif dttls.dane_status == DaneStatus.none_bogus:
@@ -628,8 +654,22 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
+            if dttls.caa_enabled:
+                caa_host_message = [
+                    TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
+                ]
+            else:
+                caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+            caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+            if not dttls.caa_enabled or dttls.caa_errors:
+                category.subtests["mail_caa"].result_bad(caa_tech_table)
+            elif dttls.caa_recommendations:
+                category.subtests["mail_caa"].result_recommendations(caa_tech_table)
+            else:
+                category.subtests["mail_caa"].result_good(caa_tech_table)
+
             if dttls.dane_status == DaneStatus.none:
-                category.subtests["dane_exists"].result_bad()
+                    category.subtests["dane_exists"].result_bad()
             elif dttls.dane_status == DaneStatus.none_bogus:
                 category.subtests["dane_exists"].result_bogus()
             else:
