@@ -196,7 +196,7 @@ server {
         alias /var/www/internet.nl/.well-known/;
     }
     # Allow result URLs to be shared and always open access to the API docs
-    location ~ (/api/batch/openapi.yaml|/(site|mail)/[^/]+/[0-9]+/)$ {
+    location ~ ^(/api/batch/openapi.yaml|/change_language/|/(site|mail)/[^/]+/[0-9]+/)$ {
         auth_basic off;
         allow all;
         # pass host for Django's allowed_hosts
