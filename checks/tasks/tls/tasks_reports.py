@@ -30,7 +30,8 @@ from checks.tasks.shared import (
     get_mail_servers_mxstatus,
     mail_get_servers,
     resolve_a_aaaa,
-    results_per_domain, TranslatableTechTableItem,
+    results_per_domain,
+    TranslatableTechTableItem,
 )
 from checks.tasks.tls.http import http_checks
 from interface import batch, batch_shared_task, redis_id
@@ -669,7 +670,7 @@ def build_report(dttls, category):
                 category.subtests["mail_caa"].result_good(caa_tech_table)
 
             if dttls.dane_status == DaneStatus.none:
-                    category.subtests["dane_exists"].result_bad()
+                category.subtests["dane_exists"].result_bad()
             elif dttls.dane_status == DaneStatus.none_bogus:
                 category.subtests["dane_exists"].result_bogus()
             else:
