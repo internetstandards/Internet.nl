@@ -44,15 +44,11 @@ pytz
 sectxt
 abnf
 pyopenssl
+dnspython
 
-# sslyze dependencies, installed from outside this file
+# sslyze dependencies, which is installed from outside this file
 tls-parser>=2,<3
 pydantic>=2.2,<2.7
-
-# Pinned deps to keep 3.7 support, remove these entirely once we drop 3.7
-dnspython < 2.7.0  # dependency of eventlet
-pluggy==1.2.0  # dependency of pytest
-zipp==3.19.1  # dependency of importlib-metadata
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
