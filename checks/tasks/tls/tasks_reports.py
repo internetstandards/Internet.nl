@@ -22,7 +22,6 @@ from checks.models import (
     ZeroRttStatus,
     WebTestTls,
 )
-from checks.tasks import SetupUnboundContext
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.shared import (
     aggregate_subreports,
@@ -158,7 +157,6 @@ batch_mail_registered = check_registry("batch_mail_tls", batch_mail_callback, ba
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_cert(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
@@ -169,7 +167,6 @@ def web_cert(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_cert(af_ip_pairs, url, self, *args, **kwargs)
@@ -180,7 +177,6 @@ def batch_web_cert(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_conn(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_conn(af_ip_pairs, url, *args, **kwargs)
@@ -191,7 +187,6 @@ def web_conn(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_conn(af_ip_pairs, url, *args, **kwargs)
@@ -202,7 +197,6 @@ def batch_web_conn(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     return do_mail_smtp_starttls(mailservers, url, self, *args, **kwargs)
@@ -213,7 +207,6 @@ def mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     return do_mail_smtp_starttls(mailservers, url, self, *args, **kwargs)
@@ -224,7 +217,6 @@ def batch_mail_smtp_starttls(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def web_http(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_http(af_ip_pairs, url, self, *args, **kwargs)
@@ -235,7 +227,6 @@ def web_http(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
-    base=SetupUnboundContext,
 )
 def batch_web_http(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_http(af_ip_pairs, url, self, args, **kwargs)
@@ -711,7 +702,7 @@ def build_summary_report(testtls, category):
     testtls.report = report
 
 
-def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
+def do_web_cert(af_ip_pairs, url, *args, **kwargs):
     """
     Check the web server's certificate.
 
@@ -719,7 +710,7 @@ def do_web_cert(af_ip_pairs, url, task, *args, **kwargs):
     try:
         results = {}
         for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = cert_checks(url, ChecksMode.WEB, task, af_ip_pair, *args, **kwargs)
+            results[af_ip_pair[1]] = cert_checks(url, ChecksMode.WEB, af_ip_pair, *args, **kwargs)
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded. Url: %s", url)
         for af_ip_pair in af_ip_pairs:
@@ -747,7 +738,7 @@ def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     return ("tls_conn", results)
 
 
-def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
+def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
     """
     Start all the TLS related checks for the mail test.
 
@@ -782,7 +773,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
                 (server, dane_cb_data) for server, dane_cb_data, _ in mailservers if not results[server]
             ]
             log.debug(f"=========== checking remaining {servers_to_check=}")
-            results.update(check_mail_tls_multiple(servers_to_check, task))
+            results.update(check_mail_tls_multiple(servers_to_check))
             time.sleep(1)
         for server, server_result in results.items():
             cache_id = redis_id.mail_starttls.id.format(server)
@@ -798,7 +789,7 @@ def do_mail_smtp_starttls(mailservers, url, task, *args, **kwargs):
     return "smtp_starttls", results
 
 
-def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
+def do_web_http(af_ip_pairs, url, *args, **kwargs):
     """
     Start all the HTTP related checks for the web test.
 
@@ -806,7 +797,7 @@ def do_web_http(af_ip_pairs, url, task, *args, **kwargs):
     try:
         results = {}
         for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = http_checks(af_ip_pair, url, task)
+            results[af_ip_pair[1]] = http_checks(af_ip_pair, url)
 
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded.")
