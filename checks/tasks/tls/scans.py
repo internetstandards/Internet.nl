@@ -120,7 +120,6 @@ def dane(
     url: str,
     port: int,
     chain: List[Certificate],
-    dane_cb_data,
     score_none: scoring.Score,
     score_none_bogus: scoring.Score,
     score_failed: scoring.Score,
@@ -139,7 +138,7 @@ def dane(
 
     continue_testing = False
 
-    cb_data = dane_cb_data or resolve_dane(port, url)
+    cb_data = resolve_dane(port, url)
 
     # Check if there is a TLSA record, if TLSA records are bogus or NXDOMAIN is
     # returned for the TLSA domain (faulty signer).
@@ -280,7 +279,7 @@ def get_common_name(cert: Certificate) -> str:
     return value
 
 
-def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, dane_cb_data=None, *args, **kwargs):
+def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwargs):
     """
     Perform certificate checks, such as trust, name match. Also scans the server.
     """
@@ -384,7 +383,6 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, dane_cb_data=N
         hostname,
         port,
         cert_deployment.received_certificate_chain,
-        dane_cb_data,
         scoring.WEB_TLS_DANE_NONE,
         scoring.WEB_TLS_DANE_NONE_BOGUS,
         scoring.WEB_TLS_DANE_FAILED,
