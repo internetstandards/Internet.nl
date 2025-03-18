@@ -319,6 +319,24 @@ server {
         set $alertmanager http://alertmanager:9093;
         proxy_pass $alertmanager;
     }
+
+    # routinator proxy for internal use on multi instance setups
+    location /routinator/ {
+        include http.headers;
+        include hsts_h3.headers;
+
+        # allow only local connections
+        allow 127.0.0.0/8;
+        allow 10.0.0.0/8;
+        allow 172.16.0.0/12;
+        allow 192.168.0.0/16;
+        deny all;
+
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to routinator profile being disabled
+        set $routinator http://routinator:9556;
+        rewrite ^/routinator(.*)$ $1 break;
+        proxy_pass $routinator;
+    }
 }
 
 # Temporary (1 year) exception for conn. subdomain to disable HSTS and redirect back to HTTP for
