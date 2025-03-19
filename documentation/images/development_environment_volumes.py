@@ -93,7 +93,7 @@ with Diagram(NAME, show=False, direction="TB", outformat=["png"], graph_attr=gra
 #
 #   }
 #   network public-internet {
-#       address = "172.42.0.0/16";
+#       address = "172.16.42.0/24";
 #
 #       webserver [address = "172.x.x.1"];
 #       web02 [address = "172.x.x.2"];
