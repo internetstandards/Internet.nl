@@ -20,6 +20,7 @@ COPY docker/deploy.sh /
 RUN mkdir -p /dist/docker
 COPY docker/defaults.env /dist/docker/
 COPY docker/host-dist.env /dist/docker/
+COPY docker/host-multi-dist.env /dist/docker/
 COPY docker/compose.yaml /dist/docker/
 COPY docker/user_manage.sh /dist/docker/
 RUN chmod a-w /dist/docker/*
