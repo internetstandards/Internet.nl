@@ -16,17 +16,6 @@ class ListField(models.TextField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def from_db_value(self, value, expression, connection, context="Null"):
-        if value is None:
-            return value
-        try:
-            return ast.literal_eval(value)
-        except SyntaxError:
-            raise SyntaxError(
-                f"Syntax error while attempting to parse value as python, in ListField,"
-                f" possibly raw value has been stored instead of valid python code: {value}"
-            )
-
     def to_python(self, value):
         if not value:
             value = []
@@ -42,8 +31,11 @@ class ListField(models.TextField):
         return str(value)
 
     def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
-        return self.get_db_prep_value(value)
+        value = self.value_from_object(obj)
+        return self.get_prep_value(value)
+
+    def from_db_value(self, value, expression, connection):
+        return self.to_python(value)
 
 
 class AutoConfOption(Enum):
