@@ -563,7 +563,7 @@ batch-tests-shell:
 
 
 live-tests:
-	COMPOSE_FILE=docker/compose.test-runner-live.yaml docker compose run --rm test-runner-live \
+	COMPOSE_FILE=docker/compose.test-runner-live.yaml RELEASE=latest docker compose run --rm test-runner-live \
 		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} integration_tests/live/
 
 # use OS specific hostname for Docker host
