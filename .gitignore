@@ -27,6 +27,7 @@ __pycache__
 *.log
 *.pid
 /tests/.pytest_cache/
+/node_modules
 
 # Pycharm defaults
 .idea
