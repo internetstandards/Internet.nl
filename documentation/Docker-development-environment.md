@@ -22,6 +22,8 @@ The metrics collection system is accessible via `http://localhost:8080/grafana/`
 
 For requirements and setup of the development environment please first refer to the [Getting started](Docker-getting-started.md) document.
 
+For development a Docker Compose version of at least `3.32.0` is required. Which is included in Orbstack `v1.9.4` or can be installed manually using these [instructions](https://docs.docker.com/compose/install/linux/#install-the-plugin-manually):
+
 ## Development cycle
 
 There are multiple to iterate over changes and rebuilding/restarting the development environment depending on what kind of changes are made. Some will be quicker than others because not everything is rebuild. Others are more complete/safe as they rebuild everything but might be a little slower.
@@ -281,7 +283,7 @@ Stop and delete potential previous Colima instance:
 
 Create new Colima instance with `shared` network (adjust `memory` to as much GB as you can spare):
 
-    colima start --memory=4 --network-address --network-driver=slirp --arch=x86_64 --edit
+    colima start --memory=4 --network-address --arch=aarch64 --vz-rosetta --edit
 
 This will also open an editor in which the following changes need to be applied:
 

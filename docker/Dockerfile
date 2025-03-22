@@ -10,7 +10,9 @@ ARG PYTHON_VERSION=3.9
 # hashes/log output prefix build command with: `DOCKER_BUILDKIT=0`
 
 # generic stage used by all build stages
-FROM debian:bullseye-20241111-slim AS build-deps
+# explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
+# platform can probably be removed after #1218
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-deps
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -32,6 +34,8 @@ RUN apt update && \
       # unbound dependencies
       flex \
       bison
+
+RUN pip3 install uv
 
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
@@ -67,7 +71,9 @@ COPY requirements.txt /src/
 
 WORKDIR /src
 
-RUN pip3 install -r requirements.txt
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system -r requirements.txt
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps
@@ -75,10 +81,12 @@ ARG PYTHON_VERSION
 
 COPY requirements-dev.txt /src/
 
-RUN pip3 install -r requirements-dev.txt
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system -r requirements-dev.txt
 
 # build unbound target
-FROM debian:bullseye-20241111-slim AS unbound
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
@@ -126,7 +134,7 @@ USER unbound
 ENTRYPOINT ["/entrypoint.sh"]
 
 # build main application image target
-FROM debian:bullseye-20241111-slim AS build-app
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-app
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -219,21 +227,13 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
-# app image with development tools for better live reloading
-FROM app AS app-dev
-
-# required for compose `develop` mode file sync/copy
-USER root
-
-# browser reload
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
-
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest
 ARG PYTHON_VERSION
 
 USER root
 
+# install additional development dependencies
 RUN apt update && \
     apt install --no-install-recommends -yqq \
     git \

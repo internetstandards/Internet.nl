@@ -16,12 +16,9 @@ services:
 
     environment:
       - INTERNETNL_DOMAINNAME
-      - IPV4_IP_WEBSERVER_INTERNAL
-      - IPV4_IP_RABBITMQ_INTERNAL
 
   app:
-    build:
-      target: app-dev
+
     develop:
       watch:
         # auto rebuild/reload when CSS/JS changes

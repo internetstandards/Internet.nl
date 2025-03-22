@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 
 from checks.tasks.ipv6 import web
 from django.conf import settings
+import socket
 
 
 class Command(BaseCommand):
@@ -18,9 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         domain = options.get("domain", "internet.nl")
-        print(
-            f"Performing ipv6 test web scan on {domain}. "
-            f"Using unbound at: {settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING}."
-        )
+        resolver = socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)
+        print(f"Performing ipv6 test web scan on {domain}. " f"Using unbound at: {resolver}.")
         answers = web(domain)
         print(answers)

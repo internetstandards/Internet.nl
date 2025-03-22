@@ -6,23 +6,20 @@ This documented is intended as a quick simple guide to setup a development envir
 
 An OCI compatible container runtime with [Compose V2](https://docs.docker.com/compose/migrate/) is required to run the project. For example one of the following:
 
-- [Docker](https://docs.docker.com/get-docker/) for Linux, (supported, tested version 24.0.2)
-- [Docker](https://docs.docker.com/get-docker/) for Mac (supported, tested version 4.21.0)
-- [Colima](https://github.com/abiosoft/colima) for Mac (recommended, tested version 0.5.5)
-- [OrbStack](https://orbstack.dev/download) for Mac (non open source, free, tested version 1.6.1)
+- [Docker](https://docs.docker.com/get-docker/) for Linux, (supported)
+- [Colima](https://github.com/abiosoft/colima) for Mac (recommended)
+- [OrbStack](https://orbstack.dev/download) for Mac (non open source, free, tested version 1.10.2)
+- [Docker](https://docs.docker.com/get-docker/) for Mac (supported)
 - [Docker](https://docs.docker.com/get-docker/) for Windows (untested)
 
 **notice**: some versions of Docker Engine might experience issues with internal DNS resolving and will cause tests to fail. Versions from and including `25.0.5` to and including `26.1.2` should be avoided.
 
-At time of writing the latest Colima version (`v0.6.9`) does not yet contain the correct Docker Engine version. To update the Docker Engine to the latest version manually for the time being run the following command:
-
-    colima ssh -- sudo /bin/sh -c 'apt update; apt install --upgrade docker-ce'
-
-**notice**: Docker Compose Plugin versions from `2.24` up to `2.27.0` should be avoided. `2.27.0` is supported but `2.27.1` is not. At the time a newer version which is supported is to be released.
+**notice**: Docker Compose Plugin versions below and up to `2.27.2` should be avoided due to missing features.
 
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
 **for arm users (eg apple m1)**: nassl will not compile on x64 architectures, so use the option to start your container engine in x86 mode. For colima this can be done with `colima start --arch x86_64`. As per the system requirements noted above, the right way to start with colima would then be: `colima start --arch x86_64 --cpu 2 --memory 4`, but giving it some room would make that: `colima start --arch x86_64 --cpu 4 --memory 8`.
+For Orbstack enable `Rosetta` under `System` settings.
 
 ## Building
 

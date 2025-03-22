@@ -1,5 +1,6 @@
 services:
   tools:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:${RELEASE:-latest}}
 
     volumes:

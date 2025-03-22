@@ -1,6 +1,7 @@
 services:
   # test runner intended to run live tests against targets on public internet
   test-runner-live:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_TEST_RUNNER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/test-runner:$RELEASE}
     # don't run anything, just make this container available to run tests in on demand
     command: python3 -m pytest -v integration-tests/live/

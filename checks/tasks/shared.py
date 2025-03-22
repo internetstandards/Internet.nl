@@ -10,6 +10,7 @@ from celery import shared_task
 from django.conf import settings
 
 from dns.exception import DNSException
+from dns.name import EmptyLabel
 from dns.rdatatype import RdataType
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
 
@@ -183,13 +184,13 @@ def do_resolve_single_a_aaaa(qname):
     af_ip_pairs = []
     try:
         ip4 = dns_resolve_a(qname)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout, EmptyLabel):
         ip4 = []
     if len(ip4) > 0:
         af_ip_pairs.append((socket.AF_INET, ip4[0]))
     try:
         ip6 = dns_resolve_aaaa(qname)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout, EmptyLabel):
         ip6 = []
     if len(ip6) > 0:
         af_ip_pairs.append((socket.AF_INET6, ip6[0]))
@@ -201,13 +202,13 @@ def do_resolve_all_a_aaaa(qname):
     af_ip_pairs = []
     try:
         ip4 = dns_resolve_a(qname)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout, EmptyLabel):
         ip4 = []
     for ip in ip4:
         af_ip_pairs.append((socket.AF_INET, ip))
     try:
         ip6 = dns_resolve_aaaa(qname)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout, EmptyLabel):
         ip6 = []
     for ip in ip6:
         af_ip_pairs.append((socket.AF_INET6, ip))
@@ -237,13 +238,13 @@ def do_resolve_ns(qname: str) -> tuple[list[str], str]:
     """
     try:
         ns_list = dns_resolve_ns(qname)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout):
+    except (NoAnswer, NXDOMAIN, LifetimeTimeout, EmptyLabel):
         ns_list = []
     next_label = qname
     while not ns_list and "." in next_label:
         try:
             ns_list = dns_resolve_ns(next_label)
-        except (NoAnswer, NXDOMAIN, LifetimeTimeout):
+        except (NoAnswer, NXDOMAIN, LifetimeTimeout, EmptyLabel):
             ns_list = []
         next_label = next_label[next_label.find(".") + 1 :]
 
@@ -275,7 +276,7 @@ def resolve_dane(port, dname, check_nxdomain=False):
             data = [(rr.usage, rr.selector, rr.mtype, binascii.hexlify(rr.cert).decode("ascii")) for rr in rrset]
     except NXDOMAIN:
         return {"nxdomain": True}
-    except (NoAnswer, NoNameservers):
+    except (NoAnswer, NoNameservers, LifetimeTimeout, EmptyLabel):
         data = None
         dnssec_status = None
     return {

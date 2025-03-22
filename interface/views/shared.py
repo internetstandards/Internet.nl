@@ -235,15 +235,15 @@ def get_hof_cache(cache_id, count):
     return (cached_data["date"], cached_data["count"], cached_data["data"][:count])
 
 
-def get_hof_champions(count=100000):
+def get_hof_champions(count=1000):
     return get_hof_cache(redis_id.hof_champions.id, count)
 
 
-def get_hof_web(count=100000):
+def get_hof_web(count=1000):
     return get_hof_cache(redis_id.hof_web.id, count)
 
 
-def get_hof_mail(count=100000):
+def get_hof_mail(count=1000):
     return get_hof_cache(redis_id.hof_mail.id, count)
 
 

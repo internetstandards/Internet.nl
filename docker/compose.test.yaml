@@ -1,6 +1,7 @@
 services:
   # environment for checks, linting and unit tests
   test:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:$RELEASE}
 
     networks:
@@ -28,7 +29,6 @@ services:
       - DB_USER=internetnl
       - DB_PASSWORD=password
       - DEBUG_LOG
-      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - PY_COLORS
       # TODO: to properly isolate tests this line needs to be uncommented, see above
       # - INTEGRATION_TESTS
@@ -65,8 +65,6 @@ services:
     ports:
       - "53/udp"
 
-    environment:
-      - IPV4_IP_UNBOUND_INTERNAL
 
     volumes:
       - ./integration-tests/dnsmasq/entrypoint.sh:/entrypoint.sh

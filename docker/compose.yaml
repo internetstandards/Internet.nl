@@ -6,6 +6,7 @@
 services:
   # nginx proxy container, also runs certbot
   webserver:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -17,7 +18,6 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_WEBSERVER_INTERNAL
       public-internet: {}
 
     ports:
@@ -33,10 +33,6 @@ services:
       - ALLOW_LIST
       # required for authentication.sh to restrict access when debug is on
       - DEBUG
-      - IPV4_IP_APP_INTERNAL
-      - IPV4_IP_GRAFANA_INTERNAL
-      - IPV4_IP_PROMETHEUS_INTERNAL
-      - IPV4_IP_ALERTMANAGER_INTERNAL
       - ENABLE_BATCH
       - LETSENCRYPT_STAGING
       - LETSENCRYPT_EMAIL
@@ -62,13 +58,13 @@ services:
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
   # django container
   app:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -80,13 +76,7 @@ services:
     memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_APP_INTERNAL
       public-internet: {}
-    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-    # also disable search domains and force default resolv settings
-    dns_search: [.]
-    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
     entrypoint: uwsgi
     command: >
       --module=internetnl.wsgi:application
@@ -108,6 +98,8 @@ services:
         condition: service_healthy
         required: false
       resolver-validating:
+        # restart this service when the resolver is restarted and possibly has a new IP, so the old IP is no longer used
+        restart: true
         condition: service_healthy
     # set hostname for Sentry
     hostname: app
@@ -121,19 +113,19 @@ services:
       - PUBLIC_SUFFIX_LIST_URL
       - ENABLE_BATCH
       - ENABLE_HOF
-      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
-      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_HOST=postgres
       - DB_NAME=internetnl_db1
       - DB_USER=internetnl
       - DB_PASSWORD=password
-      - CELERY_BROKER_URL=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672//
-      - CELERY_RESULT_BACKEND=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
-      - CACHE_LOCATION=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
       - ROUTINATOR_URL
       - DJANGO_IS_PROXIED=True
-      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
+      - STATSD_HOST=statsd
       - ALLOWED_HOSTS
       - DEBUG
       - DEBUG_LOG
@@ -144,7 +136,6 @@ services:
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
       - IPV6_TEST_ADDR
-      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -161,8 +152,7 @@ services:
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -172,6 +162,7 @@ services:
 
   # django DB migrations, runs to completion and exits with 0
   db-migrate:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     networks:
       - internal
@@ -186,10 +177,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
-      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_HOST=postgres
       - DB_NAME=internetnl_db1
       - DB_USER=internetnl
       - DB_PASSWORD=password
@@ -206,6 +197,7 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     deploy:
       replicas: $WORKER_REPLICAS
@@ -220,11 +212,6 @@ services:
     networks:
       - internal
       - public-internet
-    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-    # also disable search domains and force default resolv settings
-    dns_search: [.]
-    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
 
     # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
     user: root
@@ -254,6 +241,8 @@ services:
         condition: service_healthy
         required: false
       resolver-validating:
+        # restart this service when the resolver is restarted and possibly has a new IP, so the old IP is no longer used
+        restart: true
         condition: service_healthy
     # set hostname for Sentry
     hostname: worker
@@ -267,18 +256,18 @@ services:
       - PUBLIC_SUFFIX_LIST_URL
       - ENABLE_BATCH
       - ENABLE_HOF
-      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
-      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_HOST=postgres
       - DB_NAME=internetnl_db1
       - DB_USER=internetnl
       - DB_PASSWORD=password
-      - CELERY_BROKER_URL=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672//
-      - CELERY_RESULT_BACKEND=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
-      - CACHE_LOCATION=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=internetnl.settings
-      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
+      - STATSD_HOST=statsd
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
@@ -292,7 +281,6 @@ services:
       - INTERNETNL_BRANDING
       - INTERNETNL_DOMAINNAME
       - USER_AGENT_URL
-      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -306,8 +294,7 @@ services:
     healthcheck:
       test: ["CMD", "/bin/sh", "-c", "celery --app=internetnl inspect ping --destination=celery@$(hostname)"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -341,6 +328,7 @@ services:
 
   # celery task queue
   beat:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -379,18 +367,18 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - ENABLE_BATCH
       - ENABLE_HOF
-      - RABBIT_HOST=$IPV4_IP_RABBITMQ_INTERNAL:15672
+      - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
-      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_HOST=postgres
       - DB_NAME=internetnl_db1
       - DB_USER=internetnl
       - DB_PASSWORD=password
-      - CELERY_BROKER_URL=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672//
-      - CELERY_RESULT_BACKEND=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
-      - CACHE_LOCATION=redis://$IPV4_IP_REDIS_INTERNAL:6379/0
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=internetnl.settings
-      - STATSD_HOST=$IPV4_IP_STATSD_INTERNAL
+      - STATSD_HOST=statsd
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
@@ -401,15 +389,13 @@ services:
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
       - BATCH_SCHEDULER_INTERVAL
-      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
     healthcheck:
       test: ["CMD", "pgrep", "-f", "celery"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
@@ -429,12 +415,10 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_REDIS_INTERNAL
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
     volumes:
@@ -457,15 +441,13 @@ services:
     user: rabbitmq
     networks:
       internal:
-        ipv4_address: $IPV4_IP_RABBITMQ_INTERNAL
     ports:
       # expose admin GUI to localhost
       - $RABBITMQ_GUI
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "--quiet", "check_running"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       # rabbitmq can initially take a long time to start
       start_period: 5m
       retries: 10
@@ -485,7 +467,6 @@ services:
     memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_POSTGRES_INTERNAL
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -493,8 +474,7 @@ services:
     healthcheck:
       test: pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
     volumes:
@@ -513,7 +493,6 @@ services:
     memswap_limit: $HIGH_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_ROUTINATOR_INTERNAL
       public-internet: {}
     volumes:
       - routinator:/home/routinator/.rpki-cache/
@@ -525,8 +504,7 @@ services:
       # needs refactoring like splitting up the api and sync parts
       # test: wget -q -O/dev/null http://127.0.0.1:9556/api/v1/status
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       # routinator has to rsync a lot of data initally which can take a long time
       start_period: 30m
       retries: 10
@@ -536,6 +514,7 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     depends_on:
       redis:
@@ -551,7 +530,6 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_UNBOUND_INTERNAL
       public-internet: {}
     ports:
       - $UNBOUND_PORT_TCP
@@ -572,13 +550,13 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
 
     entrypoint: /entrypoint-resolver.sh
@@ -594,7 +572,6 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       public-internet: {}
 
     environment:
@@ -604,18 +581,18 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/resolver-validating.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
   # cron with periodic tasks
   cron:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7
     environment:
       - HOSTERS_HOF_URL
-      - DB_HOST=$IPV4_IP_POSTGRES_INTERNAL
+      - DB_HOST=postgres
       - DB_NAME=internetnl_db1
       - DB_USER=internetnl
       - DB_PASSWORD=password
@@ -624,7 +601,6 @@ services:
       - CRON_DAILY_DELETE_BATCH_RESULTS
       - CRON_15MIN_RUN_TESTS
       - CRON_DAILY_TRUNCATE_EXPORTER_LOGS
-      - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
       - TEST_DOMAINS_SITE
@@ -642,11 +618,6 @@ services:
       internal: {}
       public-internet: {}
 
-    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
-    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
-    # also disable search domains and force default resolv settings
-    dns_search: [.]
-    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
 
     volumes:
       - manual-hof:/app/manual-hall-of-fame/
@@ -658,13 +629,13 @@ services:
     healthcheck:
       test: ["CMD", "pgrep", "crond"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
   # cron daemon with access to Docker socket but no networking
   cron-docker:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7 -c /etc/crontabs-docker
     environment:
@@ -688,6 +659,7 @@ services:
       - /opt/Internet.nl:/opt/Internet.nl
 
   grafana:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
 
     environment:
@@ -722,7 +694,6 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_GRAFANA_INTERNAL
 
     profiles:
       - monitoring
@@ -733,7 +704,8 @@ services:
     command:
       - --config.file=/prometheus.yaml
       - --web.external-url=/prometheus/
-      - --storage.tsdb.retention.time=5y
+      - --storage.tsdb.retention.time=$PROMETHEUS_RETENTION_TIME
+      - --storage.tsdb.retention.size=$PROMETHEUS_RETENTION_SIZE
       - --web.enable-admin-api
 
     configs:
@@ -752,7 +724,6 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_PROMETHEUS_INTERNAL
 
     volumes:
       - prometheus-data:/prometheus
@@ -780,7 +751,6 @@ services:
         tag: '{{.Name}}'
     networks:
       internal:
-        ipv4_address: $IPV4_IP_ALERTMANAGER_INTERNAL
       public-internet: {}
 
     profiles:
@@ -790,7 +760,7 @@ services:
     image: ${DOCKER_IMAGE_POSTGRESQL_EXPORTER}
 
     environment:
-      - DATA_SOURCE_NAME=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$IPV4_IP_POSTGRES_INTERNAL:5432/$POSTGRES_DB?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?sslmode=disable
 
     restart: unless-stopped
     logging:
@@ -810,7 +780,7 @@ services:
     image: ${DOCKER_IMAGE_REDIS_EXPORTER}
 
     environment:
-      - REDIS_ADDR=redis://$IPV4_IP_REDIS_INTERNAL:6379
+      - REDIS_ADDR=redis://redis:6379
 
     restart: unless-stopped
     logging:
@@ -843,7 +813,6 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
-        ipv4_address: $IPV4_IP_STATSD_INTERNAL
         aliases:
           - statsd
 
@@ -851,9 +820,10 @@ services:
       - monitoring
 
   celery-exporter:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_CELERY_EXPORTER}
     command:
-      - --broker-url=amqp://guest:guest@$IPV4_IP_RABBITMQ_INTERNAL:5672/
+      - --broker-url=amqp://guest:guest@rabbitmq:5672/
       - --accept-content=json,pickle
       # retry connecting to broker on failure
       - --retry-interval=10
@@ -909,6 +879,7 @@ services:
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_DOCKER_STATSD_EXPORTER}
     environment:
       LABEL_state: '{{.Container.State}}'
@@ -930,6 +901,7 @@ services:
       - monitoring
 
   nginx_logs_exporter:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_NGINX_LOGS_EXPORTER}
     command:
       - -config-file=/config.hcl
@@ -1007,7 +979,7 @@ configs:
           - path_prefix: /alertmanager
             static_configs:
               - targets:
-                  - $IPV4_IP_ALERTMANAGER_INTERNAL:9093
+                  - alertmanager:9093
       scrape_configs:
         - &scrape_config
           scheme: http

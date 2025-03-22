@@ -25,11 +25,22 @@ _Compared to the latest 1.9 release._
 - The `resolver-permissive` container was obsoleted and removed.
 - Periodic tests will only run when [specifically enabled](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-deployment.md#periodic-tests)
   with the CRON_15MIN_RUN_TESTS, TEST_DOMAINS_SITE and/or TEST_DOMAINS_MAIL settings.
+- There is now support for running multiple instances per server, sharing a Routinator instance,
+  intended for acceptance testing.
+
+On upgrade from an earlier version, a
+[change in networking setup](https://github.com/internetstandards/Internet.nl/pull/1688) requires
+recreation of one of the Docker networks. Before deploy, bring down the entire environment and make sure the network is removed:
+```
+docker compose --project-name=internetnl-prod down
+docker network rm internetnl-prod_public-internet
+```
 
 ### API changes
 
 - The API version was updated to version 2.5.0.
-- The fields `caa_enabled`, `caa_errors`, `caa_recommendations` and `caa_found_on_domain` have been added.
+- The fields `caa_enabled`, `caa_errors`, `caa_recommendations` and `caa_found_on_domain` have been added
+  ([OpenAPI diff](https://github.com/internetstandards/Internet.nl/commit/cdc642c97f3ef00b4ef8ec7ff6ea4c5403c80978#diff-ccabca18cd3cc1ba3dd325e532acccf5d37c7be317a2966209b6e55b968d4890)).
 
 ## 1.9.2
 

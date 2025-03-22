@@ -21,11 +21,10 @@ services:
 
     environment:
       - INTERNETNL_DOMAINNAME
-      - IPV4_IP_WEBSERVER_INTERNAL
-      - IPV4_IP_RABBITMQ_INTERNAL
 
   # test runner for integration tests in isolated environment
   test-runner:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_TEST_RUNNER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/test-runner:$RELEASE}
     # don't run anything, just make this container available to run tests in on demand
     command: python3 -m pytest -v integration_tests/integration/
@@ -121,6 +120,7 @@ services:
       retries: 30
 
   mail-test-target:
+    platform: linux/amd64
     image: mailhog/mailhog:v1.0.1
 
     networks:
@@ -136,8 +136,30 @@ services:
     environment:
       MH_SMTP_BIND_ADDR: 0.0.0.0:25
 
+  static:
+    image: nginx:1.27.3-alpine
+
+    restart: unless-stopped
+
+    ports:
+      - 80
+      - 443
+
+    networks:
+      public-internet:
+
+    volumes:
+      - ./integration-tests/nginx_templates/static.conf.template:/etc/nginx/templates/static.conf.template
+      - ./integration-tests/www:/var/www/
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: $HEALTHCHECK_INTERVAL
+      retries: 30
+
   # internal resolver for the browser running the integration tests, makes sure test target hostname are resolved
   mock-resolver:
+    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:$RELEASE}
 
     entrypoint: /opt/unbound/sbin/unbound
@@ -157,8 +179,7 @@ services:
     healthcheck:
       test: ["CMD", "unbound-control", "-c", "/opt/unbound/etc/unbound/mock.conf", "status"]
       interval: $HEALTHCHECK_INTERVAL
-      # TODO: waiting for: https://github.com/docker/compose/issues/10830
-      # start_interval: 5s
+      start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
       retries: 10
 
