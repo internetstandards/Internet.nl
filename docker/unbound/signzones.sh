@@ -6,14 +6,14 @@ set -e
 
 cd /opt/unbound/etc/unbound/zones/
 
-ns_keytag=$(cat ns_keytag.$CONN_TEST_DOMAIN)
-ns6_keytag=$(cat ns6_keytag.$CONN_TEST_DOMAIN)
+ns_keytag=$(cat "ns_keytag.$CONN_TEST_DOMAIN")
+ns6_keytag=$(cat "ns6_keytag.$CONN_TEST_DOMAIN")
 
 echo "Signing zone files"
 
 # sign zones
-ldns-signzone -u -n -o test-ns-signed.$CONN_TEST_DOMAIN test-ns.zone $ns_keytag
-ldns-signzone -u -n -o test-ns6-signed.$CONN_TEST_DOMAIN test-ns6.zone $ns6_keytag
+ldns-signzone -u -n -o "test-ns-signed.$CONN_TEST_DOMAIN" "test-ns.zone $ns_keytag"
+ldns-signzone -u -n -o "test-ns6-signed.$CONN_TEST_DOMAIN" "test-ns6.zone $ns6_keytag"
 
 # make bogus record
 sed -ie '/bogus.*IN\tRRSIG/d' test-ns.zone.signed

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -e
+
 cd tmp
 tar -czf content_repo.tar.gz locale_files/*
 cd ..

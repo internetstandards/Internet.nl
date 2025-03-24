@@ -1,5 +1,5 @@
 #!/bin/sh
-echo $MONITORING_AUTH_RAW|tr ',' '\n' >> /etc/nginx/htpasswd/monitoring.htpasswd
+echo "$MONITORING_AUTH_RAW" | tr ',' '\n' >> /etc/nginx/htpasswd/monitoring.htpasswd
 
 # enable basic auth when user/password is configured
 touch /etc/nginx/conf.d/basic_auth.include

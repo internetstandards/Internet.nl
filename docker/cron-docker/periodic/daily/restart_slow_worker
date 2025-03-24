@@ -19,10 +19,10 @@ COMPOSE_CMD="docker compose --env-file=docker/defaults.env --env-file=docker/hos
 OLD_CONTAINERS=$($COMPOSE_CMD ps --format "{{ .Name }}"|grep "$SERVICE")
 
 # bring up new containers, wait until healthy
-$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$(($REPLICAS*2))" "$SERVICE"
+$COMPOSE_CMD up --no-deps --no-recreate --wait --scale="$SERVICE=$((REPLICAS*2))" "$SERVICE"
 
 # graceful shutdown and remove old containers
 docker rm --force "$OLD_CONTAINERS"
 
 # restore replica number to original
-$COMPOSE_CMD scale $SERVICE=$REPLICAS
+$COMPOSE_CMD scale $SERVICE="$REPLICAS"

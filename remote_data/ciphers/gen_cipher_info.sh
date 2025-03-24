@@ -7,7 +7,7 @@
 set -euo pipefail
 
 if [[ $# -ne 1 || $1 == *help ]]; then
-    echo >&2 "Usage: $(basename $0) </path/to/bin/openssl>"
+    echo >&2 "Usage: $(basename "$0") </path/to/bin/openssl>"
     exit 1
 fi
 
@@ -52,11 +52,11 @@ echo_csv_header_row() {
 echo_ciphers_as_csv() {
     OPENSSL=$1
     DUMP_FUNC=$2
-    $DUMP_FUNC $OPENSSL 2>/dev/null | openssl_ciphers_verbose_to_csv
+    $DUMP_FUNC "$OPENSSL" 2>/dev/null | openssl_ciphers_verbose_to_csv
 }
 
 OPENSSL=$1
 
 echo_csv_header_row
-echo_ciphers_as_csv $OPENSSL modern_cipher_dump ||
-    echo_ciphers_as_csv $OPENSSL legacy_cipher_dump
+echo_ciphers_as_csv "$OPENSSL" modern_cipher_dump ||
+    echo_ciphers_as_csv "$OPENSSL" legacy_cipher_dump

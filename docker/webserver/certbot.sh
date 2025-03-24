@@ -4,26 +4,26 @@ set -x
 
 # request initial TLS certificates from letsencrypt
 
-if [ $LETSENCRYPT_STAGING != "0" ]; then
+if [ "$LETSENCRYPT_STAGING" != "0" ]; then
   staging="--staging"
 fi
 
-if [ ! -z $LETSENCRYPT_EMAIL ]; then
+if [ -n "$LETSENCRYPT_EMAIL" ]; then
   email="--email=$LETSENCRYPT_EMAIL"
 else
   email="--register-unsafely-without-email"
 fi
 
-if [ ! -z $CERTBOT_SERVER ]; then
+if [ -n "$CERTBOT_SERVER" ]; then
   server="--server=$CERTBOT_SERVER"
 fi
 
 
-if [ ! -z $CERTBOT_EAB_KID ]; then
+if [ -n "$CERTBOT_EAB_KID" ]; then
   eab_kid="--eab-kid=$CERTBOT_EAB_KID"
 fi
 
-if [ ! -z $CERTBOT_EAB_HMAC_KEY ]; then
+if [ -n "$CERTBOT_EAB_HMAC_KEY" ]; then
   eab_hmac_key="--eab-hmac-key=$CERTBOT_EAB_HMAC_KEY"
 fi
 
@@ -42,7 +42,7 @@ if [ "$ENABLE_BATCH" != True ]; then
     subdomains="$subdomains,$language.conn.$domain,$language.conn.ipv6.$domain"
   done
 fi
-if [ ! -z $REDIRECT_DOMAINS ];then
+if [ -n "$REDIRECT_DOMAINS" ];then
   subdomains="$subdomains,$REDIRECT_DOMAINS"
 fi
 
@@ -50,10 +50,10 @@ fi
 # even if the subdomains are not configured.
 configure_letsencrypt() {
   # skip if already configured
-  if [ ! -f /etc/letsencrypt/renewal/$domain.conf ]; then
+  if [ ! -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
 
     # move temporary self signed cert out of the way
-    mv /etc/letsencrypt/live/$domain /etc/letsencrypt/live/$domain.bak
+    mv "/etc/letsencrypt/live/$domain" "/etc/letsencrypt/live/$domain.bak"
 
     # request new certificate for main domain
     /opt/certbot/bin/certbot certonly --webroot \
@@ -64,26 +64,26 @@ configure_letsencrypt() {
       --force-renewal \
       --post-hook "nginx -s reload" \
       --webroot \
-      $staging \
-      $email \
-      $server \
-      $eab_kid \
-      $eab_hmac_key \
-      --cert-name $domain \
-      -d $domain
+      "$staging" \
+      "$email" \
+      "$server" \
+      "$eab_kid" \
+      "$eab_hmac_key" \
+      --cert-name "$domain" \
+      -d "$domain"
     cert_acquired=$?
 
     if [ $cert_acquired -eq 0 ];then
       # remove temporary self signed cert
-      rm -rf /etc/letsencrypt/live/$domain.bak
+      rm -rf "/etc/letsencrypt/live/$domain.bak"
     else
       # move self signed certificate back
-      mv /etc/letsencrypt/live/$domain.bak /etc/letsencrypt/live/$domain
+      mv "/etc/letsencrypt/live/$domain.bak" "/etc/letsencrypt/live/$domain"
     fi
   fi
 
   # update certificate with subdomains if domain is configured and subdomains have changed or are not configured yet
-  if [ -f /etc/letsencrypt/renewal/$domain.conf ] && [ ! "$(cat /etc/letsencrypt/.subdomains-configured)" = "$subdomains" ]; then
+  if [ -f "/etc/letsencrypt/renewal/$domain.conf" ] && [ ! "$(cat /etc/letsencrypt/.subdomains-configured)" = "$subdomains" ]; then
     # request new certificate for subdomains as well, but in a seperate step so we
     # don't fail if they are not properly setup
     /opt/certbot/bin/certbot certonly --webroot \
@@ -94,14 +94,14 @@ configure_letsencrypt() {
       --force-renewal \
       --post-hook "nginx -s reload" \
       --webroot \
-      $staging \
-      $email \
-      $server \
-      $eab_kid \
-      $eab_hmac_key \
-      --cert-name $domain \
-      -d $domain \
-      -d $subdomains \
+      "$staging" \
+      "$email" \
+      "$server" \
+      "$eab_kid" \
+      "$eab_hmac_key" \
+      --cert-name "$domain" \
+      -d "$domain" \
+      -d "$subdomains" \
       --expand
     cert_acquired=$?
 
