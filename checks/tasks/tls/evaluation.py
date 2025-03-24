@@ -1,12 +1,14 @@
 from dataclasses import dataclass
-from typing import List, Optional, Any, Set
+from typing import List, Optional, Any, Set, cast
 
+from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
+from cryptography.x509 import AuthorityInformationAccess, ExtensionNotFound
 from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo, OpenSslEvpPkeyEnum
-from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite
+from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite, CertificateDeploymentAnalysisResult
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
-from checks.models import KexHashFuncStatus, CipherOrderStatus
+from checks.models import KexHashFuncStatus, CipherOrderStatus, OcspStatus
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
@@ -195,6 +197,58 @@ class TLSCipherEvaluation:
     @property
     def score(self) -> scoring.Score:
         return scoring.WEB_TLS_SUITES_BAD if self.ciphers_bad else scoring.WEB_TLS_SUITES_GOOD
+
+
+@dataclass(frozen=True)
+class TLSOCSPEvaluation:
+    """
+    Evaluate the OCSP setup, based on certificate info.
+    """
+
+    ocsp_in_cert: bool
+    has_ocsp_response: bool
+    ocsp_response_trusted: bool
+
+    GOOD_STATUSES = {OcspStatus.good, OcspStatus.not_in_cert}
+
+    @classmethod
+    def from_certificate_deployments(cls, certificate_deployment: CertificateDeploymentAnalysisResult):
+        leaf_cert = certificate_deployment.received_certificate_chain[0]
+        try:
+            aia_extension = leaf_cert.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
+            aia_value = cast(AuthorityInformationAccess, aia_extension.value)
+            ocsp_access = [ad for ad in aia_value if ad.access_method == AuthorityInformationAccessOID.OCSP]
+            ocsp_in_cert = len(ocsp_access) > 0
+        except ExtensionNotFound:
+            ocsp_in_cert = False
+
+        has_ocsp_response = certificate_deployment.ocsp_response is not None
+        ocsp_response_trusted = certificate_deployment.ocsp_response is True
+
+        return cls(
+            ocsp_in_cert=ocsp_in_cert,
+            has_ocsp_response=has_ocsp_response,
+            ocsp_response_trusted=ocsp_response_trusted,
+        )
+
+    @property
+    def status(self) -> OcspStatus:
+        if not self.ocsp_in_cert:
+            return OcspStatus.not_in_cert
+        if self.has_ocsp_response:
+            if self.ocsp_response_trusted:
+                return OcspStatus.good
+            else:
+                return OcspStatus.not_trusted
+        return OcspStatus.ok
+
+    @property
+    def score(self) -> scoring.Score:
+        return (
+            scoring.WEB_TLS_OCSP_STAPLING_GOOD
+            if self.status in self.GOOD_STATUSES
+            else scoring.WEB_TLS_OCSP_STAPLING_BAD
+        )
 
 
 @dataclass(frozen=True)
