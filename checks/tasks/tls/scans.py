@@ -3,7 +3,7 @@ from binascii import hexlify
 from enum import Enum
 from pathlib import Path
 from ssl import match_hostname, CertificateError
-from typing import List, Tuple, Generator, Dict, Any, Optional
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import subprocess
 from cryptography.hazmat._oid import NameOID
@@ -54,7 +54,6 @@ from checks.models import (
     DaneStatus,
     ZeroRttStatus,
     KexHashFuncStatus,
-    OcspStatus,
     CipherOrderStatus,
 )
 from checks.tasks.shared import resolve_dane
@@ -65,6 +64,7 @@ from checks.tasks.tls.evaluation import (
     TLSCipherEvaluation,
     KeyExchangeHashFunctionEvaluation,
     TLSCipherOrderEvaluation,
+    TLSOCSPEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
@@ -728,18 +728,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ),
     )
 
-    ocsp_status = OcspStatus.ok
-    if any(
-        [d.ocsp_response_is_trusted is True for d in result.scan_result.certificate_info.result.certificate_deployments]
-    ):
-        ocsp_status = OcspStatus.good
-    elif any(
-        [
-            d.ocsp_response_is_trusted is False
-            for d in result.scan_result.certificate_info.result.certificate_deployments
-        ]
-    ):
-        ocsp_status = OcspStatus.not_trusted
+    ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
+        result.scan_result.certificate_info.result.certificate_deployments[0]
+    )
 
     probe_result = dict(
         tls_enabled=True,
@@ -787,10 +778,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        ocsp_stapling=ocsp_status,
-        ocsp_stapling_score=(
-            scoring.WEB_TLS_OCSP_STAPLING_GOOD if ocsp_status == OcspStatus.good else scoring.WEB_TLS_OCSP_STAPLING_BAD
-        ),
+        ocsp_stapling=ocsp_evaluation.status,
+        ocsp_stapling_score=ocsp_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
     )

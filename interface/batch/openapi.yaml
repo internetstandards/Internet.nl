@@ -821,6 +821,7 @@ components:
             * `good` - OCSP is supported.
             * `ok` - OCSP is not supported,
             * `not_trusted` - OCSP is supported but the returned data is invalid.
+            * `not_in_cert` - OCSP not enabled in the certificate, therefore OCSP stapling is not required or possible.
 
         x_frame_options_enabled:
           type: boolean

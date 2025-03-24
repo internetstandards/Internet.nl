@@ -549,6 +549,8 @@ def build_report(dttls, category):
                 category.subtests["ocsp_stapling"].result_not_trusted()
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests["ocsp_stapling"].result_ok()
+            elif dttls.ocsp_stapling == OcspStatus.not_in_cert:
+                category.subtests["ocsp_stapling"].result_not_in_cert()
 
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests["kex_hash_func"].result_good()
