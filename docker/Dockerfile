@@ -35,7 +35,6 @@ RUN apt update && \
       flex \
       bison
 
-RUN pip3 install uv
 
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
@@ -70,9 +69,7 @@ COPY requirements.txt /src/
 
 WORKDIR /src
 
-ENV UV_LINK_MODE=copy
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements.txt
+RUN pip3 install --system -r requirements.txt
 # sslyze is installed from our own fork, and installed
 # without deps to avoid it trying to install nassl, when
 # we have our custom nassl
@@ -84,9 +81,7 @@ ARG PYTHON_VERSION
 
 COPY requirements-dev.txt /src/
 
-ENV UV_LINK_MODE=copy
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements-dev.txt
+RUN pip3 install --system -r requirements-dev.txt
 
 # build unbound target
 FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS unbound
