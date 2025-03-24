@@ -86,6 +86,7 @@ class OcspStatus(Enum):
     ok = 0
     good = 1
     not_trusted = 2
+    not_in_cert = 3
 
 
 class ZeroRttStatus(Enum):
