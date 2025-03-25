@@ -394,7 +394,7 @@ def do_mx(self, url, *args, **kwargs):
         if mx_status != MxStatus.has_mx:
             mailservers = []
 
-        for mailserver, _, _ in mailservers:
+        for mailserver, _ in mailservers:
             # Check if we already have cached results.
             cache_id = redis_id.mail_ipv6.id.format(mailserver)
             cache_ttl = redis_id.mail_ipv6.ttl
