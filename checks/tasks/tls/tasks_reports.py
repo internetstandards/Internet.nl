@@ -794,7 +794,7 @@ def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
     if mx_status != MxStatus.has_mx:
         return ("smtp_starttls", {"mx_status": mx_status})
 
-    results = {server: False for server, _, _ in mailservers}
+    results = {server: False for server, _ in mailservers}
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.
@@ -806,15 +806,13 @@ def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
 
-        for server, dane_cb_data, _ in mailservers:
+        for server, _ in mailservers:
             # Pull in any cached results
             cache_id = redis_id.mail_starttls.id.format(server)
             results[server] = cache.get(cache_id, False)
             log.debug(f"=========== pulled {cache_id=} for {server=} data {results[server]}")
         while timer() - start < cache_ttl and (not results or not all(results.values())):
-            servers_to_check = [
-                (server, dane_cb_data) for server, dane_cb_data, _ in mailservers if not results[server]
-            ]
+            servers_to_check = [server for server, _ in mailservers if not results[server]]
             log.debug(f"=========== checking remaining {servers_to_check=}")
             results.update(check_mail_tls_multiple(servers_to_check))
             time.sleep(1)
