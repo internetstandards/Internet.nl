@@ -525,22 +525,25 @@ def simhash(url, task=None):
     distance = SIMHASH_NOT_CALCULABLE
 
     v4_response = None
-    v6_response = None
+    v4_ports = set()
     for port in [80, 443]:
         try:
             v4_response = http_get_af(hostname=url, port=port, af=socket.AF_INET, https=port == 443)
-            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, https=port == 443)
-            break
+            v4_ports.add(port)
         except requests.RequestException:
             pass
 
-    if v4_response is not None and v6_response is None:
-        log.debug("simhash unable to connect on IPv6, but IPv4 worked")
-        return simhash_score, distance, None
+    v6_response = None
+    v6_ports = set()
+    for port in [80, 443]:
+        try:
+            v6_response = http_get_af(hostname=url, port=port, af=socket.AF_INET6, https=port == 443)
+            v6_ports.add(port)
+        except requests.RequestException:
+            pass
 
-    if v4_response is None:
-        # FAIL: Could not establish a connection on both addresses.
-        log.debug("simhash unable to connect on IPv4")
+    if v4_ports != v6_ports:
+        log.debug(f"simhash found different ports on IPv4 ({v4_ports}) and IPv6 ({v6_ports})")
         return simhash_score, distance, v6_response.status_code if v6_response else None
 
     # Regardless of content, status code must be identical (#1267)
