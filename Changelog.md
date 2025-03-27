@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.3
+
+- Updated the [expired PGP key](https://github.com/internetstandards/Internet.nl_content/pull/57).
+
 ## 1.9.2
 
 - Fixed an issue where static files incorrectly required authentication (#1676)
