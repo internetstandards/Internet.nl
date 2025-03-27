@@ -3,6 +3,7 @@ import concurrent.futures
 from binascii import hexlify
 from enum import Enum
 from pathlib import Path
+import socket
 from ssl import match_hostname, CertificateError
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
@@ -213,6 +214,7 @@ def dane(
     for cert in chain:
         chain_pem.append(cert.public_bytes(Encoding.PEM).decode("ascii"))
     chain_txt = "\n".join(chain_pem)
+    resolver = socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)
     with subprocess.Popen(
         [
             settings.LDNS_DANE,
@@ -221,7 +223,7 @@ def dane(
             "-n",  # Do not validate hostname
             "-T",  # Exit status 2 for PKIX without (secure) TLSA records
             "-r",
-            settings.IPV4_IP_RESOLVER_INTERNAL_VALIDATING,  # Use internal unbound resolver
+            resolver,
             "-f",
             settings.CA_CERTIFICATES,  # CA file
             "verify",
