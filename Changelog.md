@@ -42,6 +42,10 @@ docker network rm internetnl-prod_public-internet
 - The fields `caa_enabled`, `caa_errors`, `caa_recommendations` and `caa_found_on_domain` have been added
   ([OpenAPI diff](https://github.com/internetstandards/Internet.nl/commit/cdc642c97f3ef00b4ef8ec7ff6ea4c5403c80978#diff-ccabca18cd3cc1ba3dd325e532acccf5d37c7be317a2966209b6e55b968d4890)).
 
+## 1.9.3
+
+- Updated the [expired PGP key](https://github.com/internetstandards/Internet.nl_content/pull/57).
+  
 ## 1.9.2
 
 - Fixed an issue where static files incorrectly required authentication (#1676)
