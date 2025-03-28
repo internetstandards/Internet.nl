@@ -1,0 +1,24 @@
+.hall-of-fame-section {
+  .container {
+    row-gap: 24px;
+    padding-block: 32px;
+
+    @media (width >= 900px) {
+      row-gap: 48px;
+      padding-block: 64px;
+    }
+  }
+
+  .content {
+    grid-column: span 12;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    text-align: center;
+    
+    @media (width >= 900px) {
+      grid-column: 3 / 11;
+      gap: 16px;
+    }
+  }
+}

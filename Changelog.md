@@ -49,6 +49,10 @@ docker network rm internetnl-prod_public-internet
 ## 1.9.2
 
 - Fixed an issue where static files incorrectly required authentication (#1676)
+### API changes
+
+- The API version was updated to version 2.5.0.
+- The fields `caa_enabled`, `caa_errors`, `caa_recommendations` and `caa_found_on_domain` have been added.
 
 ## 1.9.1
 

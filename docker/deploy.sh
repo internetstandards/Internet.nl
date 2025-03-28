@@ -2,9 +2,7 @@
 
 set -e
 
-./configcheck.sh
-
-cd /opt/Internet.nl/
+cd /opt/Internet.nl
 
 echo "Deploying release: $RELEASE"
 
