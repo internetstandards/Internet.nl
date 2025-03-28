@@ -20,8 +20,9 @@ else:
     string = str
     from subprocess import run
 
+DEFAULT_PO_FILE = "main.po"
 KNOWN_PO_FILES = [
-    ("main.po", []),
+    (DEFAULT_PO_FILE, []),
     ("news.po", ['article', 'author']),
     ("manual_hof.po", ['manual halloffame']),
     ("custom.po", []),
@@ -264,16 +265,13 @@ def read_tar(args):
                 po_entry = polib.POEntry(msgid=msgid, msgstr=content)
 
                 # Check in which file we should save the POEntry
-                target_filename = None
-                for filename, known_strings in KNOWN_PO_FILES:
-                    if not known_strings:
-                        target_filename = filename
-                    else:
-                        for known_string in known_strings:
-                            if po_entry.msgid.startswith(known_string):
-                                target_filename = filename
+                target_filename = DEFAULT_PO_FILE
+                for potential_target_filename, target_msgids in KNOWN_PO_FILES:
+                    for target_msgid in target_msgids:
+                        if po_entry.msgid.startswith(target_msgid):
+                            target_filename = filename
 
-                print(f"Adding {target_filename} to {locale} with entry: {po_entry}.")
+                print(f"Adding to {target_filename} locale {locale} entry: {po_entry.msgid}")
                 read_po_files[locale][target_filename].append(po_entry)
 
                 locales.add(locale)
