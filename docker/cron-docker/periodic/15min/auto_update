@@ -7,7 +7,7 @@ if [ -z "$AUTO_UPDATE_TO" ];then
   exit 0
 fi
 
-cd /opt/Internet.nl/
+cd "$INTERNETNL_INSTALL_BASE"
 
 CURRENT_RELEASE="$RELEASE"
 
@@ -31,8 +31,8 @@ echo "Updating to: $UPSTREAM_RELEASE"
 # as the initiator (cron-docker) will be killed during the deploy process
 docker run --pull=always --network none \
   --volume /var/run/docker.sock:/var/run/docker.sock \
-  --volume $HOME/.docker:/root/.docker \
-  --volume /opt/Internet.nl:/opt/Internet.nl \
+  --volume "$HOME/.docker:/root/.docker" \
+  --volume "$INTERNETNL_INSTALL_BASE:/opt/Internet.nl" \
   --env "DOCKER_REGISTRY=${DOCKER_REGISTRY:-ghcr.io/internetstandards}" \
   "${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:$UPSTREAM_RELEASE" \
   /deploy.sh
