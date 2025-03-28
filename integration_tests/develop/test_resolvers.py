@@ -2,7 +2,7 @@
 
 import pytest
 import subprocess
-from .conftest import ipv6_available
+from ..conftest import ipv6_available
 
 
 def docker_compose_exec(service, command, env="develop"):

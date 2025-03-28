@@ -13,7 +13,6 @@ RUN sed -i 's/periodic/periodic-docker/' /etc/crontabs-docker/root
 COPY docker/cron-docker/periodic /etc/periodic-docker/
 
 # install deploy script
-COPY docker/configcheck.sh /
 COPY docker/deploy.sh /
 
 # package deploy artifacts
