@@ -54,6 +54,16 @@ footer {
     &:hover span {
       border-bottom: 2px solid currentcolor;
     }
+
+    &::before {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: block;
+
+      @media (width >= 900px) {
+        width: 32px;
+        height: 32px;
+      }
+    }
   }
 
   .nav-item a svg {
@@ -109,5 +119,30 @@ footer {
   .footer-social {
     display: flex;
     align-items: center;
+
+    .icon {
+      background-color: var(--green-600);
+      padding: 8px;
+      border-radius: 100%;
+
+      &::after {
+        display: block;
+        background-color: var(--white-100);
+        width: 18px;
+        height: 18px;
+      }
+
+      &.x::after {
+        mask-image: url("/static/icons/x.svg");
+      }
+
+      &.linkedin::after {
+        mask-image: url("/static/icons/linkedin.svg");
+      }
+
+      &.mastodon::after {
+        mask-image: url("/static/icons/mastodon.svg");
+      }
+    }
   }
 }
