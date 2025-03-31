@@ -12,6 +12,15 @@ toggleMenu.addEventListener('click', () => {
   footer.toggleAttribute('inert', menu.classList.contains('active'));
 });
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && menu.classList.contains('active')) {
+    menu.classList.remove('active');
+    toggleMenu.setAttribute('aria-expanded', 'false');
+    main.removeAttribute('inert');
+    footer.removeAttribute('inert');
+  }
+});
+
 /* TOGGLE DROPDOWN MENU */
 const toggleSubMenu = document.getElementById('toggle-subnav');
 const subMenu = document.querySelector('.nav-sublist');

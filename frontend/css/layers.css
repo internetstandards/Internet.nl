@@ -1,0 +1,18 @@
+@layer base, layout, components;
+
+/* Base layer: fundamental styles */
+@import url("variables.css") layer(base);
+@import url("global.css") layer(base);
+
+/* Layout layer: structural elements like header and footer */
+@import url("header.css") layer(layout);
+@import url("footer.css") layer(layout);
+
+/* Components layer: sections and other component styles */
+@import url("components.css") layer(components);
+@import url("about-section.css") layer(components);
+@import url("explanation-section.css") layer(components);
+@import url("faq-section.css") layer(components);
+@import url("hall-of-fame-section.css") layer(components);
+@import url("news-section.css") layer(components);
+@import url("test-section.css") layer(components);

@@ -64,15 +64,19 @@ body {
   font-family: Montserrat, sans-serif;
   background-color: var(--bg-color-1);
   interpolate-size: allow-keywords;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 main {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  margin-bottom: 40px;
 
   @media (width >= 900px) {
     gap: 80px;
+    margin-bottom: 80px;
   }
 }
 
@@ -82,6 +86,7 @@ ul {
 
 a {
   text-decoration: none;
+  display: flex;
 }
 
 button {
@@ -100,6 +105,10 @@ section > .container {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: auto;
+
+  > * {
+    grid-column: span 12;
+  }
 }
 
 .skip-link {
@@ -108,14 +117,14 @@ section > .container {
   z-index: 999;
   padding: 16px;
   background-color: var(--black-100);
-  color: #FFF;
+  color: var(--white-100);
   opacity: 0;
-}
 
-.skip-link:focus {
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 1;
+  &:focus {
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 1;
+  }
 }
 
 body:has(.nav-controls.active) .skip-link {
@@ -131,10 +140,6 @@ body:has(.nav-controls.active) {
 svg {
   min-width: 24px;
   min-height: 24px;
-}
-
-.block.wide {
-  display: none;
 }
 
 section:has(.ellipse-container) {
@@ -238,9 +243,60 @@ section:has(.ellipse-container) {
   }
 }
 
-svg {
-  min-width: 24px;
-  min-height: 24px;
+.light-visible {
+  display: var(--light-visible);
+}
+
+.dark-visible {
+  display: var(--dark-visible);
+}
+
+.card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 24px;
+
+  @media (width >= 900px) {
+    gap: 32px;
+  }
+}
+
+.card {
+  padding: 24px;
+  overflow: clip;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 0;
+  gap: 24px;
+  height: 100%;
+  justify-content: space-between;
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  h2, h3 {
+    font: var(--card-header-2);
+  }
+
+  &:hover h2,
+  &:hover h3 {
+    text-decoration: underline;
+  }
+
+  &.large {
+    @media (width >= 900px) {
+      padding: 40px;
+    }
+
+    .content {
+      gap: 16px;
+    }
+  }
 }
 
 .block.wide {

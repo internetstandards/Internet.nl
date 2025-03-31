@@ -13,6 +13,10 @@ carousel.addEventListener('scroll', () => {
 });
 
 dots.forEach((dot, index) => {
+  const headerId = items[index].querySelector('h3').id;
+  const headerText = document.getElementById(headerId).textContent;
+  dot.querySelector('button').setAttribute('aria-label', `Scroll naar ${headerText}`);
+  
   dot.addEventListener('click', () => {
     items[index].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   });
