@@ -846,7 +846,7 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
         error_trace = getattr(scan_result, "error_trace")
         if error_trace:
             last_error_trace = error_trace
-            log.error(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
+            log.info(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
     if last_error_trace:
         raise TLSException(str(last_error_trace))
 
