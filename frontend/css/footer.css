@@ -20,32 +20,10 @@
 
 .footer-logo {
   transition: opacity 0.3s;
+  height: fit-content;
 
   &:hover {
     opacity: 0.8;
-  }
-
-  svg {
-    .search-icon-background, 
-    .big-text {
-      fill: var(--logo-color-4);
-    }
-
-    .small-grey-text {
-      fill: var(--logo-color-4);
-    }
-
-    .search-icon {
-      fill: var(--logo-color-5);
-    }
-
-    .search-icon-inner {
-      fill: var(--logo-color-4);
-    }
-
-    .small-orange-text {
-      fill: var(--logo-color-4);
-    }
   }
 }
 

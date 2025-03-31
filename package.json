@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@csstools/postcss-cascade-layers": "^5.0.1",
+    "postcss": "^8.5.3",
+    "postcss-import": "^16.1.0"
+  }
+}

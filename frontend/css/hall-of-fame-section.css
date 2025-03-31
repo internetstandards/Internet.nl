@@ -10,7 +10,6 @@
   }
 
   .content {
-    grid-column: span 12;
     display: flex;
     gap: 8px;
     flex-direction: column;

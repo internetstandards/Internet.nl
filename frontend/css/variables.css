@@ -80,9 +80,9 @@
   --card-header-3: var(--heading-font-xs);
   --card-header-4: var(--heading-font-xxs);
   --card-header-5: var(--heading-font-xxs);
-  --card-body-1: var(--body-font-xxs);
+  --card-body-1: var(--body-font-xs);
   --card-body-2: var(--body-font-xxs);
-  --card-body-3: var(--body-font-xs);
+  --card-body-3: var(--body-font-xxs);
   --card-input-1: var(--body-font-s);
 
   /* ACCORDION FONTS MOBILE */
@@ -122,8 +122,8 @@
     --card-header-4: var(--heading-font-xs);
     --card-header-5: var(--heading-font-xxs);
     --card-body-1: var(--body-font-xs);
-    --card-body-2: var(--body-font-xxs);
-    --card-body-3: var(--body-font-xs);
+    --card-body-2: var(--body-font-xs);
+    --card-body-3: var(--body-font-xxs);
     --card-input-1: var(--body-font-s);
 
     /* ACCORDION FONTS DESKTOP */
@@ -203,21 +203,14 @@
     --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
     --ellipse-color-4: linear-gradient(135deg,var(--transparent-200),var(--white-100)) border-box;
 
-    /* LOGO COLORS LIGHTMODE */
-    --logo-color-1: var(--white-100);
-    --logo-color-2: var(--orange-400);
-    --logo-color-3: var(--green-500);
-    --logo-color-4: var(--white-100);
-    --logo-color-5: var(--green-500);
-
     /* ACCORDION COLORS LIGHTMODE */
     --accordion-bg-color: var(--white-100);
     --accordion-heading-color: var(--green-500);
     --accordion-body-color: var(--green-500);
 
     /* IMAGE VISIBILITY LIGHTMODE */
-    --image-visible: block;
-    --image-hidden: none;
+    --light-visible: block;
+    --dark-visible: none;
   }
 }
 
@@ -290,21 +283,14 @@
     --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
     --ellipse-color-4: linear-gradient(45deg,var(--green-600),var(--green-500)) border-box;
 
-    /* LOGO COLORS DARKMODE */
-    --logo-color-1: var(--black-100);
-    --logo-color-2: var(--white-100);
-    --logo-color-3: var(--white-100);
-    --logo-color-4: var(--white-100);
-    --logo-color-5: var(--green-500);
-
     /* ACCORDION COLORS DARKMODE */
     --accordion-bg-color: var(--black-200);
     --accordion-heading-color: var(--white-100);
     --accordion-body-color: var(--white-100);
 
     /* IMAGE VISIBILITY DARKMODE */
-    --image-visible: none;
-    --image-hidden: block;
+    --light-visible: none;
+    --dark-visible: block;
   }
 }
 
@@ -376,21 +362,14 @@
   --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
   --ellipse-color-4: linear-gradient(45deg,var(--transparent-200),var(--white-100)) border-box;
 
-  /* LOGO COLORS LIGHTMODE */
-  --logo-color-1: var(--white-100);
-  --logo-color-2: var(--orange-400);
-  --logo-color-3: var(--green-500);
-  --logo-color-4: var(--white-100);
-  --logo-color-5: var(--green-500);
-
   /* ACCORDION COLORS LIGHTMODE */
   --accordion-bg-color: var(--white-100);
   --accordion-heading-color: var(--green-500);
   --accordion-body-color: var(--green-500);
 
   /* IMAGE VISIBILITY LIGHTMODE */
-  --image-visible: block;
-  --image-hidden: none;
+  --light-visible: block;
+  --dark-visible: none;
 }
 
 [data-theme="dark"] {
@@ -460,13 +439,6 @@
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
   --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
   --ellipse-color-4: linear-gradient(45deg,var(--green-600),var(--green-500)) border-box;
-
-  /* LOGO COLORS DARKMODE */
-  --logo-color-1: var(--black-100);
-  --logo-color-2: var(--white-100);
-  --logo-color-3: var(--white-100);
-  --logo-color-4: var(--white-100);
-  --logo-color-5: var(--green-500);
   
   /* ACCORDION COLORS DARKMODE */
   --accordion-bg-color: var(--black-200);
@@ -474,6 +446,6 @@
   --accordion-body-color: var(--white-100);
 
   /* IMAGE VISIBILITY DARKMODE */
-  --image-visible: none;
-  --image-hidden: block;
+  --light-visible: none;
+  --dark-visible: block;
 }

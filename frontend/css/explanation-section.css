@@ -9,7 +9,6 @@
   }
 
   .content {
-    grid-column: span 12;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -36,7 +35,6 @@
 }
 
 .explanation-list {
-  grid-column: span 12;
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -63,19 +61,18 @@
     padding-bottom: 0;
     grid-row: 1 / 11;
   }
+}
 
-  li {
+.explanation-card {
+  background-color: var(--card-bg-color-2);
+  color: var(--card-heading-color-2);
+
+  &.home-variant {
     flex: 0 0 75%;
     scroll-snap-align: start;
     padding: 32px 24px;
-    display: flex;
-    flex-direction: column;
     gap: 8px;
-    border-radius: 8px;
-    background: var(--card-bg-color-2);
-    position: relative;
-    overflow: clip;
-    z-index: 0;
+    height: auto;
 
     @media (width >= 900px) {
       padding: 48px 24px 32px;
@@ -102,22 +99,23 @@
         align-self: center;
       }
     }
-  }
 
-  h3 {
-    font: var(--card-header-3);
-    color: var(--card-heading-color-2);
-  }
+    h3 {
+      font: var(--card-header-4);
+    }
 
-  /* stylelint-disable-next-line no-descending-specificity */
-  p {
-    font: var(--card-body-2);
-    color: var(--card-body-color-2);
+    p {
+      font: var(--card-body-3);
+    }
+
+    &:hover h3 {
+      text-decoration: none;
+    }
   }
 }
 
+
 .dots {
-  grid-column: span 12;
   display: flex;
   justify-content: center;
   align-items: center;

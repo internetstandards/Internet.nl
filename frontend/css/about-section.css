@@ -1,6 +1,5 @@
 .about-section {
   h2 {
-    grid-column: span 12;
     padding-bottom: 8px;
 
     @media (width >= 900px) {
@@ -9,8 +8,6 @@
   }
 
   p {
-    grid-column: span 12;
-
     @media (width >= 900px) {
       grid-column: 1 / 7;
     }
@@ -29,7 +26,6 @@
     display: none;
 
     @media (width >= 900px) {
-      grid-column: span 12;
       gap: 8px;
       display: flex;
       align-items: center;
@@ -43,7 +39,6 @@
 }
 
 .logo-list {
-  grid-column: span 12;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: auto;
@@ -97,14 +92,6 @@
     
     @media screen and (width >= 900px) {
       max-width: initial;
-    }
-
-    &:first-of-type {
-      display: var(--image-visible);
-    }
-
-    &:last-of-type {
-      display: var(--image-hidden);
     }
 
     &:hover {

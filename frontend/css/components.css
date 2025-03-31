@@ -1,3 +1,4 @@
+/* BUTTONS */
 .primary-button,
 .secondary-button {
   display: flex;
@@ -59,7 +60,6 @@
 .button-container {
   display: flex;
   align-items: center;
-  grid-column: span 12;
   gap: 8px;
   flex-direction: column;
 
@@ -73,6 +73,7 @@
   }
 }
 
+/* ELLIPSES */
 .ellipse {
   border-style: solid;
   border-color: transparent;
