@@ -67,9 +67,22 @@
     font: var(--card-header-1);
     padding-bottom: 24px;
 
-    svg {
-      min-width: 32px;
-      min-height: 32px;
+    &.icon::before {
+      display: block;
+      width: 32px;
+      height: 32px;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
     }
   }
 
@@ -144,6 +157,11 @@
       
       @media (width >= 900px) {
         display: flex;
+      }
+
+      &::after {
+        mask-image: url("/static/icons/arrow-right.svg");
+        display: block;
       }
     }
   }
@@ -264,6 +282,22 @@
     display: flex;
     gap: 16px;
     align-items: center;
+
+    &::before {
+      display: block;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
+    }
   }
 
   .card-content {

@@ -34,6 +34,11 @@
       justify-self: center;
       margin-top: 48px;
       border-bottom: 1px solid currentcolor;
+
+      &::after {
+        mask-image: url("/static/icons/arrow-right.svg");
+        display: block;
+      }
     }
   }
 }
