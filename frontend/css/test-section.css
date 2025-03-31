@@ -184,40 +184,37 @@
       gap: 16px;
       color: var(--card-body-color-1);
       font: var(--section-link-2);
-  
-      svg {
+
+      .icon {
+        padding: 4px;
+        background-color: var(--bg-color-2);
+        border-radius: 100%;
+
+        &::before {
+          mask-image: url("/static/icons/checkmark.svg");
+          display: block;
+          padding: 4px;
+          border-radius: 100%;
+        }
+      }
+    
+      /* svg {
         border-radius: 100%;
         padding: 4px;
         min-width: 24px;
         min-height: 24px;
         background: var(--green-100);
-      }
+      } */
     }
   }
 
   &.connection-variant {
-    #form-connection-test {
-      @media (width >= 900px) {
-        width: 50%;
-      }
+    .button-container {
+      width: auto;
     }
 
-    .connection-button {
-      @media (width >= 900px) {
-        width: 100%;
-      }
-    }
-
-    .secondary-button {
+    .primary-button {
       width: 100%;
-
-      @media (width >= 900px) {
-        width: 50%;
-      }
-
-      &:hover {
-        border: 2px solid var(--button-bg-color-hover-2);
-      }
     }
   }
 
@@ -243,6 +240,12 @@
         border-radius: 4px 0 0 4px;
         display: flex;
         align-items: center;
+
+        &::after {
+          mask-image: url("/static/icons/atsymbol.svg");
+          display: block;
+          background-color: #004654;
+        }
       }
     }
   }
@@ -282,6 +285,7 @@
     display: flex;
     gap: 16px;
     align-items: center;
+    color: var(--card-heading-color-1);
 
     &::before {
       display: block;
@@ -309,12 +313,10 @@
     }
 
     h2, h3 {
-      color: var(--card-heading-color-1);
       font: var(--card-header-4);
     }
 
     p {
-      color: var(--card-body-color-1);
       font: var(--card-body-2);
     }
   }
