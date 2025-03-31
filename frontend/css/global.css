@@ -101,7 +101,7 @@ button {
   padding-inline: 16px;
 }
 
-section > .container {
+[class*="section"]  > .container {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: auto;
@@ -142,13 +142,12 @@ svg {
   min-height: 24px;
 }
 
-section:has(.ellipse-container) {
-  overflow: clip;
+.center-self {
+  place-self: center;
+}
 
-  .container {
-    z-index: 0;
-    position: relative;
-  }
+.center-content {
+  place-content: center;
 }
 
 .heading-accent-color {
@@ -194,6 +193,11 @@ section:has(.ellipse-container) {
   &.color-2 {
     color: var(--heading-color-3);
   }
+}
+
+.section-header-5 {
+  font: var(--section-header-6);
+  color: var(--heading-color-3);
 }
 
 .section-header-6 {
@@ -251,6 +255,21 @@ section:has(.ellipse-container) {
   display: var(--dark-visible);
 }
 
+.card-section {
+  .container {
+    gap: 24px;
+
+    @media (width >= 900px) {
+      gap: 48px;
+    }
+
+    .section-header-2,
+    .secondary-button {
+      justify-self: center;
+    }
+  }
+}
+
 .card-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
@@ -273,14 +292,14 @@ section:has(.ellipse-container) {
   height: 100%;
   justify-content: space-between;
 
-  .content {
+  .card-content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-  }
+    gap: 16px;
 
-  h2, h3 {
-    font: var(--card-header-2);
+    h2, h3 {
+      font: var(--card-header-2);
+    }
   }
 
   &:hover h2,
@@ -289,13 +308,57 @@ section:has(.ellipse-container) {
   }
 
   &.large {
+    transform: translateY(48px);
+    border: var(--card-border-1);
+
     @media (width >= 900px) {
+      transform: translateY(64px);
       padding: 40px;
     }
 
-    .content {
+    .card-content {
       gap: 16px;
+
+      h2, h3 {
+        font: var(--card-header-1);
+      }
+
+      p:not(.card-category):not(.card-date) {
+        font: var(--card-body-4);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+      }
     }
+  }
+
+  .card-category {
+    background-color: var(--white-100);
+    color: var(--green-500);
+    font: var(--card-header-5);
+    border-radius: 4px;
+    padding: 8px 20px;
+    width: fit-content;
+  }
+
+  .card-date {
+    font: var(--card-body-1);
+  }
+}
+
+[class*="section"] {
+  &:has(.ellipse-container) {
+    overflow: clip;
+
+    .container {
+      z-index: 0;
+      position: relative;
+    }
+  }
+
+  &:has(h1):has(.card-list) {
+    margin-bottom: 64px;
   }
 }
 

@@ -63,10 +63,6 @@
   gap: 8px;
   flex-direction: column;
 
-  &.center {
-    justify-content: center;
-  }
-
   @media (width >= 900px) {
     flex-direction: row;
     gap: 24px;

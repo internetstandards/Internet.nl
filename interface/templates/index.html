@@ -37,7 +37,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M3.42692 8.13385C3.42099 8.20042 3.41797 8.26782 3.41797 8.33594V15.6659C3.41797 16.9087 4.42518 17.9159 5.66797 17.9159H18.334C19.5769 17.9159 20.5842 16.9085 20.585 15.6664V8.33594C20.585 8.26755 20.5819 8.19988 20.576 8.13305L12.489 15.0634C12.2082 15.3041 11.7938 15.3041 11.513 15.0634L3.42692 8.13385ZM4.09287 6.7291L12.001 13.5062L19.9096 6.72865C19.5038 6.33105 18.9481 6.08594 18.335 6.08594H5.66797C5.05465 6.08594 4.4987 6.33124 4.09287 6.7291ZM1.91797 8.33594C1.91797 6.26472 3.59676 4.58594 5.66797 4.58594H18.335C20.4062 4.58594 22.085 6.26472 22.085 8.33594V15.6669C22.0837 17.7368 20.4051 19.4159 18.334 19.4159H5.66797C3.59676 19.4159 1.91797 17.7371 1.91797 15.6659V8.33594Z" fill="var(--card-body-color-1)"/>
           </svg>
-          <div class="content">
+          <div class="card-content">
             <h2>Test je e-mail</h2>
             <p>Binnen 30 seconden getest!</p>
           </div>
@@ -53,7 +53,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M5.54472 14.1912L4.89072 14.8452C3.71872 16.0172 3.71872 17.9162 4.89072 19.0882C6.06272 20.2602 7.96172 20.2602 9.13372 19.0882L13.3757 14.8462C14.5477 13.6742 14.5477 11.7752 13.3757 10.6032M9.57972 14.3992C8.40772 13.2272 8.40772 11.3282 9.57972 10.1562L13.8217 5.91416C14.9937 4.74216 16.8927 4.74216 18.0647 5.91416C19.2367 7.08616 19.2367 8.98516 18.0647 10.1572L17.4097 10.8112" stroke="var(--card-body-color-1)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <div class="content">
+            <div class="card-content">
               <h2>Test je verbinding</h2>
               <p>Binnen 30 seconden uitslag!</p>
             </div>
@@ -73,7 +73,7 @@
 {% endblock %}
 
 {% block maincontent %}
-  <section class="explanation-section">
+  <section class="explanation-section home-variant">
     <div class="container">
       <div class="content">
         <h2 class="section-header-3">Waarom zou je jouw <span class="heading-accent-color">standaarden</span> moeten testen?</h2>
@@ -122,7 +122,7 @@
     </div>
   </section>
 
-  <section class="hall-of-fame-section not-full-width colored-section bg-1">
+  <section class="hall-of-fame-section home-variant not-full-width colored-section bg-1">
     <div class="container">
       <div class="content">
         <h2 class="section-header-7">Hall of Fame</h2>
@@ -138,7 +138,7 @@
           </li>
         {% endfor %}
       </ul>
-      <div class="button-container center">
+      <div class="button-container center-content">
         <a class="primary-button" href="/test-site">
           <span>Ik wil mijn domein testen</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -160,7 +160,7 @@
     </div>
   </section>
   
-  <section class="about-section">
+  <section class="about-section home-variant">
     <div class="container">
       <h2 class="section-header-7">Onze missie</h2>
       <p class="section-header-4 color-2">Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
@@ -206,7 +206,7 @@
     </div>
   </section>
 
-  <section class="news-section">
+  <section class="card-section home-variant">
     <div class="container">
       <h2 class="section-header-2 color-1">Laatste nieuws</h2>
       <ul class="card-list">
@@ -216,8 +216,8 @@
           {% expand "article {{article}} lead" as articlelead %}
         <li>
           <a class="card news-card ellipse-color-4" href="/article/{{article}}">
-            <div class="content">
-              <p>{% include "string.html" with name=articledate %}</p>
+            <div class="card-content">
+              <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h3>{% include "string.html" with name=articletitle %}</h3>
             </div>
             <svg class="secondary-rounded-button" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -237,7 +237,7 @@
     </div>
   </section>
 
-  <section class="faq-section">
+  <section class="faq-section home-variant">
     <div class="container">
       <h2 class="section-header-3">Veelgestelde vragen</h2>
       <details class="faq-item">
