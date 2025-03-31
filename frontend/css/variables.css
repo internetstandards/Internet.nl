@@ -21,6 +21,7 @@
   --transparent-300: #0000001A;
   --transparent-400: #FFC17014;
   --transparent-500: #FFFFFF80;
+  --transparent-600: #00000066;
 
   /* FONT FAMILIES */
   --montserrat: 'Montserrat', sans-serif;
@@ -204,6 +205,7 @@
     --card-heading-color-4: var(--white-100);
     --card-body-color-4: var(--white-100);
     --card-border-1: none;
+    --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
 
     /* ELLIPSES LIGHTMODE */
     --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
@@ -286,6 +288,7 @@
     --card-heading-color-4: var(--white-100);
     --card-body-color-4: var(--white-100);
     --card-border-1: 2px solid var(--white-100);
+    --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
 
     /* ELLIPSES DARKMODE */
     --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
@@ -367,6 +370,7 @@
   --card-heading-color-4: var(--white-100);
   --card-body-color-4: var(--white-100);
   --card-border-1: none;
+  --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
 
   /* ELLIPSES LIGHTMODE */
   --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
@@ -447,6 +451,7 @@
   --card-heading-color-4: var(--white-100);
   --card-body-color-4: var(--white-100);
   --card-border-1: 2px solid var(--white-100);
+  --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
   
   /* ELLIPSES DARKMODE */
   --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;

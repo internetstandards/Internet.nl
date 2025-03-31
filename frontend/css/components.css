@@ -58,14 +58,15 @@
 }
 
 .button-container {
-  display: flex;
+  display: grid;
   align-items: center;
   gap: 8px;
-  flex-direction: column;
+  width: 100%;
 
   @media (width >= 900px) {
-    flex-direction: row;
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
+    width: fit-content;
   }
 }
 

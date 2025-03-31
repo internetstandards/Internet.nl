@@ -20,4 +20,64 @@
       gap: 16px;
     }
   }
+
+  .button-container {
+    place-self: center;
+  }
+}
+
+.hall-of-fame-filter {
+  transform: translateY(-125px);
+  margin-inline: 16px;
+
+  @media (width >= 900px) {
+    margin-inline: 0;
+  }
+
+  form {
+    background: var(--bg-color-1);
+    border: var(--card-border-1);
+    box-shadow: var(--card-box-shadow);
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    border-radius: 8px;
+    flex-direction: column;
+    gap: 16px;
+
+    @media (width >= 900px) {
+      grid-column: 3 / 11;
+      width: 100%;
+      gap: 48px;
+      align-items: center;
+      flex-direction: row;
+    }
+
+    label {
+      font: var(--section-header-5);
+      color: var(--heading-color-3);
+    }
+  }
+}
+
+.hosters-section {
+  .container {
+    gap: 64px 32px;
+  }
+  
+  .content {  
+    @media (width >= 900px) {
+      grid-column: 2 / 10;
+    }
+  }
+
+  .image-container {
+    background-color: var(--green-100);
+    border-radius: 100%;
+    padding: 24px 38px;
+
+    @media (width >= 900px) {
+      grid-column: 10 / 13;
+    }
+  }
 }

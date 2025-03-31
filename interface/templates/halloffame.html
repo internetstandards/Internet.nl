@@ -2,7 +2,7 @@
 {%load translate %}
 
 {% block maincontent %}
-<article class="block fullwidth">
+<!-- <article class="block fullwidth">
   <div class="intro">
     <div class="flexblocks champions">
       <div class="flexblock">
@@ -43,5 +43,45 @@
     {% endfor %}
     </ul>
   </div>
-</article>
+</article> -->
+
+<section class="intro-section about colored-section bg-2 not-full-width">
+  <div class="container">
+    <h1>Hall of fame</h1>
+    <p class="section-header-1 color-2">Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je domeinnaam opgenomen in de relevante Hall of Fame</p>
+    <div class="ellipse-container bottom-right ellipse-color-3">
+      <div class="ellipse"></div>
+      <div class="ellipse"></div>
+      <div class="ellipse"></div>
+    </div>
+  </div>
+</section>
+
+<search class="hall-of-fame-filter section">
+  <div class="container">
+    <form action="/">
+      <label>Filter op:</label>
+      <div class="button-container">
+        <button class="primary-button" type="submit">
+          Hosters
+        </button>
+        <button class="secondary-button" type="submit">
+          Kampioenen
+        </button>
+      </div>
+    </form>
+  </div>
+</search>
+
+<section class="hosters-section">
+  <div class="container">
+    <div class="content">
+      <h2>Hosters</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus.</p>
+    </div>
+    <div class="image-container">
+      <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
+    </div>
+  </div>
+</section>
 {% endblock %}

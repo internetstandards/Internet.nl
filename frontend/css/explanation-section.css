@@ -53,6 +53,7 @@
       text-align: center;
       font: var(--section-link-2);
       font-weight: 500;
+      color: var(--body-color-1);
     }
   }
 }
