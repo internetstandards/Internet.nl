@@ -76,6 +76,13 @@ header {
   @media (scripting: none) {
     display: none;
   }
+
+  &::after {
+    mask-image: url("/static/icons/hamburger.svg");
+    display: block;
+    width: 32px;
+    height: 32px;
+  }
 }
 
 header:has(.active) {
@@ -90,6 +97,10 @@ header:has(.active) {
   .header-logo-toggle-controls {
     padding: 20px 16px;
     border-radius: 0 0 16px 16px;
+  }
+
+  .toggle-menu::after {
+    mask-image: url("/static/icons/close.svg");
   }
 }
 
@@ -324,31 +335,32 @@ header nav {
         font-size: 1rem;
       }
 
-      svg {
-        display: none;
-
+      &::after {
         @media (width >= 900px) {
-          display: initial;
+          display: block;
+          mask-image: url("/static/icons/angle-down.svg");
           transform: rotate(270deg);
         }
       }
     }
   }
 
-  #toggle-subnav svg {
-    transform: rotate(360deg) scale(1.25);
-    transition: 0.3s;
+  #toggle-subnav::after {
+    mask-image: url("/static/icons/angle-down.svg");
+    display: block;
+    transform: scale(1.25);
+    transition: transform 0.3s;
 
     @media (width >= 900px) {
-      transform: rotate(0deg);
+      transform: scale(1);
     }
   }
 
-  &:has(.nav-sublist.expanded) #toggle-subnav svg {
+  &:has(.nav-sublist.expanded) #toggle-subnav::after {
     transform: rotate(180deg) scale(1.25);
 
     @media (width >= 900px) {
-      transform: rotate(0deg);
+      transform: rotate(0deg) scale(1);
     }
   }
 }
@@ -369,6 +381,23 @@ header nav {
   gap: 8px;
   position: relative;
 
+  &::after {
+    mask-image: url("/static/icons/angle-down.svg");
+    display: block;
+    position: absolute;
+    top: 49%;
+    right: 4px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    height: 20px;
+    width: 20px;
+    background-color: var(--nav-mobile-lang-text-color);
+    
+    @media (width >= 900px) {
+      background-color: var(--nav-text-color);
+    }
+  }
+
   select {
     display: flex;
     cursor: pointer;
@@ -384,21 +413,6 @@ header nav {
 
     @media (width >= 900px) {
       background-color: var(--nav-lang-bg-color);
-      color: var(--nav-text-color);
-    }
-  }
-
-  .select-icon {
-    position: absolute;
-    top: 49%;
-    right: 4px;
-    transform: translateY(-50%);
-    pointer-events: none;
-    min-height: 20px;
-    min-width: 20px;
-    color: var(--nav-mobile-lang-text-color);
-    
-    @media (width >= 900px) {
       color: var(--nav-text-color);
     }
   }
@@ -467,34 +481,30 @@ header nav {
   .switch {
     margin-left: 0;
     margin-right: 4px;
-  }
+    color: var(--green-500);
 
-  .sun-icon {
-    display: none;
-  }
-
-  .moon-icon {
-    display: flex;
+    &::after {
+      mask-image: url("/static/icons/moon.svg");
+      display: block;
+    }
   }
 }
 
 [data-theme="light"] .theme-button {
-    .switch-container {
-      justify-content: left;
+  .switch-container {
+    justify-content: left;
+  }
+
+  .switch {
+    margin-left: 4px;
+    margin-right: 0;
+    color: var(--orange-500);
+
+    &::after {
+      mask-image: url("/static/icons/sun.svg");
+      display: block;
     }
-  
-    .switch {
-      margin-left: 4px;
-      margin-right: 0;
-    }
-  
-    .sun-icon {
-      display: flex;
-    }
-  
-    .moon-icon {
-      display: none;
-    }
+  }
 }
 
 @media (scripting: none) and (prefers-color-scheme: dark) {
@@ -506,14 +516,12 @@ header nav {
     .switch {
       margin-left: 0;
       margin-right: 4px;
-    }
+      color: var(--green-500);
 
-    .sun-icon {
-      display: none;
-    }
-
-    .moon-icon {
-      display: flex;
+      &::after {
+        mask-image: url("/static/icons/moon.svg");
+        display: block;
+      }
     }
   }
 }
@@ -527,14 +535,12 @@ header nav {
     .switch {
       margin-left: 4px;
       margin-right: 0;
-    }
+      color: var(--orange-500);
 
-    .sun-icon {
-      display: flex;
-    }
-
-    .moon-icon {
-      display: none;
+      &::after {
+        mask-image: url("/static/icons/sun.svg");
+        display: block;
+      }
     }
   }
 }

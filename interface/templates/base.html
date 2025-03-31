@@ -70,51 +70,25 @@
           </picture>
         </a>
         {% endif %}
-        <button class="toggle-menu" type="button" aria-controls="nav-controls" aria-expanded="false">
+        <button class="toggle-menu icon large" type="button" aria-controls="nav-controls" aria-expanded="false">
           <span class="open">Menu</span>
-          <svg class="open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M4.1665 5.83333H15.2781M4.1665 10.2767H15.2781M4.1665 14.72H15.2781" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
           <span class="close">Sluiten</span>
-          <svg class="close" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-            <path d="M20.7457 3.32851C20.3552 2.93798 19.722 2.93798 19.3315 3.32851L12.0371 10.6229L4.74275 3.32851C4.35223 2.93798 3.71906 2.93798 3.32854 3.32851C2.93801 3.71903 2.93801 4.3522 3.32854 4.74272L10.6229 12.0371L3.32856 19.3314C2.93803 19.722 2.93803 20.3551 3.32856 20.7457C3.71908 21.1362 4.35225 21.1362 4.74277 20.7457L12.0371 13.4513L19.3315 20.7457C19.722 21.1362 20.3552 21.1362 20.7457 20.7457C21.1362 20.3551 21.1362 19.722 20.7457 19.3315L13.4513 12.0371L20.7457 4.74272C21.1362 4.3522 21.1362 3.71903 20.7457 3.32851Z"/>
-          </svg>
         </button>
       </div>
       <div id="nav-controls" class="nav-controls">
         <nav>
           <ul class="nav-list">
             <li class="nav-item">
-              <button id="toggle-subnav" type="button" aria-controls="nav-sublist" aria-expanded="false">
-                <span>Test tools</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
+              <button id="toggle-subnav" class="icon" type="button" aria-controls="nav-sublist" aria-expanded="false">Test tools</button>
               <ul id="nav-sublist" class="nav-sublist">
                 <li class="nav-subitem">
-                  <a href="/test-site">
-                    <span>Test je website</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
+                  <a class="icon" href="/test-site">Test je website</a>
                 </li>
                 <li class="nav-subitem">
-                  <a href="/test-connection">
-                    <span>Test je verbinding</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
+                  <a class="icon" href="/test-connection">Test je verbinding</a>
                 </li>
                 <li class="nav-subitem">
-                  <a href="/test-mail">
-                    <span>Test je e-mail</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
+                  <a class="icon" href="/test-mail">Test je e-mail</a>
                 </li>
               </ul>
             </li>
@@ -136,7 +110,7 @@
           </ul>
         </nav>
         <div class="language-theme-controls">
-          <form class="language-form" action="/change_language/" method="post">
+          <form class="language-form icon" action="/change_language/" method="post">
             <select id="language-select" name="language" aria-label="Kies een taal">
               {% with user_language=request.current_language_code %}
                 {% for language in LANGUAGES %}
@@ -147,22 +121,12 @@
                 {% endfor %}
               {% endwith %}
             </select>
-              <svg class="select-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
             <button type="submit">Taal wijzigen</button>
           </form>
           <button id="theme-toggle" class="theme-button" type="button">
             <span>Mode</span>
             <span class="switch-container">
-              <span class="switch">
-                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M9.99984 2.22331V3.33498M9.99984 16.6634V17.7743M15.4993 4.50195L14.7133 5.28695M5.28762 14.7135L4.50179 15.4993M4.50179 4.50195L5.28762 5.28695M14.7133 14.7135L15.4993 15.4993M2.22314 10H3.33398M16.6665 10H17.7773M14.444 9.99917C14.444 12.4536 12.4543 14.4433 9.99984 14.4433C7.5454 14.4433 5.55567 12.4536 5.55567 9.99917C5.55567 7.54472 7.5454 5.555 9.99984 5.555C12.4543 5.555 14.444 7.54472 14.444 9.99917Z" stroke="#BC6D07" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M12.0775 3.19661C12.2032 3.72423 12.2874 4.26893 12.2874 4.83593C12.2874 8.70133 9.19309 11.8356 5.37706 11.8356C4.60997 11.8356 3.88564 11.6794 3.19629 11.4457C3.9271 14.5171 6.63914 16.8061 9.89542 16.8061C13.7114 16.8061 16.8058 13.6717 16.8058 9.80641C16.807 6.71677 14.818 4.12455 12.0775 3.19661Z" stroke="#34545F" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
+              <span class="switch icon"></span>
             </span>
           </button>
         </div>
