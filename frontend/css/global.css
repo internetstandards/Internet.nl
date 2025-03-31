@@ -142,16 +142,15 @@ svg {
   min-height: 24px;
 }
 
-.icon {
-  &::after, &::before {
-    content: "";
-    background-color: currentcolor;
-    mask-repeat: no-repeat;
-    mask-size: cover;
-    display: none;
-    width: 24px;
-    height: 24px;
-  }
+.icon::after, 
+.icon::before {
+  content: "";
+  background-color: currentcolor;
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  display: none;
+  width: 24px;
+  height: 24px;
 }
 
 .heading-accent-color {
