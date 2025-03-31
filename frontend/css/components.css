@@ -14,6 +14,22 @@
   @media (width >= 900px) {
     width: auto;
   }
+
+  &::after {
+    mask-image: url("/static/icons/arrow-right.svg");
+    display: block;
+  }
+
+  &.rounded {
+    border-radius: 100%;
+    padding: 6px;
+    border: none;
+    width: fit-content;
+
+    &.secondary-button {
+      background: var(--button-bg-color-5);
+    }
+  }
 }
 
 .primary-button {
@@ -25,7 +41,7 @@
   }
 }
 
-.secondary-button {
+.secondary-button:not(.rounded) {
   color: var(--button-text-color-2);
   border: 2px solid currentcolor;
 
@@ -34,7 +50,7 @@
   }
 }
 
-.primary-rounded-button,
+/* .primary-rounded-button,
 .secondary-rounded-button {
   width: 32px;
   height: 32px;
@@ -55,7 +71,7 @@
 
 .secondary-rounded-button {
   background: var(--button-bg-color-5);
-}
+} */
 
 .button-container {
   display: grid;

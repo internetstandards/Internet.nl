@@ -95,10 +95,6 @@
     }
 
     &::after {
-      content: "";
-      width: 24px;
-      height: 24px;
-      background-color: currentcolor;
       mask-image: url("/static/icons/angle-down.svg");
       display: block;
       transition: transform 0.3s;
@@ -159,6 +155,22 @@
       padding-bottom: 8px;
       font: var(--card-header-3);
       color: var(--card-heading-color-4);
+
+      &::before {
+        display: block;
+      }
+
+      &.mail::before {
+        mask-image: url("/static/icons/envelope.svg");
+      }
+
+      &.help::before {
+        mask-image: url("/static/icons/gear.svg");
+      }
+
+      &.visit::before {
+        mask-image: url("/static/icons/pin.svg");
+      }
     }
 
     /* stylelint-disable-next-line no-descending-specificity */
