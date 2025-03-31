@@ -647,7 +647,7 @@ services:
       - DOCKER_REGISTRY
       - CRON_DAILY_DATABASE_CLEANUP
       - CRON_WORKER_RESTART
-
+      - INTERNETNL_INSTALL_BASE
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -659,7 +659,7 @@ services:
     network_mode: "none"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/Internet.nl:/opt/Internet.nl
+      - $INTERNETNL_INSTALL_BASE:/opt/Internet.nl
 
   grafana:
     platform: linux/amd64
