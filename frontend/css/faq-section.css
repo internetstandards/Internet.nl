@@ -75,8 +75,8 @@
       }
     }
     
-    svg {
-      transform: rotate(180deg);
+    summary::after {
+      transform: rotate(-180deg);
     }
   }
 
@@ -92,6 +92,16 @@
 
     &::-webkit-details-marker {
       display: none;
+    }
+
+    &::after {
+      content: "";
+      width: 24px;
+      height: 24px;
+      background-color: currentcolor;
+      mask-image: url("/static/icons/angle-down.svg");
+      display: block;
+      transition: transform 0.3s;
     }
   }
 }
