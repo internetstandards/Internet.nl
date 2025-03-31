@@ -66,10 +66,12 @@
   --section-header-5: var(--heading-font-xs);
   --section-header-6: var(--heading-font-xxs);
   --section-header-7: var(--heading-font-xxs);
+  --section-header-8: var(--heading-font-xxs);
   --section-body-1: var(--body-font-xs);
   --section-body-2: var(--body-font-xxs);
   --section-body-3: var(--body-font-xxs);
   --section-body-4: var(--body-font-xxs);
+  --section-body-5: var(--body-font-xs);
   --section-button-1: var(--button-link-font-xxs);
   --section-link-1: var(--button-link-font-s);
   --section-link-2: var(--button-link-font-xxs-semibold);
@@ -83,6 +85,7 @@
   --card-body-1: var(--body-font-xs);
   --card-body-2: var(--body-font-xxs);
   --card-body-3: var(--body-font-xxs);
+  --card-body-4: var(--body-font-xxs);
   --card-input-1: var(--body-font-s);
 
   /* ACCORDION FONTS MOBILE */
@@ -107,10 +110,12 @@
     --section-header-5: var(--heading-font-s);
     --section-header-6: var(--heading-font-m);
     --section-header-7: var(--heading-font-xs);
+    --section-header-8: var(--heading-font-s);
     --section-body-1: var(--body-font-s);
     --section-body-2: var(--body-font-s);
     --section-body-3: var(--body-font-xs);
     --section-body-4: var(--body-font-xxs);
+    --section-body-5: var(--body-font-xs);
     --section-button-1: var(--button-link-font-xs);
     --section-link-1: var(--button-link-font-s);
     --section-link-2: var(--button-link-font-xxs-semibold);
@@ -124,6 +129,7 @@
     --card-body-1: var(--body-font-xs);
     --card-body-2: var(--body-font-xs);
     --card-body-3: var(--body-font-xxs);
+    --card-body-4: var(--body-font-s);
     --card-input-1: var(--body-font-s);
 
     /* ACCORDION FONTS DESKTOP */
@@ -163,6 +169,7 @@
     --heading-color-1: var(--green-500);
     --heading-color-2: var(--green-400);
     --heading-color-3: var(--black-200);
+    --heading-color-4: var(--orange-500);
     --body-color-1: var(--black-200);
     --body-color-2: var(--green-500);
 
@@ -196,7 +203,8 @@
     --card-bg-color-4: var(--green-400);
     --card-heading-color-4: var(--white-100);
     --card-body-color-4: var(--white-100);
-    
+    --card-border-1: none;
+
     /* ELLIPSES LIGHTMODE */
     --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
     --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
@@ -239,10 +247,11 @@
     /* GENERAL COLORS DARKMODE */
     --bg-color-1: var(--black-100);
     --bg-color-2: var(--green-600);
-    --bg-color-3: var(--orange-100);
+    --bg-color-3: var(--green-600);
     --heading-color-1: var(--white-100);
     --heading-color-2: var(--green-300);
     --heading-color-3: var(--white-100);
+    --heading-color-4: var(--white-100);
     --body-color-1: var(--white-100);
     --body-color-2: var(--white-100);
 
@@ -276,7 +285,8 @@
     --card-bg-color-4: var(--green-500);
     --card-heading-color-4: var(--white-100);
     --card-body-color-4: var(--white-100);
-    
+    --card-border-1: 2px solid var(--white-100);
+
     /* ELLIPSES DARKMODE */
     --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
     --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
@@ -322,6 +332,7 @@
   --heading-color-1: var(--green-500);
   --heading-color-2: var(--green-400);
   --heading-color-3: var(--black-200);
+  --heading-color-4: var(--orange-500);
   --body-color-1: var(--black-200);
   --body-color-2: var(--green-500);
 
@@ -355,7 +366,8 @@
   --card-bg-color-4: var(--green-400);
   --card-heading-color-4: var(--white-100);
   --card-body-color-4: var(--white-100);
-  
+  --card-border-1: none;
+
   /* ELLIPSES LIGHTMODE */
   --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
@@ -396,10 +408,11 @@
   /* GENERAL COLORS DARKMODE */
   --bg-color-1: var(--black-100);
   --bg-color-2: var(--green-600);
-  --bg-color-3: var(--orange-100);
+  --bg-color-3: var(--green-600);
   --heading-color-1: var(--white-100);
   --heading-color-2: var(--green-300);
   --heading-color-3: var(--white-100);
+  --heading-color-4: var(--white-100);
   --body-color-1: var(--white-100);
   --body-color-2: var(--white-100);
 
@@ -433,6 +446,7 @@
   --card-bg-color-4: var(--green-500);
   --card-heading-color-4: var(--white-100);
   --card-body-color-4: var(--white-100);
+  --card-border-1: 2px solid var(--white-100);
   
   /* ELLIPSES DARKMODE */
   --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;

@@ -1,14 +1,22 @@
 .news-section {
-  .container {
-    gap: 24px;
+  &.page-variant {
+    padding-top: 48px;
 
     @media (width >= 900px) {
-      gap: 48px;
+      padding-top: 88px;
     }
 
-    h2, 
-    .secondary-button {
-      justify-self: center;
+    h1 {
+      padding-bottom: 16px;
+
+      @media (width >= 900px) {
+        padding-bottom: 24px;
+      }
+    }
+
+    > div > p {
+      font: var(--section-header-5);
+      color: var(--body-color-2);
     }
   }
 }
@@ -16,8 +24,4 @@
 .news-card {
   background-color: var(--card-bg-color-3);
   color: var(--card-body-color-3);
-
-  p {
-    font: var(--card-body-1);
-  }
 }
