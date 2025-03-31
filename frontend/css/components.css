@@ -28,6 +28,7 @@
 
     &.secondary-button {
       background: var(--button-bg-color-5);
+      color: var(--green-500);
     }
   }
 }
