@@ -142,14 +142,6 @@ svg {
   min-height: 24px;
 }
 
-.center-self {
-  place-self: center;
-}
-
-.center-content {
-  place-content: center;
-}
-
 .heading-accent-color {
   color: var(--heading-color-2);
 }
