@@ -3,7 +3,7 @@
 {% load translate %}
 
 {% block maincontent %}
-  <article class="block wide">
+  <!-- <article class="block wide">
     <section>
       {% if "INTERNETNL_BRANDING"|get_settings_value %}
       {% include "content.html" with name="about content" %}
@@ -20,5 +20,238 @@
       {% include "content.html" with name="about contact custom" %}
       {% endif %}
     </section>
+  </aside> -->
+
+  <section class="intro-section about colored-section bg-2">
+    <div class="container">
+      <h1>Over ons</h1>
+      <p class="section-header-1 color-2">Wij helpen jou testen en het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten.</p>
+      <div class="ellipse-container bottom-right ellipse-color-3">
+        <div class="ellipse"></div>
+        <div class="ellipse"></div>
+        <div class="ellipse"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section home-variant">
+    <div class="container">
+      <h2 class="section-header-7">Onze missie</h2>
+      <p class="section-header-4 color-2">Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
+      <p class="section-body-1 color-2">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:</p>
+      <ul class="logo-list">
+        <li>
+          <a href="https://surf.nl/" target="_blank" aria-label="Ga naar de website van Surf">
+            <img class="light-visible" src="/static/images/surf.png" alt="Surf logo" loading="lazy" width="100" height="52">
+            <img class="dark-visible" src="/static/images/surf-wit.png" alt="Surf logo" loading="lazy" width="100" height="52">
+          </a>
+        </li>
+        <li>
+          <a href="https://ncsc.nl" target="_blank" aria-label="Ga naar de website van NCSC">
+            <img class="light-visible" src="/static/images/ncsc.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+            <img class="dark-visible" src="/static/images/ncsc-wit.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+          </a>
+        </li>
+        <li>
+          <a href="https://nlnet.nl/" target="_blank" aria-label="Ga naar de website van NLnet">
+            <img class="light-visible" src="/static/images/nlnet.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+            <img class="dark-visible" src="/static/images/nlnet-wit.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+          </a>
+        </li>
+        <li>
+          <a href="https://ripe.net/" target="_blank" aria-label="Ga naar de website van Ripe NCC">
+            <img class="light-visible" src="/static/images/ncc.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+            <img class="dark-visible" src="/static/images/ncc-wit.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+          </a>
+        </li>
+        <li>
+          <a href="https://verenigingvanregistrars.nl/" target="_blank" aria-label="Ga naar de website van VVR">
+            <img class="light-visible" src="/static/images/vvr.png" alt="VVR logo" loading="lazy" width="200" height="46">
+            <img class="dark-visible" src="/static/images/vvr-wit.png" alt="VVR logo" loading="lazy" width="200" height="46">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <aside class="quote-section colored-section not-full-width bg-1">
+    <div class="container">
+      <img src="/static/images/portret-oprichter-internetnl.png" alt="Portret van Coen Wesselman, oprichter van Internet.nl" class="quote-image" loading="lazy" width="100" height="100">
+      <blockquote>
+        <p>“Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.”</p>
+        <cite><strong>Coen Wesselman</strong> - Oprichter Internet.nl</cite>
+      </blockquote>
+      <div class="ellipse-container bottom-right ellipse-color-1">
+        <div class="ellipse"></div>
+        <div class="ellipse"></div>
+        <div class="ellipse"></div>
+      </div>
+    </div>
   </aside>
+
+  <section class="explanation-section home-variant">
+    <div class="container">
+      <div class="content">
+        <h2 class="section-header-3">Waarom zou je jouw <span class="heading-accent-color">standaarden</span> moeten testen?</h2>
+        <p class="section-body-2">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
+      </div>
+      <ul class="explanation-list" id="card-carousel">
+        <li class="card home-variant explanation-card ellipse-color-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M14.0103 5.90625C9.53453 5.90625 5.90625 9.53454 5.90625 14.0103C5.90625 18.486 9.53453 22.1143 14.0103 22.1143C16.2407 22.1143 18.2606 21.2132 19.726 19.7553C19.7308 19.7503 19.7356 19.7453 19.7406 19.7404C19.7454 19.7355 19.7503 19.7307 19.7553 19.726C21.2132 18.2606 22.1143 16.2407 22.1143 14.0103C22.1143 9.53453 18.486 5.90625 14.0103 5.90625ZM21.827 20.413C23.2564 18.67 24.1143 16.4403 24.1143 14.0103C24.1143 8.42997 19.5905 3.90625 14.0103 3.90625C8.42997 3.90625 3.90625 8.42997 3.90625 14.0103C3.90625 19.5905 8.42997 24.1143 14.0103 24.1143C16.4402 24.1143 18.6698 23.2565 20.4128 21.8272L25.9604 27.376C26.3509 27.7665 26.9841 27.7666 27.3746 27.3761C27.7652 26.9856 27.7653 26.3525 27.3748 25.9619L21.827 20.413Z" fill="var(--card-body-color-2)"/>
+          </svg>
+          <h3 id="explanation-dia-1">Beveiligingslekken en kwetsbaarheid opzoeken</h3>
+          <p>Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken. </p>
+          <div class="ellipse singular"></div>
+        </li>
+        <li class="card home-variant explanation-card ellipse-color-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M21.3345 21.332V10.668M16.0012 21.332V14.2227M10.6678 21.332V17.7774M24.4452 28.4427H7.55713C5.3478 28.4427 3.55713 26.652 3.55713 24.4427L3.55713 7.55731C3.55713 5.34798 5.3478 3.55731 7.55713 3.55731L24.4465 3.55731C26.6558 3.55731 28.4465 5.34798 28.4465 7.55731V24.4427C28.4452 26.652 26.6545 28.4427 24.4452 28.4427Z" stroke="var(--card-body-color-2)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3 id="explanation-dia-2">Garanderen van compatibiliteit</h3>
+          <p>Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en optimale ervaring hebben.</p>
+          <div class="ellipse singular"></div>
+        </li>
+        <li class="card home-variant explanation-card ellipse-color-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M19.5556 15.928C19.5556 17.892 17.9636 19.484 15.9996 19.484C14.0356 19.484 12.4436 17.892 12.4436 15.928C12.4436 13.964 14.0356 12.372 15.9996 12.372M5 15.9286C6.88836 11.7363 11.1031 8.81769 15.9996 8.81769C20.896 8.81769 25.1108 11.7363 26.9992 15.9286C25.1108 20.121 20.896 23.0397 15.9996 23.0397C11.1031 23.0397 6.88836 20.121 5 15.9286Z" stroke="var(--card-body-color-2)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3 id="explanation-dia-3">Identificeren van prestatie problemen</h3>
+          <p>Testen helpt bij het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten.</p>
+          <div class="ellipse singular"></div>
+        </li>
+      </ul>
+      <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
+        <li class="dot active"><button type="button"></button></li>
+        <li class="dot"><button type="button"></button></li>
+        <li class="dot"><button type="button"></button></li>
+      </ul>
+      <div class="button-container">
+        <a class="secondary-button" href="/test-site">
+          <span>Ik wil graag testen</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+            <path d="M11.739 4.79567C11.4949 4.55159 11.0992 4.55159 10.8551 4.79567C10.611 5.03975 10.611 5.43547 10.8551 5.67956L11.739 4.79567ZM16.0579 9.99848L16.4998 10.4404C16.6171 10.3231 16.6829 10.1642 16.6829 9.99848C16.6829 9.83265 16.6171 9.67373 16.4998 9.55648L16.0579 9.99848ZM10.8551 14.3173C10.611 14.5614 10.611 14.9571 10.8551 15.2012C11.0992 15.4453 11.4949 15.4453 11.739 15.2012L10.8551 14.3173ZM4.96289 9.37348C4.61772 9.37348 4.33789 9.65323 4.33789 9.99848C4.33789 10.3436 4.61772 10.6235 4.96289 10.6235V9.37348ZM16.0437 10.6235C16.3889 10.6235 16.6687 10.3436 16.6687 9.99848C16.6687 9.65323 16.3889 9.37348 16.0437 9.37348V10.6235ZM10.8551 5.67956L15.6159 10.4404L16.4998 9.55648L11.739 4.79567L10.8551 5.67956ZM15.6159 9.55648L10.8551 14.3173L11.739 15.2012L16.4998 10.4404L15.6159 9.55648ZM4.96289 10.6235H16.0437V9.37348H4.96289V10.6235Z" fill="currentColor"/>
+          </svg>
+        </a>
+        <p>487 succesvolle testen!</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq-section home-variant">
+    <div class="container">
+      <h2 class="section-header-3">Veelgestelde vragen</h2>
+      <details class="faq-item">
+        <summary>
+          <span>What is your return policy?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>What is your return policy?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <p>Yes, we ship worldwide! Shipping costs vary by location.</p>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>What is your return policy?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <p>Once your order is shipped, you'll receive a tracking number via email.</p>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>What is your return policy?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <p>Once your order is shipped, you'll receive a tracking number via email.</p>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>What is your return policy?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18.859 9L12.43 15.43L6 9" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <p>Once your order is shipped, you'll receive a tracking number via email.</p>
+      </details>
+      <a class="secondary-button" href="/">
+        <span>Bekijk alle gestelde vragen</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M11.239 4.79569C10.9949 4.5516 10.5992 4.5516 10.3551 4.79569C10.111 5.03976 10.111 5.43549 10.3551 5.67957L11.239 4.79569ZM15.5579 9.9985L15.9998 10.4404C16.1171 10.3232 16.1829 10.1642 16.1829 9.9985C16.1829 9.83266 16.1171 9.67375 15.9998 9.5565L15.5579 9.9985ZM10.3551 14.3173C10.111 14.5614 10.111 14.9572 10.3551 15.2012C10.5992 15.4453 10.9949 15.4453 11.239 15.2012L10.3551 14.3173ZM4.46289 9.3735C4.11772 9.3735 3.83789 9.65325 3.83789 9.9985C3.83789 10.3437 4.11772 10.6235 4.46289 10.6235V9.3735ZM15.5437 10.6235C15.8889 10.6235 16.1687 10.3437 16.1687 9.9985C16.1687 9.65325 15.8889 9.3735 15.5437 9.3735V10.6235ZM10.3551 5.67957L15.1159 10.4404L15.9998 9.5565L11.239 4.79569L10.3551 5.67957ZM15.1159 9.5565L10.3551 14.3173L11.239 15.2012L15.9998 10.4404L15.1159 9.5565ZM4.46289 10.6235H15.5437V9.3735H4.46289V10.6235Z" fill="currentColor"/>
+        </svg>
+      </a>
+      <article class="contact-card">
+        <h3>Contact met ons</h3>
+        <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+        <ul>
+          <li>
+            <a href="/">
+              <div>
+                <h4>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M2.55981 5.70153L10.0007 12.0782L17.4415 5.70153M15.2782 15.5548H4.72314C3.34231 15.5548 2.22314 14.4357 2.22314 13.0548V6.94653C2.22314 5.5657 3.34231 4.44653 4.72314 4.44653H15.279C16.6598 4.44653 17.779 5.5657 17.779 6.94653V13.0557C17.7782 14.4357 16.659 15.5548 15.2782 15.5548Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Mailen</span>
+                </h4>
+                <p>Contact wanneer het u uitkomt</p>
+              </div>
+              <svg class="secondary-rounded-button" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M11.239 4.79569C10.9949 4.5516 10.5992 4.5516 10.3551 4.79569C10.111 5.03976 10.111 5.43549 10.3551 5.67957L11.239 4.79569ZM15.5579 9.9985L15.9998 10.4404C16.1171 10.3232 16.1829 10.1642 16.1829 9.9985C16.1829 9.83266 16.1171 9.67375 15.9998 9.5565L15.5579 9.9985ZM10.3551 14.3173C10.111 14.5614 10.111 14.9572 10.3551 15.2012C10.5992 15.4453 10.9949 15.4453 11.239 15.2012L10.3551 14.3173ZM4.46289 9.3735C4.11772 9.3735 3.83789 9.65325 3.83789 9.9985C3.83789 10.3437 4.11772 10.6235 4.46289 10.6235V9.3735ZM15.5437 10.6235C15.8889 10.6235 16.1687 10.3437 16.1687 9.9985C16.1687 9.65325 15.8889 9.3735 15.5437 9.3735V10.6235ZM10.3551 5.67957L15.1159 10.4404L15.9998 9.5565L11.239 4.79569L10.3551 5.67957ZM15.1159 9.5565L10.3551 14.3173L11.239 15.2012L15.9998 10.4404L15.1159 9.5565ZM4.46289 10.6235H15.5437V9.3735H4.46289V10.6235Z" fill="currentColor"/>
+            </svg>
+            </a>
+          </li>
+          <li>
+            <a href="/">
+              <div>
+                <h4>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M15.6913 10.0001C15.6913 9.57258 15.6405 9.15841 15.5513 8.75841L16.4913 7.85006C16.9605 7.39589 17.0613 6.68089 16.7347 6.11589C16.408 5.55006 15.7388 5.28006 15.1105 5.45922L13.8513 5.81839C13.2405 5.25589 12.5105 4.82089 11.6988 4.56756L11.3822 3.30089C11.2238 2.66756 10.6547 2.22339 10.0013 2.22339C9.348 2.22339 8.77883 2.66756 8.6205 3.30172L8.30381 4.56756C7.49381 4.82006 6.76631 5.25339 6.15631 5.81422L4.88797 5.45172C4.26047 5.27172 3.59131 5.54255 3.26464 6.10839C2.93797 6.67422 3.03797 7.38922 3.50797 7.84256L4.45214 8.75508C4.36214 9.15675 4.31131 9.57175 4.31131 10.0001C4.31131 10.4251 4.36131 10.8376 4.44964 11.2359L3.50381 12.1509C3.03464 12.6051 2.93381 13.3201 3.26047 13.8851C3.58714 14.4509 4.25631 14.7209 4.88464 14.5417L6.14964 14.1801C6.75881 14.7417 7.48631 15.1759 8.29547 15.4301L8.613 16.6992C8.77133 17.3326 9.3405 17.7767 9.99383 17.7767C10.6472 17.7767 11.2163 17.3326 11.3747 16.6984L11.6905 15.4351C12.503 15.1826 13.2338 14.7484 13.8455 14.1876L15.1072 14.5484C15.7347 14.7276 16.4047 14.4576 16.7305 13.8917C17.0572 13.3259 16.9563 12.6109 16.4872 12.1576L15.5497 11.2509C15.6397 10.8476 15.6913 10.4301 15.6913 10.0001ZM10.0013 12.2217C8.77467 12.2217 7.77964 11.2267 7.77964 10.0001C7.77964 8.77341 8.77467 7.77839 10.0013 7.77839C11.228 7.77839 12.223 8.77341 12.223 10.0001C12.223 11.2267 11.228 12.2217 10.0013 12.2217Z" stroke="white" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Technische hulp</span>
+                </h4>
+                <p>We helpen u graag verder</p>
+              </div>
+              <svg class="secondary-rounded-button" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M11.239 4.79569C10.9949 4.5516 10.5992 4.5516 10.3551 4.79569C10.111 5.03976 10.111 5.43549 10.3551 5.67957L11.239 4.79569ZM15.5579 9.9985L15.9998 10.4404C16.1171 10.3232 16.1829 10.1642 16.1829 9.9985C16.1829 9.83266 16.1171 9.67375 15.9998 9.5565L15.5579 9.9985ZM10.3551 14.3173C10.111 14.5614 10.111 14.9572 10.3551 15.2012C10.5992 15.4453 10.9949 15.4453 11.239 15.2012L10.3551 14.3173ZM4.46289 9.3735C4.11772 9.3735 3.83789 9.65325 3.83789 9.9985C3.83789 10.3437 4.11772 10.6235 4.46289 10.6235V9.3735ZM15.5437 10.6235C15.8889 10.6235 16.1687 10.3437 16.1687 9.9985C16.1687 9.65325 15.8889 9.3735 15.5437 9.3735V10.6235ZM10.3551 5.67957L15.1159 10.4404L15.9998 9.5565L11.239 4.79569L10.3551 5.67957ZM15.1159 9.5565L10.3551 14.3173L11.239 15.2012L15.9998 10.4404L15.1159 9.5565ZM4.46289 10.6235H15.5437V9.3735H4.46289V10.6235Z" fill="currentColor"/>
+            </svg>
+            </a>
+          </li>
+          <li>
+            <a href="/">
+              <div>
+                <h4>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M9.99883 17.775C9.99883 17.775 3.52881 13.8875 3.52881 8.70167C3.52881 5.12164 6.43047 2.21997 10.0105 2.21997C13.5905 2.21997 16.4922 5.12164 16.4922 8.70167C16.4922 13.8875 9.99883 17.775 9.99883 17.775Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10.0105 11.2951C11.4422 11.2951 12.603 10.1344 12.603 8.70264C12.603 7.27081 11.4422 6.11011 10.0105 6.11011C8.57866 6.11011 7.41797 7.27081 7.41797 8.70264C7.41797 10.1344 8.57866 11.2951 10.0105 11.2951Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Bezoeken</span>
+                </h4>
+                <p>Het adres van ons kantoor</p>
+              </div>
+              <svg class="secondary-rounded-button" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M11.239 4.79569C10.9949 4.5516 10.5992 4.5516 10.3551 4.79569C10.111 5.03976 10.111 5.43549 10.3551 5.67957L11.239 4.79569ZM15.5579 9.9985L15.9998 10.4404C16.1171 10.3232 16.1829 10.1642 16.1829 9.9985C16.1829 9.83266 16.1171 9.67375 15.9998 9.5565L15.5579 9.9985ZM10.3551 14.3173C10.111 14.5614 10.111 14.9572 10.3551 15.2012C10.5992 15.4453 10.9949 15.4453 11.239 15.2012L10.3551 14.3173ZM4.46289 9.3735C4.11772 9.3735 3.83789 9.65325 3.83789 9.9985C3.83789 10.3437 4.11772 10.6235 4.46289 10.6235V9.3735ZM15.5437 10.6235C15.8889 10.6235 16.1687 10.3437 16.1687 9.9985C16.1687 9.65325 15.8889 9.3735 15.5437 9.3735V10.6235ZM10.3551 5.67957L15.1159 10.4404L15.9998 9.5565L11.239 4.79569L10.3551 5.67957ZM15.1159 9.5565L10.3551 14.3173L11.239 15.2012L15.9998 10.4404L15.1159 9.5565ZM4.46289 10.6235H15.5437V9.3735H4.46289V10.6235Z" fill="currentColor"/>
+            </svg>
+            </a>
+          </li>
+        </ul>
+      </article>
+      <div class="ellipse-container bottom-left ellipse-color-1 hidden-mobile">
+        <div class="ellipse"></div>
+        <div class="ellipse"></div>
+        <div class="ellipse"></div>
+      </div>
+    </div>
+  </section>
 {% endblock %}

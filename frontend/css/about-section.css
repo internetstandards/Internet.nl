@@ -99,3 +99,54 @@
     }
   }
 }
+
+.intro-section {
+  .container {
+    padding-block: 156px;
+    text-align: center;
+    row-gap: 24px;
+  }
+
+  h1 {
+    font: var(--section-header-8);
+    color: var(--heading-color-4);
+  }
+}
+
+.quote-section {
+  .container {
+    padding-block: 88px;
+    gap: 16px;
+
+    @media (width >= 900px) {
+      align-items: center;
+      gap: 104px;
+    }
+  }
+
+  .quote-image {
+    border-radius: 100%;
+    grid-column: span 1;
+  }
+
+  blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--heading-color-1);
+
+    @media (width >= 900px) {
+      grid-column: span 11;
+      gap: 40px;
+    }
+
+    p {
+      font: var(--section-header-4);
+    }
+
+    cite {
+      font: var(--section-body-5);
+      font-style: normal;
+    }
+  }
+}
