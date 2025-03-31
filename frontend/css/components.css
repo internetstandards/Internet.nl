@@ -93,6 +93,10 @@
   background: var(--ellipse-color-1);
 }
 
+.ellipse-color-3 .ellipse {
+  background: var(--ellipse-color-3);
+}
+
 .ellipse-color-4 .ellipse {
   background: var(--ellipse-color-4);
 }
