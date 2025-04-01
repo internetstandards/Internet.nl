@@ -507,6 +507,7 @@ header nav {
     border-radius: 100%;
     margin-left: 4px;
     background-color: var(--nav-theme-button-color);
+    color: var(--nav-theme-button-bg-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -521,7 +522,6 @@ header nav {
   .switch {
     margin-left: 0;
     margin-right: 4px;
-    color: var(--green-500);
 
     &::after {
       mask-image: url("/static/icons/moon.svg");
@@ -538,7 +538,6 @@ header nav {
   .switch {
     margin-left: 4px;
     margin-right: 0;
-    color: var(--orange-500);
 
     &::after {
       mask-image: url("/static/icons/sun.svg");
@@ -556,7 +555,6 @@ header nav {
     .switch {
       margin-left: 0;
       margin-right: 4px;
-      color: var(--green-500);
 
       &::after {
         mask-image: url("/static/icons/moon.svg");
@@ -575,7 +573,6 @@ header nav {
     .switch {
       margin-left: 4px;
       margin-right: 0;
-      color: var(--orange-500);
 
       &::after {
         mask-image: url("/static/icons/sun.svg");
