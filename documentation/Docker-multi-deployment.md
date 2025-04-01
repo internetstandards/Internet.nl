@@ -23,18 +23,26 @@ Bring down the initial instance and rename it to `dev1`, renaming all existing v
 
     docker compose --project-name internetnl-prod down
     mv /opt/Internet.nl /opt/Internet.nl-dev1
-    cd /var/log/docker/volumes
-    rename 's/prod/dev1/` internetnl-prod_*
+    cd /var/lib/docker/volumes
+    rename 's/prod/dev1/' internetnl-prod_*
     cd /opt/Internet.nl-dev1
     echo INTERNETNL_INSTALL_BASE=/opt/Internet.nl-dev1 >> docker/host.env
-    sed 's/dev-docker/dev1/' docker/host.env
+    sed -i 's/dev-docker/dev1/' docker/host.env
+    sed -i 's/internetnl-prod/internetnl-dev1/' docker/host.env
     docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+
+Add the following lines to `docker/host.env` and change the IP's to the public IP's for the dev1 instances:
+
+    WEBSERVER_PORT=192.0.2.2:80:80
+    WEBSERVER_PORT_TLS=192.0.2.2:443:443
+    WEBSERVER_PORT_IPV6=[2001:db8:1::2]:80:80/tcp
+    WEBSERVER_PORT_IPV6_TLS=[2001:db8:1::2]:443:443/tcp
 
 ## Adding a new instance
 
 To add a new instance copy the configuration directory from the existing instance to a new path, eg:
 
-    cp -r /opt/Internet.nl /opt/Internet.nl-dev2
+    cp -r /opt/Internet.nl-dev1 /opt/Internet.nl-dev2
     cd /opt/Internet.nl-dev2
 
 Modify the `docker/host.env` file with the following steps:
@@ -84,3 +92,17 @@ After the `docker/host.env` file has been modified or recreated, run the followi
       /deploy.sh
 
 *notice*: please note the `/opt/Internet.nl-dev2` path for the `--volume` argument which makes sure this configuration directory is used instead of the normal `/opt/Internet.nl` path. This should also be applied when running update commands from CI.
+
+If you have manually defined user/password added using the `docker/user_manage.sh` script use the following command to copy them over (~note~: this can be done at any time in the future when users are added to the first instance and doesn't require a restart).
+
+    cp /var/lib/docker/volumes/internetnl-dev1_htpasswd-files/_data/users.htpasswd /var/lib/docker/volumes/internetnl-dev2_htpasswd-files/_data/users.htpasswd
+
+## Useful commands
+
+Getting DS records for all instances:
+
+    for i in {1..5}; do docker compose --project-name internetnl-dev$i restart unbound 2>&1;  docker compose --project-name internetnl-dev$i logs unbound 2>&1 | grep -A2 "Please add the following DS records for domain";done | grep "IN	DS"
+
+Copy password file from `dev1` to all other instances
+
+    for i in {2..4}; do cp /var/lib/docker/volumes/internetnl-dev1_htpasswd-files/_data/users.htpasswd /var/lib/docker/volumes/internetnl-dev${i}_htpasswd-files/_data/users.htpasswd; done
