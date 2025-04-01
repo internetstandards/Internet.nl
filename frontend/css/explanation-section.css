@@ -94,6 +94,7 @@
   &.home-variant {
     flex: 0 0 75%;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
     padding: 32px 24px;
     gap: 8px;
     height: auto;

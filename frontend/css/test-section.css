@@ -269,6 +269,14 @@
   @media (width >= 900px) {
     grid-column: 2 / 7;
 
+    &.hall-of-fame-variant {
+      grid-column: span 4;
+
+      &:nth-of-type(2) {
+        grid-column: span 4;
+      }
+    }
+
     &:nth-of-type(2) {
       grid-column: 7 / 12;
     }
@@ -318,6 +326,7 @@
 
     p {
       font: var(--card-body-2);
+      color: var(--card-body-color-1);
     }
   }
 }
