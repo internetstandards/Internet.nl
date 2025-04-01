@@ -155,7 +155,7 @@ body:has(.nav-controls.active) {
 }
 
 .section-header-1 {
-  font: var(--section-header-1);
+  font: var(--section-header-xxl);
 
   &.color-1 {
     color: var(--heading-color-1);
@@ -167,7 +167,7 @@ body:has(.nav-controls.active) {
 }
 
 .section-header-2 {
-  font: var(--section-header-2);
+  font: var(--section-header-xl);
 
   &.color-1 {
     color: var(--heading-color-1);
@@ -179,12 +179,12 @@ body:has(.nav-controls.active) {
 }
 
 .section-header-3 {
-  font: var(--section-header-3);
+  font: var(--section-header-l);
   color: var(--heading-color-1);
 }
 
 .section-header-4 {
-  font: var(--section-header-4);
+  font: var(--section-header-m);
 
   &.color-1 {
     color: var(--heading-color-1);
@@ -196,22 +196,22 @@ body:has(.nav-controls.active) {
 }
 
 .section-header-5 {
-  font: var(--section-header-6);
+  font: var(--section-header-xs);
   color: var(--heading-color-3);
 }
 
 .section-header-6 {
-  font: var(--section-header-6);
+  font: var(--section-header-xs);
   color: var(--heading-color-3);
 }
 
 .section-header-7 {
-  font: var(--section-header-7);
+  font: var(--section-header-xxs);
   color: var(--heading-color-2);
 }
 
 .section-body-1 {
-  font: var(--section-body-1);
+  font: var(--section-body-xl);
 
   &.color-1 {
     color: var(--body-color-1);
@@ -223,7 +223,7 @@ body:has(.nav-controls.active) {
 }
 
 .section-body-2 {
-  font: var(--section-body-1);
+  font: var(--section-body-xl);
   color: var(--body-color-1);
 }
 
@@ -244,6 +244,23 @@ body:has(.nav-controls.active) {
 
   &.bg-2 {
     background-color: var(--bg-color-3);
+  }
+}
+
+.intro-section {
+  .container {
+    text-align: center;
+    row-gap: 24px;
+    padding-block: 59px;
+
+    @media (width >= 900px) {
+      padding-block: 156px;
+    }
+  }
+
+  h1 {
+    font: var(--section-header-xxxs);
+    color: var(--heading-color-4);
   }
 }
 
@@ -298,7 +315,7 @@ body:has(.nav-controls.active) {
     gap: 16px;
 
     h2, h3 {
-      font: var(--card-header-2);
+      font: var(--card-header-l);
     }
   }
 
@@ -309,7 +326,7 @@ body:has(.nav-controls.active) {
 
   &.large {
     transform: translateY(48px);
-    border: var(--card-border-1);
+    border: var(--card-border);
 
     @media (width >= 900px) {
       transform: translateY(64px);
@@ -320,11 +337,11 @@ body:has(.nav-controls.active) {
       gap: 16px;
 
       h2, h3 {
-        font: var(--card-header-1);
+        font: var(--card-header-xl);
       }
 
       p:not(.card-category):not(.card-date) {
-        font: var(--card-body-4);
+        font: var(--card-body-xs);
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;  
@@ -336,14 +353,14 @@ body:has(.nav-controls.active) {
   .card-category {
     background-color: var(--white-100);
     color: var(--green-500);
-    font: var(--card-header-5);
+    font: var(--card-header-xs);
     border-radius: 4px;
     padding: 8px 20px;
     width: fit-content;
   }
 
   .card-date {
-    font: var(--card-body-1);
+    font: var(--card-body-l);
   }
 }
 

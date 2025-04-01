@@ -23,34 +23,30 @@
   --transparent-500: #FFFFFF80;
   --transparent-600: #0000000A;
 
-  /* FONT FAMILIES */
-  --montserrat: 'Montserrat', sans-serif;
-  --roboto: 'Roboto', sans-serif;
-
   /* HEADING FONTS */
-  --heading-font-xxs: 700 0.875rem/1.5 var(--montserrat); /* 14px */
-  --heading-font-xxs-semibold: 500 0.875rem/1.5 var(--montserrat); /* 14px */
-  --heading-font-xs: 700 1rem/1.5 var(--montserrat); /* 16px */
-  --heading-font-s: 700 1.25rem/1.5 var(--montserrat); /* 20px */
-  --heading-font-m: 700 1.5rem/1.3 var(--montserrat); /* 24px */
-  --heading-font-l: 700 2rem/1.3 var(--montserrat); /* 32px */
-  --heading-font-xl: 700 2.5rem/1.3 var(--montserrat); /* 40px */
+  --heading-font-xxs: 700 0.875rem/1.5 'Montserrat', sans-serif; /* 14px */
+  --heading-font-xxs-semibold: 500 0.875rem/1.5 'Montserrat', sans-serif; /* 14px */
+  --heading-font-xs: 700 1rem/1.5 'Montserrat', sans-serif; /* 16px */
+  --heading-font-s: 700 1.25rem/1.5 'Montserrat', sans-serif; /* 20px */
+  --heading-font-m: 700 1.5rem/1.3 'Montserrat', sans-serif; /* 24px */
+  --heading-font-l: 700 2rem/1.3 'Montserrat', sans-serif; /* 32px */
+  --heading-font-xl: 700 2.5rem/1.3 'Montserrat', sans-serif; /* 40px */
 
   /* BODY FONTS */
-  --body-font-xxs: 400 0.875rem/1.5 var(--roboto); /* 14px */
-  --body-font-xxs-bold: 700 0.875rem/1.5 var(--roboto); /* 14px */
-  --body-font-xs: 400 1rem/1.5 var(--roboto); /* 16px */
-  --body-font-xs-bold: 700 1rem/1.5 var(--roboto); /* 16px */
-  --body-font-s: 400 1.125rem/1.75 var(--roboto); /* 18px */
-  --body-font-s-bold: 700 1.125rem/1.75 var(--roboto); /* 18px */
+  --body-font-xxs: 400 0.875rem/1.5 'Roboto', sans-serif; /* 14px */
+  --body-font-xxs-bold: 700 0.875rem/1.5 'Roboto', sans-serif; /* 14px */
+  --body-font-xs: 400 1rem/1.5 'Roboto', sans-serif; /* 16px */
+  --body-font-xs-bold: 700 1rem/1.5 'Roboto', sans-serif; /* 16px */
+  --body-font-s: 400 1.125rem/1.75 'Roboto', sans-serif; /* 18px */
+  --body-font-s-bold: 700 1.125rem/1.75 'Roboto', sans-serif; /* 18px */
 
   /* BUTTON FONTS */
-  --button-link-font-xxs: 700 0.875rem/2 var(--montserrat); /* 14px */
-  --button-link-font-xxs-semibold: 500 0.875rem/2 var(--montserrat); /* 14x */
-  --button-link-font-xs: 700 1rem/2 var(--montserrat); /* 16px */
-  --button-link-font-s: 700 1.125rem/2 var(--montserrat); /* 18px */
-  --button-link-font-m: 700 1.25rem/2 var(--montserrat); /* 20px */
-  --button-link-font-l: 700 1.5rem/2 var(--montserrat); /* 24px */
+  --button-link-font-xxs: 700 0.875rem/2 'Montserrat', sans-serif; /* 14px */
+  --button-link-font-xxs-semibold: 500 0.875rem/2 'Montserrat', sans-serif; /* 14x */
+  --button-link-font-xs: 700 1rem/2 'Montserrat', sans-serif; /* 16px */
+  --button-link-font-s: 700 1.125rem/2 'Montserrat', sans-serif; /* 18px */
+  --button-link-font-m: 700 1.25rem/2 'Montserrat', sans-serif; /* 20px */
+  --button-link-font-l: 700 1.5rem/2 'Montserrat', sans-serif; /* 24px */
 
   /* NAV FONTS MOBILE */
   --nav-link: var(--button-link-font-m);
@@ -60,40 +56,40 @@
   --footer-bar-link: var(--button-link-font-xxs);
 
   /* SECTION FONTS MOBILE */
-  --section-header-1: var(--heading-font-m);
-  --section-header-2: var(--heading-font-s);
-  --section-header-3: var(--heading-font-s);
-  --section-header-4: var(--heading-font-xs);
-  --section-header-5: var(--heading-font-xs);
-  --section-header-6: var(--heading-font-xxs);
-  --section-header-7: var(--heading-font-xxs);
-  --section-header-8: var(--heading-font-xxs);
-  --section-body-1: var(--body-font-xs);
-  --section-body-2: var(--body-font-xxs);
-  --section-body-3: var(--body-font-xxs);
-  --section-body-4: var(--body-font-xxs);
-  --section-body-5: var(--body-font-xs);
-  --section-button-1: var(--button-link-font-xxs);
-  --section-link-1: var(--button-link-font-s);
-  --section-link-2: var(--button-link-font-xxs-semibold);
+  --section-header-xxl: var(--heading-font-m);
+  --section-header-xl: var(--heading-font-s);
+  --section-header-l: var(--heading-font-s);
+  --section-header-m: var(--heading-font-xs);
+  --section-header-s: var(--heading-font-xs);
+  --section-header-xs: var(--heading-font-xxs);
+  --section-header-xxs: var(--heading-font-xxs);
+  --section-header-xxxs: var(--heading-font-xxs);
+  --section-body-xl: var(--body-font-xs);
+  --section-body-l: var(--body-font-xxs);
+  --section-body-m: var(--body-font-xxs);
+  --section-body-s: var(--body-font-xxs);
+  --section-body-xs: var(--body-font-xs);
+  --section-button-l: var(--button-link-font-s);
+  --section-button-m: var(--button-link-font-xs);
+  --section-button-s: var(--button-link-font-xxs-semibold);
 
   /* CARD FONTS MOBILE */
-  --card-header-1: var(--heading-font-s);
-  --card-header-2: var(--heading-font-xs);
-  --card-header-3: var(--heading-font-xs);
-  --card-header-4: var(--heading-font-xxs);
-  --card-header-5: var(--heading-font-xxs);
-  --card-body-1: var(--body-font-xs);
-  --card-body-2: var(--body-font-xxs);
-  --card-body-3: var(--body-font-xxs);
-  --card-body-4: var(--body-font-xxs);
-  --card-input-1: var(--body-font-s);
+  --card-header-xl: var(--heading-font-s);
+  --card-header-l: var(--heading-font-xs);
+  --card-header-m: var(--heading-font-xs);
+  --card-header-s: var(--heading-font-xxs);
+  --card-header-xs: var(--heading-font-xxs);
+  --card-body-l: var(--body-font-xs);
+  --card-body-m: var(--body-font-xxs);
+  --card-body-s: var(--body-font-xxs);
+  --card-body-xs: var(--body-font-xxs);
+  --card-input: var(--body-font-s);
 
   /* ACCORDION FONTS MOBILE */
-  --accordion-header-1: var(--heading-font-xxs);
-  --accordion-header-2: var(--heading-font-xxs-semibold);
-  --accordion-body-1: var(--body-font-xxs);
-  --accordion-body-2: var(--body-font-xxs-semibold);
+  --accordion-header: var(--heading-font-xxs);
+  --accordion-header-semibold: var(--heading-font-xxs-semibold);
+  --accordion-body: var(--body-font-xxs);
+  --accordion-body-semibold: var(--body-font-xxs-semibold);
 
   @media (width >= 900px) {
     /* NAV FONTS DESKTOP */
@@ -104,40 +100,40 @@
     --footer-bar-link: var(--button-link-font-xs);
 
     /* SECTION FONTS DESKTOP */
-    --section-header-1: var(--heading-font-xl);
-    --section-header-2: var(--heading-font-l);
-    --section-header-3: var(--heading-font-m);
-    --section-header-4: var(--heading-font-m);
-    --section-header-5: var(--heading-font-s);
-    --section-header-6: var(--heading-font-m);
-    --section-header-7: var(--heading-font-xs);
-    --section-header-8: var(--heading-font-s);
-    --section-body-1: var(--body-font-s);
-    --section-body-2: var(--body-font-s);
-    --section-body-3: var(--body-font-xs);
-    --section-body-4: var(--body-font-xxs);
-    --section-body-5: var(--body-font-xs);
-    --section-button-1: var(--button-link-font-xs);
-    --section-link-1: var(--button-link-font-s);
-    --section-link-2: var(--button-link-font-xxs-semibold);
+    --section-header-xxl: var(--heading-font-xl);
+    --section-header-xl: var(--heading-font-l);
+    --section-header-l: var(--heading-font-m);
+    --section-header-m: var(--heading-font-m);
+    --section-header-s: var(--heading-font-s);
+    --section-header-xs: var(--heading-font-m);
+    --section-header-xxs: var(--heading-font-xs);
+    --section-header-xxxs: var(--heading-font-s);
+    --section-body-xl: var(--body-font-s);
+    --section-body-l: var(--body-font-s);
+    --section-body-m: var(--body-font-xs);
+    --section-body-s: var(--body-font-xxs);
+    --section-body-xs: var(--body-font-xs);
+    --section-button-l: var(--button-link-font-s);
+    --section-button-m: var(--button-link-font-xs);
+    --section-button-s: var(--button-link-font-xxs-semibold);
 
     /* CARD FONTS DESKTOP */
-    --card-header-1: var(--heading-font-m);
-    --card-header-2: var(--heading-font-s);
-    --card-header-3: var(--heading-font-xs);
-    --card-header-4: var(--heading-font-xs);
-    --card-header-5: var(--heading-font-xxs);
-    --card-body-1: var(--body-font-xs);
-    --card-body-2: var(--body-font-xs);
-    --card-body-3: var(--body-font-xxs);
-    --card-body-4: var(--body-font-s);
-    --card-input-1: var(--body-font-s);
+    --card-header-xl: var(--heading-font-m);
+    --card-header-l: var(--heading-font-s);
+    --card-header-m: var(--heading-font-xs);
+    --card-header-s: var(--heading-font-xs);
+    --card-header-xs: var(--heading-font-xxs);
+    --card-body-l: var(--body-font-xs);
+    --card-body-m: var(--body-font-xs);
+    --card-body-s: var(--body-font-xxs);
+    --card-body-xs: var(--body-font-s);
+    --card-input: var(--body-font-s);
 
     /* ACCORDION FONTS DESKTOP */
-    --accordion-header-1: var(--heading-font-xs);
-    --accordion-header-2: var(--heading-font-xxs-semibold);
-    --accordion-body-1: var(--body-font-xxs);
-    --accordion-body-2: var(--body-font-xxs-semibold);
+    --accordion-header: var(--heading-font-xs);
+    --accordion-header-semibold: var(--heading-font-xxs-semibold);
+    --accordion-body: var(--body-font-xxs);
+    --accordion-body-semibold: var(--body-font-xxs-semibold);
   }
 }
 
@@ -175,43 +171,37 @@
     --body-color-2: var(--green-500);
 
     /* BUTTON COLORS LIGHTMODE */
-    --button-bg-color-1: var(--orange-300);
-    --button-bg-color-hover-1: var(--orange-200);
-    --button-text-color-1: var(--black-200);
-    --button-bg-color-2: var(--transparent-100);
-    --button-bg-color-hover-2: var(--green-400);
-    --button-text-color-2: var(--green-500);
-    --button-bg-color-3: var(--green-500);
-    --button-text-color-3: var(--white-100);
-    --button-bg-color-4: var(--green-200);
-    --button-text-color-4: var(--green-500);
-    --button-bg-color-5: var(--white-100);
-    --button-text-color-5: var(--black-100);
-    --button-bg-color-6: var(--green-100);
-    --button-text-color-6: var(--green-500);
+    --button-bg-color-primary: var(--orange-300);
+    --button-bg-color-hover-primary: var(--orange-200);
+    --button-text-color-primary: var(--black-200);
+    --button-bg-color-secondary: var(--transparent-100);
+    --button-bg-color-hover-secondary: var(--green-400);
+    --button-text-color-secondary: var(--green-500);
+    --button-bg-color-contact: var(--green-500);
+    --button-text-color-contact: var(--white-100);
+    --button-bg-color-hoster: var(--green-100);
+    --button-text-color-hoster: var(--green-500);
 
     /* CARD COLORS LIGHTMODE */
-    --card-bg-color-1: var(--white-100);
-    --card-heading-color-1: var(--green-400);
-    --card-body-color-1: var(--green-500);
-    --card-input-bg-color-1: var(--green-200);
-    --card-bg-color-2: var(--orange-200);
-    --card-heading-color-2: var(--black-200);
-    --card-body-color-2: var(--black-200);
-    --card-bg-color-3: var(--green-100);
-    --card-heading-color-3: var(--green-500);
-    --card-body-color-3: var(--green-500);
-    --card-bg-color-4: var(--green-400);
-    --card-heading-color-4: var(--white-100);
-    --card-body-color-4: var(--white-100);
-    --card-border-1: none;
+    --card-bg-color-test: var(--white-100);
+    --card-heading-color-test: var(--green-400);
+    --card-body-color-test: var(--green-500);
+    --card-input-bg-color-test: var(--green-200);
+    --card-bg-color-explanation: var(--orange-200);
+    --card-heading-color-explanation: var(--black-200);
+    --card-body-color-explanation: var(--black-200);
+    --card-bg-color-news: var(--green-100);
+    --card-heading-color-news: var(--green-500);
+    --card-body-color-news: var(--green-500);
+    --card-bg-color-contact: var(--green-400);
+    --card-heading-color-contact: var(--white-100);
+    --card-body-color-contact: var(--white-100);
+    --card-border: none;
     --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
 
     /* ELLIPSES LIGHTMODE */
-    --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
-    --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
-    --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
-    --ellipse-color-4: linear-gradient(135deg,var(--transparent-200),var(--white-100)) border-box;
+    --ellipse-color-light: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+    --ellipse-color-dark: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
 
     /* ACCORDION COLORS LIGHTMODE */
     --accordion-bg-color: var(--white-100);
@@ -258,42 +248,38 @@
     --body-color-2: var(--white-100);
 
     /* BUTTON COLORS DARKMODE */
-    --button-bg-color-1: var(--orange-300);
-    --button-bg-color-hover-1: var(--orange-200);
-    --button-text-color-1: var(--black-200);
-    --button-bg-color-2: var(--transparent-100);
-    --button-bg-color-hover-2: var(--green-400);
-    --button-text-color-2: var(--white-100);
-    --button-bg-color-3: var(--black-200);
-    --button-text-color-3: var(--white-100);
-    --button-bg-color-4: var(--green-200);
-    --button-text-color-4: var(--green-500);
-    --button-bg-color-5: var(--white-100);
-    --button-text-color-5: var(--black-100);
-    --button-bg-color-6: var(--black-200);
-    --button-text-color-6: var(--white-100);
+    --button-bg-color-primary: var(--orange-300);
+    --button-bg-color-hover-primary: var(--orange-200);
+    --button-text-color-primary: var(--black-200);
+    --button-bg-color-secondary: var(--transparent-100);
+    --button-bg-color-hover-secondary: var(--green-400);
+    --button-text-color-secondary: var(--white-100);
+    --button-bg-color-contact: var(--black-200);
+    --button-text-color-contact: var(--white-100);
+    --button-bg-color-hoster: var(--black-200);
+    --button-text-color-hoster: var(--white-100);
 
     /* CARD COLORS DARKMODE */
-    --card-bg-color-1: var(--black-100);
-    --card-heading-color-1: var(--white-100);
-    --card-body-color-1: var(--white-100);
-    --card-input-bg-color-1: var(--green-500);
-    --card-bg-color-2: var(--green-600);
-    --card-heading-color-2: var(--white-100);
-    --card-body-color-2: var(--white-100);
-    --card-bg-color-3: var(--green-600);
-    --card-heading-color-3: var(--white-100);
-    --card-body-color-3: var(--white-100);
-    --card-bg-color-4: var(--green-500);
-    --card-heading-color-4: var(--white-100);
-    --card-body-color-4: var(--white-100);
-    --card-border-1: 2px solid var(--white-100);
+    --card-bg-color-test: var(--black-100);
+    --card-heading-color-test: var(--white-100);
+    --card-body-color-test: var(--white-100);
+    --card-input-bg-color-test: var(--green-500);
+    --card-bg-color-explanation: var(--green-600);
+    --card-heading-color-explanation: var(--white-100);
+    --card-body-color-explanation: var(--white-100);
+    --card-bg-color-news: var(--green-600);
+    --card-heading-color-news: var(--white-100);
+    --card-body-color-news: var(--white-100);
+    --card-bg-color-contact: var(--green-500);
+    --card-heading-color-contact: var(--white-100);
+    --card-body-color-contact: var(--white-100);
+    --card-border: 2px solid var(--white-100);
     --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
 
     /* ELLIPSES DARKMODE */
-    --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
+    --ellipse-color-light: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
     --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
-    --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+    --ellipse-color-dark: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
     --ellipse-color-4: linear-gradient(45deg,var(--green-600),var(--green-500)) border-box;
 
     /* ACCORDION COLORS DARKMODE */
@@ -340,42 +326,38 @@
   --body-color-2: var(--green-500);
 
   /* BUTTON COLORS LIGHTMODE */
-  --button-bg-color-1: var(--orange-300);
-  --button-bg-color-hover-1: var(--orange-200);
-  --button-text-color-1: var(--black-200);
-  --button-bg-color-2: var(--transparent-100);
-  --button-bg-color-hover-2: var(--green-400);
-  --button-text-color-2: var(--green-500);
-  --button-bg-color-3: var(--green-500);
-  --button-text-color-3: var(--white-100);
-  --button-bg-color-4: var(--green-200);
-  --button-text-color-4: var(--green-500);
-  --button-bg-color-5: var(--white-100);
-  --button-text-color-5: var(--black-100);
-  --button-bg-color-6: var(--green-100);
-  --button-text-color-6: var(--green-500);
+  --button-bg-color-primary: var(--orange-300);
+  --button-bg-color-hover-primary: var(--orange-200);
+  --button-text-color-primary: var(--black-200);
+  --button-bg-color-secondary: var(--transparent-100);
+  --button-bg-color-hover-secondary: var(--green-400);
+  --button-text-color-secondary: var(--green-500);
+  --button-bg-color-contact: var(--green-500);
+  --button-text-color-contact: var(--white-100);
+  --button-bg-color-hoster: var(--green-100);
+  --button-text-color-hoster: var(--green-500);
 
   /* CARD COLORS LIGHTMODE */
-  --card-bg-color-1: var(--white-100);
-  --card-heading-color-1: var(--green-400);
-  --card-body-color-1: var(--green-500);
-  --card-input-bg-color-1: var(--green-200);
-  --card-bg-color-2: var(--orange-200);
-  --card-heading-color-2: var(--black-200);
-  --card-body-color-2: var(--black-200);
-  --card-bg-color-3: var(--green-100);
-  --card-heading-color-3: var(--green-500);
-  --card-body-color-3: var(--green-500);
-  --card-bg-color-4: var(--green-400);
-  --card-heading-color-4: var(--white-100);
-  --card-body-color-4: var(--white-100);
-  --card-border-1: none;
+  --card-bg-color-test: var(--white-100);
+  --card-heading-color-test: var(--green-400);
+  --card-body-color-test: var(--green-500);
+  --card-input-bg-color-test: var(--green-200);
+  --card-bg-color-explanation: var(--orange-200);
+  --card-heading-color-explanation: var(--black-200);
+  --card-body-color-explanation: var(--black-200);
+  --card-bg-color-news: var(--green-100);
+  --card-heading-color-news: var(--green-500);
+  --card-body-color-news: var(--green-500);
+  --card-bg-color-contact: var(--green-400);
+  --card-heading-color-contact: var(--white-100);
+  --card-body-color-contact: var(--white-100);
+  --card-border: none;
   --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
 
   /* ELLIPSES LIGHTMODE */
-  --ellipse-color-1: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
+  --ellipse-color-light: linear-gradient(135deg,var(--white-100),var(--transparent-200)) border-box;
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
-  --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+  --ellipse-color-dark: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
   --ellipse-color-4: linear-gradient(45deg,var(--transparent-200),var(--white-100)) border-box;
 
   /* ACCORDION COLORS LIGHTMODE */
@@ -421,42 +403,38 @@
   --body-color-2: var(--white-100);
 
   /* BUTTON COLORS DARKMODE */
-  --button-bg-color-1: var(--orange-300);
-  --button-bg-color-hover-1: var(--orange-200);
-  --button-text-color-1: var(--black-200);
-  --button-bg-color-2: var(--transparent-100);
-  --button-bg-color-hover-2: var(--green-400);
-  --button-text-color-2: var(--white-100);
-  --button-bg-color-3: var(--black-200);
-  --button-text-color-3: var(--white-100);
-  --button-bg-color-4: var(--green-200);
-  --button-text-color-4: var(--green-500);
-  --button-bg-color-5: var(--white-100);
-  --button-text-color-5: var(--black-100);
-  --button-bg-color-6: var(--black-200);
-  --button-text-color-6: var(--white-100);
+  --button-bg-color-primary: var(--orange-300);
+  --button-bg-color-hover-primary: var(--orange-200);
+  --button-text-color-primary: var(--black-200);
+  --button-bg-color-secondary: var(--transparent-100);
+  --button-bg-color-hover-secondary: var(--green-400);
+  --button-text-color-secondary: var(--white-100);
+  --button-bg-color-contact: var(--black-200);
+  --button-text-color-contact: var(--white-100);
+  --button-bg-color-hoster: var(--black-200);
+  --button-text-color-hoster: var(--white-100);
 
   /* CARD COLORS DARKMODE */
-  --card-bg-color-1: var(--black-100);
-  --card-heading-color-1: var(--white-100);
-  --card-body-color-1: var(--white-100);
-  --card-input-bg-color-1: var(--green-500);
-  --card-bg-color-2: var(--green-600);
-  --card-heading-color-2: var(--white-100);
-  --card-body-color-2: var(--white-100);
-  --card-bg-color-3: var(--green-600);
-  --card-heading-color-3: var(--white-100);
-  --card-body-color-3: var(--white-100);
-  --card-bg-color-4: var(--green-500);
-  --card-heading-color-4: var(--white-100);
-  --card-body-color-4: var(--white-100);
-  --card-border-1: 2px solid var(--white-100);
+  --card-bg-color-test: var(--black-100);
+  --card-heading-color-test: var(--white-100);
+  --card-body-color-test: var(--white-100);
+  --card-input-bg-color-test: var(--green-500);
+  --card-bg-color-explanation: var(--green-600);
+  --card-heading-color-explanation: var(--white-100);
+  --card-body-color-explanation: var(--white-100);
+  --card-bg-color-news: var(--green-600);
+  --card-heading-color-news: var(--white-100);
+  --card-body-color-news: var(--white-100);
+  --card-bg-color-contact: var(--green-500);
+  --card-heading-color-contact: var(--white-100);
+  --card-body-color-contact: var(--white-100);
+  --card-border: 2px solid var(--white-100);
   --card-box-shadow: 0 4px 32px 0 var(--transparent-600);
   
   /* ELLIPSES DARKMODE */
-  --ellipse-color-1: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
+  --ellipse-color-light: linear-gradient(135deg,var(--green-500),var(--green-600)) border-box;
   --ellipse-color-2: linear-gradient(135deg,var(--orange-200),var(--orange-300)) border-box;
-  --ellipse-color-3: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
+  --ellipse-color-dark: linear-gradient(135deg,var(--orange-200),var(--transparent-400)) border-box;
   --ellipse-color-4: linear-gradient(45deg,var(--green-600),var(--green-500)) border-box;
   
   /* ACCORDION COLORS DARKMODE */

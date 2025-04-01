@@ -40,7 +40,7 @@
           {% expand "article {{article}} date" as articledate %}
           {% expand "article {{article}} lead" as articlelead %}
         <li>
-          <a class="card news-card ellipse-color-1 large" href="/article/{{article}}">
+          <a class="card news-card ellipse-color-light large" href="/article/{{article}}">
             <div class="card-content">
               <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h2>{% include "string.html" with name=articletitle %}</h2>
@@ -64,7 +64,7 @@
           {% expand "article {{article}} date" as articledate %}
           {% expand "article {{article}} lead" as articlelead %}
         <li>
-          <a class="card news-card ellipse-color-1" href="">
+          <a class="card news-card ellipse-color-light" href="">
             <div class="card-content">
               <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h3>{% include "string.html" with name=articletitle %}</h3>
@@ -146,7 +146,7 @@
           </li>
         </ul>
       </article>
-      <div class="ellipse-container bottom-left ellipse-color-1 hidden-mobile">
+      <div class="ellipse-container bottom-left ellipse-color-light hidden-mobile">
         <div class="ellipse"></div>
         <div class="ellipse"></div>
         <div class="ellipse"></div>

@@ -43,7 +43,7 @@
 
   form {
     background: var(--bg-color-1);
-    border: var(--card-border-1);
+    border: var(--card-border);
     box-shadow: var(--card-box-shadow);
     display: flex;
     justify-content: center;
@@ -61,7 +61,7 @@
     }
 
     label {
-      font: var(--section-header-5);
+      font: var(--section-header-s);
       color: var(--heading-color-3);
     }
   }
@@ -89,12 +89,12 @@
 
     h2 {
       color: var(--heading-color-1);
-      font: var(--section-header-2);
+      font: var(--section-header-xl);
     }
   
     p {
       color: var(--body-color-1);
-      font: var(--section-body-1);
+      font: var(--section-body-xl);
     }
   }
 
@@ -126,9 +126,9 @@
     text-wrap: nowrap;
     text-overflow: ellipsis;
     padding: 12px 8px;
-    background-color: var(--button-bg-color-6);
-    color: var(--button-text-color-6);
-    font: var(--button-link-font-xs);
+    background-color: var(--button-bg-color-hoster);
+    color: var(--button-text-color-hoster);
+    font: var(--section-button-m);
     border-radius: 4px;
     text-align: center;
     display: block;
