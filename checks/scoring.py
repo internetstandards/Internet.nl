@@ -1,17 +1,22 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from typing import NewType
+
+Status = NewType("Status", int)
+Score = NewType("Score", int)
 
 # --- STATUSES
 #
 # Do not change these values.
 # You can append statuses and then change the ORDERED_STATUSES below.
-STATUS_FAIL = 0
-STATUS_SUCCESS = 1
-STATUS_NOTICE = 2
-STATUS_GOOD_NOT_TESTED = 3
-STATUS_NOT_TESTED = 4
-STATUS_INFO = 5
-STATUS_ERROR = 6
+
+STATUS_FAIL = Status(0)
+STATUS_SUCCESS = Status(1)
+STATUS_NOTICE = Status(2)
+STATUS_GOOD_NOT_TESTED = Status(3)
+STATUS_NOT_TESTED = Status(4)
+STATUS_INFO = Status(5)
+STATUS_ERROR = Status(6)
 
 STATUS_MAX = STATUS_SUCCESS
 
@@ -42,10 +47,10 @@ STATUSES_API_TEXT_MAP = {k: v.replace("-", "_") for k, v in STATUSES_HTML_CSS_TE
 
 # --- SCORES
 #
-FULL_WEIGHT_POINTS = 10  # These are three levels of weighing results.
-HALF_WEIGHT_POINTS = 5  # All three can be used for passed tests, the
-LESS_WEIGHT_POINTS = 2  # difference is the effect on the overall score.
-NO_POINTS = 0
+FULL_WEIGHT_POINTS = Score(10)  # These are three levels of weighing results.
+HALF_WEIGHT_POINTS = Score(5)  # All three can be used for passed tests, the
+LESS_WEIGHT_POINTS = Score(2)  # difference is the effect on the overall score.
+NO_POINTS = Score(0)
 
 
 # You can edit the below values to change the scoring for the subtests.
