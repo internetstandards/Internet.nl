@@ -107,9 +107,13 @@
 
 .intro-section {
   .container {
-    padding-block: 156px;
     text-align: center;
     row-gap: 24px;
+    padding-block: 59px;
+
+    @media (width >= 900px) {
+      padding-block: 156px;
+    }
   }
 
   h1 {

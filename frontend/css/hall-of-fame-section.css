@@ -24,13 +24,20 @@
   .button-container {
     place-self: center;
   }
+
+  @media (width >= 900px) {
+    .hall-of-fame-list {
+      grid-column: span 12;
+    }
+  }
 }
 
 .hall-of-fame-filter {
-  transform: translateY(-125px);
+  transform: translateY(-65px);
   margin-inline: 16px;
 
   @media (width >= 900px) {
+    transform: translateY(-125px);
     margin-inline: 0;
   }
 
@@ -62,12 +69,32 @@
 
 .hosters-section {
   .container {
-    gap: 64px 32px;
+    gap: 32px 16px;
+
+    @media (width >= 900px) {
+      gap: 64px 32px;
+    }
   }
   
-  .content {  
+  .content { 
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+    
     @media (width >= 900px) {
       grid-column: 2 / 10;
+      text-align: start;
+    }
+
+    h2 {
+      color: var(--heading-color-1);
+      font: var(--section-header-2);
+    }
+  
+    p {
+      color: var(--body-color-1);
+      font: var(--section-body-1);
     }
   }
 
@@ -75,9 +102,36 @@
     background-color: var(--green-100);
     border-radius: 100%;
     padding: 24px 38px;
+    place-self: center;
+    order: -1;
 
     @media (width >= 900px) {
-      grid-column: 10 / 13;
+      grid-column: 10 / 12;
+      order: unset;
     }
+  }
+}
+
+.hall-of-fame-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 50%), 1fr));
+  grid-auto-flow: dense;
+  gap: 24px;
+  
+  @media (width >= 900px) {
+    grid-column: 2 / 12;
+  }
+
+  li a {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    padding: 12px 8px;
+    background-color: var(--button-bg-color-6);
+    color: var(--button-text-color-6);
+    font: var(--button-link-font-xs);
+    border-radius: 4px;
+    text-align: center;
+    display: block;
+    overflow: clip;
   }
 }
