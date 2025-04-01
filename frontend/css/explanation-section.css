@@ -15,7 +15,7 @@
     }
 
     > div > p {
-      font: var(--section-header-5);
+      font: var(--section-header-s);
       color: var(--body-color-1);
     }
   }
@@ -51,7 +51,7 @@
 
     .button-container p {
       text-align: center;
-      font: var(--section-link-2);
+      font: var(-section-button-s);
       font-weight: 500;
       color: var(--body-color-1);
     }
@@ -88,8 +88,8 @@
 }
 
 .explanation-card {
-  background-color: var(--card-bg-color-2);
-  color: var(--card-heading-color-2);
+  background-color: var(--card-bg-color-explanation);
+  color: var(--card-heading-color-explanation);
 
   &.home-variant {
     flex: 0 0 75%;
@@ -144,11 +144,11 @@
     }
 
     h3 {
-      font: var(--card-header-4);
+      font: var(--card-header-s);
     }
 
     p {
-      font: var(--card-body-3);
+      font: var(--card-body-s);
     }
 
     &:hover h3 {

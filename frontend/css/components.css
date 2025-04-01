@@ -7,7 +7,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   justify-content: center;
-  font: var(--button-link-font-xs);
+  font: var(--section-button-m);
   transition: 0.3s;
   width: 100%;
 
@@ -27,27 +27,27 @@
     width: fit-content;
 
     &.secondary-button {
-      background: var(--button-bg-color-5);
+      background: var(--white-100);
       color: var(--green-500);
     }
   }
 }
 
 .primary-button {
-  background: var(--button-bg-color-1);
-  color: var(--button-text-color-1);
+  background: var(--button-bg-color-primary);
+  color: var(--button-text-color-primary);
 
   &:hover {
-    background: var(--button-bg-color-hover-1);
+    background: var(--button-bg-color-hover-primary);
   }
 }
 
 .secondary-button:not(.rounded) {
-  color: var(--button-text-color-2);
+  color: var(--button-text-color-secondary);
   border: 2px solid currentcolor;
 
   &:hover {
-    border: 2px solid var(--button-bg-color-hover-2);
+    border: 2px solid var(--button-bg-color-hover-secondary);
   }
 }
 
@@ -84,16 +84,12 @@
   }
 }
 
-.ellipse-color-1 .ellipse {
-  background: var(--ellipse-color-1);
+.ellipse-color-light .ellipse {
+  background: var(--ellipse-color-light);
 }
 
-.ellipse-color-3 .ellipse {
-  background: var(--ellipse-color-3);
-}
-
-.ellipse-color-4 .ellipse {
-  background: var(--ellipse-color-4);
+.ellipse-color-dark .ellipse {
+  background: var(--ellipse-color-dark);
 }
 
 .ellipse-container {

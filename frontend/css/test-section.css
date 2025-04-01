@@ -46,7 +46,7 @@
 }
 
 .test-card-large {
-  background: var(--card-bg-color-1);
+  background: var(--card-bg-color-test);
   padding: 32px 16px;
   border-radius: 8px;
   display: flex;
@@ -63,8 +63,8 @@
     display: flex;
     gap: 16px;
     align-items: center;
-    color: var(--card-heading-color-1);
-    font: var(--card-header-1);
+    color: var(--card-heading-color-test);
+    font: var(--card-header-xl);
     padding-bottom: 24px;
 
     &.icon::before {
@@ -101,8 +101,8 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    color: var(--card-body-color-1);
-    font: var(--card-header-5);
+    color: var(--card-body-color-test);
+    font: var(--card-header-xs);
     padding-bottom: 16px;
     
     @media (width >= 900px) {
@@ -114,13 +114,13 @@
   input {
     padding: 8px 16px;
     border-radius: 4px;
-    background: var(--card-input-bg-color-1);
-    font: var(--card-input-1);
-    color: var(--card-body-color-1);
+    background: var(--card-input-bg-color-test);
+    font: var(--card-input);
+    color: var(--card-body-color-test);
     border: 1px solid currentcolor;
 
     &::placeholder {
-      color: var(--card-body-color-1);
+      color: var(--card-body-color-test);
     }
   }
 
@@ -145,8 +145,8 @@
       margin-top: 24px;
       align-items: center;
       gap: 16px;
-      color: var(--card-body-color-1);
-      font: var(--section-link-2);
+      color: var(--card-body-color-test);
+      font: var(-section-button-s);
       width: fit-content;
       border-bottom: 1px solid var(--transparent-100);
       transition: 0.3s;
@@ -182,8 +182,8 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      color: var(--card-body-color-1);
-      font: var(--section-link-2);
+      color: var(--card-body-color-test);
+      font: var(-section-button-s);
 
       .icon {
         padding: 4px;
@@ -256,7 +256,7 @@
     display: flex;
     align-items: center;
     padding: 24px 16px;
-    background: var(--card-bg-color-1);
+    background: var(--card-bg-color-test);
     border-radius: 8px;
     gap: 16px;
     justify-content: space-between;
@@ -293,7 +293,7 @@
     display: flex;
     gap: 16px;
     align-items: center;
-    color: var(--card-heading-color-1);
+    color: var(--card-heading-color-test);
 
     &::before {
       display: block;
@@ -321,12 +321,12 @@
     }
 
     h2, h3 {
-      font: var(--card-header-4);
+      font: var(--card-header-s);
     }
 
     p {
-      font: var(--card-body-2);
-      color: var(--card-body-color-1);
+      font: var(--card-body-m);
+      color: var(--card-body-color-test);
     }
   }
 }

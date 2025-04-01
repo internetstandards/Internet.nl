@@ -29,8 +29,8 @@
       gap: 8px;
       display: flex;
       align-items: center;
-      color: var(--button-text-color-2);
-      font: var(--section-link-1);
+      color: var(--button-text-color-secondary);
+      font: var(--section-button-l);
       justify-self: center;
       margin-top: 48px;
       border-bottom: 1px solid currentcolor;
@@ -105,23 +105,6 @@
   }
 }
 
-.intro-section {
-  .container {
-    text-align: center;
-    row-gap: 24px;
-    padding-block: 59px;
-
-    @media (width >= 900px) {
-      padding-block: 156px;
-    }
-  }
-
-  h1 {
-    font: var(--section-header-8);
-    color: var(--heading-color-4);
-  }
-}
-
 .quote-section {
   .container {
     padding-block: 88px;
@@ -150,11 +133,11 @@
     }
 
     p {
-      font: var(--section-header-4);
+      font: var(--section-header-m);
     }
 
     cite {
-      font: var(--section-body-5);
+      font: var(--section-body-xs);
       font-style: normal;
     }
   }

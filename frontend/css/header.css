@@ -1,9 +1,12 @@
 header {
-  position: sticky;
   top: 0;
   z-index: 1;
   background: var(--nav-bg-color);
   transition: border 0.3s, box-shadow 0.3s;
+
+  @media (scripting: enabled) {
+    position: sticky;
+  }
 
   &.stuck {
     border-bottom: var(--nav-sticky-border);
@@ -264,9 +267,18 @@ header nav {
 
       @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
         @supports (transition-behavior: allow-discrete) {
+          overflow: clip;
           opacity: 0;
-          max-height: 0;
-          transition: max-height 0.3s, opacity 0.3s, display 0.3s, padding 0.3s;
+
+          @supports not (interpolate-size: allow-keywords) {
+            max-height: 0;
+          }
+
+          @supports (interpolate-size: allow-keywords) {
+            height: 0;
+          }
+
+          transition: max-height 0.3s, height 0.3s, opacity 0.3s, display 0.3s, padding 0.3s;
           transition-behavior: allow-discrete;
         }
       }
@@ -291,11 +303,25 @@ header nav {
         @media (prefers-reduced-motion: no-preference) {
           @supports (transition-behavior: allow-discrete) {
             opacity: 1;
-            max-height: 500px;
+
+            @supports not (interpolate-size: allow-keywords) {
+              max-height: 500px;
+            }
+  
+            @supports (interpolate-size: allow-keywords) {
+              height: auto;
+            }
 
             @starting-style {
               opacity: 0;
-              max-height: 0;
+
+              @supports not (interpolate-size: allow-keywords) {
+                max-height: 0;
+              }
+    
+              @supports (interpolate-size: allow-keywords) {
+                height: 0;
+              }
             }
           }
         }
@@ -315,11 +341,25 @@ header nav {
         @media (prefers-reduced-motion: no-preference) {
           @supports (transition-behavior: allow-discrete) {
             opacity: 1;
-            max-height: 500px;
+
+            @supports not (interpolate-size: allow-keywords) {
+              max-height: 500px;
+            }
+
+            @supports (interpolate-size: allow-keywords) {
+              height: auto;
+            }
 
             @starting-style {
               opacity: 0;
-              max-height: 0;
+              
+              @supports not (interpolate-size: allow-keywords) {
+                max-height: 0;
+              }
+    
+              @supports (interpolate-size: allow-keywords) {
+                height: 0;
+              }
             }
           }
         }

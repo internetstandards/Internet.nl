@@ -50,7 +50,7 @@
 
   p {
     padding: 0 16px 16px;
-    font: var(--accordion-body-1);
+    font: var(--accordion-body);
     color: var(--accordion-body-color);
   }
 
@@ -83,7 +83,7 @@
   summary {
     cursor: pointer;
     padding: 16px;
-    font: var(--accordion-header-1);
+    font: var(--accordion-header);
     color: var(--accordion-heading-color);
     list-style: none;
     display: flex;
@@ -104,7 +104,7 @@
 
 .contact-card {
   padding: 32px 16px;
-  background: var(--card-bg-color-4);
+  background: var(--card-bg-color-contact);
   border-radius: 8px;
   align-self: start;
 
@@ -115,14 +115,14 @@
   }
 
   h3 {
-    font: var(--card-header-1);
-    color: var(--card-heading-color-4);
+    font: var(--card-header-xl);
+    color: var(--card-heading-color-contact);
   }
 
   /* stylelint-disable-next-line no-descending-specificity */
   > p {
-    font: var(--card-body-1);
-    color: var(--card-body-color-4);
+    font: var(--card-body-l);
+    color: var(--card-body-color-contact);
     padding-block: 8px 16px;
 
     @media (width >= 900px) {
@@ -139,7 +139,7 @@
   li {
     /* stylelint-disable-next-line no-descending-specificity */
     a {
-      background: var(--button-bg-color-3);
+      background: var(--button-bg-color-contact);
       border-radius: 8px;
       padding: 16px;
       color: inherit;
@@ -153,8 +153,8 @@
       gap: 8px;
       align-items: center;
       padding-bottom: 8px;
-      font: var(--card-header-3);
-      color: var(--card-heading-color-4);
+      font: var(--card-header-m);
+      color: var(--card-heading-color-contact);
 
       &::before {
         display: block;
@@ -175,8 +175,8 @@
 
     /* stylelint-disable-next-line no-descending-specificity */
     p {
-      font: var(--card-body-2);
-      color: var(--card-body-color-4);
+      font: var(--card-body-m);
+      color: var(--card-body-color-contact);
     }
   }
 }
