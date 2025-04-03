@@ -107,26 +107,32 @@
   background: var(--card-bg-color-contact);
   border-radius: 8px;
   align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
   @media (width >= 900px) {
     grid-column: 9 / 13;
     grid-row: 1 / 8;  
     padding: 32px;  
+    gap: 32px;
   }
 
-  h3 {
-    font: var(--card-header-xl);
-    color: var(--card-heading-color-contact);
-  }
-
-  /* stylelint-disable-next-line no-descending-specificity */
-  > p {
-    font: var(--card-body-l);
-    color: var(--card-body-color-contact);
-    padding-block: 8px 16px;
+  > hgroup {
+    gap: 8px;
 
     @media (width >= 900px) {
-      padding-block: 16px 32px
+      gap: 16px;
+    }
+
+    h3 {
+      font: var(--card-header-xl);
+      color: var(--card-heading-color-contact);
+    }
+
+    p {
+      font: var(--card-body-l);
+      color: var(--card-body-color-contact);
     }
   }
 
@@ -148,11 +154,14 @@
       align-items: center;
     }
 
+    hgroup {
+      gap: 8px;
+    }
+
     h4 {
       display: flex;
       gap: 8px;
       align-items: center;
-      padding-bottom: 8px;
       font: var(--card-header-m);
       color: var(--card-heading-color-contact);
 

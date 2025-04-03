@@ -8,9 +8,7 @@
     }
   }
 
-  .content {
-    display: flex;
-    flex-direction: column;
+  hgroup {
     gap: 16px;
 
     @media (width >= 900px) {

@@ -15,7 +15,7 @@
     width: auto;
   }
 
-  &::after {
+  &:not(#load-more)::after {
     mask-image: url("/static/icons/arrow-right.svg");
     display: block;
   }
@@ -51,6 +51,15 @@
   }
 }
 
+#load-more::after {
+  display: block;
+  mask-image: url("/static/icons/plus.svg");
+}
+
+#load-more.hidden {
+  display: none;
+}
+
 .button-container {
   display: grid;
   align-items: center;
@@ -72,11 +81,11 @@
     padding-top: 88px;
   }
 
-  h1 {
-    padding-bottom: 16px;
+  hgroup {
+    gap: 16px;
 
     @media (width >= 900px) {
-      padding-bottom: 24px;
+      gap: 24px;
     }
   }
 }

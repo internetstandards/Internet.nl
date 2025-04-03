@@ -47,33 +47,31 @@
 
 <section class="intro-section bg-secondary ellipse reverse">
   <div class="container">
-    <p class="h5 color-alt">Hall of fame</h1>
-    <h1 class="h1">Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je domeinnaam opgenomen in de relevante Hall of Fame</p>
+    <hgroup>
+      <h1 class="h5 color-alt">Hall of fame</h1>
+      <p class="h1">Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je domeinnaam opgenomen in de relevante Hall of Fame</p>
+    </hgroup>
   </div>
 </section>
 
-<search class="hall-of-fame-filter section">
+<search class="filter-section">
   <div class="container">
-    <form action="/">
-      <label>Filter op:</label>
+    <div class="filter-container">
+      <h2 class="h5 color-secondary">Filter op:</h2>
       <div class="button-container">
-        <button class="primary-button" type="submit">
-          Hosters
-        </button>
-        <button class="secondary-button" type="submit">
-          Kampioenen
-        </button>
+        <a class="primary-button" href="/halloffame">Kampioenen</a>
+        <a class="secondary-button" href="/halloffame/hosters">Hosters</a>
       </div>
-    </form>
+    </div>
   </div>
 </search>
 
 <section class="hosters-section">
   <div class="container">
-    <div class="content">
+    <hgroup>
       <h2 class="h2 color-secondary">Hosters</h2>
       <p class="body-xl">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus.</p>
-    </div>
+    </hgroup>
     <div class="image-container">
       <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
     </div>
@@ -108,16 +106,16 @@
   </div>
 </section>
 
-<section class="test-section page-variant secondary bg-primary">
+<section class="test-section secondary bg-primary">
   <div class="container">
     <h2 class="h3 color-secondary">Wat wil je testen?</h2>
     <article class="test-card-small hall-of-fame-variant">
       <a href="/test-connection">
         <div class="card-container icon domain">
-          <div class="card-content">
+          <hgroup>
             <h3>Test je website domein</h3>
             <p>487 succesvolle testen uitgevoerd deze week!</p>
-          </div>
+          </hgroup>
         </div>
         <div class="primary-button rounded icon"></div>
       </a>
@@ -125,10 +123,10 @@
     <article class="test-card-small hall-of-fame-variant">
       <a href="/test-mail">
         <div class="card-container mail icon">
-          <div class="card-content">
+          <hgroup>
             <h3>Test je e-mail</h3>
             <p>537 testen met 100% score deze week!</p>
-          </div>
+          </hgroup>
         </div>
         <div class="primary-button rounded icon"></div>
       </a>
@@ -136,10 +134,10 @@
     <article class="test-card-small hall-of-fame-variant">
       <a href="/test-connection">
         <div class="card-container connection icon">
-          <div class="card-content">
+          <hgroup>
             <h3>Test je verbinding</h3>
             <p>573 testen met 100% score deze week!</p>
-          </div>
+          </hgroup>
         </div>
         <div class="primary-button rounded icon"></div>
       </a>
@@ -182,33 +180,35 @@
     </details>
     <a class="secondary-button icon" href="/">Bekijk alle gestelde vragen</a>
     <article class="contact-card">
-      <h3>Contact met ons</h3>
-      <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+      <hgroup>
+        <h3>Contact met ons</h3>
+        <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+      </hgroup>
       <ul>
         <li>
           <a href="/">
-            <div>
+            <hgroup>
               <h4 class="mail icon">Mailen</h4>
               <p>Contact wanneer het u uitkomt</p>
-            </div>
+            </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
         <li>
           <a href="/">
-            <div>
+            <hgroup>
               <h4 class="help icon">Technische hulp</h4>
               <p>We helpen u graag verder</p>
-            </div>
+            </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
         <li>
           <a href="/">
-            <div>
+            <hgroup>
               <h4 class="visit icon">Bezoeken</h4>
               <p>Het adres van ons kantoor</p>
-            </div>
+            </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
