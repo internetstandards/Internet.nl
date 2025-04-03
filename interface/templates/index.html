@@ -19,10 +19,10 @@
       <article class="test-card-small home-variant">
         <a href="/test-mail">
         <div class="card-container mail icon">
-          <div class="card-content">
+          <hgroup>
             <h2>Test je e-mail</h2>
             <p>Binnen 30 seconden getest!</p>
-          </div>
+          </hgroup>
         </div>
         <div class="primary-button rounded icon"></div>
         </a>
@@ -30,10 +30,10 @@
       <article class="test-card-small home-variant">
         <a href="/test-connection">
           <div class="card-container connection icon">
-            <div class="card-content">
+            <hgroup>
               <h2>Test je verbinding</h2>
               <p>Binnen 30 seconden uitslag!</p>
-            </div>
+            </hgroup>
           </div>
           <div class="primary-button rounded icon"></div>
         </a>
@@ -45,10 +45,10 @@
 {% block maincontent %}
   <section class="knowledge-section">
     <div class="container">
-      <div class="content">
+      <hgroup>
         <h2 class="h3 color-secondary">Waarom zou je jouw <span class="color-accent">standaarden</span> moeten testen?</h2>
         <p class="body-l">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
-      </div>
+      </hgroup>
       <ul class="knowledge-list" id="card-carousel">
         <li class="card home-variant knowledge-card ellipse icon">
           <h3 id="knowledge-dia-1">Beveiligingslekken en kwetsbaarheid opzoeken</h3>
@@ -77,13 +77,13 @@
 
   <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
     <div class="container">
-      <div class="content">
+      <hgroup>
         <h2 class="h7 color-secondary">Hall of Fame</h2>
         <p class="h6">Onderstaande hosters zijn opgenomen in de Hall of Fame, 
           omdat ze voldoen aan de criteria voor opname zoals een 
           dubbele <span class="color-accent">100%-score</span> voor hun eigen domein.
         </p>
-      </div>
+      </hgroup>
       <ul class="hall-of-fame-list">
         <!-- {% for member in halloffame %}
           <li>
@@ -170,10 +170,10 @@
           {% expand "article {{article}} lead" as articlelead %}
         <li class="card news-card ellipse">
           <a href="/article/{{article}}">
-            <div class="card-content">
-              <p class="card-date">{% include "string.html" with name=articledate %}</p>
+            <hgroup class="flipped">
               <h3>{% include "string.html" with name=articletitle %}</h3>
-            </div>
+              <p class="card-date">{% include "string.html" with name=articledate %}</p>
+            </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
@@ -218,33 +218,35 @@
       </details>
       <a class="secondary-button icon" href="/">Bekijk alle gestelde vragen</a>
       <article class="contact-card">
-        <h3>Contact met ons</h3>
-        <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+        <hgroup>
+          <h3>Contact met ons</h3>
+          <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+        </hgroup>
         <ul>
           <li>
             <a href="/">
-              <div>
+              <hgroup>
                 <h4 class="mail icon">Mailen</h4>
                 <p>Contact wanneer het u uitkomt</p>
-              </div>
+              </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>
           <li>
             <a href="/">
-              <div>
+              <hgroup>
                 <h4 class="help icon">Technische hulp</h4>
                 <p>We helpen u graag verder</p>
-              </div>
+              </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>
           <li>
             <a href="/">
-              <div>
+              <hgroup>
                 <h4 class="visit icon">Bezoeken</h4>
                 <p>Het adres van ons kantoor</p>
-              </div>
+              </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>

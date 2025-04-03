@@ -9,10 +9,8 @@
     }
   }
 
-  .content {
-    display: flex;
+  hgroup {
     gap: 8px;
-    flex-direction: column;
     text-align: center;
     
     @media (width >= 900px) {
@@ -32,16 +30,16 @@
   }
 }
 
-.hall-of-fame-filter {
+.filter-section {
   transform: translateY(-65px);
-  margin-inline: 16px;
+  margin: 0 16px -65px;
 
   @media (width >= 900px) {
     transform: translateY(-125px);
-    margin-inline: 0;
+    margin: 0 0 -125px;
   }
 
-  form {
+  .filter-container {
     background: var(--bg-color-body);
     border: var(--card-border);
     box-shadow: var(--card-box-shadow);
@@ -60,7 +58,7 @@
       flex-direction: row;
     }
 
-    label {
+    .h2 {
       font: var(--section-header-s);
       color: var(--heading-color-primary);
     }
@@ -76,9 +74,7 @@
     }
   }
   
-  .content { 
-    display: flex;
-    flex-direction: column;
+  hgroup { 
     gap: 16px;
     text-align: center;
     

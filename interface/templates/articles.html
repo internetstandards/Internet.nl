@@ -32,8 +32,10 @@
 
   <section class="article-index-section bg-primary">
     <div class="container">
-      <h1 class="h1 color-secondary">Nieuws & Artikelen</h1>
-      <p class="h5 color-secondary">Bekijk ons nieuws met updates en handige informatie.</p>
+      <hgroup>
+        <h1 class="h1 color-secondary">Nieuws & Artikelen</h1>
+        <p class="h5 color-secondary">Bekijk ons nieuws met updates en handige informatie.</p>
+      </hgroup>
       <ul class="card-list">
         {% for article in articles|slice:":2" %}
           {% expand "article {{article}} title" as articletitle %}
@@ -41,11 +43,11 @@
           {% expand "article {{article}} lead" as articlelead %}
           <li class="card news-card large ellipse">
             <a href="/article/{{article}}">
-            <div class="card-content">
+            <hgroup>
               <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h2>{% include "string.html" with name=articletitle %}</h2>
               <p>{% include "string.html" with name=articlelead %}</p>
-            </div>
+            </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
@@ -64,16 +66,16 @@
           {% expand "article {{article}} lead" as articlelead %}
           <li class="card news-card ellipse">
             <a href="/article/{{article}}">
-            <div class="card-content">
-              <p class="card-date">{% include "string.html" with name=articledate %}</p>
+            <hgroup class="flipped">
               <h3>{% include "string.html" with name=articletitle %}</h3>
-            </div>
+              <p class="card-date">{% include "string.html" with name=articledate %}</p>
+            </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
         {% endfor %}
       </ul>
-      <button id="load-articles-button" class="secondary-button icon" type="button">Laad meer artikelen</button>
+      <button id="load-more" class="secondary-button icon" type="button">Laad meer artikelen</button>
     </div>
   </section>
 
@@ -112,33 +114,35 @@
       </details>
       <a class="secondary-button icon" href="/">Bekijk alle gestelde vragen</a>
       <article class="contact-card">
-        <h3>Contact met ons</h3>
-        <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+        <hgroup>
+          <h3>Contact met ons</h3>
+          <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+        </hgroup>
         <ul>
           <li>
             <a href="/">
-              <div>
+              <hgroup>
                 <h4 class="mail icon">Mailen</h4>
                 <p>Contact wanneer het u uitkomt</p>
-              </div>
+              </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>
           <li>
             <a href="/">
-              <div>
+              <hgroup>
                 <h4 class="help icon">Technische hulp</h4>
                 <p>We helpen u graag verder</p>
-              </div>
+              </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>
           <li>
             <a href="/">
-              <div>
+              <hgroup>
                 <h4 class="visit icon">Bezoeken</h4>
                 <p>Het adres van ons kantoor</p>
-              </div>
+              </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>

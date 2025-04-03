@@ -304,10 +304,7 @@
     }
   }
 
-  .card-content {
-    display: flex;
-    flex-direction: column;
-
+  hgroup {
     @media (width >= 900px) {
       gap: 8px;
     }
