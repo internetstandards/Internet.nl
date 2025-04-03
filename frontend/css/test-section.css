@@ -187,7 +187,7 @@
 
       .icon {
         padding: 4px;
-        background-color: var(--bg-color-2);
+        background-color: var(--bg-color-green);
         border-radius: 100%;
 
         &::before {
@@ -197,14 +197,6 @@
           border-radius: 100%;
         }
       }
-    
-      /* svg {
-        border-radius: 100%;
-        padding: 4px;
-        min-width: 24px;
-        min-height: 24px;
-        background: var(--green-100);
-      } */
     }
   }
 

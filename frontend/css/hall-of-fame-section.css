@@ -42,7 +42,7 @@
   }
 
   form {
-    background: var(--bg-color-1);
+    background: var(--bg-color-body);
     border: var(--card-border);
     box-shadow: var(--card-box-shadow);
     display: flex;
@@ -62,7 +62,7 @@
 
     label {
       font: var(--section-header-s);
-      color: var(--heading-color-3);
+      color: var(--heading-color-primary);
     }
   }
 }
@@ -88,12 +88,12 @@
     }
 
     h2 {
-      color: var(--heading-color-1);
+      color: var(--heading-color-green);
       font: var(--section-header-xl);
     }
   
     p {
-      color: var(--body-color-1);
+      color: var(--body-color-primary);
       font: var(--section-body-xl);
     }
   }

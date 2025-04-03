@@ -30,7 +30,7 @@
   </article>
 
 
-  <section class="news-section page-variant colored-section bg-1">
+  <section class="news-section page-variant bg-green">
     <div class="container">
       <h1 class="section-header-1 color-1">Nieuws & Artikelen</h1>
       <p>Bekijk ons nieuws met updates en handige informatie.</p>
@@ -39,15 +39,14 @@
           {% expand "article {{article}} title" as articletitle %}
           {% expand "article {{article}} date" as articledate %}
           {% expand "article {{article}} lead" as articlelead %}
-        <li>
-          <a class="card news-card ellipse-color-light large" href="/article/{{article}}">
+          <li class="card news-card large ellipse">
+            <a href="/article/{{article}}">
             <div class="card-content">
               <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h2>{% include "string.html" with name=articletitle %}</h2>
               <p>{% include "string.html" with name=articlelead %}</p>
             </div>
             <div class="secondary-button rounded icon"></div>
-            <div class="ellipse singular"></div>
           </a>
         </li>
         {% endfor %}
@@ -63,14 +62,13 @@
           {% expand "article {{article}} title" as articletitle %}
           {% expand "article {{article}} date" as articledate %}
           {% expand "article {{article}} lead" as articlelead %}
-        <li>
-          <a class="card news-card ellipse-color-light" href="">
+          <li class="card news-card ellipse">
+            <a href="/article/{{article}}">
             <div class="card-content">
               <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h3>{% include "string.html" with name=articletitle %}</h3>
             </div>
             <div class="secondary-button rounded icon"></div>
-            <div class="ellipse singular"></div>
           </a>
         </li>
         {% endfor %}
@@ -79,7 +77,7 @@
     </div>
   </section>
 
-  <section class="faq-section">
+  <section class="faq-section ellipse hidden-mobile">
     <div class="container">
       <h2 class="section-header-3">Veelgestelde vragen</h2>
       <details class="faq-item" name="faq-item">
@@ -146,11 +144,6 @@
           </li>
         </ul>
       </article>
-      <div class="ellipse-container bottom-left ellipse-color-light hidden-mobile">
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-      </div>
     </div>
   </section>
 {% endblock %}

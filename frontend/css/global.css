@@ -62,7 +62,7 @@
 
 body {
   font-family: Montserrat, sans-serif;
-  background-color: var(--bg-color-1);
+  background-color: var(--bg-color-body);
   interpolate-size: allow-keywords;
   overflow-wrap: break-word;
   text-wrap: pretty;
@@ -101,7 +101,7 @@ button {
   padding-inline: 16px;
 }
 
-[class*="section"]  > .container {
+[class*="section"] > .container {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: auto;
@@ -137,7 +137,7 @@ body:has(.nav-controls.active) {
   }
 }
 
-.icon::after, 
+.icon:not(.ellipse)::after, 
 .icon::before {
   content: "";
   background-color: currentcolor;
@@ -150,19 +150,19 @@ body:has(.nav-controls.active) {
   min-height: 24px;
 }
 
-.heading-accent-color {
-  color: var(--heading-color-2);
+.accent {
+  color: var(--heading-color-accent);
 }
 
 .section-header-1 {
   font: var(--section-header-xxl);
 
   &.color-1 {
-    color: var(--heading-color-1);
+    color: var(--heading-color-green);
   }
 
   &.color-2 {
-    color: var(--heading-color-3);
+    color: var(--heading-color-primary);
   }
 }
 
@@ -170,80 +170,92 @@ body:has(.nav-controls.active) {
   font: var(--section-header-xl);
 
   &.color-1 {
-    color: var(--heading-color-1);
+    color: var(--heading-color-green);
   }
 
   &.color-2 {
-    color: var(--heading-color-3);
+    color: var(--heading-color-primary);
   }
 }
 
 .section-header-3 {
   font: var(--section-header-l);
-  color: var(--heading-color-1);
+  color: var(--heading-color-green);
 }
 
 .section-header-4 {
   font: var(--section-header-m);
 
   &.color-1 {
-    color: var(--heading-color-1);
+    color: var(--heading-color-green);
   }
 
   &.color-2 {
-    color: var(--heading-color-3);
+    color: var(--heading-color-primary);
   }
 }
 
 .section-header-5 {
   font: var(--section-header-xs);
-  color: var(--heading-color-3);
+  color: var(--heading-color-primary);
 }
 
 .section-header-6 {
   font: var(--section-header-xs);
-  color: var(--heading-color-3);
+  color: var(--heading-color-primary);
 }
 
 .section-header-7 {
   font: var(--section-header-xxs);
-  color: var(--heading-color-2);
+  color: var(--heading-color-accent);
 }
 
 .section-body-1 {
   font: var(--section-body-xl);
 
   &.color-1 {
-    color: var(--body-color-1);
+    color: var(--body-color-primary);
   }
 
   &.color-2 {
-    color: var(--body-color-2);
+    color: var(--body-color-secondary);
   }
 }
 
 .section-body-2 {
   font: var(--section-body-xl);
-  color: var(--body-color-1);
+  color: var(--body-color-primary);
 }
 
-.colored-section {
-  @media (width >= 900px) {
-    border-radius: 16px;
-    margin: 16px 16px 0;
+section {
+  &:has(bg-green, bg-orange) {
+    @media (width >= 900px) {
+      border-radius: 16px;
+      margin: 16px 16px 0;
+    }
   }
 
-  &.not-full-width {
+  &.narrow {
     margin: 0 16px;
     border-radius: 16px;
+
+    &.test-section:not(.secondary) {
+      margin: 0;
+      border-radius: 0;
+
+      @media (width >= 900px) {
+        margin: 0 16px;
+        border-radius: 16px;
+      }
+    }
   }
 
-  &.bg-1 {
-    background-color: var(--bg-color-2);
+  &.bg-green {
+    background-color: var(--bg-color-green);
   }
 
-  &.bg-2 {
-    background-color: var(--bg-color-3);
+  &.bg-orange {
+    background-color: var(--bg-color-orange);
   }
 }
 
@@ -260,7 +272,7 @@ body:has(.nav-controls.active) {
 
   h1 {
     font: var(--section-header-xxxs);
-    color: var(--heading-color-4);
+    color: var(--heading-color-orange);
   }
 }
 
@@ -270,6 +282,12 @@ body:has(.nav-controls.active) {
 
 .dark-visible {
   display: var(--dark-visible);
+}
+
+[class*="section"] {
+  &:has(h1):has(.card-list) {
+    margin-bottom: 64px;
+  }
 }
 
 .card-section {
@@ -298,16 +316,19 @@ body:has(.nav-controls.active) {
 }
 
 .card {
-  padding: 24px;
-  overflow: clip;
   border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 0;
-  gap: 24px;
-  height: 100%;
-  justify-content: space-between;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+    justify-content: space-between;
+    height: 100%;
+    border-radius: 8px;
+  }
 
   .card-content {
     display: flex;
@@ -330,12 +351,13 @@ body:has(.nav-controls.active) {
 
     @media (width >= 900px) {
       transform: translateY(64px);
-      padding: 40px;
+
+      a {
+        padding: 40px;
+      }
     }
 
     .card-content {
-      gap: 16px;
-
       h2, h3 {
         font: var(--card-header-xl);
       }
@@ -345,7 +367,7 @@ body:has(.nav-controls.active) {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;  
-        overflow: hidden;
+        overflow: clip;
       }
     }
   }
@@ -364,18 +386,79 @@ body:has(.nav-controls.active) {
   }
 }
 
-[class*="section"] {
-  &:has(.ellipse-container) {
-    overflow: clip;
+.ellipse {
+  position: relative;
 
-    .container {
-      z-index: 0;
-      position: relative;
+  .container {
+    position: relative;
+    z-index: 1;
+  }
+
+  &::after {
+    content: "";
+    mask-repeat: no-repeat;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: var(--ellipse-color-light);
+  }
+
+  &.hidden-mobile::after {
+    display: none;
+
+    @media (width >= 900px) {
+      display: block;
     }
   }
 
-  &:has(h1):has(.card-list) {
-    margin-bottom: 64px;
+  &:not(.card) {
+    &::after {
+      mask-image: url("/static/icons/ellipse-multiple.svg");
+      mask-position: bottom left;
+      transform: scaleY(-1);
+      mask-size: 1000px;
+  
+      @media (width >= 900px) {
+        mask-size: cover;
+        transform: scaleY(1);
+      }
+    }
+  
+    &.reverse::after {
+      transform: scale(-1);
+  
+      @media (width >= 900px) {
+        transform: scaleX(-1);
+      }
+    }
+  
+    &.bg-orange::after {
+      background: var(--ellipse-color-dark);
+    }
+  }
+  
+  &.card {
+    &::after {
+      mask-position: bottom left;
+      mask-size: cover;
+      background: var(--ellipse-color-light);
+      border-radius: 8px;
+    }
+  
+    &:nth-child(3n + 1)::after {
+      mask-image: url("/static/icons/ellipse-single-1.svg");
+    }
+  
+    &:nth-child(3n + 2)::after {
+      mask-image: url("/static/icons/ellipse-single-2.svg");
+    }
+  
+    &:nth-child(3n)::after {
+      mask-image: url("/static/icons/ellipse-single-3.svg");
+      mask-position: bottom right;
+    }
   }
 }
 
