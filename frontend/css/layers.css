@@ -11,7 +11,7 @@
 /* Components layer: sections and other component styles */
 @import url("components.css") layer(components);
 @import url("about-section.css") layer(components);
-@import url("explanation-section.css") layer(components);
+@import url("knowledge-section.css") layer(components);
 @import url("faq-section.css") layer(components);
 @import url("hall-of-fame-section.css") layer(components);
 @import url("news-section.css") layer(components);

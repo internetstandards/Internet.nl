@@ -2,7 +2,7 @@
 {% load translate %}
 
 {% block introcontent %}
-  <section class="test-section home-variant colored-section bg-1">
+  <section class="test-section home-variant narrow bg-green ellipse">
     <div class="container">
       <h1 class="section-header-1 color-1">Bescherm uw website en uw gebruikers door te testen.</h1>
       <article class="test-card-large home-variant">
@@ -38,37 +38,29 @@
           <div class="primary-button rounded icon"></div>
         </a>
       </article>
-      <div class="ellipse-container bottom-left ellipse-color-light">
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-      </div>
     </div>
   </section>
 {% endblock %}
 
 {% block maincontent %}
-  <section class="explanation-section home-variant">
+  <section class="knowledge-section home-variant">
     <div class="container">
       <div class="content">
-        <h2 class="section-header-3">Waarom zou je jouw <span class="heading-accent-color">standaarden</span> moeten testen?</h2>
+        <h2 class="section-header-3">Waarom zou je jouw <span class="accent">standaarden</span> moeten testen?</h2>
         <p class="section-body-2">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
       </div>
-      <ul class="explanation-list" id="card-carousel">
-        <li class="card home-variant explanation-card ellipse-color-light icon">
-          <h3 id="explanation-dia-1">Beveiligingslekken en kwetsbaarheid opzoeken</h3>
+      <ul class="knowledge-list" id="card-carousel">
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-1">Beveiligingslekken en kwetsbaarheid opzoeken</h3>
           <p>Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken. </p>
-          <div class="ellipse singular"></div>
         </li>
-        <li class="card home-variant explanation-card ellipse-color-light icon">
-          <h3 id="explanation-dia-2">Garanderen van compatibiliteit</h3>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-2">Garanderen van compatibiliteit</h3>
           <p>Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en optimale ervaring hebben.</p>
-          <div class="ellipse singular"></div>
         </li>
-        <li class="card home-variant explanation-card ellipse-color-light icon">
-          <h3 id="explanation-dia-3">Identificeren van prestatie problemen</h3>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-3">Identificeren van prestatie problemen</h3>
           <p>Testen helpt bij het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten.</p>
-          <div class="ellipse singular"></div>
         </li>
       </ul>
       <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
@@ -83,13 +75,13 @@
     </div>
   </section>
 
-  <section class="hall-of-fame-section home-variant not-full-width colored-section bg-1">
+  <section class="hall-of-fame-section home-variant narrow bg-green ellipse reverse hidden-mobile">
     <div class="container">
       <div class="content">
         <h2 class="section-header-7">Hall of Fame</h2>
         <p class="section-header-6">Onderstaande hosters zijn opgenomen in de Hall of Fame, 
           omdat ze voldoen aan de criteria voor opname zoals een 
-          dubbele <span class="heading-accent-color">100%-score</span> voor hun eigen domein.
+          dubbele <span class="accent">100%-score</span> voor hun eigen domein.
         </p>
       </div>
       <ul class="hall-of-fame-list">
@@ -123,11 +115,6 @@
       <div class="button-container">
         <a class="primary-button icon" href="/test-site">Ik wil mijn domein testen</a>
         <a class="secondary-button icon" href="/halloffame">Ontdek de Hall of Fame</a>
-      </div>
-      <div class="ellipse-container bottom-right ellipse-color-light hidden-mobile">
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
       </div>
     </div>
   </section>
@@ -181,14 +168,13 @@
           {% expand "article {{article}} title" as articletitle %}
           {% expand "article {{article}} date" as articledate %}
           {% expand "article {{article}} lead" as articlelead %}
-        <li>
-          <a class="card news-card ellipse-color-4" href="/article/{{article}}">
+        <li class="card news-card ellipse">
+          <a href="/article/{{article}}">
             <div class="card-content">
               <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h3>{% include "string.html" with name=articletitle %}</h3>
             </div>
             <div class="secondary-button rounded icon"></div>
-            <div class="ellipse singular"></div>
           </a>
         </li>
         {% endfor %}
@@ -197,7 +183,7 @@
     </div>
   </section>
 
-  <section class="faq-section home-variant">
+  <section class="faq-section ellipse hidden-mobile">
     <div class="container">
       <h2 class="section-header-3">Veelgestelde vragen</h2>
       <details class="faq-item" name="faq-item">
@@ -264,11 +250,6 @@
           </li>
         </ul>
       </article>
-      <div class="ellipse-container bottom-left ellipse-color-light hidden-mobile">
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-        <div class="ellipse"></div>
-      </div>
     </div>
   </section>
 

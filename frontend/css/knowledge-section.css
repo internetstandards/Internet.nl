@@ -1,4 +1,4 @@
-.explanation-section {
+.knowledge-section {
   &.page-variant {
     padding-top: 48px;
 
@@ -16,7 +16,7 @@
 
     > div > p {
       font: var(--section-header-s);
-      color: var(--body-color-1);
+      color: var(--body-color-primary);
     }
   }
 
@@ -53,18 +53,31 @@
       text-align: center;
       font: var(-section-button-s);
       font-weight: 500;
-      color: var(--body-color-1);
+      color: var(--body-color-primary);
     }
   }
 }
 
-.explanation-list {
+.knowledge-list {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 16px;
   padding-bottom: 20px;
+
+  @supports selector(::scroll-marker) {
+    scroll-marker-group: after;
+
+    &::scroll-marker-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      grid-column: span 12;
+      gap: 20px;
+      min-height: 15px;
+    }
+  }
 
   @media (scripting: enabled) {
     scrollbar-width: none;
@@ -87,9 +100,12 @@
   }
 }
 
-.explanation-card {
-  background-color: var(--card-bg-color-explanation);
-  color: var(--card-heading-color-explanation);
+.knowledge-card {
+  background-color: var(--card-bg-color-knowledge);
+
+  a {
+    color: var(--card-heading-color-knowledge);
+  }
 
   &.home-variant {
     flex: 0 0 75%;
@@ -98,6 +114,32 @@
     padding: 32px 24px;
     gap: 8px;
     height: auto;
+
+    > *,
+    &::before {
+      z-index: 1;
+      position: relative;
+    }
+
+    @supports selector(::scroll-marker) {
+      &::scroll-marker {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 100%;
+        background-color: var(--green-400);
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &::scroll-marker:target-current {
+        background-color: var(--orange-300);
+        width: 15px;
+        height: 15px;
+      }
+    }
 
     @media (width >= 900px) {
       padding: 48px 24px 32px;
@@ -165,11 +207,7 @@
   gap: 20px;
   min-height: 15px;
 
-  @media (width >= 900px) {
-    display: none;
-  }
-
-  @media (scripting: none) {
+  @media (width >= 900px) or (scripting: none) {
     display: none;
   }
 
@@ -193,5 +231,9 @@
       height: 100%;
       width: 100%;
     }
+  }
+
+  @supports selector(::scroll-marker) {
+    display: none;
   }
 }

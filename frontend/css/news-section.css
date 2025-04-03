@@ -16,12 +16,15 @@
 
     > div > p {
       font: var(--section-header-s);
-      color: var(--body-color-2);
+      color: var(--body-color-secondary);
     }
   }
 }
 
 .news-card {
   background-color: var(--card-bg-color-news);
-  color: var(--card-body-color-news);
+
+  a {
+    color: var(--card-body-color-news);
+  }
 }
