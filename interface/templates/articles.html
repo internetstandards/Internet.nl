@@ -4,7 +4,7 @@
 {% load translate %}
 
 {% block maincontent %}
-  <article class="block wide">
+  <!-- <article class="block wide">
     <section class="overview">
         <h1>{% include "string.html" with name="{{pagetitle}}"%}</h1>
       {% for article in articles %}
@@ -27,13 +27,13 @@
         </div>
       {% endfor %}
     </section>
-  </article>
+  </article> -->
 
 
-  <section class="news-section page-variant bg-green">
+  <section class="article-index-section bg-primary">
     <div class="container">
-      <h1 class="section-header-1 color-1">Nieuws & Artikelen</h1>
-      <p>Bekijk ons nieuws met updates en handige informatie.</p>
+      <h1 class="h1 color-secondary">Nieuws & Artikelen</h1>
+      <p class="h5 color-secondary">Bekijk ons nieuws met updates en handige informatie.</p>
       <ul class="card-list">
         {% for article in articles|slice:":2" %}
           {% expand "article {{article}} title" as articletitle %}
@@ -56,7 +56,7 @@
   
   <section class="card-section">
     <div class="container">
-      <h2 class="section-header-2 color-1">Onze laatste nieuws</h2>
+      <h2 class="h2 color-secondary">Onze laatste nieuws</h2>
       <ul class="card-list">
         {% for article in articles|slice:":9" %}
           {% expand "article {{article}} title" as articletitle %}
@@ -79,7 +79,7 @@
 
   <section class="faq-section ellipse hidden-mobile">
     <div class="container">
-      <h2 class="section-header-3">Veelgestelde vragen</h2>
+      <h2 class="h3 color-secondary">Veelgestelde vragen</h2>
       <details class="faq-item" name="faq-item">
         <summary class="icon">
           What is your return policy?

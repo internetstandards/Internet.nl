@@ -2,9 +2,9 @@
 {% load translate %}
 
 {% block introcontent %}
-  <section class="test-section home-variant narrow bg-green ellipse">
+  <section class="test-section home-variant bg-primary ellipse">
     <div class="container">
-      <h1 class="section-header-1 color-1">Bescherm uw website en uw gebruikers door te testen.</h1>
+      <h1 class="h1 color-secondary">Bescherm uw website en uw gebruikers door te testen.</h1>
       <article class="test-card-large home-variant">
         <h2 class="domain icon">Test je website domein</h2>
         <form action="/site/" method="POST">
@@ -43,11 +43,11 @@
 {% endblock %}
 
 {% block maincontent %}
-  <section class="knowledge-section home-variant">
+  <section class="knowledge-section">
     <div class="container">
       <div class="content">
-        <h2 class="section-header-3">Waarom zou je jouw <span class="accent">standaarden</span> moeten testen?</h2>
-        <p class="section-body-2">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
+        <h2 class="h3 color-secondary">Waarom zou je jouw <span class="color-accent">standaarden</span> moeten testen?</h2>
+        <p class="body-l">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
       </div>
       <ul class="knowledge-list" id="card-carousel">
         <li class="card home-variant knowledge-card ellipse icon">
@@ -70,18 +70,18 @@
       </ul>
       <div class="button-container">
         <a class="secondary-button icon" href="/test-site">Ik wil graag testen</a>
-        <p>487 succesvolle testen!</p>
+        <p class="body-m color-secondary">487 succesvolle testen!</p>
       </div>
     </div>
   </section>
 
-  <section class="hall-of-fame-section home-variant narrow bg-green ellipse reverse hidden-mobile">
+  <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
     <div class="container">
       <div class="content">
-        <h2 class="section-header-7">Hall of Fame</h2>
-        <p class="section-header-6">Onderstaande hosters zijn opgenomen in de Hall of Fame, 
+        <h2 class="h7 color-secondary">Hall of Fame</h2>
+        <p class="h6">Onderstaande hosters zijn opgenomen in de Hall of Fame, 
           omdat ze voldoen aan de criteria voor opname zoals een 
-          dubbele <span class="accent">100%-score</span> voor hun eigen domein.
+          dubbele <span class="color-accent">100%-score</span> voor hun eigen domein.
         </p>
       </div>
       <ul class="hall-of-fame-list">
@@ -119,11 +119,11 @@
     </div>
   </section>
   
-  <section class="about-section home-variant">
+  <section class="about-section">
     <div class="container">
-      <h2 class="section-header-7">Onze missie</h2>
-      <p class="section-header-4 color-2">Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
-      <p class="section-body-1 color-2">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:</p>
+      <h2 class="h7 color-accent">Onze missie</h2>
+      <p class="h4">Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
+      <p class="body-xl color-secondary">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:</p>
       <ul class="logo-list">
         <li>
           <a href="https://surf.nl/" target="_blank" aria-label="Ga naar de website van Surf">
@@ -156,13 +156,13 @@
           </a>
         </li>
       </ul>
-      <a class="icon" href="/about">Ik wil meer informatie over deze organisaties</a>
+      <a class="about-link icon" href="/about">Ik wil meer informatie over deze organisaties</a>
     </div>
   </section>
 
-  <section class="card-section home-variant">
+  <section class="card-section">
     <div class="container">
-      <h2 class="section-header-2 color-1">Laatste nieuws</h2>
+      <h2 class="h2 color-secondary">Laatste nieuws</h2>
       <ul class="card-list">
         {% for article in articles|slice:":3" %}
           {% expand "article {{article}} title" as articletitle %}
@@ -185,7 +185,7 @@
 
   <section class="faq-section ellipse hidden-mobile">
     <div class="container">
-      <h2 class="section-header-3">Veelgestelde vragen</h2>
+      <h2 class="h3 color-secondary">Veelgestelde vragen</h2>
       <details class="faq-item" name="faq-item">
         <summary class="icon">
           What is your return policy?

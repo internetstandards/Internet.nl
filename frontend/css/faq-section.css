@@ -1,8 +1,8 @@
 .faq-section {
-  background: linear-gradient(to bottom, var(--bg-color-green) 65%, transparent 65%);
+  background: linear-gradient(to bottom, var(--bg-color-primary) 65%, transparent 65%);
 
   @media (width >= 900px) {
-    background: linear-gradient(to right, var(--bg-color-green) 100%, transparent 100%);
+    background: linear-gradient(to right, var(--bg-color-primary) 100%, transparent 100%);
     background-size: calc((100vw - 1240px) / 2 + 1240px - 200px) 100%;
     background-repeat: no-repeat;
   }
@@ -23,7 +23,7 @@
       }
     }
 
-    > a {
+    .secondary-button {
       margin-block: 16px 32px;
       justify-self: center;
 

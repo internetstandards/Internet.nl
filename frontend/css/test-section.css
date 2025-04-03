@@ -146,7 +146,7 @@
       align-items: center;
       gap: 16px;
       color: var(--card-body-color-test);
-      font: var(-section-button-s);
+      font: var(--card-body-m);
       width: fit-content;
       border-bottom: 1px solid var(--transparent-100);
       transition: 0.3s;
@@ -183,11 +183,11 @@
       align-items: center;
       gap: 16px;
       color: var(--card-body-color-test);
-      font: var(-section-button-s);
+      font: var(--card-body-m);
 
       .icon {
         padding: 4px;
-        background-color: var(--bg-color-green);
+        background-color: var(--bg-color-primary);
         border-radius: 100%;
 
         &::before {

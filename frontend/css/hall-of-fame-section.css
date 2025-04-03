@@ -86,16 +86,6 @@
       grid-column: 2 / 10;
       text-align: start;
     }
-
-    h2 {
-      color: var(--heading-color-green);
-      font: var(--section-header-xl);
-    }
-  
-    p {
-      color: var(--body-color-primary);
-      font: var(--section-body-xl);
-    }
   }
 
   .image-container {
