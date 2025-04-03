@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 10,
+  "id": 16,
   "links": [],
   "panels": [
     {
@@ -81,7 +81,32 @@
           },
           "unit": "bytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "Value"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 13,
@@ -116,8 +141,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "docker_container_memory_usage_bytes{name=~\"$container\", compose_project=~\"$compose_project\"}",
-          "legendFormat": "{{name}}",
+          "expr": "sum(docker_container_memory_usage_bytes{name=~\"$container\"}) by (compose_project)",
+          "legendFormat": "{{compose_project}}",
           "range": true,
           "refId": "A"
         }
@@ -221,8 +246,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_cpu_seconds_total{name=~\"$container\", compose_project=~\"$compose_project\"}[$__rate_interval])",
-          "legendFormat": "{{name}}",
+          "expr": "sum(rate(docker_container_cpu_seconds_total{name=~\"$container\"}[$__rate_interval])) by (compose_project)",
+          "legendFormat": "{{compose_project}}",
           "range": true,
           "refId": "A"
         }
@@ -326,8 +351,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "docker_container_pids{name=~\"$container\", compose_project=~\"$compose_project\"}",
-          "legendFormat": "{{name}}",
+          "expr": "sum(docker_container_pids{name=~\"$container\"}) by (compose_project)",
+          "legendFormat": "{{compose_project}}",
           "range": true,
           "refId": "A"
         }
@@ -431,8 +456,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_blkio_read_bytes_total{name=~\"$container\", compose_project=~\"$compose_project\"}[$__rate_interval])",
-          "legendFormat": "{{name}} read",
+          "expr": "sum(rate(docker_container_blkio_read_bytes_total{name=~\"$container\"}[$__rate_interval])) by (compose_project)",
+          "legendFormat": "{{compose_project}} read",
           "range": true,
           "refId": "A"
         },
@@ -442,9 +467,9 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_blkio_write_bytes_total{name=~\"$container\", compose_project=~\"$compose_project\"}[$__rate_interval])",
+          "expr": "sum(rate(docker_container_blkio_write_bytes_total{name=~\"$container\"}[$__rate_interval])) by (compose_project)",
           "hide": false,
-          "legendFormat": "{{name}} write",
+          "legendFormat": "{{compose_project}} write",
           "range": true,
           "refId": "B"
         }
@@ -502,8 +527,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -548,8 +572,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_network_rx_bytes_total{name=~\"$container\", compose_project=~\"$compose_project\"}[$__rate_interval])",
-          "legendFormat": "{{name}} read",
+          "expr": "sum(rate(docker_container_network_rx_bytes_total{name=~\"$container\"}[$__rate_interval])) by (compose_project)",
+          "legendFormat": "{{compose_project}} read",
           "range": true,
           "refId": "A"
         },
@@ -559,9 +583,9 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_network_tx_bytes_total{name=~\"$container\", compose_project=~\"$compose_project\"}[$__rate_interval])",
+          "expr": "sum(rate(docker_container_network_tx_bytes_total{name=~\"$container\"}[$__rate_interval])) by (compose_project)",
           "hide": false,
-          "legendFormat": "{{name}} write",
+          "legendFormat": "{{compose_project}} write",
           "range": true,
           "refId": "B"
         }
@@ -578,26 +602,6 @@
     "list": [
       {
         "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "definition": "label_values(docker_container_info{compose_project=~\"$compose_project\"},name)",
-        "includeAll": true,
-        "label": "Container",
-        "multi": true,
-        "name": "container",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(docker_container_info{compose_project=~\"$compose_project\"},name)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
           "text": [
             "All"
           ],
@@ -605,32 +609,30 @@
             "$__all"
           ]
         },
-        "definition": "label_values(docker_container_info,compose_project)",
-        "description": "",
+        "definition": "label_values(docker_container_info,name)",
         "includeAll": true,
-        "label": "Instance",
+        "label": "Container",
         "multi": true,
-        "name": "compose_project",
+        "name": "container",
         "options": [],
         "query": {
-          "qryType": 1,
-          "query": "label_values(docker_container_info,compose_project)",
+          "query": "label_values(docker_container_info,name)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 2,
+        "refresh": 1,
         "regex": "",
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Docker Stats",
-  "uid": "e687549d-9737-4403-af26-d55fe0e76b23",
+  "title": "Docker Stats per instance",
+  "uid": "eeh7lex909728a",
   "version": 2,
   "weekStart": ""
 }
