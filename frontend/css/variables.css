@@ -42,7 +42,6 @@
 
   /* BUTTON FONTS */
   --button-link-font-xxs: 700 0.875rem/2 'Montserrat', sans-serif; /* 14px */
-  --button-link-font-xxs-semibold: 500 0.875rem/2 'Montserrat', sans-serif; /* 14x */
   --button-link-font-xs: 700 1rem/2 'Montserrat', sans-serif; /* 16px */
   --button-link-font-s: 700 1.125rem/2 'Montserrat', sans-serif; /* 18px */
   --button-link-font-m: 700 1.25rem/2 'Montserrat', sans-serif; /* 20px */
@@ -63,15 +62,11 @@
   --section-header-s: var(--heading-font-xs);
   --section-header-xs: var(--heading-font-xxs);
   --section-header-xxs: var(--heading-font-xxs);
-  --section-header-xxxs: var(--heading-font-xxs);
   --section-body-xl: var(--body-font-xs);
   --section-body-l: var(--body-font-xxs);
-  --section-body-m: var(--body-font-xxs);
-  --section-body-s: var(--body-font-xxs);
-  --section-body-xs: var(--body-font-xs);
+  --section-body-m: var(--body-font-xs);
   --section-button-l: var(--button-link-font-s);
   --section-button-m: var(--button-link-font-xs);
-  --section-button-s: var(--button-link-font-xxs-semibold);
 
   /* CARD FONTS MOBILE */
   --card-header-xl: var(--heading-font-s);
@@ -107,15 +102,18 @@
     --section-header-s: var(--heading-font-s);
     --section-header-xs: var(--heading-font-m);
     --section-header-xxs: var(--heading-font-xs);
-    --section-header-xxxs: var(--heading-font-s);
     --section-body-xl: var(--body-font-s);
     --section-body-l: var(--body-font-s);
     --section-body-m: var(--body-font-xs);
-    --section-body-s: var(--body-font-xxs);
-    --section-body-xs: var(--body-font-xs);
     --section-button-l: var(--button-link-font-s);
     --section-button-m: var(--button-link-font-xs);
-    --section-button-s: var(--button-link-font-xxs-semibold);
+
+    /* --section-body-xl: var(--body-font-s);
+    --section-body-l: var(--body-font-s);
+    --section-body-m -> --section-body-s;
+    --section-body-s -> --section-body-xs
+    --section-body-xs -> --section-body-m */
+
 
     /* CARD FONTS DESKTOP */
     --card-header-xl: var(--heading-font-m);
@@ -161,12 +159,12 @@
 
   /* GENERAL COLORS LIGHTMODE */
   --bg-color-body: light-dark(var(--white-100), var(--black-100));
-  --bg-color-green: light-dark(var(--green-200), var(--green-600));
-  --bg-color-orange: light-dark(var(--orange-100), var(--green-600));
+  --bg-color-primary: light-dark(var(--green-200), var(--green-600));
+  --bg-color-secondary: light-dark(var(--orange-100), var(--green-600));
   --heading-color-primary: light-dark(var(--black-200), var(--white-100));
+  --heading-color-secondary: light-dark(var(--green-500), var(--white-100));
   --heading-color-accent: light-dark(var(--green-400), var(--green-300));
-  --heading-color-green: light-dark(var(--green-500), var(--white-100));
-  --heading-color-orange: light-dark(var(--orange-500), var(--white-100));
+  --heading-color-alt: light-dark(var(--orange-500), var(--white-100));
   --body-color-primary: light-dark(var(--black-200), var(--white-100));
   --body-color-secondary: light-dark(var(--green-500), var(--white-100));
 

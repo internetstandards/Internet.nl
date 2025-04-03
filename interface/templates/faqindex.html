@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
 {% block maincontent %}
-  <article class="block wide">
+  <!-- <article class="block wide">
     <section>
       <h1>{% include "string.html" with name="faqs title" %}</h1>
       {% include "content.html" with name="faqs content" %}
     </section>
-  </article>
+  </article> -->
 
-  <section class="knowledge-section page-variant bg-orange">
+  <section class="article-index-section bg-secondary">
     <div class="container">
-      <h1 class="section-header-1 color-2">Onze kennisbank</h1>
-      <p>Bekijk hier onze kennisbank met allerlei handige informatie en tips.</p>
+      <h1 class="h1">Onze kennisbank</h1>
+      <p class="h5">Bekijk hier onze kennisbank met allerlei handige informatie en tips.</p>
       <ul class="card-list">
         <li class="card knowledge-card ellipse large">
           <a href="/">
@@ -41,7 +41,7 @@
 
   <section class="card-section">
     <div class="container">
-      <h2 class="section-header-2 color-2">Categorieën</h2>
+      <h2 class="h2">Categorieën</h2>
       <ul class="card-list">
         <li class="card knowledge-card ellipse">
           <a href="">
@@ -110,7 +110,7 @@
 
   <section class="faq-section ellipse hidden-mobile">
     <div class="container">
-      <h2 class="section-header-3">Veelgestelde vragen</h2>
+      <h2 class="h3 color-secondary">Veelgestelde vragen</h2>
       <details class="faq-item" name="faq-item">
         <summary class="icon">
           What is your return policy?

@@ -63,3 +63,20 @@
     width: fit-content;
   }
 }
+
+.article-index-section {
+  padding-top: 48px;
+  margin-bottom: 64px;
+
+  @media (width >= 900px) {
+    padding-top: 88px;
+  }
+
+  h1 {
+    padding-bottom: 16px;
+
+    @media (width >= 900px) {
+      padding-bottom: 24px;
+    }
+  }
+}

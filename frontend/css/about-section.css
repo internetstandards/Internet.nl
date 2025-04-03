@@ -22,7 +22,7 @@
     }
   }
 
-  > div > a {
+  .about-link {
     display: none;
 
     @media (width >= 900px) {
@@ -119,25 +119,23 @@
   .quote-image {
     border-radius: 100%;
     grid-column: span 1;
+
+    @media (width >= 900px) {
+      grid-column: 2 / 3;
+    }
   }
 
   blockquote {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    color: var(--heading-color-green);
 
     @media (width >= 900px) {
-      grid-column: span 11;
+      grid-column: 3 / 12;
       gap: 40px;
     }
 
-    p {
-      font: var(--section-header-m);
-    }
-
     cite {
-      font: var(--section-body-xs);
       font-style: normal;
     }
   }
