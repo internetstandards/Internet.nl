@@ -98,6 +98,11 @@ button {
   background-color: transparent;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .container {
   max-inline-size: 1240px;
   margin-inline: auto;
@@ -254,7 +259,7 @@ hgroup {
     margin-inline: 16px;
     border-radius: 16px;
 
-    &:first-of-type {
+    &:first-child {
       margin-inline: 0;
       border-radius: 0;
 

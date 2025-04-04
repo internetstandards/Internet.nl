@@ -92,12 +92,7 @@
   }
 
   img {
-    max-width: 100%;
     transition: 0.3s;
-    
-    @media screen and (width >= 900px) {
-      max-width: initial;
-    }
 
     &:hover {
       opacity: 0.6;
@@ -108,17 +103,16 @@
 .quote-section {
   .container {
     padding-block: 88px;
-    gap: 16px;
+    gap: 40px;
 
     @media (width >= 900px) {
       align-items: center;
-      gap: 104px;
+      gap: 0;
     }
   }
 
   .quote-image {
     border-radius: 100%;
-    grid-column: span 1;
 
     @media (width >= 900px) {
       grid-column: 2 / 3;
@@ -131,7 +125,7 @@
     gap: 16px;
 
     @media (width >= 900px) {
-      grid-column: 3 / 12;
+      grid-column: 4 / 12;
       gap: 40px;
     }
 
