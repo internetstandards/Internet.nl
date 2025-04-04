@@ -156,7 +156,7 @@
   /* FOOTER COLORS LIGHTMODE */
   --footer-bg-color: light-dark(var(--green-400), var(--green-600));
   --footer-text-color: light-dark(var(--white-100), var(--white-100));
-  --footer-bar-bg-color: light-dark(var(--white-100) var(--green-500));
+  --footer-bar-bg-color: light-dark(var(--white-100), var(--green-500));
   --footer-bar-text-color: light-dark(var(--green-500), var(--white-100));
 
   /* GENERAL COLORS LIGHTMODE */
