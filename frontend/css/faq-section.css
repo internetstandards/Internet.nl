@@ -23,7 +23,7 @@
       }
     }
 
-    .secondary-button {
+    .secondary-button:not(.rounded) {
       margin-block: 16px 32px;
       justify-self: center;
 
@@ -31,6 +31,21 @@
         grid-column: span 7;
         justify-self: start;
         margin-block: 24px 0;
+      }
+    }
+  }
+
+  &.alt {
+    background: none;
+
+    .container {
+      background-color: var(--bg-color-primary);
+      border-radius: 8px;
+
+      > *, .secondary-button:not(.rounded) {
+        @media (width >= 900px) {
+          grid-column: 3 / 11;
+        }
       }
     }
   }
@@ -141,51 +156,102 @@
     gap: 16px;
     flex-direction: column;
   }
+}
 
-  li {
-    /* stylelint-disable-next-line no-descending-specificity */
-    a {
-      background: var(--button-bg-color-contact);
-      border-radius: 8px;
-      padding: 16px;
-      color: inherit;
-      display: flex;
+.faq-sub-section {
+  .container {
+    padding-block: 32px;
+    gap: 16px;
+
+    @media (width >= 900px) {
+      padding-block: 64px;
+      gap: 48px;
+    }
+  }
+
+  .h2 {
+    text-align: center;
+  }
+}
+
+.contact-card-list {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+
+  @media (width >= 900px) {
+    gap: 32px;
+    flex-direction: row;
+  }
+}
+
+.contact-card-small {
+  background: var(--card-bg-color-contact);
+  border-radius: 8px;
+  padding: 16px;
+  color: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  @media (width >= 900px) {
+    padding: 32px;
+  }
+
+  &:has(> a) {
+    background: var(--button-bg-color-contact);
+
+    @media (width >= 900px) {
+    padding: 16px;
+    }
+
+    > a {
+      width: 100%;
+      height: 100%;
       justify-content: space-between;
       align-items: center;
+      border-radius: 8px;
+    }
+  }
+
+  hgroup {
+    gap: 8px;
+
+    a {
+      display: inline;
+      text-decoration: underline;
+      color: inherit;
+    }
+  }
+
+  h4 {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font: var(--card-header-m);
+    color: var(--card-heading-color-contact);
+
+    &::before {
+      display: block;
     }
 
-    hgroup {
-      gap: 8px;
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
     }
 
-    h4 {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      font: var(--card-header-m);
-      color: var(--card-heading-color-contact);
-
-      &::before {
-        display: block;
-      }
-
-      &.mail::before {
-        mask-image: url("/static/icons/envelope.svg");
-      }
-
-      &.help::before {
-        mask-image: url("/static/icons/gear.svg");
-      }
-
-      &.visit::before {
-        mask-image: url("/static/icons/pin.svg");
-      }
+    &.help::before {
+      mask-image: url("/static/icons/gear.svg");
     }
 
-    /* stylelint-disable-next-line no-descending-specificity */
-    p {
-      font: var(--card-body-m);
-      color: var(--card-body-color-contact);
+    &.visit::before {
+      mask-image: url("/static/icons/pin.svg");
     }
+  }
+
+  /* stylelint-disable-next-line no-descending-specificity */
+  p {
+    font: var(--card-body-m);
+    color: var(--card-body-color-contact);
   }
 }
