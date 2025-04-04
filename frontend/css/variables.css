@@ -1,4 +1,7 @@
 :root {
+  /* MARK: THEME PROPERTIES
+*
+/
   /* COLORS */
   --black-100: #000;
   --black-200: #191919;
@@ -46,6 +49,9 @@
   --button-link-font-s: 700 1.125rem/2 'Montserrat', sans-serif; /* 18px */
   --button-link-font-m: 700 1.25rem/2 'Montserrat', sans-serif; /* 20px */
   --button-link-font-l: 700 1.5rem/2 'Montserrat', sans-serif; /* 24px */
+
+  /* MARK: FONT VARIABLES
+*/
 
   /* NAV FONTS MOBILE */
   --nav-link: var(--button-link-font-m);
@@ -108,13 +114,6 @@
     --section-button-l: var(--button-link-font-s);
     --section-button-m: var(--button-link-font-xs);
 
-    /* --section-body-xl: var(--body-font-s);
-    --section-body-l: var(--body-font-s);
-    --section-body-m -> --section-body-s;
-    --section-body-s -> --section-body-xs
-    --section-body-xs -> --section-body-m */
-
-
     /* CARD FONTS DESKTOP */
     --card-header-xl: var(--heading-font-m);
     --card-header-l: var(--heading-font-s);
@@ -133,6 +132,9 @@
     --accordion-body: var(--body-font-xxs);
     --accordion-body-semibold: var(--body-font-xxs-semibold);
   }
+
+  /* MARK: COLOR VARIABLES
+*/
 
   /* COLORS */
   color-scheme: light dark;
@@ -211,6 +213,9 @@
   --accordion-heading-color: light-dark(var(--green-500), var(--white-100));
   --accordion-body-color: light-dark(var(--green-500), var(--white-100));
 }
+
+/* MARK: OTHER VARIABLES
+*/
 
 @media (prefers-color-scheme: light) {
   :root {

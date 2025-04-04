@@ -1,4 +1,5 @@
-/* BUTTONS */
+/* MARK: BUTTONS
+*/
 .primary-button,
 .secondary-button {
   display: flex;
@@ -72,6 +73,9 @@
     width: fit-content;
   }
 }
+
+/* MARK: INTRO SECTIONS
+*/
 
 .intro-section {
   .container {
@@ -157,6 +161,9 @@
     font-weight: 500;
   }
 }
+
+/* MARK: CARDS
+*/
 
 .card-section {
   .container {
@@ -296,6 +303,9 @@
     }
   }
 }
+
+/* MARK: ELLIPSE
+*/
 
 .ellipse {
   position: relative;

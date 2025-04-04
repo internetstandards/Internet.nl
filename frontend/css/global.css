@@ -1,3 +1,6 @@
+/* MARK: FONT FAMILIES
+*/
+
 /* Montserrat-400 */
 @font-face {
   font-display: swap;
@@ -101,14 +104,12 @@ button {
   padding-inline: 16px;
 }
 
-[class*="section"] > .container {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: auto;
+.light-visible {
+  display: var(--light-visible);
+}
 
-  > * {
-    grid-column: span 12;
-  }
+.dark-visible {
+  display: var(--dark-visible);
 }
 
 .skip-link {
@@ -263,12 +264,14 @@ hgroup {
       }
     }
   }
-}
 
-.light-visible {
-  display: var(--light-visible);
-}
-
-.dark-visible {
-  display: var(--dark-visible);
+  > .container {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto;
+  
+    > * {
+      grid-column: span 12;
+    }
+  }
 }
