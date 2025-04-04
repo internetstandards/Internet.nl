@@ -158,12 +158,12 @@
   }
 
   ul {
-    all: initial;
+    list-style: initial;
   }
 
   li {
     font: var(--section-body-xl);
-    /* color: var(--body-color-primary); */
+    color: var(--body-color-primary);
     padding-block: 6px;
     font-weight: 500;
   }

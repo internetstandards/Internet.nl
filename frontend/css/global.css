@@ -66,6 +66,7 @@
 body {
   font-family: Montserrat, sans-serif;
   background-color: var(--bg-color-body);
+  color: var(--body-color-primary);
   interpolate-size: allow-keywords;
   overflow-wrap: break-word;
   text-wrap: pretty;
@@ -99,6 +100,11 @@ button {
 }
 
 img {
+  max-width: 100%;
+  height: auto;
+}
+
+video {
   max-width: 100%;
   height: auto;
 }
