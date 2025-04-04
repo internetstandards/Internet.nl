@@ -11,7 +11,6 @@
 
   hgroup {
     gap: 8px;
-    text-align: center;
     
     @media (width >= 900px) {
       grid-column: 3 / 11;
