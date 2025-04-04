@@ -204,13 +204,19 @@
         {% if "INTERNETNL_BRANDING"|get_settings_value %}
         <ul class="footer-socials">
           <li class="footer-social">
-            <a class="x icon" href="https://x.com/internet_nl/" target="_blank" aria-label="Ga naar onze X profiel"></a>
+            <a class="x icon" href="https://x.com/internet_nl/" target="_blank">
+              <span class="visually-hidden">Ga naar onze X profiel</span>
+            </a>
           </li>
           <li class="footer-social">
-            <a class="linkedin icon" href="https://www.linkedin.com/company/internet-nl/" target="_blank" aria-label="Ga naar onze LinkedIn profiel"></a>
+            <a class="linkedin icon" href="https://www.linkedin.com/company/internet-nl/" target="_blank">
+              <span class="visually-hidden">Ga naar onze LinkedIn profiel</span>
+            </a>
           </li>
           <li class="footer-social">
-            <a class="mastodon icon" href="https://mastodon.nl/@internet_nl" target="_blank" aria-label="Ga naar onze Mastodon profiel"></a>
+            <a class="mastodon icon" href="https://mastodon.nl/@internet_nl" target="_blank">
+              <span class="visually-hidden">Ga naar onze Mastodon profiel</span>
+            </a>
           </li>
         </ul>
         {% endif %}
