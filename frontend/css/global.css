@@ -127,6 +127,19 @@ button {
   }
 }
 
+.visually-hidden {
+  border: 0;
+  clip: rect(1px,1px,1px,1px);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: clip;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
 body:has(.nav-controls.active) .skip-link {
   display: none;
 }
