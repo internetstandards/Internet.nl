@@ -1,10 +1,10 @@
 .test-section {
   .container {
-    row-gap: 8px;
+    gap: 8px;
     padding-block: 40px;
     
     @media (width >= 900px) {
-      gap: 24px 32px;
+      gap: 32px;
       padding-block: 104px;
     }
   }
@@ -14,7 +14,7 @@
 
     @media (width >= 900px) {
       grid-column: 2 / 12;
-      padding-bottom: 24px;
+      padding-bottom: 16px;
     }
   }
 
@@ -23,24 +23,25 @@
       grid-column: span 12;
     }
   }
+}
 
-  &.secondary {
-    .container {
-      row-gap: 24px;
-      padding-block: 32px;
-  
-      @media (width >= 900px) {
-        row-gap: 32px;
-        padding-block: 48px;
-      }
+
+.test-sub-section {
+  .container {
+    gap: 24px;
+    padding-block: 32px;
+
+    @media (width >= 900px) {
+      row-gap: 32px;
+      padding-block: 48px;
     }
-  
-    h2 {
-      text-align: center;
-  
-      @media (width >= 900px) {
-        grid-column: 2 / 12;
-      }
+  }
+
+  h2 {
+    text-align: center;
+
+    @media (width >= 900px) {
+      grid-column: 2 / 12;
     }
   }
 }
@@ -137,7 +138,7 @@
   &.home-variant {
     @media (width >= 900px) {
       grid-column: span 8;
-      grid-row: span 2;
+      /* grid-row: span 2; */
     }
 
     a {
@@ -243,7 +244,36 @@
   }
 }
 
+.test-card-list {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+
+  @media (width >= 900px) {
+    gap: 24px;
+    align-items: center;
+    grid-column: 2 / 12;
+    flex-direction: row;
+  }
+
+  &.home-variant {
+    @media (width >= 900px) {
+      flex-direction: column;
+      grid-column: span 4;
+    }
+  }
+
+  &.hall-of-fame-variant {
+    @media (width >= 900px) {
+      grid-column: span 12;
+    }
+  }
+}
+
 .test-card-small {
+  width: 100%;
+  height: 100%;
+
   a {
     display: flex;
     align-items: center;
@@ -252,32 +282,10 @@
     border-radius: 8px;
     gap: 16px;
     justify-content: space-between;
+    height: 100%;
 
     @media (width >= 900px) {
       padding: 36px 24px;
-    }
-  }
-
-  @media (width >= 900px) {
-    grid-column: 2 / 7;
-
-    &.hall-of-fame-variant {
-      grid-column: span 4;
-
-      &:nth-of-type(2) {
-        grid-column: span 4;
-      }
-    }
-
-    &:nth-of-type(2) {
-      grid-column: 7 / 12;
-    }
-  }
-
-  &.home-variant {
-    @media (width >= 900px) {
-      grid-column: span 4;
-      grid-row: span 1;
     }
   }
 

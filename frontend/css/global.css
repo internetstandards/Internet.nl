@@ -233,15 +233,15 @@ hgroup {
   }
 
   &.bg-primary, &.bg-secondary {
-    margin: 0 16px;
+    margin-inline: 16px;
     border-radius: 16px;
 
     &:first-of-type {
-      margin: 0;
+      margin-inline: 0;
       border-radius: 0;
 
       @media (width >= 900px) {
-        margin: 0 16px;
+        margin-inline: 16px;
         border-radius: 16px;
       }
     }
@@ -266,6 +266,23 @@ hgroup {
 
   &.text-left {
     text-align: left;
+  }
+}
+
+.article-index-section {
+  padding-top: 48px;
+  margin-bottom: 64px;
+
+  @media (width >= 900px) {
+    padding-top: 88px;
+  }
+
+  hgroup {
+    gap: 16px;
+
+    @media (width >= 900px) {
+      gap: 24px;
+    }
   }
 }
 
