@@ -7,6 +7,7 @@
 /* Layout layer: structural elements like header and footer */
 @import url("header.css") layer(layout);
 @import url("footer.css") layer(layout);
+@import url("structure.css") layer(layout);
 
 /* Components layer: sections and other component styles */
 @import url("components.css") layer(components);
