@@ -406,8 +406,29 @@ hgroup {
   &:nth-child(n+6) {
     display: none;
 
+    @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+      @supports (transition-behavior: allow-discrete) {
+        transition: display 0.5s, opacity 0.5s, left 0.5s, transform 0.5s;
+        transition-behavior: allow-discrete;
+        transform: translateY(25px);
+        opacity: 0;
+      }
+    }
+
     &.visible {
       display: block;
+
+      @media (prefers-reduced-motion: no-preference) {
+        @supports (transition-behavior: allow-discrete) {
+          transform: translateY(0);
+          opacity: 1;
+          
+          @starting-style {
+            transform: translateY(25px);
+            opacity: 0;
+          }
+        }
+      }
     }
   }
 }
