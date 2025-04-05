@@ -1042,6 +1042,9 @@ class MailTestAuth(BaseTestModel):
     spf_policy_status = EnumIntegerField(SpfPolicyStatus, null=True)
     spf_policy_score = models.IntegerField(null=True)
     spf_policy_records = ListField(null=True)
+    tlsrpt_score = models.IntegerField(null=True)
+    tlsrpt_available = models.BooleanField(null=True, default=False)
+    tlsrpt_record = ListField(default=[])
     score = models.IntegerField(null=True)
     max_score = models.IntegerField(null=True)
 
@@ -1064,6 +1067,9 @@ class MailTestAuth(BaseTestModel):
             "spf_policy_status",
             "spf_policy_score",
             "spf_policy_records",
+            "tlsrpt_score",
+            "tlsrpt_available",
+            "tlsrpt_record",
             "score",
             "max_score",
         ]
