@@ -113,11 +113,15 @@
         <div class="language-theme-controls">
           <form class="language-form icon" action="/change_language/" method="post">
             <select id="language-select" name="language" aria-label="Kies een taal">
+              <button>
+                  <selectedcontent></selectedcontent>
+              </button>
               {% with user_language=request.current_language_code %}
                 {% for language in LANGUAGES %}
                   {% get_language_info for language.0 as lang %}
                   <option aria-label="{{lang.name_local}}" value="{{ language.0 }}" {% if language.0 == user_language %}selected{% endif %}>
-                    {{ language.0 }}
+                    <img src="/static/icons/{{ language.0 }}-flag.svg" width="20" height="20" alt="{{lang.name_local}} vlag">
+                    <span>{{ language.0 }}</span>
                   </option>
                 {% endfor %}
               {% endwith %}
