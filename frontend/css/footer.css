@@ -65,16 +65,6 @@ footer {
       }
     }
   }
-
-  .nav-item a svg {
-    width: 24px;
-    height: 24px;
-
-    @media (width >= 900px) {
-      width: 32px;
-      height: 32px;
-    }
-  }
 }
 
 .footer-bar {
