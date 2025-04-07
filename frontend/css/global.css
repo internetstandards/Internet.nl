@@ -134,7 +134,7 @@ video {
 
   &:focus-visible {
     left: 50%;
-    transform: translateX(-50%);
+    translate: -50% 0;
     opacity: 1;
   }
 }
@@ -284,5 +284,17 @@ hgroup {
     > * {
       grid-column: span 12;
     }
+  }
+}
+
+.test-card-small, 
+.contact-card-small, 
+.hall-of-fame-list li, 
+.card:not(.home-variant), 
+.faq-item {
+  transition: transform 0.3s;
+
+  &:hover {
+    transform: scale(1.03);
   }
 }

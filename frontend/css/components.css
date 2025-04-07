@@ -38,7 +38,7 @@
   background: var(--button-bg-color-primary);
   color: var(--button-text-color-primary);
 
-  &:hover {
+  &:not(.rounded):hover {
     background: var(--button-bg-color-hover-primary);
   }
 }
@@ -242,11 +242,11 @@
   }
 
   &.large {
-    transform: translateY(48px);
+    translate: 0 48px;
     border: var(--card-border);
 
     @media (width >= 900px) {
-      transform: translateY(64px);
+      translate: 0 64px;
 
       a {
         padding: 40px;
@@ -286,9 +286,9 @@
 
     @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
       @supports (transition-behavior: allow-discrete) {
-        transition: display 0.5s, opacity 0.5s, left 0.5s, transform 0.5s;
+        transition: display 0.5s, opacity 0.5s, left 0.5s, translate 0.5s;
         transition-behavior: allow-discrete;
-        transform: translateY(25px);
+        translate: 0 25px;
         opacity: 0;
       }
     }
@@ -298,11 +298,11 @@
 
       @media (prefers-reduced-motion: no-preference) {
         @supports (transition-behavior: allow-discrete) {
-          transform: translateY(0);
+          translate: 0 0;
           opacity: 1;
           
           @starting-style {
-            transform: translateY(25px);
+            translate: 0 25px;
             opacity: 0;
           }
         }

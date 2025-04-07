@@ -51,8 +51,7 @@
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  
+  justify-content: space-between;  
 
   @media (width >= 900px) {
     padding: 48px;
