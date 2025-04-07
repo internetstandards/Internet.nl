@@ -436,6 +436,10 @@ header nav {
     @media (width >= 900px) {
       background-color: var(--nav-text-color);
     }
+
+    @supports (appearance: base-select) {
+      display: none;
+    }
   }
 
   select {
@@ -450,25 +454,98 @@ header nav {
     padding: 2px 30px 2px 8px;
     background: var(--nav-mobile-lang-bg-color);
     border-radius: 8px;
+    width: max-content;
 
     @media (width >= 900px) {
       background-color: var(--nav-lang-bg-color);
       color: var(--nav-text-color);
     }
+
+    @supports (appearance: base-select) {
+      padding: 2px 8px;
+
+      selectedcontent {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        span {
+          display: none;
+        }
+      }
+
+      &:open::picker-icon {
+        transform: rotate(-180deg);
+      }
+
+      &, &::picker(select) {
+        appearance: base-select;    
+      }
+
+      &::picker(select) {
+        border: none;
+        border-radius: 8px;
+        background: var(--nav-mobile-lang-bg-color);
+        box-shadow: var(--nav-sticky-shadow);
+  
+        @media (width >= 900px) {
+          background-color: var(--nav-lang-bg-color);
+        } 
+      }
+
+      &::picker-icon {
+        content: "";
+        mask-image: url("/static/icons/angle-down.svg");
+        transition: transform 0.3s;
+        background-color: currentcolor;
+        mask-repeat: no-repeat;
+        mask-size: cover;
+        display: block;
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+      }
+    }
   }
 
   option {
-    color: var(--mobile-lang-text-color);
+    color: var(--nav-mobile-lang-text-color);
     font: var(--nav-button);
     text-transform: uppercase;
 
     @media (width >= 900px) {
       color: var(--nav-text-color);
     }
+
+    @supports (appearance: base-select) {
+      align-items: center;
+      justify-content: center;
+
+      span {
+        display: none;
+      }
+
+      &::checkmark {
+        order: 1;
+        content: "";
+        mask-image: url("/static/icons/checkmark.svg");
+        transition: transform 0.3s;
+        background-color: currentcolor;
+        mask-repeat: no-repeat;
+        mask-size: cover;
+        display: block;
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+      }
+    }
   }
 
   /* stylelint-disable-next-line no-descending-specificity */
-  button {
+  button[type="submit"] {
     color: var(--nav-text-color);
     border: 1px solid currentcolor;
     border-radius: 8px;
