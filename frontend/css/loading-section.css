@@ -1,0 +1,67 @@
+.loading-section {
+  .container {
+    padding-block: 32px;
+    gap: 24px;
+
+    @media (width >= 900px) {
+      padding-block: 72px;
+      gap: 40px;
+
+      & > * {
+        grid-column: 3 / 11;
+      }
+    }
+  }
+
+  h1 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  hgroup {
+    gap: 12px;
+
+    @media (width >= 900px) {
+      gap: 24px;
+    }
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  li {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  li::before {
+    background-image: url("/static/icons/spinner.svg");
+    display: block;
+    background-color: unset;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    min-height: 20px;
+    min-width: 20px;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: rotate linear infinite 2s;
+    }
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
