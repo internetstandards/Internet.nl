@@ -30,11 +30,11 @@
 }
 
 .filter-section {
-  transform: translateY(-65px);
+  translate: 0 -65px;
   margin: 0 16px -65px;
 
   @media (width >= 900px) {
-    transform: translateY(-125px);
+    translate: 0 -125px;
     margin: 0 0 -125px;
   }
 

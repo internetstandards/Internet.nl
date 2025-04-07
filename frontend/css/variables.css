@@ -175,7 +175,7 @@
   --button-bg-color-hover-primary: light-dark(var(--orange-200), var(--orange-200));
   --button-text-color-primary: light-dark(var(--black-200), var(--black-200));
   --button-bg-color-secondary: light-dark(var(--transparent-100), var(--transparent-100));
-  --button-bg-color-hover-secondary: light-dark(var(--green-400), var(--green-400));
+  --button-bg-color-hover-secondary: light-dark(var(--orange-300), var(--green-400));
   --button-text-color-secondary: light-dark(var(--green-500), var(--white-100));
   --button-bg-color-contact: light-dark(var(--green-500), var(--black-200));
   --button-text-color-contact: light-dark(var(--white-100), var(--white-100));

@@ -291,7 +291,7 @@ header nav {
         border-radius: 8px;
         width: max-content;
         justify-content: space-between;
-        transform: translateX(-50%);
+        translate: -50% 0;
         left: 50%;
         margin-top: 20px;
       }
@@ -427,7 +427,7 @@ header nav {
     position: absolute;
     top: 49%;
     right: 4px;
-    transform: translateY(-50%);
+    translate: 0 -50%;
     pointer-events: none;
     height: 20px;
     width: 20px;
