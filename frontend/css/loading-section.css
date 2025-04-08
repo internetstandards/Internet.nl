@@ -1,4 +1,4 @@
-.loading-section {
+.result-section {
   .container {
     padding-block: 32px;
     gap: 24px;
@@ -7,7 +7,15 @@
       padding-block: 72px;
       gap: 40px;
 
-      & > * {
+      & > *:not(.action-card-container) {
+        grid-column: 1 / 9;
+      }
+    }
+  }
+
+  &.loading-variant {
+    .container > * {
+      @media (width >= 900px) {
         grid-column: 3 / 11;
       }
     }
@@ -37,21 +45,178 @@
     display: flex;
     gap: 24px;
     align-items: center;
+
+    &.probing::before {
+      background-image: url("/static/icons/spinner.svg");
+      display: block;
+      background-color: unset;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 20px;
+      height: 20px;
+      min-height: 20px;
+      min-width: 20px;
+  
+      @media (prefers-reduced-motion: no-preference) {
+        animation: rotate linear infinite 2s;
+      }
+    }
+
+    &.passed::before {
+      background-image: url("/static/icons/checkmark-circle.svg");
+      display: block;
+      background-color: unset;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 20px;
+      height: 20px;
+      min-height: 20px;
+      min-width: 20px;
+    }
+
+    &.warning {
+      background-image: url("/static/icons/exclamation-circle.svg");
+      display: block;
+      background-color: unset;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 20px;
+      height: 20px;
+      min-height: 20px;
+      min-width: 20px;
+    }
+
+    &.failed {
+      background-image: url("/static/icons/error.svg");
+      display: block;
+      background-color: unset;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 20px;
+      height: 20px;
+      min-height: 20px;
+      min-width: 20px;
+    }
+  }
+}
+
+.action-card-container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  position: sticky;
+  max-width: 1240px;
+  place-self: center;
+  width: 100vw;
+  bottom: 0;
+  order: 1;
+
+  @media (width >= 900px) {
+    translate: 0 -300px;
+    top: 450px;
+    padding-inline: 16px;
+    order: unset;
+    bottom: unset;
+  }
+}
+
+.action-card {
+  background-color: var(--card-bg-color-contact);
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  grid-column: span 12;
+  gap: 16px;
+
+  @media (width >= 900px) {
+    grid-column: 9 / 13;
+    padding: 32px;
+    gap: 24px;
   }
 
-  li::before {
-    background-image: url("/static/icons/spinner.svg");
-    display: block;
-    background-color: unset;
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 20px;
-    height: 20px;
-    min-height: 20px;
-    min-width: 20px;
+  details {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 
-    @media (prefers-reduced-motion: no-preference) {
-      animation: rotate linear infinite 2s;
+    &::details-content {
+      @media (width >= 900px) {
+        content-visibility: visible;
+      }
+    }
+  }
+
+  summary {
+    font: var(--card-header-xl);
+    color: var(--card-heading-color-contact);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &::marker {
+      display: none;
+    }
+
+    &::after {
+      mask-image: url("/static/icons/angle-down.svg");
+      display: block;
+
+      @media (width >= 900px) {
+        display: none;
+      }
+    }
+  }
+
+  p {
+    font: var(--card-body-m);
+    color: var(--card-body-color-contact);
+    padding-top: 24px;
+  }
+
+  .action-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .action-card-item a {
+    color: var(--card-body-color-contact);
+    font: var(--card-header-m);
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--card-body-color-contact);
+    padding-bottom: 8px;
+
+    &::after {
+      mask-image: url("/static/icons/angle-down.svg");
+      display: block;
+      transform: rotate(-90deg);
+    }
+
+    span {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+      display: block;
+    }
+
+    .connection::before {
+      mask-image: url("/static/icons/link.svg");
+      display: block;
+    }
+
+    .reset::before {
+      mask-image: url("/static/icons/reset.svg");
+      display: block;
+    }
+
+    .clipboard::before {
+      mask-image: url("/static/icons/clipboard.svg");
+      display: block;
     }
   }
 }

@@ -7,6 +7,64 @@
 {% endblock %}
 
 {% block maincontent %}
+
+<section class="result-section bg-primary">
+  <div class="container">
+    <h1>
+      <span class="h5 color-secondary">Website score voor:</span>
+      <span class="h1 color-secondary">
+        {% block testheadcontent %}
+        {% endblock %}
+      </span>
+    </h1>
+    <meter></meter>
+    <ul class="main-items">
+      {% for probe in probes %} <!-- probe.name probe.icon probe.summary|safe -->
+        <li class="main-item {{probe.verdict}} icon" id="{{probe.name}}-results">
+          <a class="h7 color-secondary" href="#{{probe.name}}">
+            <span class="visually-hidden">
+              {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
+            </span>
+            {% include "string.html" with name=probe.summary|safe %}
+          </a>
+        </li>
+      {% endfor %}
+      </ul>
+  </div>
+</section>
+
+<aside class="action-card-container">
+  <article class="action-card">
+    <details>
+      <summary class="icon">Vervolg acties</summary>
+      <ul class="action-card-list">
+        <li class="action-card-item">
+          <a class="icon" href="/test-mail">
+            <span class="mail icon">Test je e-mail domein</span>
+          </a>
+        </li>
+        <li class="action-card-item">
+          <a class="icon" href="/test-connection">
+            <span class="connection icon">Test je verbinding</span>
+          </a>
+        </li>
+        <li class="action-card-item">
+          <a class="icon" href="/test-mail">
+            <span class="reset icon">Herhaal de test</span>
+          </a>
+        </li>
+        <li class="action-card-item">
+          <a class="icon" href="/">
+            <span class="clipboard icon">Toelichting op testrapport</span>
+          </a>
+        </li>
+      </ul>
+      <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
+    </details>
+    <a class="primary-button icon" href="/">Deel uitslag met hoster</a>
+  </article>
+</aside>
+
   <div class="hidethis" aria-hidden="true">
     <span id="panel-button-show">
       {% include "string.html" with name="results panel-button show" %}
@@ -22,41 +80,8 @@
     </span>
   </div>
 
-  <article class="result wide">
+  <!-- <article class="result wide">
     <div id="testresults-overview" class="block">
-      {% block testheadcontent %}
-        <div class="testresults-percentage" data-resultscore="{{score}}">
-          <div class="visuallyhidden">
-            {% include "string.html" with name="results score-description"%}
-          </div>
-        {% block perfectscore %}
-          {% if score == 100 %}
-          <div class="perfect-score">
-            {% include "string.html" with name="results perfect-score" %}
-          </div>
-          {% endif %}
-        {% endblock %}
-          <div class="score-container">
-            <p class="score" aria-hidden="true">{{score}}%</p>
-            <div class="meter">
-              <!-- The following span is controlled by js -->
-              <span></span>
-            </div>
-          </div>
-        </div>
-      {% endblock %}
-      <ul class="main-items">
-      {% for probe in probes %} <!-- probe.name probe.icon probe.summary|safe -->
-        <li class="main-item {{probe.verdict}}" id="{{probe.name}}-results">
-          <a href="#{{probe.name}}">
-            <span class="visuallyhidden">
-              {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
-            </span>
-            {% include "string.html" with name=probe.summary|safe %}
-          </a>
-        </li>
-      {% endfor %}
-      </ul>
       {% block testmiddlecontent %}
           <div class="timestamp">
             <a href="{% url "faqs_report" %}" class="icon-testinfo">{% include "string.html" with name="results test-info" %}</a>
@@ -122,7 +147,7 @@
       </section>
       {% endfor %}
      </div>
-   </article>
+   </article> -->
 
    {% block testtailcontent %}
    <aside>
