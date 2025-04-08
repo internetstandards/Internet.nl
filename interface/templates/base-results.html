@@ -17,7 +17,17 @@
         {% endblock %}
       </span>
     </h1>
-    <meter></meter>
+    <div class="meter-container">
+      <meter min="0" max="100" value="{{score}}">{{score}}%</meter>
+      <ul class="meter-numbers h7 color-secondary">
+        <li class="meter-number">0</li>
+        <li class="meter-number">25</li>
+        <li class="meter-number">50</li>
+        <li class="meter-number">75</li>
+        <li class="meter-number">100</li>
+      </ul>
+      <p class="meter-value h7">{{score}}%</p>
+    </div>
     <ul class="main-items">
       {% for probe in probes %} <!-- probe.name probe.icon probe.summary|safe -->
         <li class="main-item {{probe.verdict}} icon" id="{{probe.name}}-results">

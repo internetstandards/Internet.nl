@@ -5,10 +5,10 @@
 
     @media (width >= 900px) {
       padding-block: 72px;
-      gap: 40px;
+      gap: 48px;
 
       & > *:not(.action-card-container) {
-        grid-column: 1 / 9;
+        grid-column: 1 / 8;
       }
     }
   }
@@ -17,6 +17,7 @@
     .container > * {
       @media (width >= 900px) {
         grid-column: 3 / 11;
+        gap: 40px;
       }
     }
   }
@@ -35,13 +36,13 @@
     }
   }
 
-  ul {
+  ul:not(.meter-numbers) {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
 
-  li {
+  li:not(.meter-number) {
     display: flex;
     gap: 24px;
     align-items: center;
@@ -78,10 +79,10 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 20px;
-      height: 20px;
-      min-height: 20px;
-      min-width: 20px;
+      width: 24px;
+      height: 24px;
+      min-height: 24px;
+      min-width: 24px;
     }
 
     &.warning {
@@ -90,10 +91,10 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 20px;
-      height: 20px;
-      min-height: 20px;
-      min-width: 20px;
+      width: 24px;
+      height: 24px;
+      min-height: 24px;
+      min-width: 24px;
     }
 
     &.failed {
@@ -102,10 +103,10 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 20px;
-      height: 20px;
-      min-height: 20px;
-      min-width: 20px;
+      width: 24px;
+      height: 24px;
+      min-height: 24px;
+      min-width: 24px;
     }
   }
 }
@@ -239,4 +240,58 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.meter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  border-bottom: 2px solid var(--green-100);
+  padding-bottom: 16px;
+}
+
+.meter-value {
+  position: absolute;
+  translate: -50% -120%;
+  color: var(--white-100);
+  background-image: url("/static/icons/box.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 6px 6px 10px;
+  display: flex;
+  font-size: 14px;
+}
+
+meter {
+  appearance: none;
+  width: 100%;
+  border-radius: 20px;
+  height: 16px;
+  background: var(--white-100);
+}
+
+meter::-webkit-meter-bar {
+  background: var(--white-100);
+  border-radius: 20px;
+  height: 16px;
+}
+
+meter::-webkit-meter-optimum-value,
+meter::-webkit-meter-suboptimum-value,
+meter::-webkit-meter-even-less-good-value {
+  background: var(--green-400);
+  border-radius: 20px;
+}
+
+.meter-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+meter::-moz-meter-bar {
+  background: var(--green-400);
+  border-radius: 20px;
 }
