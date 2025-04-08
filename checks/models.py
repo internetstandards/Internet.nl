@@ -559,6 +559,7 @@ class DomainTestTls(BaseTestModel):
     caa_enabled = models.BooleanField(null=True, default=False)
     caa_errors = ListField(default=[])
     caa_recommendations = ListField(default=[])
+    caa_records = ListField(default=[])
     caa_score = models.IntegerField(null=True)
     caa_found_on_domain = models.CharField(null=True, max_length=255)
 
@@ -625,6 +626,7 @@ class DomainTestTls(BaseTestModel):
             "caa_enabled",
             "caa_errors",
             "caa_recommendations",
+            "caa_records",
             "caa_score",
             "caa_found_on_domain",
             "score",
@@ -662,6 +664,7 @@ class DomainTestTls(BaseTestModel):
             "caa_enabled": self.caa_enabled,
             "caa_errors": self.caa_errors,
             "caa_recommendations": self.caa_recommendations,
+            "caa_records": self.caa_records,
             "caa_found_on_domain": self.caa_found_on_domain,
         }
 

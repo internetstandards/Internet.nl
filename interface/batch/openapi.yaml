@@ -750,6 +750,11 @@ components:
           description: Recommendations found in the parsing and evaluation of the CAA records.
           items:
             $ref: '#/components/schemas/TechnicalMessagesWithContext'
+        caa_records:
+          type: array
+          description: The found CAA records
+          items:
+            $ref: string
         caa_found_on_domain:
           type: string
           description: Domain name under which the CAA record was found.

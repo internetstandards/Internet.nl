@@ -5428,6 +5428,9 @@ msgstr "Mail server|Findings"
 msgid "detail tech data caa invalid_property_syntax"
 msgstr "invalid_property_syntax name {property_name} value {property_value} invalid character {invalid_character} at pos {invalid_character_position}"
 
+msgid "detail tech data caa caa_record"
+msgstr "caa record found: {record}"
+
 msgid "detail tech data caa invalid_unknown_property"
 msgstr "invalid_unknown_property {value}"
 
