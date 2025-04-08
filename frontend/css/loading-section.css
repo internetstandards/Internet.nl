@@ -111,8 +111,8 @@
   order: 1;
 
   @media (width >= 900px) {
-    translate: 0 -300px;
-    top: 450px;
+    margin-top: -300px;
+    top: 200px;
     padding-inline: 16px;
     order: unset;
     bottom: unset;
