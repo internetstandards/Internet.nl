@@ -2,9 +2,7 @@
 {% load translate %}
 
 {% block testheadcontent %}
-  <h1>
-    {% include "string.html" with name="domain title" %}
-  </h1>
+  {% include "string.html" with name="domain title" %}
   {{block.super}}
 {% endblock %}
 
