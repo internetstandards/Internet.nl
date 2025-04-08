@@ -656,6 +656,7 @@ def save_results(model, results, addr, domain, category):
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
                 model.caa_enabled = result.get("caa_result").caa_found
+                model.caa_records = result.get("caa_result").caa_records_str
                 model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                 model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                 model.caa_score = result.get("caa_result").score
@@ -729,6 +730,7 @@ def save_results(model, results, addr, domain, category):
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
                     model.caa_enabled = result.get("caa_result").caa_found
+                    model.caa_records = result.get("caa_result").caa_records_str
                     model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                     model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                     model.caa_score = result.get("caa_result").score
@@ -899,6 +901,10 @@ def build_report(dttls, category):
                 else:
                     caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
                 caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+                for record in dttls.caa_records:
+                    caa_tech_table.append(
+                        TranslatableTechTableItem(msgid="caa_record", context={"record": record}).to_dict()
+                    )
                 if not dttls.caa_enabled or dttls.caa_errors:
                     category.subtests["web_caa"].result_bad(caa_tech_table)
                 elif dttls.caa_recommendations:
@@ -1069,6 +1075,10 @@ def build_report(dttls, category):
             else:
                 caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
             caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+            for record in dttls.caa_records:
+                caa_tech_table.append(
+                    TranslatableTechTableItem(msgid="caa_record", context={"record": record}).to_dict()
+                )
             if not dttls.caa_enabled or dttls.caa_errors:
                 category.subtests["mail_caa"].result_bad(caa_tech_table)
             elif dttls.caa_recommendations:

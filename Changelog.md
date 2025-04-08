@@ -39,7 +39,7 @@ docker network rm internetnl-prod_public-internet
 ### API changes
 
 - The API version was updated to version 2.5.0.
-- The fields `caa_enabled`, `caa_errors`, `caa_recommendations` and `caa_found_on_domain` have been added
+- The fields `caa_enabled`, `caa_errors`, `caa_recommendations`, `caa_records`, and `caa_found_on_domain` have been added
   ([OpenAPI diff](https://github.com/internetstandards/Internet.nl/commit/cdc642c97f3ef00b4ef8ec7ff6ea4c5403c80978#diff-ccabca18cd3cc1ba3dd325e532acccf5d37c7be317a2966209b6e55b968d4890)).
 
 ## 1.9.3
