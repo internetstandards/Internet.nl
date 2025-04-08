@@ -138,9 +138,13 @@ footer {
 }
 
 .version {
-  text-align: center;
+  text-align: left;
   border-top: 1px solid var(--transparent-300);
-  padding-block: 20px;
+  padding: 20px 16px;
   max-width: 1240px;
   margin-inline: auto;
+
+  @media (width >= 900px) {
+    text-align: right;
+  }
 }
