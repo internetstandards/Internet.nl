@@ -130,6 +130,8 @@
           </form>
           <button id="theme-toggle" class="theme-button" type="button">
             <span>Mode</span>
+            <span class="visually-hidden light-visible">Schakel naar donkere thema</span>
+            <span class="visually-hidden dark-visible">Schakel naar lichte thema</span>
             <span class="switch-container">
               <span class="switch icon"></span>
             </span>
@@ -226,6 +228,7 @@
         {% endif %}
       </div>
     </div>
+    <p class="version">v{{ "VERSION"|get_settings_value }}</p>
   </footer>
 
   <!-- <script type="text/javascript" src="{% static "js/menu-min.js" %}" defer></script> -->
