@@ -38,7 +38,7 @@ from nassl import _nassl
 from nassl.ocsp_response import OcspResponseNotTrustedError
 
 from checks import categories, scoring
-from checks.caa.retrieval import retrieve_parse_caa
+from checks.caa.retrieval import retrieve_parse_caa, CAA_MSGID_INSUFFICIENT_POLICY
 from checks.http_client import http_get_ip
 from checks.models import (
     CipherOrderStatus,
@@ -905,8 +905,13 @@ def build_report(dttls, category):
                     caa_tech_table.append(
                         TranslatableTechTableItem(msgid="caa_record", context={"record": record}).to_dict()
                     )
-                if not dttls.caa_enabled or dttls.caa_errors:
+                if not dttls.caa_enabled:
                     category.subtests["web_caa"].result_bad(caa_tech_table)
+                elif dttls.caa_errors:
+                    if all([ttti.msgid != CAA_MSGID_INSUFFICIENT_POLICY for ttti in dttls.caa_errors]):
+                        category.subtests["web_caa"].result_syntax_error(caa_tech_table)
+                    else:
+                        category.subtests["web_caa"].result_insufficient(caa_tech_table)
                 elif dttls.caa_recommendations:
                     category.subtests["web_caa"].result_recommendations(caa_tech_table)
                 else:
@@ -1079,8 +1084,13 @@ def build_report(dttls, category):
                 caa_tech_table.append(
                     TranslatableTechTableItem(msgid="caa_record", context={"record": record}).to_dict()
                 )
-            if not dttls.caa_enabled or dttls.caa_errors:
+            if not dttls.caa_enabled:
                 category.subtests["mail_caa"].result_bad(caa_tech_table)
+            elif dttls.caa_errors:
+                if all([ttti.msgid != CAA_MSGID_INSUFFICIENT_POLICY for ttti in dttls.caa_errors]):
+                    category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
+                else:
+                    category.subtests["mail_caa"].result_insufficient(caa_tech_table)
             elif dttls.caa_recommendations:
                 category.subtests["mail_caa"].result_recommendations(caa_tech_table)
             else:

@@ -1339,6 +1339,16 @@ class WebCaa(Subtest):
         self.verdict = "detail web caa verdict bad"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
+    def result_syntax_error(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web caa verdict syntax_error"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
+    def result_insufficient(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web caa verdict insufficient"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
 
 class WebTlsDaneExists(Subtest):
     def __init__(self):
@@ -1969,6 +1979,16 @@ class MailCaa(Subtest):
     def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail caa verdict bad"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
+    def result_syntax_error(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail caa verdict syntax_error"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
+    def result_insufficient(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail caa verdict insufficient"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
