@@ -56,11 +56,11 @@
       height: 20px;
       min-height: 20px;
       min-width: 20px;
-      
-      &:has(:not(.done)) {
-        @media (prefers-reduced-motion: no-preference) {
-          animation: rotate linear infinite 2s;
-        }
+    }
+
+    &.probing:has(:not(.done))::before {
+      @media (prefers-reduced-motion: no-preference) {
+        animation: rotate linear infinite 2s;
       }
     }
 
