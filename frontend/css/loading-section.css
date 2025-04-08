@@ -56,10 +56,20 @@
       height: 20px;
       min-height: 20px;
       min-width: 20px;
-  
-      @media (prefers-reduced-motion: no-preference) {
-        animation: rotate linear infinite 2s;
+      
+      &:has(:not(.done)) {
+        @media (prefers-reduced-motion: no-preference) {
+          animation: rotate linear infinite 2s;
+        }
       }
+    }
+
+    &.probing:has(.done)::before {
+      background-image: url("/static/icons/checkmark-circle.svg");
+      width: 24px;
+      height: 24px;
+      min-height: 24px;
+      min-width: 24px;
     }
 
     &.passed::before {
