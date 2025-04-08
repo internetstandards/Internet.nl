@@ -9,6 +9,7 @@ from checks.caa.parser import validate_caa_record, CAAParseError
 from checks.resolver import dns_resolve_caa
 from checks.tasks.shared import TranslatableTechTableItem
 
+CAA_MSGID_INSUFFICIENT_POLICY = "missing_required_tag"
 CAA_TAGS_REQUIRED = {"issue"}
 CAA_MAX_RECORDS = 1000
 
@@ -21,6 +22,8 @@ class CAAEvaluation:
 
     caa_found: bool
     canonical_name: Optional[str] = None
+    has_syntax_error: bool = False
+    has_insufficient_policy: bool = False
     errors: list[TranslatableTechTableItem] = field(default_factory=list)
     recommendations: list[TranslatableTechTableItem] = field(default_factory=list)
     caa_records_str: list[str] = field(default_factory=list)
@@ -40,7 +43,7 @@ class CAAEvaluation:
 
         missing_tags = CAA_TAGS_REQUIRED - self.caa_tags
         for tag in missing_tags:
-            self.errors.append(TranslatableTechTableItem("missing_required_tag", {"tag": tag}))
+            self.errors.append(TranslatableTechTableItem(CAA_MSGID_INSUFFICIENT_POLICY, {"tag": tag}))
 
     @property
     def score(self) -> int:
