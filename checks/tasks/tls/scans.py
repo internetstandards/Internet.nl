@@ -1015,7 +1015,10 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
         except (ConnectionToServerFailed, OpenSSLError) as exc:
-            log.debug(f"Server {server_connectivity_info.server_location.hostname} rejected {tls_version.name}: {str(exc).strip()} ({requires_legacy_openssl=}")
+            log.debug(
+                f"Server {server_connectivity_info.server_location.hostname} rejected {tls_version.name}: "
+                f"{str(exc).strip()} ({requires_legacy_openssl=}"
+            )
         finally:
             ssl_connection.close()
 
