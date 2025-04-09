@@ -1,6 +1,5 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-import binascii
 import re
 import socket
 from collections import defaultdict
@@ -11,19 +10,15 @@ from django.conf import settings
 
 from dns.exception import DNSException
 from dns.name import EmptyLabel
-from dns.rdatatype import RdataType
-from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
+from dns.resolver import LifetimeTimeout, NXDOMAIN, NoAnswer
 
 from checks.models import MxStatus
 from checks.resolver import (
     dns_resolve_spf,
     dns_resolve_a,
     dns_resolve_aaaa,
-    DNSSECStatus,
-    dns_resolve_tlsa,
     dns_resolve_ns,
     dns_resolve_mx,
-    dns_resolve,
 )
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
@@ -131,8 +126,8 @@ def batch_resolve_ns(self, qname, *args, **kwargs):
 
 def do_mail_get_servers(self, url, *args, **kwargs):
     """
-    Resolve the domain's mailservers and TLSA records.
-    Returns [mailserver, dane_data, MxStatus].
+    Resolve the domain's mailservers.
+    Returns [mailserver, MxStatus].
 
     """
     mailservers = []
@@ -154,8 +149,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
         elif re.match(MX_LOCALHOST_RE, rdata):
             # Ignore "localhost".
             continue
-        dane_cb_data = resolve_dane(25, rdata)
-        mailservers.append((rdata, dane_cb_data, MxStatus.has_mx))
+        mailservers.append((rdata, MxStatus.has_mx))
 
     if not mailservers:
         if do_resolve_single_a_aaaa(url):
@@ -176,7 +170,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
 
 
 def get_mail_servers_mxstatus(mailservers):
-    return mailservers[0][2]
+    return mailservers[0][1]
 
 
 def do_resolve_single_a_aaaa(qname):
@@ -221,7 +215,7 @@ def do_resolve_mx_ips(self, url, *args, **kwargs):
     """
     mx_ips_pairs = []
 
-    for mx_name, _, status in do_mail_get_servers(self, url, *args, **kwargs):
+    for mx_name, status in do_mail_get_servers(self, url, *args, **kwargs):
         if status is not MxStatus.has_mx:
             continue
 
@@ -262,28 +256,6 @@ def do_resolve_ns_ips(qname):
             yield ns_name, do_resolve_all_a_aaaa(ns_name)
         except ValueError as ve:
             raise Exception(f"resolver failed on ns_name: {ns_name=} {ns_list=} {qname=} {ve=}")
-
-
-def resolve_dane(port, dname, check_nxdomain=False):
-    # Due to its complex use, the API of this call is backwards compatible
-    qname = f"_{port}._tcp.{dname}"
-    try:
-        if check_nxdomain:
-            rrset, dnssec_status = dns_resolve(qname, RdataType.A)
-            data = [rr.address for rr in rrset]
-        else:
-            rrset, dnssec_status = dns_resolve_tlsa(qname)
-            data = [(rr.usage, rr.selector, rr.mtype, binascii.hexlify(rr.cert).decode("ascii")) for rr in rrset]
-    except NXDOMAIN:
-        return {"nxdomain": True}
-    except (NoAnswer, NoNameservers, LifetimeTimeout, EmptyLabel):
-        data = None
-        dnssec_status = None
-    return {
-        "data": data,
-        "bogus": dnssec_status == DNSSECStatus.BOGUS,
-        "secure": dnssec_status == DNSSECStatus.SECURE,
-    }
 
 
 def results_per_domain(results):
