@@ -1314,9 +1314,9 @@ class WebCaa(Subtest):
     def __init__(self):
         super(WebCaa, self).__init__(
             name="web_caa",
-            label="detail web caa label",
-            explanation="detail web caa exp",
-            tech_string="detail web caa tech table",
+            label="detail web tls caa label",
+            explanation="detail web tls caa exp",
+            tech_string="detail web tls caa tech table",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
             model_score_field="caa_score",
@@ -1326,27 +1326,27 @@ class WebCaa(Subtest):
 
     def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web caa verdict good"
+        self.verdict = "detail web tls caa verdict good"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_recommendations(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_INFO)
-        self.verdict = "detail web caa verdict recommendations"
+        self.verdict = "detail web tls caa verdict recommendations"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web caa verdict bad"
+        self.verdict = "detail web tls caa verdict bad"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_syntax_error(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web caa verdict syntax_error"
+        self.verdict = "detail web tls caa verdict syntax_error"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_insufficient(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web caa verdict insufficient"
+        self.verdict = "detail web tls caa verdict insufficient"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
@@ -1956,9 +1956,9 @@ class MailCaa(Subtest):
     def __init__(self):
         super().__init__(
             name="mail_caa",
-            label="detail mail caa label",
-            explanation="detail mail caa exp",
-            tech_string="detail mail caa tech table",
+            label="detail mail tls caa label",
+            explanation="detail mail tls caa exp",
+            tech_string="detail mail tls caa tech table",
             worst_status=scoring.CAA_WORST_STATUS,
             full_score=scoring.CAA_GOOD,
             model_score_field="caa_score",
@@ -1968,27 +1968,27 @@ class MailCaa(Subtest):
 
     def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail caa verdict good"
+        self.verdict = "detail mail tls caa verdict good"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_recommendations(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_INFO)
-        self.verdict = "detail mail caa verdict recommendations"
+        self.verdict = "detail mail tls caa verdict recommendations"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail caa verdict bad"
+        self.verdict = "detail mail tls caa verdict bad"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_syntax_error(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail caa verdict syntax_error"
+        self.verdict = "detail mail tls caa verdict syntax_error"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_insufficient(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail caa verdict insufficient"
+        self.verdict = "detail mail tls caa verdict insufficient"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
