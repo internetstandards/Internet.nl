@@ -28,7 +28,6 @@ from checks.resolver import (
 from checks.tasks.spf_parser import parse as spf_parse
 from checks.scoring import ORDERED_STATUSES, STATUS_MAX
 from interface import batch_shared_task
-from internetnl import log
 
 MAX_MAILSERVERS = 10
 MX_LOCALHOST_RE = re.compile(r"^localhost\.?$")
@@ -140,7 +139,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
     mxlist = dns_resolve_mx(url)
 
     for rdata, prio in mxlist:
-        is_null_mx = prio == 0 and rdata == ""
+        is_null_mx = prio == 0 and rdata == "."
         if is_null_mx:
             if len(mxlist) > 1:
                 # Invalid NULL MX next to other MX.
