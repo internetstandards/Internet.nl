@@ -48,3 +48,5 @@ In all other cases, the status is bad (notice).
 * We do not evaluate more than 1000 records.
 * The API and database support recommendations for future use,
   but none are currently used.
+* We do not accept HTTP URLs in iodef, which may be a slightly 
+  different interpretation from the RFC, though it is very ambiguous.

@@ -147,7 +147,7 @@ def validate_property_iodef(value: str):
         url = urlparse(value)
     except ValueError:
         raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
-    if url.scheme in ["http", "https"]:
+    if url.scheme == "https":
         # RFC8659 refers to RFC6546, which is unclear on requirements. Let's assume a netloc is needed.
         if not url.netloc:
             raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})

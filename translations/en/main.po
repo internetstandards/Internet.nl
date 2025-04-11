@@ -5368,17 +5368,20 @@ msgstr ""
 "Would you like visitors of your website to be able to directly start a website test?  \n"
 "Copy the HTML and CSS code from the text fields below into the source code of your website."
 
-msgid "detail web caa label"
+msgid "detail web tls caa label"
 msgstr "CAA web"
 
-msgid "detail mail caa label"
+msgid "detail mail tls caa label"
 msgstr "CAA mail"
 
-msgid "detail web caa tech table"
+msgid "detail web tls caa tech table"
 msgstr "Findings"
 
-msgid "detail mail caa tech table"
+msgid "detail mail tls caa tech table"
 msgstr "Mail server|Findings"
+
+msgid "detail tech data caa caa_record"
+msgstr "caa record found: {record}"
 
 msgid "detail tech data caa invalid_property_syntax"
 msgstr "invalid_property_syntax name {property_name} value {property_value} invalid character {invalid_character} at pos {invalid_character_position}"
