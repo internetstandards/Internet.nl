@@ -80,16 +80,14 @@
     }
   }
 
-  &[open] {
-    &::details-content {
-      @media (prefers-reduced-motion: no-preference) {
-        @supports (transition-behavior: allow-discrete) {
-          opacity: 1;
-          height: auto;
-        }
+  &[open]::details-content {
+    @media (prefers-reduced-motion: no-preference) {
+      @supports (transition-behavior: allow-discrete) {
+        opacity: 1;
+        height: auto;
       }
     }
-    
+  
     summary::after {
       transform: rotate(-180deg);
     }
