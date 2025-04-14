@@ -12,7 +12,7 @@
 @import url("components.css") layer(components);
 @import url("about-section.css") layer(components);
 @import url("knowledge-section.css") layer(components);
-@import url("faq-section.css") layer(components);
+@import url("contact-section.css") layer(components);
 @import url("hall-of-fame-section.css") layer(components);
 @import url("test-section.css") layer(components);
-@import url("loading-section.css") layer(components);
+@import url("result-section.css") layer(components);

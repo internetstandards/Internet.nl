@@ -13,7 +13,7 @@
     }
   }
 
-  &.loading-variant {
+  &.loading {
     .container > * {
       @media (width >= 900px) {
         grid-column: 3 / 11;
@@ -251,6 +251,12 @@
   padding-bottom: 16px;
 }
 
+.meter {
+  background-color: var(--white-100);
+  border-radius: 20px;
+  height: 16px;
+}
+
 .meter-value {
   position: absolute;
   translate: -50% -120%;
@@ -262,14 +268,44 @@
   padding: 6px 6px 10px;
   display: flex;
   font-size: 14px;
+  opacity: 0;
+  animation: fadein 1s ease forwards 2s;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 meter {
   appearance: none;
-  width: 100%;
+  width: 0%;
   border-radius: 20px;
-  height: 16px;
+  height: 100%;
   background: var(--white-100);
+  animation: fillmeter 2s ease forwards;
+  vertical-align: top;
+}
+
+@keyframes fillmeter {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.meter-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
 }
 
 meter::-webkit-meter-bar {
@@ -285,13 +321,8 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 20px;
 }
 
-.meter-numbers {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-}
-
 meter::-moz-meter-bar {
   background: var(--green-400);
   border-radius: 20px;
+  height: 16px;
 }
