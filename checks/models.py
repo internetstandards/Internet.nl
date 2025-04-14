@@ -80,6 +80,7 @@ class ForcedHttpsStatus(Enum):
     good = 1
     no_http = 2
     no_https = 3
+    bad_redirect = 4
 
 
 class OcspStatus(Enum):
@@ -531,6 +532,8 @@ class DomainTestTls(BaseTestModel):
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
 
+    redirect_domain = models.CharField(null=True, max_length=255, default=None)
+
     # HTTP headers
     http_compression_enabled = models.BooleanField(null=True, default=False)
     http_compression_score = models.IntegerField(null=True)
@@ -608,6 +611,7 @@ class DomainTestTls(BaseTestModel):
             "kex_hash_func_score",
             "forced_https",
             "forced_https_score",
+            "redirect_domain",
             "http_compression_enabled",
             "http_compression_score",
             "hsts_enabled",
