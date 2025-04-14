@@ -291,6 +291,7 @@
   position: relative;
   border-bottom: 2px solid var(--green-100);
   padding-bottom: 16px;
+  margin-inline: 10px;
 }
 
 .meter {
@@ -367,4 +368,45 @@ meter::-moz-meter-bar {
   background: var(--green-400);
   border-radius: 20px;
   height: 16px;
+}
+
+.result-details-section {
+  .container {
+    gap: 32px;
+
+    & > * {
+      @media (width >= 900px) {
+        grid-column: 1 / 9;
+        z-index: 1;
+      }
+    }
+  }
+}
+
+.result-details-item {
+  > hgroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h2 {
+      display: flex;
+      gap: 16px;
+    }
+
+    p {
+      a {
+        display: inline-flex;
+      }
+    }
+  }
+
+  .result-details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: var(--green-200);
+    border-radius: 8px;
+    padding: 24px;
+  }
 }

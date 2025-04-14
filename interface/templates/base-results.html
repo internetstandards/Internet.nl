@@ -11,7 +11,7 @@
 <section class="result-section bg-primary">
   <div class="container">
     <h1>
-      <span class="h5 color-secondary">Website score voor:</span>
+      <span class="h5 color-secondary">Score voor:</span>
       <span class="h1 color-secondary">
         {% block testheadcontent %}
         {% endblock %}
@@ -78,7 +78,32 @@
   </article>
 </aside>
 
-  <div class="hidethis" aria-hidden="true">
+<section class="result-details-section">
+  <div class="container">
+    <h2 class="h3 color-secondary">Details over de test</h2>
+    <ul class="result-details-list">
+      {% for probe in probes %}
+
+      <li class="result-details-item">
+        <hgroup>
+          <h3 class="h4 color-secondary icon">{% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}</h3>
+          <p class="body-m">{% include "string.html" with name=probe.description|safe %}</p>
+        </hgroup>
+        <!-- <article>
+          <h4 class="h5 color-secondary"></h4> -->
+        <div class="result-details-content">
+          {% for domain_type, domain, details in probe.details_set %}
+          {% block testdetailitems %}
+          {% endblock %}
+          {% endfor %}
+          {% endfor %}
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+  <!-- <div class="hidethis" aria-hidden="true">
     <span id="panel-button-show">
       {% include "string.html" with name="results panel-button show" %}
     </span>
@@ -91,79 +116,11 @@
     <span id="panel-item-close">
       {% include "string.html" with name="results no-icon-detail close" %}
     </span>
-  </div>
+  </div> -->
 
-  <!-- <article class="result wide">
-    <div id="testresults-overview" class="block">
-      {% block testmiddlecontent %}
-          <div class="timestamp">
-            <a href="{% url "faqs_report" %}" class="icon-testinfo">{% include "string.html" with name="results test-info" %}</a>
-            <br>
-            <a href="{{permalink}}" class="permalink">{% include "string.html" with name="results permalink" %}</a>
-            <br>
-            <span id="retest-time" class="hidethis" aria-hidden="true">{{retest_time}}</span>
-            <span
-            {% if retest_time < 1 %}
-                class="retest-text reruntest hidethis" aria-hidden="true"
-            {% else %}
-                class="retest-text reruntest"
-            {% endif %}>
-              {% include "string.html" with name="results retest-time" %}
-              <span class="retest-time"> {{retest_time}}</span>
-            </span>
-            <a href="{{retest_link}}" rel="nofollow"
-            {% if retest_time > 0 %}
-                class="retest-link reruntest hidethis" aria-hidden="true"
-            {% else %}
-                class="retest-link reruntest"
-            {% endif %}>
-              {% include "string.html" with name="results rerun-test" %}
-            </a>
-          </div>
-      {% endblock %}
-      {% if probes|probes_contain_dated_results %}
-      <div id="dated-results-warning">
-        <a href="{{retest_link}}" rel="nofollow">
-          {% include "string.html" with name="results dated-presentation" %}
-        </a>
-      </div>
-      {% endif %}
-    </div>
-
-    <div class="block">
-    {% for probe in probes %}
-      <section class="test-header">
-      {% if not forloop.first %}
-        <hr/>
-      {% endif %}
-        <div class="test-title">
-            <h2 id="{{probe.name}}" class="{{probe.verdict}}">
-              <span class="visuallyhidden">
-                {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
-              </span>
-              {% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}
-            </h2>
-        </div>
-        <div id="{{probe.name}}-description" class="description">
-          {% include "string.html" with name=probe.description|safe %}
-        </div>
-        <div class="panel-button-container">
-          <button class="panel-button-show hidethis" aria-hidden="true"></button>
-        </div>
-      </section>
-      <section class="testresults">
-        <br/>
-        {% for domain_type, domain, details in probe.details_set %}
-          {% block testdetailitems %}
-          {% endblock %}
-        {% endfor %}
-      </section>
-      {% endfor %}
-     </div>
-   </article> -->
 
    {% block testtailcontent %}
-   <aside>
+   <!-- <aside>
      <div id="first-aside-block" class="block">
      <section class="websitetest">
        <h2>
@@ -249,6 +206,6 @@
 
      {% block furthertesting %}
      {% endblock %}
-   </aside>
+   </aside> -->
    {% endblock %}
 {% endblock %}
