@@ -21,9 +21,14 @@ aside,
 .footlink,
 .panel-button-container,
 .panel-title a .icon,
-.timestamp,
+.timestamp > :not(a.permalink),
 #site-description {
   display:none !important;
+}
+
+/* print permalink */
+a.permalink::after {
+  content: ": " attr(href);
 }
 
 /* print design */
