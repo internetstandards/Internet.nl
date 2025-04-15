@@ -1,0 +1,150 @@
+
+.footer-nav {
+  background: var(--footer-bg-color);
+  width: 100%;
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+    padding-block: 40px;
+    flex-direction: column;
+    gap: 40px;
+    width: 100%;
+
+    @media (width >= 900px) {
+      flex-direction: row;
+      padding-block: 64px;
+    }
+  }
+}
+
+.footer-logo {
+  transition: opacity 0.3s;
+  height: fit-content;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+footer {
+  .nav-list {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: auto;
+    gap: 24px;
+
+    @media (width >= 900px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .nav-item a {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font: var(--footer-link);
+    color: var(--footer-text-color);
+
+    span {
+      border-bottom: 2px solid var(--transparent-100);
+      transition: 0.3s;
+    }
+
+    &:hover span {
+      border-bottom: 2px solid currentcolor;
+    }
+
+    &::before {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: block;
+
+      @media (width >= 900px) {
+        width: 32px;
+        height: 32px;
+      }
+    }
+  }
+}
+
+.footer-bar {
+  background: var(--footer-bar-bg-color);
+
+  .container {
+    display: flex;
+    gap: 32px;
+    flex-direction: column;
+    padding-block: 32px;
+    width: 100%;
+
+    @media (width >= 900px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding-block: 16px;
+    }
+  }
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+
+  @media (width >= 900px) {
+    flex-direction: row;
+  }
+
+  .footer-link a {
+    color: var(--footer-bar-text-color);
+    font: var(--footer-bar-link);
+    text-decoration: underline;
+  }
+}
+
+.footer-socials {
+  display: flex;
+  gap: 24px;
+
+  .footer-social {
+    display: flex;
+    align-items: center;
+
+    .icon {
+      background-color: var(--green-600);
+      padding: 8px;
+      border-radius: 100%;
+
+      &::after {
+        display: block;
+        background-color: var(--white-100);
+        width: 18px;
+        height: 18px;
+      }
+
+      &.x::after {
+        mask-image: url("/static/icons/x.svg");
+      }
+
+      &.linkedin::after {
+        mask-image: url("/static/icons/linkedin.svg");
+      }
+
+      &.mastodon::after {
+        mask-image: url("/static/icons/mastodon.svg");
+      }
+    }
+  }
+}
+
+.version {
+  text-align: left;
+  border-top: 1px solid var(--transparent-300);
+  padding: 20px 16px;
+  max-width: 1240px;
+  margin-inline: auto;
+
+  @media (width >= 900px) {
+    text-align: right;
+  }
+}

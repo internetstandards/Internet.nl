@@ -1,0 +1,327 @@
+.test-section {
+  .container {
+    gap: 8px;
+    padding-block: 40px;
+    
+    @media (width >= 900px) {
+      gap: 32px;
+      padding-block: 104px;
+    }
+  }
+
+  h1 {
+    padding-bottom: 8px;
+
+    @media (width >= 900px) {
+      grid-column: 2 / 12;
+      padding-bottom: 16px;
+    }
+  }
+
+  &.home-variant {
+    h1 {
+      grid-column: span 12;
+    }
+  }
+}
+
+.test-sub-section {
+  .container {
+    gap: 24px;
+    padding-block: 32px;
+
+    @media (width >= 900px) {
+      row-gap: 32px;
+      padding-block: 48px;
+    }
+  }
+
+  h2 {
+    text-align: center;
+
+    @media (width >= 900px) {
+      grid-column: 2 / 12;
+    }
+  }
+}
+
+.test-card-large {
+  background: var(--card-bg-color-test);
+  padding: 32px 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  
+
+  @media (width >= 900px) {
+    padding: 48px;
+    grid-column: 2 / 12;
+  }
+
+  h2 {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    color: var(--card-heading-color-test);
+    font: var(--card-header-xl);
+    padding-bottom: 24px;
+
+    &.icon::before {
+      display: block;
+      width: 32px;
+      height: 32px;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    @media (width >= 900px) {
+      flex-direction: row;
+      gap: 24px;
+    }
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--card-body-color-test);
+    font: var(--card-header-xs);
+    padding-bottom: 16px;
+    
+    @media (width >= 900px) {
+      width: 50%;
+      padding-bottom: 0;
+    }
+  }
+
+  input {
+    padding: 8px 16px;
+    border-radius: 4px;
+    background: var(--card-input-bg-color-test);
+    font: var(--card-input);
+    color: var(--card-body-color-test);
+    border: 1px solid currentcolor;
+
+    &::placeholder {
+      color: var(--card-body-color-test);
+    }
+  }
+
+  button {
+    padding: 10px 16px;
+
+    @media (width >= 900px) {
+      width: 50%;
+      align-self: end;
+      height: fit-content;
+    }
+  }
+
+  &.home-variant {
+    @media (width >= 900px) {
+      grid-column: span 8;
+      /* grid-row: span 2; */
+    }
+
+    a {
+      display: none;
+      margin-top: 24px;
+      align-items: center;
+      gap: 16px;
+      color: var(--card-body-color-test);
+      font: var(--card-body-m);
+      width: fit-content;
+      border-bottom: 1px solid var(--transparent-100);
+      transition: 0.3s;
+  
+      &:hover {
+        border-bottom: 1px solid currentcolor;
+      }
+      
+      @media (width >= 900px) {
+        display: flex;
+      }
+
+      &::after {
+        mask-image: url("/static/icons/arrow-right.svg");
+        display: block;
+      }
+    }
+  }
+
+  &.domain-variant,
+  &.mail-variant {
+    ul {
+      display: none;
+      gap: 48px;
+      padding-top: 24px;;
+  
+      @media (width >= 900px) {
+        display: flex;
+      }
+    }
+  
+    li {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--card-body-color-test);
+      font: var(--card-body-m);
+
+      .icon {
+        padding: 4px;
+        background-color: var(--bg-color-primary);
+        border-radius: 100%;
+
+        &::before {
+          mask-image: url("/static/icons/checkmark.svg");
+          display: block;
+          padding: 4px;
+          border-radius: 100%;
+        }
+      }
+    }
+  }
+
+  &.connection-variant {
+    .button-container {
+      width: auto;
+    }
+
+    .primary-button {
+      width: 100%;
+    }
+  }
+
+  &.mail-variant {
+    .mail-input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      input {
+        padding-left: 50px;
+        width: 100%;
+      }
+
+      .mail-icon-container {
+        position: absolute;
+        pointer-events: none;
+        background-color: white;
+        padding: 6px;
+        height: calc(100% - 2px);
+        left: 2px;
+        border-right: 1px solid currentcolor;
+        border-radius: 4px 0 0 4px;
+        display: flex;
+        align-items: center;
+
+        &::after {
+          mask-image: url("/static/icons/atsymbol.svg");
+          display: block;
+          background-color: #004654;
+        }
+      }
+    }
+  }
+}
+
+.test-card-list {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+
+  @media (width >= 900px) {
+    gap: 24px;
+    align-items: center;
+    grid-column: 2 / 12;
+    flex-direction: row;
+  }
+
+  &.home-variant {
+    @media (width >= 900px) {
+      flex-direction: column;
+      grid-column: span 4;
+    }
+  }
+
+  &.hall-of-fame-variant {
+    @media (width >= 900px) {
+      grid-column: span 12;
+    }
+  }
+}
+
+.test-card-small {
+  width: 100%;
+  height: 100%;
+
+  a {
+    display: flex;
+    align-items: center;
+    padding: 24px 16px;
+    background: var(--card-bg-color-test);
+    border-radius: 8px;
+    gap: 16px;
+    justify-content: space-between;
+    height: 100%;
+
+    @media (width >= 900px) {
+      padding: 36px 24px;
+    }
+  }
+
+  .card-container {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    color: var(--card-heading-color-test);
+
+    &::before {
+      display: block;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
+    }
+  }
+
+  hgroup {
+    @media (width >= 900px) {
+      gap: 8px;
+    }
+
+    h2, h3 {
+      font: var(--card-header-s);
+    }
+
+    p {
+      font: var(--card-body-m);
+      color: var(--card-body-color-test);
+    }
+  }
+}

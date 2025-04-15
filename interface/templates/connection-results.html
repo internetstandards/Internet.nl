@@ -2,9 +2,7 @@
 {% load static %}
 
 {% block testheadcontent %}
-  <h1>
     {% include "string.html" with name="connection title" %}
-  </h1>
   {{block.super}}
 {% endblock %}
 
