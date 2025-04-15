@@ -3,6 +3,7 @@
 {% load translate %}
 
 {% block scripting %}
+  <script type="text/javascript" src="{% static 'js/functions-min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/internetnl.probe-min.js' %}"></script>
 {% endblock %}
 
@@ -25,6 +26,7 @@
         {% include "string.html" with name="probes tests-description" %}
       </p>
     </hgroup>
+
     <ul>
       {% for probe in probes %}
       <li class="probing icon h7 color-secondary">
@@ -33,36 +35,32 @@
         <span id="{{probe.name}}-summary" class="visually-hidden" aria-live="polite">{% include "string.html" with name="probes test-running" %}</span>
       </li>
       {% endfor %}
-      <!-- {% block probesnojs %}
+      {% block probesnojs %}
       <li class="jsless">
         <a href={{no_javascript_redirect}} id="continue" class="connforward">
           {% include "string.html" with name="probes no-javascript" %}
         </a>
       </li>
-      {% endblock %} -->
+      {% endblock %}
     </ul>
   </div>
 </section>
 
-  <!-- <div class="hidethis" aria-hidden="true">
-    <span id="javascript-retries">{{javascript_retries}}</span>
-    <span id="javascript-timeout">{{javascript_timeout}}</span>
-    <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
-    <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
-    <span id="probes-no-redirection">{% include "string.html" with name="probes no-redirection" %}</span>
-    <span id="probes-url">{{probes.0.probesurl}}{{addr}}/</span>
-    <div id="probes">
-    {% for probe in probes %}
-      <div>
-        <span class="probe-name">{{probe.name}}</span>
-      </div>
-    {% endfor %}
+<div class="hidethis" aria-hidden="true">
+  <span id="javascript-retries">{{javascript_retries}}</span>
+  <span id="javascript-timeout">{{javascript_timeout}}</span>
+  <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
+  <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
+  <span id="probes-no-redirection">{% include "string.html" with name="probes no-redirection" %}</span>
+  <span id="probes-url">{{probes.0.probesurl}}{{addr}}/</span>
+  <div id="probes">
+  {% for probe in probes %}
+    <div>
+      <span class="probe-name">{{probe.name}}</span>
     </div>
+  {% endfor %}
   </div>
+</div>
 
-  <article class="block fullwidth center">
-    <div class="wrap">
-    </div>
-  </article> -->
 
 {% endblock %}
