@@ -155,7 +155,7 @@
 
 .action-card {
   background-color: var(--card-bg-color-contact);
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
   padding: 24px 32px;
   display: flex;
   flex-direction: column;
@@ -166,12 +166,12 @@
     grid-column: 9 / 13;
     padding: 32px;
     gap: 24px;
+    border-radius: 16px;
   }
 
   details {
     display: flex;
     flex-direction: column;
-    gap: 24px;
     appearance: none;
     overflow: clip;
 
@@ -190,11 +190,15 @@
       }
     }
 
-    &[open]::details-content {
-      @media (prefers-reduced-motion: no-preference) {
-        @supports (transition-behavior: allow-discrete) {
-          opacity: 1;
-          height: fit-content;
+    &[open] {
+      gap: 16px;
+      
+      &::details-content {
+        @media (prefers-reduced-motion: no-preference) {
+          @supports (transition-behavior: allow-discrete) {
+            opacity: 1;
+            height: fit-content;
+          }
         }
       }
 
