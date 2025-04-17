@@ -18,6 +18,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "contact_intro_title_newstring"
+msgstr "Service & Contact"
+
+msgid "contact_intro_description_newstring"
+msgstr "Where can we help you with? Search directly for your answer or view our contact details."
+
+msgid "contact_get_in_touch_title_newstring"
+msgstr "Get in touch with us"
+
+msgid "faq_knowledge_title_newstring"
+msgstr "Our knowledge base"
+
+msgid "faq_knowledge_description_newstring"
+msgstr "View our knowledge base with all kinds of useful information and tips."
+
+msgid "faq_categories_title_newstring"
+msgstr "Categories"
+
+msgid "faq_knowledge_category_newstring"
+msgstr "Testing"
+
+msgid "faq_knowledge_heading_newstring"
+msgstr "What is tested on your domain names"
+
+msgid "faq_knowledge_description_long_newstring"
+msgstr "Today Internet.nl launches a new version of its testing tool in the form of a 'ready-to-use' package based on Docker..."
+
+msgid "faq_docker_title_newstring"
+msgstr "Internet.nl available as 'ready-to-use' Docker package"
+
+msgid "halloffame_intro_title_newstring"
+msgstr "Hall of fame"
+
+msgid "halloffame_intro_description_newstring"
+msgstr "If your website or email scores 100% on Internet.nl, then your domain name will be included in the relevant Hall of Fame"
+
+msgid "halloffame_filter_label_newstring"
+msgstr "Filter by:"
+
+msgid "halloffame_filter_champions_newstring"
+msgstr "Champions"
+
+msgid "halloffame_filter_hosters_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_title_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_description_newstring"
+msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus."
+
+msgid "halloffame_what_test_title_newstring"
+msgstr "What do you want to test?"
+
 msgid "base_probe_score_loading_newstring"
 msgstr "Score loading for:"
 

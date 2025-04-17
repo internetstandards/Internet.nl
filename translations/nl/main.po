@@ -18,6 +18,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "contact_intro_title_newstring"
+msgstr "Service & Contact"
+
+msgid "contact_intro_description_newstring"
+msgstr "Waar kunnen we je mee helpen? Zoek direct naar je antwoord of bekijk onze contactgegevens."
+
+msgid "contact_get_in_touch_title_newstring"
+msgstr "Kom in contact met ons"
+
+msgid "faq_knowledge_title_newstring"
+msgstr "Onze kennisbank"
+
+msgid "faq_knowledge_description_newstring"
+msgstr "Bekijk hier onze kennisbank met allerlei handige informatie en tips."
+
+msgid "faq_categories_title_newstring"
+msgstr "Categorieën"
+
+msgid "faq_knowledge_category_newstring"
+msgstr "Testen"
+
+msgid "faq_knowledge_heading_newstring"
+msgstr "Aan de hand van wat wordt er getest op je domeinnamen"
+
+msgid "faq_knowledge_description_long_newstring"
+msgstr "Vandaag lanceert Internet.nl een nieuwe versie van haar testtool in de vorm van een 'kant-en-klaar' pakket op basis van Docker..."
+
+msgid "faq_docker_title_newstring"
+msgstr "Internet.nl beschikbaar als 'kant-en-klaar' Docker-pakket"
+
+msgid "halloffame_intro_title_newstring"
+msgstr "Hall of fame"
+
+msgid "halloffame_intro_description_newstring"
+msgstr "Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je domeinnaam opgenomen in de relevante Hall of Fame"
+
+msgid "halloffame_filter_label_newstring"
+msgstr "Filter op:"
+
+msgid "halloffame_filter_champions_newstring"
+msgstr "Kampioenen"
+
+msgid "halloffame_filter_hosters_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_title_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_description_newstring"
+msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus."
+
+msgid "halloffame_what_test_title_newstring"
+msgstr "Wat wil je testen?"
+
 msgid "base_probe_score_loading_newstring"
 msgstr "Score laden voor:"
 
