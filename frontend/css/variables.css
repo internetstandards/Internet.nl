@@ -8,12 +8,14 @@
   --green-100: #E3F0F5;
   --green-200: #EEF6F9;
   --green-300: #8BF1FF;
+  --green-350: #219653;
   --green-400: #037584;
   --green-500: #34545F;
   --green-600: #22363C;
   --orange-100: #FFEBD2;
   --orange-200: #FFC170;
   --orange-300: #FFAC40;
+  --orange-350: #CF7604;
   --orange-400: #E98400;
   --orange-500: #BC6D07;
   --orange-600: #CF7604;
@@ -71,6 +73,7 @@
   --section-body-xl: var(--body-font-xs);
   --section-body-l: var(--body-font-xxs);
   --section-body-m: var(--body-font-xs);
+  --section-body-s: var(--body-font-xxs);
   --section-button-l: var(--button-link-font-s);
   --section-button-m: var(--button-link-font-xs);
 
@@ -111,6 +114,7 @@
     --section-body-xl: var(--body-font-s);
     --section-body-l: var(--body-font-s);
     --section-body-m: var(--body-font-xs);
+    --section-body-s: var(--body-font-xs);
     --section-button-l: var(--button-link-font-s);
     --section-button-m: var(--button-link-font-xs);
 
@@ -212,6 +216,11 @@
   --accordion-bg-color: light-dark(var(--white-100), var(--black-200));
   --accordion-heading-color: light-dark(var(--green-500), var(--white-100));
   --accordion-body-color: light-dark(var(--green-500), var(--white-100));
+
+  /* RESULT STATE COLORS */
+  --success-color: var(--green-350);
+  --warning-color: var(--orange-350);
+  --failed-color: var(--red-100);
 }
 
 /* MARK: OTHER VARIABLES

@@ -86,11 +86,14 @@
 
       <li class="result-details-item">
         <hgroup>
-          <h3 class="h4 color-secondary icon">{% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}</h3>
-          <p class="body-m">{% include "string.html" with name=probe.description|safe %}</p>
+          <h3 class="h5 color-secondary icon {{probe.verdict}}">
+            <span class="visually-hidden">
+              {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
+            </span>
+            {% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}
+          </h3>
+          <p class="body-s">{% include "string.html" with name=probe.description|safe %}</p>
         </hgroup>
-        <!-- <article>
-          <h4 class="h5 color-secondary"></h4> -->
         <div class="result-details-content">
           {% for domain_type, domain, details in probe.details_set %}
           {% block testdetailitems %}

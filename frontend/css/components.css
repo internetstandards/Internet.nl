@@ -149,6 +149,10 @@
 
   a {
     display: inline;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   code {
@@ -157,8 +161,9 @@
     border-radius: 4px;
   }
 
-  ul {
+  ul, ol {
     list-style: initial;
+    list-style-position: inside;
   }
 
   li {

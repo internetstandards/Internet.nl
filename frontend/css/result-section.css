@@ -7,8 +7,9 @@
       padding-block: 72px;
       gap: 48px;
 
-      & > *:not(.action-card-container) {
+      & > * {
         grid-column: 1 / 8;
+        z-index: 1;
       }
     }
   }
@@ -47,6 +48,14 @@
     gap: 24px;
     align-items: center;
 
+    a {
+      display: inline;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
     &.probing::before {
       background-image: url("/static/icons/spinner.svg");
       display: block;
@@ -73,40 +82,51 @@
       min-width: 24px;
     }
 
+    &:not(.probing)::before {
+      background-color: unset;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 24px;
+      height: 24px;
+      min-height: 24px;
+      min-width: 24px;
+      display: block;
+    }
+
     &.passed::before {
       background-image: url("/static/icons/checkmark-circle.svg");
-      display: block;
+      /* display: block;
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
       width: 24px;
       height: 24px;
       min-height: 24px;
-      min-width: 24px;
+      min-width: 24px; */
     }
 
-    &.warning {
+    &.warning::before {
       background-image: url("/static/icons/exclamation-circle.svg");
-      display: block;
+      /* display: block;
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
       width: 24px;
       height: 24px;
       min-height: 24px;
-      min-width: 24px;
+      min-width: 24px; */
     }
 
-    &.failed {
+    &.failed::before {
       background-image: url("/static/icons/error.svg");
-      display: block;
+      /* display: block;
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
       width: 24px;
       height: 24px;
       min-height: 24px;
-      min-width: 24px;
+      min-width: 24px; */
     }
   }
 }
@@ -120,6 +140,8 @@
   width: 100vw;
   bottom: 0;
   order: 1;
+  gap: 32px;
+  z-index: 1;
 
   @media (width >= 900px) {
     margin-top: -300px;
@@ -127,6 +149,7 @@
     padding-inline: 16px;
     order: unset;
     bottom: unset;
+    z-index: unset;
   }
 }
 
@@ -174,14 +197,15 @@
           height: fit-content;
         }
       }
-      
+
       summary::after {
         transform: rotate(-180deg);
       }
     }
   }
 
-  summary, h2 {
+  summary,
+  h2 {
     font: var(--card-header-xl);
     color: var(--card-heading-color-contact);
     display: flex;
@@ -310,7 +334,7 @@
   background-position: center;
   padding: 6px 6px 10px;
   display: flex;
-  font-size: 14px;
+  font: var(--heading-font-xxs);
   opacity: 0;
   animation: fadein 1s ease forwards 2s;
 }
@@ -348,7 +372,7 @@ meter {
 .meter-numbers {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font: var(--heading-font-xxs);
 }
 
 meter::-webkit-meter-bar {
@@ -371,6 +395,10 @@ meter::-moz-meter-bar {
 }
 
 .result-details-section {
+  @media (width >= 900px) {
+    margin-top: -300px;
+  }
+
   .container {
     gap: 32px;
 
@@ -383,20 +411,71 @@ meter::-moz-meter-bar {
   }
 }
 
+.result-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media (width >= 900px) {
+    gap: 34px;
+  }
+}
+
 .result-details-item {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 24px;
+
+  @media (width >= 900px) {
+    padding-bottom: 34px;
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--green-100);
+  }
+
   > hgroup {
     display: flex;
     flex-direction: column;
     gap: 8px;
 
-    h2 {
+    h3 {
       display: flex;
       gap: 16px;
+      align-items: center;
+
+      &.passed::before {
+        mask-image: url("/static/icons/checkmark-circle.svg");
+        display: block;
+        background-color: var(--success-color);
+      }
+
+      &.warning::before {
+        mask-image: url("/static/icons/exclamation-circle.svg");
+        display: block;
+        background-color: var(--warning-color);
+      }
+
+      &.failed::before {
+        mask-image: url("/static/icons/error.svg");
+        display: block;
+        background-color: var(--failed-color);
+      }
+
+      &.info::before {
+        mask-image: url("/static/icons/info.svg");
+        display: block;
+      }
     }
 
     p {
       a {
         display: inline-flex;
+
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }
@@ -404,9 +483,170 @@ meter::-moz-meter-bar {
   .result-details-content {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background-color: var(--green-200);
+    background-color: var(--bg-color-primary);
     border-radius: 8px;
     padding: 24px;
+
+    h4 {
+      padding-bottom: 16px;
+
+      &:not(:first-child) {
+        padding-top: 16px;
+      }
+    }
+
+    details {
+      margin-bottom: 8px;
+      background: var(--accordion-bg-color);
+      border-radius: 8px;
+      appearance: none;
+      overflow: clip;
+
+      @media (width >= 900px) {
+        grid-column: span 7;
+        margin-bottom: 16px;
+      }
+
+      &:not(:last-child) {
+        margin-bottom: 8px;
+      }
+
+      > *:last-child {
+        padding-bottom: 16px;
+      }
+
+      a {
+        display: inline;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      ul, ol {
+        list-style: initial;
+        list-style-position: inside;
+      }
+
+      tbody {
+        font-family: monospace, sans-serif;
+      }
+
+      th {
+        border-bottom: 1px solid var(--green-100);
+      }
+
+      td, th {
+        padding: 6px;
+        font-size: 0.875rem;
+      }
+
+      code {
+        background: var(--bg-color-primary);
+        padding: 4px;
+        border-radius: 4px;
+      }
+
+      hgroup div {
+        display: flex;
+        gap: 8px;
+        flex-direction: column;
+      }
+
+      h5 {
+        font-size: inherit;
+      }
+
+      &::details-content {
+        font: var(--accordion-body);
+        display: flex;
+        padding-inline: 16px;
+        flex-direction: column;
+        gap: 16px;
+
+        @media (prefers-reduced-motion: no-preference) {
+          @supports (transition-behavior: allow-discrete) {
+            transition: height 0.3s, opacity 0.3s, content-visibility 0.3s;
+            transition-behavior: allow-discrete;
+            opacity: 0;
+            height: 0;
+          }
+        }
+      }
+
+      &[open] {
+        &::details-content {
+          @media (prefers-reduced-motion: no-preference) {
+            @supports (transition-behavior: allow-discrete) {
+              opacity: 1;
+              height: auto;
+            }
+          }
+        }
+
+        summary::after {
+          transform: rotate(-180deg);
+        }
+      }
+
+      summary {
+        cursor: pointer;
+        padding: 16px;
+        font: var(--accordion-header);
+        color: var(--accordion-heading-color);
+        font-weight: 600;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+
+        &::-webkit-details-marker {
+          display: none;
+        }
+
+        &.warning {
+          color: var(--warning-color);
+        }
+        
+        &.failed {
+          color: var(--failed-color);
+        }
+
+        &::after {
+          mask-image: url("/static/icons/angle-down.svg");
+          display: block;
+          transition: transform 0.3s;
+          margin-left: auto;
+        }
+
+        &.passed::before {
+          mask-image: url("/static/icons/checkmark-circle.svg");
+          display: block;
+          background-color: var(--success-color);
+        }
+
+        &.warning::before {
+          mask-image: url("/static/icons/exclamation-circle.svg");
+          display: block;
+          background-color: var(--warning-color);
+        }
+
+        &.failed::before {
+          mask-image: url("/static/icons/error.svg");
+          display: block;
+          background-color: var(--failed-color);
+        }
+
+        &.info::before {
+          mask-image: url("/static/icons/info.svg");
+          display: block;
+        }
+
+        &.not-tested::before {
+          mask-image: url("/static/icons/question.svg");
+          display: block;
+        }
+      }
+    }
   }
 }
