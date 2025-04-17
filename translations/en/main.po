@@ -22,7 +22,7 @@ msgid "contact_intro_title_newstring"
 msgstr "Service & Contact"
 
 msgid "contact_intro_description_newstring"
-msgstr "Where can we help you with? Search directly for your answer or view our contact details."
+msgstr "How can we help you? Search directly for your answer or view our contact information."
 
 msgid "contact_get_in_touch_title_newstring"
 msgstr "Get in touch with us"
@@ -31,7 +31,7 @@ msgid "faq_knowledge_title_newstring"
 msgstr "Our knowledge base"
 
 msgid "faq_knowledge_description_newstring"
-msgstr "View our knowledge base with all kinds of useful information and tips."
+msgstr "Check out our knowledge base with all kinds of useful information and tips."
 
 msgid "faq_categories_title_newstring"
 msgstr "Categories"
@@ -40,10 +40,10 @@ msgid "faq_knowledge_category_newstring"
 msgstr "Testing"
 
 msgid "faq_knowledge_heading_newstring"
-msgstr "What is tested on your domain names"
+msgstr "Based on what are your domain names being tested"
 
 msgid "faq_knowledge_description_long_newstring"
-msgstr "Today Internet.nl launches a new version of its testing tool in the form of a 'ready-to-use' package based on Docker..."
+msgstr "Today Internet.nl launches a new version of its test tool in the form of a 'ready-to-use' package based on Docker..."
 
 msgid "faq_docker_title_newstring"
 msgstr "Internet.nl available as 'ready-to-use' Docker package"
@@ -52,7 +52,7 @@ msgid "halloffame_intro_title_newstring"
 msgstr "Hall of fame"
 
 msgid "halloffame_intro_description_newstring"
-msgstr "If your website or email scores 100% on Internet.nl, then your domain name will be included in the relevant Hall of Fame"
+msgstr "If your website or email scores 100% on Internet.nl, your domain name will be included in the relevant Hall of Fame"
 
 msgid "halloffame_filter_label_newstring"
 msgstr "Filter by:"
@@ -73,13 +73,13 @@ msgid "halloffame_what_test_title_newstring"
 msgstr "What do you want to test?"
 
 msgid "base_probe_score_loading_newstring"
-msgstr "Score loading for:"
+msgstr "Loading score for:"
 
 msgid "base_results_score_for_newstring"
 msgstr "Score for:"
 
 msgid "base_results_test_details_newstring"
-msgstr "Details about the test"
+msgstr "Test details"
 
 msgid "base_results_next_actions_newstring"
 msgstr "Next actions"
@@ -184,31 +184,31 @@ msgid "about_section_title_newstring"
 msgstr "About us"
 
 msgid "about_section_intro_newstring"
-msgstr "We help you test and identify performance issues such as slow loading times and server errors."
+msgstr "I want more information about these organizations"
 
 msgid "about_mission_title_newstring"
 msgstr "Our mission"
 
 msgid "about_mission_heading_newstring"
-msgstr "The goal of the platform is to increase the use of modern internet standards and make the internet more accessible, safer and more reliable for everyone."
+msgstr "The goal of the platform is to further increase the use of modern internet standards and make it more accessible, secure, and reliable for everyone."
 
 msgid "about_mission_description_newstring"
-msgstr "The Internet.nl test tool is an initiative of the Internet Standards Platform. It is a collaborative effort between the Internet community and the Dutch government. Currently, the following parties participate in the platform:"
+msgstr "The Internet.nl test tool is an initiative of the Platform Internet Standards. It is a collaboration between the Internet community and the Dutch government. Currently, the following parties participate in the platform:"
 
 msgid "about_quote_newstring"
-msgstr "\"The goal of the platform is to increase the use of modern internet standards and make the internet more accessible, safer and more reliable for everyone.\""
+msgstr "\"The goal of the platform is to further increase the use of modern internet standards and make it more accessible, secure, and reliable for everyone.\""
 
 msgid "about_quote_author_newstring"
 msgstr "Coen Wesselman"
 
 msgid "about_quote_role_newstring"
-msgstr "Founder of Internet.nl"
+msgstr "Founder Internet.nl"
 
 msgid "about_why_test_title_newstring"
 msgstr "Why should you test your <span class=\"color-accent\">standards</span>?"
 
 msgid "about_why_test_description_newstring"
-msgstr "The Internet.nl test tool is an initiative of the Internet Standards Platform. The aim of the platform is to jointly increase the use of modern internet standards to make the internet more accessible, safer and more reliable for everyone."
+msgstr "The Internet.nl test tool is an initiative of the Platform Internet Standards. The goal of the platform is to jointly increase the use of modern internet standards to make the internet more accessible, safer and more reliable for everyone."
 
 msgid "about_reason_1_title_newstring"
 msgstr "Find security vulnerabilities and weaknesses"
@@ -220,13 +220,13 @@ msgid "about_reason_2_title_newstring"
 msgstr "Ensure compatibility"
 
 msgid "about_reason_2_description_newstring"
-msgstr "Testing ensures that users have an accessible, consistent and optimal experience."
+msgstr "Testing ensures users have an accessible, consistent, and optimal experience."
 
 msgid "about_reason_3_title_newstring"
 msgstr "Identify performance issues"
 
 msgid "about_reason_3_description_newstring"
-msgstr "Testing helps to identify performance issues such as slow loading times and server errors."
+msgstr "Testing helps identify performance issues like slow loading times and server errors."
 
 msgid "about_test_button_newstring"
 msgstr "I want to test"
@@ -238,7 +238,7 @@ msgid "articles_title_newstring"
 msgstr "News & Articles"
 
 msgid "articles_subtitle_newstring"
-msgstr "Check out our news with updates and useful information."
+msgstr "View our news with updates and useful information."
 
 msgid "articles_latest_news_title_newstring"
 msgstr "Our latest news"
@@ -256,13 +256,13 @@ msgid "faq_title_newstring"
 msgstr "Frequently asked questions"
 
 msgid "faq_view_all_button_newstring"
-msgstr "View all questions"
+msgstr "View all frequently asked questions"
 
 msgid "contact_card_title_newstring"
 msgstr "Contact us"
 
 msgid "contact_card_subtitle_newstring"
-msgstr "Do you have a question, comment or complaint?<br>We're happy to help."
+msgstr "Do you have a question, comment or complaint?<br>We are happy to help."
 
 msgid "contact_email_title_newstring"
 msgstr "Email"
@@ -274,19 +274,19 @@ msgid "contact_help_title_newstring"
 msgstr "Technical help"
 
 msgid "contact_help_description_newstring"
-msgstr "We're happy to help you"
+msgstr "We are happy to help"
 
 msgid "contact_visit_title_newstring"
 msgstr "Visit"
 
 msgid "contact_visit_description_newstring"
-msgstr "Our office address"
+msgstr "The address of our office"
 
 msgid "load_more_button_newstring"
 msgstr "Load more"
 
 msgid "test_website_protect_intro_newstring"
-msgstr "Protect your website by testing."
+msgstr "Protect your website and your users by testing."
 
 msgid "test_website_domain_title_newstring"
 msgstr "Test your website domain"
@@ -298,7 +298,7 @@ msgid "test_start_button_newstring"
 msgstr "Start the test"
 
 msgid "test_usp_placeholder_newstring"
-msgstr "USP 1 is here"
+msgstr "USP 1 goes here"
 
 msgid "test_more_tests_title_newstring"
 msgstr "What else do you want to test?"
@@ -322,7 +322,7 @@ msgid "test_email_domain_label_newstring"
 msgstr "Your email domain"
 
 msgid "test_website_stats_newstring"
-msgstr "487 successful tests performed this week!"
+msgstr "487 successful tests conducted this week!"
 
 msgid "test_connection_protect_intro_newstring"
 msgstr "Protect your connection by testing."

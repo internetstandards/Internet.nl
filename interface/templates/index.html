@@ -4,25 +4,25 @@
 {% block introcontent %}
   <section class="test-section home-variant bg-primary ellipse">
     <div class="container">
-      <h1 class="h1 color-secondary">Bescherm uw website en uw gebruikers door te testen.</h1>
+      <h1 class="h1 color-secondary">{% include "string.html" with name="test_website_protect_intro_newstring" %}</h1>
       <article class="test-card-large home-variant">
-        <h2 class="domain icon">Test je website domein</h2>
+        <h2 class="domain icon">{% include "string.html" with name="test_website_domain_title_newstring" %}</h2>
         <form action="/site/" method="POST">
           <label>
-            <span>Jouw website-domein</span>
+            <span>{% include "string.html" with name="test_website_domain_label_newstring" %}</span>
             <input name="url" type="text" placeholder="www.example.nl" inputmode="url" required>
           </label>
-          <button class="primary-button icon" type="submit" aria-label="Start de domein test">Start de test</button>
+          <button class="primary-button icon" type="submit" aria-label="{% include "string.html" with name="test_start_button_newstring" %}">{% include "string.html" with name="test_start_button_newstring" %}</button>
         </form>
-        <a class="icon" href="/test-site" aria-label="Meer informatie over de domeintest">Meer informatie over de test</a>
+        <a class="icon" href="/test-site" aria-label="{% include "string.html" with name="test_more_info_link_newstring" %}">{% include "string.html" with name="test_more_info_link_newstring" %}</a>
       </article>
       <ul class="test-card-list home-variant">
         <li class="test-card-small">
           <a href="/test-mail">
             <div class="card-container mail icon">
               <hgroup>
-                <h2>Test je e-mail</h2>
-                <p>Binnen 30 seconden getest!</p>
+                <h2>{% include "string.html" with name="test_email_title_newstring" %}</h2>
+                <p>{% include "string.html" with name="test_email_stats_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
@@ -32,8 +32,8 @@
           <a href="/test-connection">
             <div class="card-container connection icon">
               <hgroup>
-                <h2>Test je verbinding</h2>
-                <p>Binnen 30 seconden uitslag!</p>
+                <h2>{% include "string.html" with name="test_connection_title_newstring" %}</h2>
+                <p>{% include "string.html" with name="test_connection_stats_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
@@ -48,21 +48,21 @@
   <section class="knowledge-section">
     <div class="container">
       <hgroup>
-        <h2 class="h3 color-secondary">Waarom zou je jouw <span class="color-accent">standaarden</span> moeten testen?</h2>
-        <p class="body-l">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
+        <h2 class="h3 color-secondary">{% include "string.html" with name="about_why_test_title_newstring" %}</h2>
+        <p class="body-l">{% include "string.html" with name="about_why_test_description_newstring" %}</p>
       </hgroup>
       <ul class="knowledge-list" id="card-carousel">
         <li class="card home-variant knowledge-card ellipse icon">
-          <h3 id="knowledge-dia-1">Beveiligingslekken en kwetsbaarheid opzoeken</h3>
-          <p>Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken. </p>
+          <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_1_description_newstring" %}</p>
         </li>
         <li class="card home-variant knowledge-card ellipse icon">
-          <h3 id="knowledge-dia-2">Garanderen van compatibiliteit</h3>
-          <p>Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en optimale ervaring hebben.</p>
+          <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_2_description_newstring" %}</p>
         </li>
         <li class="card home-variant knowledge-card ellipse icon">
-          <h3 id="knowledge-dia-3">Identificeren van prestatie problemen</h3>
-          <p>Testen helpt bij het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten.</p>
+          <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_3_description_newstring" %}</p>
         </li>
       </ul>
       <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
@@ -71,8 +71,8 @@
         <li class="dot"><button type="button"></button></li>
       </ul>
       <div class="button-container">
-        <a class="secondary-button icon" href="/test-site">Ik wil graag testen</a>
-        <p class="body-m color-secondary">487 succesvolle testen!</p>
+        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="about_test_button_newstring" %}</a>
+        <p class="body-m color-secondary">{% include "string.html" with name="test_website_stats_newstring" %}</p>
       </div>
     </div>
   </section>
@@ -80,10 +80,8 @@
   <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
     <div class="container">
       <hgroup class="center">
-        <h2 class="h7 color-secondary">Hall of Fame</h2>
-        <p class="h6">Onderstaande hosters zijn opgenomen in de Hall of Fame, 
-          omdat ze voldoen aan de criteria voor opname zoals een 
-          dubbele <span class="color-accent">100%-score</span> voor hun eigen domein.
+        <h2 class="h7 color-secondary">{% include "string.html" with name="halloffame_intro_title_newstring" %}</h2>
+        <p class="h6">{% include "string.html" with name="halloffame_intro_description_newstring" %}
         </p>
       </hgroup>
       <ul class="hall-of-fame-list">
@@ -115,17 +113,17 @@
         </li>
       </ul>
       <div class="button-container">
-        <a class="primary-button icon" href="/test-site">Ik wil mijn domein testen</a>
-        <a class="secondary-button icon" href="/halloffame">Ontdek de Hall of Fame</a>
+        <a class="primary-button icon" href="/test-site">{% include "string.html" with name="test_start_button_newstring" %}</a>
+        <a class="secondary-button icon" href="/halloffame">{% include "string.html" with name="halloffame_what_test_title_newstring" %}</a>
       </div>
     </div>
   </section>
   
   <section class="about-section">
     <div class="container">
-      <h2 class="h7 color-accent">Onze missie</h2>
-      <p class="h4">Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
-      <p class="body-xl color-secondary">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:</p>
+      <h2 class="h7 color-accent">{% include "string.html" with name="about_mission_title_newstring" %}</h2>
+      <p class="h4">{% include "string.html" with name="about_mission_heading_newstring" %}</p>
+      <p class="body-xl color-secondary">{% include "string.html" with name="about_mission_description_newstring" %}</p>
       <ul class="logo-list">
         <li>
           <a href="https://surf.nl/" target="_blank" aria-label="Ga naar de website van Surf">
@@ -158,13 +156,13 @@
           </a>
         </li>
       </ul>
-      <a class="about-link icon" href="/about">Ik wil meer informatie over deze organisaties</a>
+      <a class="about-link icon" href="/about">{% include "string.html" with name="about_section_intro_newstring" %}</a>
     </div>
   </section>
 
   <section class="card-section">
     <div class="container">
-      <h2 class="h2 color-secondary">Laatste nieuws</h2>
+      <h2 class="h2 color-secondary">{% include "string.html" with name="articles_latest_news_title_newstring" %}</h2>
       <ul class="card-list">
         {% for article in articles|slice:":3" %}
           {% expand "article {{article}} title" as articletitle %}
@@ -181,13 +179,13 @@
         </li>
         {% endfor %}
       </ul>
-      <a class="secondary-button icon" href="/articles">Lees meer artikelen</a>
+      <a class="secondary-button icon" href="/articles">{% include "string.html" with name="article_read_more_button_newstring" %}</a>
     </div>
   </section>
 
   <section class="contact-section ellipse hidden-mobile">
     <div class="container">
-      <h2 class="h3 color-secondary">Veelgestelde vragen</h2>
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
       <details class="faq-item" name="faq-item">
         <summary class="icon">
           What is your return policy?
@@ -218,18 +216,18 @@
         </summary>
         <p>We accept returns within 30 days of purchase with a valid receipt.</p>
       </details>
-      <a class="secondary-button icon" href="/">Bekijk alle gestelde vragen</a>
+      <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
       <article class="contact-card">
         <hgroup>
-          <h3>Contact met ons</h3>
-          <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+          <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
         </hgroup>
         <ul>
           <li class="contact-card-small">
             <a href="/">
               <hgroup>
-                <h4 class="mail icon">Mailen</h4>
-                <p>Contact wanneer het u uitkomt</p>
+                <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
@@ -237,8 +235,8 @@
           <li class="contact-card-small">
             <a href="/">
               <hgroup>
-                <h4 class="help icon">Technische hulp</h4>
-                <p>We helpen u graag verder</p>
+                <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
@@ -246,8 +244,8 @@
           <li class="contact-card-small">
             <a href="/">
               <hgroup>
-                <h4 class="visit icon">Bezoeken</h4>
-                <p>Het adres van ons kantoor</p>
+                <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
@@ -256,71 +254,4 @@
       </article>
     </div>
   </section>
-
-      <!-- <section class="block news">
-        <h2>{% include "string.html" with name="base news" %}</h2>
-        <ul>
-        {% for article in articles %}
-          {% expand "article {{article}} title" as articletitle %}
-          {% expand "article {{article}} date" as articledate %}
-          {% expand "article {{article}} lead" as articlelead %}
-          <li><a href="/article/{{article}}">{% include "string.html" with name=articletitle %}</a></li>
-        {% endfor %}
-        </ul>
-        <p class="read-more"><a href="/articles/">{% include "string.html" with name="base newslink" %}</a></p>
-      </section>
-      <section class="block hall-of-fame">
-        <h2>{% include "string.html" with name="base halloffame" %}</h2>
-        <p>
-          {% include "string.html" with name="base halloffame lead" %}
-        </p>
-        <ol>
-        {% for member in halloffame %}
-          <li><a href="{{member.permalink}}">{{member.domain|idna}}</a></li>
-        {% endfor %}
-        </ol>
-        <p class="read-more"><a href="/halloffame/">{% include "string.html" with name="base halloffame link" %}</a></p>
-      </section>
-      <section class="block dark stats">
-        <h2>{% include "string.html" with name="home stats header" %}</h2>
-        <h3>{{statswebsite}} {% include "string.html" with name="home stats website" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statswebsitegood}} {% include "string.html" with name="home stats website-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statswebsitebad}} {% include "string.html" with name="home stats website-items" %}</span>
-          </li>
-        </ol>
-        <h3>{{statsmail}} {% include "string.html" with name="home stats mail" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statsmailgood}} {% include "string.html" with name="home stats mail-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statsmailbad}} {% include "string.html" with name="home stats mail-items" %}</span>
-          </li>
-        </ol>
-        <h3>{{statsconnection}} {% include "string.html" with name="home stats connection" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statsconnectiongood}} {% include "string.html" with name="home stats connection-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statsconnectionbad}} {% include "string.html" with name="home stats connection-items" %}</span>
-          </li>
-        </ol>
-      </section> -->
 {% endblock %}

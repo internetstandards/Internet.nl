@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "test_website_protect_intro_newstring"
-msgstr "Bescherm uw website door te testen."
+msgstr "Bescherm uw website en uw gebruikers door te testen."
 
 msgid "test_website_domain_title_newstring"
 msgstr "Test je website domein"
@@ -229,7 +229,7 @@ msgid "about_section_title_newstring"
 msgstr "Over ons"
 
 msgid "about_section_intro_newstring"
-msgstr "Wij helpen jou testen en het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten."
+msgstr "Ik wil meer informatie over deze organisaties"
 
 msgid "about_mission_title_newstring"
 msgstr "Onze missie"
