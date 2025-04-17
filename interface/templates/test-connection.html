@@ -14,14 +14,14 @@
 
   <section class="test-section bg-primary ellipse">
     <div class="container">
-      <h1 class="h1 color-secondary">Bescherm uw verbinding door te testen.</h1>
+      <h1 class="h1 color-secondary">{% include "string.html" with name="test_connection_protect_intro_newstring" %}</h1>
       <article class="test-card-large connection-variant">
-        <h2 class="connection icon">Test je verbinding</h2>
+        <h2 class="connection icon">{% include "string.html" with name="test_connection_title_newstring" %}</h2>
         <div class="button-container">
           <form action="/connection/" method="POST" id="form-connection-test">
-            <button class="primary-button icon connection-button" type="submit" aria-label="Start de verbindingstest">Start de test</button>
+            <button class="primary-button icon connection-button" type="submit" aria-label="{% include "string.html" with name="test_start_button_newstring" %}">{% include "string.html" with name="test_start_button_newstring" %}</button>
           </form>
-          <a class="secondary-button icon" href="/test-connection" aria-label="Meer informatie over de verbindingstest">Meer informatie over de test</a>
+          <a class="secondary-button icon" href="/test-connection" aria-label="{% include "string.html" with name="test_more_info_link_newstring" %}">{% include "string.html" with name="test_more_info_link_newstring" %}</a>
         </div>
       </article>
     </div>
@@ -29,14 +29,14 @@
 
   <section class="test-sub-section bg-primary">
     <div class="container">
-      <h2 class="h3 color-secondary">Wat wil je nog meer testen?</h2>
+      <h2 class="h3 color-secondary">{% include "string.html" with name="test_more_tests_title_newstring" %}</h2>
       <ul class="test-card-list">
         <li class="test-card-small">
           <a href="/test-connection">
             <div class="card-container icon domain">
               <hgroup>
-                <h3>Test je website domein</h3>
-                <p>487 succesvolle testen uitgevoerd deze week!</p>
+                <h3>{% include "string.html" with name="test_website_domain_title_newstring" %}</h3>
+                <p>{% include "string.html" with name="test_website_stats_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
@@ -46,8 +46,8 @@
           <a href="/test-mail">
             <div class="card-container icon mail">
               <hgroup>
-                <h3>Test je e-mail</h3>
-                <p>537 testen met 100% score deze week!</p>
+                <h3>{% include "string.html" with name="test_email_title_newstring" %}</h3>
+                <p>{% include "string.html" with name="test_email_stats_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>

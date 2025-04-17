@@ -285,6 +285,51 @@ msgstr "Our office address"
 msgid "load_more_button_newstring"
 msgstr "Load more"
 
+msgid "test_website_protect_intro_newstring"
+msgstr "Protect your website by testing."
+
+msgid "test_website_domain_title_newstring"
+msgstr "Test your website domain"
+
+msgid "test_website_domain_label_newstring"
+msgstr "Your website domain"
+
+msgid "test_start_button_newstring"
+msgstr "Start the test"
+
+msgid "test_usp_placeholder_newstring"
+msgstr "USP 1 is here"
+
+msgid "test_more_tests_title_newstring"
+msgstr "What else do you want to test?"
+
+msgid "test_email_title_newstring"
+msgstr "Test your email"
+
+msgid "test_email_stats_newstring"
+msgstr "537 tests with 100% score this week!"
+
+msgid "test_connection_title_newstring"
+msgstr "Test your connection"
+
+msgid "test_connection_stats_newstring"
+msgstr "573 tests with 100% score this week!"
+
+msgid "test_email_protect_intro_newstring"
+msgstr "Protect your email by testing."
+
+msgid "test_email_domain_label_newstring"
+msgstr "Your email domain"
+
+msgid "test_website_stats_newstring"
+msgstr "487 successful tests performed this week!"
+
+msgid "test_connection_protect_intro_newstring"
+msgstr "Protect your connection by testing."
+
+msgid "test_more_info_link_newstring"
+msgstr "More information about the test"
+
 #, md-format
 msgid "about contact"
 msgstr ""

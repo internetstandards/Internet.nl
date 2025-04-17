@@ -18,6 +18,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "test_website_protect_intro_newstring"
+msgstr "Bescherm uw website door te testen."
+
+msgid "test_website_domain_title_newstring"
+msgstr "Test je website domein"
+
+msgid "test_website_domain_label_newstring"
+msgstr "Jouw website-domein"
+
+msgid "test_start_button_newstring"
+msgstr "Start de test"
+
+msgid "test_usp_placeholder_newstring"
+msgstr "USP 1 staat hier"
+
+msgid "test_more_tests_title_newstring"
+msgstr "Wat wil je nog meer testen?"
+
+msgid "test_email_title_newstring"
+msgstr "Test je e-mail"
+
+msgid "test_email_stats_newstring"
+msgstr "537 testen met 100% score deze week!"
+
+msgid "test_connection_title_newstring"
+msgstr "Test je verbinding"
+
+msgid "test_connection_stats_newstring"
+msgstr "573 testen met 100% score deze week!"
+
+msgid "test_email_protect_intro_newstring"
+msgstr "Bescherm uw e-mail door te testen."
+
+msgid "test_email_domain_label_newstring"
+msgstr "Jouw e-mail-domein"
+
+msgid "test_website_stats_newstring"
+msgstr "487 succesvolle testen uitgevoerd deze week!"
+
+msgid "test_connection_protect_intro_newstring"
+msgstr "Bescherm uw verbinding door te testen."
+
+msgid "test_more_info_link_newstring"
+msgstr "Meer informatie over de test"
+
 msgid "contact_intro_title_newstring"
 msgstr "Service & Contact"
 

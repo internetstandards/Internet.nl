@@ -24,31 +24,31 @@
 
   <section class="test-section bg-primary ellipse">
     <div class="container">
-      <h1 class="h1 color-secondary">Bescherm uw e-mail door te testen.</h1>
+      <h1 class="h1 color-secondary">{% include "string.html" with name="test_email_protect_intro_newstring" %}</h1>
       <article class="test-card-large mail-variant">
-        <h2 class="mail icon">Test je e-mail</h2>
+        <h2 class="mail icon">{% include "string.html" with name="test_email_title_newstring" %}</h2>
         <form action="/mail/" method="POST">
           <label class="mail-label">
-            <span>Jouw e-mail-domein</span>
+            <span>{% include "string.html" with name="test_email_domain_label_newstring" %}</span>
             <div class="mail-input-container">
               <div class="mail-icon-container icon"></div>
               <input class="mail-input" name="url" type="text" placeholder="bikkelhart.com" inputmode="url" required>
             </div>
           </label>
-          <button class="primary-button icon" type="submit" aria-label="Start de emailtest">Start de test</button>
+          <button class="primary-button icon" type="submit" aria-label="{% include "string.html" with name="test_start_button_newstring" %}">{% include "string.html" with name="test_start_button_newstring" %}</button>
         </form>
         <ul>
           <li>
             <div class="icon"></div>
-            <span>USP 1 staat hier</span>
+            <span>{% include "string.html" with name="test_usp_placeholder_newstring" %}</span>
           </li>
           <li>
             <div class="icon"></div>
-            <span>USP 1 staat hier</span>
+            <span>{% include "string.html" with name="test_usp_placeholder_newstring" %}</span>
           </li>
           <li>
             <div class="icon"></div>
-            <span>USP 1 staat hier</span>
+            <span>{% include "string.html" with name="test_usp_placeholder_newstring" %}</span>
           </li>
         </ul>
       </article>
@@ -57,14 +57,14 @@
 
   <section class="test-sub-section bg-primary">
     <div class="container">
-      <h2 class="h3 color-secondary">Wat wil je nog meer testen?</h2>
+      <h2 class="h3 color-secondary">{% include "string.html" with name="test_more_tests_title_newstring" %}</h2>
       <ul class="test-card-list">
         <li class="test-card-small">
           <a href="/test-site">
             <div class="card-container domain icon">
               <hgroup>
-                <h3>Test je website domein</h3>
-                <p>487 succesvolle testen uitgevoerd deze week!</p>
+                <h3>{% include "string.html" with name="test_website_domain_title_newstring" %}</h3>
+                <p>{% include "string.html" with name="test_website_stats_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
@@ -74,8 +74,8 @@
           <a href="/test-connection">
             <div class="card-container connection icon">
               <hgroup>
-                <h3>Test je verbinding</h3>
-                <p>573 testen met 100% score deze week!</p>
+                <h3>{% include "string.html" with name="test_connection_title_newstring" %}</h3>
+                <p>{% include "string.html" with name="test_connection_stats_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
