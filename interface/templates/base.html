@@ -57,11 +57,11 @@
   <div class="skiplink"><a href="#footer">{% include "string.html" with name='page gotofooter' %}</a></div> -->
 
   <header>
-    <a class="skip-link" href="#main-content">Ga naar hoofdinhoud</a>
+    <a class="skip-link" href="#main-content">{% include "string.html" with name="base_header_skip_to_main_newstring" %}</a>
     <div class="container">
       <div class="header-logo-toggle-controls">
         {% if "INTERNETNL_BRANDING"|get_settings_value %}
-        <a class="header-logo" href="/" aria-label="Internet.nl Homepagina">
+        <a class="header-logo" href="/" aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
           <picture class="light-visible">
             <source srcset="/static/logos/logo.svg" media="(width >= 900px)">
             <img src="/static/logos/logo-mobile.svg" alt="Internet.nl Logo" width="182" height="40" loading="lazy">          
@@ -73,24 +73,24 @@
         </a>
         {% endif %}
         <button class="toggle-menu icon large" type="button" aria-controls="nav-controls" aria-expanded="false">
-          <span class="open">Menu</span>
-          <span class="close">Sluiten</span>
+          <span class="open">{% include "string.html" with name="base_header_menu_newstring" %}</span>
+          <span class="close">{% include "string.html" with name="base_header_close_newstring" %}</span>
         </button>
       </div>
       <div id="nav-controls" class="nav-controls">
         <nav>
           <ul class="nav-list">
             <li class="nav-item">
-              <button id="toggle-subnav" class="icon" type="button" aria-controls="nav-sublist" aria-expanded="false">Test tools</button>
+              <button id="toggle-subnav" class="icon" type="button" aria-controls="nav-sublist" aria-expanded="false">{% include "string.html" with name="base_header_test_tools_newstring" %}</button>
               <ul id="nav-sublist" class="nav-sublist">
                 <li class="nav-subitem">
-                  <a class="icon" href="/test-site">Test je website</a>
+                  <a class="icon" href="/test-site">{% include "string.html" with name="base_header_test_website_newstring" %}</a>
                 </li>
                 <li class="nav-subitem">
-                  <a class="icon" href="/test-connection">Test je verbinding</a>
+                  <a class="icon" href="/test-connection">{% include "string.html" with name="base_header_test_connection_newstring" %}</a>
                 </li>
                 <li class="nav-subitem">
-                  <a class="icon" href="/test-mail">Test je e-mail</a>
+                  <a class="icon" href="/test-mail">{% include "string.html" with name="base_header_test_email_newstring" %}</a>
                 </li>
               </ul>
             </li>
@@ -107,13 +107,13 @@
               <a href="/about">{% include "string.html" with name="base about" %}</a>
             </li>
             <li class="nav-item {% if pagemenu == 'contact' %}current{% endif %}">
-              <a href="/contact">Contact</a>
+              <a href="/contact">{% include "string.html" with name="base_header_contact_newstring" %}</a>
             </li>
           </ul>
         </nav>
         <div class="language-theme-controls">
           <form class="language-form icon" action="/change_language/" method="post">
-            <select id="language-select" name="language" aria-label="Kies een taal">
+            <select id="language-select" name="language" aria-label="{% include "string.html" with name="base_language_select_label_newstring" %}">
               <button>
                   <selectedcontent></selectedcontent>
               </button>
@@ -127,12 +127,12 @@
                 {% endfor %}
               {% endwith %}
             </select>
-            <button type="submit">Taal wijzigen</button>
+            <button type="submit">{% include "string.html" with name="base_language_change_button_newstring" %}</button>
           </form>
           <button id="theme-toggle" class="theme-button" type="button">
-            <span>Mode</span>
-            <span class="visually-hidden light-visible">Schakel naar donkere thema</span>
-            <span class="visually-hidden dark-visible">Schakel naar lichte thema</span>
+            <span>{% include "string.html" with name="base_theme_toggle_mode_newstring" %}</span>
+            <span class="visually-hidden light-visible">{% include "string.html" with name="base_theme_toggle_to_dark_newstring" %}</span>
+            <span class="visually-hidden dark-visible">{% include "string.html" with name="base_theme_toggle_to_light_newstring" %}</span>
             <span class="switch-container">
               <span class="switch icon"></span>
             </span>
@@ -153,38 +153,38 @@
   <footer>
     <div class="footer-nav">
       <div class="container">
-        <a class="footer-logo" href="/" aria-label="Internet.nl Homepagina">
+        <a class="footer-logo" href="/" aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
           <img src="/static/logos/logo-white.svg" alt="Internet.nl Logo" width="182" height="40" loading="lazy">
         </a>
         <ul class="nav-list">
           <li class="nav-item">
             <a class="icon" href="/test-tools">
-              <span>Test tools</span>
+              <span>{% include "string.html" with name="base_footer_test_tools_newstring" %}</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="icon" href="/faqs">
-              <span>Kennisbank</span>
+              <span>{% include "string.html" with name="base_footer_knowledge_base_newstring" %}</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="icon" href="/halloffame">
-              <span>Hall of fame</span>
+              <span>{% include "string.html" with name="base_footer_hall_of_fame_newstring" %}</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="icon" href="/articles">
-              <span>Nieuws</span>
+              <span>{% include "string.html" with name="base_footer_news_newstring" %}</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="icon" href="/about">
-              <span>Over ons</span>
+              <span>{% include "string.html" with name="base_footer_about_us_newstring" %}</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="icon" href="/contact">
-              <span>Service & contact</span>
+              <span>{% include "string.html" with name="base_footer_service_contact_newstring" %}</span>
             </a>
           </li>
         </ul>
@@ -194,17 +194,17 @@
       <div class="container">
         <ul class="footer-links">
           <li class="footer-link">
-            <a href="/disclosure">Kwetsbaarheid melden</a>
+            <a href="/disclosure">{% include "string.html" with name="base_footer_vulnerability_report_newstring" %}</a>
           </li>
           <li class="footer-link">
-            <a href="/privacy">Privacyverklaring</a>
+            <a href="/privacy">{% include "string.html" with name="base_footer_privacy_statement_newstring" %}</a>
           </li>
           <li class="footer-link">
-            <a href="/copyright">Auteursrecht</a>
+            <a href="/copyright">{% include "string.html" with name="base_footer_copyright_newstring" %}</a>
           </li>
           {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
           <li class="footer-link">
-            <a href="/accessibility">Toegankelijkheid</a>
+            <a href="/accessibility">{% include "string.html" with name="base_footer_accessibility_newstring" %}</a>
           </li>
           {% endif %}
         </ul>
@@ -212,17 +212,17 @@
         <ul class="footer-socials">
           <li class="footer-social">
             <a class="x icon" href="https://x.com/internet_nl/" target="_blank">
-              <span class="visually-hidden">Ga naar onze X profiel</span>
+              <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_x_newstring" %}</span>
             </a>
           </li>
           <li class="footer-social">
             <a class="linkedin icon" href="https://www.linkedin.com/company/internet-nl/" target="_blank">
-              <span class="visually-hidden">Ga naar onze LinkedIn profiel</span>
+              <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_linkedin_newstring" %}</span>
             </a>
           </li>
           <li class="footer-social">
             <a class="mastodon icon" href="https://mastodon.nl/@internet_nl" target="_blank">
-              <span class="visually-hidden">Ga naar onze Mastodon profiel</span>
+              <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_mastodon_newstring" %}</span>
             </a>
           </li>
         </ul>

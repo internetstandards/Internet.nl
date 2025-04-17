@@ -18,6 +18,113 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "base_probe_score_loading_newstring"
+msgstr "Score loading for:"
+
+msgid "base_results_score_for_newstring"
+msgstr "Score for:"
+
+msgid "base_results_test_details_newstring"
+msgstr "Details about the test"
+
+msgid "base_results_next_actions_newstring"
+msgstr "Next actions"
+
+msgid "base_results_test_email_domain_newstring"
+msgstr "Test your email domain"
+
+msgid "base_results_test_connection_newstring"
+msgstr "Test your connection"
+
+msgid "base_results_repeat_test_newstring"
+msgstr "Repeat the test"
+
+msgid "base_results_test_explanation_newstring"
+msgstr "Explanation of test report"
+
+msgid "base_results_share_results_newstring"
+msgstr "Share results with hoster"
+
+msgid "base_header_skip_to_main_newstring"
+msgstr "Skip to main content"
+
+msgid "base_header_menu_newstring"
+msgstr "Menu"
+
+msgid "base_header_close_newstring"
+msgstr "Close"
+
+msgid "base_header_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_knowledge_base_newstring"
+msgstr "Knowledge base"
+
+msgid "base_footer_hall_of_fame_newstring"
+msgstr "Hall of fame"
+
+msgid "base_footer_news_newstring"
+msgstr "News"
+
+msgid "base_footer_about_us_newstring"
+msgstr "About us"
+
+msgid "base_footer_service_contact_newstring"
+msgstr "Service & contact"
+
+msgid "base_footer_vulnerability_report_newstring"
+msgstr "Report vulnerability"
+
+msgid "base_footer_privacy_statement_newstring"
+msgstr "Privacy statement"
+
+msgid "base_footer_copyright_newstring"
+msgstr "Copyright"
+
+msgid "base_footer_accessibility_newstring"
+msgstr "Accessibility"
+
+msgid "base_footer_goto_x_newstring"
+msgstr "Go to our X profile"
+
+msgid "base_footer_goto_linkedin_newstring"
+msgstr "Go to our LinkedIn profile"
+
+msgid "base_footer_goto_mastodon_newstring"
+msgstr "Go to our Mastodon profile"
+
+msgid "base_header_homepage_label_newstring"
+msgstr "Internet.nl Homepage"
+
+msgid "base_header_test_website_newstring"
+msgstr "Test your website"
+
+msgid "base_header_test_connection_newstring"
+msgstr "Test your connection"
+
+msgid "base_header_test_email_newstring"
+msgstr "Test your email"
+
+msgid "base_header_contact_newstring"
+msgstr "Contact"
+
+msgid "base_language_select_label_newstring"
+msgstr "Choose a language"
+
+msgid "base_language_change_button_newstring"
+msgstr "Change language"
+
+msgid "base_theme_toggle_mode_newstring"
+msgstr "Mode"
+
+msgid "base_theme_toggle_to_dark_newstring"
+msgstr "Switch to dark theme"
+
+msgid "base_theme_toggle_to_light_newstring"
+msgstr "Switch to light theme"
 
 msgid "about_section_title_newstring"
 msgstr "About us"

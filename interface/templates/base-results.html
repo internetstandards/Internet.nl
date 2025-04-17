@@ -11,7 +11,7 @@
 <section class="result-section bg-primary">
   <div class="container">
     <h1>
-      <span class="h5 color-secondary">Score voor:</span>
+      <span class="h5 color-secondary">{% include "string.html" with name="base_results_score_for_newstring" %}</span>
       <span class="h1 color-secondary">
         {% block testheadcontent %}
         {% endblock %}
@@ -31,7 +31,7 @@
       <p class="meter-value h7">{{score}}%</p>
     </div>
     <ul class="main-items">
-      {% for probe in probes %} <!-- probe.name probe.icon probe.summary|safe -->
+      {% for probe in probes %}
         <li class="main-item {{probe.verdict}} icon" id="{{probe.name}}-results">
           <a class="h7 color-secondary" href="#{{probe.name}}">
             <span class="visually-hidden">
@@ -48,39 +48,39 @@
 <aside class="action-card-container">
   <article class="action-card">
     <details>
-      <summary class="icon">Vervolg acties</summary>
-      <h2>Vervolg acties</h2>
+      <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
+      <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
       <ul class="action-card-list">
         <li class="action-card-item">
           <a class="icon" href="/test-mail">
-            <span class="mail icon">Test je e-mail domein</span>
+            <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
           </a>
         </li>
         <li class="action-card-item">
           <a class="icon" href="/test-connection">
-            <span class="connection icon">Test je verbinding</span>
+            <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
           </a>
         </li>
         <li class="action-card-item">
           <a class="icon" href="/test-mail">
-            <span class="reset icon">Herhaal de test</span>
+            <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
           </a>
         </li>
         <li class="action-card-item">
           <a class="icon" href="/">
-            <span class="clipboard icon">Toelichting op testrapport</span>
+            <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
           </a>
         </li>
       </ul>
       <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
     </details>
-    <a class="primary-button icon" href="/">Deel uitslag met hoster</a>
+    <a class="primary-button icon" href="/">{% include "string.html" with name="base_results_share_results_newstring" %}</a>
   </article>
 </aside>
 
 <section class="result-details-section">
   <div class="container">
-    <h2 class="h3 color-secondary">Details over de test</h2>
+    <h2 class="h3 color-secondary">{% include "string.html" with name="base_results_test_details_newstring" %}</h2>
     <ul class="result-details-list">
       {% for probe in probes %}
 

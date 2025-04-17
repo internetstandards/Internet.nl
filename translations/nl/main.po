@@ -18,6 +18,114 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "base_probe_score_loading_newstring"
+msgstr "Score laden voor:"
+
+msgid "base_results_score_for_newstring"
+msgstr "Score voor:"
+
+msgid "base_results_test_details_newstring"
+msgstr "Details over de test"
+
+msgid "base_results_next_actions_newstring"
+msgstr "Vervolg acties"
+
+msgid "base_results_test_email_domain_newstring"
+msgstr "Test je e-mail domein"
+
+msgid "base_results_test_connection_newstring"
+msgstr "Test je verbinding"
+
+msgid "base_results_repeat_test_newstring"
+msgstr "Herhaal de test"
+
+msgid "base_results_test_explanation_newstring"
+msgstr "Toelichting op testrapport"
+
+msgid "base_results_share_results_newstring"
+msgstr "Deel uitslag met hoster"
+
+msgid "base_header_skip_to_main_newstring"
+msgstr "Ga naar hoofdinhoud"
+
+msgid "base_header_menu_newstring"
+msgstr "Menu"
+
+msgid "base_header_close_newstring"
+msgstr "Sluiten"
+
+msgid "base_header_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_header_homepage_label_newstring"
+msgstr "Internet.nl Homepagina"
+
+msgid "base_header_test_website_newstring"
+msgstr "Test je website"
+
+msgid "base_header_test_connection_newstring"
+msgstr "Test je verbinding"
+
+msgid "base_header_test_email_newstring"
+msgstr "Test je e-mail"
+
+msgid "base_header_contact_newstring"
+msgstr "Contact"
+
+msgid "base_language_select_label_newstring"
+msgstr "Kies een taal"
+
+msgid "base_language_change_button_newstring"
+msgstr "Taal wijzigen"
+
+msgid "base_theme_toggle_mode_newstring"
+msgstr "Mode"
+
+msgid "base_theme_toggle_to_dark_newstring"
+msgstr "Schakel naar donkere thema"
+
+msgid "base_theme_toggle_to_light_newstring"
+msgstr "Schakel naar lichte thema"
+
+msgid "base_footer_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_knowledge_base_newstring"
+msgstr "Kennisbank"
+
+msgid "base_footer_hall_of_fame_newstring"
+msgstr "Hall of fame"
+
+msgid "base_footer_news_newstring"
+msgstr "Nieuws"
+
+msgid "base_footer_about_us_newstring"
+msgstr "Over ons"
+
+msgid "base_footer_service_contact_newstring"
+msgstr "Service & contact"
+
+msgid "base_footer_vulnerability_report_newstring"
+msgstr "Kwetsbaarheid melden"
+
+msgid "base_footer_privacy_statement_newstring"
+msgstr "Privacyverklaring"
+
+msgid "base_footer_copyright_newstring"
+msgstr "Auteursrecht"
+
+msgid "base_footer_accessibility_newstring"
+msgstr "Toegankelijkheid"
+
+msgid "base_footer_goto_x_newstring"
+msgstr "Ga naar onze X profiel"
+
+msgid "base_footer_goto_linkedin_newstring"
+msgstr "Ga naar onze LinkedIn profiel"
+
+msgid "base_footer_goto_mastodon_newstring"
+msgstr "Ga naar onze Mastodon profiel"
+
 msgid "about_section_title_newstring"
 msgstr "Over ons"
 

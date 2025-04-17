@@ -11,7 +11,7 @@
   <div class="container">
     <hgroup>
       <h1>
-        <span class="h5 color-secondary">Score laden voor:</span>
+        <span class="h5 color-secondary">{% include "string.html" with name="base_probe_score_loading_newstring" %}</span>
         <span class="h1 color-secondary">
           {% block testtitle %}
           {% endblock %}
@@ -29,17 +29,9 @@
       {% for probe in probes %}
       <li class="probing icon h7 color-secondary">
         {% translate probe.title %}
-        <!-- <img id="{{probe.name}}-icon" src="/static/probe-animation.gif" width="20" height="20" alt=""/> -->
         <span id="{{probe.name}}-summary" class="visually-hidden" aria-live="polite">{% include "string.html" with name="probes test-running" %}</span>
       </li>
       {% endfor %}
-      <!-- {% block probesnojs %}
-      <li class="jsless">
-        <a href={{no_javascript_redirect}} id="continue" class="connforward">
-          {% include "string.html" with name="probes no-javascript" %}
-        </a>
-      </li>
-      {% endblock %} -->
     </ul>
   </div>
 </section>
