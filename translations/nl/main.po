@@ -18,6 +18,111 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "about_section_title_newstring"
+msgstr "Over ons"
+
+msgid "about_section_intro_newstring"
+msgstr "Wij helpen jou testen en het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten."
+
+msgid "about_mission_title_newstring"
+msgstr "Onze missie"
+
+msgid "about_mission_heading_newstring"
+msgstr "Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken."
+
+msgid "about_mission_description_newstring"
+msgstr "De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:"
+
+msgid "about_quote_newstring"
+msgstr "\"Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.\""
+
+msgid "about_quote_author_newstring"
+msgstr "Coen Wesselman"
+
+msgid "about_quote_role_newstring"
+msgstr "Oprichter Internet.nl"
+
+msgid "about_why_test_title_newstring"
+msgstr "Waarom zou je jouw <span class=\"color-accent\">standaarden</span> moeten testen?"
+
+msgid "about_why_test_description_newstring"
+msgstr "De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken."
+
+msgid "about_reason_1_title_newstring"
+msgstr "Beveiligingslekken en kwetsbaarheid opzoeken"
+
+msgid "about_reason_1_description_newstring"
+msgstr "Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken."
+
+msgid "about_reason_2_title_newstring"
+msgstr "Garanderen van compatibiliteit"
+
+msgid "about_reason_2_description_newstring"
+msgstr "Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en optimale ervaring hebben."
+
+msgid "about_reason_3_title_newstring"
+msgstr "Identificeren van prestatie problemen"
+
+msgid "about_reason_3_description_newstring"
+msgstr "Testen helpt bij het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten."
+
+msgid "about_test_button_newstring"
+msgstr "Ik wil graag testen"
+
+msgid "about_successful_tests_newstring"
+msgstr "succesvolle testen!"
+
+msgid "articles_title_newstring"
+msgstr "Nieuws & Artikelen"
+
+msgid "articles_subtitle_newstring"
+msgstr "Bekijk ons nieuws met updates en handige informatie."
+
+msgid "articles_latest_news_title_newstring"
+msgstr "Onze laatste nieuws"
+
+msgid "articles_load_more_button_newstring"
+msgstr "Laad meer artikelen"
+
+msgid "article_related_news_title_newstring"
+msgstr "Gerelateerd nieuws"
+
+msgid "article_read_more_button_newstring"
+msgstr "Lees meer artikelen"
+
+msgid "faq_title_newstring"
+msgstr "Veelgestelde vragen"
+
+msgid "faq_view_all_button_newstring"
+msgstr "Bekijk alle gestelde vragen"
+
+msgid "contact_card_title_newstring"
+msgstr "Contact met ons"
+
+msgid "contact_card_subtitle_newstring"
+msgstr "Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag."
+
+msgid "contact_email_title_newstring"
+msgstr "Mailen"
+
+msgid "contact_email_description_newstring"
+msgstr "Contact wanneer het u uitkomt"
+
+msgid "contact_help_title_newstring"
+msgstr "Technische hulp"
+
+msgid "contact_help_description_newstring"
+msgstr "We helpen u graag verder"
+
+msgid "contact_visit_title_newstring"
+msgstr "Bezoeken"
+
+msgid "contact_visit_description_newstring"
+msgstr "Het adres van ons kantoor"
+
+msgid "load_more_button_newstring"
+msgstr "Laad meer"
+
 #, md-format
 msgid "about contact"
 msgstr ""

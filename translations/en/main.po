@@ -18,6 +18,112 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+
+msgid "about_section_title_newstring"
+msgstr "About us"
+
+msgid "about_section_intro_newstring"
+msgstr "We help you test and identify performance issues such as slow loading times and server errors."
+
+msgid "about_mission_title_newstring"
+msgstr "Our mission"
+
+msgid "about_mission_heading_newstring"
+msgstr "The goal of the platform is to increase the use of modern internet standards and make the internet more accessible, safer and more reliable for everyone."
+
+msgid "about_mission_description_newstring"
+msgstr "The Internet.nl test tool is an initiative of the Internet Standards Platform. It is a collaborative effort between the Internet community and the Dutch government. Currently, the following parties participate in the platform:"
+
+msgid "about_quote_newstring"
+msgstr "\"The goal of the platform is to increase the use of modern internet standards and make the internet more accessible, safer and more reliable for everyone.\""
+
+msgid "about_quote_author_newstring"
+msgstr "Coen Wesselman"
+
+msgid "about_quote_role_newstring"
+msgstr "Founder of Internet.nl"
+
+msgid "about_why_test_title_newstring"
+msgstr "Why should you test your <span class=\"color-accent\">standards</span>?"
+
+msgid "about_why_test_description_newstring"
+msgstr "The Internet.nl test tool is an initiative of the Internet Standards Platform. The aim of the platform is to jointly increase the use of modern internet standards to make the internet more accessible, safer and more reliable for everyone."
+
+msgid "about_reason_1_title_newstring"
+msgstr "Find security vulnerabilities and weaknesses"
+
+msgid "about_reason_1_description_newstring"
+msgstr "This helps prevent cyber attacks, hacking, and data breaches."
+
+msgid "about_reason_2_title_newstring"
+msgstr "Ensure compatibility"
+
+msgid "about_reason_2_description_newstring"
+msgstr "Testing ensures that users have an accessible, consistent and optimal experience."
+
+msgid "about_reason_3_title_newstring"
+msgstr "Identify performance issues"
+
+msgid "about_reason_3_description_newstring"
+msgstr "Testing helps to identify performance issues such as slow loading times and server errors."
+
+msgid "about_test_button_newstring"
+msgstr "I want to test"
+
+msgid "about_successful_tests_newstring"
+msgstr "successful tests!"
+
+msgid "articles_title_newstring"
+msgstr "News & Articles"
+
+msgid "articles_subtitle_newstring"
+msgstr "Check out our news with updates and useful information."
+
+msgid "articles_latest_news_title_newstring"
+msgstr "Our latest news"
+
+msgid "articles_load_more_button_newstring"
+msgstr "Load more articles"
+
+msgid "article_related_news_title_newstring"
+msgstr "Related news"
+
+msgid "article_read_more_button_newstring"
+msgstr "Read more articles"
+
+msgid "faq_title_newstring"
+msgstr "Frequently asked questions"
+
+msgid "faq_view_all_button_newstring"
+msgstr "View all questions"
+
+msgid "contact_card_title_newstring"
+msgstr "Contact us"
+
+msgid "contact_card_subtitle_newstring"
+msgstr "Do you have a question, comment or complaint?<br>We're happy to help."
+
+msgid "contact_email_title_newstring"
+msgstr "Email"
+
+msgid "contact_email_description_newstring"
+msgstr "Contact when it suits you"
+
+msgid "contact_help_title_newstring"
+msgstr "Technical help"
+
+msgid "contact_help_description_newstring"
+msgstr "We're happy to help you"
+
+msgid "contact_visit_title_newstring"
+msgstr "Visit"
+
+msgid "contact_visit_description_newstring"
+msgstr "Our office address"
+
+msgid "load_more_button_newstring"
+msgstr "Load more"
+
 #, md-format
 msgid "about contact"
 msgstr ""
