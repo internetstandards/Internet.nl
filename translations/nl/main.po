@@ -18,6 +18,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "articles_latest_news_title_home_newstring"
+msgstr "Laatste nieuws"
+
+msgid "halloffame_first_button_home_newstring"
+msgstr "Ik wil mijn domein testen"
+
+msgid "halloffame_second_button_home_newstring"
+msgstr "Ontdek de Hall of Fame"
+
+msgid "halloffame_intro_description_home_newstring"
+msgstr "Onderstaande hosters zijn opgenomen in de Hall of Fame, omdat ze voldoen aan de criteria voor opname zoals een dubbele <span class="accent">100%-score</span> voor hun eigen domein."
+
+msgid "test_email_paragraph_alt_newstring"
+msgstr "Binnen 30 seconden getest!"
+
+msgid "test_connection_paragraph_alt_newstring"
+msgstr "Binnen 30 seconden uitslag!"
+
 msgid "test_website_protect_intro_newstring"
 msgstr "Bescherm uw website en uw gebruikers door te testen."
 
@@ -337,7 +355,7 @@ msgid "contact_visit_description_newstring"
 msgstr "Het adres van ons kantoor"
 
 msgid "load_more_button_newstring"
-msgstr "Laad meer"
+msgstr "Laad meer artikelen"
 
 #, md-format
 msgid "about contact"

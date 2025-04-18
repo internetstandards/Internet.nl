@@ -22,7 +22,7 @@
             <div class="card-container mail icon">
               <hgroup>
                 <h2>{% include "string.html" with name="test_email_title_newstring" %}</h2>
-                <p>{% include "string.html" with name="test_email_stats_newstring" %}</p>
+                <p>{% include "string.html" with name="test_email_paragraph_alt_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
@@ -33,7 +33,7 @@
             <div class="card-container connection icon">
               <hgroup>
                 <h2>{% include "string.html" with name="test_connection_title_newstring" %}</h2>
-                <p>{% include "string.html" with name="test_connection_stats_newstring" %}</p>
+                <p>{% include "string.html" with name="test_connection_paragraph_alt_newstring" %}</p>
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
@@ -72,7 +72,7 @@
       </ul>
       <div class="button-container">
         <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="about_test_button_newstring" %}</a>
-        <p class="body-m color-secondary">{% include "string.html" with name="test_website_stats_newstring" %}</p>
+        <p class="body-m color-secondary">487 {% include "string.html" with name="about_successful_tests_newstring" %}</p>
       </div>
     </div>
   </section>
@@ -81,7 +81,7 @@
     <div class="container">
       <hgroup class="center">
         <h2 class="h7 color-secondary">{% include "string.html" with name="halloffame_intro_title_newstring" %}</h2>
-        <p class="h6">{% include "string.html" with name="halloffame_intro_description_newstring" %}
+        <p class="h6">{% include "string.html" with name="halloffame_intro_description_home_newstring" %}
         </p>
       </hgroup>
       <ul class="hall-of-fame-list">
@@ -113,8 +113,8 @@
         </li>
       </ul>
       <div class="button-container">
-        <a class="primary-button icon" href="/test-site">{% include "string.html" with name="test_start_button_newstring" %}</a>
-        <a class="secondary-button icon" href="/halloffame">{% include "string.html" with name="halloffame_what_test_title_newstring" %}</a>
+        <a class="primary-button icon" href="/test-site">{% include "string.html" with name="halloffame_first_button_home_newstring" %}</a>
+        <a class="secondary-button icon" href="/halloffame">{% include "string.html" with name="halloffame_second_button_home_newstring" %}</a>
       </div>
     </div>
   </section>
@@ -162,7 +162,7 @@
 
   <section class="card-section">
     <div class="container">
-      <h2 class="h2 color-secondary">{% include "string.html" with name="articles_latest_news_title_newstring" %}</h2>
+      <h2 class="h2 color-secondary">{% include "string.html" with name="articles_latest_news_title_home_newstring" %}</h2>
       <ul class="card-list">
         {% for article in articles|slice:":3" %}
           {% expand "article {{article}} title" as articletitle %}
