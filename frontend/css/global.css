@@ -301,7 +301,7 @@ hgroup {
 }
 
 .test-card-small, 
-.contact-card-small, 
+.contact-card .contact-card-small, 
 .hall-of-fame-list li, 
 .card:not(.home-variant), 
 .faq-item:not([open]),

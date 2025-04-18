@@ -267,20 +267,29 @@ msgstr "Do you have a question, comment or complaint?<br>We are happy to help."
 msgid "contact_email_title_newstring"
 msgstr "Email"
 
-msgid "contact_email_description_newstring"
+msgid "contact_page_email_description_newstring"
 msgstr "Question or complaint?<br>You can mail us at"
+
+msgid "contact_email_description_newstring"
+msgstr "Contact us whenever"
 
 msgid "contact_help_title_newstring"
 msgstr "Technical help"
 
-msgid "contact_help_description_newstring"
+msgid "contact_page_help_description_newstring"
 msgstr "We are happy to help you on our"
+
+msgid "contact_help_description_newstring"
+msgstr "We are happy to help you"
 
 msgid "contact_visit_title_newstring"
 msgstr "Visit"
 
-msgid "contact_visit_description_newstring"
+msgid "contact_page_visit_description_newstring"
 msgstr "Maanweg 174 (8e verdieping)<br>2516 AB Den Haag"
+
+msgid "contact_visit_description_newstring"
+msgstr "Our office address"
 
 msgid "load_more_button_newstring"
 msgstr "Load more"
