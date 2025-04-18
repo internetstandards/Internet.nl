@@ -18,6 +18,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "test_website_page_protect_intro_newstring"
+msgstr "Bescherm uw website door te testen."
+
 msgid "articles_latest_news_title_home_newstring"
 msgstr "Laatste nieuws"
 
