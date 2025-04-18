@@ -555,6 +555,7 @@ meter::-moz-meter-bar {
         display: flex;
         gap: 8px;
         flex-direction: column;
+        overflow-x: auto;
       }
 
       h5 {
