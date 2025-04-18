@@ -60,7 +60,7 @@ urlpatterns = [
     re_path(r"^mail/(?P<mailaddr>.*)/results$", mail.validate_domain),
     re_path(rf"^clear/{regex_dname}/$", views.clear),
     path("change_language/", views.change_language, name="change_language"),
-    path("contact/", views.indexpage),
+    path("contact/", views.contactpage),
     path("blogs/", views.blogindexpage),
     re_path(r"^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
     re_path(r"^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.blogarticlepage),
@@ -72,7 +72,6 @@ urlpatterns = [
     path("about/", views.aboutpage),
     path("disclosure/", views.disclosurepage),
     path("privacy/", views.privacypage),
-    path("contact/", views.contactpage),
 ]
 
 # Host-urls that are accessible by host-only, which should be approachable by developers as well during
