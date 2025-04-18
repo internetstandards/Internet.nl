@@ -204,6 +204,9 @@ msgstr "Switch to light theme"
 msgid "about_section_title_newstring"
 msgstr "About us"
 
+msgid "about_section_page_intro_newstring"
+msgstr "We help you test and identify performance issues such as slow load times and server errors."
+
 msgid "about_section_intro_newstring"
 msgstr "I want more information about these organizations"
 

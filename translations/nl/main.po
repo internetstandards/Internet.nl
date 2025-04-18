@@ -249,6 +249,9 @@ msgstr "Ga naar onze Mastodon profiel"
 msgid "about_section_title_newstring"
 msgstr "Over ons"
 
+msgid "about_section_page_intro_newstring"
+msgstr "Wij helpen jou testen en het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten."
+
 msgid "about_section_intro_newstring"
 msgstr "Ik wil meer informatie over deze organisaties"
 
