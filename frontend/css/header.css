@@ -36,6 +36,11 @@ header {
       nav {
         place-content: start;
       }
+
+      #nav-sublist {
+        left: 0;
+        translate: initial;
+      }
     }
 
     @media (scripting: none) {
