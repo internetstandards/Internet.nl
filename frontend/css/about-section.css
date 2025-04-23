@@ -103,7 +103,7 @@
 .quote-section {
   .container {
     padding-block: 88px;
-    gap: 40px;
+    row-gap: 40px;
 
     @media (width >= 900px) {
       align-items: center;
