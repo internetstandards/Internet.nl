@@ -573,12 +573,12 @@ else
 docker_host = host-gateway
 endif
 
-DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml RELEASE=latest docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
+DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml:docker/compose.yaml:docker/compose.development.yaml RELEASE=latest docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
 
 # this runs limited live test suite against the development environment to test its sanity
 develop-tests development-environment-tests:
 	APP_URLS=http://${docker_host}:8080  ${DOCKER_COMPOSE_DEVELOP_CMD} run --rm test-runner-development-environment \
-		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} integration_tests/develop/
+		-ra --screenshot=only-on-failure --video=retain-on-failure --junit-xml=test-results.xml ${test_args} -k'${tests}' integration_tests/develop/
 
 develop-tests-shell:
 	${DOCKER_COMPOSE_DEVELOP_CMD} run --rm --entrypoint bash test-runner-development-environment
