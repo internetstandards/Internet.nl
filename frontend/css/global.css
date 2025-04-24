@@ -73,12 +73,10 @@
 }
 
 html {
-  @media (scripting: enabled) {
-    scroll-padding-top: 120px;
+  scroll-padding-top: 120px;
 
-    @media (width >= 900px) {
-      scroll-padding-top: 150px;
-    }
+  @media (width >= 900px) {
+    scroll-padding-top: 150px;
   }
 }
 
@@ -177,7 +175,7 @@ body:has(.nav-controls.active) .skip-link {
 }
 
 body:has(.nav-controls.active) {
-  @media (scripting: enabled) and (width <= 900px) {
+  @media (width <= 900px) {
     overflow: clip;
   }
 }

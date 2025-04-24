@@ -3,9 +3,10 @@ header {
   z-index: 2;
   background: var(--nav-bg-color);
   transition: border 0.3s, box-shadow 0.3s;
+  position: sticky;
 
-  @media (scripting: enabled) {
-    position: sticky;
+  @media (scripting: none) {
+    position: initial;
   }
 
   &.stuck {
@@ -129,9 +130,10 @@ header:has(.active) {
   background: var(--nav-mobile-bg-color);
   display: none;  
   overflow: auto;
+  padding: 120px 16px 30px;
 
-  @media (scripting: enabled) {
-    padding: 120px 16px 30px;
+  @media (scripting: none) {
+    padding: 0;
   }
 
   @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
@@ -561,9 +563,10 @@ header nav {
     border: 1px solid currentcolor;
     border-radius: 8px;
     padding: 2px;
+    display: none;
 
-    @media (scripting: enabled) {
-      display: none;
+    @media (scripting: none) {
+      display: block;
     }
   }
 }

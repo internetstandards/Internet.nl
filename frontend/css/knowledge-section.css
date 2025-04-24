@@ -53,12 +53,19 @@
     }
   }
 
-  @media (scripting: enabled) {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (scripting: none) {
+    scrollbar-width: initial;
+    -ms-overflow-style: initial;
+  
     &::-webkit-scrollbar {
-      display: none;
+      display: initial;
     }
   }
 
