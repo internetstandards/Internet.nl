@@ -73,7 +73,7 @@
 }
 
 html {
-  @media (scripting: none) {
+  @media (scripting: enabled) {
     scroll-padding-top: 120px;
 
     @media (width >= 900px) {
