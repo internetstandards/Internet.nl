@@ -116,6 +116,7 @@
   position: sticky;
   bottom: 0;
   order: 2;
+  z-index: 1;
 
   @media (width >= 900px) {
     grid-column: 9 / 13;
