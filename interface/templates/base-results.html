@@ -45,41 +45,38 @@
   </div>
 </section>
 
-<aside class="action-card-container">
-  <article class="action-card">
-    <details>
-      <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
-      <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
-      <ul class="action-card-list">
-        <li class="action-card-item">
-          <a class="icon" href="/test-mail">
-            <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
-          </a>
-        </li>
-        <li class="action-card-item">
-          <a class="icon" href="/test-connection">
-            <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
-          </a>
-        </li>
-        <li class="action-card-item">
-          <a class="icon" href="{{retest_link}}">
-            <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
-          </a>
-        </li>
-        <li class="action-card-item">
-          <a class="icon" href="/faqs/report/">
-            <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
-          </a>
-        </li>
-      </ul>
-      <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
-    </details>
-    <a class="primary-button icon" href="/">{% include "string.html" with name="base_results_share_results_newstring" %}</a>
-  </article>
-</aside>
-
 <section class="result-details-section">
   <div class="container">
+    <aside class="action-card">
+      <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
+      <details>
+        <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
+        <ul class="action-card-list">
+          <li class="action-card-item">
+            <a class="icon" href="/test-mail">
+              <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
+            </a>
+          </li>
+          <li class="action-card-item">
+            <a class="icon" href="/test-connection">
+              <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
+            </a>
+          </li>
+          <li class="action-card-item">
+            <a class="icon" href="{{retest_link}}">
+              <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
+            </a>
+          </li>
+          <li class="action-card-item">
+            <a class="icon" href="/faqs/report/">
+              <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
+            </a>
+          </li>
+        </ul>
+        <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
+      </details>
+      <a class="primary-button icon" href="/">{% include "string.html" with name="base_results_share_results_newstring" %}</a>
+    </aside>
     <h2 class="h3 color-secondary">{% include "string.html" with name="base_results_test_details_newstring" %}</h2>
     <ul class="result-details-list">
       {% for probe in probes %}
@@ -106,109 +103,6 @@
   </div>
 </section>
 
-  <!-- <div class="hidethis" aria-hidden="true">
-    <span id="panel-button-show">
-      {% include "string.html" with name="results panel-button show" %}
-    </span>
-    <span id="panel-button-hide">
-      {% include "string.html" with name="results panel-button hide" %}
-    </span>
-    <span id="panel-item-open">
-      {% include "string.html" with name="results no-icon-detail open" %}
-    </span>
-    <span id="panel-item-close">
-      {% include "string.html" with name="results no-icon-detail close" %}
-    </span>
-  </div> -->
-
-
    {% block testtailcontent %}
-   <!-- <aside>
-     <div id="first-aside-block" class="block">
-     <section class="websitetest">
-       <h2>
-         {% include "string.html" with name="results test website label" %}
-       </h2>
-       <form action="/site/" method="POST">
-         <label class="text-input" for="web-url">
-           {% include "string.html" with name="base test website input" %}
-           <input id="web-url" type="text" inputmode="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-         </label>
-         <div class="contains-button">
-           <button>
-             {% include "string.html" with name="base test start" %}
-           </button>
-         </div>
-       </form>
-    {% if webtest_direct %}
-       <div class="test-direct">
-         <h3>
-           {% include "string.html" with name="results test direct" %}
-         </h3>
-         <ol>
-      {% for addr in webtest_direct %}
-           <li><a href="/site/{{addr}}/" rel="nofollow">{{addr}}</a></li>
-      {% endfor %}
-         </ol>
-       </div>
-    {% endif %}
-     </section>
-     </div>
-
-
-     <div class="block">
-     <section class="emailtest">
-       <h2>
-         {% include "string.html" with name="results test email label" %}
-       </h2>
-       <form action="/mail/" method="POST">
-         <label class="text-input" for="mail-url">
-           {% include "string.html" with name="base test mail input" %}
-           <span class="emailfield before">
-             <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-           </span>
-         </label>
-         <div class="contains-button">
-           <button>
-             {% include "string.html" with name="base test start" %}
-           </button>
-         </div>
-       </form>
-    {% if mailtest_direct %}
-       <div class="test-direct">
-         <h3>
-           {% include "string.html" with name="results test direct" %}
-         </h3>
-         <ol>
-       {% for addr in mailtest_direct %}
-           <li><a href="/mail/{{addr}}/" rel="nofollow">@{{addr}}</a></li>
-       {% endfor %}
-         </ol>
-       </div>
-    {% endif %}
-     </section>
-     </div>
-
-
-     <div class="block">
-     <section class="connectiontest">
-       <div class="title-and-explanation">
-         <h2>
-           {% include "string.html" with name="base test connection label" %}
-         </h2>
-       </div>
-       <form action="/connection/" method="POST" id="form-connection-test">
-         <div class="contains-button">
-           <button>
-             {% include "string.html" with name="base test start" %}
-           </button>
-         </div>
-       </form>
-     </section>
-     </div>
-
-     {% block furthertesting %}
-     {% endblock %}
-   </aside> -->
    {% endblock %}
 {% endblock %}

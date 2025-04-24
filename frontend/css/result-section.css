@@ -1,15 +1,14 @@
 .result-section {
   .container {
     padding-block: 32px;
-    gap: 24px;
+    row-gap: 24px;
 
     @media (width >= 900px) {
       padding-block: 72px;
-      gap: 48px;
+      row-gap: 48px;
 
       & > * {
         grid-column: 1 / 8;
-        z-index: 1;
       }
     }
   }
@@ -18,7 +17,7 @@
     .container > * {
       @media (width >= 900px) {
         grid-column: 3 / 11;
-        gap: 40px;
+        row-gap: 40px;
       }
     }
   }
@@ -95,61 +94,15 @@
 
     &.passed::before {
       background-image: url("/static/icons/checkmark-circle.svg");
-      /* display: block;
-      background-color: unset;
-      background-repeat: no-repeat;
-      background-size: cover;
-      width: 24px;
-      height: 24px;
-      min-height: 24px;
-      min-width: 24px; */
     }
 
     &.warning::before {
       background-image: url("/static/icons/exclamation-circle.svg");
-      /* display: block;
-      background-color: unset;
-      background-repeat: no-repeat;
-      background-size: cover;
-      width: 24px;
-      height: 24px;
-      min-height: 24px;
-      min-width: 24px; */
     }
 
     &.failed::before {
       background-image: url("/static/icons/error.svg");
-      /* display: block;
-      background-color: unset;
-      background-repeat: no-repeat;
-      background-size: cover;
-      width: 24px;
-      height: 24px;
-      min-height: 24px;
-      min-width: 24px; */
     }
-  }
-}
-
-.action-card-container {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  position: sticky;
-  max-width: 1240px;
-  place-self: center;
-  width: 100vw;
-  bottom: 0;
-  order: 1;
-  gap: 32px;
-  z-index: 1;
-
-  @media (width >= 900px) {
-    margin-top: -300px;
-    top: 200px;
-    padding-inline: 16px;
-    order: unset;
-    bottom: unset;
-    z-index: unset;
   }
 }
 
@@ -160,13 +113,24 @@
   display: flex;
   flex-direction: column;
   grid-column: span 12;
-  gap: 16px;
+  position: sticky;
+  bottom: 0;
+  order: 2;
 
   @media (width >= 900px) {
     grid-column: 9 / 13;
+    grid-row: 2 / 3;
+    bottom: unset;
+    order: unset;
+    top: 150px;
+    margin-top: -450px;
+    align-self: start;
     padding: 32px;
-    gap: 24px;
     border-radius: 16px;
+  }
+
+  @media (900px <= width <= 1100px) {
+    top: 250px;
   }
 
   details {
@@ -174,6 +138,11 @@
     flex-direction: column;
     appearance: none;
     overflow: clip;
+    padding-bottom: 16px;
+
+    @media (width >= 900px) {
+      padding-bottom: 24px;
+    }
 
     &::details-content {
       @media (prefers-reduced-motion: no-preference) and (width < 900px) {
@@ -399,17 +368,16 @@ meter::-moz-meter-bar {
 }
 
 .result-details-section {
-  @media (width >= 900px) {
-    margin-top: -300px;
-  }
-
   .container {
-    gap: 32px;
+    row-gap: 32px;
 
-    & > * {
+    @media (width >= 900px) {
+      gap: 32px;
+    }
+
+    & > *:not(.action-card) {
       @media (width >= 900px) {
         grid-column: 1 / 9;
-        z-index: 1;
       }
     }
   }
@@ -419,6 +387,7 @@ meter::-moz-meter-bar {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  z-index: 0;
 
   @media (width >= 900px) {
     gap: 34px;
@@ -530,6 +499,10 @@ meter::-moz-meter-bar {
       ul, ol {
         list-style: initial;
         list-style-position: inside;
+
+        li {
+          margin-block: 8px;
+        }
       }
 
       tbody {
@@ -551,7 +524,8 @@ meter::-moz-meter-bar {
         border-radius: 4px;
       }
 
-      hgroup div {
+      div:has(.tech-details-table)
+      {
         display: flex;
         gap: 8px;
         flex-direction: column;

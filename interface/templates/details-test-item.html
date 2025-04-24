@@ -13,48 +13,17 @@
         <p>{% include "string.html" with name=testitem.verdict %}</p>
       </hgroup>
       {% if testitem.tech_type and testitem.tech_data %}
-      <hgroup>
+      <div>
         <h5>{% include "string.html" with name="results tech-details label" %}</h5>
-        <p>
-          {% if testitem.tech_type == 'table' or testitem.tech_type == 'table_multi_col' or testitem.tech_type == 'table_translatable' %}
-            {% render_details_table tech_type=testitem.tech_type table_headers=testitem.tech_string table_content=testitem.tech_data %}
-          {% endif %}
+        {% if testitem.tech_type == 'table' or testitem.tech_type == 'table_multi_col' or testitem.tech_type == 'table_translatable' %}
+          {% render_details_table tech_type=testitem.tech_type table_headers=testitem.tech_string table_content=testitem.tech_data %}
         {% endif %}
-        </p>
-      </hgroup>
-      <hgroup>
+      </div>
+      {% endif %}
+      <div>
         <h5>{% include "string.html" with name="results explanation label" %}</h5>
-        <p>{% include "content.html" with name=testitem.exp %}</p>
-      </hgroup>
-    </details>
-
-    <!-- <div class="testresult {{set.0}}">
-        <h3 class="panel-title" > 
-          <a href="" aria-expanded="false">
-            <span class="visuallyhidden">{{set.1}}:</span>
-            {% translate testitem.label %}
-            <span class="pre-icon visuallyhidden"></span>
-            <span class="icon"><img src="{% static "push-open.png" %}" alt=""></span>
-          </a>
-      </h3>
-      <div class="panel-content">
-        <h4>
-          {% include "string.html" with name="results verdict label" %}
-        </h4>
-          <p>{% include "string.html" with name=testitem.verdict %}</p>
-        {% if testitem.tech_type and testitem.tech_data %}
-        <h4>
-          {% include "string.html" with name="results tech-details label" %}
-        </h4>
-          {% if testitem.tech_type == 'table' or testitem.tech_type == 'table_multi_col' or testitem.tech_type == 'table_translatable' %}
-            {% render_details_table tech_type=testitem.tech_type table_headers=testitem.tech_string table_content=testitem.tech_data %}
-          {% endif %}
-        {% endif %}
-        <h4>
-          {% include "string.html" with name="results explanation label" %}
-        </h4>
         {% include "content.html" with name=testitem.exp %}
       </div>
-    </div> -->
+    </details>
   {% endwith %}
 {% endif %}

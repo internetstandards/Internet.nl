@@ -1,6 +1,6 @@
 .test-section {
   .container {
-    gap: 8px;
+    row-gap: 8px;
     padding-block: 40px;
     
     @media (width >= 900px) {
@@ -27,7 +27,7 @@
 
 .test-sub-section {
   .container {
-    gap: 24px;
+    row-gap: 24px;
     padding-block: 32px;
 
     @media (width >= 900px) {
