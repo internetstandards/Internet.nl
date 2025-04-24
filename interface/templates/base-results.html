@@ -81,7 +81,7 @@
     <ul class="result-details-list">
       {% for probe in probes %}
 
-      <li class="result-details-item">
+      <li id="{{probe.name}}" class="result-details-item">
         <hgroup>
           <h3 class="h5 color-secondary icon {{probe.verdict}}">
             <span class="visually-hidden">

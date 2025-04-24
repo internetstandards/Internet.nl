@@ -72,6 +72,16 @@
   box-sizing: border-box;
 }
 
+html {
+  @media (scripting: none) {
+    scroll-padding-top: 120px;
+
+    @media (width >= 900px) {
+      scroll-padding-top: 150px;
+    }
+  }
+}
+
 body {
   font-family: Montserrat, sans-serif;
   background-color: var(--bg-color-body);
