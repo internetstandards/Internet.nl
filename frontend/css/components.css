@@ -395,3 +395,55 @@
     }
   }
 }
+
+/* MARK: ACCORDION
+*/
+
+.accordion {
+  appearance: none;
+  overflow: clip;
+
+  &::details-content {
+    @media (prefers-reduced-motion: no-preference) {
+      @supports (transition-behavior: allow-discrete) {
+        transition: height 0.3s, opacity 0.3s, content-visibility 0.3s;
+        transition-behavior: allow-discrete;
+        opacity: 0;
+        height: 0;
+      }
+    }
+  }
+
+  &[open] {
+    &::details-content {
+      @media (prefers-reduced-motion: no-preference) {
+        @supports (transition-behavior: allow-discrete) {
+          opacity: 1;
+          height: auto;
+        }
+      }
+    }
+  
+    summary::after {
+      transform: rotate(-180deg);
+    }
+  }
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      mask-image: url("/static/icons/angle-down.svg");
+      display: block;
+      transition: transform 0.3s;
+    }
+  }
+}

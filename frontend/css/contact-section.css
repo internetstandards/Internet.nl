@@ -55,8 +55,8 @@
   margin-bottom: 8px;
   background: var(--accordion-bg-color);
   border-radius: 8px;
-  appearance: none;
-  overflow: clip;
+  /* appearance: none;
+  overflow: clip; */
   
   @media (width >= 900px) {
     grid-column: span 7;
@@ -69,7 +69,7 @@
     color: var(--accordion-body-color);
   }
 
-  &::details-content {
+  /* &::details-content {
     @media (prefers-reduced-motion: no-preference) {
       @supports (transition-behavior: allow-discrete) {
         transition: height 0.3s, opacity 0.3s, content-visibility 0.3s;
@@ -93,14 +93,14 @@
     summary::after {
       transform: rotate(-180deg);
     }
-  }
+  } */
 
   summary {
-    cursor: pointer;
+    /* cursor: pointer; */
     padding: 16px;
     font: var(--accordion-header);
     color: var(--accordion-heading-color);
-    list-style: none;
+    /* list-style: none;
     display: flex;
     justify-content: space-between;
     gap: 24px;
@@ -113,7 +113,7 @@
       mask-image: url("/static/icons/angle-down.svg");
       display: block;
       transition: transform 0.3s;
-    }
+    } */
   }
 }
 

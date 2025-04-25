@@ -3,7 +3,7 @@
 
 {% if testitem %}
   {% with set=testitem|get_testitem_div_class_and_text_status %}
-    <details>
+    <details class="accordion">
       <summary class="{{set.0}} icon">
         <span class="visually-hidden">{{set.1}}: </span>
         {% translate testitem.label %}

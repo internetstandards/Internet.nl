@@ -183,16 +183,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    &::after {
-      mask-image: url("/static/icons/angle-down.svg");
-      display: block;
-      transition: transform 0.3s;
-
-      @media (width >= 900px) {
-        display: none;
-      }
-    }
   }
 
   h2 {
@@ -210,6 +200,16 @@
 
     &::-webkit-details-marker {
       display: none;
+    }
+
+    &::after {
+      mask-image: url("/static/icons/angle-down.svg");
+      display: block;
+      transition: transform 0.3s;
+
+      @media (width >= 900px) {
+        display: none;
+      }
     }
 
     @media (width >= 900px) {
@@ -443,13 +443,11 @@ meter::-moz-meter-bar {
       }
     }
 
-    p {
-      a {
-        display: inline-flex;
+    p a {
+      display: inline-flex;
 
-        &:hover {
-          text-decoration: underline;
-        }
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
@@ -473,8 +471,6 @@ meter::-moz-meter-bar {
       margin-bottom: 8px;
       background: var(--accordion-bg-color);
       border-radius: 8px;
-      appearance: none;
-      overflow: clip;
 
       @media (width >= 900px) {
         grid-column: span 7;
@@ -543,53 +539,21 @@ meter::-moz-meter-bar {
         padding-inline: 16px;
         flex-direction: column;
         gap: 16px;
-
-        @media (prefers-reduced-motion: no-preference) {
-          @supports (transition-behavior: allow-discrete) {
-            transition: height 0.3s, opacity 0.3s, content-visibility 0.3s;
-            transition-behavior: allow-discrete;
-            opacity: 0;
-            height: 0;
-          }
-        }
       }
 
-      &[open] {
-        > *:not(summary) {
-          @supports not (selector(::details-content)) {
-            font: var(--accordion-body);
-            padding: 8px 16px;
-          }
-        }
-
-        &::details-content {
-          @media (prefers-reduced-motion: no-preference) {
-            @supports (transition-behavior: allow-discrete) {
-              opacity: 1;
-              height: auto;
-            }
-          }
-        }
-
-        summary::after {
-          transform: rotate(-180deg);
+      &[open] > *:not(summary) {
+        @supports not (selector(::details-content)) {
+          font: var(--accordion-body);
+          padding: 8px 16px;
         }
       }
 
       summary {
-        cursor: pointer;
         padding: 16px;
         font: var(--accordion-header);
         color: var(--accordion-heading-color);
         font-weight: 600;
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
         gap: 16px;
-
-        &::-webkit-details-marker {
-          display: none;
-        }
 
         &.warning {
           color: var(--warning-color);
@@ -600,9 +564,6 @@ meter::-moz-meter-bar {
         }
 
         &::after {
-          mask-image: url("/static/icons/angle-down.svg");
-          display: block;
-          transition: transform 0.3s;
           margin-left: auto;
         }
 
