@@ -73,7 +73,7 @@
             </a>
           </li>
         </ul>
-        <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
+        <p>{% include "string.html" with name="base_results_test_description_newstring" %}</p>
       </details>
       <a class="primary-button icon" href="/">{% include "string.html" with name="base_results_share_results_newstring" %}</a>
     </aside>
@@ -102,7 +102,4 @@
     </ul>
   </div>
 </section>
-
-   {% block testtailcontent %}
-   {% endblock %}
 {% endblock %}

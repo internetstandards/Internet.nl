@@ -117,6 +117,9 @@ msgstr "Repeat the test"
 msgid "base_results_test_explanation_newstring"
 msgstr "Explanation of test report"
 
+msgid "base_results_test_description_newstring"
+msgstr "The forwarding of the test results can help in identifying the causes and providing solutions."
+
 msgid "base_results_share_results_newstring"
 msgstr "Share results with hoster"
 
