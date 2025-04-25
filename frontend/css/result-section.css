@@ -272,6 +272,12 @@
   }
 }
 
+body.font-large .action-card {
+  @media (width >= 900px) {
+    position: initial;
+  }
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
