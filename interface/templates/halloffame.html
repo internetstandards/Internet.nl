@@ -2,48 +2,6 @@
 {%load translate %}
 
 {% block maincontent %}
-<!-- <article class="block fullwidth">
-  <div class="intro">
-    <div class="flexblocks champions">
-      <div class="flexblock">
-        <h1>{% include "string.html" with name=hof_title %}</h1>
-          <ul class="hall-of-fame menu">
-            <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
-            <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
-            <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
-            {% for manual in manuals %}
-            <li><a href="/halloffame/{{manual.0}}/" {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a></li>
-            {% endfor %}
-          </ul>
-      </div>
-      <div class="flexblock">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% if cpage == 'champions' %}
-        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
-        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
-      {% elif cpage == 'web' %}
-        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
-      {% elif cpage == 'mail' %}
-        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
-      {% else %}
-        {% if manual_icon and manual_icon_alt %}
-        <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}">
-        {% endif %}
-      {% endif %}
-      {% endif %}
-      </div>
-    </div>
-    <span class="hof-content">{% include "content.html" with name=hof_text %}</span>
-  </div>
-  <div class="perfect-scores-list">
-    <h2>{% include "string.html" with name=hof_subtitle %}</h2>
-    <ul class="list-column column-3">
-    {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
-    {% endfor %}
-    </ul>
-  </div>
-</article> -->
 
 <section class="intro-section bg-secondary ellipse reverse">
   <div class="container">
@@ -59,14 +17,14 @@
     <div class="filter-container">
       <h2 class="h5 color-secondary">{% include "string.html" with name="halloffame_filter_label_newstring" %}</h2>
       <div class="button-container">
-        <a class="primary-button" href="/halloffame">{% include "string.html" with name="halloffame_filter_champions_newstring" %}</a>
-        <a class="secondary-button" href="/halloffame/hosters">{% include "string.html" with name="halloffame_filter_hosters_newstring" %}</a>
+        <a class="primary-button" href="#kampioenen">{% include "string.html" with name="halloffame_filter_champions_newstring" %}</a>
+        <a class="secondary-button" href="/halloffame/hosters#hosters">{% include "string.html" with name="halloffame_filter_hosters_newstring" %}</a>
       </div>
     </div>
   </div>
 </search>
 
-<section class="hosters-section">
+<section class="hosters-section" id="kampioenen">
   <div class="container">
     <hgroup>
       <h2 class="h2 color-secondary">{% include "string.html" with name="halloffame_hosters_title_newstring" %}</h2>

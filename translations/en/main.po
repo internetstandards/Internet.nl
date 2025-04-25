@@ -330,8 +330,14 @@ msgstr "Your website domain"
 msgid "test_start_button_newstring"
 msgstr "Start the test"
 
-msgid "test_usp_placeholder_newstring"
-msgstr "USP 1 goes here"
+msgid "test_usp_one_newstring"
+msgstr "USP 1 stands here"
+
+msgid "test_usp_two_newstring"
+msgstr "USP 2 stands here"
+
+msgid "test_usp_three_newstring"
+msgstr "USP 3 stands here"
 
 msgid "test_more_tests_title_newstring"
 msgstr "What else do you want to test?"

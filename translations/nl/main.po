@@ -51,8 +51,14 @@ msgstr "Jouw website-domein"
 msgid "test_start_button_newstring"
 msgstr "Start de test"
 
-msgid "test_usp_placeholder_newstring"
+msgid "test_usp_one_newstring"
 msgstr "USP 1 staat hier"
+
+msgid "test_usp_two_newstring"
+msgstr "USP 2 staat hier"
+
+msgid "test_usp_three_newstring"
+msgstr "USP 3 staat hier"
 
 msgid "test_more_tests_title_newstring"
 msgstr "Wat wil je nog meer testen?"
