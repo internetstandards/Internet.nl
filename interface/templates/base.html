@@ -15,9 +15,21 @@
   <link rel="icon" href="{% static "favicon.png" %}" sizes="192x192" />
   <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
   <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style-min.css' %}" /> -->
   <link rel="stylesheet" type="text/css" href="{% static 'css/print-min.css' %}" media="print" />
 
   <link rel="stylesheet" href="{% static 'css/layers.css' %}" />
+  <!-- <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/test-section.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/knowledge-section.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/hall-of-fame-section.css' %}" /> 
+  <link rel="stylesheet" href="{% static 'css/about-section.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/news-section.css' %}" />  
+  <link rel="stylesheet" href="{% static 'css/contact-section.css' %}" />   -->
 
   <script src="{% static "js/jquery-3.5.1.min.js" %}"></script>
   <script type="text/javascript" src="{% static "js/headroom-min.js" %}"></script>
@@ -37,6 +49,14 @@
   {% endblock %}
 </head>
 <body class="{{pageclass}}">
+  <!-- <div class="hidethis" aria-hidden="true">
+    <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
+    <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
+    <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
+  </div> -->
+  <!-- <div class="skiplink"><a href="#content">{% include "string.html" with name='page gotocontents' %}</a></div>
+  <div class="skiplink" id="skiplink-sitenav"><a href="#sitenav">{% include "string.html" with name='page gotomainmenu' %}</a></div>
+  <div class="skiplink"><a href="#footer">{% include "string.html" with name='page gotofooter' %}</a></div> -->
 
   <header>
     <a class="skip-link" href="#main-content">{% include "string.html" with name="base_header_skip_to_main_newstring" %}</a>
@@ -214,6 +234,7 @@
     <p class="version">v{{ "VERSION"|get_settings_value }}</p>
   </footer>
 
+  <!-- <script type="text/javascript" src="{% static "js/menu-min.js" %}" defer></script> -->
   <script type="text/javascript" src="{% static "js/accordion-min.js" %}" defer></script>
   <script type="text/javascript" src="{% static "js/matomo-min.js" %}"></script>
 </body>

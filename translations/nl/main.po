@@ -168,9 +168,6 @@ msgstr "Herhaal de test"
 msgid "base_results_test_explanation_newstring"
 msgstr "Toelichting op testrapport"
 
-msgid "base_results_test_description_newstring"
-msgstr "Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen."
-
 msgid "base_results_share_results_newstring"
 msgstr "Deel uitslag met hoster"
 

@@ -89,6 +89,15 @@
   {% endif %}
 {% endblock %}
 
+{% block furthertesting %}
+  <div class="block">
+    <section class="further-testing">
+        <h2>{% include "string.html" with name="results further-testing web label" %}</h2>
+        {% include "content.html" with name="results further-testing web content" %}
+    </section>
+  </div>
+{% endblock %}
+
 {% block testtailcontent %}
 {{block.super}}
 {% endblock %}

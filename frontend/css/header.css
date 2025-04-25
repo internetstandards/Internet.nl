@@ -558,6 +558,7 @@ header nav {
     }
   }
 
+  /* stylelint-disable-next-line no-descending-specificity */
   button[type="submit"] {
     color: var(--nav-text-color);
     border: 1px solid currentcolor;
