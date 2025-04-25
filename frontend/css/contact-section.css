@@ -188,23 +188,22 @@
 .contact-card-small {
   background: var(--card-bg-color-contact);
   border-radius: 8px;
-  padding: 16px;
   color: inherit;
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
 
-  @media (width >= 900px) {
-    padding: 32px;
-  }
-
-  &:has(> a) {
-    background: var(--button-bg-color-contact);
+  &.alt {
+    padding: 16px;
 
     @media (width >= 900px) {
-    padding: 16px;
+      padding: 32px;
     }
+  }
+
+  &:not(.alt) {
+    background: var(--button-bg-color-contact);
 
     > a {
       width: 100%;
@@ -212,6 +211,7 @@
       justify-content: space-between;
       align-items: center;
       border-radius: 8px;
+      padding: 16px;
     }
   }
 
