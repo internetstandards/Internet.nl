@@ -4,32 +4,6 @@
 {% load translate %}
 
 {% block maincontent %}
-  <!-- <article class="block wide">
-    <section class="overview">
-        <h1>{% include "string.html" with name="{{pagetitle}}"%}</h1>
-      {% for article in articles %}
-      {% expand "article {{article}} title" as articletitle %}
-      {% expand "article {{article}} date" as articledate %}
-      {% expand "article {{article}} lead" as articlelead %}
-      {% expand "article {{article}} author" as articleauthor %}
-      {% trans articleauthor as author %}
-        <div>
-          <a href="/article/{{article}}">
-            {% if author != articleauthor %}
-              {% expand "author {{author}} name" as authorname %}
-              <h2>Blog {% include "string.html" with name=authorname %}: {% include "string.html" with name=articletitle %}</h2>
-              {% include "content.html" with name=articlelead %}
-            {% else %}
-              <h2>{% include "string.html" with name=articletitle %}</h2>
-              {% include "string_no_tags.html" with name=articlelead %}
-            {% endif %}
-          </a>
-        </div>
-      {% endfor %}
-    </section>
-  </article> -->
-
-
   <section class="article-index-section bg-primary">
     <div class="container">
       <hgroup>
