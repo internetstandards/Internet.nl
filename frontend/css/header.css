@@ -2,16 +2,20 @@ header {
   top: 0;
   z-index: 2;
   background: var(--nav-bg-color);
-  transition: border 0.3s, box-shadow 0.3s;
+  transition: border 0.3s, box-shadow 0.3s, translate 0.3s;
   position: sticky;
-
-  @media (scripting: none) {
-    position: initial;
-  }
 
   &.stuck {
     border-bottom: var(--nav-sticky-border);
     box-shadow: var(--nav-sticky-shadow);
+  }
+
+  &.not-scrolling-up {
+    translate: 0 -100%;
+  }
+
+  @media (scripting: none) {
+    position: initial;
   }
 
   .container {

@@ -33,6 +33,7 @@ toggleSubMenu.addEventListener('click', () => {
 
 /* STICKY HEADER */
 const header = document.querySelector('header');
+const headerHeight = header.offsetHeight;
 const scrollWatcher = document.createElement('div');
 
 scrollWatcher.setAttribute('data-scroll-watcher', '');
@@ -43,3 +44,23 @@ const navObserver = new IntersectionObserver((entries) => {
 });
 
 navObserver.observe(scrollWatcher);
+
+let prevScrollY     = window.pageYOffset;
+let ticking         = false;
+
+window.addEventListener('scroll', () => {
+  const currentY = window.pageYOffset;
+
+  if (!ticking) {
+    ticking = true;
+    requestAnimationFrame(() => {
+      const isScrollingDown = currentY >= prevScrollY;
+      header.classList.toggle(
+        'not-scrolling-up',
+        currentY > headerHeight && isScrollingDown
+      );
+      prevScrollY = currentY;
+      ticking     = false;
+    });
+  }
+}, { passive: true });
