@@ -81,7 +81,7 @@ msgstr "Filter by:"
 msgid "halloffame_filter_champions_newstring"
 msgstr "Champions"
 
-sgid "halloffame_champions_title_newstring"
+msgid "halloffame_champions_title_newstring"
 msgstr "Champions"
 
 msgid "halloffame_filter_hosters_newstring"

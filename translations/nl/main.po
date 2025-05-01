@@ -132,7 +132,7 @@ msgstr "Filter op:"
 msgid "halloffame_filter_champions_newstring"
 msgstr "Kampioenen"
 
-sgid "halloffame_champions_title_newstring"
+msgid "halloffame_champions_title_newstring"
 msgstr "Kampioenen"
 
 msgid "halloffame_filter_hosters_newstring"

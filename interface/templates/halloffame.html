@@ -27,14 +27,14 @@
 <section class="hosters-section" id="kampioenen">
   <div class="container">
     <hgroup>
-      <h2 class="h2 color-secondary">{% include "string.html" with name="halloffame_kampioenen_title_newstring" %}</h2>
+      <h2 class="h2 color-secondary">{% include "string.html" with name="halloffame_champions_title_newstring" %}</h2>
       <p class="body-xl">{% include "string.html" with name="halloffame_hosters_description_newstring" %}</p>
     </hgroup>
     <div class="image-container">
       <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
     </div>
     <ul class="hall-of-fame-list">
-      <!-- {% for member in halloffame %}
+      <!-- {% for member in halloffame|slice:"-20:" %}
         <li>
           <a href="{{member.permalink}}">{{member.domain|idna}}</a>
         </li>

@@ -34,7 +34,7 @@
       <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
     </div>
     <ul class="hall-of-fame-list">
-      <!-- {% for member in halloffame %}
+      <!-- {% for member in halloffame|slice:"-20:" %}
         <li>
           <a href="{{member.permalink}}">{{member.domain|idna}}</a>
         </li>
