@@ -45,26 +45,6 @@ const navObserver = new IntersectionObserver((entries) => {
 
 navObserver.observe(scrollWatcher);
 
-// let prevScrollY     = window.pageYOffset;
-// let ticking         = false;
-
-// window.addEventListener('scroll', () => {
-//   const currentY = window.pageYOffset;
-
-//   if (!ticking) {
-//     ticking = true;
-//     requestAnimationFrame(() => {
-//       const isScrollingDown = currentY >= prevScrollY;
-//       header.classList.toggle(
-//         'not-scrolling-up',
-//         currentY > headerHeight && isScrollingDown
-//       );
-//       prevScrollY = currentY;
-//       ticking     = false;
-//     });
-//   }
-// }, { passive: true });
-
 let prevScrollY     = window.pageYOffset;
 let lastHideScrollY = prevScrollY;
 let ticking         = false;
@@ -79,14 +59,11 @@ window.addEventListener('scroll', () => {
       const isScrollingDown = currentY > prevScrollY;
 
       if (currentY <= headerHeight) {
-        // Always show the header when near the top
         header.classList.remove('not-scrolling-up');
       } else if (isScrollingDown) {
-        // Scrolling down past headerHeight -> hide
         header.classList.add('not-scrolling-up');
         lastHideScrollY = currentY;
       } else {
-        // Scrolling up by more than buffer -> show
         if (lastHideScrollY - currentY > buffer) {
           header.classList.remove('not-scrolling-up');
         }
