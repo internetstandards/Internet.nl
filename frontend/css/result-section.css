@@ -313,6 +313,10 @@ body.font-large .action-card {
       display: flex;
     }
   }
+
+  @media (scripting: none) {
+    cursor: default;
+  }
 }
 
 @keyframes rotate {
