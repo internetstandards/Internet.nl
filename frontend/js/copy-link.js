@@ -1,11 +1,7 @@
 const shareBtn = document.getElementById('copy-link');
 
-function getLinkToShare() {
-  return window.location.href;
-}
-
 shareBtn.addEventListener('click', function() {
-  const link = getLinkToShare();
+  const link = window.location.href;
 
   if (!window.isSecureContext) {
     alert('Sharing is only supported over HTTPS. Please access this page via HTTPS to share.');
