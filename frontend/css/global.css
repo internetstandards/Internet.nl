@@ -73,11 +73,7 @@
 }
 
 html {
-  scroll-padding-top: 120px;
-
-  @media (width >= 900px) {
-    scroll-padding-top: 150px;
-  }
+  scroll-padding-top: 50px;
 }
 
 body {

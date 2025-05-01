@@ -81,6 +81,9 @@ msgstr "Filter by:"
 msgid "halloffame_filter_champions_newstring"
 msgstr "Champions"
 
+sgid "halloffame_champions_title_newstring"
+msgstr "Champions"
+
 msgid "halloffame_filter_hosters_newstring"
 msgstr "Hosters"
 
@@ -346,13 +349,13 @@ msgid "test_email_title_newstring"
 msgstr "Test your email"
 
 msgid "test_email_stats_newstring"
-msgstr "537 tests with 100% score this week!"
+msgstr "tests with 100% score this week!"
 
 msgid "test_connection_title_newstring"
 msgstr "Test your connection"
 
 msgid "test_connection_stats_newstring"
-msgstr "573 tests with 100% score this week!"
+msgstr "tests with 100% score this week!"
 
 msgid "test_email_protect_intro_newstring"
 msgstr "Protect your email by testing."
@@ -361,7 +364,7 @@ msgid "test_email_domain_label_newstring"
 msgstr "Your email domain"
 
 msgid "test_website_stats_newstring"
-msgstr "487 successful tests conducted this week!"
+msgstr "successful tests conducted this week!"
 
 msgid "test_connection_protect_intro_newstring"
 msgstr "Protect your connection by testing."

@@ -67,13 +67,13 @@ msgid "test_email_title_newstring"
 msgstr "Test je e-mail"
 
 msgid "test_email_stats_newstring"
-msgstr "537 testen met 100% score deze week!"
+msgstr "testen met 100% score deze week!"
 
 msgid "test_connection_title_newstring"
 msgstr "Test je verbinding"
 
 msgid "test_connection_stats_newstring"
-msgstr "573 testen met 100% score deze week!"
+msgstr "testen met 100% score deze week!"
 
 msgid "test_email_protect_intro_newstring"
 msgstr "Bescherm uw e-mail door te testen."
@@ -82,7 +82,7 @@ msgid "test_email_domain_label_newstring"
 msgstr "Jouw e-mail-domein"
 
 msgid "test_website_stats_newstring"
-msgstr "487 succesvolle testen uitgevoerd deze week!"
+msgstr "succesvolle testen uitgevoerd deze week!"
 
 msgid "test_connection_protect_intro_newstring"
 msgstr "Bescherm uw verbinding door te testen."
@@ -130,6 +130,9 @@ msgid "halloffame_filter_label_newstring"
 msgstr "Filter op:"
 
 msgid "halloffame_filter_champions_newstring"
+msgstr "Kampioenen"
+
+sgid "halloffame_champions_title_newstring"
 msgstr "Kampioenen"
 
 msgid "halloffame_filter_hosters_newstring"
