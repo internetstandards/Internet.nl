@@ -159,6 +159,9 @@ msgstr "Details over de test"
 msgid "base_results_next_actions_newstring"
 msgstr "Vervolg acties"
 
+msgid "base_results_test_website_domain_newstring"
+msgstr "Test je website"
+
 msgid "base_results_test_email_domain_newstring"
 msgstr "Test je e-mail domein"
 
@@ -173,6 +176,9 @@ msgstr "Toelichting op testrapport"
 
 msgid "base_results_share_results_newstring"
 msgstr "Deel uitslag met hoster"
+
+msgid "base_results_share_results_clicked_newstring"
+msgstr "Gekopieerd naar klembord"
 
 msgid "base_header_skip_to_main_newstring"
 msgstr "Ga naar hoofdinhoud"

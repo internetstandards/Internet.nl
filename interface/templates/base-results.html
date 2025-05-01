@@ -53,6 +53,11 @@
         <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
         <ul class="action-card-list">
           <li class="action-card-item">
+            <a class="icon" href="/test-site">
+              <span class="domain icon">{% include "string.html" with name="base_results_test_website_domain_newstring" %}</span>
+            </a>
+          </li>
+          <li class="action-card-item">
             <a class="icon" href="/test-mail">
               <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
             </a>
@@ -75,7 +80,10 @@
         </ul>
         <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
       </details>
-      <a class="primary-button icon" href="/">{% include "string.html" with name="base_results_share_results_newstring" %}</a>
+      <button id="copy-link" class="primary-button icon" type="button">
+        <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>
+        <span class="clicked">{% include "string.html" with name="base_results_share_results_clicked_newstring" %}</span>
+      </button>
     </aside>
     <h2 class="h3 color-secondary">{% include "string.html" with name="base_results_test_details_newstring" %}</h2>
     <ul class="result-details-list">

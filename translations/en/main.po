@@ -108,6 +108,9 @@ msgstr "Test details"
 msgid "base_results_next_actions_newstring"
 msgstr "Next actions"
 
+msgid "base_results_test_website_domain_newstring"
+msgstr "Test your website"
+
 msgid "base_results_test_email_domain_newstring"
 msgstr "Test your email domain"
 
@@ -122,6 +125,9 @@ msgstr "Explanation of test report"
 
 msgid "base_results_share_results_newstring"
 msgstr "Share results with hoster"
+
+msgid "base_results_share_results_clicked_newstring"
+msgstr "Copied to clipboard"
 
 msgid "base_header_skip_to_main_newstring"
 msgstr "Skip to main content"

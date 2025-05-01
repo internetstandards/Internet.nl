@@ -106,10 +106,16 @@
   }
 }
 
+body.emailtest .action-card-item:has(.mail),
+body.websitetest .action-card-item:has(.domain),
+body.connectiontest .action-card-item:has(.connection) {
+  display: none;
+}
+
 .action-card {
   background-color: var(--card-bg-color-contact);
   border-radius: 16px 16px 0 0;
-  padding: 24px 32px;
+  padding: 16px 24px;
   display: flex;
   flex-direction: column;
   grid-column: span 12;
@@ -250,6 +256,11 @@
       align-items: center;
     }
 
+    .domain::before {
+      mask-image: url("/static/icons/globe.svg");
+      display: block;
+    }
+
     .mail::before {
       mask-image: url("/static/icons/envelope.svg");
       display: block;
@@ -278,6 +289,32 @@ body.font-large .action-card {
   }
 }
 
+#copy-link {
+  &:not(.copied) {
+    .not-clicked {
+      display: flex;
+    }
+
+    .clicked {
+      display: none;
+    }
+  }
+
+  &.copied {
+    &::after {
+      display: none;
+    }
+
+    .not-clicked {
+      display: none;
+    }
+
+    .clicked {
+      display: flex;
+    }
+  }
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
@@ -294,7 +331,7 @@ body.font-large .action-card {
   gap: 16px;
   position: relative;
   border-bottom: 2px solid var(--green-100);
-  padding-bottom: 16px;
+  padding-block: 24px 16px;
   margin-inline: 10px;
 }
 
