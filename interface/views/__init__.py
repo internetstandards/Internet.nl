@@ -94,15 +94,15 @@ def clear(request, dname):
 
 
 def testconnectionpage(request):
-    return render(request, "test-connection.html", dict(pagemenu="faqs", pagetitle=_("base test connection title")))
+    return render(request, "test-connection.html", dict(pagemenu="test-tools", pagetitle=_("base test connection title")))
 
 
 def testsitepage(request):
-    return render(request, "test-site.html", dict(pagemenu="faqs", pagetitle=_("base test website title")))
+    return render(request, "test-site.html", dict(pagemenu="test-tools", pagetitle=_("base test website title")))
 
 
 def testmailpage(request):
-    return render(request, "test-mail.html", dict(pagemenu="faqs", pagetitle=_("base test mail title")))
+    return render(request, "test-mail.html", dict(pagemenu="test-tools", pagetitle=_("base test mail title")))
 
 
 def disclosurepage(request):

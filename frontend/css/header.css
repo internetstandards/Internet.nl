@@ -258,8 +258,8 @@ header nav {
     }
   }
 
-  .nav-item.current a,
-  .nav-item.current button {
+  .nav-item.current > a,
+  .nav-item.current > button {
     @media (width >= 900px) {
       border-bottom: 2px solid currentcolor;
     }

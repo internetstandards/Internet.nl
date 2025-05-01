@@ -65,7 +65,7 @@
       <div id="nav-controls" class="nav-controls">
         <nav>
           <ul class="nav-list">
-            <li class="nav-item">
+            <li class="nav-item {% if pagemenu == 'test-tools' %}current{% endif %}">
               <button id="toggle-subnav" class="icon" type="button" aria-controls="nav-sublist" aria-expanded="false">{% include "string.html" with name="base_header_test_tools_newstring" %}</button>
               <ul id="nav-sublist" class="nav-sublist">
                 <li class="nav-subitem">
@@ -85,7 +85,7 @@
             <li class="nav-item {% if pagemenu == 'halloffame' %}current{% endif %}">
               <a href="/halloffame">{% include "string.html" with name="base halloffame" %}</a>
             </li>
-            <li class="nav-item {% if pagemenu == 'articles' %}current{% endif %}">
+            <li class="nav-item {% if pagemenu == 'news' %}current{% endif %}">
               <a href="/articles">{% include "string.html" with name="base news" %}</a>
             </li>
             <li class="nav-item {% if pagemenu == 'about' %}current{% endif %}">
