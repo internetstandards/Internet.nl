@@ -435,6 +435,8 @@
     display: flex;
     justify-content: space-between;
     gap: 24px;
+    hyphens: auto;
+    word-break: break-word;
 
     &::-webkit-details-marker {
       display: none;
