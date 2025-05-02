@@ -136,7 +136,10 @@ def do_mail_get_servers(self, url, *args, **kwargs):
 
     """
     mailservers = []
-    mxlist = dns_resolve_mx(url)
+    try:
+        mxlist = dns_resolve_mx(url)
+    except (NoNameservers, NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
+        mxlist = []
 
     for rdata, prio in mxlist:
         is_null_mx = prio == 0 and rdata == "."
