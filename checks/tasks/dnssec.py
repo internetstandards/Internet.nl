@@ -328,12 +328,12 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
     try:
         mx_status = shared.get_mail_servers_mxstatus(mailservers)
         if mx_status != MxStatus.has_mx:
-            mailservers = [(url, None, mx_status)]
+            mailservers = [(url, mx_status)]
         else:
-            mailservers.insert(0, (url, None, mx_status))
+            mailservers.insert(0, (url, mx_status))
 
         res = OrderedDict()
-        for domain, _, mx_status in mailservers:
+        for domain, mx_status in mailservers:
             if domain != "":
                 res[domain] = dnssec_status(
                     domain,
@@ -346,7 +346,7 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
 
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded.")
-        for domain, _, mx_status in mailservers:
+        for domain, mx_status in mailservers:
             if domain != "" and not res.get(domain):
                 res[domain] = dict(
                     status=DnssecStatus.dnserror.value,
