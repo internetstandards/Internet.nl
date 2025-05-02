@@ -141,10 +141,10 @@ def do_mail_get_servers(self, url, *args, **kwargs):
         if is_null_mx:
             if len(mxlist) > 1:
                 # Invalid NULL MX next to other MX.
-                return [(None, None, MxStatus.null_mx_with_other_mx)]
+                return [(None, MxStatus.null_mx_with_other_mx)]
             elif not do_resolve_single_a_aaaa(url):
                 return [(None, None, MxStatus.null_mx_without_a_aaaa)]
-            return [(None, None, MxStatus.null_mx)]
+            return [(None, MxStatus.null_mx)]
 
         rdata = rdata.lower().strip()
         if rdata == "":
@@ -161,10 +161,10 @@ def do_mail_get_servers(self, url, *args, **kwargs):
                 if spf_data:
                     spf_parsed = spf_parse(spf_data)
                     if spf_parsed.get("terms", []) == ["-all"]:
-                        return [(None, None, MxStatus.no_null_mx)]
+                        return [(None, MxStatus.no_null_mx)]
             except DNSException:
                 pass
-        return [(None, None, MxStatus.no_mx)]
+        return [(None, MxStatus.no_mx)]
 
     # Sort the mailservers on their name so that the same ones are tested for
     # all related tests.
