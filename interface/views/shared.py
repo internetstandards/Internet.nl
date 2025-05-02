@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from urllib.parse import urlparse
 
+import dns
 import idna
 import yaml
 from celery import shared_task
@@ -18,7 +19,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from dns.rdatatype import RdataType
-from dns.resolver import NXDOMAIN, NoAnswer
+from dns.resolver import NXDOMAIN, NoAnswer, LifetimeTimeout, NoNameservers
 from dns.exception import Timeout
 
 from checks.resolver import dns_resolve, dns_resolve_soa
@@ -273,7 +274,7 @@ def get_valid_domain_web(dname, timeout=5):
         try:
             dns_resolve(dname, qtype)
             return dname
-        except (NoAnswer, NXDOMAIN, Timeout):
+        except (NoNameservers, NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
             pass
     log.debug(f"{dname}: Could not retrieve A/AAAA record")
     return None

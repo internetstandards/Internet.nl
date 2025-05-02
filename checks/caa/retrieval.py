@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field, InitVar
 from typing import Optional, Iterable
 
+import dns
 from dns.rdtypes.ANY.CAA import CAA
 from dns.resolver import NoAnswer, NXDOMAIN, LifetimeTimeout, NoNameservers
 
@@ -57,7 +58,7 @@ def retrieve_parse_caa(target_domain: str) -> CAAEvaluation:
     """
     try:
         canonical_name, rrset = dns_resolve_caa(target_domain)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout, NoNameservers):
+    except (NoNameservers, NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
         return CAAEvaluation(caa_found=False)
 
     return CAAEvaluation(caa_found=True, canonical_name=canonical_name, caa_records=rrset)
