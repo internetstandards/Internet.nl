@@ -371,13 +371,16 @@ body.font-large .action-card {
 }
 
 meter {
-  appearance: none;
-  width: 0%;
+  width: 100%;
   border-radius: 20px;
   height: 100%;
   background: var(--white-100);
-  animation: fillmeter 2s ease forwards;
   vertical-align: top;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: fillmeter 2s ease forwards;
+    width: 0%;
+  }
 }
 
 @keyframes fillmeter {
