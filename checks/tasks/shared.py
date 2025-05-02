@@ -10,7 +10,7 @@ from django.conf import settings
 
 import dns
 from dns.exception import DNSException
-from dns.resolver import LifetimeTimeout, NXDOMAIN, NoAnswer
+from dns.resolver import LifetimeTimeout, NXDOMAIN, NoAnswer, NoNameservers
 
 from checks.models import MxStatus
 from checks.resolver import (
