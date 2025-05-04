@@ -6,7 +6,7 @@ import re
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import DisallowedRedirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 
@@ -34,6 +34,7 @@ from interface.views.shared import (
     redirect_invalid_domain,
     update_report_with_registrar_and_score,
     SafeHttpResponseRedirect,
+    latest_report,
 )
 
 # Entrance after form submission.
@@ -186,6 +187,12 @@ def resultscurrent(request, dname):
         )
 
     return HttpResponseRedirect(f"/site/{addr}/{report.id}/")
+
+
+def resultsstored_historic(request, domain_name, date):
+    if report := latest_report(DomainTestReport, domain_name, date):
+        return resultsrender(report.domain, report, request)
+    return HttpResponseNotFound()
 
 
 # URL: /(site|domain)/<dname>/<reportid>/
