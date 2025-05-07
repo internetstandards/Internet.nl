@@ -1,24 +1,26 @@
 const shareBtn = document.getElementById('copy-link');
 
-shareBtn.addEventListener('click', function() {
-  const link = window.location.href;
+if (shareBtn) {
+  shareBtn.addEventListener('click', function() {
+    const link = window.location.href;
 
-  if (!window.isSecureContext) {
-    alert('Sharing is only supported over HTTPS. Please access this page via HTTPS to share.');
-    return;
-  }
+    if (!window.isSecureContext) {
+      alert('Sharing is only supported over HTTPS. Please access this page via HTTPS to share.');
+      return;
+    }
 
-  if (navigator.share) {
-    navigator.share({
-      url: link
-    })
-    .catch(() => {
+    if (navigator.share) {
+      navigator.share({
+        url: link
+      })
+      .catch(() => {
+        fallbackCopy(link);
+      });
+    } else {
       fallbackCopy(link);
-    });
-  } else {
-    fallbackCopy(link);
-  }
-});
+    }
+  });
+}
 
 function fallbackCopy(link) {
   navigator.clipboard.writeText(link)
