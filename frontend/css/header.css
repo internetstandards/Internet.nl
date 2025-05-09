@@ -138,7 +138,7 @@ header:has(.active) {
   background: var(--nav-mobile-bg-color);
   display: none;  
   overflow: auto;
-  padding: 120px 16px 30px;
+  padding: 120px 16px 120px;
 
   @media (scripting: none) {
     padding: 0;
