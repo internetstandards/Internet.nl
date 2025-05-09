@@ -82,7 +82,7 @@
     padding-block: 64px;
 
     @media (width >= 900px) {
-      padding-block: 156px;
+      padding-block: 78px;
     }
   }
 
@@ -109,7 +109,7 @@
     padding-top: 48px;
 
     @media (width >= 900px) {
-      padding-top: 88px;
+      padding-top: 48px;
     }
   }
 

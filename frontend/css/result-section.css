@@ -4,7 +4,7 @@
     row-gap: 24px;
 
     @media (width >= 900px) {
-      padding-block: 72px;
+      padding-block: 36px;
       row-gap: 48px;
 
       & > * {

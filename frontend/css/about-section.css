@@ -111,7 +111,7 @@
 
 .quote-section {
   .container {
-    padding-block: 88px;
+    padding-block: 44px;
     row-gap: 40px;
 
     @media (width >= 900px) {

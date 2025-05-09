@@ -11,7 +11,7 @@
     padding-block: 32px;
 
     @media (width >= 900px) {
-      padding-block: 64px;
+      padding-block: 32px;
     }
 
     h2 {
@@ -121,7 +121,7 @@
     gap: 16px;
 
     @media (width >= 900px) {
-      padding-block: 64px;
+      padding-block: 32px;
       gap: 48px;
     }
   }

@@ -5,7 +5,7 @@
     
     @media (width >= 900px) {
       gap: 32px;
-      padding-block: 104px;
+      padding-block: 52px;
     }
   }
 
@@ -32,7 +32,7 @@
 
     @media (width >= 900px) {
       row-gap: 32px;
-      padding-block: 48px;
+      padding-block: 32px;
     }
   }
 

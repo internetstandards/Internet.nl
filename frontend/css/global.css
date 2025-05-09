@@ -92,8 +92,8 @@ main {
   margin-bottom: 40px;
 
   @media (width >= 900px) {
-    gap: 80px;
-    margin-bottom: 80px;
+    gap: 40px;
+    margin-bottom: 40px;
   }
 }
 
