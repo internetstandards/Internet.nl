@@ -31,7 +31,7 @@ msgid "halloffame_second_button_home_newstring"
 msgstr "Discover the Hall of Fame"
 
 msgid "halloffame_intro_description_home_newstring"
-msgstr "The hosters listed below are included in the Hall of Fame because they meet the criteria for inclusion, such as achieving a double <span class=\"accent\">100% score</span> for their own domain."
+msgstr "The hosters listed below are included in the Hall of Fame because they meet the criteria for inclusion, such as achieving a double 100% score for their own domain."
 
 msgid "test_email_paragraph_alt_newstring"
 msgstr "Tested within 30 seconds!"
@@ -238,7 +238,7 @@ msgid "about_quote_role_newstring"
 msgstr "Founder Internet.nl"
 
 msgid "about_why_test_title_newstring"
-msgstr "Why should you test your <span class=\"color-accent\">standards</span>?"
+msgstr "Why should you test your standards?"
 
 msgid "about_why_test_description_newstring"
 msgstr "The Internet.nl test tool is an initiative of the Platform Internet Standards. The goal of the platform is to jointly increase the use of modern internet standards to make the internet more accessible, safer and more reliable for everyone."
