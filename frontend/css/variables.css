@@ -173,6 +173,7 @@
   --heading-color-alt: light-dark(var(--orange-500), var(--white-100));
   --body-color-primary: light-dark(var(--black-200), var(--white-100));
   --body-color-secondary: light-dark(var(--green-500), var(--white-100));
+  --body-link-color: light-dark(var(--green-400), var(--green-300));
 
   /* BUTTON COLORS LIGHTMODE */
   --button-bg-color-primary: light-dark(var(--orange-300), var(--orange-300));

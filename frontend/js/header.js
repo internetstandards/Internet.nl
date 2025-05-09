@@ -48,7 +48,7 @@ navObserver.observe(scrollWatcher);
 let prevScrollY     = window.pageYOffset;
 let lastHideScrollY = prevScrollY;
 let ticking         = false;
-const buffer        = 200;
+const buffer        = 50;
 
 window.addEventListener('scroll', () => {
   const currentY = window.pageYOffset;

@@ -33,7 +33,16 @@
       font: var(--section-button-l);
       justify-self: center;
       margin-top: 48px;
-      border-bottom: 1px solid currentcolor;
+      padding-bottom: 10px;
+      background-image: linear-gradient(currentColor, currentColor);
+      background-position: 0 85%;
+      background-repeat: no-repeat;
+      background-size: 100% 2px; 
+      transition: background-position 0.3s;
+
+      &:hover {
+        background-position: 0 100%;
+      }
 
       &::after {
         mask-image: url("/static/icons/arrow-right.svg");

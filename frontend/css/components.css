@@ -149,6 +149,7 @@
 
   a {
     display: inline;
+    color: var(--body-link-color);
 
     &:hover {
       text-decoration: underline;

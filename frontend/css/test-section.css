@@ -136,7 +136,6 @@
   &.home-variant {
     @media (width >= 900px) {
       grid-column: span 8;
-      /* grid-row: span 2; */
     }
 
     a {
@@ -147,11 +146,15 @@
       color: var(--card-body-color-test);
       font: var(--card-body-m);
       width: fit-content;
-      border-bottom: 1px solid var(--transparent-100);
-      transition: 0.3s;
-  
+      background-image: linear-gradient(currentColor, currentColor);
+      background-position: 0 80%;
+      background-repeat: no-repeat;
+      background-size: 100% 1px; 
+      transition: background-position 0.3s;
+      padding-bottom: 10px;
+
       &:hover {
-        border-bottom: 1px solid currentcolor;
+        background-position: 0 100%;
       }
       
       @media (width >= 900px) {
