@@ -74,6 +74,10 @@ header {
   &:hover {
     opacity: 0.8;
   }
+
+  img {
+    max-width: fit-content;
+  }
 }
 
 .toggle-menu {
