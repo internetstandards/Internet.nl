@@ -119,6 +119,7 @@ footer {
       background-color: var(--green-600);
       padding: 8px;
       border-radius: 100%;
+      color: var(--white-100);
 
       &::after {
         display: block;
