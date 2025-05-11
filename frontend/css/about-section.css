@@ -23,22 +23,12 @@
   }
 
   .about-link {
-    display: none;
+    justify-self: center;
+    margin-block: 48px;
 
-    @media (width >= 900px) {
-      gap: 8px;
-      display: flex;
-      align-items: center;
-      color: var(--button-text-color-secondary);
-      font: var(--section-button-l);
-      justify-self: center;
-      margin-top: 48px;
-      border-bottom: 1px solid currentcolor;
-
-      &::after {
-        mask-image: url("/static/icons/arrow-right.svg");
-        display: block;
-      }
+    &::after {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: block;
     }
   }
 }
@@ -102,8 +92,8 @@
 
 .quote-section {
   .container {
-    padding-block: 88px;
-    gap: 40px;
+    padding-block: 44px;
+    row-gap: 40px;
 
     @media (width >= 900px) {
       align-items: center;

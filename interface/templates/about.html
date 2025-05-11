@@ -3,66 +3,47 @@
 {% load translate %}
 
 {% block maincontent %}
-  <!-- <article class="block wide">
-    <section>
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about content" %}
-      {% else %}
-      {% include "content.html" with name="about content custom" %}
-      {% endif %}
-    </section>
-  </article>
-  <aside>
-    <section class="block">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about contact" %}
-      {% else %}
-      {% include "content.html" with name="about contact custom" %}
-      {% endif %}
-    </section>
-  </aside> -->
-
   <section class="intro-section bg-secondary ellipse reverse">
     <div class="container">
       <hgroup class="center">
-        <h1 class="h5 color-alt">Over ons</h1>
-        <p class="h1">Wij helpen jou testen en het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten.</p>
+        <h1 class="h5 color-alt">{% include "string.html" with name="about_section_title_newstring" %}</h1>
+        <p class="h1">{% include "string.html" with name="about_section_page_intro_newstring" %}</p>
       </hgroup>
     </div>
   </section>
 
   <section class="about-section home-variant">
     <div class="container">
-      <h2 class="h7 color-accent">Onze missie</h2>
-      <p class="h4">Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
-      <p class="body-xl color-secondary">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:</p>
+      <h2 class="h5 color-accent">{% include "string.html" with name="about_mission_title_newstring" %}</h2>
+      <p class="h4">{% include "string.html" with name="about_mission_heading_newstring" %}</p>
+      <p class="body-xl">{% include "string.html" with name="about_mission_description_newstring" %}</p>
       <ul class="logo-list">
         <li>
-          <a href="https://surf.nl/" target="_blank" aria-label="Ga naar de website van Surf">
+          <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
             <img class="light-visible" src="/static/images/surf.png" alt="Surf logo" loading="lazy" width="100" height="52">
             <img class="dark-visible" src="/static/images/surf-wit.png" alt="Surf logo" loading="lazy" width="100" height="52">
           </a>
         </li>
         <li>
-          <a href="https://ncsc.nl" target="_blank" aria-label="Ga naar de website van NCSC">
+          <a href="https://ncsc.nl" target="_blank" aria-label="NCSC website">
             <img class="light-visible" src="/static/images/ncsc.png" alt="NCSC logo" loading="lazy" width="224" height="90">
             <img class="dark-visible" src="/static/images/ncsc-wit.png" alt="NCSC logo" loading="lazy" width="224" height="90">
           </a>
         </li>
         <li>
-          <a href="https://nlnet.nl/" target="_blank" aria-label="Ga naar de website van NLnet">
+          <a href="https://nlnet.nl/" target="_blank" aria-label="NLnet website">
             <img class="light-visible" src="/static/images/nlnet.png" alt="NLnet logo" loading="lazy" width="146" height="55">
             <img class="dark-visible" src="/static/images/nlnet-wit.png" alt="NLnet logo" loading="lazy" width="146" height="55">
           </a>
         </li>
         <li>
-          <a href="https://ripe.net/" target="_blank" aria-label="Ga naar de website van Ripe NCC">
+          <a href="https://ripe.net/" target="_blank" aria-label="Ripe NCC website">
             <img class="light-visible" src="/static/images/ncc.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
             <img class="dark-visible" src="/static/images/ncc-wit.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
           </a>
         </li>
         <li>
-          <a href="https://verenigingvanregistrars.nl/" target="_blank" aria-label="Ga naar de website van VVR">
+          <a href="https://verenigingvanregistrars.nl/" target="_blank" aria-label="VVR website">
             <img class="light-visible" src="/static/images/vvr.png" alt="VVR logo" loading="lazy" width="200" height="46">
             <img class="dark-visible" src="/static/images/vvr-wit.png" alt="VVR logo" loading="lazy" width="200" height="46">
           </a>
@@ -75,8 +56,8 @@
     <div class="container">
       <img src="/static/images/portret-oprichter-internetnl.png" alt="Portret van Coen Wesselman, oprichter van Internet.nl" class="quote-image" loading="lazy" width="100" height="100">
       <blockquote>
-        <p class="h4 color-secondary">“Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.”</p>
-        <cite class="body-m color-secondary"><strong>Coen Wesselman</strong> - Oprichter Internet.nl</cite>
+        <p class="h4 color-secondary">{% include "string.html" with name="about_quote_newstring" %}</p>
+        <cite class="body-m color-secondary"><strong>{% include "string.html" with name="about_quote_author_newstring" %}</strong> - {% include "string.html" with name="about_quote_role_newstring" %}</cite>
       </blockquote>
     </div>
   </aside>
@@ -84,21 +65,21 @@
   <section class="knowledge-section">
     <div class="container">
       <hgroup>
-        <h2 class="h3 color-secondary">Waarom zou je jouw <span class="color-accent">standaarden</span> moeten testen?</h2>
-        <p class="body-l">De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.</p>
+        <h2 class="h3 color-secondary">{% include "string.html" with name="about_why_test_title_newstring" %}</h2>
+        <p class="body-l">{% include "string.html" with name="about_why_test_description_newstring" %}</p>
       </hgroup>
       <ul class="knowledge-list" id="card-carousel">
         <li class="card home-variant knowledge-card ellipse icon">
-          <h3 id="knowledge-dia-1">Beveiligingslekken en kwetsbaarheid opzoeken</h3>
-          <p>Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken. </p>
+          <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_1_description_newstring" %}</p>
         </li>
         <li class="card home-variant knowledge-card ellipse icon">
-          <h3 id="knowledge-dia-2">Garanderen van compatibiliteit</h3>
-          <p>Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en optimale ervaring hebben.</p>
+          <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_2_description_newstring" %}</p>
         </li>
         <li class="card home-variant knowledge-card ellipse icon">
-          <h3 id="knowledge-dia-3">Identificeren van prestatie problemen</h3>
-          <p>Testen helpt bij het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten.</p>
+          <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_3_description_newstring" %}</p>
         </li>
       </ul>
       <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
@@ -107,57 +88,57 @@
         <li class="dot"><button type="button"></button></li>
       </ul>
       <div class="button-container">
-        <a class="secondary-button icon" href="/test-site">Ik wil graag testen</a>
-        <p class="body-m color-secondary">487 succesvolle testen!</p>
+        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="about_test_button_newstring" %}</a>
+        <p class="body-m">487 {% include "string.html" with name="about_successful_tests_newstring" %}</p>
       </div>
     </div>
   </section>
 
   <section class="contact-section ellipse hidden-mobile">
     <div class="container">
-      <h2 class="h3 color-secondary">Veelgestelde vragen</h2>
-      <details class="faq-item" name="faq-item">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
           What is your return policy?
         </summary>
         <p>We accept returns within 30 days of purchase with a valid receipt.</p>
       </details>
-      <details class="faq-item" name="faq-item">
+      <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
           What is your return policy?
         </summary>
         <p>We accept returns within 30 days of purchase with a valid receipt.</p>
       </details>      
-      <details class="faq-item" name="faq-item">
+      <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
           What is your return policy?
         </summary>
         <p>We accept returns within 30 days of purchase with a valid receipt.</p>
       </details>      
-      <details class="faq-item" name="faq-item">
+      <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
           What is your return policy?
         </summary>
         <p>We accept returns within 30 days of purchase with a valid receipt.</p>
       </details>      
-      <details class="faq-item" name="faq-item">
+      <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
           What is your return policy?
         </summary>
         <p>We accept returns within 30 days of purchase with a valid receipt.</p>
       </details>
-      <a class="secondary-button icon" href="/">Bekijk alle gestelde vragen</a>
+      <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
       <article class="contact-card">
         <hgroup>
-          <h3>Contact met ons</h3>
-          <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+          <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
         </hgroup>
         <ul>
           <li class="contact-card-small">
             <a href="/">
               <hgroup>
-                <h4 class="mail icon">Mailen</h4>
-                <p>Contact wanneer het u uitkomt</p>
+                <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
@@ -165,8 +146,8 @@
           <li class="contact-card-small">
             <a href="/">
               <hgroup>
-                <h4 class="help icon">Technische hulp</h4>
-                <p>We helpen u graag verder</p>
+                <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
@@ -174,8 +155,8 @@
           <li class="contact-card-small">
             <a href="/">
               <hgroup>
-                <h4 class="visit icon">Bezoeken</h4>
-                <p>Het adres van ons kantoor</p>
+                <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>

@@ -8,12 +8,12 @@
 
 {% block testdetailitems %}
   {% if probe.name == 'siteipv6' %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain-mail ipv6 name-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.ns_aaaa %}
     {% include "details-test-item.html" with testitem=details.ns_reach %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain ipv6 web-server label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.web_aaaa %}
@@ -25,14 +25,14 @@
     {% include "details-test-item.html" with testitem=details.dnssec_valid %}
 
   {% elif probe.name == 'sitetls' %}
-  <h4 class="h5 color-secondary test-subsection">
+  <h4 class="h7 color-secondary test-subsection">
     {% include "string.html" with name="results domain tls https label" %}
   </h4>
   {% include "details-test-item.html" with testitem=details.https_exists %}
     {% include "details-test-item.html" with testitem=details.https_forced %}
     {% include "details-test-item.html" with testitem=details.http_compression %}
     {% include "details-test-item.html" with testitem=details.https_hsts %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain tls tls label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.tls_version %}
@@ -45,7 +45,7 @@
     {% include "details-test-item.html" with testitem=details.renegotiation_client %}
     {% include "details-test-item.html" with testitem=details.zero_rtt %}
     {% include "details-test-item.html" with testitem=details.ocsp_stapling %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain-mail tls certificate label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.cert_trust %}
@@ -53,14 +53,14 @@
     {% include "details-test-item.html" with testitem=details.cert_signature %}
     {% include "details-test-item.html" with testitem=details.cert_hostmatch %}
     {% include "details-test-item.html" with testitem=details.web_caa %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain-mail tls dane label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.dane_exists %}
     {% include "details-test-item.html" with testitem=details.dane_valid %}
 
   {% elif probe.name == 'siteappsecpriv' %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
     {% include "string.html" with name="results domain appsecpriv http-headers label" %}
   </h4>
   {% include "details-test-item.html" with testitem=details.http_x_frame %}
@@ -69,33 +69,24 @@
     {% include "details-test-item.html" with testitem=details.http_x_xss %}
     {% include "details-test-item.html" with testitem=details.http_csp %}
     {% include "details-test-item.html" with testitem=details.http_referrer_policy %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain appsecpriv other-options label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.http_securitytxt %}
 
   {% elif probe.name == 'siterpki' %}
-  <h4 class="h5 color-secondary test-subsection">
+  <h4 class="h7 color-secondary test-subsection">
     {% include "string.html" with name="results domain-mail rpki name-servers label" %}
   </h4>
   {% include "details-test-item.html" with testitem=details.ns_rpki_exists %}
     {% include "details-test-item.html" with testitem=details.ns_rpki_valid %}
-    <h4 class="h5 color-secondary test-subsection">
+    <h4 class="h7 color-secondary test-subsection">
       {% include "string.html" with name="results domain rpki web-server label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.web_rpki_exists %}
     {% include "details-test-item.html" with testitem=details.web_rpki_valid %}
 
   {% endif %}
-{% endblock %}
-
-{% block furthertesting %}
-  <div class="block">
-    <section class="further-testing">
-        <h2>{% include "string.html" with name="results further-testing web label" %}</h2>
-        {% include "content.html" with name="results further-testing web content" %}
-    </section>
-  </div>
 {% endblock %}
 
 {% block testtailcontent %}

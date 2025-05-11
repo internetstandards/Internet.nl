@@ -33,6 +33,7 @@ toggleSubMenu.addEventListener('click', () => {
 
 /* STICKY HEADER */
 const header = document.querySelector('header');
+const headerHeight = header.offsetHeight;
 const scrollWatcher = document.createElement('div');
 
 scrollWatcher.setAttribute('data-scroll-watcher', '');
@@ -43,3 +44,33 @@ const navObserver = new IntersectionObserver((entries) => {
 });
 
 navObserver.observe(scrollWatcher);
+
+let prevScrollY     = window.pageYOffset;
+let lastHideScrollY = prevScrollY;
+let ticking         = false;
+const buffer        = 50;
+
+window.addEventListener('scroll', () => {
+  const currentY = window.pageYOffset;
+
+  if (!ticking) {
+    ticking = true;
+    requestAnimationFrame(() => {
+      const isScrollingDown = currentY > prevScrollY;
+
+      if (currentY <= headerHeight) {
+        header.classList.remove('not-scrolling-up');
+      } else if (isScrollingDown) {
+        header.classList.add('not-scrolling-up');
+        lastHideScrollY = currentY;
+      } else {
+        if (lastHideScrollY - currentY > buffer) {
+          header.classList.remove('not-scrolling-up');
+        }
+      }
+
+      prevScrollY = currentY;
+      ticking     = false;
+    });
+  }
+}, { passive: true });

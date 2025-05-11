@@ -1,44 +1,13 @@
 {% extends "base.html" %}
-{%load translate %}
+{% load translate %}
 
 {% block maincontent %}
-<!-- <article class="block fullwidth">
-  <div class="intro">
-    <div class="flexblocks champions">
-      <div class="flexblock">
-        <h1>{% include "string.html" with name=hof_title %}</h1>
-          <ul class="hall-of-fame menu">
-            <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
-            <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
-            <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
-            {% for manual in manuals %}
-            <li><a href="/halloffame/{{manual.0}}/" {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a></li>
-            {% endfor %}
-          </ul>
-      </div>
-    </div>
-    <span class="hof-content">
-    {% if manual_icon and manual_icon_alt %}
-      <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}" align="right">
-    {% endif %}
-      {% include "content.html" with name=hof_text %}
-    </span>
-  </div>
-  <div class="perfect-scores-list">
-    <h2>{% include "string.html" with name=hof_subtitle %}</h2>
-    <ul class="list-column column-3">
-    {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.domain|truncatechars:36}}</a></li>
-    {% endfor %}
-    </ul>
-  </div>
-</article> -->
 
 <section class="intro-section bg-secondary ellipse reverse">
   <div class="container">
     <hgroup class="center">
-      <h1 class="h5 color-alt">Hall of fame</h1>
-      <p class="h1">Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je domeinnaam opgenomen in de relevante Hall of Fame</p>
+      <h1 class="h5 color-alt">{% include "string.html" with name="halloffame_intro_title_newstring" %}</h1>
+      <p class="h1">{% include "string.html" with name="halloffame_intro_description_newstring" %}</p>
     </hgroup>
   </div>
 </section>
@@ -46,28 +15,28 @@
 <search class="filter-section">
   <div class="container">
     <div class="filter-container">
-      <h2 class="h5 color-secondary">Filter op:</h2>
+      <h2 class="h5 color-secondary">{% include "string.html" with name="halloffame_filter_label_newstring" %}</h2>
       <div class="button-container">
-        <a class="primary-button" href="/halloffame">Kampioenen</a>
-        <a class="secondary-button" href="/halloffame/hosters">Hosters</a>
+        <a class="primary-button" href="/halloffame#kampioenen">{% include "string.html" with name="halloffame_filter_champions_newstring" %}</a>
+        <a class="secondary-button" href="#hosters">{% include "string.html" with name="halloffame_filter_hosters_newstring" %}</a>
       </div>
     </div>
   </div>
 </search>
 
-<section class="hosters-section">
+<section class="hosters-section" id="hosters">
   <div class="container">
     <hgroup>
-      <h2 class="h2 color-secondary">Hosters</h2>
-      <p class="body-xl">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus.</p>
+      <h2 class="h2 color-secondary">{% include "string.html" with name="halloffame_hosters_title_newstring" %}</h2>
+      <p class="body-xl">{% include "string.html" with name="halloffame_hosters_description_newstring" %}</p>
     </hgroup>
     <div class="image-container">
       <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
     </div>
     <ul class="hall-of-fame-list">
-      <!-- {% for member in halloffame %}
+      <!-- {% for member in halloffame|slice:"-20:" %}
         <li>
-          <a href="{{member.permalink}}">{{member.domain|idna}}</a>
+          <a href="{{member.permalink}}">{{member.domain}}</a>
         </li>
       {% endfor %} -->
       <li>
@@ -97,14 +66,14 @@
 
 <section class="test-sub-section bg-primary">
   <div class="container">
-    <h2 class="h3 color-secondary">Wat wil je testen?</h2>
+    <h2 class="h3 color-secondary">{% include "string.html" with name="halloffame_what_test_title_newstring" %}</h2>
     <ul class="test-card-list hall-of-fame-variant">
       <li class="test-card-small">
-        <a href="/test-connection">
+        <a href="/test-site">
           <div class="card-container icon domain">
             <hgroup>
-              <h3>Test je website domein</h3>
-              <p>487 succesvolle testen uitgevoerd deze week!</p>
+              <h3>{% include "string.html" with name="base_header_test_website_newstring" %}</h3>
+              <p>487 {% include "string.html" with name="test_website_stats_newstring" %}</p>
             </hgroup>
           </div>
           <div class="primary-button rounded icon"></div>
@@ -114,8 +83,8 @@
         <a href="/test-mail">
           <div class="card-container mail icon">
             <hgroup>
-              <h3>Test je e-mail</h3>
-              <p>537 testen met 100% score deze week!</p>
+              <h3>{% include "string.html" with name="base_header_test_email_newstring" %}</h3>
+              <p>537 {% include "string.html" with name="test_email_stats_newstring" %}</p>
             </hgroup>
           </div>
           <div class="primary-button rounded icon"></div>
@@ -125,8 +94,8 @@
         <a href="/test-connection">
           <div class="card-container connection icon">
             <hgroup>
-              <h3>Test je verbinding</h3>
-              <p>573 testen met 100% score deze week!</p>
+              <h3>{% include "string.html" with name="base_header_test_connection_newstring" %}</h3>
+              <p>573 {% include "string.html" with name="test_connection_stats_newstring" %}</p>
             </hgroup>
           </div>
           <div class="primary-button rounded icon"></div>
@@ -138,49 +107,49 @@
 
 <section class="contact-section ellipse hidden-mobile">
   <div class="container">
-    <h2 class="h3 color-secondary">Veelgestelde vragen</h2>
-    <details class="faq-item" name="faq-item">
+    <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
+    <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
         What is your return policy?
       </summary>
       <p>We accept returns within 30 days of purchase with a valid receipt.</p>
     </details>
-    <details class="faq-item" name="faq-item">
+    <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
         What is your return policy?
       </summary>
       <p>We accept returns within 30 days of purchase with a valid receipt.</p>
     </details>      
-    <details class="faq-item" name="faq-item">
+    <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
         What is your return policy?
       </summary>
       <p>We accept returns within 30 days of purchase with a valid receipt.</p>
     </details>      
-    <details class="faq-item" name="faq-item">
+    <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
         What is your return policy?
       </summary>
       <p>We accept returns within 30 days of purchase with a valid receipt.</p>
     </details>      
-    <details class="faq-item" name="faq-item">
+    <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
         What is your return policy?
       </summary>
       <p>We accept returns within 30 days of purchase with a valid receipt.</p>
     </details>
-    <a class="secondary-button icon" href="/">Bekijk alle gestelde vragen</a>
+    <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
     <article class="contact-card">
       <hgroup>
-        <h3>Contact met ons</h3>
-        <p>Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag.</p>
+        <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
+        <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
       </hgroup>
       <ul>
         <li class="contact-card-small">
           <a href="/">
             <hgroup>
-              <h4 class="mail icon">Mailen</h4>
-              <p>Contact wanneer het u uitkomt</p>
+              <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
+              <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
             </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
@@ -188,8 +157,8 @@
         <li class="contact-card-small">
           <a href="/">
             <hgroup>
-              <h4 class="help icon">Technische hulp</h4>
-              <p>We helpen u graag verder</p>
+              <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
+              <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
             </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
@@ -197,8 +166,8 @@
         <li class="contact-card-small">
           <a href="/">
             <hgroup>
-              <h4 class="visit icon">Bezoeken</h4>
-              <p>Het adres van ons kantoor</p>
+              <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
+              <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
             </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>

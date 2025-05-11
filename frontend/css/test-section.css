@@ -1,11 +1,11 @@
 .test-section {
   .container {
-    gap: 8px;
+    row-gap: 8px;
     padding-block: 40px;
     
     @media (width >= 900px) {
       gap: 32px;
-      padding-block: 104px;
+      padding-block: 52px;
     }
   }
 
@@ -27,12 +27,12 @@
 
 .test-sub-section {
   .container {
-    gap: 24px;
+    row-gap: 24px;
     padding-block: 32px;
 
     @media (width >= 900px) {
       row-gap: 32px;
-      padding-block: 48px;
+      padding-block: 32px;
     }
   }
 
@@ -136,7 +136,6 @@
   &.home-variant {
     @media (width >= 900px) {
       grid-column: span 8;
-      /* grid-row: span 2; */
     }
 
     a {
@@ -146,10 +145,10 @@
       gap: 16px;
       color: var(--card-body-color-test);
       font: var(--card-body-m);
-      width: fit-content;
       border-bottom: 1px solid var(--transparent-100);
-      transition: 0.3s;
-  
+      width: fit-content;
+      transition: border-bottom 0.3s;
+
       &:hover {
         border-bottom: 1px solid currentcolor;
       }

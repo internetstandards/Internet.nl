@@ -18,6 +18,366 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "test_website_page_protect_intro_newstring"
+msgstr "Bescherm uw website door te testen."
+
+msgid "articles_latest_news_title_home_newstring"
+msgstr "Laatste nieuws"
+
+msgid "halloffame_first_button_home_newstring"
+msgstr "Ik wil mijn domein testen"
+
+msgid "halloffame_second_button_home_newstring"
+msgstr "Ontdek de Hall of Fame"
+
+msgid "halloffame_intro_description_home_newstring"
+msgstr "Onderstaande hosters zijn opgenomen in de Hall of Fame, omdat ze voldoen aan de criteria voor opname zoals een dubbele 100%-score voor hun eigen domein."
+
+msgid "test_email_paragraph_alt_newstring"
+msgstr "Binnen 30 seconden getest!"
+
+msgid "test_connection_paragraph_alt_newstring"
+msgstr "Binnen 30 seconden uitslag!"
+
+msgid "test_website_protect_intro_newstring"
+msgstr "Bescherm uw website en uw gebruikers door te testen."
+
+msgid "test_website_domain_title_newstring"
+msgstr "Test je website domein"
+
+msgid "test_website_domain_label_newstring"
+msgstr "Jouw website-domein"
+
+msgid "test_start_button_newstring"
+msgstr "Start de test"
+
+msgid "test_usp_one_newstring"
+msgstr "USP 1 staat hier"
+
+msgid "test_usp_two_newstring"
+msgstr "USP 2 staat hier"
+
+msgid "test_usp_three_newstring"
+msgstr "USP 3 staat hier"
+
+msgid "test_more_tests_title_newstring"
+msgstr "Wat wil je nog meer testen?"
+
+msgid "test_email_title_newstring"
+msgstr "Test je e-mail"
+
+msgid "test_email_stats_newstring"
+msgstr "testen met 100% score deze week!"
+
+msgid "test_connection_title_newstring"
+msgstr "Test je verbinding"
+
+msgid "test_connection_stats_newstring"
+msgstr "testen met 100% score deze week!"
+
+msgid "test_email_protect_intro_newstring"
+msgstr "Bescherm uw e-mail door te testen."
+
+msgid "test_email_domain_label_newstring"
+msgstr "Jouw e-mail-domein"
+
+msgid "test_website_stats_newstring"
+msgstr "succesvolle testen uitgevoerd deze week!"
+
+msgid "test_connection_protect_intro_newstring"
+msgstr "Bescherm uw verbinding door te testen."
+
+msgid "test_more_info_link_newstring"
+msgstr "Meer informatie over de test"
+
+msgid "contact_intro_title_newstring"
+msgstr "Service & Contact"
+
+msgid "contact_intro_description_newstring"
+msgstr "Waar kunnen we je mee helpen? Zoek direct naar je antwoord of bekijk onze contactgegevens."
+
+msgid "contact_get_in_touch_title_newstring"
+msgstr "Kom in contact met ons"
+
+msgid "faq_knowledge_title_newstring"
+msgstr "Onze kennisbank"
+
+msgid "faq_knowledge_description_newstring"
+msgstr "Bekijk hier onze kennisbank met allerlei handige informatie en tips."
+
+msgid "faq_categories_title_newstring"
+msgstr "Categorieën"
+
+msgid "faq_knowledge_category_newstring"
+msgstr "Testen"
+
+msgid "faq_knowledge_heading_newstring"
+msgstr "Aan de hand van wat wordt er getest op je domeinnamen"
+
+msgid "faq_knowledge_description_long_newstring"
+msgstr "Vandaag lanceert Internet.nl een nieuwe versie van haar testtool in de vorm van een 'kant-en-klaar' pakket op basis van Docker..."
+
+msgid "faq_docker_title_newstring"
+msgstr "Internet.nl beschikbaar als 'kant-en-klaar' Docker-pakket"
+
+msgid "halloffame_intro_title_newstring"
+msgstr "Hall of fame"
+
+msgid "halloffame_intro_description_newstring"
+msgstr "Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je domeinnaam opgenomen in de relevante Hall of Fame"
+
+msgid "halloffame_filter_label_newstring"
+msgstr "Filter op:"
+
+msgid "halloffame_filter_champions_newstring"
+msgstr "Kampioenen"
+
+msgid "halloffame_champions_title_newstring"
+msgstr "Kampioenen"
+
+msgid "halloffame_filter_hosters_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_title_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_description_newstring"
+msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus."
+
+msgid "halloffame_what_test_title_newstring"
+msgstr "Wat wil je testen?"
+
+msgid "base_probe_score_loading_newstring"
+msgstr "Score laden voor:"
+
+msgid "base_results_score_for_newstring"
+msgstr "Score voor:"
+
+msgid "base_results_test_details_newstring"
+msgstr "Details over de test"
+
+msgid "base_results_next_actions_newstring"
+msgstr "Vervolg acties"
+
+msgid "base_results_test_website_domain_newstring"
+msgstr "Test je website"
+
+msgid "base_results_test_email_domain_newstring"
+msgstr "Test je e-mail domein"
+
+msgid "base_results_test_connection_newstring"
+msgstr "Test je verbinding"
+
+msgid "base_results_repeat_test_newstring"
+msgstr "Herhaal de test"
+
+msgid "base_results_test_explanation_newstring"
+msgstr "Toelichting op testrapport"
+
+msgid "base_results_share_results_newstring"
+msgstr "Deel uitslag met hoster"
+
+msgid "base_results_share_results_clicked_newstring"
+msgstr "Gekopieerd naar klembord"
+
+msgid "base_header_skip_to_main_newstring"
+msgstr "Ga naar hoofdinhoud"
+
+msgid "base_header_menu_newstring"
+msgstr "Menu"
+
+msgid "base_header_close_newstring"
+msgstr "Sluiten"
+
+msgid "base_header_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_header_homepage_label_newstring"
+msgstr "Internet.nl Homepagina"
+
+msgid "base_header_test_website_newstring"
+msgstr "Test je website"
+
+msgid "base_header_test_connection_newstring"
+msgstr "Test je verbinding"
+
+msgid "base_header_test_email_newstring"
+msgstr "Test je e-mail"
+
+msgid "base_header_contact_newstring"
+msgstr "Contact"
+
+msgid "base_language_select_label_newstring"
+msgstr "Kies een taal"
+
+msgid "base_language_change_button_newstring"
+msgstr "Taal wijzigen"
+
+msgid "base_theme_toggle_mode_newstring"
+msgstr "Mode"
+
+msgid "base_theme_toggle_to_dark_newstring"
+msgstr "Schakel naar donkere thema"
+
+msgid "base_theme_toggle_to_light_newstring"
+msgstr "Schakel naar lichte thema"
+
+msgid "base_footer_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_knowledge_base_newstring"
+msgstr "Kennisbank"
+
+msgid "base_footer_hall_of_fame_newstring"
+msgstr "Hall of fame"
+
+msgid "base_footer_news_newstring"
+msgstr "Nieuws"
+
+msgid "base_footer_about_us_newstring"
+msgstr "Over ons"
+
+msgid "base_footer_service_contact_newstring"
+msgstr "Service & contact"
+
+msgid "base_footer_vulnerability_report_newstring"
+msgstr "Kwetsbaarheid melden"
+
+msgid "base_footer_privacy_statement_newstring"
+msgstr "Privacyverklaring"
+
+msgid "base_footer_copyright_newstring"
+msgstr "Auteursrecht"
+
+msgid "base_footer_accessibility_newstring"
+msgstr "Toegankelijkheid"
+
+msgid "base_footer_goto_x_newstring"
+msgstr "Ga naar onze X profiel"
+
+msgid "base_footer_goto_linkedin_newstring"
+msgstr "Ga naar onze LinkedIn profiel"
+
+msgid "base_footer_goto_mastodon_newstring"
+msgstr "Ga naar onze Mastodon profiel"
+
+msgid "about_section_title_newstring"
+msgstr "Over ons"
+
+msgid "about_section_page_intro_newstring"
+msgstr "Wij helpen jou testen en het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten."
+
+msgid "about_section_intro_newstring"
+msgstr "Ik wil meer informatie over deze organisaties"
+
+msgid "about_mission_title_newstring"
+msgstr "Onze missie"
+
+msgid "about_mission_heading_newstring"
+msgstr "Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken."
+
+msgid "about_mission_description_newstring"
+msgstr "De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het is een samenwerkingsverband van de Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende partijen deel in het platform:"
+
+msgid "about_quote_newstring"
+msgstr "\"Het doel van het platform is om het gebruik van moderne internetstandaarden verder te vergroten en voor iedereen toegankelijker, veiliger en betrouwbaarder te maken.\""
+
+msgid "about_quote_author_newstring"
+msgstr "Coen Wesselman"
+
+msgid "about_quote_role_newstring"
+msgstr "Oprichter Internet.nl"
+
+msgid "about_why_test_title_newstring"
+msgstr "Waarom zou je jouw standaarden moeten testen?"
+
+msgid "about_why_test_description_newstring"
+msgstr "De testtool Internet.nl is een initiatief van het Platform Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik van moderne internetstandaarden verder te vergroten om daarmee het internet voor iedereen toegankelijker, veiliger en betrouwbaarder te maken."
+
+msgid "about_reason_1_title_newstring"
+msgstr "Beveiligingslekken en kwetsbaarheid opzoeken"
+
+msgid "about_reason_1_description_newstring"
+msgstr "Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken."
+
+msgid "about_reason_2_title_newstring"
+msgstr "Garanderen van compatibiliteit"
+
+msgid "about_reason_2_description_newstring"
+msgstr "Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en optimale ervaring hebben."
+
+msgid "about_reason_3_title_newstring"
+msgstr "Identificeren van prestatie problemen"
+
+msgid "about_reason_3_description_newstring"
+msgstr "Testen helpt bij het identificeren van prestatieproblemen zoals trage laadtijden en serverfouten."
+
+msgid "about_test_button_newstring"
+msgstr "Ik wil graag testen"
+
+msgid "about_successful_tests_newstring"
+msgstr "succesvolle testen!"
+
+msgid "articles_title_newstring"
+msgstr "Nieuws & Artikelen"
+
+msgid "articles_subtitle_newstring"
+msgstr "Bekijk ons nieuws met updates en handige informatie."
+
+msgid "articles_latest_news_title_newstring"
+msgstr "Onze laatste nieuws"
+
+msgid "articles_load_more_button_newstring"
+msgstr "Laad meer artikelen"
+
+msgid "article_related_news_title_newstring"
+msgstr "Gerelateerd nieuws"
+
+msgid "article_read_more_button_newstring"
+msgstr "Lees meer artikelen"
+
+msgid "faq_title_newstring"
+msgstr "Veelgestelde vragen"
+
+msgid "faq_view_all_button_newstring"
+msgstr "Bekijk alle gestelde vragen"
+
+msgid "contact_card_title_newstring"
+msgstr "Contact met ons"
+
+msgid "contact_card_subtitle_newstring"
+msgstr "Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag."
+
+msgid "contact_email_title_newstring"
+msgstr "Mailen"
+
+msgid "contact_page_email_description_newstring"
+msgstr "Heeft u een vraag of een klacht?<br>U kunt ons mailen op"
+
+msgid "contact_email_description_newstring"
+msgstr "Contact wanneer het u uitkomt"
+
+msgid "contact_help_title_newstring"
+msgstr "Technische hulp"
+
+msgid "contact_page_help_description_newstring"
+msgstr "We helpen u graag verder met technische hulp op onze"
+
+msgid "contact_help_description_newstring"
+msgstr "We helpen u graag verder"
+
+msgid "contact_visit_title_newstring"
+msgstr "Bezoeken"
+
+msgid "contact_page_visit_description_newstring"
+msgstr "Maanweg 174 (8e verdieping)<br>2516 AB Den Haag"
+
+msgid "contact_visit_description_newstring"
+msgstr "Het adres van ons kantoor"
+
+msgid "load_more_button_newstring"
+msgstr "Laad meer artikelen"
+
 #, md-format
 msgid "about contact"
 msgstr ""
@@ -5413,23 +5773,20 @@ msgstr ""
 "Wil je dat bezoekers van jouw website direct een websitetest kunnen starten?  \n"
 "Neem dan de HTML- en CSS-code uit onderstaande tekstvakken op in de broncode van je website."
 
-msgid "detail web tls caa label"
+msgid "detail web caa label"
 msgstr "CAA web"
 
-msgid "detail mail tls caa label"
+msgid "detail mail caa label"
 msgstr "CAA mail"
 
-msgid "detail web tls caa tech table"
+msgid "detail web caa tech table"
 msgstr "Findings"
 
-msgid "detail mail tls caa tech table"
+msgid "detail mail caa tech table"
 msgstr "Mail server|Findings"
 
 msgid "detail tech data caa invalid_property_syntax"
 msgstr "invalid_property_syntax name {property_name} value {property_value} invalid character {invalid_character} at pos {invalid_character_position}"
-
-msgid "detail tech data caa caa_record"
-msgstr "caa record found: {record}"
 
 msgid "detail tech data caa invalid_unknown_property"
 msgstr "invalid_unknown_property {value}"

@@ -5,7 +5,7 @@
 
     @media (width >= 900px) {
       row-gap: 48px;
-      padding-block: 64px;
+      padding-block: 32px;
     }
   }
 
@@ -32,10 +32,11 @@
 .filter-section {
   translate: 0 -65px;
   margin: 0 16px -65px;
+  z-index: 1;
 
   @media (width >= 900px) {
-    translate: 0 -125px;
-    margin: 0 0 -125px;
+    translate: 0 -75px;
+    margin: 0 0 -75px;
   }
 
   .filter-container {

@@ -19,6 +19,15 @@
   src: url('/static/fonts/montserrat-500.woff2') format('woff2');
 }
 
+/* Montserrat-600 */
+@font-face {
+  font-display: swap;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  src: url('/static/fonts/montserrat-600.woff2') format('woff2');
+}
+
 /* Montserrat-700 */
 @font-face {
   font-display: swap;
@@ -63,6 +72,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-padding-top: 50px;
+}
+
 body {
   font-family: Montserrat, sans-serif;
   background-color: var(--bg-color-body);
@@ -79,8 +92,8 @@ main {
   margin-bottom: 40px;
 
   @media (width >= 900px) {
-    gap: 80px;
-    margin-bottom: 80px;
+    gap: 40px;
+    margin-bottom: 40px;
   }
 }
 
@@ -107,6 +120,7 @@ img {
 video {
   max-width: 100%;
   height: auto;
+  width: auto;
 }
 
 .container {
@@ -157,8 +171,8 @@ body:has(.nav-controls.active) .skip-link {
 }
 
 body:has(.nav-controls.active) {
-  @media (scripting: enabled) and (width <= 900px) {
-    overflow: clip;
+  @media (width <= 900px) {
+    overflow: hidden;
   }
 }
 
@@ -202,7 +216,7 @@ body:has(.nav-controls.active) {
   font: var(--section-header-xxs);
 }
 
-.body-xl, .body-l, .body-m {
+.body-xl, .body-l, .body-m, .body-s {
   color: var(--body-color-primary);
 
   &.color-secondary {
@@ -220,6 +234,10 @@ body:has(.nav-controls.active) {
 
 .body-m {
   font: var(--section-body-m);
+}
+
+.body-s {
+  font: var(--section-body-s);
 }
 
 .color-accent {
@@ -288,10 +306,12 @@ hgroup {
 }
 
 .test-card-small, 
-.contact-card-small, 
+.contact-card .contact-card-small, 
 .hall-of-fame-list li, 
 .card:not(.home-variant), 
-.faq-item {
+.faq-item:not([open]),
+.result-details-content details:not([open]),
+.footer-social {
   transition: transform 0.3s;
 
   &:hover {
