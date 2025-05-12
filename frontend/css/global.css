@@ -310,7 +310,8 @@ hgroup {
 .hall-of-fame-list li, 
 .card:not(.home-variant), 
 .faq-item:not([open]),
-.result-details-content details:not([open]) {
+.result-details-content details:not([open]),
+.footer-social {
   transition: transform 0.3s;
 
   &:hover {
