@@ -173,6 +173,18 @@
     padding-block: 6px;
     font-weight: 500;
   }
+
+  &.footer-page .container {
+    padding-block: 20px;
+
+    @media (width >= 900px) {
+      padding-block: 40px;
+    }
+
+    > * {
+      grid-column: span 12;
+    }
+  }
 }
 
 /* MARK: CARDS
