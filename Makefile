@@ -573,7 +573,7 @@ else
 docker_host = host-gateway
 endif
 
-DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml:docker/compose.yaml:docker/compose.development.yaml RELEASE=latest docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
+DOCKER_COMPOSE_DEVELOP_CMD=docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
 
 # this runs limited live test suite against the development environment to test its sanity
 develop-tests development-environment-tests:
