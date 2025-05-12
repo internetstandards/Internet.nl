@@ -145,16 +145,12 @@
       gap: 16px;
       color: var(--card-body-color-test);
       font: var(--card-body-m);
+      border-bottom: 1px solid var(--transparent-100);
       width: fit-content;
-      background-image: linear-gradient(currentColor, currentColor);
-      background-position: 0 80%;
-      background-repeat: no-repeat;
-      background-size: 100% 1px; 
-      transition: background-position 0.3s;
-      padding-bottom: 10px;
+      transition: border-bottom 0.3s;
 
       &:hover {
-        background-position: 0 100%;
+        border-bottom: 1px solid currentcolor;
       }
       
       @media (width >= 900px) {
