@@ -1,4 +1,4 @@
-@layer base, layout, components;
+@layer base, layout, components, print;
 
 /* Base layer: fundamental styles */
 @import url("variables.css") layer(base);
@@ -16,3 +16,6 @@
 @import url("hall-of-fame-section.css") layer(components);
 @import url("test-section.css") layer(components);
 @import url("result-section.css") layer(components);
+
+/* Print layer: styles for print media */
+@import url("print.css") layer(print);

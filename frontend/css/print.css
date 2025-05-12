@@ -1,0 +1,13 @@
+@media print {
+  header {
+    position: static;
+  }
+  
+  .not-scrolling-up {
+    translate: unset;
+  }
+
+  .toggle-menu, .nav-controls, .footer-nav, .footer-bar, .action-card {
+    display: none;
+  }
+}
