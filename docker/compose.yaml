@@ -81,11 +81,16 @@ services:
       internal:
       public-internet: {}
     entrypoint: uwsgi
+    # maximum amount of processes/workers to allow is 4
+    # use 'cheaper' to reduce amount of processes/workers when idle to 1, this reduces memory usage
+    # start with at least 2 processes/workers
     command: >
       --module=internetnl.wsgi:application
       --http=0.0.0.0:8080
       --master
       --processes=4
+      --cheaper=1
+      --cheaper-initial=2
       --stats 127.0.0.1:1717 --stats-http
     depends_on:
       db-migrate:
