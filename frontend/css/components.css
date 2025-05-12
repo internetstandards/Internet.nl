@@ -9,7 +9,7 @@
   border-radius: 8px;
   justify-content: center;
   font: var(--section-button-m);
-  transition: 0.3s;
+  transition: border 0.3s, background-color 0.3s;
   width: 100%;
 
   @media (width >= 900px) {
