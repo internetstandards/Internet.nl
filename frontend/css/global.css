@@ -172,7 +172,7 @@ body:has(.nav-controls.active) .skip-link {
 
 body:has(.nav-controls.active) {
   @media (width <= 900px) {
-    overflow: clip;
+    overflow: hidden;
   }
 }
 

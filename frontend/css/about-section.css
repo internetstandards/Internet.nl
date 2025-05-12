@@ -24,7 +24,7 @@
 
   .about-link {
     justify-self: center;
-    margin-top: 48px;
+    margin-block: 48px;
 
     &::after {
       mask-image: url("/static/icons/arrow-right.svg");
