@@ -19,6 +19,7 @@ from checks.resolver import dns_resolve_txt, dns_resolve_spf
 from checks.tasks.dispatcher import check_registry, post_callback_hook
 from checks.tasks.dmarc_parser import parse as dmarc_parse
 from checks.tasks.spf_parser import parse as spf_parse
+from checks.tasks import tlsrpt_parsing
 from interface import batch, batch_shared_task, redis_id
 from internetnl import log
 
@@ -108,6 +109,17 @@ def spf(self, url, *args, **kwargs):
 )
 def batch_spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)
+
+
+@mail_registered
+@shared_task(
+    bind=True,
+    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
+    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    base=SetupUnboundContext,
+)
+def tlsrpt(self, url, *args, **kwargs):
+    return do_tlsrpt(self, url, *args, **kwargs)
 
 
 def skip_dkim_for_non_sending_domain(mtauth):
@@ -211,10 +223,23 @@ def callback(results, addr, category):
                         subtests["spf_policy"].result_bad_include(spf_records)
                     elif spf_policy_status == SpfPolicyStatus.invalid_redirect:
                         subtests["spf_policy"].result_bad_redirect(spf_records)
-
             else:
                 subtests["spf"].result_bad(spf_record)
 
+        elif testname == "tlsrpt":
+            tlsrpt_available = result.get("available")
+            tlsrpt_record = result.get("record")
+            tlsrpt_score = result.get("score")
+
+            # Pass results to mtauth and subtests
+            mtauth.tlsrpt_available = tlsrpt_available
+            mtauth.tlsrpt_record = tlsrpt_record
+            mtauth.tlsrpt_score = tlsrpt_score
+            log.debug(f"subtests: {subtests.keys()}")
+            if tlsrpt_available:
+                subtests["tlsrpt"].result_good(tlsrpt_record)
+            else:
+                subtests["tlsrpt"].result_bad(tlsrpt_record)
     if skip_dkim_for_non_sending_domain(mtauth):
         mtauth.dkim_score = scoring.MAIL_AUTH_DKIM_PASS
         subtests["dkim"].result_no_email()
@@ -725,3 +750,76 @@ def dmarc_get_public_suffix_list():
             public_suffix_list = dmarc_get_public_suffix_list()
 
     return public_suffix_list
+
+
+def tlsrpt_callback(data, status, r):
+    data["score"] = scoring.MAIL_AUTH_TLSRPT_FAIL
+    data["available"] = False
+    data["record"] = []
+    if status == 0:
+        record = []
+        available = False
+        if r.rcode == unbound.RCODE_NOERROR and r.havedata == 1:
+            # TXT record(s) for _smtp._tls.{domain} found, start looking for TLSRPT
+            score = scoring.MAIL_AUTH_TLSRPT_FAIL
+            for d in r.data.data:
+                txt = as_txt(d)
+                log.debug(f"tlsrpt: found record '{txt.lower()}'")
+                if txt.lower().startswith("v=tlsrptv1"):
+                    record.append(txt)
+                    if tlsrpt_parsing.parse_silent(txt) is None:
+                        # A parsing error has occured
+                        available = False
+                        score = scoring.MAIL_AUTH_TLSRPT_FAIL
+                        break
+                    if available:
+                        # We see more than one TLSRPT record. Fail the test.
+                        available = False
+                        score = scoring.MAIL_AUTH_TLSRPT_FAIL
+                        break
+                    else:
+                        available = True
+                        score = scoring.MAIL_AUTH_TLSRPT_PASS
+        elif r.rcode == unbound.RCODE_NXDOMAIN or (r.rcode == unbound.RCODE_NOERROR and r.havedata == 0):
+            # we know for sure there is no TLSRPT record
+            score = scoring.MAIL_AUTH_TLSRPT_FAIL
+        else:
+            # resolving problems, servfail probably
+            score = scoring.MAIL_AUTH_TLSRPT_ERROR
+
+        data["score"] = score
+        data["available"] = available
+        data["record"] = record
+    data["done"] = True
+
+
+def resolve_tlsrpt_record(url, task):
+    # Make sure, url does not start with a dot, then add "_smtp._tls." in front
+    # of the domain name.
+    tls_rpt_url = f'_smtp._tls.{url.lstrip(".")}'
+    return task.async_resolv(tls_rpt_url, unbound.RR_TYPE_TXT, callback=tlsrpt_callback)
+
+
+def do_tlsrpt(self, url, *args, **kwargs):
+    try:
+        cb_data = resolve_tlsrpt_record(url, self)
+        available = "available" in cb_data and cb_data["available"]
+        score = cb_data["score"]
+        record = cb_data["record"]
+
+        result = dict(
+            available=available,
+            score=score,
+            record=record,
+        )
+
+    # KeyError is due to score missing, happens in case of timeout on non resolving domain
+    except (SoftTimeLimitExceeded, KeyError) as specific_exception:
+        log.debug("Soft time limit exceeded: %s", specific_exception)
+        result = dict(
+            available=False,
+            score=scoring.MAIL_AUTH_TLSRPT_FAIL,
+            record=[],
+        )
+    # return a tuple containing ("testname", result)
+    return ("tlsrpt", result)
