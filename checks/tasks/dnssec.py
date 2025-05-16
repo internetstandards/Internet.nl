@@ -3,6 +3,7 @@
 import sys
 from collections import OrderedDict
 
+import dns
 import pythonwhois
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -10,7 +11,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
-from dns.resolver import NoNameservers
+from dns.resolver import NoNameservers, LifetimeTimeout, NoAnswer
 
 from checks import categories, scoring
 from checks.models import DnssecStatus, DomainTestDnssec, MailTestDnssec, MxStatus
@@ -372,7 +373,7 @@ def dnssec_status(domain, mx_status, score_secure, score_insecure, score_bogus, 
         log.info(f"requesting SOA for {domain=} with {mx_status=}")
         answer_dnssec_status = dns_resolve_soa(domain, raise_on_no_answer=False)
         status, score = status_mapping[answer_dnssec_status]
-    except NoNameservers:
+    except (NoNameservers, NoAnswer, NoNameservers, LifetimeTimeout, dns.name.EmptyLabel):
         status = DnssecStatus.dnserror.value
         score = score_error
 

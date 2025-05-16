@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 import dns
-from dns.resolver import NoAnswer, NXDOMAIN, LifetimeTimeout
+from dns.resolver import NoAnswer, NXDOMAIN, LifetimeTimeout, NoNameservers
 
 from checks import categories, scoring
 from checks.http_client import http_get_af, response_content_chunk
@@ -354,14 +354,14 @@ def get_domain_results(
     """
     try:
         v6 = dns_resolve_aaaa(domain)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
+    except (NoNameservers, NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
         v6 = []
     v6 = remove_ipv4_mapped_v6(v6)
     log.debug("V6 resolve: %s" % v6)
     v6_good, v6_bad, v6_ports = test_connectivity(v6, socket.AF_INET6, sock_type, ports, is_ns, test_domain)
     try:
         v4 = dns_resolve_a(domain)
-    except (NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
+    except (NoNameservers, NoAnswer, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
         v4 = []
     log.debug("V4 resolve: %s" % v4)
     v4_good, v4_bad, v4_ports = test_connectivity(v4, socket.AF_INET, sock_type, ports, is_ns, test_domain)
