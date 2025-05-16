@@ -17,8 +17,8 @@ def test_reject_invalid_domain(page, app_url):
 
     page.goto(app_url)
 
-    page.locator("#web-url").fill(domain)
-    page.locator("section.websitetest button").click()
+    page.locator('input[name="url"]').fill(domain)
+    page.get_by_label("Start de domein test").click()
 
     assert page.url == f"{app_url}/test-site/?invalid"
 
