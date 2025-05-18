@@ -80,8 +80,7 @@ update_cert_fingerprints:
 	cd $(CERTSSDIR); ./update-certs.sh
 
 update_container_documentation:
-	chmod +x bin/update_container_documentation.sh
-	./bin/update_container_documentation.sh
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_container_documentation.sh
 
 update_padded_macs:
 	chmod +x $(MACSDIR)/update-macs.sh

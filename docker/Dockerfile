@@ -1,4 +1,5 @@
 ARG PYTHON_VERSION=3.9
+ARG YQ_VERSION=4.45.4
 
 # This Dockerfile consists of multiple stages in order to parallize and speed up
 # building. It also reduces image size as only build artifacts are copied into
@@ -230,6 +231,7 @@ CMD ["runserver", "0.0.0.0:8080"]
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest
 ARG PYTHON_VERSION
+ARG YQ_VERSION
 
 USER root
 
@@ -241,8 +243,12 @@ RUN apt update && \
     python3-pip \
     docker.io \
     shellcheck \
+    bsdmainutils \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
+
+# Install yq
+RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
 
 # copy application dependencies into image
 COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
