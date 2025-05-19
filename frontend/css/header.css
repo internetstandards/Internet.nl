@@ -127,7 +127,7 @@ header:has(.active) {
   background: var(--nav-mobile-bg-color);
   display: none;  
   overflow: auto;
-  padding: 120px 16px 120px;
+  padding: 110px 16px 120px;
 
   @media (scripting: none) {
     padding: 0;
@@ -165,7 +165,7 @@ header:has(.active) {
   &.active {
     display: flex;
     align-items: start;
-    gap: 40px;
+    gap: 30px;
   
     @media (prefers-reduced-motion: no-preference) {
       @supports (transition-behavior: allow-discrete) {
@@ -198,7 +198,7 @@ header nav {
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: 40px;
+    gap: 20px;
     flex-wrap: wrap;
 
     @media (width >= 1170px) {
@@ -274,7 +274,7 @@ header nav {
     .nav-sublist {
       display: none;
       flex-direction: column;
-      gap: 32px;
+      gap: 16px;
 
       @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
         @supports (transition-behavior: allow-discrete) {
