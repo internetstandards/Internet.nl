@@ -68,9 +68,14 @@
             </a>
           </li>
           <li class="action-card-item">
-            <a class="icon" href="{{retest_link}}">
+            <a class="icon repeat-test link {% if retest_time > 0 %} hidden {% endif %}" href="{{retest_link}}">
               <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
             </a>
+            <p class="icon repeat-test countdown {% if retest_time < 1 %} hidden {% endif %}">
+              <span class="reset icon">
+                <span class="countdown-time-text">{% include "string.html" with name="results retest-time" %} (<span class="countdown-time">{{retest_time}}</span>)</span>
+              </span>
+            </p>
           </li>
           <li class="action-card-item">
             <a class="icon" href="/faqs/report/">
@@ -78,7 +83,7 @@
             </a>
           </li>
         </ul>
-        <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
+        <p class="action-card-description">Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
       </details>
       <button id="copy-link" class="primary-button icon" type="button">
         <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>

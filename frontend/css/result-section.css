@@ -126,7 +126,7 @@ body.connectiontest .action-card-item:has(.connection) {
 
   @media (width >= 900px) {
     grid-column: 9 / 13;
-    grid-row: 2 / 3;
+    grid-row: 1 / 2;
     bottom: unset;
     order: unset;
     top: 150px;
@@ -223,7 +223,7 @@ body.connectiontest .action-card-item:has(.connection) {
     }
   }
 
-  p {
+  .action-card-description {
     font: var(--card-body-m);
     color: var(--card-body-color-contact);
     padding-top: 24px;
@@ -236,13 +236,15 @@ body.connectiontest .action-card-item:has(.connection) {
     padding-top: 16px;
   }
 
-  .action-card-item a {
+  .action-card-item a,
+  .action-card-item .countdown {
     color: var(--card-body-color-contact);
     font: var(--card-header-m);
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--card-body-color-contact);
     padding-bottom: 8px;
+    display: flex;
 
     &::after {
       mask-image: url("/static/icons/angle-down.svg");
@@ -279,6 +281,15 @@ body.connectiontest .action-card-item:has(.connection) {
     .clipboard::before {
       mask-image: url("/static/icons/clipboard.svg");
       display: block;
+    }
+
+    .countdown-time-text,
+    .countdown-time {
+      display: inline;
+    }
+
+    &.repeat-test.hidden {
+      display: none;
     }
   }
 }
