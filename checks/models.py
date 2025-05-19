@@ -7,9 +7,13 @@ from uuid import uuid4 as uuid
 
 from django.core.exceptions import SuspiciousFileOperation
 from django.db import models, transaction
+from django.db.models import Case, F, Q, Value, When
+from django.db.models.functions import Greatest
+from django.db.models.lookups import GreaterThan
 from django.utils import timezone
 from enumfields import Enum as LabelEnum
 from enumfields import EnumField, EnumIntegerField
+import pgtrigger
 
 
 class ListField(models.TextField):
@@ -947,6 +951,34 @@ class DomainTestReport(models.Model):
     class Meta:
         app_label = "checks"
 
+        triggers = [
+            pgtrigger.Trigger(
+                name="update_fame_on_site_report",
+                when=pgtrigger.After,
+                operation=pgtrigger.Insert | pgtrigger.UpdateOf("score"),
+                func="""
+IF NEW.score IS NULL THEN
+  -- DO NOTHING
+ELSIF NEW.score = 100 THEN
+  INSERT INTO checks_fame (domain, site_report_id, site_report_timestamp, mail_report_id, mail_report_timestamp)
+    VALUES (NEW.domain, NEW.id, NEW.timestamp, NULL, NULL)
+  ON CONFLICT (domain)
+    DO UPDATE SET site_report_id = NEW.id, site_report_timestamp = NEW.timestamp;
+ELSE
+  MERGE INTO ONLY checks_fame c1
+    USING checks_fame c2 ON c1.domain = c2.domain AND c1.domain = NEW.domain
+  WHEN NOT MATCHED THEN
+    DO NOTHING
+  WHEN MATCHED AND c1.mail_report_id IS NOT NULL THEN
+    UPDATE SET site_report_id = NULL, site_report_timestamp = NULL
+  WHEN MATCHED AND c1.mail_report_id IS NULL THEN
+    DELETE;
+  END IF;
+RETURN NEW;
+""",
+            ),
+        ]
+
 
 ###
 # Mail test
@@ -1092,6 +1124,79 @@ class MailTestReport(models.Model):
 
     class Meta:
         app_label = "checks"
+
+        triggers = [
+            pgtrigger.Trigger(
+                name="update_fame_on_mail_report",
+                when=pgtrigger.After,
+                operation=pgtrigger.Insert | pgtrigger.UpdateOf("score"),
+                func="""
+IF NEW.score IS NULL THEN
+  -- DO NOTHING
+ELSIF NEW.score = 100 THEN
+  INSERT INTO checks_fame (domain, site_report_id, site_report_timestamp, mail_report_id, mail_report_timestamp)
+    VALUES (NEW.domain, NULL, NULL, NEW.id, NEW.timestamp)
+  ON CONFLICT (domain)
+    DO UPDATE SET mail_report_id = NEW.id, mail_report_timestamp = NEW.timestamp;
+ELSE
+  MERGE INTO ONLY checks_fame c1
+    USING checks_fame c2 ON c1.domain = c2.domain AND c1.domain = NEW.domain
+  WHEN NOT MATCHED THEN
+    DO NOTHING
+  WHEN MATCHED AND c1.site_report_id IS NOT NULL THEN
+    UPDATE SET mail_report_id = NULL, mail_report_timestamp = NULL
+  WHEN MATCHED AND c1.site_report_id IS NULL THEN
+    DELETE;
+  END IF;
+RETURN NEW;
+""",
+            ),
+        ]
+
+
+class Fame(models.Model):
+    id = models.IntegerField(serialize=False, verbose_name="ID")
+    domain = models.CharField(max_length=255, primary_key=True, serialize=False)
+    site_report = models.ForeignKey(DomainTestReport, null=True, on_delete=models.CASCADE, db_index=False)
+    site_report_timestamp = models.DateTimeField(null=True)
+    mail_report = models.ForeignKey(MailTestReport, null=True, on_delete=models.CASCADE, db_index=False)
+    mail_report_timestamp = models.DateTimeField(null=True)
+
+    def __dir__(self):
+        return ["domain", "site_report", "site_report_timestamp", "mail_report", "mail_report_timestamp"]
+
+    class Meta:
+        app_label = "checks"
+
+        indexes = [
+            models.Index(
+                condition=Q(site_report_id__isnull=False),
+                fields=["-site_report_timestamp", "domain", "site_report_id"],
+                name="checks_fame_sites_idx",
+            ),
+            models.Index(
+                condition=Q(mail_report_id__isnull=False),
+                fields=["-mail_report_timestamp", "domain", "mail_report_id"],
+                name="checks_fame_mail_idx",
+            ),
+            # TODO: is there a way to alias/annotate the expressions?
+            #       (so psql `\d checks_fame_champions_idx` looks nice)
+            models.Index(
+                Greatest("site_report_timestamp", "mail_report_timestamp").desc(),
+                "domain",
+                Case(
+                    When(GreaterThan(F("site_report_timestamp"), F("mail_report_timestamp")), then=Value("s")),
+                    default=Value("m"),
+                    output_field=models.CharField(max_length=1),
+                ),
+                Case(
+                    When(GreaterThan(F("site_report_timestamp"), F("mail_report_timestamp")), then="site_report_id"),
+                    default="mail_report_id",
+                ),
+                condition=Q(site_report_id__isnull=False) & Q(mail_report_id__isnull=False),
+                name="checks_fame_champions_idx",
+            ),
+        ]
 
 
 class BatchUser(models.Model):

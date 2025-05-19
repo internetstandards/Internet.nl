@@ -29,25 +29,11 @@ dom_task = REDIS_RECORD("dom:task:{}:{}", settings.CACHE_TTL)
 # Request limit per address
 req_limit = REDIS_RECORD("dom:req_limit:{}", 2 * 60 * 60)
 
-# Lock for HoF updater
-hof_lock = REDIS_RECORD("hof:updater:lock", 60 * 5)
-
-# HoF data
-hof_champions = REDIS_RECORD("hof:champions", None)
-hof_web = REDIS_RECORD("hof:web", None)
-hof_mail = REDIS_RECORD("hof:mail", None)
-
 # Public suffix list data
 psl_data = REDIS_RECORD("public:suffix:list", settings.PUBLIC_SUFFIX_LIST_RENEWAL)
 
 # Public suffix list loading flag
 psl_loading = REDIS_RECORD("public:suffix:list:loading", 60)
-
-# Home page stats data
-home_stats_data = REDIS_RECORD("home:stats:{}", None)
-
-# Home page stats lock
-home_stats_lock = REDIS_RECORD("home:stats:lock", 60 * 2)
 
 # Started connection test
 conn_test = REDIS_RECORD("conn:{}", settings.CACHE_TTL)

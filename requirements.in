@@ -17,6 +17,7 @@ django-bleach
 django-enumfields
 django-hosts
 django-markdown_deux
+django-pgtrigger
 eventlet
 gevent
 libsass
