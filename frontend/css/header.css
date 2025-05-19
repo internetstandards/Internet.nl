@@ -12,6 +12,10 @@ header {
 
   &.not-scrolling-up {
     translate: 0 -100%;
+
+    #nav-sublist.nav-sublist.expanded {
+      translate: -50% -100%;
+    }
   }
 
   @media (scripting: none) {
@@ -285,7 +289,7 @@ header nav {
             height: 0;
           }
 
-          transition: max-height 0.3s, height 0.3s, opacity 0.3s, display 0.3s, padding 0.3s;
+          transition: max-height 0.3s, height 0.3s, opacity 0.3s, display 0.3s, padding 0.3s, translate 0.3s;
           transition-behavior: allow-discrete;
         }
       }

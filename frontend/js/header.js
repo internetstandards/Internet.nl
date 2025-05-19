@@ -45,32 +45,35 @@ const navObserver = new IntersectionObserver((entries) => {
 
 navObserver.observe(scrollWatcher);
 
-let prevScrollY     = window.pageYOffset;
-let lastHideScrollY = prevScrollY;
-let ticking         = false;
-const buffer        = 50;
+let lastScrollY = window.pageYOffset;
+const buffer = 100;
+let ticking = false;
 
 window.addEventListener('scroll', () => {
   const currentY = window.pageYOffset;
 
   if (!ticking) {
     ticking = true;
+
     requestAnimationFrame(() => {
-      const isScrollingDown = currentY > prevScrollY;
+      const delta = currentY - lastScrollY;
 
       if (currentY <= headerHeight) {
+        // Always show header near the top of the page
         header.classList.remove('not-scrolling-up');
-      } else if (isScrollingDown) {
-        header.classList.add('not-scrolling-up');
-        lastHideScrollY = currentY;
-      } else {
-        if (lastHideScrollY - currentY > buffer) {
+      } else if (Math.abs(delta) > buffer) {
+        if (delta > 0) {
+          // Scrolled down
+          header.classList.add('not-scrolling-up');
+        } else {
+          // Scrolled up
           header.classList.remove('not-scrolling-up');
         }
+
+        lastScrollY = currentY;
       }
 
-      prevScrollY = currentY;
-      ticking     = false;
+      ticking = false;
     });
   }
 }, { passive: true });
