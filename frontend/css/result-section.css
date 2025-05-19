@@ -633,6 +633,10 @@ meter::-moz-meter-bar {
           color: var(--failed-color);
         }
 
+        &.not-tested {
+          color: var(--not-tested-color);
+        }
+
         &::after {
           margin-left: auto;
         }

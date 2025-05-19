@@ -20,6 +20,8 @@
   --orange-500: #BC6D07;
   --orange-600: #CF7604;
   --red-100: #E03030;
+  --grey-100: #757575;
+  --grey-200: #828282;
   --white-100: #FFF;
   --transparent-100: transparent;
   --transparent-200: #E3F0F500;
@@ -222,6 +224,8 @@
   --success-color: var(--green-350);
   --warning-color: var(--orange-350);
   --failed-color: var(--red-100);
+  --not-tested-color: light-dark(var(--grey-100), var(--grey-200));
+  
 }
 
 /* MARK: OTHER VARIABLES
