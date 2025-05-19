@@ -61,10 +61,10 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 20px;
-      height: 20px;
-      min-height: 20px;
-      min-width: 20px;
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      min-width: 18px;
     }
 
     &.probing:has(:not(.done))::before {
@@ -102,6 +102,10 @@
 
     &.failed::before {
       background-image: url("/static/icons/error.svg");
+    }
+
+    &.hidethis {
+      display: none;
     }
   }
 }

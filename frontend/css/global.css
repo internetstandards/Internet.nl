@@ -322,3 +322,7 @@ hgroup {
 .matomo {
   display: none;
 }
+
+.hidethis {
+  display: none;
+}
