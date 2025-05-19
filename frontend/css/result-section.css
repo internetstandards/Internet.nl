@@ -480,6 +480,13 @@ meter::-moz-meter-bar {
       gap: 16px;
       align-items: center;
 
+      &::before {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+      }
+
       &.passed::before {
         mask-image: url("/static/icons/checkmark-circle.svg");
         display: block;
