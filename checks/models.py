@@ -1094,6 +1094,21 @@ class MailTestReport(models.Model):
         app_label = "checks"
 
 
+class Fame(models.Model):
+    id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
+    domain = models.CharField(max_length=255)
+    site_report = models.ForeignKey(DomainTestReport, null=True, on_delete=models.CASCADE, db_index=False)
+    site_report_timestamp = models.DateTimeField(null=True)
+    mail_report = models.ForeignKey(MailTestReport, null=True, on_delete=models.CASCADE, db_index=False)
+    mail_report_timestamp = models.DateTimeField(null=True)
+
+    def __dir__(self):
+        return ["domain", "site_report", "site_report_timestamp", "mail_report", "mail_report_timestamp"]
+
+    class Meta:
+        app_label = "checks"
+
+
 class BatchUser(models.Model):
     """
     Users allowed to run batch tests. Automatically created when encountering new users.
