@@ -31,12 +31,19 @@
   <script src="{% static 'js/detect-browser-font-size-min.js' %}" defer></script>
   <script src="{% static 'js/copy-link-min.js' %}" defer></script>
   <script src="{% static 'js/print-min.js' %}" defer></script>
+  <script src="{% static 'js/matomo-min.js' %}" defer></script>
 
   {% block scripting %}
   {% endblock %}
 </head>
 <body class="{{pageclass}}">
-  
+
+  <div class="matomo">
+    <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
+    <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
+    <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
+  </div>
+
   <header>
     <a class="skip-link" href="#main-content">{% include "string.html" with name="base_header_skip_to_main_newstring" %}</a>
     <div class="container">
