@@ -31,8 +31,8 @@ rjsmin
 argparse
 GitPython
 pathlib2
-pytest<7
-selenium<4
+pytest
+selenium
 chardet
 requests
 hiredis
