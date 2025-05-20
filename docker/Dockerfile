@@ -210,6 +210,14 @@ RUN python3 bin/frontend.py css
 # generate language files
 RUN python3 bin/pofiles.py to_django
 
+# copy dependencies to rebuild CSS (postcss)
+COPY --from=frontend /usr/local/bin/ /usr/local/bin/
+COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=frontend /app/frontend/node_modules /app/frontend/node_modules
+
+# copy browser reload module
+COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
+
 # use fake version to prevent building the next steps when only the version changes
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0-build0
 
