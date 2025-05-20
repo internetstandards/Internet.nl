@@ -1,0 +1,126 @@
+.about-section {
+  h2 {
+    padding-bottom: 8px;
+
+    @media (width >= 900px) {
+      padding-bottom: 24px;
+    }
+  }
+
+  p {
+    @media (width >= 900px) {
+      grid-column: 1 / 7;
+    }
+
+    &:nth-of-type(2) {
+      padding-top: 16px;
+
+      @media (width >= 900px) {
+        grid-column: 8 / 13;
+        padding-top: 0;
+      }
+    }
+  }
+
+  .about-link {
+    justify-self: center;
+    margin-block: 48px;
+
+    &::after {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: block;
+    }
+  }
+}
+
+.logo-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto;
+  padding-top: 40px;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (width >= 900px) {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 100px;
+    overflow-x: auto;
+    padding-top: 80px;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-color: var(--green-500) var(--transparent-100);
+    scrollbar-width: thin;
+    padding-bottom: 20px;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--green-500);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: var(--transparent-100);
+    }
+  }
+
+  li {
+    grid-column: span 1;
+    display: flex;
+    justify-content: center;
+    scroll-snap-align: start;
+
+    &:last-child {
+      display: none;
+
+      @media (width >= 900px) {
+        display: block;
+      }
+    }
+  }
+
+  img {
+    transition: 0.3s;
+
+    &:hover {
+      opacity: 0.6;
+    }
+  }
+}
+
+.quote-section {
+  .container {
+    padding-block: 44px;
+    row-gap: 40px;
+
+    @media (width >= 900px) {
+      align-items: center;
+      gap: 0;
+    }
+  }
+
+  .quote-image {
+    border-radius: 100%;
+
+    @media (width >= 900px) {
+      grid-column: 2 / 3;
+    }
+  }
+
+  blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @media (width >= 900px) {
+      grid-column: 4 / 12;
+      gap: 40px;
+    }
+
+    cite {
+      font-style: normal;
+    }
+  }
+}

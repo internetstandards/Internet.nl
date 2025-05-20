@@ -1,0 +1,123 @@
+.hall-of-fame-section {
+  .container {
+    row-gap: 24px;
+    padding-block: 32px;
+
+    @media (width >= 900px) {
+      row-gap: 48px;
+      padding-block: 32px;
+    }
+  }
+
+  hgroup {
+    gap: 8px;
+    
+    @media (width >= 900px) {
+      grid-column: 3 / 11;
+      gap: 16px;
+    }
+  }
+
+  .button-container {
+    place-self: center;
+  }
+
+  @media (width >= 900px) {
+    .hall-of-fame-list {
+      grid-column: span 12;
+    }
+  }
+}
+
+.filter-section {
+  translate: 0 -65px;
+  margin: 0 16px -65px;
+  z-index: 1;
+
+  @media (width >= 900px) {
+    translate: 0 -75px;
+    margin: 0 0 -75px;
+  }
+
+  .filter-container {
+    background: var(--bg-color-body);
+    border: var(--card-border);
+    box-shadow: var(--card-box-shadow);
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    border-radius: 8px;
+    flex-direction: column;
+    gap: 16px;
+
+    @media (width >= 900px) {
+      grid-column: 3 / 11;
+      width: 100%;
+      gap: 48px;
+      align-items: center;
+      flex-direction: row;
+    }
+
+    .h2 {
+      font: var(--section-header-s);
+      color: var(--heading-color-primary);
+    }
+  }
+}
+
+.hosters-section {
+  .container {
+    gap: 32px 16px;
+
+    @media (width >= 900px) {
+      gap: 64px 32px;
+    }
+  }
+  
+  hgroup { 
+    gap: 16px;
+    text-align: center;
+    
+    @media (width >= 900px) {
+      grid-column: 2 / 10;
+      text-align: start;
+    }
+  }
+
+  .image-container {
+    background-color: var(--green-100);
+    border-radius: 100%;
+    padding: 24px 38px;
+    place-self: center;
+    order: -1;
+
+    @media (width >= 900px) {
+      grid-column: 10 / 12;
+      order: unset;
+    }
+  }
+}
+
+.hall-of-fame-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 50%), 1fr));
+  grid-auto-flow: dense;
+  gap: 24px;
+  
+  @media (width >= 900px) {
+    grid-column: 2 / 12;
+  }
+
+  li a {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    padding: 12px 8px;
+    background-color: var(--button-bg-color-hoster);
+    color: var(--button-text-color-hoster);
+    font: var(--section-button-m);
+    border-radius: 4px;
+    text-align: center;
+    display: block;
+    overflow: clip;
+  }
+}

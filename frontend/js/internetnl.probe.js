@@ -26,6 +26,7 @@ function showResults(category, results) {
         var probeFinished = $("#probe-finished").text();
         $("#"+category+"-summary").attr('aria-busy', false).text(probeFinished);
         $("#"+category+"-icon").attr("src", "/static/probe-animation-ready.gif");
+        $("#" + category + "-summary").addClass("done");
     }
 }
 
