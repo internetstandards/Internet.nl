@@ -462,6 +462,7 @@
       mask-image: url("/static/icons/angle-down.svg");
       display: block;
       transition: transform 0.3s;
+      background-color: var(--accordion-heading-color);
     }
   }
 }

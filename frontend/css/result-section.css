@@ -93,15 +93,18 @@
     }
 
     &.passed::before {
-      background-image: url("/static/icons/checkmark-circle.svg");
+      mask-image: url("/static/icons/checkmark-circle.svg");
+      background-color: var(--success-color);
     }
 
     &.warning::before {
-      background-image: url("/static/icons/exclamation-circle.svg");
+      mask-image: url("/static/icons/exclamation-circle.svg");
+      background-color: var(--warning-color);
     }
 
     &.failed::before {
-      background-image: url("/static/icons/error.svg");
+      mask-image: url("/static/icons/error.svg");
+      background-color: var(--failed-color);
     }
 
     &.hidethis {
@@ -512,6 +515,7 @@ meter::-moz-meter-bar {
       &.info::before {
         mask-image: url("/static/icons/info.svg");
         display: block;
+        background-color: var(--info-color);
       }
     }
 
@@ -666,6 +670,7 @@ meter::-moz-meter-bar {
         &.info::before {
           mask-image: url("/static/icons/info.svg");
           display: block;
+          background-color: var(--info-color);
         }
 
         &.not-tested::before {

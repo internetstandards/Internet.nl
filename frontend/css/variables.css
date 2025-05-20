@@ -15,11 +15,13 @@
   --orange-100: #FFEBD2;
   --orange-200: #FFC170;
   --orange-300: #FFAC40;
-  --orange-350: #CF7604;
+  --orange-350: #FFAD33;
+  --orange-375: #D45C00;
   --orange-400: #E98400;
   --orange-500: #BC6D07;
   --orange-600: #CF7604;
-  --red-100: #E03030;
+  --blue-100: #1565C0;
+  --red-100: #C00000;
   --grey-100: #757575;
   --grey-200: #828282;
   --white-100: #FFF;
@@ -222,9 +224,10 @@
 
   /* RESULT STATE COLORS */
   --success-color: var(--green-350);
-  --warning-color: var(--orange-350);
+  --warning-color: light-dark(var(--orange-375), var(--orange-350));
   --failed-color: var(--red-100);
   --not-tested-color: light-dark(var(--grey-100), var(--grey-200));
+  --info-color: var(--blue-100);
   
 }
 
