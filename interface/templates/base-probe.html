@@ -19,9 +19,7 @@
       </h1>
       <p class="body-m">
         {% include "string.html" with name="probes tests-duration" cache_ttl="CACHE_TTL"|get_settings_value %}
-        <span class="probing-text hidethis">
-          {% include "string.html" with name="probes auto-redirect" %}
-        </span>
+        {% include "string.html" with name="probes auto-redirect" %}
         {% include "string.html" with name="probes tests-description" %}
       </p>
     </hgroup>

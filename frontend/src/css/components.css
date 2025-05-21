@@ -9,7 +9,7 @@
   border-radius: 8px;
   justify-content: center;
   font: var(--section-button-m);
-  transition: 0.3s;
+  transition: border 0.3s, background-color 0.3s;
   width: 100%;
 
   @media (width >= 900px) {
@@ -173,6 +173,21 @@
     padding-block: 6px;
     font-weight: 500;
   }
+
+  &.footer-page .container {
+    padding-block: 20px;
+
+    @media (width >= 900px) {
+      padding-block: 40px;
+    }
+
+    > * {
+      grid-column: span 12;
+      display: flex;
+      flex-direction: column;
+      row-gap: 24px;
+    }
+  }
 }
 
 /* MARK: CARDS
@@ -186,7 +201,7 @@
       gap: 48px;
     }
 
-    .h2,
+    .h3,
     .secondary-button {
       justify-self: center;
     }
@@ -447,6 +462,7 @@
       mask-image: url("/static/icons/angle-down.svg");
       display: block;
       transition: transform 0.3s;
+      background-color: var(--accordion-heading-color);
     }
   }
 }

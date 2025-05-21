@@ -61,10 +61,10 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 20px;
-      height: 20px;
-      min-height: 20px;
-      min-width: 20px;
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      min-width: 18px;
     }
 
     &.probing:has(:not(.done))::before {
@@ -93,15 +93,22 @@
     }
 
     &.passed::before {
-      background-image: url("/static/icons/checkmark-circle.svg");
+      mask-image: url("/static/icons/checkmark-circle.svg");
+      background-color: var(--success-color);
     }
 
     &.warning::before {
-      background-image: url("/static/icons/exclamation-circle.svg");
+      mask-image: url("/static/icons/exclamation-circle.svg");
+      background-color: var(--warning-color);
     }
 
     &.failed::before {
-      background-image: url("/static/icons/error.svg");
+      mask-image: url("/static/icons/error.svg");
+      background-color: var(--failed-color);
+    }
+
+    &.hidethis {
+      display: none;
     }
   }
 }
@@ -126,7 +133,7 @@ body.connectiontest .action-card-item:has(.connection) {
 
   @media (width >= 900px) {
     grid-column: 9 / 13;
-    grid-row: 2 / 3;
+    grid-row: 1 / 2;
     bottom: unset;
     order: unset;
     top: var(--header-height, 80px);
@@ -225,7 +232,7 @@ body.connectiontest .action-card-item:has(.connection) {
     }
   }
 
-  p {
+  .action-card-description {
     font: var(--card-body-m);
     color: var(--card-body-color-contact);
     padding-top: 24px;
@@ -238,13 +245,15 @@ body.connectiontest .action-card-item:has(.connection) {
     padding-top: 16px;
   }
 
-  .action-card-item a {
+  .action-card-item a,
+  .action-card-item .countdown {
     color: var(--card-body-color-contact);
     font: var(--card-header-m);
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--card-body-color-contact);
     padding-bottom: 8px;
+    display: flex;
 
     &::after {
       mask-image: url("/static/icons/angle-down.svg");
@@ -281,6 +290,15 @@ body.connectiontest .action-card-item:has(.connection) {
     .clipboard::before {
       mask-image: url("/static/icons/clipboard.svg");
       display: block;
+    }
+
+    .countdown-time-text,
+    .countdown-time {
+      display: inline;
+    }
+
+    &.repeat-test.hidden {
+      display: none;
     }
   }
 }
@@ -465,6 +483,13 @@ meter::-moz-meter-bar {
       gap: 16px;
       align-items: center;
 
+      &::before {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+      }
+
       &.passed::before {
         mask-image: url("/static/icons/checkmark-circle.svg");
         display: block;
@@ -486,6 +511,7 @@ meter::-moz-meter-bar {
       &.info::before {
         mask-image: url("/static/icons/info.svg");
         display: block;
+        background-color: var(--info-color);
       }
     }
 
@@ -611,6 +637,10 @@ meter::-moz-meter-bar {
           color: var(--failed-color);
         }
 
+        &.not-tested {
+          color: var(--not-tested-color);
+        }
+
         &::after {
           margin-left: auto;
         }
@@ -636,6 +666,7 @@ meter::-moz-meter-bar {
         &.info::before {
           mask-image: url("/static/icons/info.svg");
           display: block;
+          background-color: var(--info-color);
         }
 
         &.not-tested::before {

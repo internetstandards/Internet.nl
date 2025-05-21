@@ -24,7 +24,13 @@
   {% endblock %}
 </head>
 <body class="{{pageclass}}">
-  
+
+  <div class="matomo">
+    <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
+    <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
+    <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
+  </div>
+
   <header>
     <a class="skip-link" href="#main-content">{% include "string.html" with name="base_header_skip_to_main_newstring" %}</a>
     <div class="container">
@@ -33,11 +39,11 @@
         <a class="header-logo" href="/" aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
           <picture class="light-visible">
             <source srcset="/static/logos/logo.svg" media="(width >= 900px)">
-            <img src="/static/logos/logo-mobile.svg" alt="Internet.nl Logo" width="182" height="40" loading="lazy">          
+            <img src="/static/logos/logo-mobile.svg" alt="Internet.nl Logo" width="182" height="40">          
           </picture>
           <picture class="dark-visible">
             <source srcset="/static/logos/logo-white.svg" media="(width >= 900px)">
-            <img src="/static/logos/logo-white-mobile.svg" alt="Internet.nl Logo" width="182" height="40" loading="lazy">          
+            <img src="/static/logos/logo-white-mobile.svg" alt="Internet.nl Logo" width="182" height="40">          
           </picture>
         </a>
         {% endif %}
@@ -83,15 +89,11 @@
         <div class="language-theme-controls">
           <form class="language-form icon" action="/change_language/" method="post">
             <select id="language-select" name="language" aria-label="{% include "string.html" with name="base_language_select_label_newstring" %}">
-              <button>
-                  <selectedcontent></selectedcontent>
-              </button>
               {% with user_language=request.current_language_code %}
                 {% for language in LANGUAGES %}
                   {% get_language_info for language.0 as lang %}
-                  <option aria-label="{{lang.name_local}}" value="{{ language.0 }}" {% if language.0 == user_language %}selected{% endif %}>
-                    <img src="/static/icons/{{ language.0 }}-flag.svg" width="20" height="20" alt="{{lang.name_local}} vlag">
-                    <span>{{ language.0 }}</span>
+                  <option aria-label="{{lang.name_local}}" lang="{{ language.0 }}" value="{{ language.0 }}"  {% if language.0 == user_language %}selected{% endif %}>
+                    {{ language.0|upper }}
                   </option>
                 {% endfor %}
               {% endwith %}
@@ -179,11 +181,6 @@
         </ul>
         {% if "INTERNETNL_BRANDING"|get_settings_value %}
         <ul class="footer-socials">
-          <li class="footer-social">
-            <a class="x icon" href="https://x.com/internet_nl/" target="_blank">
-              <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_x_newstring" %}</span>
-            </a>
-          </li>
           <li class="footer-social">
             <a class="linkedin icon" href="https://www.linkedin.com/company/internet-nl/" target="_blank">
               <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_linkedin_newstring" %}</span>

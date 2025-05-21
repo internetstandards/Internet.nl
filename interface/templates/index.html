@@ -160,13 +160,13 @@
           </a>
         </li>
       </ul>
-      <a class="about-link icon" href="/about">{% include "string.html" with name="about_section_intro_newstring" %}</a>
+      <a class="about-link secondary-button icon" href="/about">{% include "string.html" with name="about_section_intro_newstring" %}</a>
     </div>
   </section>
 
   <section class="card-section">
     <div class="container">
-      <h2 class="h2 color-secondary">{% include "string.html" with name="articles_latest_news_title_home_newstring" %}</h2>
+      <h2 class="h3 color-secondary">{% include "string.html" with name="articles_latest_news_title_home_newstring" %}</h2>
       <ul class="card-list">
         {% for article in articles|slice:":3" %}
           {% expand "article {{article}} title" as articletitle %}
@@ -184,78 +184,6 @@
         {% endfor %}
       </ul>
       <a class="secondary-button icon" href="/articles">{% include "string.html" with name="article_read_more_button_newstring" %}</a>
-    </div>
-  </section>
-
-  <section class="contact-section ellipse hidden-mobile">
-    <div class="container">
-      <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
-      <details class="faq-item accordion" name="faq-item">
-        <summary class="icon">
-          What is your return policy?
-        </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
-      </details>
-      <details class="faq-item accordion" name="faq-item">
-        <summary class="icon">
-          What is your return policy?
-        </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
-      </details>      
-      <details class="faq-item accordion" name="faq-item">
-        <summary class="icon">
-          What is your return policy?
-        </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
-      </details>      
-      <details class="faq-item accordion" name="faq-item">
-        <summary class="icon">
-          What is your return policy?
-        </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
-      </details>      
-      <details class="faq-item accordion" name="faq-item">
-        <summary class="icon">
-          What is your return policy?
-        </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
-      </details>
-      <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
-      <article class="contact-card">
-        <hgroup>
-          <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
-          <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
-        </hgroup>
-        <ul>
-          <li class="contact-card-small">
-            <a href="/">
-              <hgroup>
-                <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
-                <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
-              </hgroup>
-              <div class="secondary-button rounded icon"></div>
-            </a>
-          </li>
-          <li class="contact-card-small">
-            <a href="/">
-              <hgroup>
-                <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
-                <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
-              </hgroup>
-              <div class="secondary-button rounded icon"></div>
-            </a>
-          </li>
-          <li class="contact-card-small">
-            <a href="/">
-              <hgroup>
-                <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
-                <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
-              </hgroup>
-              <div class="secondary-button rounded icon"></div>
-            </a>
-          </li>
-        </ul>
-      </article>
     </div>
   </section>
 {% endblock %}

@@ -12,6 +12,10 @@ header {
 
   &.not-scrolling-up {
     translate: 0 -100%;
+
+    #nav-sublist.nav-sublist.expanded {
+      translate: -50% -100%;
+    }
   }
 
   @media (scripting: none) {
@@ -25,26 +29,12 @@ header {
     justify-content: space-between;
     gap: 16px;
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       padding: 24px 16px;
     }
 
     &:has(.active) {
       padding: 0;
-    }
-
-    @media (900px <= width <= 1100px) {
-      flex-flow: column wrap;
-      align-items: start;
-
-      nav {
-        place-content: start;
-      }
-
-      #nav-sublist {
-        left: 0;
-        translate: initial;
-      }
     }
 
     @media (scripting: none) {
@@ -61,7 +51,7 @@ header {
   width: 100%;
   padding: 20px 16px;
 
-  @media (width >= 900px) {
+  @media (width >= 1170px) {
     width: auto;
     padding: 0;
   }
@@ -91,7 +81,7 @@ header {
     display: none;
   }
 
-  @media (width >= 900px) {
+  @media (width >= 1170px) {
     display: none;
   }
 
@@ -137,7 +127,7 @@ header:has(.active) {
   background: var(--nav-mobile-bg-color);
   display: none;  
   overflow: auto;
-  padding: 120px 16px;
+  padding: 110px 16px 120px;
 
   @media (scripting: none) {
     padding: 0;
@@ -152,7 +142,7 @@ header:has(.active) {
     }
   }
 
-  @media (width >= 900px) {
+  @media (width >= 1170px) {
     width: 100%;
     flex-direction: row;
     position: initial;
@@ -175,7 +165,7 @@ header:has(.active) {
   &.active {
     display: flex;
     align-items: start;
-    gap: 40px;
+    gap: 30px;
   
     @media (prefers-reduced-motion: no-preference) {
       @supports (transition-behavior: allow-discrete) {
@@ -197,7 +187,7 @@ header nav {
   gap: 8px;
   width: 100%;
   
-  @media (width >= 900px) {
+  @media (width >= 1170px) {
     display: flex;
     align-items: center;
     height: auto;
@@ -208,9 +198,10 @@ header nav {
     display: flex;
     flex-flow: column wrap;
     width: 100%;
-    gap: 40px;
+    gap: 20px;
+    flex-wrap: wrap;
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       flex-direction: row;
       align-items: center;
       width: auto;
@@ -226,7 +217,7 @@ header nav {
     padding-bottom: 16px;
     border-bottom: var(--nav-mobile-border);
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       padding-bottom: 0;
       border-bottom: none;
     }
@@ -245,7 +236,7 @@ header nav {
     transition: border 0.3s;
 
     &:hover {
-      @media (width >= 900px) {
+      @media (width >= 1170px) {
         border-bottom: 2px solid currentcolor;
       }
     }
@@ -254,7 +245,7 @@ header nav {
       font-size: 1rem;
     }
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       gap: 4px;
       width: auto;
     }
@@ -262,13 +253,13 @@ header nav {
 
   .nav-item.current > a,
   .nav-item.current > button {
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       border-bottom: 2px solid currentcolor;
     }
   }
 
   .nav-item:has(.nav-sublist) {
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       position: relative;
 
       &::after {
@@ -283,7 +274,7 @@ header nav {
     .nav-sublist {
       display: none;
       flex-direction: column;
-      gap: 32px;
+      gap: 16px;
 
       @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
         @supports (transition-behavior: allow-discrete) {
@@ -298,12 +289,12 @@ header nav {
             height: 0;
           }
 
-          transition: max-height 0.3s, height 0.3s, opacity 0.3s, display 0.3s, padding 0.3s;
+          transition: max-height 0.3s, height 0.3s, opacity 0.3s, display 0.3s, padding 0.3s, translate 0.3s;
           transition-behavior: allow-discrete;
         }
       }
 
-      @media (width >= 900px) {
+      @media (width >= 1170px) {
         gap: 16px;
         position: absolute;
         padding: 20px 24px;
@@ -355,7 +346,7 @@ header nav {
     }
 
     &:hover .nav-sublist {
-      @media (width >= 900px) {
+      @media (width >= 1170px) {
         display: flex;
 
         @media (prefers-reduced-motion: no-preference) {
@@ -396,7 +387,7 @@ header nav {
       }
 
       &::after {
-        @media (width >= 900px) {
+        @media (width >= 1170px) {
           display: block;
           mask-image: url("/static/icons/angle-down.svg");
           transform: rotate(270deg);
@@ -411,7 +402,7 @@ header nav {
     transform: scale(1.25);
     transition: transform 0.3s;
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       transform: scale(1);
     }
   }
@@ -419,7 +410,7 @@ header nav {
   &:has(.nav-sublist.expanded) #toggle-subnav::after {
     transform: rotate(180deg) scale(1.25);
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       transform: rotate(0deg) scale(1);
     }
   }
@@ -429,7 +420,7 @@ header nav {
   display: flex;
   gap: 50px;
 
-  @media (width >= 900px) {
+  @media (width >= 1170px) {
     display: flex;
     flex-direction: row;
     gap: 24px;
@@ -453,12 +444,8 @@ header nav {
     width: 20px;
     background-color: var(--nav-mobile-lang-text-color);
     
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       background-color: var(--nav-text-color);
-    }
-
-    @supports (appearance: base-select) {
-      display: none;
     }
   }
 
@@ -469,98 +456,24 @@ header nav {
     border: none;
     align-items: center;
     font: var(--nav-button);
-    text-transform: uppercase;
     appearance: none;
     padding: 2px 30px 2px 8px;
     background: var(--nav-mobile-lang-bg-color);
     border-radius: 8px;
     width: max-content;
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       background-color: var(--nav-lang-bg-color);
       color: var(--nav-text-color);
-    }
-
-    @supports (appearance: base-select) {
-      padding: 2px 8px;
-
-      selectedcontent {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-
-        span {
-          display: none;
-        }
-      }
-
-      &:open::picker-icon {
-        transform: rotate(-180deg);
-      }
-
-      &, &::picker(select) {
-        appearance: base-select;    
-      }
-
-      &::picker(select) {
-        border: none;
-        border-radius: 8px;
-        background: var(--nav-mobile-lang-bg-color);
-        box-shadow: var(--nav-sticky-shadow);
-  
-        @media (width >= 900px) {
-          background-color: var(--nav-lang-bg-color);
-        } 
-      }
-
-      &::picker-icon {
-        content: "";
-        mask-image: url("/static/icons/angle-down.svg");
-        transition: transform 0.3s;
-        background-color: currentcolor;
-        mask-repeat: no-repeat;
-        mask-size: cover;
-        display: block;
-        width: 20px;
-        height: 20px;
-        min-width: 20px;
-        min-height: 20px;
-      }
     }
   }
 
   option {
     color: var(--nav-mobile-lang-text-color);
     font: var(--nav-button);
-    text-transform: uppercase;
 
-    @media (width >= 900px) {
+    @media (width >= 1170px) {
       color: var(--nav-text-color);
-    }
-
-    @supports (appearance: base-select) {
-      align-items: center;
-      justify-content: center;
-
-      span {
-        display: none;
-      }
-
-      &::checkmark {
-        order: 1;
-        content: "";
-        mask-image: url("/static/icons/checkmark.svg");
-        transition: transform 0.3s;
-        background-color: currentcolor;
-        mask-repeat: no-repeat;
-        mask-size: cover;
-        display: block;
-        width: 16px;
-        height: 16px;
-        min-width: 16px;
-        min-height: 16px;
-      }
     }
   }
 

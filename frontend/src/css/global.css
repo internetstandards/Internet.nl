@@ -172,7 +172,7 @@ body:has(.nav-controls.active) .skip-link {
 
 body:has(.nav-controls.active) {
   @media (width <= 900px) {
-    overflow: clip;
+    overflow: hidden;
   }
 }
 
@@ -310,7 +310,8 @@ hgroup {
 .hall-of-fame-list li, 
 .card:not(.home-variant), 
 .faq-item:not([open]),
-.result-details-content details:not([open]) {
+.result-details-content details:not([open]),
+.footer-social {
   transition: transform 0.3s;
 
   &:hover {
@@ -318,9 +319,10 @@ hgroup {
   }
 }
 
-/* Test style for watching */
-.test-watch {
-    border: 2px solid red;
-    padding: 10px;
-    margin: 10px;
+.matomo {
+  display: none;
+}
+
+.hidethis {
+  display: none;
 }

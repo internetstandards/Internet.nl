@@ -1,4 +1,3 @@
-
 .footer-nav {
   background: var(--footer-bg-color);
   width: 100%;
@@ -102,15 +101,14 @@ footer {
   .footer-link a {
     color: var(--footer-bar-text-color);
     font: var(--footer-bar-link);
-    background-image: linear-gradient(currentcolor, currentcolor);
-    padding-bottom: 5px;
-    background-position: 0 80%;
-    background-repeat: no-repeat;
-    background-size: 100% 2px; 
-    transition: background-position 0.3s;
+    text-decoration: underline;
+    text-decoration-color: var(--transparent-100);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 10px;
+    transition: text-decoration-color 0.3s;
 
     &:hover {
-      background-position: 0 100%;
+      text-decoration-color: currentcolor;
     }
   }
 }

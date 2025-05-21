@@ -23,31 +23,12 @@
   }
 
   .about-link {
-    display: none;
+    justify-self: center;
+    margin-block: 48px;
 
-    @media (width >= 900px) {
-      gap: 8px;
-      display: flex;
-      align-items: center;
-      color: var(--button-text-color-secondary);
-      font: var(--section-button-l);
-      justify-self: center;
-      margin-top: 48px;
-      padding-bottom: 10px;
-      background-image: linear-gradient(currentcolor, currentcolor);
-      background-position: 0 85%;
-      background-repeat: no-repeat;
-      background-size: 100% 2px; 
-      transition: background-position 0.3s;
-
-      &:hover {
-        background-position: 0 100%;
-      }
-
-      &::after {
-        mask-image: url("/static/icons/arrow-right.svg");
-        display: block;
-      }
+    &::after {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: block;
     }
   }
 }
