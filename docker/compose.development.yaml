@@ -33,7 +33,7 @@ services:
           cd /app/frontend;
           # It's needed to install the rollup linux dependency
           npm install; 
-          npm run watch &
+          npm run docker:watch &
           cd /app;
           # start development server with auto reloading
           ./manage.py runserver 0.0.0.0:8080

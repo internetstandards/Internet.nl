@@ -2,31 +2,18 @@ import terser from "@rollup/plugin-terser";
 import postcss from "rollup-plugin-postcss";
 import { defineConfig } from "rollup";
 import fs from "fs";
-import path from "path";
 
 const isProduction = process.env.NODE_ENV === "production";
 const outputDir = process.env.OUTPUT_DIR ?? "dist";
 
-// Plugin to delete the dist folder before starting a new build
-const deleteOutputDir = {
-  name: "delete-output-dir",
+const cleanupOutputDir = () => ({
+  name: "cleanup-output-dir",
   buildStart() {
     if (fs.existsSync(outputDir)) {
       fs.rmSync(outputDir, { recursive: true, force: true });
     }
   },
-};
-
-// Plugin to clean up dist/css/index.js after the build
-const cleanupIndexJs = {
-  name: "cleanup-index-js",
-  closeBundle() {
-    const indexJsPath = path.join(outputDir, "css", "index.js");
-    if (fs.existsSync(indexJsPath)) {
-      fs.unlinkSync(indexJsPath);
-    }
-  },
-};
+});
 
 // Create config for each file
 const config = [
@@ -61,7 +48,7 @@ const config = [
       chunkFileNames: "[name]-min.js",
     },
     plugins: [
-      deleteOutputDir,
+      cleanupOutputDir(),
       isProduction &&
         terser({
           compress: {
@@ -78,23 +65,14 @@ const config = [
   {
     input: "src/index.css",
     output: {
-      dir: outputDir + "/css",
-      assetFileNames: (assetInfo) => {
-        // Keep original filename for CSS files
-        if (assetInfo.name.endsWith(".css")) {
-          return "[name]-min.css";
-        }
-      },
+      file: outputDir + "/css/style-min.css",
     },
     plugins: [
       postcss({
         extract: true,
         minimize: isProduction,
         sourceMap: !isProduction,
-        inject: false,
-        modules: false,
       }),
-      cleanupIndexJs,
     ],
   },
 ];

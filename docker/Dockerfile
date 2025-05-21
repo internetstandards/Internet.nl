@@ -134,7 +134,7 @@ COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 ADD frontend/ /app/frontend
 WORKDIR /app/frontend
 RUN npm install
-RUN npm run build
+RUN npm run docker:build
 
 # build main application image target
 FROM debian:bullseye-20241111-slim AS build-app
