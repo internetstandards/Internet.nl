@@ -83,4 +83,4 @@ config-compose-*
 
 # Frontend
 frontend/node_modules
-frontend/build
+frontend/dist
