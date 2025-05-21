@@ -37,7 +37,7 @@ def test_your_website_score(page, app_url, test_domain):
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
 
     print_details_test_results(page)
     print_results_url(page)

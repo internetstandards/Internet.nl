@@ -3,6 +3,10 @@
 {% load i18n %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/card-list-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
   <section class="article-index-section bg-primary">
     <div class="container">

@@ -22,7 +22,7 @@ def test_your_email_score(page, app_url, test_email):
 
     page.wait_for_url(f"{app_url}/mail/{test_email}/*/", timeout=MAX_TIMEOUT)
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
     expect(score).to_have_attribute("data-resultscore", str(TEST_EMAIL_EXPECTED_SCORE))
 
 

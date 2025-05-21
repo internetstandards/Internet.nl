@@ -77,10 +77,9 @@ footer {
   .container {
     display: flex;
     gap: 32px;
-    flex-direction: column;
+    flex-flow: column wrap;
     padding-block: 32px;
     width: 100%;
-    flex-wrap: wrap;
 
     @media (width >= 900px) {
       flex-direction: row;
@@ -103,7 +102,7 @@ footer {
   .footer-link a {
     color: var(--footer-bar-text-color);
     font: var(--footer-bar-link);
-    background-image: linear-gradient(currentColor, currentColor);
+    background-image: linear-gradient(currentcolor, currentcolor);
     padding-bottom: 5px;
     background-position: 0 80%;
     background-repeat: no-repeat;

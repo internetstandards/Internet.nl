@@ -115,7 +115,7 @@ body.connectiontest .action-card-item:has(.connection) {
 .action-card {
   background-color: var(--card-bg-color-contact);
   border-radius: 16px 16px 0 0;
-  padding: 16px 24px;
+  padding: clamp(16px, 2vw, 32px);
   display: flex;
   flex-direction: column;
   grid-column: span 12;
@@ -129,10 +129,12 @@ body.connectiontest .action-card-item:has(.connection) {
     grid-row: 2 / 3;
     bottom: unset;
     order: unset;
-    top: 150px;
+    top: var(--header-height, 80px);
+    max-height: calc(100vh - var(--header-height, 80px));
+    overflow-y: auto;
+    scrollbar-gutter: stable;
     margin-top: -450px;
     align-self: start;
-    padding: 32px;
     border-radius: 16px;
   }
 
@@ -280,12 +282,6 @@ body.connectiontest .action-card-item:has(.connection) {
       mask-image: url("/static/icons/clipboard.svg");
       display: block;
     }
-  }
-}
-
-body.font-large .action-card {
-  @media (width >= 900px) {
-    position: initial;
   }
 }
 

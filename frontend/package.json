@@ -1,19 +1,29 @@
 {
+  "type": "module",
   "scripts": {
     "css:lint": "stylelint css/*.css",
-    "css:build": "postcss css/*.css --dir /app/static_frontend/css/",
-    "css:build:watch": "postcss css/*.css --dir /app/static_frontend/css/ --watch --poll"
+    "docker:build": "NODE_ENV=production OUTPUT_DIR=/app/static_frontend rollup -c",
+    "docker:watch": "NODE_ENV=development OUTPUT_DIR=/app/static_frontend rollup -c -w",
+    "build": "NODE_ENV=production rollup -c",
+    "watch": "NODE_ENV=development rollup -c -w"
   },
   "devDependencies": {
     "@csstools/postcss-cascade-layers": "^5.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "cssnano": "^7.0.6",
+    "glob": "^11.0.2",
     "postcss": "^8.5.3",
-    "postcss-cli": "^11.0.0",
     "postcss-import": "^16.1.0",
     "postcss-preset-env": "^10.1.4",
+    "rollup": "^4.40.2",
+    "rollup-plugin-postcss": "^4.0.2",
     "stylelint": "^16.14.1",
     "stylelint-config-standard": "^37.0.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.40.2"
   },
   "browserslist": [
     "defaults"

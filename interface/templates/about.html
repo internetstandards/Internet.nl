@@ -2,6 +2,10 @@
 {% load static %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
   <section class="intro-section bg-secondary ellipse reverse">
     <div class="container">

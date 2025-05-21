@@ -18,20 +18,9 @@
 
   <link rel="stylesheet" href="{% static 'css/layers.css' %}" />
 
-  <script src="{% static "js/jquery-3.5.1.min.js" %}"></script>
-
-  <script src="{% static 'js/theme-min.js' %}" defer></script>
-  <script src="{% static 'js/initial-min.js' %}"></script>
-  <script src="{% static 'js/header-min.js' %}" defer></script>
-  <script src="{% static 'js/language-switch-min.js' %}" defer></script>
-  <script src="{% static 'js/carrousel-min.js' %}" defer></script>
-  <script src="{% static 'js/load-more-min.js' %}" defer></script>
-  <script src="{% static 'js/result-meter-min.js' %}" defer></script>
-  <script src="{% static 'js/action-card-fallback-min.js' %}" defer></script>
-  <script src="{% static 'js/detect-browser-font-size-min.js' %}" defer></script>
-  <script src="{% static 'js/copy-link-min.js' %}" defer></script>
-
   {% block scripting %}
+    <script type="module" src="{% static 'js/utils-min.js' %}"></script>
+    <script type="module" src="{% static 'js/base-min.js' %}"></script>
   {% endblock %}
 </head>
 <body class="{{pageclass}}">

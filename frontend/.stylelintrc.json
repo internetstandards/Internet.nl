@@ -1,1 +1,12 @@
-{ "extends": ["stylelint-config-standard"] }
+{
+    "extends": [
+        "stylelint-config-standard"
+    ],
+    "rules": {
+        "selector-type-no-unknown": null,
+        "selector-pseudo-element-no-unknown": null,
+        "selector-pseudo-class-no-unknown": null,
+        "declaration-property-value-no-unknown": null,
+        "no-descending-specificity": null
+    }
+}

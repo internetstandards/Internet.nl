@@ -34,7 +34,7 @@
       justify-self: center;
       margin-top: 48px;
       padding-bottom: 10px;
-      background-image: linear-gradient(currentColor, currentColor);
+      background-image: linear-gradient(currentcolor, currentcolor);
       background-position: 0 85%;
       background-repeat: no-repeat;
       background-size: 100% 2px; 

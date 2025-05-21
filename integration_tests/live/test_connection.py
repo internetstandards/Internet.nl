@@ -21,7 +21,7 @@ def test_your_connection_score_no_ipv6(page, app_url):
 
     page.wait_for_url(f"{app_url}/connection/*/results")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
 
     print_details_test_results(page)
 
@@ -38,7 +38,7 @@ def test_your_connection_score(page, app_url):
 
     page.wait_for_url(f"{app_url}/connection/*/results")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
 
     print_details_test_results(page)
 

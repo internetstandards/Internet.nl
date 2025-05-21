@@ -146,7 +146,7 @@
       color: var(--card-body-color-test);
       font: var(--card-body-m);
       width: fit-content;
-      background-image: linear-gradient(currentColor, currentColor);
+      background-image: linear-gradient(currentcolor, currentcolor);
       background-position: 0 80%;
       background-repeat: no-repeat;
       background-size: 100% 1px; 

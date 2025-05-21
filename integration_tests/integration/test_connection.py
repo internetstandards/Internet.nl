@@ -29,7 +29,7 @@ def test_your_connection_score(page, app_url, app_domain):
     # wait for results, should be server over https
     page.wait_for_url(f"https://{app_domain}/connection/*/results")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
 
     print_details_test_results(page)
     print_results_url(page)

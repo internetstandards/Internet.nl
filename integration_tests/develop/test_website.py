@@ -36,7 +36,7 @@ def test_your_website_score_with_ipv6(page, app_url, test_domain):
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
 
     print_details_test_results(page)
 
@@ -59,7 +59,7 @@ def test_your_website_score_no_ipv6(page, app_url, test_domain):
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/", timeout=LONG_TIMEOUT)
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage"")
 
     print_details_test_results(page)
 

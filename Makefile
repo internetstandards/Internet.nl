@@ -4,7 +4,6 @@ PY?=python
 TAR?=0
 
 BINDIR=bin
-FRONTENDEXEC=$(BINDIR)/frontend.py
 
 REMOTEDATADIR=remote_data
 MACSDIR=$(REMOTEDATADIR)/macs

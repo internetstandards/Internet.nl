@@ -3,7 +3,9 @@
 {% load translate %}
 
 {% block scripting %}
-  <script type="text/javascript" src="{% static 'js/internetnl.results-min.js' %}"></script>
+  <script type="module" src="{% static 'js/results-min.js' %}"></script>
+  <script type="module" src="{% static 'js/components/meter-min.js' %}"></script>
+  <script type="module" src="{% static 'js/components/action-card-min.js' %}"></script>
 {% endblock %}
 
 {% block maincontent %}
@@ -19,7 +21,7 @@
     </h1>
     <div class="meter-container">
       <div class="meter">
-        <meter min="0" max="100" value="{{score}}">{{score}}%</meter>
+        <meter min="0" max="100" value="{{score}}" id="testresults-percentage">{{score}}%</meter>
       </div>
       <ul class="meter-numbers h7 color-secondary">
         <li class="meter-number">0</li>

@@ -24,7 +24,7 @@ def test_your_email_score(page, app_url, test_email):
     # make sure the test is completed
     page.wait_for_url(f"{app_url}/mail/{test_email}/*/", timeout=1000 * 60)
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("#testresults-percentage")
 
     print_details_test_results(page)
     print_results_url(page)

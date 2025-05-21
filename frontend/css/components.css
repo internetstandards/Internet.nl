@@ -264,7 +264,7 @@
         font: var(--card-header-xl);
       }
 
-      p:not(.card-category):not(.card-date) {
+      p:not(.card-category, .card-date) {
         font: var(--card-body-xs);
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -437,7 +437,7 @@
     justify-content: space-between;
     gap: 24px;
     hyphens: auto;
-    word-break: break-word;
+    overflow-wrap: break-word;
 
     &::-webkit-details-marker {
       display: none;

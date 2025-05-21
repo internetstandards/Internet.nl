@@ -15,23 +15,23 @@ ARG PYTHON_VERSION
 
 RUN apt update && \
     apt install --no-install-recommends -yqq \
-      # generic build dependencies
-      build-essential \
-      # unbound dependencies
-      python${PYTHON_VERSION}-dev \
-      python3-distutils \
-      python3-pip \
-      libssl-dev \
-      libevent-dev \
-      libhiredis-dev \
-      bison \
-      # TODO: swig3.0 hard requirements? get from oldstable
-      swig \
-      # nassl dependencies
-      python3-setuptools \
-      # unbound dependencies
-      flex \
-      bison
+    # generic build dependencies
+    build-essential \
+    # unbound dependencies
+    python${PYTHON_VERSION}-dev \
+    python3-distutils \
+    python3-pip \
+    libssl-dev \
+    libevent-dev \
+    libhiredis-dev \
+    bison \
+    # TODO: swig3.0 hard requirements? get from oldstable
+    swig \
+    # nassl dependencies
+    python3-setuptools \
+    # unbound dependencies
+    flex \
+    bison
 
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
@@ -39,12 +39,12 @@ ARG PYTHON_VERSION
 COPY vendor/unbound /src/vendor/unbound
 WORKDIR /src/vendor/unbound
 RUN ./configure \
-  --prefix=/opt/unbound \
-  --enable-internetnl \
-  --with-pyunbound \
-  --with-libevent \
-  --with-libhiredis \
-  PYTHON_VERSION=${PYTHON_VERSION}
+    --prefix=/opt/unbound \
+    --enable-internetnl \
+    --with-pyunbound \
+    --with-libevent \
+    --with-libhiredis \
+    PYTHON_VERSION=${PYTHON_VERSION}
 RUN make
 RUN make install
 
@@ -128,13 +128,13 @@ ENTRYPOINT ["/entrypoint.sh"]
 FROM debian:bullseye-20241111-slim AS frontend
 
 # install npm from official image
-COPY --from=node:20-slim /usr/local/bin/ /usr/local/bin/
-COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:22-slim /usr/local/bin/ /usr/local/bin/
+COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 ADD frontend/ /app/frontend
 WORKDIR /app/frontend
 RUN npm install
-RUN npm run css:build
+RUN npm run build
 
 # build main application image target
 FROM debian:bullseye-20241111-slim AS build-app
@@ -207,10 +207,10 @@ RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
 # some js/css files use a separate script to generate minimized versions
 # storage these in a place for django to find
 RUN mkdir -p /app/static_frontend
-# minimize JS files
-RUN python3 bin/frontend.py js
-# copy build/minimized CSS files from frontand stage
+# copy build/minimized CSS files from frontend stage
 COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/css/*.css /app/static_frontend/css/
+# copy build/minimized JS files from frontend stage
+COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/js/*.js /app/static_frontend/js/
 
 # generate language files
 RUN python3 bin/pofiles.py to_django

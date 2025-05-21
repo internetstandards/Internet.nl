@@ -34,8 +34,7 @@ header {
     }
 
     @media (900px <= width <= 1100px) {
-      flex-wrap: wrap;
-      flex-direction: column;
+      flex-flow: column wrap;
       align-items: start;
 
       nav {
@@ -138,7 +137,7 @@ header:has(.active) {
   background: var(--nav-mobile-bg-color);
   display: none;  
   overflow: auto;
-  padding: 120px 16px 120px;
+  padding: 120px 16px;
 
   @media (scripting: none) {
     padding: 0;
@@ -207,10 +206,9 @@ header nav {
 
   .nav-list {
     display: flex;
-    flex-direction: column;
+    flex-flow: column wrap;
     width: 100%;
     gap: 40px;
-    flex-wrap: wrap;
 
     @media (width >= 900px) {
       flex-direction: row;
