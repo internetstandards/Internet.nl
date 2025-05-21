@@ -1,4 +1,4 @@
-const _paq = _paq || [];
+const _paq = window._paq || [];
 
 /**
  * Initialize Matomo tracking with optional cookie disabling

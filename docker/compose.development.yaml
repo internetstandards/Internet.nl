@@ -49,8 +49,7 @@ services:
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
       # mount frontend files so build tools can detect changes and rebuild
-      - ../frontend/css:/app/frontend/css
-      - ../frontend/js:/app/frontend/js
+      - ../frontend/src:/app/frontend/src
 
   worker:
     volumes:

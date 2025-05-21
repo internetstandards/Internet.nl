@@ -31,6 +31,7 @@ function validateNumber(value, name) {
     console.error(`Invalid ${name} value:`, value);
     return null;
   }
+
   return num;
 }
 
