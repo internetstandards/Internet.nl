@@ -8,19 +8,22 @@ _Compared to the latest 1.9 release._
 
 - A test for CAA records was added for web and mail tests. This checks for the presence of one or more correctly
   formatted CAA records, of which one must have an `issue` tag. This test is not required, i.e. does not affect scoring.
-- The [sectxt](https://github.com/DigitalTrustCenter/sectxt) library, used for validating security.txt files, was updated from 0.9.4 to 0.9.6.
+- The [sectxt](https://github.com/DigitalTrustCenter/sectxt) library, used for validating security.txt files, was updated from 0.9.4 to 0.9.7.
   This includes:
   - A new error if a PGP signed message ends with more than one newline, named `too_many_line_separators` ([sectxt/#78](https://github.com/DigitalTrustCenter/sectxt/issues/78)).
   - Improved detection of repeated use of fields that must only occur once. Previously, these were not always detected ([sectxt/#83](https://github.com/DigitalTrustCenter/sectxt/issues/83)).
   - Fixed an issue with checking signatures made with AEAD keys ([sectxt/#79](https://github.com/DigitalTrustCenter/sectxt/issues/79)).
+  - Fixed exception [for certain malformed PGP signatures](https://github.com/DigitalTrustCenter/sectxt/issues/85).
+- The test date and time are now [included in the print CSS](https://github.com/internetstandards/Internet.nl/pull/1735).
 
-### Internal changes
+### Significant internal changes
 
 - The test code no longer interfaces with libunbound, but 
  [uses dnspython as a stub resolver](https://github.com/internetstandards/Internet.nl/pull/1578).
 - Periodic tests [are no longer enabled by default](https://github.com/internetstandards/Internet.nl/pull/1628).
+- UWSGI [cheaper](https://uwsgi-docs.readthedocs.io/en/latest/Cheaper.html) options are used to reduce idle processes and reduce memory consumption.
 
-### Deployment setup changes
+### Possibly required changes to deployments
 
 - The `resolver-permissive` container was obsoleted and removed.
 - Periodic tests will only run when [specifically enabled](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-deployment.md#periodic-tests)
