@@ -9,7 +9,8 @@ const outputDir = process.env.OUTPUT_DIR ?? "dist";
 const cleanupOutputDir = () => ({
   name: "cleanup-output-dir",
   buildStart() {
-    if (fs.existsSync(outputDir)) {
+    // Only clean up if not in watch mode
+    if (!this.meta.watchMode && fs.existsSync(outputDir)) {
       fs.rmSync(outputDir, { recursive: true, force: true });
     }
   },
@@ -23,7 +24,7 @@ const config = [
     output: {
       format: "es",
       sourcemap: !isProduction,
-      dir: outputDir + "/js",
+      dir: `${outputDir}/js`,
       manualChunks: {
         base: [
           "src/js/base/header.js",
@@ -31,10 +32,12 @@ const config = [
           "src/js/base/language-switch.js",
           "src/js/base/detect-browser-font-size.js",
           "src/js/base/initial.js",
+          "src/js/base/print.js",
+          "src/js/lib/matomo.js",
         ],
         results: [
           "src/js/pages/results/copy-link.js",
-          "src/js/pages/results/results.js",
+          "src/js/pages/results/repeat-test-countdown.js",
         ],
         connection: ["src/js/pages/connection/connection.js"],
         probe: ["src/js/pages/probe/probe.js"],
@@ -65,7 +68,7 @@ const config = [
   {
     input: "src/index.css",
     output: {
-      file: outputDir + "/css/style-min.css",
+      file: `${outputDir}/css/style-min.css`,
     },
     plugins: [
       postcss({

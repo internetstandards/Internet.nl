@@ -4,6 +4,10 @@ import {
   toggleElements,
 } from "../../lib/utils.js";
 
+const elements = {
+  retestTime: document.querySelector(".countdown-time"),
+};
+
 /**
  * Start the countdown timer for retesting
  */
@@ -26,28 +30,26 @@ function startCountDownRetestTime() {
  */
 function countDownRetestTime(seconds) {
   const elements = {
-    text: document.querySelector(".retest-text"),
-    link: document.querySelector(".retest-link"),
-    time: document.querySelector(".retest-text .retest-time"),
+    text: document.querySelector(".repeat-test.link"),
+    link: document.querySelector(".repeat-test.countdown"),
+    time: document.querySelector(".countdown-time"),
   };
 
   if (!validateElements(elements)) return;
 
   if (seconds < 1) {
-    toggleElements(".retest-text", true);
-    toggleElements(".retest-link", false);
+    toggleElements(".repeat-test.link", false);
+    toggleElements(".repeat-test.countdown", true);
   } else {
-    toggleElements(".retest-text", false);
-    toggleElements(".retest-link", true);
+    toggleElements(".repeat-test.link", true);
+    toggleElements(".repeat-test.countdown", false);
     elements.time.textContent = seconds;
     setTimeout(() => countDownRetestTime(seconds - 1), 1000);
   }
 }
 
-const elements = {
-  retestTime: document.querySelector("#retest-time"),
-};
-
 if (validateElements(elements, "results")) {
   startCountDownRetestTime();
 }
+
+export default startCountDownRetestTime;

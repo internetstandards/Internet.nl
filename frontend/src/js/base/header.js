@@ -97,4 +97,4 @@ if (validateElements(elements, "header")) {
   header();
 }
 
-export default headerBehavior;
+export default header;
