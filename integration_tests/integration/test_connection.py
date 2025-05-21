@@ -39,7 +39,7 @@ def test_your_connection_score(page, app_url, app_domain):
         "https://trace.playwright.dev for viewing."
     )
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_CONNECTION_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_CONNECTION_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")

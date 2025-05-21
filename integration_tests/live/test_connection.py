@@ -25,7 +25,7 @@ def test_your_connection_score_no_ipv6(page, app_url):
 
     print_details_test_results(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_CONNECTION_EXPECTED_SCORE_NO_IPV6))
+    expect(score).to_have_attribute("value", str(TEST_CONNECTION_EXPECTED_SCORE_NO_IPV6))
 
 
 @pytest.mark.skipif(not ipv6_available(), reason="IPv6 networking not available")
@@ -42,7 +42,7 @@ def test_your_connection_score(page, app_url):
 
     print_details_test_results(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_CONNECTION_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_CONNECTION_EXPECTED_SCORE))
 
 
 @pytest.mark.parametrize("probe", ALL_CONNECTION_PROBES_NO_IPV6)

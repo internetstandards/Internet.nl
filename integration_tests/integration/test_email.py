@@ -29,7 +29,7 @@ def test_your_email_score(page, app_url, test_email):
     print_details_test_results(page)
     print_results_url(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_EMAIL_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_EMAIL_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")

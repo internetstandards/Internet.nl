@@ -40,7 +40,7 @@ def test_your_website_score(page, app_url, test_domain):
 
     print_details_test_results(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
 @pytest.mark.parametrize("probe", ALL_PROBES)
@@ -99,4 +99,4 @@ def test_your_website_score_known_scores(page, app_url, test_domain, expected_sc
 
     print_details_test_results(page)
 
-    assert score.get_attribute("data-resultscore") == str(expected_score)
+    assert score.get_attribute("value") == str(expected_score)

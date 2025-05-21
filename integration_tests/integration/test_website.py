@@ -42,7 +42,7 @@ def test_your_website_score(page, app_url, test_domain):
     print_details_test_results(page)
     print_results_url(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
