@@ -77,7 +77,9 @@ def validate_issue_validation_methods(parameter_value: str) -> set[str]:
         if validation_method not in ACME_VALIDATION_METHODS and not validation_method.startswith(
             ACME_VALIDATION_CUSTOM_PREFIX
         ):
-            raise CAAParseError(msg_id="invalid_property_issue_validation_method", context={"value": parameter_value})
+            raise CAAParseError(
+                msg_id="invalid-parameter-validation-methods", context={"parameter_value": parameter_value}
+            )
     return validation_methods
 
 
@@ -146,22 +148,22 @@ def validate_property_iodef(value: str):
     try:
         url = urlparse(value)
     except ValueError:
-        raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
+        raise CAAParseError(msg_id="invalid-property-iodef-value", context={"property_value": value})
     if url.scheme == "https":
         # RFC8659 refers to RFC6546, which is unclear on requirements. Let's assume a netloc is needed.
         if not url.netloc:
-            raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
+            raise CAAParseError(msg_id="invalid-property-iodef-value", context={"property_value": value})
     elif url.scheme == "mailto":
         if not validate_email(url.path):
-            raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
+            raise CAAParseError(msg_id="invalid-property-iodef-value", context={"property_value": value})
     else:
-        raise CAAParseError(msg_id="invalid_property_iodef_value", context={"value": value})
+        raise CAAParseError(msg_id="invalid-property-iodef-value", context={"property_value": value})
 
 
 def validate_property_contactemail(value: str):
     """Validate contactemail per CAB BR 1.6.3, requiring a single RFC 6532 3.2 address."""
     if not validate_email(value):
-        raise CAAParseError(msg_id="invalid_property_contactemail_value", context={"value": value})
+        raise CAAParseError(msg_id="invalid-property-contactemail-value", context={"property_value": value})
 
 
 @load_grammar_rulelist()
@@ -212,7 +214,7 @@ def validate_property_contactphone(value: str):
     """Validate contactphone per CAB SC014, requiring an RFC3966 5.1.4 global number."""
     parse_result = PhoneNumberRule("global-number").parse_all(value)
     if not parse_result:
-        raise CAAParseError(msg_id="invalid_property_contactphone_value", context={"value": value})
+        raise CAAParseError(msg_id="invalid-property-contactphone-value", context={"property_value": value})
 
 
 @load_grammar_rulelist()
@@ -241,13 +243,13 @@ def validate_property_issuemail(value: str):
     """Validate issuemail property per RFC9495."""
     parse_result = CAAPropertyIssueMailRule("issuemail-value").parse_all(value)
     if not parse_result:
-        raise CAAParseError(msg_id="invalid_property_issuemail_value", context={"value": value})
+        raise CAAParseError(msg_id="invalid-property-issuemail-value", context={"property_value": value})
 
 
 def validate_flags(flags: int):
     """Validate the flags per RFC8659 4.1, i.e. only allow 0/128"""
     if flags not in [0, 128]:
-        raise CAAParseError(msg_id="invalid_flags_reserved_bits", context={"value": str(flags)})
+        raise CAAParseError(msg_id="invalid-flags-reserved-bits", context={"flags": str(flags)})
 
 
 # https://www.iana.org/assignments/pkix-parameters/pkix-parameters.xhtml#caa-properties
@@ -274,11 +276,11 @@ def validate_caa_record(flags: int, tag: str, value: str) -> None:
     try:
         validator = CAA_PROPERTY_VALIDATORS[tag.lower()]
         if validator is None:
-            raise CAAParseError(msg_id="invalid_reserved_property", context={"value": tag})
+            raise CAAParseError(msg_id="invalid-reserved-property", context={"property_tag": tag})
         validator(value)
     except ParseError as e:
         raise CAAParseError(
-            msg_id="invalid_property_syntax",
+            msg_id="invalid-property-syntax",
             context={
                 "property_name": tag,
                 "property_value": value,
@@ -287,4 +289,4 @@ def validate_caa_record(flags: int, tag: str, value: str) -> None:
             },
         )
     except KeyError:
-        raise CAAParseError(msg_id="invalid_unknown_property", context={"value": tag})
+        raise CAAParseError(msg_id="invalid-unknown-property", context={"property_tag": tag})
