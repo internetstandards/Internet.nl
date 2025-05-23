@@ -538,7 +538,7 @@ if "hosters" in MANUAL_HOF_PAGES:
         "icon_file": "embed-badge-hosters-v3.svg",
     }
 
-HOF_UPDATE_INTERVAL = 600  # seconds
+HOF_UPDATE_INTERVAL = 60  # seconds
 
 LOGGING = {
     "version": 1,
