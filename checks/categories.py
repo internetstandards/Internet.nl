@@ -1341,7 +1341,7 @@ class WebCaa(Subtest):
 
     def result_syntax_error(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls caa verdict syntax_error"
+        self.verdict = "detail web tls caa verdict syntax-error"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_insufficient(self, tech_data: list[dict[str, str]]):
@@ -1983,7 +1983,7 @@ class MailCaa(Subtest):
 
     def result_syntax_error(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls caa verdict syntax_error"
+        self.verdict = "detail mail tls caa verdict syntax-error"
         self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
     def result_insufficient(self, tech_data: list[dict[str, str]]):

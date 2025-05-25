@@ -895,15 +895,15 @@ def build_report(dttls, category):
                 if dttls.caa_enabled:
                     caa_host_message = [
                         TranslatableTechTableItem(
-                            msgid="found_host", context={"host": dttls.caa_found_on_domain}
+                            msgid="found-host", context={"host": dttls.caa_found_on_domain}
                         ).to_dict()
                     ]
                 else:
-                    caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+                    caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
                 caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
                 for record in dttls.caa_records:
                     caa_tech_table.append(
-                        TranslatableTechTableItem(msgid="caa_record", context={"record": record}).to_dict()
+                        TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
                     )
                 if not dttls.caa_enabled:
                     category.subtests["web_caa"].result_bad(caa_tech_table)
@@ -1075,14 +1075,14 @@ def build_report(dttls, category):
 
             if dttls.caa_enabled:
                 caa_host_message = [
-                    TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
+                    TranslatableTechTableItem(msgid="found-host", context={"host": dttls.caa_found_on_domain}).to_dict()
                 ]
             else:
-                caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+                caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
             caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
             for record in dttls.caa_records:
                 caa_tech_table.append(
-                    TranslatableTechTableItem(msgid="caa_record", context={"record": record}).to_dict()
+                    TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
                 )
             if not dttls.caa_enabled:
                 category.subtests["mail_caa"].result_bad(caa_tech_table)
