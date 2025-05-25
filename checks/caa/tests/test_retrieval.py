@@ -21,7 +21,7 @@ def test_caa_evaluation():
     evaluation = CAAEvaluation(caa_found=True, canonical_name="example.com", caa_records=caa_records)
     assert evaluation.errors == [
         TranslatableTechTableItem(
-            "invalid_property_syntax",
+            "invalid-property-syntax",
             {
                 "property_name": "issuewild",
                 "property_value": "\x08",
@@ -29,8 +29,8 @@ def test_caa_evaluation():
                 "invalid_character": "\x08",
             },
         ),
-        TranslatableTechTableItem("invalid_unknown_property", {"value": "unknown"}),
-        TranslatableTechTableItem("missing_required_tag", {"tag": "issue"}),
+        TranslatableTechTableItem("invalid-unknown-property", {"property_tag": "unknown"}),
+        TranslatableTechTableItem("missing-required-property-issue", {"property_tag": "issue"}),
     ]
     assert evaluation.caa_records_str == ['0 issuewild "\\008"', '0 unknown ";"']
     assert evaluation.caa_tags == {"issuewild", "unknown"}
