@@ -68,7 +68,7 @@ def dns_resolve_tlsa(qname: str, allow_bogus=True) -> tuple[list[TLSA], DNSSECSt
 
 def dns_resolve_txt(qname: str, allow_bogus=True) -> list[str]:
     rrset, dnssec_status = dns_resolve(qname, RdataType.TXT, allow_bogus)
-    return [rr.to_text()[1:-1] for rr in rrset]
+    return ["".join([dns.rdata._escapify(s) for s in rr.strings]) for rr in rrset]
 
 
 def dns_resolve_spf(qname: str, allow_bogus=True) -> Optional[str]:
