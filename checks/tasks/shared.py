@@ -336,7 +336,7 @@ def aggregate_subreports(subreports, report):
                 # This is a small hack to allow running CAA along with all other tests in web,
                 # i.e. once per webserver IP, while it only applies once per target domain.
                 # Therefore, the tech table is flattened to only include one result, and no server column.
-                if subreport[test_item]["name"] in ["web_caa", "mail_caa"]:
+                if subreport[test_item]["name"] == "web_caa":
                     report[test_item]["tech_data"] = [[row] for row in subtechdata]
                     continue
                 elif subreport[test_item]["tech_type"] == "table_multi_col" and isinstance(subtechdata, list):
