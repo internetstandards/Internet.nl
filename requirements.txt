@@ -23,7 +23,9 @@ beautifulsoup4==4.12.3
 billiard==4.2.1
     # via celery
 bleach[css]==5.0.1
-    # via django-bleach
+    # via
+    #   bleach
+    #   django-bleach
 cached-property==2.0.1
     # via -r requirements.in
 celery==5.4.0
@@ -65,6 +67,7 @@ django==4.2.21
     #   -r requirements.in
     #   django-bleach
     #   django-browser-reload
+    #   django-pgtrigger
     #   django-redis
 django-bleach==3.1.0
     # via -r requirements.in
@@ -75,6 +78,8 @@ django-enumfields==2.1.1
 django-hosts==6.0
     # via -r requirements.in
 django-markdown-deux==1.0.6
+    # via -r requirements.in
+django-pgtrigger==4.15.2
     # via -r requirements.in
 django-redis==4.12.1
     # via -r requirements.in

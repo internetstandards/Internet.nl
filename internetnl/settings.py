@@ -117,8 +117,6 @@ RABBIT_HOST = getenv("RABBIT_HOST", "localhost:15672")  # Note: Management port
 RABBIT_USER = getenv("RABBIT_USER", "guest")
 RABBIT_PASS = getenv("RABBIT_PASS", "guest")
 
-ENABLE_HOF = get_boolean_env("ENABLE_HOF", True)
-
 AUTORELOAD = get_boolean_env("INTERNETNL_AUTORELOAD", False)
 
 # -- End of manual configuration
@@ -144,6 +142,7 @@ INSTALLED_APPS = [
     "checks",
     "django_hosts",
     "django_statsd",
+    "pgtrigger",
 ]
 if AUTORELOAD:
     INSTALLED_APPS += ["django_browser_reload"]
@@ -297,7 +296,6 @@ CELERY_WORKER_SEND_TASK_EVENTS = True
 CELERY_TASK_SEND_SENT_EVENT = True
 
 CELERY_IMPORTS = (
-    "checks.tasks.update",
     "interface.batch.scheduler",
     "interface.batch.util",
 )
@@ -321,9 +319,6 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.appsecpriv.web_callback": {"queue": "db_worker"},
     "checks.tasks.rpki.web_callback": {"queue": "db_worker"},
     "checks.tasks.rpki.mail_callback": {"queue": "db_worker"},
-    "interface.views.shared.run_stats_queries": {"queue": "slow_db_worker"},
-    "interface.views.shared.update_running_status": {"queue": "slow_db_worker"},
-    "checks.tasks.update.update_hof": {"queue": "slow_db_worker"},
     "checks.tasks.tls.web_cert": {"queue": "nassl_worker"},
     "checks.tasks.tls.web_conn": {"queue": "nassl_worker"},
     "checks.tasks.tls.mail_smtp_starttls": {"queue": "nassl_worker"},
@@ -537,8 +532,6 @@ if "hosters" in MANUAL_HOF_PAGES:
         "template_file": "halloffame-hosters.html",
         "icon_file": "embed-badge-hosters-v3.svg",
     }
-
-HOF_UPDATE_INTERVAL = 600  # seconds
 
 LOGGING = {
     "version": 1,

@@ -30,9 +30,6 @@ def test_hof_update(page, app_url, trigger_scheduled_task, unique_id, docker_com
         ),
     )
 
-    # generate hof
-    trigger_scheduled_task("generate_HoF")
-
     page.goto(app_url)
     page.get_by_role("link", name="Hall of Fame", exact=True).click()
     page.get_by_text("Websites").click()

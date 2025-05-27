@@ -120,7 +120,6 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - PUBLIC_SUFFIX_LIST_URL
       - ENABLE_BATCH
-      - ENABLE_HOF
       - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
@@ -196,7 +195,6 @@ services:
       - CACHE_LOCATION=
       # disable batch checks
       - ENABLE_BATCH=False
-      - ENABLE_HOF=False
       - DEBUG
       - DEBUG_LOG
       - DEBUG_LOG_UNBOUND
@@ -263,7 +261,6 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - PUBLIC_SUFFIX_LIST_URL
       - ENABLE_BATCH
-      - ENABLE_HOF
       - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
@@ -374,7 +371,6 @@ services:
       - INTERNET_NL_CHECK_SUPPORT_APPSECPRIV
       - INTERNET_NL_CHECK_SUPPORT_RPKI
       - ENABLE_BATCH
-      - ENABLE_HOF
       - RABBIT_HOST=rabbitmq:15672
       - SECRET_KEY
       - GENERATE_SECRET_KEY
