@@ -76,7 +76,7 @@ def _populate_HOF(hof, model, entry_creation):
     previousscore = 0
     previoustimestamp = None
     previousreportid = None
-    for report in model.objects.all().order_by("domain", "timestamp"):
+    for report in model.objects.only("id", "domain", "timestamp", "score").order_by("domain", "timestamp").iterator():
         if previousname != report.domain and previousname is not None:
             if previousscore >= 100:
                 entry_creation(hof, previousname, previousreportid, previoustimestamp)
