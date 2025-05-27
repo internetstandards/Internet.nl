@@ -46,7 +46,7 @@ In all other cases, the status is bad (notice).
 * We do not check whether the current TLS certificate matches
   one or more of the `issue*` records, i.e. whether the current
   certificate could be re-issued.
-* We do not evaluate more than 1000 records.
+* We do not evaluate more than 100 records.
 * The API and database support a "recommendations" field for future use,
   but none are currently detected.
 * We do not accept HTTP URLs in iodef, which may be a slightly 
