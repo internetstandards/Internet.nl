@@ -120,6 +120,10 @@ def test_batch_request(unique_id, register_test_user, test_domain):
     assert results_response_data["domains"][test_domain]["status"] == "ok"
     assert results_response_data["domains"][test_domain]["scoring"]["percentage"] == TEST_DOMAIN_EXPECTED_SCORE
 
+    assert results_response_data["domains"][test_domain]["report"]["url"].startswith(
+        "https"
+    ), "Report URL should take procotol from request (https)"
+
     # test results page should be publicly accessible
     report_url = results_response_data["domains"][test_domain]["report"]["url"]
     response = requests.get(report_url, verify=False)
