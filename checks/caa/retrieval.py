@@ -12,7 +12,7 @@ from checks.tasks.shared import TranslatableTechTableItem
 
 CAA_MSGID_INSUFFICIENT_POLICY = "missing-required-property-issue"
 CAA_TAGS_REQUIRED = {"issue"}
-CAA_MAX_RECORDS = 1000
+CAA_MAX_RECORDS = 100
 
 
 @dataclass
