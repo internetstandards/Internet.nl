@@ -269,7 +269,7 @@ def read_tar(args):
                 for potential_target_filename, target_msgids in KNOWN_PO_FILES:
                     for target_msgid in target_msgids:
                         if po_entry.msgid.startswith(target_msgid):
-                            target_filename = filename
+                            target_filename = potential_target_filename
 
                 print(f"Adding to {target_filename} locale {locale} entry: {po_entry.msgid}")
                 read_po_files[locale][target_filename].append(po_entry)
