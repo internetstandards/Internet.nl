@@ -94,7 +94,6 @@ For instance specific configuration use the `docker/local.env` file. Please refe
 Batch installations require the following settings:
 
 - `ENABLE_BATCH`: Must be set to `True`, to enable batch API
-- `ENABLE_HOF`: Must be set to `False`, to disable Hall of Fame processing
 
 And optionally:
 
@@ -105,7 +104,6 @@ For example:
 
     cat >> docker/local.env <<EOF
     ENABLE_BATCH=True
-    ENABLE_HOF=False
     # user/password(s) for access to /grafana monitoring
     MONITORING_AUTH_RAW=user:<htpasswd hash>
     # allowed IP's to visit web interface without password

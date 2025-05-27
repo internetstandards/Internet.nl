@@ -231,6 +231,9 @@ jobs:
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
+        # if this build is for a forked PR or dependabot the images are not pushed to the
+        # registry and the deploy instructions won't work.
+        if: ${{ env.use_registry == 'true' }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF
 
