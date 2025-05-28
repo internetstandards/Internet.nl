@@ -6,7 +6,7 @@ There are several DNS components. First, there are the following three Docker co
 2. A validating resolver, used to validate DANE records through ldns-dane.
 3. An authoritative name server for the connection test zone.
 
-Besides, an authoritative name server that should be hosted elsewhere, is needed for the DNS records in the zone for `INTERNETNL_DOMAINNAME`. 
+Besides, an authoritative name server that should be hosted elsewhere, is needed for the DNS records in the zone for `INTERNETNL_DOMAINNAME`.
 
 The resolvers (1 and 2) do not require any specific configuration.
 In this document, `INTERNETNL_DOMAINNAME` is `example.com`. Furthermore, example IP addresses are used.
@@ -88,3 +88,37 @@ You can verify DNSSEC using:
   - https://dnsviz.net/d/test.a.conn.test-ns-signed.example.com/dnssec/
   - https://dnsviz.net/d/test.aaaa.conn.test-ns-signed.example.com/dnssec/
 
+# Advanced CAA configuration
+
+Letsencrypt is used in the `webserver` container to automatically generate TLS certificates. Basic CAA records can be created to ensure only Letsencrypt issues certificates are valid for the `INTERNETNL_DOMAINNAME`:
+
+    example.com.                 CAA 0 issue "letsencrypt.org;"
+
+To provide even stricter configuration the ACME validation method and the account ID registered with Letsencrypt can be specified.
+
+The validation method used is `http-01` and the account ID can be obtailed by running the following command after setup (this might require installing the `jq` tool):
+
+    jq -r .uri < /var/lib/docker/volumes/internetnl-prod_certbot-config/_data/accounts/acme-v02.api.letsencrypt.org/directory/*/regr.json
+
+Instead of the CAA record above add this to the zone file:
+
+    example.com.                 CAA	128 issue "letsencrypt.org;validationmethods=http-01;accounturi=https://acme-staging-v02.api.letsencrypt.org/acme/acct/123456"
+
+Also see: https://letsencrypt.org/docs/caa/
+
+## Backing up/restoring/reusing Letsencrypt account
+
+Letsencrypt account ID and private key are stored in a Docker volume for persistence between deploys. If you want to completely redeploy without losing the Letsencrypt account used in de CAA record, or you want to use the same account for multiple installations, you need to make a backup/copy of the following directory:
+
+    /var/lib/docker/volumes/internetnl-prod_certbot-config/_data/
+
+When deploying a new instance, first complete the full setup. After that perform the following steps to restore the account:
+
+    docker compose --project-name=internetnl-prod stop webserver
+    rm -rf /var/lib/docker/volumes/internetnl-prod_certbot-config/_data/*
+    cp -r <location of backed up _data directory> /var/lib/docker/volumes/internetnl-prod_certbot-config/_data/
+    docker compose --project-name=internetnl-prod start webserver
+
+The certbot instance in the webserver container should start requesting a certificate for the domain after at most 1 minute. You can check the progress using:
+
+    docker compose --project-name=internetnl-prod exec webserver cat /var/log/letsencrypt/letsencrypt.log
