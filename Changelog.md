@@ -43,7 +43,7 @@ docker network rm internetnl-prod_public-internet
 
 - The API version was updated to version 2.5.0.
 - The fields `caa_enabled`, `caa_errors`, `caa_recommendations`, `caa_records`, and `caa_found_on_domain` have been added
-  ([OpenAPI diff](https://github.com/internetstandards/Internet.nl/commit/cdc642c97f3ef00b4ef8ec7ff6ea4c5403c80978#diff-ccabca18cd3cc1ba3dd325e532acccf5d37c7be317a2966209b6e55b968d4890)).
+  ([OpenAPI diff](https://github.com/internetstandards/Internet.nl/blob/0dd94d67a6363404cfcf6e2690d6938d09b319b2/interface/batch/openapi.yaml#L738-L760)).
 - The API report URL was [updated to use HTTPS](https://github.com/internetstandards/Internet.nl/issues/1704).
 
 ## 1.9.3
