@@ -482,3 +482,22 @@ class SafeHttpResponseRedirect(HttpResponseRedirect):
 
         if not settings.DEBUG and not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=allowed_hosts):
             raise DisallowedRedirect("Unsafe redirect to URL: %s" % redirect_to)
+
+
+def latest_report(model, domain_name: str, date: datetime):
+    # probably the default ordering in the database is on -id or -timestamp. Both will work.
+    # domain does not have an index, timestamp neither. This might be a problem, but it also might just work fine.
+
+    # for caching purposes don't allow users to request domains newer than today:
+    # assume users don't enter timezones, they can, and that will crash here due to non-zone-awareness :)
+    if date > datetime.now():
+        log.debug("Will not hand out reports in the future.")
+        date = datetime.now()
+
+    # if no time is given, the first moment of the day is assumed, at that time the report did not exist yet.
+    # so if people try with just a date, they will not get what they expect: the latest report for that day.
+    if date.hour == 0 and date.minute == 0 and date.second == 0:
+        log.debug("Aiding the user to set the date of the date to the latest report of the day.")
+        date = date.replace(hour=23, minute=59, second=59)  # try to get the latest report of this day.
+
+    return model.objects.all().filter(domain=domain_name, timestamp__lte=date).order_by("-timestamp").first()

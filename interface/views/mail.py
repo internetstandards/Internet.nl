@@ -5,7 +5,7 @@ import re
 
 from django.conf import settings
 from django.core.cache import cache
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 
@@ -32,6 +32,7 @@ from interface.views.shared import (
     process,
     redirect_invalid_domain,
     update_report_with_registrar_and_score,
+    latest_report,
 )
 from internetnl import log
 
@@ -180,6 +181,12 @@ def resultscurrent(request, mailaddr):
         )
 
     return HttpResponseRedirect(f"/mail/{addr}/{report.id}/")
+
+
+def resultsstored_historic(request, domain_name, date):
+    if report := latest_report(MailTestReport, domain_name, date):
+        return resultsrender(report.domain, report, request)
+    return HttpResponseNotFound()
 
 
 # URL: /mail/<dname>/<reportid>/
