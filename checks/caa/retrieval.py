@@ -10,9 +10,9 @@ from checks.caa.parser import validate_caa_record, CAAParseError
 from checks.resolver import dns_resolve_caa
 from checks.tasks.shared import TranslatableTechTableItem
 
-CAA_MSGID_INSUFFICIENT_POLICY = "missing_required_tag"
+CAA_MSGID_INSUFFICIENT_POLICY = "missing-required-property-issue"
 CAA_TAGS_REQUIRED = {"issue"}
-CAA_MAX_RECORDS = 1000
+CAA_MAX_RECORDS = 100
 
 
 @dataclass
@@ -44,7 +44,7 @@ class CAAEvaluation:
 
         missing_tags = CAA_TAGS_REQUIRED - self.caa_tags
         for tag in missing_tags:
-            self.errors.append(TranslatableTechTableItem(CAA_MSGID_INSUFFICIENT_POLICY, {"tag": tag}))
+            self.errors.append(TranslatableTechTableItem(CAA_MSGID_INSUFFICIENT_POLICY, {"property_tag": tag}))
 
     @property
     def score(self) -> int:

@@ -14,6 +14,7 @@ Key references:
 - [RFC8657](https://www.rfc-editor.org/rfc/rfc8657.html) Certification Authority Authorization (CAA) Record Extensions for Account URI and Automatic Certificate Management Environment (ACME) Method Binding, specifically [chapter 4](https://www.rfc-editor.org/rfc/rfc8657.html#name-extensions-to-the-caa-record)
 - [IANA Certification Authority Restriction Properties](https://www.iana.org/assignments/pkix-parameters/pkix-parameters.xhtml#caa-properties) registry
 - [IANA ACME Validation Methods](https://www.iana.org/assignments/acme/acme.xhtml#acme-validation-methods)  registry (referred from RFC8657)
+- [CABF Baseline](https://cabforum.org/working-groups/server/baseline-requirements/documents/CA-Browser-Forum-TLS-BR-2.1.2.pdf)
 
 https://caatestsuite.com/ has useful test cases, though those do not work
 as a full test target through the web UI, as they only have CAA records.
@@ -45,8 +46,10 @@ In all other cases, the status is bad (notice).
 * We do not check whether the current TLS certificate matches
   one or more of the `issue*` records, i.e. whether the current
   certificate could be re-issued.
-* We do not evaluate more than 1000 records.
-* The API and database support recommendations for future use,
-  but none are currently used.
+* We do not evaluate more than 100 records.
+* The API and database support a "recommendations" field for future use,
+  but none are currently detected.
 * We do not accept HTTP URLs in iodef, which may be a slightly 
   different interpretation from the RFC, though it is very ambiguous.
+  CABF Baseline also states "CAs are not expected to support URL schemes in
+  the iodef record other than mailto: or https:", so we are in line with that.

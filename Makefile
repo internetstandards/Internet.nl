@@ -80,8 +80,7 @@ update_cert_fingerprints:
 	cd $(CERTSSDIR); ./update-certs.sh
 
 update_container_documentation:
-	chmod +x bin/update_container_documentation.sh
-	./bin/update_container_documentation.sh
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_container_documentation.sh
 
 update_padded_macs:
 	chmod +x $(MACSDIR)/update-macs.sh
@@ -573,7 +572,7 @@ else
 docker_host = host-gateway
 endif
 
-DOCKER_COMPOSE_DEVELOP_CMD=COMPOSE_FILE=docker/compose.test-runner-develop.yaml:docker/compose.yaml:docker/compose.development.yaml RELEASE=latest docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
+DOCKER_COMPOSE_DEVELOP_CMD=docker compose --env-file=docker/defaults.env --env-file=docker/develop.env
 
 # this runs limited live test suite against the development environment to test its sanity
 develop-tests development-environment-tests:
