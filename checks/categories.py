@@ -1323,6 +1323,8 @@ class WebCaa(Subtest):
             init_tech_type="table_translatable",
             tech_data_translation_root="detail tech data caa",
         )
+        # Fix for one line, one value data (not-tested case)
+        self.tech_data = [[self.tech_data]]
 
     def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
