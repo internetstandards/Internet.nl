@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.10
+## 1.10.0
 
 _Compared to the latest 1.9 release._
 
