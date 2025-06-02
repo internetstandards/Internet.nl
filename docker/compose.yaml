@@ -704,7 +704,7 @@ services:
       - DOCKER_REGISTRY
       - CRON_DAILY_DATABASE_CLEANUP
       - CRON_WORKER_RESTART
-
+      - COMPOSE_PROJECT='{{index .Container.Labels "com.docker.compose.project"}}'
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
