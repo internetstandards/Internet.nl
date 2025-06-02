@@ -1,21 +1,21 @@
 .about-section {
   h2 {
-    padding-bottom: 8px;
+    padding-bottom: 0.5rem;
 
-    @media (width >= 900px) {
-      padding-bottom: 24px;
+    @media (width >= 56.25rem) {
+      padding-bottom: 1.5rem;
     }
   }
 
   p {
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 1 / 7;
     }
 
     &:nth-of-type(2) {
-      padding-top: 16px;
+      padding-top: 1rem;
 
-      @media (width >= 900px) {
+      @media (width >= 56.25rem) {
         grid-column: 8 / 13;
         padding-top: 0;
       }
@@ -24,7 +24,7 @@
 
   .about-link {
     justify-self: center;
-    margin-block: 48px;
+    margin-block: 3rem;
 
     &::after {
       mask-image: url("/static/icons/arrow-right.svg");
@@ -37,20 +37,20 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: auto;
-  padding-top: 40px;
+  padding-top: 2.5rem;
   justify-content: space-between;
   align-items: center;
 
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     grid-template-columns: repeat(5, 1fr);
-    gap: 100px;
+    gap: 6.25rem;
     overflow-x: auto;
-    padding-top: 80px;
+    padding-top: 5rem;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     scrollbar-color: var(--green-500) var(--transparent-100);
     scrollbar-width: thin;
-    padding-bottom: 20px;
+    padding-bottom: 1.25rem;
 
     &::-webkit-scrollbar {
       height: 6px;
@@ -58,7 +58,7 @@
 
     &::-webkit-scrollbar-thumb {
       background-color: var(--green-500);
-      border-radius: 10px;
+      border-radius: 0.625rem;
     }
 
     &::-webkit-scrollbar-track {
@@ -75,7 +75,7 @@
     &:last-child {
       display: none;
 
-      @media (width >= 900px) {
+      @media (width >= 56.25rem) {
         display: block;
       }
     }
@@ -92,10 +92,10 @@
 
 .quote-section {
   .container {
-    padding-block: 44px;
-    row-gap: 40px;
+    padding-block: 2.75rem;
+    row-gap: 2.5rem;
 
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       align-items: center;
       gap: 0;
     }
@@ -104,7 +104,7 @@
   .quote-image {
     border-radius: 100%;
 
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 2 / 3;
     }
   }
@@ -112,11 +112,11 @@
   blockquote {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 1rem;
 
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 4 / 12;
-      gap: 40px;
+      gap: 2.5rem;
     }
 
     cite {

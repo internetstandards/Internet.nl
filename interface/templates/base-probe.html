@@ -8,59 +8,52 @@
 {% endblock %}
 
 {% block maincontent %}
-<section class="result-section loading bg-primary ellipse reverse hidden-mobile">
-  <div class="container">
-    <hgroup>
+  <div class="hidethis" aria-hidden="true">
+    <span id="javascript-retries">{{javascript_retries}}</span>
+    <span id="javascript-timeout">{{javascript_timeout}}</span>
+    <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
+    <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
+    <span id="probes-no-redirection">{% include "string.html" with name="probes no-redirection" %}</span>
+    <span id="probes-url">{{probes.0.probesurl}}{{addr}}/</span>
+    <div id="probes">
+    {% for probe in probes %}
+      <div>
+        <span class="probe-name">{{probe.name}}</span>
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+
+  <article class="block fullwidth center">
+    <div class="wrap">
       <h1>
-        <span class="h5 color-secondary">{% include "string.html" with name="base_probe_score_loading_newstring" %}</span>
-        <span class="h1 color-secondary">
-          {% block testtitle %}
-          {% endblock %}
-        </span>
+        {% block testtitle %}
+        {% endblock %}
       </h1>
-      <p class="body-m">
+      <p>
         {% include "string.html" with name="probes tests-duration" cache_ttl="CACHE_TTL"|get_settings_value %}
-        <span class="probing-text hidethis">
+        <span class="probing-text hidethis" aria-hidden="true">
           {% include "string.html" with name="probes auto-redirect" %}
         </span>
         {% include "string.html" with name="probes tests-description" %}
       </p>
-    </hgroup>
-
-    <ul>
-      {% for probe in probes %}
-      <li class="probing icon h7 color-secondary">
-        {% translate probe.title %}
-        <!-- <img id="{{probe.name}}-icon" src="/static/probe-animation.gif" width="20" height="20" alt=""/> -->
-        <span id="{{probe.name}}-summary" class="visually-hidden" aria-live="polite">{% include "string.html" with name="probes test-running" %}</span>
-      </li>
-      {% endfor %}
-      {% block probesnojs %}
-      <li class="jsless">
-        <a href={{no_javascript_redirect}} id="continue" class="connforward">
-          {% include "string.html" with name="probes no-javascript" %}
-        </a>
-      </li>
-      {% endblock %}
-    </ul>
-  </div>
-</section>
-
-<div class="hidethis" aria-hidden="true">
-  <span id="javascript-retries">{{javascript_retries}}</span>
-  <span id="javascript-timeout">{{javascript_timeout}}</span>
-  <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
-  <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
-  <span id="probes-no-redirection">{% include "string.html" with name="probes no-redirection" %}</span>
-  <span id="probes-url">{{probes.0.probesurl}}{{addr}}/</span>
-  <div id="probes">
-  {% for probe in probes %}
-    <div>
-      <span class="probe-name">{{probe.name}}</span>
+      <ul>
+        {% for probe in probes %}
+        <li class="probing">
+          <strong>{% translate probe.title %}</strong>
+          <br/>
+          <img id="{{probe.name}}-icon" src="/static/probe-animation.gif" width="20" height="20" alt=""/>
+          <span id="{{probe.name}}-summary" aria-live="polite" aria-busy="true">{% include "string.html" with name="probes test-running" %}</span>
+        </li>
+        {% endfor %}
+        {% block probesnojs %}
+        <li class="jsless">
+          <a href={{no_javascript_redirect}} id="continue" class="connforward">
+            {% include "string.html" with name="probes no-javascript" %}
+          </a>
+        </li>
+        {% endblock %}
+      </ul>
     </div>
-  {% endfor %}
-  </div>
-</div>
-
-
+  </article>
 {% endblock %}

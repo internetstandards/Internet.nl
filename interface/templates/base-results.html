@@ -11,11 +11,12 @@
 <section class="result-section bg-primary">
   <div class="container">
     <h1>
-      <span class="h5 color-secondary">{% include "string.html" with name="base_results_score_for_newstring" %}</span>
+      <span class="h5 color-secondary visually-hidden">{% include "string.html" with name="base_results_score_for_newstring" %}</span>
       <span class="h1 color-secondary">
         {% block testheadcontent %}
         {% endblock %}
       </span>
+      <span class="h5 color-secondary">{{permadate|date:'(Y-m-d H:i T)'}}</span>
     </h1>
     <div class="meter-container">
       <div class="meter">
@@ -68,9 +69,14 @@
             </a>
           </li>
           <li class="action-card-item">
-            <a class="icon" href="{{retest_link}}">
+            <a class="icon repeat-test link {% if retest_time > 0 %} hidden {% endif %}" href="{{retest_link}}">
               <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
             </a>
+            <p class="icon repeat-test countdown {% if retest_time < 1 %} hidden {% endif %}">
+              <span class="reset icon">
+                <span class="countdown-time-text">{% include "string.html" with name="results retest-time" %} (<span class="countdown-time">{{retest_time}}</span>)</span>
+              </span>
+            </p>
           </li>
           <li class="action-card-item">
             <a class="icon" href="/faqs/report/">
@@ -78,14 +84,14 @@
             </a>
           </li>
         </ul>
-        <p>Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
+        <p class="action-card-description">Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
       </details>
       <button id="copy-link" class="primary-button icon" type="button">
         <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>
         <span class="clicked">{% include "string.html" with name="base_results_share_results_clicked_newstring" %}</span>
       </button>
     </aside>
-    <h2 class="h3 color-secondary">{% include "string.html" with name="base_results_test_details_newstring" %}</h2>
+    <h2 class="h3 color-secondary visually-hidden">{% include "string.html" with name="base_results_test_details_newstring" %}</h2>
     <ul class="result-details-list">
       {% for probe in probes %}
 

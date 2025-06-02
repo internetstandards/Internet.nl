@@ -29,15 +29,22 @@
   <script src="{% static 'js/load-more-min.js' %}" defer></script>
   <script src="{% static 'js/result-meter-min.js' %}" defer></script>
   <script src="{% static 'js/action-card-fallback-min.js' %}" defer></script>
-  <script src="{% static 'js/detect-browser-font-size-min.js' %}" defer></script>
   <script src="{% static 'js/copy-link-min.js' %}" defer></script>
   <script src="{% static 'js/print-min.js' %}" defer></script>
+  <script src="{% static 'js/matomo-min.js' %}" defer></script>
+  <script src="{% static 'js/repeat-test-countdown-min.js' %}" defer></script>
 
   {% block scripting %}
   {% endblock %}
 </head>
 <body class="{{pageclass}}">
-  
+
+  <div class="matomo">
+    <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
+    <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
+    <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
+  </div>
+
   <header>
     <a class="skip-link" href="#main-content">{% include "string.html" with name="base_header_skip_to_main_newstring" %}</a>
     <div class="container">
@@ -46,11 +53,11 @@
         <a class="header-logo" href="/" aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
           <picture class="light-visible">
             <source srcset="/static/logos/logo.svg" media="(width >= 900px)">
-            <img src="/static/logos/logo-mobile.svg" alt="Internet.nl Logo" width="182" height="40">          
+            <img src="/static/logos/logo-mobile.svg" alt="Internet.nl Logo" width="227.5" height="50">          
           </picture>
           <picture class="dark-visible">
             <source srcset="/static/logos/logo-white.svg" media="(width >= 900px)">
-            <img src="/static/logos/logo-white-mobile.svg" alt="Internet.nl Logo" width="182" height="40">          
+            <img src="/static/logos/logo-white-mobile.svg" alt="Internet.nl Logo" width="227.5" height="50">          
           </picture>
         </a>
         {% endif %}
@@ -132,38 +139,26 @@
     <div class="footer-nav">
       <div class="container">
         <a class="footer-logo" href="/" aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
-          <img src="/static/logos/logo-white.svg" alt="Internet.nl Logo" width="182" height="40" loading="lazy">
+          <img src="/static/logos/logo-white.svg" alt="Internet.nl Logo" width="227.5" height="50" loading="lazy">
         </a>
         <ul class="nav-list">
           <li class="nav-item">
-            <a class="icon" href="/test-tools">
-              <span>{% include "string.html" with name="base_footer_test_tools_newstring" %}</span>
-            </a>
+            <a class="icon" href="/test-tools">{% include "string.html" with name="base_footer_test_tools_newstring" %}</a>
           </li>
           <li class="nav-item">
-            <a class="icon" href="/faqs">
-              <span>{% include "string.html" with name="base_footer_knowledge_base_newstring" %}</span>
-            </a>
+            <a class="icon" href="/faqs">{% include "string.html" with name="base_footer_knowledge_base_newstring" %}</a>
           </li>
           <li class="nav-item">
-            <a class="icon" href="/halloffame">
-              <span>{% include "string.html" with name="base_footer_hall_of_fame_newstring" %}</span>
-            </a>
+            <a class="icon" href="/halloffame">{% include "string.html" with name="base_footer_hall_of_fame_newstring" %}</a>
           </li>
           <li class="nav-item">
-            <a class="icon" href="/articles">
-              <span>{% include "string.html" with name="base_footer_news_newstring" %}</span>
-            </a>
+            <a class="icon" href="/articles">{% include "string.html" with name="base_footer_news_newstring" %}</a>
           </li>
           <li class="nav-item">
-            <a class="icon" href="/about">
-              <span>{% include "string.html" with name="base_footer_about_us_newstring" %}</span>
-            </a>
+            <a class="icon" href="/about">{% include "string.html" with name="base_footer_about_us_newstring" %}</a>
           </li>
           <li class="nav-item">
-            <a class="icon" href="/contact">
-              <span>{% include "string.html" with name="base_footer_service_contact_newstring" %}</span>
-            </a>
+            <a class="icon" href="/contact">{% include "string.html" with name="base_footer_service_contact_newstring" %}</a>
           </li>
         </ul>
       </div>

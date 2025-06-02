@@ -4,15 +4,15 @@
 .secondary-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 8px;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
   justify-content: center;
   font: var(--section-button-m);
   transition: border 0.3s, background-color 0.3s;
   width: 100%;
 
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     width: auto;
   }
 
@@ -23,7 +23,7 @@
 
   &.rounded {
     border-radius: 100%;
-    padding: 6px;
+    padding: 0.375rem;
     border: none;
     width: fit-content;
 
@@ -64,12 +64,12 @@
 .button-container {
   display: grid;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   width: 100%;
 
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    gap: 1.5rem;
     width: fit-content;
   }
 }
@@ -79,61 +79,61 @@
 
 .intro-section {
   .container {
-    padding-block: 64px;
+    padding-block: 4rem;
 
-    @media (width >= 900px) {
-      padding-block: 78px;
+    @media (width >= 56.25rem) {
+      padding-block: 4.875rem;
     }
   }
 
   hgroup {
-    gap: 24px;
+    gap: 1.5rem;
 
-    @media (width >= 900px) {
-      gap: 36px;
+    @media (width >= 56.25rem) {
+      gap: 2.25rem;
       grid-column: 2 / 12;
     }
 
     .article-category {
-      padding: 8px 16px;
+      padding: 0.5rem 1rem;
       background-color: var(--white-100);
-      border-radius: 8px;
+      border-radius: 0.5rem;
     }
   }
 }
 
 .article-index-section {
-  margin-bottom: 64px;
+  margin-bottom: 4rem;
 
   .container {
-    padding-top: 48px;
+    padding-top: 3rem;
 
-    @media (width >= 900px) {
-      padding-top: 48px;
+    @media (width >= 56.25rem) {
+      padding-top: 3rem;
     }
   }
 
   hgroup {
-    gap: 16px;
+    gap: 1rem;
 
-    @media (width >= 900px) {
-      gap: 24px;
+    @media (width >= 56.25rem) {
+      gap: 1.5rem;
     }
   }
 }
 
 .article-content-section {
   .container {
-    gap: 24px;
-    border-bottom: 0.5px solid var(--green-400);
-    padding-bottom: 20px;
+    row-gap: 1.5rem;
+    border-bottom: 0.0313rem solid var(--green-400);
+    padding-bottom: 1.25rem;
 
-    @media (width >= 900px) {
-      padding-bottom: 40px;
+    @media (width >= 56.25rem) {
+      padding-bottom: 2.5rem;
     }
 
     > * {
-      @media (width >= 900px) {
+      @media (width >= 56.25rem) {
         grid-column: 2 / 12;
       }
     }
@@ -158,8 +158,8 @@
 
   code {
     background: var(--bg-color-primary);
-    padding: 4px;
-    border-radius: 4px;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
   }
 
   ul, ol {
@@ -170,22 +170,22 @@
   li {
     font: var(--section-body-xl);
     color: var(--body-color-primary);
-    padding-block: 6px;
+    padding-block: 0.375rem;
     font-weight: 500;
   }
 
   &.footer-page .container {
-    padding-block: 20px;
+    padding-block: 1.25rem;
 
-    @media (width >= 900px) {
-      padding-block: 40px;
+    @media (width >= 56.25rem) {
+      padding-block: 2.5rem;
     }
 
     > * {
       grid-column: span 12;
       display: flex;
       flex-direction: column;
-      row-gap: 24px;
+      row-gap: 1.5rem;
     }
   }
 }
@@ -195,10 +195,14 @@
 
 .card-section {
   .container {
-    gap: 24px;
+    row-gap: 1.5rem;
 
-    @media (width >= 900px) {
-      gap: 48px;
+    @media (width >= 56.25rem) {
+      row-gap: 3rem;
+    }
+
+    .h3 {
+      text-align: center;
     }
 
     .h3,
@@ -210,27 +214,27 @@
 
 .card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(18.75rem, 100%), 1fr));
+  gap: 1.5rem;
 
-  @media (width >= 900px) {
-    gap: 32px;
+  @media (width >= 56.25rem) {
+    gap: 2rem;
   }
 }
 
 .card {
-  border-radius: 8px;
+  border-radius: 0.5rem;
 
   a {
     display: flex;
     flex-direction: column;
-    padding: 24px;
-    gap: 24px;
+    padding: 1.5rem;
+    gap: 1.5rem;
     position: relative;
     z-index: 1;
     justify-content: space-between;
     height: 100%;
-    border-radius: 8px;
+    border-radius: 0.5rem;
   }
 
   &.news-card {
@@ -250,7 +254,7 @@
   }
 
   hgroup {
-    gap: 16px;
+    gap: 1rem;
 
     h2, h3 {
       font: var(--card-header-l);
@@ -263,14 +267,14 @@
   }
 
   &.large {
-    translate: 0 48px;
+    translate: 0 3rem;
     border: var(--card-border);
 
-    @media (width >= 900px) {
-      translate: 0 64px;
+    @media (width >= 56.25rem) {
+      translate: 0 4rem;
 
       a {
-        padding: 40px;
+        padding: 2.5rem;
       }
     }
 
@@ -293,8 +297,8 @@
     background-color: var(--white-100);
     color: var(--green-500);
     font: var(--card-header-xs);
-    border-radius: 4px;
-    padding: 8px 20px;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1.25rem;
     width: fit-content;
   }
 
@@ -309,7 +313,7 @@
       @supports (transition-behavior: allow-discrete) {
         transition: display 0.5s, opacity 0.5s, left 0.5s, translate 0.5s;
         transition-behavior: allow-discrete;
-        translate: 0 25px;
+        translate: 0 1.5625rem;
         opacity: 0;
       }
     }
@@ -323,7 +327,7 @@
           opacity: 1;
           
           @starting-style {
-            translate: 0 25px;
+            translate: 0 1.5625rem;
             opacity: 0;
           }
         }
@@ -357,7 +361,7 @@
   &.hidden-mobile::after {
     display: none;
 
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       display: block;
     }
   }
@@ -367,10 +371,10 @@
       mask-image: url("/static/icons/ellipse-multiple.svg");
       mask-position: bottom left;
       transform: scaleY(-1);
-      mask-size: 1000px;
-      border-radius: 16px;
+      mask-size: 62.5rem;
+      border-radius: 1rem;
   
-      @media (width >= 900px) {
+      @media (width >= 56.25rem) {
         mask-size: cover;
         transform: scaleY(1);
       }
@@ -379,7 +383,7 @@
     &.reverse::after {
       transform: scale(-1);
   
-      @media (width >= 900px) {
+      @media (width >= 56.25rem) {
         transform: scaleX(-1);
       }
     }
@@ -394,7 +398,7 @@
       mask-position: bottom left;
       mask-size: cover;
       background: var(--ellipse-color-light);
-      border-radius: 8px;
+      border-radius: 0.5rem;
     }
   
     &:nth-child(3n + 1)::after {
@@ -450,7 +454,7 @@
     list-style: none;
     display: flex;
     justify-content: space-between;
-    gap: 24px;
+    gap: 1.5rem;
     hyphens: auto;
     word-break: break-word;
 
@@ -462,6 +466,7 @@
       mask-image: url("/static/icons/angle-down.svg");
       display: block;
       transition: transform 0.3s;
+      background-color: var(--accordion-heading-color);
     }
   }
 }

@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2025-05-27 14:55:39.942551\n"
+"PO-Revision-Date: 2025-01-28 12:01:21.412632\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -395,7 +395,7 @@ msgstr ""
 "\n"
 "[PGP public key](/static/question@internet.nl_0x45028563.asc)  \n"
 "Fingerprint: ACB7 8829 4C7E 12BA E922 8C60 D894 E15F 4502 8563  \n"
-"Expiration date: 28th of March 2028"
+"Expiration date: 19th of March 2025"
 
 #, md-format
 msgid "about content"
@@ -1274,13 +1274,13 @@ msgstr ""
 
 msgid "detail mail rpki exists exp"
 msgstr ""
-"We check if an RPKI Route Origin Authorisation (ROA) has been published for all IP addresses of your mail server(s) (MX).\n"
+"We check if an RPKI Route Origin Authorization (ROA) has been published for all IP addresses of your mail server(s) (MX).\n"
 "\n"
 "Your hoster (or its network provider) announces through the Border Gateway Protocol (BGP) for which of its IP address blocks it accepts incoming Internet traffic. Other network providers use these route announcements to determine via which route to send traffic for your server's IP addresses.\n"
 "\n"
 "However, a route announcement can be faked. In fact, another network provider may be able to connect the IP address block of your IP address to its network and thus potentially receive Internet traffic that is actually intended for your network provider. The cause may be accidental or malicious. In either case, this can result in your server becoming unreachable or in Internet traffic to your server being intercepted.\n"
 "\n"
-"Resource Public Key Infrastructure (RPKI) significantly improves protection against this. With RPKI, the rightful holder of a block of IP addresses can publish a digitally signed statement with route authorisation (Route Origin Authorisation; ROA for short). Another network provider that wants to send Internet traffic to a particular IP address, can use the corresponding statement to filter out `Invalid` routes. In this way, the network provider prevents Internet traffic from its network from being sent to unauthorized provider networks."
+"Resource Public Key Infrastructure (RPKI) significantly improves protection against this. With RPKI, the rightful holder of a block of IP addresses can publish a digitally signed statement with route authorization (Route Origin Authorisation; ROA for short). Another network provider that wants to send Internet traffic to a particular IP address, can use the corresponding statement to filter out `Invalid` routes. In this way, the network provider prevents Internet traffic from its network from being sent to unauthorized provider networks."
 
 msgid "detail mail rpki exists label"
 msgstr "Route Origin Authorisation existence"
@@ -1305,13 +1305,13 @@ msgstr ""
 
 msgid "detail mail rpki mx-ns-exists exp"
 msgstr ""
-"We check if an RPKI Route Origin Authorisation (ROA) has been published for all IP addresses of the name servers of your mail server(s) (MX).\n"
+"We check if an RPKI Route Origin Authorization (ROA) has been published for all IP addresses of the name servers of your mail server(s) (MX).\n"
 "\n"
 "Your hoster (or its network provider) announces through the Border Gateway Protocol (BGP) for which of its IP address blocks it accepts incoming Internet traffic. Other network providers use these route announcements to determine via which route to send traffic for your server's IP addresses.\n"
 "\n"
 "However, a route announcement can be faked. In fact, another network provider may be able to connect the IP address block of your IP address to its network and thus potentially receive Internet traffic that is actually intended for your network provider. The cause may be accidental or malicious. In either case, this can result in your server becoming unreachable or in Internet traffic to your server being intercepted.\n"
 "\n"
-"Resource Public Key Infrastructure (RPKI) significantly improves protection against this. With RPKI, the rightful holder of a block of IP addresses can publish a digitally signed statement with route authorisation (Route Origin Authorisation; ROA for short). Another network provider that wants to send Internet traffic to a particular IP address, can use the corresponding statement to filter out `Invalid` routes. In this way, the network provider prevents Internet traffic from its network from being sent to unauthorized provider networks."
+"Resource Public Key Infrastructure (RPKI) significantly improves protection against this. With RPKI, the rightful holder of a block of IP addresses can publish a digitally signed statement with route authorization (Route Origin Authorisation; ROA for short). Another network provider that wants to send Internet traffic to a particular IP address, can use the corresponding statement to filter out `Invalid` routes. In this way, the network provider prevents Internet traffic from its network from being sent to unauthorized provider networks."
 
 msgid "detail mail rpki mx-ns-exists label"
 msgstr "Route Origin Authorisation existence"
@@ -1464,46 +1464,6 @@ msgid "detail mail rpki valid verdict not-routed"
 msgstr ""
 "This subtest did *not* run, because *no* route announcement was available "
 "for any of the IP addresses."
-
-msgid "detail mail tls caa exp"
-msgstr ""
-"We check if the name servers of each of your receiving mail servers (MX) contain one or more CAA records, that are syntactically valid and sufficiently protective.\n"
-"\n"
-"Certification Authority Authorisation (CAA) allows you as a DNS domain name holder to specify one or more certificate authority authorised to issue certificates for your mail server domain names.\n"
-"A certificate authority must not issue a certificate unless the certificate authority determines that the certificate request is consistent with the applicable CAA records.\n"
-"\n"
-"Note that CAA records are located during validation by walking up the DNS hierarchy until one or more records are found.\n"
-"For example, if no CAA records are found on `sub.example.nl`, `example.nl` will be queried.\n"
-"The domain were the applicable CAA records are found is shown in the table with technical details below.\n"
-"\n"
-"The verdict is good if one or more CAA records were found that all have correct syntax, and at least one of these CAA records has the `issue` tag.\n"
-"Otherwise, the test will result in a fail.\n"
-"It is not checked whether the certificate authority of the current TLS certificate matches one or more of the `issue` and `issuewild` values, i.e., whether the current certificate could be reissued at this time.\n"
-"\n"
-"If your are using the Automatic Certificate Management Environment (ACME) standard and your certificate authority supports it, we recommend you to use the parameters `validationmethods` and `accounturi` to further restrict isssuance by the authorised certificate authority. Furthermore, it is recommended to add `issuewild`, `issuemail` and `issuevmc` with an empty `;` if you do not use wildcard, S/MIME and/or BIMI certificates respectively. Otherwise, any certificate authority is still allowed to issue these certificates for your domain, since `issue` does not cover them.\n"
-"\n"
-"We expect URLs in `iodef` to be secure (i.e. use HTTPS scheme).\n"
-"Furthermore, to prevent suppression or spoofing of CAA records we strongly recommend you to use DNSSEC, although this CAA test does not specifically test for DNSSEC.\n"
-"\n"
-"*Requirement level: Recommended*"
-
-msgid "detail mail tls caa label"
-msgstr "CAA for mail server"
-
-msgid "detail mail tls caa tech table"
-msgstr "Mail server|Findings"
-
-msgid "detail mail tls caa verdict bad"
-msgstr "Your mail server does *not* have CAA."
-
-msgid "detail mail tls caa verdict good"
-msgstr "Your mail server has a valid, sufficiently protective CAA. "
-
-msgid "detail mail tls caa verdict insufficient"
-msgstr "Your mail server has a valid, but *unsufficiently* protective CAA."
-
-msgid "detail mail tls caa verdict syntax-error"
-msgstr "Your mail server has an *invalid* CAA."
 
 msgid "detail mail tls cert-hostmatch exp"
 msgstr ""
@@ -2259,86 +2219,6 @@ msgstr ""
 msgid "detail tech data bogus"
 msgstr "bogus"
 
-msgid "detail tech data caa caa-record"
-msgstr "Record: {record}"
-
-msgid "detail tech data caa caa_record"
-msgstr "caa record found: {record}"
-
-msgid "detail tech data caa found-host"
-msgstr "CAA found on: {host}"
-
-msgid "detail tech data caa found_host"
-msgstr "found CAA on host {host}"
-
-msgid "detail tech data caa invalid-flags-reserved-bits"
-msgstr "Error: Invalid reserved flags \"{flags}\""
-
-msgid "detail tech data caa invalid-parameter-validation-methods"
-msgstr "Error: Invalid 'validationmethods' value \"{parameter_value}\""
-
-msgid "detail tech data caa invalid-property-contactemail-value"
-msgstr "Error: Invalid 'contactemail' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-contactphone-value"
-msgstr "Error: Invalid 'contactphone' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-iodef-value"
-msgstr "Error: Invalid 'iodef' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-issuemail-value"
-msgstr "Error: Invalid 'issuemail' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-syntax"
-msgstr ""
-"Error: Invalid \"{invalid_character}\" at position "
-"{invalid_character_position} in '{property_name}' value \"{property_value}\""
-" "
-
-msgid "detail tech data caa invalid-reserved-property"
-msgstr "Error: Invalid reserved property \"{property_tag}\""
-
-msgid "detail tech data caa invalid-unknown-property"
-msgstr "Error: Unknown property \"{property_tag}\""
-
-msgid "detail tech data caa invalid_flags_reserved_bits"
-msgstr "invalid_flags_reserved_bits {value}"
-
-msgid "detail tech data caa invalid_property_contactemail_value"
-msgstr "invalid_property_contactemail_value {value}"
-
-msgid "detail tech data caa invalid_property_contactphone_value"
-msgstr "invalid_property_contactphone_value {value}"
-
-msgid "detail tech data caa invalid_property_iodef_value"
-msgstr "invalid_property_iodef_value {value}"
-
-msgid "detail tech data caa invalid_property_issue_validation_method"
-msgstr "invalid_property_issue_validation_method {value}"
-
-msgid "detail tech data caa invalid_property_issuemail_value"
-msgstr "invalid_property_issuemail_value {value}"
-
-msgid "detail tech data caa invalid_property_syntax"
-msgstr ""
-"invalid_property_syntax name {property_name} value {property_value} invalid "
-"character {invalid_character} at pos {invalid_character_position}"
-
-msgid "detail tech data caa invalid_reserved_property"
-msgstr "invalid_reserved_property {value}"
-
-msgid "detail tech data caa invalid_unknown_property"
-msgstr "invalid_unknown_property {value}"
-
-msgid "detail tech data caa missing-required-property-issue"
-msgstr "Error: Required 'issue' property missing"
-
-msgid "detail tech data caa not-found"
-msgstr "Error: CAA not found"
-
-msgid "detail tech data caa not_found"
-msgstr "CAA not found"
-
 msgid "detail tech data good"
 msgstr "good"
 
@@ -2394,7 +2274,7 @@ msgstr ""
 
 msgid "detail tech data http-csp missing-invalid-frame-src"
 msgstr ""
-"Recommendation: 'frame-src' (or 'child-src' or 'default-src' as fallback) "
+"Recommendation: 'frame-src' (or child-src' or 'default-src' as fallback) "
 "with sufficiently secure value should be defined (#3)."
 
 msgid "detail tech data http-csp no-policy-found"
@@ -3038,13 +2918,13 @@ msgstr "All your web servers with an IPv6 address are reachable over IPv6."
 
 msgid "detail web rpki exists exp"
 msgstr ""
-"We check if an RPKI Route Origin Authorisation (ROA) has been published for all IP addresses of your web server.\n"
+"We check if an RPKI Route Origin Authorization (ROA) has been published for all IP addresses of your web server.\n"
 "\n"
 "Your hoster (or its network provider) announces through the Border Gateway Protocol (BGP) for which of its IP address blocks it accepts incoming Internet traffic. Other network providers use these route announcements to determine via which route to send traffic for your server's IP addresses.\n"
 "\n"
 "However, a route announcement can be faked. In fact, another network provider may be able to connect the IP address block of your IP address to its network and thus potentially receive Internet traffic that is actually intended for your network provider. The cause may be accidental or malicious. In either case, this can result in your server becoming unreachable or in Internet traffic to your server being intercepted.\n"
 "\n"
-"Resource Public Key Infrastructure (RPKI) significantly improves protection against this. With RPKI, the rightful holder of a block of IP addresses can publish a digitally signed statement with route authorisation (Route Origin Authorisation; ROA for short). Another network provider that wants to send Internet traffic to a particular IP address, can use the corresponding statement to filter out `Invalid` routes. In this way, the network provider prevents Internet traffic from its network from being sent to unauthorized provider networks."
+"Resource Public Key Infrastructure (RPKI) significantly improves protection against this. With RPKI, the rightful holder of a block of IP addresses can publish a digitally signed statement with route authorization (Route Origin Authorisation; ROA for short). Another network provider that wants to send Internet traffic to a particular IP address, can use the corresponding statement to filter out `Invalid` routes. In this way, the network provider prevents Internet traffic from its network from being sent to unauthorized provider networks."
 
 msgid "detail web rpki exists label"
 msgstr "Route Origin Authorisation existence"
@@ -3131,45 +3011,6 @@ msgid "detail web rpki valid verdict not-routed"
 msgstr ""
 "This subtest did *not* run, because *no* route announcement was available "
 "for any of the IP addresses."
-
-msgid "detail web tls caa exp"
-msgstr ""
-"We check if the name servers of your website domain contain one or more CAA records, that are syntactically valid and sufficiently protective.\n"
-"\n"
-"Certification Authority Authorisation (CAA) allows you as a DNS domain name holder to specify one or more certificate authorities authorised to issue certificates for your domain name.\n"
-"A certificate authority must not issue a certificate unless the CA determines that the certificate request is consistent with the applicable CAA records.\n"
-"\n"
-"Note that CAA records are located during validation by walking up the DNS hierarchy until one or more records are found.\n"
-"For example, if no CAA records are found on `sub.example.nl`, `example.nl` will be queried.\n"
-"The domain were the applicable CAA records are found is shown in the table with technical details below.\n"
-"\n"
-"The verdict is good if one or more CAA records were found that all have correct syntax, and at least one of these CAA records has the `issue` tag with a valid value.\n"
-"Otherwise, the test will result in a fail. It is not checked whether the certificate authority of the current certificate matches one or more of the `issue` and `issuewild` values, i.e., whether the current certificate could be reissued at this time.\n"
-"\n"
-"If your are using the Automatic Certificate Management Environment (ACME) standard and your certificate authority supports it, we recommend you to use the parameters `validationmethods` and `accounturi` to further restrict isssuance by the authorised certificate authority. Furthermore, it is recommended to add `issuewild`, `issuemail` and `issuevmc` with an empty `;` if you do not use wildcard, S/MIME and/or BIMI certificates respectively. Otherwise, any certificate authority is still allowed to issue these certificates for your domain, since `issue` does not cover them.\n"
-"\n"
-"We expect URLs in `iodef` to be secure (i.e. use HTTPS scheme). \n"
-"Furthermore, to prevent suppression or spoofing of CAA records we strongly recommend you to use DNSSEC, although this CAA test does not specifically test for DNSSEC.\n"
-"\n"
-"*Requirement level: Recommended*"
-
-msgid "detail web tls caa label"
-msgstr "CAA for domain"
-
-msgid "detail web tls caa tech table"
-msgstr "Findings"
-
-msgid "detail web tls caa verdict bad"
-msgstr "Your domain does *not* have CAA."
-
-msgid "detail web tls caa verdict good"
-msgstr "Your domain has a valid, sufficiently protective CAA. "
-
-msgid "detail web tls caa verdict insufficient"
-msgstr "Your domain has a valid, but *unsufficiently* protective CAA."
-
-msgid "detail web tls caa verdict syntax-error"
-msgstr "Your domain has an *invalid* CAA."
 
 msgid "detail web tls cert-hostmatch exp"
 msgstr ""
@@ -4387,20 +4228,10 @@ msgstr ""
 "* [How HTTPS works](https://howhttps.works/)\n"
 "\n"
 "## Specifications\n"
-"### HTTPS\n"
 "* [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)\n"
 "* [RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3](https://www.rfc-editor.org/rfc/rfc8446)\n"
 "* [RFC 5246: The Transport Layer Security (TLS) Protocol, Version 1.2](https://www.rfc-editor.org/rfc/rfc5246)\n"
-"* [RFC 9325:Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)](https://www.rfc-editor.org/rfc/rfc9325.html)\n"
 "* [RFC 6797: HTTP Strict Transport Security (HSTS)](https://www.rfc-editor.org/rfc/rfc6797)\n"
-"\n"
-"### CAA\n"
-"* [RFC8659: DNS Certification Authority Authorization (CAA) Resource Record](https://www.rfc-editor.org/rfc/rfc8659.html)\n"
-"* [RFC8657: Certification Authority Authorization (CAA) Record Extensions for Account URI and Automatic Certificate Management Environment (ACME) Method Binding](https://www.rfc-editor.org/rfc/rfc8657.html) \n"
-"* [Baseline Requirements by Certification Authority Browser Forum](https://cabforum.org/working-groups/server/baseline-requirements/requirements/)\n"
-"* [Certification Authority Restriction Properties by IANA](https://www.iana.org/assignments/pkix-parameters/pkix-parameters.xhtml#caa-properties)\n"
-"\n"
-"### DANE\n"
 "* [RFC 6698: The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA](https://www.rfc-editor.org/rfc/rfc6698)"
 
 #, md-format
@@ -5896,3 +5727,48 @@ msgstr ""
 "# Website test widget\n"
 "Would you like visitors of your website to be able to directly start a website test?  \n"
 "Copy the HTML and CSS code from the text fields below into the source code of your website."
+
+msgid "detail web caa label"
+msgstr "CAA web"
+
+msgid "detail mail caa label"
+msgstr "CAA mail"
+
+msgid "detail web caa tech table"
+msgstr "Findings"
+
+msgid "detail mail caa tech table"
+msgstr "Mail server|Findings"
+
+msgid "detail tech data caa invalid_property_syntax"
+msgstr "invalid_property_syntax name {property_name} value {property_value} invalid character {invalid_character} at pos {invalid_character_position}"
+
+msgid "detail tech data caa invalid_unknown_property"
+msgstr "invalid_unknown_property {value}"
+
+msgid "detail tech data caa invalid_reserved_property"
+msgstr "invalid_reserved_property {value}"
+
+msgid "detail tech data caa invalid_flags_reserved_bits"
+msgstr "invalid_flags_reserved_bits {value}"
+
+msgid "detail tech data caa invalid_property_issuemail_value"
+msgstr "invalid_property_issuemail_value {value}"
+
+msgid "detail tech data caa invalid_property_contactphone_value"
+msgstr "invalid_property_contactphone_value {value}"
+
+msgid "detail tech data caa invalid_property_contactemail_value"
+msgstr "invalid_property_contactemail_value {value}"
+
+msgid "detail tech data caa invalid_property_iodef_value"
+msgstr "invalid_property_iodef_value {value}"
+
+msgid "detail tech data caa invalid_property_issue_validation_method"
+msgstr "invalid_property_issue_validation_method {value}"
+
+msgid "detail tech data caa found_host"
+msgstr "found CAA on host {host}"
+
+msgid "detail tech data caa not_found"
+msgstr "CAA not found"

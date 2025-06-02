@@ -1,20 +1,20 @@
 .hall-of-fame-section {
   .container {
-    row-gap: 24px;
-    padding-block: 32px;
+    row-gap: 1.5rem;
+    padding-block: 2rem;
 
-    @media (width >= 900px) {
-      row-gap: 48px;
-      padding-block: 32px;
+    @media (width >= 56.25rem) {
+      row-gap: 3rem;
+      padding-block: 2rem;
     }
   }
 
   hgroup {
-    gap: 8px;
+    gap: 0.5rem;
     
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 3 / 11;
-      gap: 16px;
+      gap: 1rem;
     }
   }
 
@@ -22,7 +22,7 @@
     place-self: center;
   }
 
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     .hall-of-fame-list {
       grid-column: span 12;
     }
@@ -30,13 +30,13 @@
 }
 
 .filter-section {
-  translate: 0 -65px;
-  margin: 0 16px -65px;
+  translate: 0 -4.0625rem;
+  margin: 0 1rem -4.0625rem;
   z-index: 1;
 
-  @media (width >= 900px) {
-    translate: 0 -75px;
-    margin: 0 0 -75px;
+  @media (width >= 56.25rem) {
+    translate: 0 -4.6875rem;
+    margin: 0 0 -4.6875rem;
   }
 
   .filter-container {
@@ -45,15 +45,15 @@
     box-shadow: var(--card-box-shadow);
     display: flex;
     justify-content: center;
-    padding: 24px;
-    border-radius: 8px;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
     flex-direction: column;
-    gap: 16px;
+    gap: 1rem;
 
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 3 / 11;
       width: 100%;
-      gap: 48px;
+      gap: 3rem;
       align-items: center;
       flex-direction: row;
     }
@@ -67,18 +67,18 @@
 
 .hosters-section {
   .container {
-    gap: 32px 16px;
+    gap: 2rem 1rem;
 
-    @media (width >= 900px) {
-      gap: 64px 32px;
+    @media (width >= 56.25rem) {
+      gap: 4rem 2rem;
     }
   }
   
   hgroup { 
-    gap: 16px;
+    gap: 1rem;
     text-align: center;
     
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 2 / 10;
       text-align: start;
     }
@@ -87,11 +87,11 @@
   .image-container {
     background-color: var(--green-100);
     border-radius: 100%;
-    padding: 24px 38px;
+    padding: 1.5rem 2.375rem;
     place-self: center;
     order: -1;
 
-    @media (width >= 900px) {
+    @media (width >= 56.25rem) {
       grid-column: 10 / 12;
       order: unset;
     }
@@ -100,22 +100,22 @@
 
 .hall-of-fame-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 50%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(12.5rem, 50%), 1fr));
   grid-auto-flow: dense;
-  gap: 24px;
+  gap: 1.5rem;
   
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     grid-column: 2 / 12;
   }
 
   li a {
     text-wrap: nowrap;
     text-overflow: ellipsis;
-    padding: 12px 8px;
+    padding: 0.75rem 0.5rem;
     background-color: var(--button-bg-color-hoster);
     color: var(--button-text-color-hoster);
     font: var(--section-button-m);
-    border-radius: 4px;
+    border-radius: 0.25rem;
     text-align: center;
     display: block;
     overflow: clip;

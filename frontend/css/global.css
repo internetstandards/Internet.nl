@@ -73,7 +73,7 @@
 }
 
 html {
-  scroll-padding-top: 50px;
+  scroll-padding-top: 3.125rem;
 }
 
 body {
@@ -88,12 +88,12 @@ body {
 main {
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  margin-bottom: 40px;
+  gap: 2.5rem;
+  margin-bottom: 2.5rem;
 
-  @media (width >= 900px) {
-    gap: 40px;
-    margin-bottom: 40px;
+  @media (width >= 56.25rem) {
+    gap: 2.5rem;
+    margin-bottom: 2.5rem;
   }
 }
 
@@ -124,9 +124,9 @@ video {
 }
 
 .container {
-  max-inline-size: 1240px;
+  max-inline-size: 77.5rem;
   margin-inline: auto;
-  padding-inline: 16px;
+  padding-inline: 1rem;
 }
 
 .light-visible {
@@ -141,7 +141,7 @@ video {
   position: absolute;
   left: -9999px;
   z-index: 999;
-  padding: 16px;
+  padding: 1rem;
   background-color: var(--black-100);
   color: var(--white-100);
   opacity: 0;
@@ -155,7 +155,7 @@ video {
 
 .visually-hidden {
   border: 0;
-  clip: rect(1px,1px,1px,1px);
+  clip: rect(1px, 1px, 1px, 1px);
   clip-path: inset(50%);
   height: 1px;
   margin: -1px;
@@ -171,7 +171,7 @@ body:has(.nav-controls.active) .skip-link {
 }
 
 body:has(.nav-controls.active) {
-  @media (width <= 900px) {
+  @media (width <= 56.25rem) {
     overflow: hidden;
   }
 }
@@ -264,10 +264,10 @@ hgroup {
   mask-repeat: no-repeat;
   mask-size: cover;
   display: none;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  min-height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
 }
 
 [class*="section"] {
@@ -280,16 +280,16 @@ hgroup {
   }
 
   &.bg-primary, &.bg-secondary {
-    margin-inline: 16px;
-    border-radius: 16px;
+    margin-inline: 1rem;
+    border-radius: 1rem;
 
     &:first-child {
       margin-inline: 0;
       border-radius: 0;
 
-      @media (width >= 900px) {
-        margin-inline: 16px;
-        border-radius: 16px;
+      @media (width >= 56.25rem) {
+        margin-inline: 1rem;
+        border-radius: 1rem;
       }
     }
   }
@@ -317,4 +317,12 @@ hgroup {
   &:hover {
     transform: scale(1.03);
   }
+}
+
+.matomo {
+  display: none;
+}
+
+.hidethis {
+  display: none;
 }
