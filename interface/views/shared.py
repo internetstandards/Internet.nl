@@ -3,6 +3,7 @@
 import random
 import re
 from datetime import datetime
+from typing import Optional
 from urllib.parse import urlparse
 
 import dns
@@ -26,7 +27,6 @@ from checks.resolver import dns_resolve, dns_resolve_soa
 from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
-
 
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
 # RFCs and other rulings that combine to define what is a valid domain name.
@@ -484,7 +484,7 @@ class SafeHttpResponseRedirect(HttpResponseRedirect):
             raise DisallowedRedirect("Unsafe redirect to URL: %s" % redirect_to)
 
 
-def latest_report(model, domain_name: str, date: datetime):
+def latest_report(model, domain_name: str, date: datetime) -> Optional[int]:
     # probably the default ordering in the database is on -id or -timestamp. Both will work.
     # domain does not have an index, timestamp neither. This might be a problem, but it also might just work fine.
 
@@ -500,4 +500,7 @@ def latest_report(model, domain_name: str, date: datetime):
         log.debug("Aiding the user to set the date of the date to the latest report of the day.")
         date = date.replace(hour=23, minute=59, second=59)  # try to get the latest report of this day.
 
-    return model.objects.all().filter(domain=domain_name, timestamp__lte=date).order_by("-timestamp").first()
+    report = (
+        model.objects.all().filter(domain=domain_name, timestamp__lte=date).order_by("-timestamp").only("id").first()
+    )
+    return report.id if report else None

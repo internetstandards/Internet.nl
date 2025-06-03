@@ -184,8 +184,8 @@ def resultscurrent(request, mailaddr):
 
 
 def resultsstored_historic(request, domain_name, date):
-    if report := latest_report(MailTestReport, domain_name, date):
-        return resultsrender(report.domain, report, request)
+    if report_id := latest_report(MailTestReport, domain_name, date):
+        return HttpResponseRedirect(f"/mail/{domain_name}/{report_id}/")
     return HttpResponseNotFound()
 
 
