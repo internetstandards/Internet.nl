@@ -229,6 +229,7 @@ services:
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
     stop_grace_period: 10m
+    stop_signal: SIGTERM
 
     depends_on:
       db-migrate:
@@ -273,6 +274,7 @@ services:
       - DB_PASSWORD=password
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERY_WORKER_SOFT_SHUTDOWN_TIMEOUT=300
       - CACHE_LOCATION=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=internetnl.settings
       - STATSD_HOST=statsd

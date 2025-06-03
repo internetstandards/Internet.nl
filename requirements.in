@@ -8,7 +8,7 @@ Django<5
 django-redis<5
 
 # 5.3 solves redis connection leak using the 'result_backend_thread_safe' option
-celery>5.3
+celery>=5.5
 
 setuptools-rust
 beautifulsoup4
