@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.10.1 (in progress)
+
+- Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
+- Fixed possible exception in [mail test prechecks](https://github.com/internetstandards/Internet.nl/pull/1787).
+
 ## 1.10.0
 
 _Compared to the latest 1.9 release._
