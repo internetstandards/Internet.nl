@@ -38,7 +38,13 @@ class CAAEvaluation:
 
         for caa in caa_records:
             try:
-                validate_caa_record(caa.flags, caa.tag.decode("ascii"), caa.value.decode("ascii"))
+                # For encoding, RFC8659 4.1 says tags are A-z0-9, so decoding as ascii is fine.
+                # Value is "binary values", but currently all are probably ascii.
+                # Most of the real validation is done later, including in ABNF, so we
+                # accept encoding errors here with a replace.
+                validate_caa_record(
+                    caa.flags, caa.tag.decode("ascii", errors="replace"), caa.value.decode("utf-8", errors="replace")
+                )
             except CAAParseError as cpe:
                 self.errors.append(TranslatableTechTableItem(cpe.msg_id, cpe.context))
 
