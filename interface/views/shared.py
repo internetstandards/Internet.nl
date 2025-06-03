@@ -20,7 +20,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from dns.rdatatype import RdataType
 from dns.resolver import NXDOMAIN, NoAnswer, LifetimeTimeout, NoNameservers
-from dns.exception import Timeout
 
 from checks.resolver import dns_resolve, dns_resolve_soa
 from checks.tasks.dispatcher import ProbeTaskResult
@@ -287,7 +286,7 @@ def get_valid_domain_mail(mailaddr, timeout=5):
 
     try:
         dns_resolve_soa(dname)
-    except (NXDOMAIN, Timeout):
+    except (NoNameservers, NXDOMAIN, LifetimeTimeout, dns.name.EmptyLabel):
         return None
     except NoAnswer:
         # We're fine with it if any record exists
