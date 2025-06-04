@@ -23,10 +23,12 @@ beautifulsoup4==4.12.3
 billiard==4.2.1
     # via celery
 bleach[css]==5.0.1
-    # via django-bleach
+    # via
+    #   bleach
+    #   django-bleach
 cached-property==2.0.1
     # via -r requirements.in
-celery==5.4.0
+celery==5.5.3
     # via
     #   -r requirements.in
     #   celery-statsd
@@ -110,7 +112,7 @@ iniconfig==2.0.0
     # via pytest
 ip-address==1.5.0
     # via -r requirements.in
-kombu==5.4.2
+kombu==5.5.4
     # via celery
 langcodes==3.5.0
     # via sectxt
@@ -127,6 +129,7 @@ markdown2==2.5.2
 packaging==24.2
     # via
     #   forcediphttpsadapter
+    #   kombu
     #   pytest
     #   setuptools-scm
 pathlib2==2.3.7.post1
@@ -217,12 +220,9 @@ typing-extensions==4.12.2
     # via
     #   asgiref
     #   exceptiongroup
-    #   kombu
     #   setuptools-scm
-tzdata==2024.2
-    # via
-    #   celery
-    #   kombu
+tzdata==2025.2
+    # via kombu
 urllib3==2.3.0
     # via
     #   requests
