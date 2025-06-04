@@ -4,6 +4,9 @@
 
 - Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
 - Fixed possible exception in [mail test prechecks](https://github.com/internetstandards/Internet.nl/pull/1787).
+- Fixed an [issue with rate limiting](https://github.com/internetstandards/Internet.nl/pull/1792).
+- Update [Django to 4.2.22](https://github.com/internetstandards/Internet.nl/pull/1795) to fix 
+  [CVE-2025-48432](https://www.djangoproject.com/weblog/2025/jun/04/security-releases/).
 
 ## 1.10.0
 
