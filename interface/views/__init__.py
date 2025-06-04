@@ -6,20 +6,42 @@ import re
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import DisallowedRedirect
+from django.db import models, transaction
+from django.db.models import Case, Count, F, Q, Value, When
+from django.db.models.functions import Coalesce, Greatest
+from django.db.models.lookups import GreaterThan
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils import translation
 from django.utils.translation import gettext as _
 
+from checks.models import ConnectionTest, DomainTestReport, Fame, MailTestReport
 from interface import redis_id, simple_cache_page
-from interface.views.shared import (
-    get_hof_champions,
-    get_hof_mail,
-    get_hof_manual,
-    get_hof_web,
-    update_base_stats,
-    SafeHttpResponseRedirect,
+from interface.views.shared import get_hof_manual, SafeHttpResponseRedirect
+
+hof_champion = (
+    Fame.objects.alias(
+        timestamp=Greatest("site_report_timestamp", "mail_report_timestamp"),
+        report_type=Case(
+            When(GreaterThan(F("site_report_timestamp"), F("mail_report_timestamp")), then=Value("s")),
+            default=Value("m"),
+            output_field=models.CharField(max_length=1),
+        ),
+        report_id=Case(
+            When(GreaterThan(F("site_report_timestamp"), F("mail_report_timestamp")), then="site_report_id"),
+            default="mail_report_id",
+        ),
+    )
+    .annotate(timestamp=F("timestamp"), report_type=F("report_type"), report_id=F("report_id"))
+    .filter(Q(site_report_id__isnull=False) & Q(mail_report_id__isnull=False))
+    .order_by("-timestamp")
 )
+
+
+def make_hof_champion_permalink(entry):
+    return "/{report_type}/{domain}/{report_id}/".format(
+        report_type="site" if entry.report_type == "s" else "mail", domain=entry.domain, report_id=entry.report_id
+    )
 
 
 def page404(request, exception):
@@ -29,25 +51,39 @@ def page404(request, exception):
 
 
 @simple_cache_page
+@transaction.atomic
 def indexpage(request):
     if settings.INTERNETNL_BRANDING:
         articles = _("article .index").split()
     else:
         articles = _("article custom .index").split()
     articles = articles[0:6]
-    cache_id = redis_id.home_stats_data.id
-    novalue = "…"
-    statswebsite = cache.get(cache_id.format("statswebsite"), novalue)
-    statswebsitegood = cache.get(cache_id.format("statswebsitegood"), novalue)
-    statswebsitebad = cache.get(cache_id.format("statswebsitebad"), novalue)
-    statsmail = cache.get(cache_id.format("statsmail"), novalue)
-    statsmailgood = cache.get(cache_id.format("statsmailgood"), novalue)
-    statsmailbad = cache.get(cache_id.format("statsmailbad"), novalue)
-    statsconnection = cache.get(cache_id.format("statsconnection"), novalue)
-    statsconnectiongood = cache.get(cache_id.format("statsconnectiongood"), novalue)
-    statsconnectionbad = cache.get(cache_id.format("statsconnectionbad"), novalue)
-    update_base_stats()
-    hof_date, hof_count, hof_entries = get_hof_champions(10)
+    statswebsite = DomainTestReport.objects.aggregate(n=Count("domain", distinct=True))["n"]
+    statswebsitegood = Fame.objects.all().filter(Q(site_report_id__isnull=False)).count()
+    statswebsitebad = statswebsite - statswebsitegood
+    statsmail = MailTestReport.objects.aggregate(n=Count("domain", distinct=True))["n"]
+    statsmailgood = Fame.objects.all().filter(Q(mail_report_id__isnull=False)).count()
+    statsmailbad = statsmail - statsmailgood
+    statsconnection = (
+        ConnectionTest.objects.all()
+        .filter(finished=True)
+        .aggregate(n=Count(Coalesce("ipv4_addr", "ipv6_addr"), distinct=True))["n"]
+    )
+    statsconnectiongood = (
+        ConnectionTest.objects.all()
+        .filter(finished=True, score_dnssec=100, score_ipv6=100)
+        .aggregate(n=Count(Coalesce("ipv4_addr", "ipv6_addr"), distinct=True))["n"]
+    )
+    statsconnectionbad = statsconnection - statsconnectiongood
+
+    hof_count = Fame.objects.filter(Q(site_report_id__isnull=False) & Q(mail_report_id__isnull=False)).count()
+    hof_entries = []
+    hof_date = None
+    for entry in hof_champion.only("domain").all()[:10]:
+        if hof_date is None:
+            hof_date = entry.timestamp
+        hof_entries.append({"domain": entry.domain, "permalink": make_hof_champion_permalink(entry)})
+
     return render(
         request,
         "index.html",
@@ -261,7 +297,10 @@ def _update_hof_with_manual(template_dict, current=None):
 
 @simple_cache_page
 def hofchampionspage(request):
-    hof_date, hof_count, hof_entries = get_hof_champions()
+    hof_entries = []
+    for entry in hof_champion.only("domain").iterator():
+        hof_entries.append({"domain": entry.domain, "permalink": make_hof_champion_permalink(entry)})
+
     template_dict = dict(
         pageclass="hall-of-fame",
         pagetitle=_("base halloffame champions"),
@@ -270,8 +309,7 @@ def hofchampionspage(request):
         cpage="champions",
         hof_text="halloffame champions text",
         hof_subtitle="halloffame champions subtitle",
-        latest=hof_date,
-        count=hof_count,
+        count=len(hof_entries),
         halloffame=hof_entries,
     )
     _update_hof_with_manual(template_dict)
@@ -280,7 +318,11 @@ def hofchampionspage(request):
 
 @simple_cache_page
 def hofwebpage(request):
-    hof_date, hof_count, hof_entries = get_hof_web()
+    hof_entries = []
+    hof_site = Fame.objects.alias().filter(Q(site_report_id__isnull=False)).order_by("-site_report_timestamp")
+    for entry in hof_site.only("domain", "site_report_id").iterator():
+        hof_entries.append({"domain": entry.domain, "permalink": f"/site/{entry.domain}/{entry.site_report_id}/"})
+
     template_dict = dict(
         pageclass="hall-of-fame",
         pagetitle=_("base halloffame web"),
@@ -289,8 +331,7 @@ def hofwebpage(request):
         cpage="web",
         hof_text="halloffame web text",
         hof_subtitle="halloffame web subtitle",
-        latest=hof_date,
-        count=hof_count,
+        count=len(hof_entries),
         halloffame=hof_entries,
     )
     _update_hof_with_manual(template_dict)
@@ -299,7 +340,11 @@ def hofwebpage(request):
 
 @simple_cache_page
 def hofmailpage(request):
-    hof_date, hof_count, hof_entries = get_hof_mail()
+    hof_entries = []
+    hof_mail = Fame.objects.alias().filter(Q(mail_report_id__isnull=False)).order_by("-mail_report_timestamp")
+    for entry in hof_mail.only("domain", "mail_report_id").iterator():
+        hof_entries.append({"domain": entry.domain, "permalink": f"/mail/{entry.domain}/{entry.mail_report_id}/"})
+
     template_dict = dict(
         pageclass="hall-of-fame",
         pagetitle=_("base halloffame mail"),
@@ -308,8 +353,7 @@ def hofmailpage(request):
         cpage="mail",
         hof_text="halloffame mail text",
         hof_subtitle="halloffame mail subtitle",
-        latest=hof_date,
-        count=hof_count,
+        count=len(hof_entries),
         halloffame=hof_entries,
     )
     _update_hof_with_manual(template_dict)

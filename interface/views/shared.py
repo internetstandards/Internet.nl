@@ -8,11 +8,9 @@ from urllib.parse import urlparse
 import dns
 import idna
 import yaml
-from celery import shared_task
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import DisallowedRedirect
-from django.db import connection
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
@@ -23,7 +21,6 @@ from dns.resolver import NXDOMAIN, NoAnswer, LifetimeTimeout, NoNameservers
 
 from checks.resolver import dns_resolve, dns_resolve_soa
 from checks.tasks.dispatcher import ProbeTaskResult
-from interface import redis_id
 from internetnl import log
 
 
@@ -35,20 +32,6 @@ from internetnl import log
 # Application Guidebook for new TLDs (June 2012)" which stated that "The
 # ASCII label must consist entirely of letters (alphabetic characters a-z)".
 regex_dname = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" "([a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)$"
-
-HOME_STATS_LOCK_ID = redis_id.home_stats_lock.id
-HOME_STATS_LOCK_TTL = redis_id.home_stats_lock.ttl
-
-
-def execsql(sql):
-    """
-    Execute raw SQL query.
-
-    """
-    with connection.cursor() as cursor:
-        cursor.execute(sql, [])
-        row = cursor.fetchone()
-    return row[0]
 
 
 def validate_dname(dname):
@@ -235,18 +218,6 @@ def get_hof_cache(cache_id, count):
     return (cached_data["date"], cached_data["count"], cached_data["data"][:count])
 
 
-def get_hof_champions(count=1000):
-    return get_hof_cache(redis_id.hof_champions.id, count)
-
-
-def get_hof_web(count=1000):
-    return get_hof_cache(redis_id.hof_web.id, count)
-
-
-def get_hof_mail(count=1000):
-    return get_hof_cache(redis_id.hof_mail.id, count)
-
-
 def get_hof_manual(manual):
     hof_entries = []
     try:
@@ -302,164 +273,6 @@ def redirect_invalid_domain(request, domain_type):
         return HttpResponseRedirect("/test-mail/?invalid")
     else:
         return HttpResponseRedirect("/")
-
-
-@shared_task(
-    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
-    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    ignore_result=True,
-)
-def run_stats_queries():
-    """
-    Run the queries for the home page statistics and save the results in redis.
-    """
-
-    query = """
-         select
-            count(distinct r.domain) as count
-        from
-            checks_domaintestreport as r
-        inner join
-            (
-                select
-                    domain,
-                    max(timestamp) as timestamp
-                from
-                    checks_domaintestreport
-                group by
-                    domain
-            )          as rmax
-                on r.domain = rmax.domain
-                and r.timestamp = rmax.timestamp
-    """
-    statswebsite = execsql(query)
-    statswebsitegood = get_hof_web(count=1)[1]
-    statswebsitebad = max(statswebsite - statswebsitegood, 0)
-
-    query = """
-        select
-            count(distinct r.domain) as count
-        from
-            checks_mailtestreport as r
-        inner join
-            (
-                select
-                    domain,
-                    max(timestamp) as timestamp
-                from
-                    checks_mailtestreport
-                group by
-                    domain
-            ) as rmax
-                on r.domain = rmax.domain
-                and r.timestamp = rmax.timestamp
-    """
-    statsmail = execsql(query)
-    statsmailgood = get_hof_mail(count=1)[1]
-    statsmailbad = max(statsmail - statsmailgood, 0)
-
-    query = """
-        select
-            count(distinct coalesce(ipv4_addr,
-            ipv6_addr)) as count
-        from
-            checks_connectiontest as r
-        inner join
-            (
-                select
-                    coalesce(ipv4_addr,
-                    ipv6_addr) as source,
-                    max(timestamp) as timestamp
-                from
-                    checks_connectiontest
-                where
-                    finished = true
-                group by
-                    coalesce(ipv4_addr,
-                    ipv6_addr)
-            ) as rmax
-                on coalesce(r.ipv4_addr,
-            r.ipv6_addr) = rmax.source
-        where
-            finished = true
-    """
-    statsconnection = execsql(query)
-
-    query = """
-        select
-            count(distinct coalesce(ipv4_addr,
-            ipv6_addr)) as count
-        from
-            checks_connectiontest as r
-        inner join
-            (
-                select
-                    coalesce(ipv4_addr,
-                    ipv6_addr) as      source,
-                    max(timestamp) as timestamp
-                from
-                    checks_connectiontest
-                where
-                    finished = true
-                group by
-                    coalesce(ipv4_addr,
-                    ipv6_addr)
-            ) as rmax
-                on coalesce(r.ipv4_addr,
-            r.ipv6_addr) = rmax.source
-        where
-            finished = true
-            and score_dnssec = 100
-            and score_ipv6 = 100
-    """
-    statsconnectiongood = execsql(query)
-    statsconnectionbad = max(statsconnection - statsconnectiongood, 0)
-
-    cache_id = redis_id.home_stats_data.id
-    cache_ttl = redis_id.home_stats_data.ttl
-    cache.set(cache_id.format("statswebsite"), statswebsite, cache_ttl)
-    cache.set(cache_id.format("statswebsitegood"), statswebsitegood, cache_ttl)
-    cache.set(cache_id.format("statswebsitebad"), statswebsitebad, cache_ttl)
-    cache.set(cache_id.format("statsmail"), statsmail, cache_ttl)
-    cache.set(cache_id.format("statsmailgood"), statsmailgood, cache_ttl)
-    cache.set(cache_id.format("statsmailbad"), statsmailbad, cache_ttl)
-    cache.set(cache_id.format("statsconnection"), statsconnection, cache_ttl)
-    cache.set(cache_id.format("statsconnectiongood"), statsconnectiongood, cache_ttl)
-    cache.set(cache_id.format("statsconnectionbad"), statsconnectionbad, cache_ttl)
-
-
-@shared_task(
-    soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
-    time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
-    ignore_result=True,
-)
-def update_running_status(results):
-    """
-    Signal that the queries for the home page statistics finished running.
-
-    """
-    cache_id = HOME_STATS_LOCK_ID
-    cache_ttl = HOME_STATS_LOCK_TTL
-    if cache.get(cache_id):
-        cache.set(cache_id, False, cache_ttl)
-
-
-def update_base_stats():
-    """
-    If the queries for the home page statistics are not already running,
-    run them.
-
-    This is done to:
-    - Not having to run the queries for every visit;
-    - Avoid queueing unnecessary tasks.
-
-    """
-    cache_id = HOME_STATS_LOCK_ID
-    cache_ttl = HOME_STATS_LOCK_TTL
-    if not cache.get(cache_id):
-        cache.set(cache_id, True, cache_ttl)
-        task_set = run_stats_queries.s() | update_running_status.s()
-        task_set()
 
 
 class SafeHttpResponseRedirect(HttpResponseRedirect):
