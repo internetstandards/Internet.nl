@@ -44,6 +44,7 @@ def check_results(url, checks_registry, remote_addr, get_results=False) -> Probe
     If the task is not registered and the user has not passed the task limit,
     start the task.
     """
+
     url = url.lower()
     cache_id = redis_id.dom_task.id.format(url, checks_registry.name)
     cache_ttl = redis_id.dom_task.ttl
@@ -53,7 +54,8 @@ def check_results(url, checks_registry, remote_addr, get_results=False) -> Probe
         log.debug("No task found for task in cache. Creating a new redis task.")
         # Task is not yet available (not running AND not in cache)
         # Limit concurrent task launches per IP
-        req_limit_id = redis_id.req_limit.id.format(remote_addr)
+        # replace colons with dots for IPv6 addresses as colons are used as namespaces
+        req_limit_id = redis_id.req_limit.id.format(remote_addr.replace(":", ".") if remote_addr else None)
         req_limit_ttl = redis_id.req_limit.ttl
         if user_limit_exceeded(req_limit_id):
             log.debug("User limit exceeded. Too many requests from this IP. Blocked.")
