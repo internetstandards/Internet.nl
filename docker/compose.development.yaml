@@ -17,8 +17,17 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
 
-  app:
+  webserver:
+    build:
+      context: ..
+      dockerfile: docker/webserver.Dockerfile
+    develop:
+      watch:
+        # auto rebuild/reload when config files change
+        - path: ./webserver/
+          action: rebuild
 
+  app:
     develop:
       watch:
         # auto rebuild/reload when CSS/JS changes
