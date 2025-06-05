@@ -73,3 +73,20 @@ def test_ipv6_ns_with_bad_connectivity(page, app_url, unique_id):
 
     # but some of them are not resolvable
     expect(page.get_by_text("Not all name servers that have an IPv6 address are reachable over IPv6."))
+
+
+def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
+    """Test if correct rate limit keys are created when starting a test."""
+
+    test_domain = "www." + test_domain
+
+    page.goto(app_url)
+
+    page.locator("#web-url").fill(test_domain)
+    page.locator("section.websitetest button").click()
+
+    rate_limit_redis_entry = docker_compose_exec("redis", "redis-cli keys dom:req_limit:*").decode("utf8").strip()
+    assert rate_limit_redis_entry, "there should be a redis entry for rate limiting"
+    assert not rate_limit_redis_entry.endswith(
+        "None"
+    ), "there should be no rate limit key created with `None` as IP address"
