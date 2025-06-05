@@ -102,7 +102,8 @@
         </nav>
         <div class="language-theme-controls">
           <form class="language-form icon" action="/change_language/" method="post">
-            <select id="language-select" name="language" aria-label="{% include "string.html" with name="base_language_select_label_newstring" %}">
+            <label for="language-select" class="visually-hidden">{% include "string.html" with name="base_language_select_label_newstring" %}</label>
+            <select id="language-select" name="language">
               {% with user_language=request.current_language_code %}
                 {% for language in LANGUAGES %}
                   {% get_language_info for language.0 as lang %}
@@ -112,6 +113,8 @@
                 {% endfor %}
               {% endwith %}
             </select>
+            <input type="hidden" name="previous-page" value="{{request.path}}"/>
+            <input type="hidden" name="language" value="{{language.0}}"/>
             <button type="submit">{% include "string.html" with name="base_language_change_button_newstring" %}</button>
           </form>
           <button id="theme-toggle" class="theme-button" type="button">

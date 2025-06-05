@@ -20,6 +20,7 @@
 .footer-logo {
   transition: opacity 0.3s;
   height: fit-content;
+  width: fit-content;
 
   &:hover {
     opacity: 0.8;
@@ -49,19 +50,11 @@ footer {
     text-decoration-thickness: 2px;
     text-underline-offset: 0.625rem;
     transition: text-decoration-color 0.3s;
+    width: fit-content;
 
     &:hover {
       text-decoration-color: currentcolor;
     }
-
-    /* span {
-      border-bottom: 2px solid var(--transparent-100);
-      transition: 0.3s;
-    }
-
-    &:hover span {
-      border-bottom: 2px solid currentcolor;
-    } */
 
     &::before {
       mask-image: url("/static/icons/arrow-right.svg");
@@ -112,6 +105,7 @@ footer {
     text-decoration-thickness: 2px;
     text-underline-offset: 0.625rem;
     transition: text-decoration-color 0.3s;
+    width: fit-content;
 
     &:hover {
       text-decoration-color: currentcolor;

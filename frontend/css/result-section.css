@@ -107,6 +107,16 @@
       background-color: var(--failed-color);
     }
 
+    &.not-tested::before {
+      mask-image: url("/static/icons/question.svg");
+      background-color: var(--not-tested-color);
+    }
+
+    &.error::before {
+      mask-image: url("/static/icons/broken.svg");
+      background-color: var(--error-color);
+    }
+
     &.hidethis {
       display: none;
     }
@@ -509,6 +519,17 @@ meter::-moz-meter-bar {
         display: block;
         background-color: var(--info-color);
       }
+
+      &.not-tested::before {
+        mask-image: url("/static/icons/question.svg");
+        background-color: var(--not-tested-color);
+      }
+
+      &.error::before {
+        mask-image: url("/static/icons/broken.svg");
+        display: block;
+        background-color: var(--error-color);
+      }
     }
 
     p a {
@@ -672,6 +693,12 @@ meter::-moz-meter-bar {
         &.not-tested::before {
           mask-image: url("/static/icons/question.svg");
           display: block;
+        }
+
+        &.error::before {
+          mask-image: url("/static/icons/broken.svg");
+          display: block;
+          background-color: var(--error-color);
         }
       }
     }

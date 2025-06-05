@@ -229,7 +229,7 @@
   --failed-color: light-dark(var(--red-100), var(--red-200));
   --not-tested-color: light-dark(var(--grey-100), var(--grey-200));
   --info-color: var(--blue-100);
-  
+  --error-color: light-dark(var(--grey-100), var(--grey-200));
 }
 
 /* MARK: OTHER VARIABLES

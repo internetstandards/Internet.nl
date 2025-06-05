@@ -127,12 +127,13 @@ header:has(.active) {
   flex-direction: column;
   position: fixed;
   height: 100vh;
+  height: 100dvh;
   top: 0;
   left: 0;
   background: var(--nav-mobile-bg-color);
   display: none;
   overflow: auto;
-  padding: 6.875rem 1rem 7.5rem;
+  padding: 6.875rem 1rem 1.875rem;
 
   @media (scripting: none) {
     padding: 0;
