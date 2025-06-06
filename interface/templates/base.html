@@ -11,35 +11,22 @@
   <meta name="description" content="{{_("page metadescription")}}">
   <meta name="keywords" content="{{_("page metakeywords")}}">
   <meta name="author" content="Platform Internetstandaarden / Internet Standards Platform">
-  <link rel="icon" href="{% static "favicon.png" %}" sizes="32x32" />
-  <link rel="icon" href="{% static "favicon.png" %}" sizes="192x192" />
+  <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml" />
+  <link rel="icon" href="{% static 'favicon.png' %}" sizes="192x192" />
   <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
   <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
 
-  <link rel="stylesheet" href="{% static 'css/layers.css' %}" />
-
-  <script src="{% static "js/jquery-3.5.1.min.js" %}"></script>
-  <script type="text/javascript" src="{% static 'js/headroom-min.js' %}"></script>
-
-  <script src="{% static 'js/theme-min.js' %}" defer></script>
-  <script src="{% static 'js/initial-min.js' %}"></script>
-  <script src="{% static 'js/header-min.js' %}" defer></script>
-  <script src="{% static 'js/language-switch-min.js' %}" defer></script>
-  <script src="{% static 'js/carrousel-min.js' %}" defer></script>
-  <script src="{% static 'js/load-more-min.js' %}" defer></script>
-  <script src="{% static 'js/result-meter-min.js' %}" defer></script>
-  <script src="{% static 'js/action-card-fallback-min.js' %}" defer></script>
-  <script src="{% static 'js/copy-link-min.js' %}" defer></script>
-  <script src="{% static 'js/print-min.js' %}" defer></script>
-  <script src="{% static 'js/matomo-min.js' %}" defer></script>
-  <script src="{% static 'js/repeat-test-countdown-min.js' %}" defer></script>
+  <link rel="stylesheet" href="{% static 'css/style-min.css' %}" />
+  <script type="module" src="{% static 'js/base-min.js' %}"></script>
+  <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
 
   {% block scripting %}
   {% endblock %}
+
 </head>
 <body class="{{pageclass}}">
 
-  <div class="matomo">
+  <div class="matomo" hidden>
     <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
     <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
     <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
@@ -114,7 +101,6 @@
               {% endwith %}
             </select>
             <input type="hidden" name="previous-page" value="{{request.path}}"/>
-            <input type="hidden" name="language" value="{{language.0}}"/>
             <button type="submit">{% include "string.html" with name="base_language_change_button_newstring" %}</button>
           </form>
           <button id="theme-toggle" class="theme-button" type="button">

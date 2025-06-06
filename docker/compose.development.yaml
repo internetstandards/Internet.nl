@@ -17,25 +17,9 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
 
-  webserver:
-    build:
-      context: ..
-      dockerfile: docker/webserver.Dockerfile
-    develop:
-      watch:
-        # auto rebuild/reload when config files change
-        - path: ./webserver/
-          action: rebuild
-
   app:
-    develop:
-      watch:
-        # auto rebuild/reload when CSS/JS changes
-        - path: ../frontend/js
-          action: sync+exec
-          target: /app/frontend/js
-          exec:
-            command: python3 bin/frontend.py js
+    build:
+      target: app-dev
     # use Django runserver for better debug abilities during development
     entrypoint: ["/bin/bash"]
     # run CSS auto rebuild in the background and start devserver
@@ -43,9 +27,11 @@ services:
       - "-c"
       - >
         if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
-          # watch CSS files for rebuild
+          # install npm dependencies and watch CSS and JS files for rebuild
           cd /app/frontend;
-          npm run css:build:watch &
+          # It's needed to install the rollup linux dependency
+          npm install;
+          npm run docker:watch &
           cd /app;
           # start development server with auto reloading
           ./manage.py runserver 0.0.0.0:8080
@@ -60,8 +46,8 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
-      # mount CSS files so `css:build:watch` can detect changes an rebuild
-      - ../frontend/css:/app/frontend/css
+      # mount frontend files so build tools can detect changes and rebuild
+      - ../frontend/src:/app/frontend/src
 
   worker:
     volumes:

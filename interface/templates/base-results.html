@@ -3,7 +3,9 @@
 {% load translate %}
 
 {% block scripting %}
-  <script type="text/javascript" src="{% static 'js/internetnl.results-min.js' %}"></script>
+  <script type="module" src="{% static 'js/results-min.js' %}"></script>
+  <script type="module" src="{% static 'js/components/meter-min.js' %}"></script>
+  <script type="module" src="{% static 'js/components/action-card-min.js' %}"></script>
 {% endblock %}
 
 {% block maincontent %}
@@ -20,7 +22,7 @@
     </h1>
     <div class="meter-container">
       <div class="meter">
-        <meter min="0" max="100" value="{{score}}">{{score}}%</meter>
+        <meter min="0" max="100" value="{{score}}" id="testresults-percentage">{{score}}%</meter>
       </div>
       <ul class="meter-numbers h7 color-secondary">
         <li class="meter-number">0</li>
@@ -84,7 +86,7 @@
             </a>
           </li>
         </ul>
-        <p class="action-card-description">Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen.</p>
+        <p class="action-card-description">{% include "string.html" with name="action_card_description_newstring" %}</p>
       </details>
       <button id="copy-link" class="primary-button icon" type="button">
         <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>

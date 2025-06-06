@@ -18,6 +18,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "action_card_description_newstring"
+msgstr "Het doorsturen van de testresultaten kan helpen bij het identificeren van de oorzaken en het bieden van oplossingen."
+
 msgid "test_website_page_protect_intro_newstring"
 msgstr "Bescherm uw website door te testen."
 

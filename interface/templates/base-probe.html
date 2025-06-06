@@ -3,8 +3,7 @@
 {% load translate %}
 
 {% block scripting %}
-  <script type="text/javascript" src="{% static 'js/functions-min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/internetnl.probe-min.js' %}"></script>
+  <script type="module" src="{% static 'js/probe-min.js' %}"></script>
 {% endblock %}
 
 {% block maincontent %}
@@ -49,7 +48,7 @@
       {% endfor %}
       {% block probesnojs %}
       <noscript>
-        <li class="jsless">
+        <li>
           <a href={{no_javascript_redirect}} id="continue" class="connforward">
             {% include "string.html" with name="probes no-javascript" %}
           </a>

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block scripting %}
-  <script type="text/javascript" src="{% static 'js/internetnl.connection-min.js' %}"></script>
+  <script type="module" src="{% static 'js/connection-min.js' %}"></script>
 {% endblock %}
 
 {% block testtitle %}
@@ -14,9 +14,11 @@
 {% endblock %}
 
 {% block probesnojs %}
-<li class="jsless">
-  <a href="/" id="continue" class="connforward">
-    {% include "string.html" with name="probes no-javascript-connection" %}
-  </a>
-</li>
+<noscript>
+  <li>
+    <a href="/" id="continue" class="connforward">
+      {% include "string.html" with name="probes no-javascript-connection" %}
+    </a>
+  </li>
+</noscript>
 {% endblock %}

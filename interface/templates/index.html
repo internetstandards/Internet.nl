@@ -1,5 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% load translate %}
+
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
+{% endblock %}
 
 {% block introcontent %}
   <section class="test-section home-variant bg-primary ellipse">

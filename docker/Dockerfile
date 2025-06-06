@@ -134,16 +134,17 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-FROM debian:bullseye-20241111-slim AS frontend
+# build frontend image target
+FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS frontend
 
 # install npm from official image
-COPY --from=node:20-slim /usr/local/bin/ /usr/local/bin/
-COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:22-slim /usr/local/bin/ /usr/local/bin/
+COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 ADD frontend/ /app/frontend
 WORKDIR /app/frontend
 RUN npm install
-RUN npm run css:build
+RUN npm run docker:build
 
 # build main application image target
 FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-app
@@ -216,21 +217,13 @@ RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
 # some js/css files use a separate script to generate minimized versions
 # storage these in a place for django to find
 RUN mkdir -p /app/static_frontend
-# minimize JS files
-RUN python3 bin/frontend.py js
-# copy build/minimized CSS files from frontand stage
+# copy build/minimized CSS files from frontend stage
 COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/css/*.css /app/static_frontend/css/
+# copy build/minimized JS files from frontend stage
+COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/js/ /app/static_frontend/js/
 
 # generate language files
 RUN python3 bin/pofiles.py to_django
-
-# copy dependencies to rebuild CSS (postcss)
-COPY --from=frontend /usr/local/bin/ /usr/local/bin/
-COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=frontend /app/frontend/node_modules /app/frontend/node_modules
-
-# copy browser reload module
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
 
 # use fake version to prevent building the next steps when only the version changes
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0-build0
@@ -248,6 +241,19 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 # define default entrypoint and command
 ENTRYPOINT [ "python3", "./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
+
+# app image with development tools for better live reloading
+FROM app AS app-dev
+
+# required for compose `develop` mode file sync/copy
+USER root
+
+# copy dependencies to rebuild CSS (postcss)
+COPY --from=frontend /usr/local/bin/ /usr/local/bin/
+COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+# copy browser reload module
+COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
 
 # supplement application with unittest, lint dependencies
 FROM build-app AS linttest

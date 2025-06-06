@@ -34,6 +34,8 @@ RUN mkdir -p /var/www/internet.nl/.well-known/
 # copy all security*.txt files
 COPY .well-known/security*.txt /var/www/internet.nl/.well-known/
 COPY interface/static/favicon.ico /var/www/internet.nl/
+COPY interface/static/favicon.svg /var/www/internet.nl/
+COPY interface/static/favicon.png /var/www/internet.nl/
 
 COPY docker/webserver/nginx_templates/* /etc/nginx/templates/
 COPY docker/webserver/mime.types /etc/nginx/
