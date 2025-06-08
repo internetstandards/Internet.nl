@@ -20,7 +20,7 @@ _Compared to the latest 1.10 release._
 
 - ...
 
-## 1.10.1 (in progress)
+## 1.10.1
 
 - Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
 - Fixed possible exception in [mail test prechecks](https://github.com/internetstandards/Internet.nl/pull/1787).
