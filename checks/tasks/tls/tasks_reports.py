@@ -1,5 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import itertools
 import time
 from timeit import default_timer as timer
 
@@ -274,6 +275,11 @@ def save_results(model, results, addr, domain, category):
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
+                    model.key_exchange_rsa_pkcs = result.get("key_exchange_rsa_pkcs")
+                    model.key_exchange_rsa_pkcs_score = result.get("key_exchange_rsa_pkcs_score")
+                    model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
+                    model.extended_master_secret = result.get("extended_master_secret")
+                    model.extended_master_secret_score = result.get("extended_master_secret_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -349,6 +355,11 @@ def save_results(model, results, addr, domain, category):
                     # model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
+                    model.key_exchange_rsa_pkcs = result.get("key_exchange_rsa_pkcs")
+                    model.key_exchange_rsa_pkcs_score = result.get("key_exchange_rsa_pkcs_score")
+                    model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
+                    model.extended_master_secret = result.get("extended_master_secret")
+                    model.extended_master_secret_score = result.get("extended_master_secret_score")
                 if result.get("tls_cert"):
                     model.cert_chain = result.get("chain")
                     model.cert_trusted = result.get("trusted")
@@ -444,6 +455,8 @@ def build_report(dttls, category):
                 category.subtests["tls_cipher_order"].result_bad(dttls.cipher_order_violation)
             elif dttls.cipher_order == CipherOrderStatus.na:
                 category.subtests["tls_cipher_order"].result_na()
+            elif dttls.cipher_order == CipherOrderStatus.sufficient_above_good:
+                category.subtests["tls_cipher_order"].result_sufficient_above_good()
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
@@ -467,10 +480,7 @@ def build_report(dttls, category):
             else:
                 category.subtests["renegotiation_secure"].result_bad()
 
-            if dttls.client_reneg:
-                category.subtests["renegotiation_client"].result_bad()
-            else:
-                category.subtests["renegotiation_client"].result_good()
+            category.subtests["renegotiation_client"].save_result(dttls.client_reneg)
 
             if not dttls.cert_chain:
                 category.subtests["cert_trust"].result_could_not_test()
@@ -484,10 +494,11 @@ def build_report(dttls, category):
                     pass
                 else:
                     cert_pubkey_all = annotate_and_combine(dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    cert_pubkey_format = list(itertools.chain(*zip(cert_pubkey_all[0], cert_pubkey_all[1])))
                     if len(dttls.cert_pubkey_bad) > 0:
-                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_format)
                     elif len(dttls.cert_pubkey_phase_out) > 0:
-                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_format)
                     else:
                         category.subtests["cert_pubkey"].result_good()
 
@@ -567,9 +578,14 @@ def build_report(dttls, category):
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests["kex_hash_func"].result_good()
             elif dttls.kex_hash_func == KexHashFuncStatus.bad:
-                category.subtests["kex_hash_func"].result_bad()
+                category.subtests["kex_hash_func"].result_bad(dttls.kex_hash_func_bad_hash)
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
+            elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
+                category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
+
+            category.subtests["key_exchange_rsa_pkcs"].save_result(dttls.key_exchange_rsa_pkcs)
+            category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -603,6 +619,8 @@ def build_report(dttls, category):
                 category.subtests["tls_cipher_order"].result_bad(dttls.cipher_order_violation)
             elif dttls.cipher_order == CipherOrderStatus.na:
                 category.subtests["tls_cipher_order"].result_na()
+            elif dttls.cipher_order == CipherOrderStatus.sufficient_above_good:
+                category.subtests["tls_cipher_order"].result_sufficient_above_good()
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
@@ -626,10 +644,7 @@ def build_report(dttls, category):
             else:
                 category.subtests["renegotiation_secure"].result_bad()
 
-            if dttls.client_reneg:
-                category.subtests["renegotiation_client"].result_bad()
-            else:
-                category.subtests["renegotiation_client"].result_good()
+            category.subtests["renegotiation_client"].save_result(dttls.client_reneg)
 
             if not dttls.cert_chain:
                 category.subtests["cert_trust"].result_could_not_test()
@@ -643,10 +658,11 @@ def build_report(dttls, category):
                     pass
                 else:
                     cert_pubkey_all = annotate_and_combine(dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    cert_pubkey_format = list(itertools.chain(*zip(cert_pubkey_all[0], cert_pubkey_all[1])))
                     if len(dttls.cert_pubkey_bad) > 0:
-                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_format)
                     elif len(dttls.cert_pubkey_phase_out) > 0:
-                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_format)
                     else:
                         category.subtests["cert_pubkey"].result_good()
 
@@ -727,9 +743,14 @@ def build_report(dttls, category):
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests["kex_hash_func"].result_good()
             elif dttls.kex_hash_func == KexHashFuncStatus.bad:
-                category.subtests["kex_hash_func"].result_bad()
+                category.subtests["kex_hash_func"].result_bad(dttls.kex_hash_func_bad_hash)
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
+            elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
+                category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
+
+            category.subtests["key_exchange_rsa_pkcs"].save_result(dttls.key_exchange_rsa_pkcs)
+            category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
     dttls.report = category.gen_report()
 
