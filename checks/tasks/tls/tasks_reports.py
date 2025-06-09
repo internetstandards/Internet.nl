@@ -1,5 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import itertools
 import time
 from timeit import default_timer as timer
 
@@ -10,6 +11,7 @@ from django.core.cache import cache
 from django.db import transaction
 
 from checks import categories, scoring
+from checks.caa.retrieval import CAA_MSGID_INSUFFICIENT_POLICY
 from checks.models import (
     CipherOrderStatus,
     DaneStatus,
@@ -117,7 +119,7 @@ def callback(results, domain, test_type):
     if "mx_status" in results:
         return callback_null_mx(results, domain, test_type)
     testdomain = test_map[test_type]["model"](domain=domain)
-    if testdomain is MailTestTls:
+    if isinstance(testdomain, MailTestTls):
         testdomain.mx_status = MxStatus.has_mx
     testdomain.save()
     category = test_map[test_type]["category"]
@@ -273,6 +275,10 @@ def save_results(model, results, addr, domain, category):
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
+                    model.key_exchange_rsa_pkcs = result.get("key_exchange_rsa_pkcs")
+                    model.key_exchange_rsa_pkcs_score = result.get("key_exchange_rsa_pkcs_score")
+                    model.extended_master_secret = result.get("extended_master_secret")
+                    model.extended_master_secret_score = result.get("extended_master_secret_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -286,7 +292,8 @@ def save_results(model, results, addr, domain, category):
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
                 model.caa_enabled = result.get("caa_result").caa_found
-                model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                model.caa_records = result.get("caa_result").caa_records_str
+                model.caa_errors = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                 model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                 model.caa_score = result.get("caa_result").score
                 model.caa_found_on_domain = result.get("caa_result").canonical_name
@@ -347,6 +354,10 @@ def save_results(model, results, addr, domain, category):
                     # model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
+                    model.key_exchange_rsa_pkcs = result.get("key_exchange_rsa_pkcs")
+                    model.key_exchange_rsa_pkcs_score = result.get("key_exchange_rsa_pkcs_score")
+                    model.extended_master_secret = result.get("extended_master_secret")
+                    model.extended_master_secret_score = result.get("extended_master_secret_score")
                 if result.get("tls_cert"):
                     model.cert_chain = result.get("chain")
                     model.cert_trusted = result.get("trusted")
@@ -359,7 +370,8 @@ def save_results(model, results, addr, domain, category):
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
                     model.caa_enabled = result.get("caa_result").caa_found
-                    model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                    model.caa_records = result.get("caa_result").caa_records_str
+                    model.caa_errors = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                     model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                     model.caa_score = result.get("caa_result").score
                     model.caa_found_on_domain = result.get("caa_result").canonical_name
@@ -441,6 +453,8 @@ def build_report(dttls, category):
                 category.subtests["tls_cipher_order"].result_bad(dttls.cipher_order_violation)
             elif dttls.cipher_order == CipherOrderStatus.na:
                 category.subtests["tls_cipher_order"].result_na()
+            elif dttls.cipher_order == CipherOrderStatus.sufficient_above_good:
+                category.subtests["tls_cipher_order"].result_sufficient_above_good()
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
@@ -464,10 +478,7 @@ def build_report(dttls, category):
             else:
                 category.subtests["renegotiation_secure"].result_bad()
 
-            if dttls.client_reneg:
-                category.subtests["renegotiation_client"].result_bad()
-            else:
-                category.subtests["renegotiation_client"].result_good()
+            category.subtests["renegotiation_client"].save_result(dttls.client_reneg)
 
             if not dttls.cert_chain:
                 category.subtests["cert_trust"].result_could_not_test()
@@ -481,10 +492,11 @@ def build_report(dttls, category):
                     pass
                 else:
                     cert_pubkey_all = annotate_and_combine(dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    cert_pubkey_format = list(itertools.chain(*zip(cert_pubkey_all[0], cert_pubkey_all[1])))
                     if len(dttls.cert_pubkey_bad) > 0:
-                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_format)
                     elif len(dttls.cert_pubkey_phase_out) > 0:
-                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_format)
                     else:
                         category.subtests["cert_pubkey"].result_good()
 
@@ -505,14 +517,23 @@ def build_report(dttls, category):
                 if dttls.caa_enabled:
                     caa_host_message = [
                         TranslatableTechTableItem(
-                            msgid="found_host", context={"host": dttls.caa_found_on_domain}
+                            msgid="found-host", context={"host": dttls.caa_found_on_domain}
                         ).to_dict()
                     ]
                 else:
-                    caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+                    caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
                 caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
-                if not dttls.caa_enabled or dttls.caa_errors:
+                for record in dttls.caa_records:
+                    caa_tech_table.append(
+                        TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
+                    )
+                if not dttls.caa_enabled:
                     category.subtests["web_caa"].result_bad(caa_tech_table)
+                elif dttls.caa_errors:
+                    if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
+                        category.subtests["web_caa"].result_syntax_error(caa_tech_table)
+                    else:
+                        category.subtests["web_caa"].result_insufficient(caa_tech_table)
                 elif dttls.caa_recommendations:
                     category.subtests["web_caa"].result_recommendations(caa_tech_table)
                 else:
@@ -549,6 +570,8 @@ def build_report(dttls, category):
                 category.subtests["ocsp_stapling"].result_not_trusted()
             elif dttls.ocsp_stapling == OcspStatus.ok:
                 category.subtests["ocsp_stapling"].result_ok()
+            elif dttls.ocsp_stapling == OcspStatus.not_in_cert:
+                category.subtests["ocsp_stapling"].result_not_in_cert()
 
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests["kex_hash_func"].result_good()
@@ -556,6 +579,11 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_bad()
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
+            elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
+                category.subtests["kex_hash_func"].result_phase_out()
+
+            category.subtests["key_exchange_rsa_pkcs"].save_result(dttls.key_exchange_rsa_pkcs)
+            category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -589,6 +617,8 @@ def build_report(dttls, category):
                 category.subtests["tls_cipher_order"].result_bad(dttls.cipher_order_violation)
             elif dttls.cipher_order == CipherOrderStatus.na:
                 category.subtests["tls_cipher_order"].result_na()
+            elif dttls.cipher_order == CipherOrderStatus.sufficient_above_good:
+                category.subtests["tls_cipher_order"].result_sufficient_above_good()
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
@@ -612,10 +642,7 @@ def build_report(dttls, category):
             else:
                 category.subtests["renegotiation_secure"].result_bad()
 
-            if dttls.client_reneg:
-                category.subtests["renegotiation_client"].result_bad()
-            else:
-                category.subtests["renegotiation_client"].result_good()
+            category.subtests["renegotiation_client"].save_result(dttls.client_reneg)
 
             if not dttls.cert_chain:
                 category.subtests["cert_trust"].result_could_not_test()
@@ -629,10 +656,11 @@ def build_report(dttls, category):
                     pass
                 else:
                     cert_pubkey_all = annotate_and_combine(dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    cert_pubkey_format = list(itertools.chain(*zip(cert_pubkey_all[0], cert_pubkey_all[1])))
                     if len(dttls.cert_pubkey_bad) > 0:
-                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_format)
                     elif len(dttls.cert_pubkey_phase_out) > 0:
-                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_format)
                     else:
                         category.subtests["cert_pubkey"].result_good()
 
@@ -657,13 +685,22 @@ def build_report(dttls, category):
 
             if dttls.caa_enabled:
                 caa_host_message = [
-                    TranslatableTechTableItem(msgid="found_host", context={"host": dttls.caa_found_on_domain}).to_dict()
+                    TranslatableTechTableItem(msgid="found-host", context={"host": dttls.caa_found_on_domain}).to_dict()
                 ]
             else:
-                caa_host_message = [TranslatableTechTableItem(msgid="not_found").to_dict()]
+                caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
             caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
-            if not dttls.caa_enabled or dttls.caa_errors:
+            for record in dttls.caa_records:
+                caa_tech_table.append(
+                    TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
+                )
+            if not dttls.caa_enabled:
                 category.subtests["mail_caa"].result_bad(caa_tech_table)
+            elif dttls.caa_errors:
+                if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
+                    category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
+                else:
+                    category.subtests["mail_caa"].result_insufficient(caa_tech_table)
             elif dttls.caa_recommendations:
                 category.subtests["mail_caa"].result_recommendations(caa_tech_table)
             else:
@@ -707,6 +744,11 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_bad()
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
+            elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
+                category.subtests["kex_hash_func"].result_phase_out()
+
+            category.subtests["key_exchange_rsa_pkcs"].save_result(dttls.key_exchange_rsa_pkcs)
+            category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
     dttls.report = category.gen_report()
 
@@ -792,7 +834,7 @@ def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
     if mx_status != MxStatus.has_mx:
         return ("smtp_starttls", {"mx_status": mx_status})
 
-    results = {server: False for server, _, _ in mailservers}
+    results = {server: False for server, _ in mailservers}
     try:
         start = timer()
         # Sleep in order for the ipv6 mail test to finish.
@@ -804,22 +846,17 @@ def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
         # avoid continuously testing popular mail hosting providers.
         cache_ttl = redis_id.mail_starttls.ttl
 
-        for server, dane_cb_data, _ in mailservers:
+        for server, _ in mailservers:
             # Pull in any cached results
             cache_id = redis_id.mail_starttls.id.format(server)
             results[server] = cache.get(cache_id, False)
-            log.debug(f"=========== pulled {cache_id=} for {server=} data {results[server]}")
         while timer() - start < cache_ttl and (not results or not all(results.values())):
-            servers_to_check = [
-                (server, dane_cb_data) for server, dane_cb_data, _ in mailservers if not results[server]
-            ]
-            log.debug(f"=========== checking remaining {servers_to_check=}")
+            servers_to_check = [server for server, _ in mailservers if not results[server]]
             results.update(check_mail_tls_multiple(servers_to_check))
             time.sleep(1)
         for server, server_result in results.items():
             cache_id = redis_id.mail_starttls.id.format(server)
             cache.set(cache_id, server_result, cache_ttl)
-            log.debug(f"=========== writing to {cache_id=} for {server=}")
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
     except SoftTimeLimitExceeded:

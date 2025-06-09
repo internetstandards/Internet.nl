@@ -1,23 +1,38 @@
 from dataclasses import dataclass
-from typing import List, Optional, Any, Set
+from typing import List, Optional, Any, Set, cast
 
+from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
+from cryptography.x509 import AuthorityInformationAccess, ExtensionNotFound
 from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo, OpenSslEvpPkeyEnum
-from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite
+from nassl.ssl_client import ExtendedMasterSecretSupportEnum
+from sslyze import (
+    TlsVersionEnum,
+    CipherSuiteAcceptedByServer,
+    CipherSuite,
+    CertificateDeploymentAnalysisResult,
+    SessionRenegotiationScanResult,
+)
+from sslyze.connection_helpers.tls_connection import SslConnection
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
-from checks.models import KexHashFuncStatus, CipherOrderStatus
+from checks.models import (
+    KexHashFuncStatus,
+    CipherOrderStatus,
+    OcspStatus,
+    KexRSAPKCSStatus,
+    TLSClientInitiatedRenegotiationStatus,
+    TLSExtendedMasterSecretStatus,
+)
+from checks.scoring import TLS_EXTENDED_MASTER_SECRET_GOOD, TLS_EXTENDED_MASTER_SECRET_BAD
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
     PROTOCOLS_PHASE_OUT,
-    FS_ECDH_MIN_KEY_SIZE,
     FS_EC_PHASE_OUT,
     FS_EC_GOOD,
-    FS_DH_MIN_KEY_SIZE,
     FFDHE_GENERATOR,
-    FFDHE2048_PRIME,
-    FFDHE_SUFFICIENT_PRIMES,
+    FFDHE_PHASE_OUT_PRIMES,
     CIPHERS_GOOD,
     CIPHERS_SUFFICIENT,
     CIPHERS_PHASE_OUT,
@@ -96,28 +111,23 @@ class TLSForwardSecrecyParameterEvaluation:
         phase_out = set()
         bad = set()
 
-        # Evaluate according to NCSC table 4 and table 10
+        # Evaluate according to NCSC 3.3.2.1 table 3 and 3.3.3.1 table 7
         for suite in _unique_unhashable(ciphers_accepted):
             key = suite.ephemeral_key
             if not key:
                 continue
 
             if isinstance(key, EcDhEphemeralKeyInfo):
-                if key.size < FS_ECDH_MIN_KEY_SIZE:
-                    bad.add(f"ECDH-{key.size}")
                 if key.curve in FS_EC_PHASE_OUT:
                     phase_out.add(f"ECDH-{key.curve_name}")
                 elif key.curve not in FS_EC_GOOD:
                     bad.add(f"ECDH-{key.curve_name}")
 
             if isinstance(key, DhEphemeralKeyInfo):
-                if key.size < FS_DH_MIN_KEY_SIZE:
-                    bad.add(f"DH-{key.size}")
-                # NCSC table 10
                 if key.generator == FFDHE_GENERATOR:
-                    if key.prime == FFDHE2048_PRIME:
-                        phase_out.add("FFDHE-2048")
-                    elif key.prime not in FFDHE_SUFFICIENT_PRIMES:
+                    if key.prime in FFDHE_PHASE_OUT_PRIMES:
+                        phase_out.add(f"DH-{key.size}")
+                    else:
                         bad.add(f"DH-{key.size}")
 
         dh_sizes = [
@@ -198,10 +208,124 @@ class TLSCipherEvaluation:
 
 
 @dataclass(frozen=True)
+class TLSOCSPEvaluation:
+    """
+    Evaluate the OCSP setup, based on certificate info.
+    """
+
+    ocsp_in_cert: bool
+    has_ocsp_response: bool
+    ocsp_response_trusted: bool
+
+    GOOD_STATUSES = {OcspStatus.good, OcspStatus.not_in_cert}
+
+    @classmethod
+    def from_certificate_deployments(cls, certificate_deployment: CertificateDeploymentAnalysisResult):
+        leaf_cert = certificate_deployment.received_certificate_chain[0]
+        try:
+            aia_extension = leaf_cert.extensions.get_extension_for_oid(ExtensionOID.AUTHORITY_INFORMATION_ACCESS)
+            aia_value = cast(AuthorityInformationAccess, aia_extension.value)
+            ocsp_access = [ad for ad in aia_value if ad.access_method == AuthorityInformationAccessOID.OCSP]
+            ocsp_in_cert = len(ocsp_access) > 0
+        except ExtensionNotFound:
+            ocsp_in_cert = False
+
+        has_ocsp_response = certificate_deployment.ocsp_response is not None
+        ocsp_response_trusted = certificate_deployment.ocsp_response_is_trusted is True
+
+        return cls(
+            ocsp_in_cert=ocsp_in_cert,
+            has_ocsp_response=has_ocsp_response,
+            ocsp_response_trusted=ocsp_response_trusted,
+        )
+
+    @property
+    def status(self) -> OcspStatus:
+        if not self.ocsp_in_cert:
+            return OcspStatus.not_in_cert
+        if self.has_ocsp_response:
+            if self.ocsp_response_trusted:
+                return OcspStatus.good
+            else:
+                return OcspStatus.not_trusted
+        return OcspStatus.ok
+
+    @property
+    def score(self) -> scoring.Score:
+        return (
+            scoring.WEB_TLS_OCSP_STAPLING_GOOD
+            if self.status in self.GOOD_STATUSES
+            else scoring.WEB_TLS_OCSP_STAPLING_BAD
+        )
+
+
+@dataclass(frozen=True)
+class TLSRenegotiationEvaluation:
+    """
+    Evaluate the secure renegotiation settings per NCSC 3.4.2
+    """
+
+    supports_secure_renegotiation: bool
+    client_renegotiations_success_count: int
+
+    # What counts as "limited" per NCSC 3.4.2
+    MAX_SECURE_RENEG_ATTEMPTS = 10
+    # The number of attempts the scan should make
+    SCAN_RENEGOTIATION_LIMIT = MAX_SECURE_RENEG_ATTEMPTS + 1
+
+    @classmethod
+    def from_session_renegotiation_scan_result(cls, session_renegotiation_scan_result: SessionRenegotiationScanResult):
+        return cls(
+            supports_secure_renegotiation=session_renegotiation_scan_result.supports_secure_renegotiation,
+            client_renegotiations_success_count=session_renegotiation_scan_result.client_renegotiations_success_count,
+        )
+
+    @property
+    def status_secure_renegotiation(self) -> bool:
+        return self.supports_secure_renegotiation
+
+    @property
+    def status_client_initiated_renegotiation(self) -> TLSClientInitiatedRenegotiationStatus:
+        if not self.client_renegotiations_success_count:
+            return TLSClientInitiatedRenegotiationStatus.not_allowed
+        if self.client_renegotiations_success_count <= self.MAX_SECURE_RENEG_ATTEMPTS:
+            return TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit
+        return TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit
+
+    @property
+    def score_secure_renegotiation(self) -> scoring.Score:
+        return (
+            scoring.WEB_TLS_SECURE_RENEG_GOOD
+            if self.supports_secure_renegotiation
+            else scoring.WEB_TLS_SECURE_RENEG_BAD
+        )
+
+    @property
+    def score_client_initiated_renegotiation(self) -> scoring.Score:
+        scores = {
+            TLSClientInitiatedRenegotiationStatus.not_allowed: scoring.WEB_TLS_CLIENT_RENEG_GOOD,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit: scoring.WEB_TLS_CLIENT_RENEG_OK,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: scoring.WEB_TLS_CLIENT_RENEG_BAD,
+        }
+        return scores[self.status_client_initiated_renegotiation]
+
+
+@dataclass(frozen=True)
+class KeyExchangeRSAPKCSFunctionEvaluation:
+    """
+    Results of support for PKCS padding for RSA per NCSC 3.3.2.1.
+    NCSC table 5
+    """
+
+    status: KexRSAPKCSStatus
+    score: scoring.Score
+
+
+@dataclass(frozen=True)
 class KeyExchangeHashFunctionEvaluation:
     """
     Results of "hash functions for key exchange" evaluation.
-    NCSC table 5
+    NCSC 3.3.5
     """
 
     status: KexHashFuncStatus
@@ -215,12 +339,33 @@ class TLSCipherOrderEvaluation:
     If a violation is found, the violation attribute is a two
     item list with first the cipher preferred by the server,
     second the cipher we expected to be preferred above that.
-    NCSC B2-5
     """
 
     violation: List[str]
     status: CipherOrderStatus
     score: scoring.Score
+
+
+@dataclass()
+class TLSExtendedMasterSecretEvaluation:
+    """
+    Results of evaluating TLS 1.2 Extended Master Secret (RFC7627).
+    """
+
+    status: TLSExtendedMasterSecretStatus = TLSExtendedMasterSecretStatus.na_no_tls_1_2
+    score: scoring.Score = TLS_EXTENDED_MASTER_SECRET_GOOD
+
+    def update_for_connection(self, ssl_connection: SslConnection, tls_version: TlsVersionEnum) -> None:
+        if tls_version != TlsVersionEnum.TLS_1_2:
+            return
+
+        ems_support = ssl_connection.ssl_client.get_extended_master_secret_support()
+        if ems_support == ExtendedMasterSecretSupportEnum.USED_IN_CURRENT_SESSION:
+            self.status = TLSExtendedMasterSecretStatus.supported
+            self.score = TLS_EXTENDED_MASTER_SECRET_GOOD
+        elif ems_support == ExtendedMasterSecretSupportEnum.NOT_USED_IN_CURRENT_SESSION:
+            self.status = TLSExtendedMasterSecretStatus.not_supported
+            self.score = TLS_EXTENDED_MASTER_SECRET_BAD
 
 
 def _unique_unhashable(items: List[Any]) -> List[Any]:

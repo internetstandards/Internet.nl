@@ -11,13 +11,14 @@ import subprocess
 from cryptography.hazmat._oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives._serialization import Encoding
-from cryptography.hazmat.primitives.asymmetric import rsa, dsa
+from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
 from dns.name import EmptyLabel
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
 from nassl._nassl import OpenSSLError
+from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum
 from nassl.ssl_client import ClientCertificateRequested, OpenSslDigestNidEnum
 from sslyze import (
     ScanCommand,
@@ -59,6 +60,7 @@ from checks.models import (
     ZeroRttStatus,
     KexHashFuncStatus,
     CipherOrderStatus,
+    KexRSAPKCSStatus,
 )
 from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
 from checks.tasks.tls import TLSException
@@ -69,16 +71,21 @@ from checks.tasks.tls.evaluation import (
     KeyExchangeHashFunctionEvaluation,
     TLSCipherOrderEvaluation,
     TLSOCSPEvaluation,
+    KeyExchangeRSAPKCSFunctionEvaluation,
+    TLSRenegotiationEvaluation,
+    TLSExtendedMasterSecretEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
-    CERT_RSA_DSA_MIN_KEY_SIZE,
     CERT_CURVES_GOOD,
-    CERT_CURVE_MIN_KEY_SIZE,
     CERT_EC_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
-    SIGNATURE_ALGORITHMS_SHA2,
     MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS,
+    CERT_RSA_MIN_GOOD_KEY_SIZE,
+    CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
+    SIGNATURE_ALGORITHMS_BAD_HASH,
+    SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
+    SIGNATURE_ALGORITHMS_RSA_PKCS,
 )
 from internetnl import log
 
@@ -379,7 +386,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
     trusted_score = trusted_score_good if cert_deployment.verified_certificate_chain else trusted_score_bad
     pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain, mode)
 
-    # NCSC guideline B3-2
+    # NCSC 3.3.2 / 3.3.5
     sigalg_bad = {}
     sigalg_score = scoring.WEB_TLS_SIGNATURE_GOOD
     for cert in cert_deployment.received_certificate_chain:
@@ -454,9 +461,9 @@ def _certificate_matches_hostname(certificate: Certificate, server_hostname: str
 
 def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     """
-    Check that all provided certificates meet NCSC requirements.
+    Check that all provided certificates meet NCSC requirements, except root.
     """
-    # NCSC guidelines B3-3, B5-1
+    # NCSC guidelines 3.3.2.x
     bad_pubkey = []
     phase_out_pubkey = []
     if mode == ChecksMode.WEB:
@@ -469,32 +476,41 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
         raise ValueError(f"Unknown checks mode: {mode}")
     pubkey_score = pubkey_score_good
     for cert in certificates:
+        if is_root_cert(cert):
+            continue
+
         common_name = get_common_name(cert)
         public_key = cert.public_key()
-        public_key_type = type(public_key)
-        key_size = public_key.key_size
+        key_type = type(public_key)
+        curve = None
+        if hasattr(public_key, "curve"):
+            curve = public_key.curve.__class__
 
-        failed_key_type = ""
-        curve = ""
-        # Note that DH fields are checked in the key exchange already
-        # https://github.com/internetstandards/Internet.nl/pull/1218#issuecomment-1944496933
-        if public_key_type is rsa.RSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type is dsa.DSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type in CERT_CURVES_GOOD and key_size < CERT_CURVE_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type is EllipticCurvePublicKey and public_key.curve not in CERT_EC_CURVES_GOOD:
-            failed_key_type = public_key_type.__name__
-        if failed_key_type:
-            message = f"{common_name}: {failed_key_type}-{key_size} key_size"
-            if curve:
-                message += f", curve: {curve}"
-            if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
-                phase_out_pubkey.append(message)
-            else:
-                bad_pubkey.append(message)
-                pubkey_score = pubkey_score_bad
+        is_good = (
+            (isinstance(public_key, rsa.RSAPublicKey) and public_key.key_size >= CERT_RSA_MIN_GOOD_KEY_SIZE)
+            or (key_type in CERT_CURVES_GOOD)
+            or (isinstance(public_key, EllipticCurvePublicKey) and curve in CERT_EC_CURVES_GOOD)
+        )
+
+        if is_good:
+            continue
+
+        key_size = getattr(public_key, "key_size", None)
+        message = f"{common_name}: {key_type.__name__}"
+        if key_size is not None:
+            message += f"-{key_size}"
+        if curve:
+            message += f", curve: {curve}"
+
+        is_phase_out = (curve in CERT_EC_CURVES_PHASE_OUT) or (
+            isinstance(public_key, rsa.RSAPublicKey) and public_key.key_size >= CERT_RSA_MIN_PHASE_OUT_KEY_SIZE
+        )
+
+        if is_phase_out:
+            phase_out_pubkey.append(message)
+        else:
+            bad_pubkey.append(message)
+            pubkey_score = pubkey_score_bad
     return pubkey_score, bad_pubkey, phase_out_pubkey
 
 
@@ -513,7 +529,7 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
 
         for future in concurrent.futures.as_completed(future_to_server):
             server = future_to_server[future]
-            scan_request = future.result()
+            scan_request, ems_evaluation = future.result()
 
             if scan_request:
                 scans.append(scan_request)
@@ -529,7 +545,7 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
             results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
             continue
         log.debug(f"sslyze mail scan complete for {result.server_location.hostname}, other scans may be pending")
-        results[result.server_location.hostname] = check_mail_tls(result, all_suites)
+        results[result.server_location.hostname] = check_mail_tls(result, all_suites, ems_evaluation)
         log.debug(f"check_mail_tls complete for {result.server_location.hostname}")
     return results
 
@@ -547,7 +563,9 @@ def connection_limit_for_scans(scans: List[ServerScanRequest]):
     return 1
 
 
-def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanRequest]:
+def _generate_mail_server_scan_request(
+    mx_hostname: str,
+) -> Tuple[Optional[ServerScanRequest], TLSExtendedMasterSecretEvaluation]:
     """
     Generate the scan request (sslyze scan commands) for a mail server.
     Includes resolving and determining supported TLS versions.
@@ -556,14 +574,14 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
         server_location = ServerNetworkLocation(hostname=mx_hostname, port=25)
     except ServerHostnameCouldNotBeResolved:
         log.info(f"unable to resolve MX host {mx_hostname}, marking server unreachable")
-        return None
+        return None, TLSExtendedMasterSecretEvaluation()
     network_configuration = ServerNetworkConfiguration(
         tls_server_name_indication=mx_hostname.rstrip("."),
         tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
         smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
-    supported_tls_versions = check_supported_tls_versions(
+    supported_tls_versions, extended_master_secret_evaluation = check_supported_tls_versions(
         ServerConnectivityInfo(
             server_location=server_location,
             network_configuration=network_configuration,
@@ -572,22 +590,31 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
     )
     if not supported_tls_versions:
         log.info(f"no TLS version support found for MX host {mx_hostname}, marking server unreachable")
-        return None
+        return None, extended_master_secret_evaluation
     scan_commands = SSLYZE_SCAN_COMMANDS | {
         SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
     }
 
-    return ServerScanRequest(
-        server_location=server_location,
-        network_configuration=network_configuration,
-        scan_commands=scan_commands,
-        scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+    return (
+        ServerScanRequest(
+            server_location=server_location,
+            network_configuration=network_configuration,
+            scan_commands=scan_commands,
+            scan_commands_extra_arguments=ScanCommandsExtraArguments(
+                session_renegotiation=SessionRenegotiationExtraArgument(
+                    client_renegotiation_attempts=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT
+                ),
+            ),
         ),
+        extended_master_secret_evaluation,
     )
 
 
-def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt]):
+def check_mail_tls(
+    result: ServerScanResult,
+    all_suites: List[CipherSuitesScanAttempt],
+    extended_master_secret_evaluation: TLSExtendedMasterSecretEvaluation,
+):
     """
     Perform evaluation and additional probes for a single mail server.
     This happens after sslyze has already been run on it.
@@ -599,14 +626,22 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+
+    server_conn_info = ServerConnectivityInfo(
+        server_location=result.server_location,
+        network_configuration=result.network_configuration,
+        tls_probing_result=result.connectivity_result,
+    )
     cipher_order_evaluation = test_cipher_order(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
+        server_conn_info,
         prots_accepted,
         cipher_evaluation,
+    )
+    key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
+    key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
+
+    renegotiation_evaluation = TLSRenegotiationEvaluation.from_session_renegotiation_scan_result(
+        result.scan_result.session_renegotiation.result
     )
     cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
@@ -629,18 +664,10 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
         cipher_order_score=cipher_order_evaluation.score,
         cipher_order=cipher_order_evaluation.status,
         cipher_order_violation=cipher_order_evaluation.violation,
-        secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
-        secure_reneg_score=(
-            scoring.WEB_TLS_SECURE_RENEG_GOOD
-            if result.scan_result.session_renegotiation.result.supports_secure_renegotiation
-            else scoring.WEB_TLS_SECURE_RENEG_BAD
-        ),
-        client_reneg=result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos,
-        client_reneg_score=(
-            scoring.WEB_TLS_CLIENT_RENEG_BAD
-            if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
-            else scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        ),
+        secure_reneg=renegotiation_evaluation.status_secure_renegotiation,
+        secure_reneg_score=renegotiation_evaluation.score_secure_renegotiation,
+        client_reneg=renegotiation_evaluation.status_client_initiated_renegotiation,
+        client_reneg_score=renegotiation_evaluation.score_client_initiated_renegotiation,
         compression=result.scan_result.tls_compression.result.supports_compression
         if result.scan_result.tls_compression.result
         else None,
@@ -664,8 +691,12 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        kex_hash_func=KexHashFuncStatus.good,
-        kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+        key_exchange_rsa_pkcs=key_exchange_rsa_pkcs_evaluation.status,
+        key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
+        kex_hash_func=key_exchange_hash_evaluation.status,
+        kex_hash_func_score=key_exchange_hash_evaluation.score,
+        extended_master_secret=extended_master_secret_evaluation.status,
+        extended_master_secret_score=extended_master_secret_evaluation.score,
     )
     results.update(cert_results)
     return results
@@ -691,7 +722,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         http_user_agent=settings.USER_AGENT,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
-    supported_tls_versions = check_supported_tls_versions(
+    supported_tls_versions, extended_master_secret_evaluation = check_supported_tls_versions(
         ServerConnectivityInfo(
             server_location=server_location,
             network_configuration=network_configuration,
@@ -710,7 +741,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         scan_commands=scan_commands,
         scan_commands_extra_arguments=ScanCommandsExtraArguments(
             certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
-            session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+            session_renegotiation=SessionRenegotiationExtraArgument(
+                client_renegotiation_attempts=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT
+            ),
         ),
     )
     all_suites, result, error = next(run_sslyze([scan], connection_limit=25))
@@ -722,21 +755,21 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+
+    server_conn_info = ServerConnectivityInfo(
+        server_location=result.server_location,
+        network_configuration=result.network_configuration,
+        tls_probing_result=result.connectivity_result,
+    )
     cipher_order_evaluation = test_cipher_order(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
+        server_conn_info,
         supported_tls_versions,
         cipher_evaluation,
     )
-    key_exchange_hash_evaluation = test_key_exchange_hash(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
+    key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
+    key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
+    renegotiation_evaluation = TLSRenegotiationEvaluation.from_session_renegotiation_scan_result(
+        result.scan_result.session_renegotiation.result
     )
 
     ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
@@ -756,19 +789,13 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         cipher_order_score=cipher_order_evaluation.score,
         cipher_order=cipher_order_evaluation.status,
         cipher_order_violation=cipher_order_evaluation.violation,
-        secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
-        secure_reneg_score=(
-            scoring.WEB_TLS_SECURE_RENEG_GOOD
-            if result.scan_result.session_renegotiation.result.supports_secure_renegotiation
-            else scoring.WEB_TLS_SECURE_RENEG_BAD
-        ),
-        client_reneg=result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos,
-        client_reneg_score=(
-            scoring.WEB_TLS_CLIENT_RENEG_BAD
-            if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
-            else scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        ),
-        compression=result.scan_result.tls_compression.result.supports_compression,
+        secure_reneg=renegotiation_evaluation.status_secure_renegotiation,
+        secure_reneg_score=renegotiation_evaluation.score_secure_renegotiation,
+        client_reneg=renegotiation_evaluation.status_client_initiated_renegotiation,
+        client_reneg_score=renegotiation_evaluation.score_client_initiated_renegotiation,
+        compression=result.scan_result.tls_compression.result.supports_compression
+        if result.scan_result.tls_compression.result
+        else None,
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
             if result.scan_result.tls_compression.result.supports_compression
@@ -791,8 +818,12 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ),
         ocsp_stapling=ocsp_evaluation.status,
         ocsp_stapling_score=ocsp_evaluation.score,
+        key_exchange_rsa_pkcs=key_exchange_rsa_pkcs_evaluation.status,
+        key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
+        extended_master_secret=extended_master_secret_evaluation.status,
+        extended_master_secret_score=extended_master_secret_evaluation.score,
     )
     return probe_result
 
@@ -806,7 +837,9 @@ def run_sslyze(
     This threading is handled inside sslyze.
     """
     log.debug(f"starting sslyze scan for {[scan.server_location for scan in scans]}")
-    scanner = Scanner(per_server_concurrent_connections_limit=connection_limit, concurrent_server_scans_limit=10)
+    scanner = Scanner(
+        per_server_concurrent_connections_limit=connection_limit,
+    )
     scanner.queue_scans(scans)
     for result in scanner.get_results():
         log.debug(f"sslyze scan for {result.server_location} result: {result.scan_status}")
@@ -850,40 +883,89 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
         raise TLSException(str(last_error_trace))
 
 
+def test_key_exchange_rsa_pkcs(
+    server_connectivity_info: ServerConnectivityInfo,
+) -> KeyExchangeRSAPKCSFunctionEvaluation:
+    """
+    Test key exchange for RSA PKCS support per NCSC 3.3.2.1.
+    See also RFC8446 1.3 and 4.2.3, RFC 5246 7.4.1.4.1.
+    """
+    rsa_pkcs_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_RSA_PKCS)
+    if rsa_pkcs_result:
+        log.info(f"RSA-PKCS key exchange check: negotiated bad sigalg ({rsa_pkcs_result})")
+        return KeyExchangeRSAPKCSFunctionEvaluation(
+            status=KexRSAPKCSStatus.bad,
+            score=scoring.TLS_KEX_RSA_PKCS_BAD,
+        )
+
+    return KeyExchangeRSAPKCSFunctionEvaluation(
+        status=KexRSAPKCSStatus.good,
+        score=scoring.TLS_KEX_RSA_PKCS_GOOD,
+    )
+
+
 def test_key_exchange_hash(
     server_connectivity_info: ServerConnectivityInfo,
 ) -> KeyExchangeHashFunctionEvaluation:
     """
-    Test the SHA2 key exchange per NCSC table 5.
+    Test key exchange hashes per NCSC 3.3.5.
     Note that this is not the certificate hash, or TLS cipher hash.
     There are few or no hosts that do not meet this requirement.
     """
-    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
-    ssl_connection.ssl_client.set_signature_algorithms(SIGNATURE_ALGORITHMS_SHA2)
-
-    try:
-        ssl_connection.connect()
-        if ssl_connection.ssl_client.get_peer_signature_nid() == OpenSslDigestNidEnum.SHA1:
-            log.info("Failed SHA2 key exchange check: negotiated SHA1 even when only offering SHA2")
-            return KeyExchangeHashFunctionEvaluation(
-                status=KexHashFuncStatus.bad,
-                score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
-            )
-    except ClientCertificateRequested:
-        pass
-    except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError) as exc:
-        log.info(f"Failed SHA2 key exchange check: {exc}")
+    bad_hash_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH)
+    if bad_hash_result:
+        log.info(f"SHA2 key exchange check: negotiated bad sigalg ({bad_hash_result})")
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.bad,
             score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
         )
-    finally:
-        ssl_connection.close()
+
+    phase_out_hash_result = _test_connection_with_limited_sigalgs(
+        server_connectivity_info, SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
+    )
+    if phase_out_hash_result:
+        log.info(f"SHA2 key exchange check: negotiated phase_out hash ({phase_out_hash_result})")
+        return KeyExchangeHashFunctionEvaluation(
+            status=KexHashFuncStatus.phase_out,
+            score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+        )
 
     return KeyExchangeHashFunctionEvaluation(
         status=KexHashFuncStatus.good,
         score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
     )
+
+
+def _test_connection_with_limited_sigalgs(
+    server_connectivity_info: ServerConnectivityInfo, sigalgs: list[tuple[OpenSslDigestNidEnum, OpenSslEvpPkeyEnum]]
+) -> Optional[OpenSslDigestNidEnum]:
+    """
+    Test whether the server accepts a connection with limited sigalgs through the signature_algorithms extension.
+    Returns a (NID, EVP PKEY) if a match was found, None otherwise.
+    """
+    # This is only interesting on TLS 1.2 or older
+    override_tls_version = None
+    if server_connectivity_info.tls_probing_result.highest_tls_version_supported == TlsVersionEnum.TLS_1_3:
+        override_tls_version = TlsVersionEnum.TLS_1_2
+    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
+        override_tls_version=override_tls_version, should_use_legacy_openssl=False
+    )
+    ssl_connection.ssl_client.set_signature_algorithms(sigalgs)
+
+    try:
+        ssl_connection.connect()
+        sigalg_nid = ssl_connection.ssl_client.get_peer_signature_nid()
+        # Extra check as some servers will ignore the client and force a secure hash anyways.
+        # OpenSSL will accept this, as it does know about the secure hash.
+        # Note that while we can double-check this for the digest hash, we cannot check it for EVP PKEY.
+        if sigalg_nid in [sa[0] for sa in sigalgs]:
+            return sigalg_nid
+    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError):
+        pass
+    finally:
+        ssl_connection.close()
+
+    return None
 
 
 def test_cipher_order(
@@ -900,9 +982,9 @@ def test_cipher_order(
     by each good, and then expects the server to choose the good cipher.
     That assures us that the server prefers each good cipher over any lower cipher.
     This is tested at all levels that the server supported.
-    NCSC B2-5.
     """
     cipher_order_violation = []
+    status = CipherOrderStatus.good
     if (
         not cipher_evaluation.ciphers_bad
         and not cipher_evaluation.ciphers_phase_out
@@ -918,14 +1000,19 @@ def test_cipher_order(
 
     order_tuples = [
         (
+            CipherOrderStatus.sufficient_above_good,
             cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out + cipher_evaluation.ciphers_sufficient,
             # Make sure we do not mix in TLS 1.3 ciphers, all TLS 1.3 ciphers are good.
             cipher_evaluation.ciphers_good_no_tls13,
         ),
-        (cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out, cipher_evaluation.ciphers_sufficient),
-        (cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
+        (
+            CipherOrderStatus.bad,
+            cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out,
+            cipher_evaluation.ciphers_sufficient,
+        ),
+        (CipherOrderStatus.bad, cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
     ]
-    for expected_less_preferred, expected_more_preferred_list in order_tuples:
+    for fail_status, expected_less_preferred, expected_more_preferred_list in order_tuples:
         if cipher_order_violation:
             break
         # Sort CHACHA as later in the list, in case SSL_OP_PRIORITIZE_CHACHA is enabled #461
@@ -938,16 +1025,19 @@ def test_cipher_order(
             )
             if preferred_suite != expected_more_preferred:
                 cipher_order_violation = [preferred_suite.name, expected_more_preferred.name]
+                status = fail_status
                 log.info(
                     f"found cipher order violation for {server_connectivity_info.server_location.hostname}:"
-                    f" preferred {preferred_suite.name} instead of {expected_more_preferred.name}"
+                    f" preferred {preferred_suite.name} instead of {expected_more_preferred.name}, status {fail_status}"
                 )
                 break
 
     return TLSCipherOrderEvaluation(
         violation=cipher_order_violation,
-        status=CipherOrderStatus.bad if cipher_order_violation else CipherOrderStatus.good,
-        score=scoring.WEB_TLS_CIPHER_ORDER_BAD if cipher_order_violation else scoring.WEB_TLS_CIPHER_ORDER_GOOD,
+        status=status,
+        score=scoring.WEB_TLS_CIPHER_ORDER_BAD
+        if status == CipherOrderStatus.bad
+        else scoring.WEB_TLS_CIPHER_ORDER_GOOD,
     )
 
 
@@ -998,14 +1088,18 @@ def _check_cipher_suite_available(tls_version: TlsVersionEnum, cipher_suite: Cip
         return False
 
 
-def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInfo) -> List[TlsVersionEnum]:
+def check_supported_tls_versions(
+    server_connectivity_info: ServerConnectivityInfo,
+) -> Tuple[List[TlsVersionEnum], TLSExtendedMasterSecretEvaluation]:
     """
-    Determine which TLS versions are supported.
+    Determine which TLS versions are supported, and EMS support.
     Providing this info to sslyze improves on the bluntness of the scans.
+    EMS is combined for efficiency, we just need access to any TLS 1.2 connection to check it.
     """
     supported_tls_versions = []
+    ems_evaluation = TLSExtendedMasterSecretEvaluation()
     for tls_version in TlsVersionEnum:
-        requires_legacy_openssl = tls_version != TlsVersionEnum.TLS_1_3
+        requires_legacy_openssl = tls_version not in [TlsVersionEnum.TLS_1_2, TlsVersionEnum.TLS_1_3]
 
         ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
             override_tls_version=tls_version, should_use_legacy_openssl=requires_legacy_openssl
@@ -1013,7 +1107,8 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
-        except (ConnectionToServerFailed, OpenSSLError) as exc:
+            ems_evaluation.update_for_connection(ssl_connection, tls_version)
+        except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut) as exc:
             log.debug(
                 f"Server {server_connectivity_info.server_location.hostname}"
                 f"/{server_connectivity_info.server_location.ip_address}"
@@ -1028,4 +1123,4 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         f"support for {supported_tls_versions}"
     )
     supported_tls_versions.sort(key=lambda t: t.value, reverse=True)
-    return supported_tls_versions
+    return supported_tls_versions, ems_evaluation
