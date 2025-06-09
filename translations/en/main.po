@@ -1294,7 +1294,7 @@ msgstr "Cipher order"
 
 msgid "detail mail tls cipher-order tech table"
 msgstr ""
-"Mail server (MX)|First found affected cipher pair|Violated rule # ('II-B')"
+"Mail server (MX)|Server preferred cipher|Expected preferred cipher"
 
 msgid "detail mail tls cipher-order verdict bad"
 msgstr ""
