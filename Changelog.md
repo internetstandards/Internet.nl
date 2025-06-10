@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.10.2
+
+- Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1801).
+
+The API version is updated to 2.6.0 due to the new CAA fields.
+
 ## 1.10.1
 
 - Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
