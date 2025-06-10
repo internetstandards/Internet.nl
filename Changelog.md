@@ -22,7 +22,7 @@ _Compared to the latest 1.10 release._
 
 ## 1.10.2
 
-- Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1804).
+- Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1801).
 
 The API version is updated to 2.6.0 due to the new CAA fields.
 
