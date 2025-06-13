@@ -58,33 +58,34 @@ function header() {
 
   navObserver.observe(scrollWatcher);
 
-  let prevScrollY = window.scrollY;
-  let lastHideScrollY = prevScrollY;
+  let lastScrollY = window.pageYOffset;
+  const buffer = 100;
   let ticking = false;
-  const buffer = 50;
 
   window.addEventListener(
     "scroll",
     () => {
-      const currentY = window.scrollY;
+      const currentY = window.pageYOffset;
 
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(() => {
-          const isScrollingDown = currentY > prevScrollY;
+          const delta = currentY - lastScrollY;
 
           if (currentY <= headerHeight) {
             header.classList.remove("not-scrolling-up");
-          } else if (isScrollingDown) {
-            header.classList.add("not-scrolling-up");
-            lastHideScrollY = currentY;
-          } else {
-            if (lastHideScrollY - currentY > buffer) {
-              header.classList.remove("not-scrolling-up");
+          } else if (Math.abs(delta) > buffer) {
+            if (delta > 0) {
+              // Scrolled down
+              header.classList.add('not-scrolling-up');
+            } else {
+              // Scrolled up
+              header.classList.remove('not-scrolling-up');
             }
-          }
 
-          prevScrollY = currentY;
+            lastScrollY = currentY;
+          }
+          
           ticking = false;
         });
       }

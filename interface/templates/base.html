@@ -17,10 +17,10 @@
   <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
 
   <link rel="stylesheet" href="{% static 'css/style-min.css' %}" />
-  <script type="module" src="{% static 'js/base-min.js' %}"></script>
-  <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
 
   {% block scripting %}
+    <script type="module" src="{% static 'js/base-min.js' %}"></script>
+    <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
   {% endblock %}
 
 </head>

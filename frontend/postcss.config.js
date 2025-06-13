@@ -1,7 +1,9 @@
 export default {
   plugins: {
     "postcss-import": {},
-    "@csstools/postcss-cascade-layers": {},
+    "@csstools/postcss-cascade-layers": {
+      onImportLayerRule: "warn",
+    },
     autoprefixer: {},
     "postcss-preset-env": {
       features: {},
@@ -9,5 +11,6 @@ export default {
     cssnano: {
       preset: "default",
     },
+    "postcss-variable-compress": {},
   },
 };

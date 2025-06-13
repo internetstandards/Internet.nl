@@ -5,6 +5,9 @@ RUN apk add --no-cache curl postgresql15 python3 py3-prometheus-client py3-reque
 # install cron tasks
 COPY docker/cron/periodic /etc/periodic/
 
+# add 5min to crontab
+RUN echo "*/5    *       *       *       *       run-parts /etc/periodic/5min" >> /etc/crontabs/root
+
 # create separate periodic config for cron-docker service
 RUN cp -r /etc/crontabs /etc/crontabs-docker
 RUN sed -i 's/periodic/periodic-docker/' /etc/crontabs-docker/root

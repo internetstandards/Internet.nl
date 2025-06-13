@@ -9,8 +9,13 @@
         <form action="/site/" method="POST">
           <label>
             <span>{% include "string.html" with name="test_website_domain_label_newstring" %}</span>
-            <input name="url" type="text" placeholder="www.example.nl" inputmode="url" required>
+            <input name="url" type="text" placeholder="www.example.nl" inputmode="url" autocomplete="url" required>
           </label>
+          {% if request.GET.invalid != None %}
+          <p class="invalid-domain">
+            {% include "string.html" with name="base test prechecks invalid domain" %}
+          </p>
+          {% endif %}
           <button class="primary-button icon" type="submit">{% include "string.html" with name="test_start_button_newstring" %}</button>
         </form>
         <ul>

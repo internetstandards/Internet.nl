@@ -12,9 +12,14 @@
             <span>{% include "string.html" with name="test_email_domain_label_newstring" %}</span>
             <div class="mail-input-container">
               <div class="mail-icon-container icon"></div>
-              <input class="mail-input" name="url" type="text" placeholder="bikkelhart.com" inputmode="url" required>
+              <input class="mail-input" name="url" type="text" placeholder="bikkelhart.com" inputmode="url" autocomplete="url" required>
             </div>
           </label>
+          {% if request.GET.invalid != None %}
+          <p class="invalid-domain">
+            {% include "string.html" with name="base test prechecks invalid domain" %}
+          </p>
+          {% endif %}
           <button class="primary-button icon" type="submit">{% include "string.html" with name="test_start_button_newstring" %}</button>
         </form>
         <ul>

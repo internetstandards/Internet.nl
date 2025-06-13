@@ -49,10 +49,7 @@
 
     a {
       display: inline;
-
-      &:hover {
-        text-decoration: underline;
-      }
+      text-decoration: underline;
     }
 
     &.probing::before {
@@ -117,6 +114,11 @@
     &.error::before {
       mask-image: url("/static/icons/broken.svg");
       background-color: var(--error-color);
+    }
+
+    &.info::before {
+      mask-image: url("/static/icons/info.svg");
+      background-color: var(--info-color);
     }
 
     &.hidethis {

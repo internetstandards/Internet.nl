@@ -6,7 +6,6 @@ import "./js/base/header.js";
 import "./js/base/theme.js";
 import "./js/base/print.js";
 import "./js/base/language-switch.js";
-import "./js/base/detect-browser-font-size.js";
 
 import "./js/components/card-list/load-more.js";
 import "./js/components/carousel/carrousel.js";

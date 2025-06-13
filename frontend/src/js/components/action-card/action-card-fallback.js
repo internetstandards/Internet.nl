@@ -6,7 +6,11 @@ const elements = {
 
 function actionCardFallback() {
   const toggleDetailsOpen = () => {
-    elements.details.setAttribute("open", window.innerWidth > 900 ? "" : null);
+    if (window.innerWidth > 900) {
+      elements.details.setAttribute("open", "");
+    } else {
+      elements.details.removeAttribute("open");
+    }
   };
 
   toggleDetailsOpen();

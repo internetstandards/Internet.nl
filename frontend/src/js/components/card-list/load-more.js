@@ -20,7 +20,7 @@ function loadMore() {
     visibleCount += batchSize;
 
     if (visibleCount >= cards.length) {
-      toggleElements("#load-more", true);
+      loadMoreBtn.classList.add('hidden');
     }
   });
 }

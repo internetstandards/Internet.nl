@@ -5,40 +5,37 @@ const elements = {
 };
 
 function copyLink() {
-  const { shareBtn } = elements;
-
-  function fallbackCopy(link) {
-    navigator.clipboard
-      .writeText(link)
-      .then(() => {
-        shareBtn.classList.add("copied");
-        setTimeout(() => {
-          shareBtn.classList.remove("copied");
-        }, 5000);
-      })
-      .catch(() => {
-        alert("Unable to share or copy link. Please copy manually: " + link);
-      });
-  }
-
-  shareBtn.addEventListener("click", function () {
+  elements.shareBtn.addEventListener('click', function() {
     const link = window.location.href;
 
     if (!window.isSecureContext) {
-      alert(
-        "Sharing is only supported over HTTPS. Please access this page via HTTPS to share."
-      );
+      alert("Unable to share or copy link. Please copy manually: " + link);
       return;
     }
 
     if (navigator.share) {
-      navigator.share({ url: link }).catch(() => {
-        fallbackCopy(link);
-      });
+      navigator.share({
+        url: link
+      })
+
     } else {
       fallbackCopy(link);
     }
   });
+
+  function fallbackCopy(link) {
+    navigator.clipboard.writeText(link)
+      .then(() => {
+        elements.shareBtn.classList.add('copied');
+        setTimeout(() => {
+          elements.shareBtn.classList.remove('copied');
+        }, 5000);
+      })
+      .catch(() => {
+        alert('Unable to share or copy link. Please copy manually: ' + link);
+      });
+      
+  }  
 }
 
 if (validateElements(elements, "copy-link")) {
