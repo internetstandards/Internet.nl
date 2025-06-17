@@ -23,8 +23,6 @@ class CAAEvaluation:
 
     caa_found: bool
     canonical_name: Optional[str] = None
-    has_syntax_error: bool = False
-    has_insufficient_policy: bool = False
     errors: list[TranslatableTechTableItem] = field(default_factory=list)
     recommendations: list[TranslatableTechTableItem] = field(default_factory=list)
     caa_records_str: list[str] = field(default_factory=list)
@@ -37,16 +35,24 @@ class CAAEvaluation:
         self.caa_tags = {caa.tag.decode("ascii") for caa in caa_records}
 
         for caa in caa_records:
+            tag = caa.tag.decode("ascii", errors="replace")
+
             try:
                 # For encoding, RFC8659 4.1 says tags are A-z0-9, so decoding as ascii is fine.
+                # Only known tags are approved, so decoding with errors=replace is safe.
                 # Value is "binary values", but currently all are probably ascii.
-                # Most of the real validation is done later, including in ABNF, so we
-                # accept encoding errors here with a replace.
-                validate_caa_record(
-                    caa.flags, caa.tag.decode("ascii", errors="replace"), caa.value.decode("utf-8", errors="replace")
-                )
+                validate_caa_record(caa.flags, tag, caa.value.decode("utf-8"))
             except CAAParseError as cpe:
                 self.errors.append(TranslatableTechTableItem(cpe.msg_id, cpe.context))
+            except UnicodeDecodeError:
+                self.errors.append(
+                    TranslatableTechTableItem(
+                        "invalid-property-encoding",
+                        {
+                            "property_name": tag,
+                        },
+                    )
+                )
 
         missing_tags = CAA_TAGS_REQUIRED - self.caa_tags
         for tag in missing_tags:

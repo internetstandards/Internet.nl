@@ -23,6 +23,8 @@ _Compared to the latest 1.10 release._
 ## 1.10.2
 
 - Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1801).
+- Fixed [incomplete detection of insufficient or invalid CAA](https://github.com/internetstandards/Internet.nl/pull/1811)
+  along with some improvements in UTF-8 handling.
 
 The API version is updated to 2.6.0 due to the new CAA fields.
 
