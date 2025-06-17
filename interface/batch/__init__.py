@@ -3,7 +3,7 @@
 from django.conf import settings
 
 BATCH_API_MAJOR_VERSION = "2"
-BATCH_API_MINOR_VERSION = "5"
+BATCH_API_MINOR_VERSION = "6"
 BATCH_API_PATCH_VERSION = "0"
 BATCH_API_FULL_VERSION = f"{BATCH_API_MAJOR_VERSION}" f".{BATCH_API_MINOR_VERSION}" f".{BATCH_API_PATCH_VERSION}"
 
@@ -229,6 +229,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
                             "name_on_report": "ocsp_stapling",
                             "type": "test",
                             "translation_key": "web tls ocsp-stapling",
+                        },
+                        {
+                            "name": "web_https_tls_caa",
+                            "name_on_report": "web_caa",
+                            "type": "test",
+                            "translation_key": "web tls caa",
                         },
                     ],
                 },
@@ -617,6 +623,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
                             "name_on_report": "zero_rtt",
                             "type": "test",
                             "translation_key": "mail tls zero-rtt",
+                        },
+                        {
+                            "name": "mail_starttls_tls_caa",
+                            "name_on_report": "mail_caa",
+                            "type": "test",
+                            "translation_key": "mail tls caa",
                         },
                     ],
                 },

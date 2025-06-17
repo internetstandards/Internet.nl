@@ -1,6 +1,14 @@
 # Change Log
 
-## 1.10.1 (in progress)
+## 1.10.2
+
+- Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1801).
+- Fixed [incomplete detection of insufficient or invalid CAA](https://github.com/internetstandards/Internet.nl/pull/1811)
+  along with some improvements in UTF-8 handling.
+
+The API version is updated to 2.6.0 due to the new CAA fields.
+
+## 1.10.1
 
 - Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
 - Fixed possible exception in [mail test prechecks](https://github.com/internetstandards/Internet.nl/pull/1787).

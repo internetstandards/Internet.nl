@@ -1944,6 +1944,9 @@ msgstr ""
 "{invalid_character_position} in '{property_name}'-waarde "
 "\"{property_value}\""
 
+msgid "detail tech data caa invalid-property-encoding"
+msgstr "Fout: Ongeldige encoding in '{property_name}'"
+
 msgid "detail tech data caa invalid-reserved-property"
 msgstr "Fout: Ongeldige gereserveerde property \"{property_tag}\""
 

@@ -1935,6 +1935,9 @@ msgstr ""
 "{invalid_character_position} in '{property_name}' value \"{property_value}\""
 " "
 
+msgid "detail tech data caa invalid-property-encoding"
+msgstr "Error: Invalid encoding in '{property_name}'"
+
 msgid "detail tech data caa invalid-reserved-property"
 msgstr "Error: Invalid reserved property \"{property_tag}\""
 
