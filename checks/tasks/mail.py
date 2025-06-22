@@ -477,7 +477,7 @@ def do_dmarc(url, *args, **kwargs):
         log.debug("Soft time limit exceeded: %s", specific_exception)
         result = dict(
             available=False,
-            score=scoring.MAIL_AUTH_DMARC_FAIL,
+            score=scoring.MAIL_AUTH_DMARC_ERROR,
             record=[],
             policy_status=None,
             policy_score=scoring.MAIL_AUTH_DMARC_POLICY_FAIL,
