@@ -22,6 +22,8 @@ _Compared to the latest 1.10 release._
 
 ## 1.10.2
 
+- Fixed an issue where [DNSSEC insecure targets could be flagged as bogus](https://github.com/internetstandards/Internet.nl/issues/1803)
+  due to a [unbound incorrectly returning a bogus EDE](https://github.com/NLnetLabs/unbound/issues/1293).
 - Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1801).
 - Fixed [incomplete detection of insufficient or invalid CAA](https://github.com/internetstandards/Internet.nl/pull/1811)
   along with some improvements in UTF-8 handling.
