@@ -430,6 +430,9 @@ def _dmarc_dns_lookup(url):
     except NXDOMAIN:
         score = scoring.MAIL_AUTH_DMARC_FAIL
         continue_looking = True
+    except NoAnswer:  # https://github.com/internetstandards/Internet.nl/issues/1808
+        score = scoring.MAIL_AUTH_DMARC_FAIL
+        continue_looking = True
     except DNSException:
         score = scoring.MAIL_AUTH_DMARC_ERROR
 
