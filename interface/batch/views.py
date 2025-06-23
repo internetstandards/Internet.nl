@@ -26,6 +26,7 @@ from interface.batch.util import (
     register_request,
 )
 from internetnl import log
+from .util import request_already_generating
 
 
 @require_http_methods(["GET", "POST"])
@@ -69,9 +70,15 @@ def results(request, request_id, *args, technical=False, **kwargs):
     if batch_request.status != BatchRequestStatus.done:
         return bad_client_request_response("The request is not yet `done`.")
     else:
+        # if not batch_request.has_report_file() and not request_already_generating(batch_request.request_id):
         if not batch_request.has_report_file():
-            batch_async_generate_results.delay(user=user, batch_request=batch_request, site_url=get_site_url(request))
-            return bad_client_request_response("The request is not yet `done`.")
+            if not request_already_generating(batch_request.request_id):
+                batch_async_generate_results.delay(
+                    user=user, batch_request=batch_request, site_url=get_site_url(request)
+                )
+                return bad_client_request_response("Report is being generated.")
+            else:
+                return bad_client_request_response("The request is not yet `done`.")
 
         else:
             report_file = batch_request.get_report_file(technical)
