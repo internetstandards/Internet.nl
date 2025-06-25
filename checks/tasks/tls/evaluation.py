@@ -14,10 +14,8 @@ from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
     PROTOCOLS_PHASE_OUT,
-    FS_ECDH_MIN_KEY_SIZE,
     FS_EC_PHASE_OUT,
     FS_EC_GOOD,
-    FS_DH_MIN_KEY_SIZE,
     FFDHE_GENERATOR,
     FFDHE_PHASE_OUT_PRIMES,
     CIPHERS_GOOD,
@@ -105,16 +103,12 @@ class TLSForwardSecrecyParameterEvaluation:
                 continue
 
             if isinstance(key, EcDhEphemeralKeyInfo):
-                if key.size < FS_ECDH_MIN_KEY_SIZE:
-                    bad.add(f"ECDH-{key.size}")
                 if key.curve in FS_EC_PHASE_OUT:
                     phase_out.add(f"ECDH-{key.curve_name}")
                 elif key.curve not in FS_EC_GOOD:
                     bad.add(f"ECDH-{key.curve_name}")
 
             if isinstance(key, DhEphemeralKeyInfo):
-                if key.size < FS_DH_MIN_KEY_SIZE:
-                    bad.add(f"DH-{key.size}")
                 # NCSC 3.3.3.1
                 if key.generator == FFDHE_GENERATOR:
                     if key.prime in FFDHE_PHASE_OUT_PRIMES:
