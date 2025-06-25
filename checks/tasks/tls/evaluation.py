@@ -19,8 +19,7 @@ from checks.tasks.tls.tls_constants import (
     FS_EC_GOOD,
     FS_DH_MIN_KEY_SIZE,
     FFDHE_GENERATOR,
-    FFDHE2048_PRIME,
-    FFDHE_SUFFICIENT_PRIMES,
+    FFDHE_PHASE_OUT_PRIMES,
     CIPHERS_GOOD,
     CIPHERS_SUFFICIENT,
     CIPHERS_PHASE_OUT,
@@ -116,11 +115,11 @@ class TLSForwardSecrecyParameterEvaluation:
             if isinstance(key, DhEphemeralKeyInfo):
                 if key.size < FS_DH_MIN_KEY_SIZE:
                     bad.add(f"DH-{key.size}")
-                # NCSC table 10
+                # NCSC 3.3.3.1
                 if key.generator == FFDHE_GENERATOR:
-                    if key.prime == FFDHE2048_PRIME:
-                        phase_out.add("FFDHE-2048")
-                    elif key.prime not in FFDHE_SUFFICIENT_PRIMES:
+                    if key.prime in FFDHE_PHASE_OUT_PRIMES:
+                        phase_out.add(f"DH-{key.size}")
+                    else:
                         bad.add(f"DH-{key.size}")
 
         dh_sizes = [
