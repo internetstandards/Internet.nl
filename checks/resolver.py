@@ -131,9 +131,9 @@ _resolver = None
 
 def _get_resolver():
     # Resolvers are thread safe once configured
-    global _resolver
-    if not _resolver:
-        _resolver = _create_resolver()
+    # global _resolver
+    # if not _resolver:
+    _resolver = _create_resolver()
     return _resolver
 
 
