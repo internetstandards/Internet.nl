@@ -13,7 +13,7 @@ from dns.rdtypes.ANY import TLSA, CAA
 from dns.resolver import Resolver, NXDOMAIN, NoAnswer
 import socket
 
-DNS_TIMEOUT = 5
+DNS_TIMEOUT = 15
 
 
 EDE_CODES_BOGUS = [
