@@ -80,6 +80,11 @@ services:
     networks:
       internal:
       public-internet: {}
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
     entrypoint: uwsgi
     # maximum amount of processes/workers to allow is 4
     # use 'cheaper' to reduce amount of processes/workers when idle to 1, this reduces memory usage
@@ -157,6 +162,7 @@ services:
       - USER_AGENT_URL
       - LANGUAGES
       - PAGE_CACHE_TIME_SECONDS
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
@@ -220,6 +226,11 @@ services:
     networks:
       - internal
       - public-internet
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
 
     # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
     user: root
@@ -289,6 +300,7 @@ services:
       - INTERNETNL_BRANDING
       - INTERNETNL_DOMAINNAME
       - USER_AGENT_URL
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -397,6 +409,7 @@ services:
       - CONN_TEST_DOMAIN
       - SMTP_EHLO_DOMAIN
       - BATCH_SCHEDULER_INTERVAL
+      - IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
@@ -583,6 +596,7 @@ services:
     memswap_limit: $DEFAULT_MEMORY_LIMIT
     networks:
       internal:
+        ipv4_address: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
       public-internet: {}
 
     environment:
@@ -629,6 +643,11 @@ services:
       internal: {}
       public-internet: {}
 
+    # configure internal Unbound service for resolving as Docker internal DNS server can be unreliable
+    dns: $IPV4_IP_RESOLVER_INTERNAL_VALIDATING
+    # also disable search domains and force default resolv settings
+    dns_search: [.]
+    dns_opt: ["ndots:0", "timeout:5", "attempts:2"]
 
     volumes:
       - manual-hof:/app/manual-hall-of-fame/
