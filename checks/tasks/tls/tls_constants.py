@@ -115,22 +115,34 @@ PROTOCOLS_SUFFICIENT = [
 ]
 PROTOCOLS_PHASE_OUT = []
 
-# NCSC table 5
-# This is eventually passed to openssl's SSL_set1_sigalgs,
+# These are eventually passed to openssl's SSL_set1_sigalgs,
 # which requires the NIDs in digest+pubkey algorithm tuples.
-SIGNATURE_ALGORITHMS_SHA2 = [
-    (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.EC),
-    (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.EC),
-    (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.EC),
+# NCSC 3.3.5, connection with this set means bad hashes are enabled
+SIGNATURE_ALGORITHMS_BAD_HASH = [
+    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.EC),
+    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.EC),
+    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA),
+    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA),
+    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA_PSS),
+    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA_PSS),
+    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.DSA),
+    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.DSA),
+]
+SIGNATURE_ALGORITHMS_PHASE_OUT_HASH = [
+    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.EC),
+    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
+    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA_PSS),
+    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.DSA),
+]
+# NCSC 3.3.2.1: RSA PKCS must not be used.
+# Failing these algs means the server has no RSA or RSA in PSS only, either is fine.
+SIGNATURE_ALGORITHMS_RSA_PKCS = [
+    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA),
+    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA),
+    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.RSA_PSS),
-    (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.RSA_PSS),
-    (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.RSA_PSS),
-    (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.DSA),
-    (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.DSA),
-    (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.DSA),
 ]
 
 # Mail servers with an increased connection limit,
