@@ -11,7 +11,7 @@ import subprocess
 from cryptography.hazmat._oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives._serialization import Encoding
-from cryptography.hazmat.primitives.asymmetric import rsa, dsa
+from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
@@ -19,6 +19,7 @@ from dns.exception import ValidationFailure
 from dns.name import EmptyLabel
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
 from nassl._nassl import OpenSSLError
+from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum
 from nassl.ssl_client import ClientCertificateRequested, OpenSslDigestNidEnum
 from sslyze import (
     ScanCommand,
@@ -73,13 +74,14 @@ from checks.tasks.tls.evaluation import (
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
-    CERT_RSA_DSA_MIN_KEY_SIZE,
     CERT_CURVES_GOOD,
-    CERT_CURVE_MIN_KEY_SIZE,
     CERT_EC_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
-    SIGNATURE_ALGORITHMS_SHA2,
     MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS,
+    CERT_RSA_MIN_GOOD_KEY_SIZE,
+    CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
+    SIGNATURE_ALGORITHMS_BAD_HASH,
+    SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
 )
 from internetnl import log
 
@@ -457,7 +459,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     """
     Check that all provided certificates meet NCSC requirements.
     """
-    # NCSC guidelines B3-3, B5-1
+    # NCSC guidelines 3.3.2.x
     bad_pubkey = []
     phase_out_pubkey = []
     if mode == ChecksMode.WEB:
@@ -472,30 +474,32 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     for cert in certificates:
         common_name = get_common_name(cert)
         public_key = cert.public_key()
-        public_key_type = type(public_key)
+        key_type = type(public_key)
         key_size = public_key.key_size
+        curve = getattr(public_key, "curve", None)
 
-        failed_key_type = ""
-        curve = ""
-        # Note that DH fields are checked in the key exchange already
-        # https://github.com/internetstandards/Internet.nl/pull/1218#issuecomment-1944496933
-        if public_key_type is rsa.RSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type is dsa.DSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type in CERT_CURVES_GOOD and key_size < CERT_CURVE_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type is EllipticCurvePublicKey and public_key.curve not in CERT_EC_CURVES_GOOD:
-            failed_key_type = public_key_type.__name__
-        if failed_key_type:
-            message = f"{common_name}: {failed_key_type}-{key_size} key_size"
-            if curve:
-                message += f", curve: {curve}"
-            if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
-                phase_out_pubkey.append(message)
-            else:
-                bad_pubkey.append(message)
-                pubkey_score = pubkey_score_bad
+        is_good = (
+            (key_type is rsa.RSAPublicKey and key_size >= CERT_RSA_MIN_GOOD_KEY_SIZE)
+            or (key_type in CERT_CURVES_GOOD)
+            or (key_type is EllipticCurvePublicKey and curve in CERT_EC_CURVES_GOOD)
+        )
+
+        if is_good:
+            continue
+
+        message = f"{common_name}: {key_type.__name__}-{key_size}"
+        if curve:
+            message += f", curve: {curve}"
+
+        is_phase_out = (curve in CERT_EC_CURVES_PHASE_OUT) or (
+            key_type is rsa.RSAPublicKey and key_size >= CERT_RSA_MIN_PHASE_OUT_KEY_SIZE
+        )
+
+        if is_phase_out:
+            phase_out_pubkey.append(message)
+        else:
+            bad_pubkey.append(message)
+            pubkey_score = pubkey_score_bad
     return pubkey_score, bad_pubkey, phase_out_pubkey
 
 
@@ -611,6 +615,14 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
     )
     cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
+    key_exchange_hash_evaluation = test_key_exchange_hash(
+        ServerConnectivityInfo(
+            server_location=result.server_location,
+            network_configuration=result.network_configuration,
+            tls_probing_result=result.connectivity_result,
+        ),
+    )
+
     # HACK for DANE-TA(2) and hostname mismatch!
     # Give a good hosmatch score if DANE-TA *is not* present.
     if cert_results["tls_cert"] and not has_daneTA(cert_results["dane_records"]) and cert_results["hostmatch_bad"]:
@@ -665,8 +677,8 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        kex_hash_func=KexHashFuncStatus.good,
-        kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+        kex_hash_func=key_exchange_hash_evaluation.status,
+        kex_hash_func_score=key_exchange_hash_evaluation.score,
     )
     results.update(cert_results)
     return results
@@ -855,36 +867,57 @@ def test_key_exchange_hash(
     server_connectivity_info: ServerConnectivityInfo,
 ) -> KeyExchangeHashFunctionEvaluation:
     """
-    Test the SHA2 key exchange per NCSC table 5.
+    Test key exchange hashes per NCSC 3.3.5.
     Note that this is not the certificate hash, or TLS cipher hash.
     There are few or no hosts that do not meet this requirement.
     """
-    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
-    ssl_connection.ssl_client.set_sigalgs(SIGNATURE_ALGORITHMS_SHA2)
-
-    try:
-        ssl_connection.connect()
-        if ssl_connection.ssl_client.get_peer_signature_nid() == OpenSslDigestNidEnum.SHA1:
-            log.info("Failed SHA2 key exchange check: negotiated SHA1 even when only offering SHA2")
-            return KeyExchangeHashFunctionEvaluation(
-                status=KexHashFuncStatus.bad,
-                score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
-            )
-    except ClientCertificateRequested:
-        pass
-    except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError) as exc:
-        log.info(f"Failed SHA2 key exchange check: {exc}")
+    bad_hash_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH)
+    if bad_hash_result:
+        log.info(f"SHA2 key exchange check: negotiated bad hash ({bad_hash_result})")
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.bad,
             score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
         )
-    finally:
-        ssl_connection.close()
+
+    phase_out_hash_result = _test_connection_with_limited_sigalgs(
+        server_connectivity_info, SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
+    )
+    if phase_out_hash_result:
+        log.info(f"SHA2 key exchange check: negotiated phase_out hash ({bad_hash_result})")
+        return KeyExchangeHashFunctionEvaluation(
+            status=KexHashFuncStatus.phase_out,
+            score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+        )
 
     return KeyExchangeHashFunctionEvaluation(
         status=KexHashFuncStatus.good,
         score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
     )
+
+
+def _test_connection_with_limited_sigalgs(
+    server_connectivity_info: ServerConnectivityInfo, sigalgs: list[tuple[OpenSslDigestNidEnum, OpenSslEvpPkeyEnum]]
+) -> Optional[tuple[OpenSslDigestNidEnum, OpenSslEvpPkeyEnum]]:
+    """
+    Test whether the server accepts a connection with limited sigalgs through the signature_algorithms extension.
+    Returns a (NID, EVP PKEY) if a match was found, None otherwise.
+    """
+    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
+    ssl_connection.ssl_client.set_sigalgs(SIGNATURE_ALGORITHMS_BAD_HASH)
+
+    try:
+        ssl_connection.connect()
+        sigalg_nid = ssl_connection.ssl_client.get_peer_signature_nid()
+        # Extra check as some servers will ignore the client, and force a secure hash anyways.
+        # OpenSSL will accept this, as it does know about the secure hash.
+        if sigalg_nid in sigalgs:
+            return sigalg_nid
+    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError):
+        pass
+    finally:
+        ssl_connection.close()
+
+    return None
 
 
 def test_cipher_order(

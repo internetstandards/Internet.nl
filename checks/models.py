@@ -99,6 +99,7 @@ class KexHashFuncStatus(Enum):
     bad = 0
     good = 1
     unknown = 2
+    phase_out = 3
 
 
 class CipherOrderStatus(Enum):
