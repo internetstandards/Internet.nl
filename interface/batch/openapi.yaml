@@ -680,10 +680,11 @@ components:
           type: string
           enumClass: KexHashFuncStatus
           description: |
-            SHA2 support for signatures of the server:
-            * `bad` - SHA2 is not supported.
-            * `good` - SHA2 is supported.
-            * `unknown` - SHA2 support could not be determined (the server
+            Supported hashes for signatures:
+            * `good` - server supports only good hashes (SHA256 or newer).
+            * `bad` - server supports MD5 or SHA1.
+            * `phase_out` - server supports SHA224.
+            * `unknown` - hash support could not be determined (the server
               uses RSA key exchange or anonymous ciphers).
         zero_rtt:
           type: string
