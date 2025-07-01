@@ -2302,6 +2302,7 @@ class ConnectionChecker:
                 if self._checks_mode == ChecksMode.WEB:
                     http_client = HTTPSConnection.fromconn(self._conn)
                     http_client.putrequest("GET", "/")
+                    http_client.putheader("User-Agent", settings.USER_AGENT)
                     http_client.endheaders()
                 elif self._checks_mode == ChecksMode.MAIL:
                     self._conn.write(bytes(f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", "ascii"))
@@ -2476,6 +2477,7 @@ class ConnectionChecker:
                     if self._checks_mode == ChecksMode.WEB:
                         http_client = HTTPSConnection.fromconn(new_conn)
                         http_client.putrequest("GET", "/")
+                        http_client.putheader("User-Agent", settings.USER_AGENT)
                         http_client.endheaders()
                         http_client.getresponse()
                     elif self._checks_mode == ChecksMode.MAIL:
