@@ -570,6 +570,8 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_bad()
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
+            elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
+                category.subtests["kex_hash_func"].result_phase_out()
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -730,6 +732,8 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_bad()
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
+            elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
+                category.subtests["kex_hash_func"].result_phase_out()
 
     dttls.report = category.gen_report()
 
