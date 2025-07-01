@@ -1488,17 +1488,22 @@ class WebTlsKexHashFunc(Subtest):
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls kex-hash-func verdict good"
-        self.tech_data = "detail tech data yes"
+        self.tech_data = "detail tech data good"
 
     def result_bad(self):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls kex-hash-func verdict phase-out"
-        self.tech_data = "detail tech data no"
+        self.verdict = "detail web tls kex-hash-func verdict bad"
+        self.tech_data = "detail tech data insufficient"
 
     def result_unknown(self):
         self._status(STATUS_INFO)
         self.verdict = "detail web tls kex-hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"
+
+    def result_phase_out(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls kex-hash-func verdict phase-out"
+        self.tech_data = "detail tech data phase-out"
 
 
 class MailTlsStarttlsExists(Subtest):
@@ -2071,6 +2076,11 @@ class MailTlsKexHashFunc(Subtest):
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls kex-hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"
+
+    def result_phase_out(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls kex-hash-func verdict phase-out"
+        self.tech_data = "detail tech data phase-out"
 
 
 class MailTlsDaneExists(Subtest):
