@@ -882,7 +882,7 @@ def test_key_exchange_hash(
     phase_out_hash_result = _test_connection_with_limited_sigalgs(
         server_connectivity_info, SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
     )
-    if bad_hash_result:
+    if phase_out_hash_result:
         log.info(f"SHA2 key exchange check: negotiated phase_out hash ({bad_hash_result})")
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.phase_out,
@@ -912,7 +912,7 @@ def _test_connection_with_limited_sigalgs(
         # OpenSSL will accept this, as it does know about the secure hash.
         if sigalg_nid in sigalgs:
             return sigalg_nid
-    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError) as exc:
+    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError):
         pass
     finally:
         ssl_connection.close()
