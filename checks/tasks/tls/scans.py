@@ -911,7 +911,7 @@ def _test_connection_with_limited_sigalgs(
         # OpenSSL will accept this, as it does know about the secure hash.
         if sigalg_nid in sigalgs:
             return sigalg_nid
-    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError) as exc:
+    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError):
         pass
     finally:
         ssl_connection.close()
