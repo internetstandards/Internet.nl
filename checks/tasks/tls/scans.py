@@ -11,7 +11,7 @@ import subprocess
 from cryptography.hazmat._oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives._serialization import Encoding
-from cryptography.hazmat.primitives.asymmetric import rsa, dsa
+from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
@@ -73,12 +73,12 @@ from checks.tasks.tls.evaluation import (
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
-    CERT_RSA_DSA_MIN_KEY_SIZE,
     CERT_CURVES_GOOD,
-    CERT_CURVE_MIN_KEY_SIZE,
     CERT_EC_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
     MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS,
+    CERT_RSA_MIN_GOOD_KEY_SIZE,
+    CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
 )
@@ -458,7 +458,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     """
     Check that all provided certificates meet NCSC requirements.
     """
-    # NCSC guidelines B3-3, B5-1
+    # NCSC guidelines 3.3.2.x
     bad_pubkey = []
     phase_out_pubkey = []
     if mode == ChecksMode.WEB:
@@ -473,30 +473,32 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     for cert in certificates:
         common_name = get_common_name(cert)
         public_key = cert.public_key()
-        public_key_type = type(public_key)
+        key_type = type(public_key)
         key_size = public_key.key_size
+        curve = getattr(public_key, "curve", None)
 
-        failed_key_type = ""
-        curve = ""
-        # Note that DH fields are checked in the key exchange already
-        # https://github.com/internetstandards/Internet.nl/pull/1218#issuecomment-1944496933
-        if public_key_type is rsa.RSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type is dsa.DSAPublicKey and key_size < CERT_RSA_DSA_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type in CERT_CURVES_GOOD and key_size < CERT_CURVE_MIN_KEY_SIZE:
-            failed_key_type = public_key_type.__name__
-        elif public_key_type is EllipticCurvePublicKey and public_key.curve not in CERT_EC_CURVES_GOOD:
-            failed_key_type = public_key_type.__name__
-        if failed_key_type:
-            message = f"{common_name}: {failed_key_type}-{key_size} key_size"
-            if curve:
-                message += f", curve: {curve}"
-            if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
-                phase_out_pubkey.append(message)
-            else:
-                bad_pubkey.append(message)
-                pubkey_score = pubkey_score_bad
+        is_good = (
+            (key_type is rsa.RSAPublicKey and key_size >= CERT_RSA_MIN_GOOD_KEY_SIZE)
+            or (key_type in CERT_CURVES_GOOD)
+            or (key_type is EllipticCurvePublicKey and curve in CERT_EC_CURVES_GOOD)
+        )
+
+        if is_good:
+            continue
+
+        message = f"{common_name}: {key_type.__name__}-{key_size}"
+        if curve:
+            message += f", curve: {curve}"
+
+        is_phase_out = (curve in CERT_EC_CURVES_PHASE_OUT) or (
+            key_type is rsa.RSAPublicKey and key_size >= CERT_RSA_MIN_PHASE_OUT_KEY_SIZE
+        )
+
+        if is_phase_out:
+            phase_out_pubkey.append(message)
+        else:
+            bad_pubkey.append(message)
+            pubkey_score = pubkey_score_bad
     return pubkey_score, bad_pubkey, phase_out_pubkey
 
 
