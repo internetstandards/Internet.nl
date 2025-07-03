@@ -21,8 +21,7 @@ def docker_compose_exec(service, command, env="develop"):
 @pytest.mark.skipif(not ipv6_available(), reason="IPv6 networking not available")
 def test_validating_resolver():
     returncode, output = docker_compose_exec(
-        "app",
-        "ldns-dane -n -T verify internet.nl 443 -r $(getent ahostsv4 resolver-validating|grep STREAM|cut -d' ' -f1)",
+        "app", "ldns-dane -n -T verify internet.nl 443 -r $IPV4_IP_RESOLVER_INTERNAL_VALIDATING"
     )
     print(output)
     assert "dane-validated successfully" in output
