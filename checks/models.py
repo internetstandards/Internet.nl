@@ -95,10 +95,17 @@ class ZeroRttStatus(Enum):
     na = 2
 
 
+class KexRSAPKCSStatus(Enum):
+    bad = 0
+    good = 1
+    unknown = 2
+
+
 class KexHashFuncStatus(Enum):
     bad = 0
     good = 1
     unknown = 2
+    phase_out = 3
 
 
 class CipherOrderStatus(Enum):
