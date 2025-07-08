@@ -8,8 +8,7 @@ from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite, Cer
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
-from checks.models import KexHashFuncStatus, CipherOrderStatus
-from checks.models import KexHashFuncStatus, CipherOrderStatus, OcspStatus
+from checks.models import KexHashFuncStatus, CipherOrderStatus, OcspStatus, KexRSAPKCSStatus
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
@@ -246,10 +245,21 @@ class TLSOCSPEvaluation:
 
 
 @dataclass(frozen=True)
+class KeyExchangeRSAPKCSFunctionEvaluation:
+    """
+    Results of support for PKCS padding for RSA per NCSC 3.3.2.1.
+    NCSC table 5
+    """
+
+    status: KexRSAPKCSStatus
+    score: scoring.Score
+
+
+@dataclass(frozen=True)
 class KeyExchangeHashFunctionEvaluation:
     """
     Results of "hash functions for key exchange" evaluation.
-    NCSC table 5
+    NCSC 3.3.5
     """
 
     status: KexHashFuncStatus
