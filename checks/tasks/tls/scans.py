@@ -60,6 +60,7 @@ from checks.models import (
     ZeroRttStatus,
     KexHashFuncStatus,
     CipherOrderStatus,
+    KexRSAPKCSStatus,
 )
 from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
 from checks.tasks.tls import TLSException
@@ -70,6 +71,7 @@ from checks.tasks.tls.evaluation import (
     KeyExchangeHashFunctionEvaluation,
     TLSCipherOrderEvaluation,
     TLSOCSPEvaluation,
+    KeyExchangeRSAPKCSFunctionEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
@@ -81,6 +83,7 @@ from checks.tasks.tls.tls_constants import (
     CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
+    SIGNATURE_ALGORITHMS_RSA_PKCS,
 )
 from internetnl import log
 
@@ -603,24 +606,21 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+
+    server_conn_info = ServerConnectivityInfo(
+        server_location=result.server_location,
+        network_configuration=result.network_configuration,
+        tls_probing_result=result.connectivity_result,
+    )
     cipher_order_evaluation = test_cipher_order(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
+        server_conn_info,
         prots_accepted,
         cipher_evaluation,
     )
-    cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
+    key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
+    key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
 
-    key_exchange_hash_evaluation = test_key_exchange_hash(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
-    )
+    cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
     # HACK for DANE-TA(2) and hostname mismatch!
     # Give a good hosmatch score if DANE-TA *is not* present.
@@ -676,6 +676,8 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
+        key_exchange_rsa_pkcs=key_exchange_rsa_pkcs_evaluation.status,
+        key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
     )
@@ -734,22 +736,19 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+
+    server_conn_info = ServerConnectivityInfo(
+        server_location=result.server_location,
+        network_configuration=result.network_configuration,
+        tls_probing_result=result.connectivity_result,
+    )
     cipher_order_evaluation = test_cipher_order(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
+        server_conn_info,
         supported_tls_versions,
         cipher_evaluation,
     )
-    key_exchange_hash_evaluation = test_key_exchange_hash(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
-    )
+    key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
+    key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
 
     ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
         result.scan_result.certificate_info.result.certificate_deployments[0]
@@ -803,6 +802,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ),
         ocsp_stapling=ocsp_evaluation.status,
         ocsp_stapling_score=ocsp_evaluation.score,
+        key_exchange_rsa_pkcs=key_exchange_rsa_pkcs_evaluation.status,
+        key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
     )
@@ -862,6 +863,27 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
         raise TLSException(str(last_error_trace))
 
 
+def test_key_exchange_rsa_pkcs(
+    server_connectivity_info: ServerConnectivityInfo,
+) -> KeyExchangeRSAPKCSFunctionEvaluation:
+    """
+    Test key exchange for RSA PKCS support per NCSC 3.3.2.1.
+    See also RFC8446 1.3 and 4.2.3, RFC 5246 7.4.1.4.1.
+    """
+    rsa_pkcs_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_RSA_PKCS)
+    if rsa_pkcs_result:
+        log.info(f"RSA-PKCS key exchange check: negotiated bad sigalg ({rsa_pkcs_result})")
+        return KeyExchangeRSAPKCSFunctionEvaluation(
+            status=KexRSAPKCSStatus.bad,
+            score=scoring.WEB_TLS_KEX_RSA_PKCS_BAD,
+        )
+
+    return KeyExchangeRSAPKCSFunctionEvaluation(
+        status=KexRSAPKCSStatus.good,
+        score=scoring.WEB_TLS_KEX_RSA_PKCS_GOOD,
+    )
+
+
 def test_key_exchange_hash(
     server_connectivity_info: ServerConnectivityInfo,
 ) -> KeyExchangeHashFunctionEvaluation:
@@ -872,7 +894,7 @@ def test_key_exchange_hash(
     """
     bad_hash_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH)
     if bad_hash_result:
-        log.info(f"SHA2 key exchange check: negotiated bad hash ({bad_hash_result})")
+        log.info(f"SHA2 key exchange check: negotiated bad sigalg ({bad_hash_result})")
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.bad,
             score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
