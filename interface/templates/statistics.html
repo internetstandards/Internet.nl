@@ -18,23 +18,25 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in table_content %}
-          <tr>
-            {% for cell in row %}
-              <td>{{cell}}</td>
-            {% endfor %}
-          </tr>
+      {% for row in table_content %}
+        <tr>
+        {% for cell in row %}
+          <td>{{cell}}</td>
         {% endfor %}
-          <tr>
-            {% for cell in per_test %}
-            {% if forloop.first %}
-              <th>{{cell}}</th>
-            {% else %}
-              <td>{{cell}}</td>
-            {% endif %}
-            {% endfor %}
-          </tr>
+        </tr>
+      {% endfor %}
       </tbody>
+      <tfoot>
+        <tr>
+        {% for cell in per_test %}
+          {% if forloop.first %}
+          <th>{{cell}}</th>
+          {% else %}
+          <td>{{cell}}</td>
+          {% endif %}
+        {% endfor %}
+        </tr>
+      </foot>
     </table>
     </section>
   </article>
