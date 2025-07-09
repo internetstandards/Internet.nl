@@ -1,30 +1,20 @@
 servers = {
-  # batch6 = {
-  #   server_type = "cx22"
-  #   version = "latest"
-  #   config      = <<-EOT
-  #   ENABLE_BATCH=True
-  #   CRON_15MIN_RUN_TESTS=True
-  #   TEST_DOMAINS_SITE=ijohan.nl,www.ijohan.nl,internet.nl,www.internet.nl,example.nl,www.example.nl
-  #   TEST_DOMAINS_MAIL=ijohan.nl,www.ijohan.nl,internet.nl,www.internet.nl,example.nl,www.example.nl
-  #   EOT
-  # }
   single-1-8-10 = {
     server_type = "cx22"
-    version = "1.8.10"
+    version = "1.8.11.dev1-gf647649"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    # is hardcoded in tests.py
-    # TEST_DOMAINS_SITE=example.nl,example.com
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     EOT
   }
   single-1-9-3 = {
     server_type = "cx22"
-    version = "1.9.3"
+    # says 1.10 but is based on v1.9.3 tag, maybe something to do with the setuptools_scm version tool?
+    version = "1.10.0.dev1-ge9f151c"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    # is hardcoded in tests.py
-    # TEST_DOMAINS_SITE=internet.nl,example.nl,example.com,internetsociety.org,ripe.net,surf.nl,ecp.nl,forumstandaardisatie.nl,minez.nl
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_MAIL=
     EOT
   }
   single-1-10-2 = {
@@ -32,11 +22,8 @@ servers = {
     version = "1.10.2"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    TEST_DOMAINS_SITE=internet.nl,example.nl,example.com,internetsociety.org,ripe.net,surf.nl,ecp.nl,forumstandaardisatie.nl,minez.nl
-    # TEST_DOMAINS_SITE=example.nl,example.com
-    # TEST_DOMAINS_SITE=example.nl,example.com,ijohan.nl,www.ijohan.nl,internet.nl,www.internet.nl,www.example.nl
-    # TEST_DOMAINS_MAIL=example.nl,example.com
-    # TEST_DOMAINS_MAIL=example.nl,example.com,ijohan.nl,www.ijohan.nl,internet.nl,www.internet.nl,www.example.nl
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_MAIL=
     EOT
   }
   norestart-1-10-2 = {
@@ -45,11 +32,8 @@ servers = {
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=False
-    TEST_DOMAINS_SITE=internet.nl,example.nl,example.com,internetsociety.org,ripe.net,surf.nl,ecp.nl,forumstandaardisatie.nl,minez.nl
-    # TEST_DOMAINS_SITE=example.nl,example.com
-    # TEST_DOMAINS_SITE=example.nl,example.com,ijohan.nl,www.ijohan.nl,internet.nl,www.internet.nl,www.example.nl
-    # TEST_DOMAINS_MAIL=example.nl,example.com
-    # TEST_DOMAINS_MAIL=example.nl,example.com,ijohan.nl,www.ijohan.nl,internet.nl,www.internet.nl,www.example.nl
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_MAIL=
     EOT
   }
 }
