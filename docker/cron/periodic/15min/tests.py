@@ -37,29 +37,9 @@ HEADERS = {"Host": INTERNETNL_DOMAINNAME}
 
 TEST_DOMAINS = {
     # domain's to use in website tests
-    "site": [
-        "internet.nl",
-        "example.nl",
-        "example.com",
-        "internetsociety.org",
-        "ripe.net",
-        "surf.nl",
-        "ecp.nl",
-        "forumstandaardisatie.nl",
-        "minez.nl",
-    ],
+    "site": [v.strip() for v in os.environ.get("TEST_DOMAINS_SITE", "").split(",") if v],
     # domain's to use in mail tests
-    "mail": [
-        "internetsociety.org",
-        "ripe.net",
-        "surf.nl",
-        "ecp.nl",
-        # these are currently really slow and will probably improve when
-        # we switch to sslyze, for now disable these in monitoring
-        # "internet.nl",
-        # "forumstandaardisatie.nl",
-        # "minez.nl",
-    ],
+    "mail": [v.strip() for v in os.environ.get("TEST_DOMAINS_MAIL", "").split(",") if v],
 }
 
 METRIC_PROBE_DONE = Gauge("tests_probe_done_total", "Whether the probe completed.", ["test", "domain", "probe"])
