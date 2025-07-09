@@ -696,6 +696,7 @@ services:
       - IPV4_IP_APP_INTERNAL
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
+      - TEST_DOMAINS_SITE
 
     restart: unless-stopped
     logging:
@@ -1067,4 +1068,3 @@ networks:
       - subnet: $IPV6_SUBNET_PUBLIC
         gateway: $IPV6_GATEWAY_PUBLIC
       - subnet: $IPV4_SUBNET_PUBLIC
-

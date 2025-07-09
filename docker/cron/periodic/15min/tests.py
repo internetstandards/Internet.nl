@@ -34,10 +34,7 @@ URL_BASE = f"http://{IPV4_IP_APP_INTERNAL}:8080"
 HEADERS = {"Host": INTERNETNL_DOMAINNAME}
 
 # domain's to use in website tests
-WEBSITE_TEST_DOMAINS = [
-    "example.nl",
-    "example.com",
-]
+WEBSITE_TEST_DOMAINS = [v.strip() for v in os.environ.get("TEST_DOMAINS_SITE", "").split(",") if v]
 
 
 METRIC_PROBE_DONE = Gauge("tests_probe_done_total", "Whether the probe completed.", ["test", "domain", "probe"])
