@@ -9,6 +9,8 @@ server:
   interface: ::
   access-control: 0.0.0.0/0 allow_setrd
   access-control: ::/0 allow_setrd
+  discard-timeout: 0  # https://github.com/internetstandards/unbound/pull/6
+  wait-limit: 0  # https://github.com/internetstandards/unbound/pull/6
 
   # enable module specific for connection test
   module-config: "internetnl iterator"

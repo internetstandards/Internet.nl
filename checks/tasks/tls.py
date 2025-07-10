@@ -657,7 +657,7 @@ def save_results(model, results, addr, domain, category):
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
                 model.caa_enabled = result.get("caa_result").caa_found
                 model.caa_records = result.get("caa_result").caa_records_str
-                model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                model.caa_errors = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                 model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                 model.caa_score = result.get("caa_result").score
                 model.caa_found_on_domain = result.get("caa_result").canonical_name
@@ -731,7 +731,7 @@ def save_results(model, results, addr, domain, category):
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
                     model.caa_enabled = result.get("caa_result").caa_found
                     model.caa_records = result.get("caa_result").caa_records_str
-                    model.caa_error = [ttti.to_dict() for ttti in result.get("caa_result").errors]
+                    model.caa_errors = [ttti.to_dict() for ttti in result.get("caa_result").errors]
                     model.caa_recommendations = [ttti.to_dict() for ttti in result.get("caa_result").recommendations]
                     model.caa_score = result.get("caa_result").score
                     model.caa_found_on_domain = result.get("caa_result").canonical_name
@@ -908,7 +908,7 @@ def build_report(dttls, category):
                 if not dttls.caa_enabled:
                     category.subtests["web_caa"].result_bad(caa_tech_table)
                 elif dttls.caa_errors:
-                    if all([ttti.msgid != CAA_MSGID_INSUFFICIENT_POLICY for ttti in dttls.caa_errors]):
+                    if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
                         category.subtests["web_caa"].result_syntax_error(caa_tech_table)
                     else:
                         category.subtests["web_caa"].result_insufficient(caa_tech_table)
@@ -1087,7 +1087,7 @@ def build_report(dttls, category):
             if not dttls.caa_enabled:
                 category.subtests["mail_caa"].result_bad(caa_tech_table)
             elif dttls.caa_errors:
-                if all([ttti.msgid != CAA_MSGID_INSUFFICIENT_POLICY for ttti in dttls.caa_errors]):
+                if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
                     category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
                 else:
                     category.subtests["mail_caa"].result_insufficient(caa_tech_table)
@@ -2302,6 +2302,7 @@ class ConnectionChecker:
                 if self._checks_mode == ChecksMode.WEB:
                     http_client = HTTPSConnection.fromconn(self._conn)
                     http_client.putrequest("GET", "/")
+                    http_client.putheader("User-Agent", settings.USER_AGENT)
                     http_client.endheaders()
                 elif self._checks_mode == ChecksMode.MAIL:
                     self._conn.write(bytes(f"EHLO {settings.SMTP_EHLO_DOMAIN}\r\n", "ascii"))
@@ -2476,6 +2477,7 @@ class ConnectionChecker:
                     if self._checks_mode == ChecksMode.WEB:
                         http_client = HTTPSConnection.fromconn(new_conn)
                         http_client.putrequest("GET", "/")
+                        http_client.putheader("User-Agent", settings.USER_AGENT)
                         http_client.endheaders()
                         http_client.getresponse()
                     elif self._checks_mode == ChecksMode.MAIL:

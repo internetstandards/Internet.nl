@@ -119,5 +119,6 @@
     text-align: center;
     display: block;
     overflow: clip;
+    border: 2px solid var(--grey-300);
   }
 }

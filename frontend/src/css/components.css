@@ -61,6 +61,12 @@
   display: none;
 }
 
+#load-more {
+  @media (scripting: none) {
+    display: none;
+  }
+}
+
 .button-container {
   display: grid;
   align-items: center;
@@ -291,6 +297,7 @@
       p:not(.card-category, .card-date) {
         font: var(--card-body-xs);
         display: -webkit-box;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;  
         overflow: clip;
@@ -312,7 +319,9 @@
   }
 
   &:nth-child(n+6) {
-    display: none;
+    @media (scripting: enabled) {
+      display: none;
+    }
 
     @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
       @supports (transition-behavior: allow-discrete) {

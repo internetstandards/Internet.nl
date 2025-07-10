@@ -154,7 +154,7 @@
   --nav-bg-color: light-dark(var(--white-100), var(--black-200));
   --nav-text-color: light-dark(var(--green-500), var(--white-100));
   --nav-mobile-bg-color: light-dark(var(--green-200), var(--green-600));
-  --nav-mobile-border: 0.5px solid light-dark(var(--green-400), var(--black-100));
+  --nav-mobile-border: 0.5px solid light-dark(var(--green-400), var(--black-200));
   --nav-dropdown-bg-color: light-dark(var(--green-200), var(--green-600));
   --nav-sticky-border: 1.5px solid light-dark(var(--green-400), var(--green-400));
   --nav-sticky-shadow: 0px 4px 32px 0px light-dark(var(--transparent-300), var(--transparent-300));
@@ -171,7 +171,7 @@
   --footer-bar-text-color: light-dark(var(--green-500), var(--white-100));
 
   /* GENERAL COLORS LIGHTMODE */
-  --bg-color-body: light-dark(var(--white-100), var(--black-100));
+  --bg-color-body: light-dark(var(--white-100), var(--black-200));
   --bg-color-primary: light-dark(var(--green-200), var(--green-600));
   --bg-color-secondary: light-dark(var(--orange-100), var(--green-600));
   --heading-color-primary: light-dark(var(--black-200), var(--white-100));
@@ -195,7 +195,7 @@
   --button-text-color-hoster: light-dark(var(--green-500), var(--white-100));
 
   /* CARD COLORS LIGHTMODE */
-  --card-bg-color-test: light-dark(var(--white-100), var(--black-100));
+  --card-bg-color-test: light-dark(var(--white-100), var(--black-200));
   --card-heading-color-test: light-dark(var(--green-400), var(--white-100));
   --card-body-color-test: light-dark(var(--green-500), var(--white-100));
   --card-input-bg-color-test: light-dark(var(--green-200), var(--green-500));
@@ -210,6 +210,9 @@
   --card-body-color-contact: light-dark(var(--white-100), var(--white-100));
   --card-border: 2px solid light-dark(var(--transparent-100), var(--white-100));
   --card-box-shadow: 0 4px 32px 0 light-dark(var(--transparent-600), var(--transparent-600));
+  --card-bg-color-action: light-dark(var(--green-400), var(--green-500));
+  --card-heading-color-action: var(--white-100);
+  --card-body-color-action: var(--white-100);
 
   /* ELLIPSES LIGHTMODE */
   --ellipse-color-light: linear-gradient(0deg,light-dark(var(--white-100), var(--green-500)),light-dark(var(--transparent-200), var(--green-600)));
@@ -235,6 +238,7 @@
 
   /* OTHER COLORS */
   --placeholder-color: light-dark(var(--grey-400), var(--grey-300));
+  --meter-bg-color: var(--green-400);
 }
 
 /* MARK: OTHER VARIABLES

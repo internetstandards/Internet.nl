@@ -312,6 +312,10 @@ header nav {
         translate: -50% 0;
         left: 50%;
         margin-top: 1.25rem;
+
+        @media (scripting: none) {
+          z-index: 2;
+        }
       }
 
       &.expanded {

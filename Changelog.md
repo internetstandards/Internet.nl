@@ -22,7 +22,15 @@ _Compared to the latest 1.10 release._
 
 ## 1.10.2
 
+- Updated unbound to fix an issue where
+  [DNSSEC insecure targets could be flagged as bogus](https://github.com/internetstandards/Internet.nl/issues/1803)
+  due to [unbound incorrectly returning a bogus EDE](https://github.com/NLnetLabs/unbound/issues/1293).
+- Fixed an issue where
+  [DMARC records were not always found](https://github.com/internetstandards/Internet.nl/issues/1808)
+  on CloudFlare name servers.
 - Added missing [CAA fields to API](https://github.com/internetstandards/Internet.nl/pull/1801).
+- Fixed [incomplete detection of insufficient or invalid CAA](https://github.com/internetstandards/Internet.nl/pull/1811)
+  along with some improvements in UTF-8 handling.
 
 The API version is updated to 2.6.0 due to the new CAA fields.
 
