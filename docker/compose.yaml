@@ -703,6 +703,7 @@ services:
       - WORKER_SLOW_REPLICAS
       - DOCKER_REGISTRY
       - CRON_DAILY_DATABASE_CLEANUP
+      - CRON_WORKER_RESTART
 
     restart: unless-stopped
     logging:

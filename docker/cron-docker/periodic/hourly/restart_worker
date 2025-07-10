@@ -1,4 +1,9 @@
 #!/bin/sh
 set -e
+
+if [ ! "$CRON_WORKER_RESTART" = "True" ];then
+  exit 0
+fi
+
 # find worker and restart the container(s)
 docker ps --filter label=com.docker.compose.service=worker --quiet | xargs --no-run-if-empty docker restart
