@@ -15,7 +15,7 @@ servers = {
     version = "1.10.0.dev2-gf422512"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    CRON_WORKER_RESTART=False
+    CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
     EOT
@@ -25,7 +25,7 @@ servers = {
     version = "1.10.2"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    CRON_WORKER_RESTART=False
+    CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
     EOT
@@ -35,7 +35,7 @@ servers = {
     version = "1.10.2"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    CRON_WORKER_RESTART=False
+    CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
     EOT
