@@ -12,7 +12,7 @@ servers = {
   single-1-9-3 = {
     server_type = "cx22"
     # says 1.10 but is based on v1.9.3 tag, maybe something to do with the setuptools_scm version tool?
-    version = "1.10.0.dev2-gf422512"
+    version = "1.10.0.dev3-g9eb3ea1"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
@@ -22,7 +22,8 @@ servers = {
   }
   single-1-10-2 = {
     server_type = "cx22"
-    version = "1.10.2"
+    # says 1.11 but is based on v1.10.2 tag, maybe something to do with the setuptools_scm version tool?
+    version = "1.11.0.dev1-g5ae750a"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
@@ -32,10 +33,10 @@ servers = {
   }
   norestart-1-10-2 = {
     server_type = "cx22"
-    version = "1.10.2"
+    version = "1.11.0.dev1-g5ae750a"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    CRON_WORKER_RESTART=True
+    CRON_WORKER_RESTART=False
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
     EOT
