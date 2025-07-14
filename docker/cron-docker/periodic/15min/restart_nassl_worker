@@ -6,4 +6,4 @@ if [ ! "$CRON_WORKER_RESTART" = "True" ];then
 fi
 
 # find nassl worker and restart the container(s)
-docker ps --filter label=com.docker.compose.service=worker-nassl --quiet |  xargs -n1 --no-run-if-empty -I% sh -c 'docker restart %; sleep 30'
+docker ps --filter label=com.docker.compose.service=worker-nassl --quiet |  xargs -n1 --no-run-if-empty -I% sh -c 'docker exec % pkill -TERM celery'
