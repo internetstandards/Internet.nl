@@ -35,13 +35,12 @@ servers = {
   }
   norestart-1-10-2 = {
     server_type = "cx22"
-    version = "1.11.0.dev3-g579901c"
+    version = "1.11.0.dev4-g5fd02a2"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
-    CRON_WORKER_RESTART=False
+    CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
-    WORKER_REPLICAS=5
     EOT
   }
 }
