@@ -30,7 +30,7 @@ servers = {
     CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
-    WORKER_REPLICAS=5
+    WORKER_REPLICAS=1
     EOT
   }
   norestart-1-10-2 = {
