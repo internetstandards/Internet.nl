@@ -2978,8 +2978,10 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             kex_hash_func_score=kex_hash_func_score,
         )
     except (OSError, NoIpError, ConnectionSocketException):
+        logger.exception("periodic-test-issue")
         return dict(server_reachable=False, tls_enabled=False)
     except (http.client.BadStatusLine, ConnectionHandshakeException):
+        logger.exception("periodic-test-issue")
         return dict(tls_enabled=False)
 
 
