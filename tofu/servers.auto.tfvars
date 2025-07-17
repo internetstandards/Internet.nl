@@ -44,3 +44,8 @@ servers = {
     EOT
   }
 }
+
+
+# "1.11.0.dev4-g5fd02a2" stop workers 5 minutes before every 15 minutes and start them every 15 minutes
+# "1.11.0.dev3-g579901c" restart workers sequentially by sending SIGTERM to celery process in container
+# "1.10.0.dev5-g3338c47" restart workers sequentially by sending SIGTERM to celery process in container
