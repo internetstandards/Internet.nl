@@ -12,13 +12,12 @@ servers = {
   single-1-9-3 = {
     server_type = "cx22"
     # says 1.10 but is based on v1.9.3 tag, maybe something to do with the setuptools_scm version tool?
-    version = "1.10.0.dev5-g3338c47"
+    version = "1.10.0.dev40-gcdc642c" # bisect-1
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
-    WORKER_REPLICAS=5
     EOT
   }
   single-1-10-2 = {
