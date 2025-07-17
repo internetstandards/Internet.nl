@@ -24,7 +24,7 @@ servers = {
   single-1-10-2 = {
     server_type = "cx22"
     # says 1.11 but is based on v1.10.2 tag, maybe something to do with the setuptools_scm version tool?
-    version = "1.11.0.dev5-geaf7acf"
+    version = "1.11.0.dev1-g2e602d0"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
