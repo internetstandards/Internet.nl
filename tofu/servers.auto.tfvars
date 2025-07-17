@@ -24,18 +24,17 @@ servers = {
   single-1-10-2 = {
     server_type = "cx22"
     # says 1.11 but is based on v1.10.2 tag, maybe something to do with the setuptools_scm version tool?
-    version = "1.11.0.dev3-g579901c"
+    version = "1.11.0.dev5-geaf7acf"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
     TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
     TEST_DOMAINS_MAIL=
-    WORKER_REPLICAS=1
     EOT
   }
   norestart-1-10-2 = {
     server_type = "cx22"
-    version = "1.11.0.dev4-g5fd02a2"
+    version = "1.10.0.dev5-g3338c47"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
@@ -46,6 +45,7 @@ servers = {
 }
 
 
-# "1.11.0.dev4-g5fd02a2" stop workers 5 minutes before every 15 minutes and start them every 15 minutes
-# "1.11.0.dev3-g579901c" restart workers sequentially by sending SIGTERM to celery process in container
-# "1.10.0.dev5-g3338c47" restart workers sequentially by sending SIGTERM to celery process in container
+# "1.11.0.dev4-g5fd02a2" 1.10 stop workers 5 minutes before every 15 minutes and start them every 15 minutes
+# "1.11.0.dev3-g579901c" 1.10 restart workers sequentially by sending SIGTERM to celery process in container
+# "1.10.0.dev5-g3338c47" 1.9  restart workers sequentially by sending SIGTERM to celery process in container
+# "1.11.0.dev5-geaf7acf" 1.10 log related exceptions to sentry
