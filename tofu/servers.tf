@@ -17,6 +17,7 @@ variable "credentials" {
   type = object({
     MONITORING_AUTH_RAW= string
     ALLOW_LIST = string
+    SENTRY_DSN = string
   })
 }
 
@@ -41,6 +42,7 @@ resource "terraform_data" "compose-up" {
     ${var.servers[each.key].config}
     MONITORING_AUTH_RAW='${var.credentials.MONITORING_AUTH_RAW}'
     ALLOW_LIST='${var.credentials.ALLOW_LIST}'
+    SENTRY_DSN='${var.credentials.SENTRY_DSN}'
     RELEASE='${var.servers[each.key].version}'
     EOT
   }
@@ -110,6 +112,7 @@ data "cloudinit_config" "internetnl" {
             envsubst < docker/host-dist.env > docker/host.env
             echo "MONITORING_AUTH_RAW='${var.credentials.MONITORING_AUTH_RAW}'" >> docker/local.env
             echo "ALLOW_LIST='${var.credentials.ALLOW_LIST}'" >> docker/local.env
+            echo "SENTRY_DSN='${var.credentials.SENTRY_DSN}'" >> docker/local.env
             echo "RELEASE='${each.value.version}'" >> docker/local.env
             docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
           %{ else }
@@ -121,6 +124,7 @@ data "cloudinit_config" "internetnl" {
             envsubst < docker/host-dist.env > docker/host.env
             echo "MONITORING_AUTH_RAW='${var.credentials.MONITORING_AUTH_RAW}'" >> docker/local.env
             echo "ALLOW_LIST='${var.credentials.ALLOW_LIST}'" >> docker/local.env
+            echo "SENTRY_DSN='${var.credentials.SENTRY_DSN}'" >> docker/local.env
             echo "RELEASE='${each.value.version}'" >> docker/local.env
             docker run --rm --pull=always   --volume /var/run/docker.sock:/var/run/docker.sock   --volume /opt/Internet.nl:/opt/Internet.nl   --network none   ghcr.io/internetstandards/util:${each.value.version}   /deploy.sh
           %{ endif }
