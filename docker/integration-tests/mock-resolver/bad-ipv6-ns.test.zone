@@ -11,11 +11,11 @@
     NS bad-ns1
     NS bad-ns2
 
-good-ns1  A 172.43.0.114
+good-ns1  A 172.16.43.114
 good-ns1  AAAA fd00:43:1::114
 bad-ns1  AAAA fd00:90::1
 bad-ns2  AAAA fd00:90::2
 
 ; IPV4_IP_TEST_TARGET_PUBLIC
-* A 172.43.0.51
+* A 172.16.43.51
   AAAA fd00:43:1::51

@@ -61,10 +61,10 @@ EXPECTED_DOMAIN_TECHNICAL_RESULTS = {
     "nameservers": {},
     "webservers": {
         "ipv4": {
-            "addresses": [{"address": "172.43.0.51", "reachable": True, "routing": []}],
+            "addresses": [{"address": "172.16.43.51", "reachable": True, "routing": []}],
             "https_enabled": True,
             "server_reachable": True,
-            "tested_address": "172.43.0.51",
+            "tested_address": "172.16.43.51",
             "details": {
                 "dane_status": "none",
                 "dane_records": [],
