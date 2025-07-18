@@ -2,23 +2,177 @@
 {% load static %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
-  <article class="block wide">
-    <section>
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about content" %}
-      {% else %}
-      {% include "content.html" with name="about content custom" %}
-      {% endif %}
-    </section>
-  </article>
-  <aside>
-    <section class="block">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about contact" %}
-      {% else %}
-      {% include "content.html" with name="about contact custom" %}
-      {% endif %}
-    </section>
+  <section class="intro-section bg-primary ellipse reverse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">{% include "string.html" with name="about_section_title_newstring" %}</h1>
+        <p class="h1 color-secondary">{% include "string.html" with name="about_section_page_intro_newstring" %}</p>
+      </hgroup>
+    </div>
+  </section>
+
+  <section class="about-section home-variant">
+    <div class="container">
+      <h2 class="h5 color-accent">{% include "string.html" with name="about_mission_title_newstring" %}</h2>
+      <p class="h4">{% include "string.html" with name="about_mission_heading_newstring" %}</p>
+      <p class="body-xl">{% include "string.html" with name="about_mission_description_newstring" %}</p>
+      <ul class="logo-list">
+        <li>
+          <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
+            <img class="light-visible" src="/static/images/surf.png" alt="Surf logo" loading="lazy" width="100" height="52">
+            <img class="dark-visible" src="/static/images/surf-wit.png" alt="Surf logo" loading="lazy" width="100" height="52">
+          </a>
+        </li>
+        <li>
+          <a href="https://ncsc.nl" target="_blank" aria-label="NCSC website">
+            <img class="light-visible" src="/static/images/ncsc.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+            <img class="dark-visible" src="/static/images/ncsc-wit.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+          </a>
+        </li>
+        <li>
+          <a href="https://nlnet.nl/" target="_blank" aria-label="NLnet website">
+            <img class="light-visible" src="/static/images/nlnet.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+            <img class="dark-visible" src="/static/images/nlnet-wit.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+          </a>
+        </li>
+        <li>
+          <a href="https://ripe.net/" target="_blank" aria-label="Ripe NCC website">
+            <img class="light-visible" src="/static/images/ncc.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+            <img class="dark-visible" src="/static/images/ncc-wit.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+          </a>
+        </li>
+        <li>
+          <a href="https://verenigingvanregistrars.nl/" target="_blank" aria-label="VVR website">
+            <img class="light-visible" src="/static/images/vvr.png" alt="VVR logo" loading="lazy" width="200" height="46">
+            <img class="dark-visible" src="/static/images/vvr-wit.png" alt="VVR logo" loading="lazy" width="200" height="46">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <aside class="quote-section bg-primary ellipse reverse">
+    <div class="container">
+      <img src="/static/images/portret-oprichter-internetnl.png" alt="Portret van Coen Wesselman, oprichter van Internet.nl" class="quote-image" loading="lazy" width="100" height="100">
+      <blockquote>
+        <p class="h4 color-secondary">{% include "string.html" with name="about_quote_newstring" %}</p>
+        <cite class="body-m color-secondary"><strong>{% include "string.html" with name="about_quote_author_newstring" %}</strong> - {% include "string.html" with name="about_quote_role_newstring" %}</cite>
+      </blockquote>
+    </div>
   </aside>
+
+  <section class="knowledge-section">
+    <div class="container">
+      <hgroup>
+        <h2 class="h3 color-secondary">{% include "string.html" with name="about_why_test_title_newstring" %}</h2>
+        <p class="body-l">{% include "string.html" with name="about_why_test_description_newstring" %}</p>
+      </hgroup>
+      <ul class="knowledge-list" id="card-carousel">
+        <li class="card home-variant knowledge-card ellipse">
+          <div class="card-container knowledge icon">
+            <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
+          </div>
+          <p>{% include "string.html" with name="about_reason_1_description_newstring" %}</p>
+        </li>
+        <li class="card home-variant knowledge-card ellipse">
+          <div class="card-container knowledge icon">
+            <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
+          </div>
+          <p>{% include "string.html" with name="about_reason_2_description_newstring" %}</p>
+        </li>
+        <li class="card home-variant knowledge-card ellipse">
+          <div class="card-container knowledge icon">
+            <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
+          </div>
+          <p>{% include "string.html" with name="about_reason_3_description_newstring" %}</p>
+        </li>
+      </ul>
+      <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
+        <li class="dot active"><button type="button"></button></li>
+        <li class="dot"><button type="button"></button></li>
+        <li class="dot"><button type="button"></button></li>
+      </ul>
+      <div class="button-container">
+        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="about_test_button_newstring" %}</a>
+        <p class="body-m">487 {% include "string.html" with name="about_successful_tests_newstring" %}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section ellipse hidden-mobile">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>
+      <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
+      <article class="contact-card">
+        <hgroup>
+          <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
+        </hgroup>
+        <ul>
+          <li class="contact-card-small">
+            <a href="/">
+              <hgroup>
+                <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+          <li class="contact-card-small">
+            <a href="/">
+              <hgroup>
+                <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+          <li class="contact-card-small">
+            <a href="/">
+              <hgroup>
+                <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
+                <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
 {% endblock %}

@@ -249,6 +249,12 @@ server {
     location = /favicon.ico {
         alias /var/www/internet.nl/favicon.ico;
     }
+    location = /favicon.svg {
+        alias /var/www/internet.nl/favicon.svg;
+    }
+    location = /favicon.png {
+        alias /var/www/internet.nl/favicon.png;
+    }
 
     # static files served from app
     location /static {
