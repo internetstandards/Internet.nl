@@ -2,7 +2,7 @@
 
 ; configure DNS for the internet.nl application instance that is running in test
 ; IPV4_WEBSERVER_IP_PUBLIC
-internet                    A                    172.43.0.100
+internet                    A                    172.16.43.100
 ; IPV6_IP_PUBLIC
                             AAAA                 fd00:43:1::100
 ; all it's subdomains
@@ -30,7 +30,7 @@ conn.www.ipv6.internet      CNAME                ipv6.internet
 ; nameserver setup for the connection test
 test-ns-signed.internet     NS                   ns.test-ns-signed.internet
 ; IPV4_UNBOUND_IP_PUBLIC
-ns.test-ns-signed.internet  A                    172.43.0.101
+ns.test-ns-signed.internet  A                    172.16.43.101
 ; IPV6_UNBOUND_IP_PUBLIC
                             AAAA                 fd00:43:1::101
 
@@ -44,7 +44,7 @@ platforminternet            CNAME                internet
 ; configure DNS for targets that are tested by the internet.test instance
 ; normal 100% website test target
 ; IPV4_IP_TEST_TARGET_PUBLIC
-target                      A                    172.43.0.51
+target                      A                    172.16.43.51
 ; IPV6_IP_TEST_TARGET_PUBLIC
                             AAAA                 fd00:43:1::51
 *.target                    CNAME                target
@@ -52,7 +52,7 @@ target                      A                    172.43.0.51
 ; normal 100% email test target
 *.mail-target           MX                   10 mx.mail-target.test.
 ; IPV4_IP_TEST_TARGET_MAIL_PUBLIC
-mx.mail-target          A                    172.43.0.52
+mx.mail-target          A                    172.16.43.52
 ; IPV6_IP_TEST_TARGET_MAIL_PUBLIC
                         AAAA                 fd00:43:1::52
 
@@ -62,7 +62,7 @@ bad-ipv6-ns             NS                   good-ns1.bad-ipv6-ns
                         NS                   bad-ns2.bad-ipv6-ns
                         NS                   bad-ns3.bad-ipv6-ns
 ; IPV4_IP_MOCK_RESOLVER_PUBLIC
-good-ns1.bad-ipv6-ns    A                    172.43.0.114
+good-ns1.bad-ipv6-ns    A                    172.16.43.114
 ; IPV6_IP_MOCK_RESOLVER_PUBLIC
 good-ns1.bad-ipv6-ns    AAAA                 fd00:43:1::114
 bad-ns2.bad-ipv6-ns     AAAA                 fd00:90::1
