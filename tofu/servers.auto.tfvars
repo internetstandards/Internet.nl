@@ -6,7 +6,7 @@ servers = {
     CRON_15MIN_RUN_TESTS=True
     # implicit because this version does not restart workers yet
     # CRON_WORKER_RESTART=False
-    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,internet.nl
     EOT
   }
   single-1-9-3 = {
@@ -15,7 +15,7 @@ servers = {
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
-    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,internet.nl
     TEST_DOMAINS_MAIL=
     EOT
   }
@@ -25,7 +25,7 @@ servers = {
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
-    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,internet.nl
     TEST_DOMAINS_MAIL=
     EOT
   }
@@ -35,7 +35,7 @@ servers = {
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=False
-    TEST_DOMAINS_SITE=ijohan.nl,example.nl,example.com
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,internet.nl
     TEST_DOMAINS_MAIL=
     EOT
   }
