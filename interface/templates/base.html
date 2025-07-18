@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% load translate %}
-<html lang="{{request.current_language_code}}" >
+<html lang="{{request.current_language_code}}" data-theme="{{request.COOKIES.theme}}">
 
 <head>
   <meta charset="utf-8">
@@ -15,14 +15,14 @@
   <link rel="icon" href="{% static 'favicon.png' %}" sizes="192x192" />
   <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
   <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
-
+    
   <link rel="stylesheet" href="{% static 'css/style-min.css' %}" />
-
+  
   {% block scripting %}
-    <script type="module" src="{% static 'js/base-min.js' %}"></script>
-    <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
+  <script type="module" src="{% static 'js/base-min.js' %}"></script>
+  <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
   {% endblock %}
-
+  
 </head>
 <body class="{{pageclass}}">
 
@@ -40,11 +40,11 @@
         <a class="header-logo" href="/" aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
           <picture class="light-visible">
             <source srcset="/static/logos/logo.svg" media="(width >= 900px)">
-            <img src="/static/logos/logo-mobile.svg" alt="Internet.nl Logo" width="227.5" height="50">          
+            <img src="/static/logos/logo.svg" alt="Internet.nl Logo" width="227.5" height="50">          
           </picture>
           <picture class="dark-visible">
             <source srcset="/static/logos/logo-white.svg" media="(width >= 900px)">
-            <img src="/static/logos/logo-white-mobile.svg" alt="Internet.nl Logo" width="227.5" height="50">          
+            <img src="/static/logos/logo-white.svg" alt="Internet.nl Logo" width="227.5" height="50">          
           </picture>
         </a>
         {% endif %}

@@ -106,6 +106,10 @@ a {
   display: flex;
 }
 
+p a { 
+  text-decoration: underline;
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -216,8 +220,12 @@ body:has(.nav-controls.active) {
   font: var(--section-header-xxs);
 }
 
+
+
 .body-xl, .body-l, .body-m, .body-s {
   color: var(--body-color-primary);
+
+
 
   &.color-secondary {
     color: var(--body-color-secondary);

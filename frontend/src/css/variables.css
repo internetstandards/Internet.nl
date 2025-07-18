@@ -130,18 +130,18 @@
     --card-header-l: var(--heading-font-s);
     --card-header-m: var(--heading-font-xs);
     --card-header-s: var(--heading-font-xs);
-    --card-header-xs: var(--heading-font-xxs);
+    --card-header-xs: var(--heading-font-xs);
     --card-body-l: var(--body-font-xs);
     --card-body-m: var(--body-font-xs);
-    --card-body-s: var(--body-font-xxs);
+    --card-body-s: var(--body-font-xs);
     --card-body-xs: var(--body-font-s);
     --card-input: var(--body-font-s);
 
     /* ACCORDION FONTS DESKTOP */
     --accordion-header: var(--heading-font-xs);
-    --accordion-header-semibold: var(--heading-font-xxs-semibold);
-    --accordion-body: var(--body-font-xxs);
-    --accordion-body-semibold: var(--body-font-xxs-semibold);
+    --accordion-header-semibold: var(--heading-font-xs-semibold);
+    --accordion-body: var(--body-font-xs);
+    --accordion-body-semibold: var(--body-font-xs-semibold);
   }
 
   /* MARK: COLOR VARIABLES
@@ -152,6 +152,7 @@
 
   /* HEADER COLORS LIGHTMODE */
   --nav-bg-color: light-dark(var(--white-100), var(--black-200));
+  --nav-sublist-border-color: light-dark(var(--green-400), var(--white-100));
   --nav-text-color: light-dark(var(--green-500), var(--white-100));
   --nav-mobile-bg-color: light-dark(var(--green-200), var(--green-600));
   --nav-mobile-border: 0.5px solid light-dark(var(--green-400), var(--black-200));
@@ -208,7 +209,7 @@
   --card-bg-color-contact: light-dark(var(--green-400), var(--green-500));
   --card-heading-color-contact: light-dark(var(--white-100), var(--white-100));
   --card-body-color-contact: light-dark(var(--white-100), var(--white-100));
-  --card-border: 2px solid light-dark(var(--transparent-100), var(--white-100));
+  --card-border: 2px solid light-dark(var(--green-400), var(--white-100));
   --card-box-shadow: 0 4px 32px 0 light-dark(var(--transparent-600), var(--transparent-600));
   --card-bg-color-action: light-dark(var(--green-400), var(--green-500));
   --card-heading-color-action: var(--white-100);

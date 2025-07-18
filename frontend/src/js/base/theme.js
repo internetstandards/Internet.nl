@@ -48,12 +48,9 @@ function setCookie(name, value, days) {
  * @returns {string} Theme name
  */
 function getPreferredTheme() {
-  return (
-    getCookie("theme") ||
-    (window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light")
-  );
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 /**
@@ -70,7 +67,7 @@ function setTheme(theme) {
  */
 function themeSwitch() {
   // Set initial theme
-  setTheme(getPreferredTheme());
+  if (!getCookie("theme")) setTheme(getPreferredTheme());
 
   // Add click handler for theme toggle
   elements.toggleTheme.addEventListener("click", () => {

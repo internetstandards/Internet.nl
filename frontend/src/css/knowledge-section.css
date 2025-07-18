@@ -91,8 +91,7 @@
   gap: 0.5rem;
   height: auto;
 
-  > *,
-  &::before {
+  > * {
     z-index: 1;
     position: relative;
   }
@@ -121,10 +120,16 @@
     padding: 3rem 1.5rem 2rem;
   }
 
-  &::before {
-    display: block;
-    width: 2rem;
-    height: 2rem;
+  .card-container.knowledge {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    &::before {
+      display: block;
+      width: 1.6rem;
+      height: 1.6rem;
+    }
   }
 
   &:nth-child(1) {
@@ -133,7 +138,7 @@
       grid-column: 1 / 4;
     }
 
-    &::before {
+    .card-container.knowledge::before {
       mask-image: url("/static/icons/search.svg");
     }
   }
@@ -144,7 +149,7 @@
       grid-column: 1 / 4;
     }
 
-    &::before {
+    .card-container.knowledge::before {
       mask-image: url("/static/icons/graph.svg");
     }
   }
@@ -156,7 +161,7 @@
       align-self: center;
     }
 
-    &::before {
+    .card-container.knowledge::before {
       mask-image: url("/static/icons/eye.svg");
     }
   }

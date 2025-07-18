@@ -305,7 +305,6 @@
   .card-container {
     display: flex;
     gap: 1rem;
-    align-items: center;
     color: var(--card-heading-color-test);
 
     &::before {

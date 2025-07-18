@@ -62,15 +62,10 @@ header {
 
 .header-logo {
   transition: opacity 0.3s;
+  width: 227.5px;
 
   &:hover {
     opacity: 0.8;
-  }
-
-  img {
-    @media (width <= 73.125rem) {
-      width: 182px;
-    }
   }
 }
 
@@ -302,6 +297,7 @@ header nav {
       }
 
       @media (width >= 73.125rem) {
+        border: 1px solid var(--nav-sublist-border-color);
         gap: 1rem;
         position: absolute;
         padding: 1.25rem 1.5rem;
