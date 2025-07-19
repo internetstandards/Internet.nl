@@ -11,7 +11,8 @@ servers = {
   }
   single-1-9-3 = {
     server_type = "cx22"
-    version = "1.9.3"
+    # says 1.10 but is based on v1.9.3 tag, maybe something to do with the setuptools_scm version tool?
+    version = "1.10.0.dev1-ge9f151c"
     config      = <<-EOT
     CRON_15MIN_RUN_TESTS=True
     CRON_WORKER_RESTART=True
@@ -46,3 +47,5 @@ servers = {
 # "1.11.0.dev3-g579901c" 1.10 restart workers sequentially by sending SIGTERM to celery process in container
 # "1.10.0.dev5-g3338c47" 1.9  restart workers sequentially by sending SIGTERM to celery process in container
 # "1.11.0.dev5-geaf7acf" 1.10 log related exceptions to sentry
+# "1.10.0.dev1-ge9f151c" 1.9 allow configuring test domains
+# "1.8.11.dev1-gf647649" 1.8 allow configuring test domains
