@@ -20,6 +20,17 @@ servers = {
     TEST_DOMAINS_MAIL=
     EOT
   }
+  bisect = {
+    server_type = "cx22"
+    version = "1.10.0.dev2-gcc1a93d-bisect-1"
+    config      = <<-EOT
+    CRON_15MIN_RUN_TESTS=True
+    CRON_WORKER_RESTART=True
+    TEST_DOMAINS_SITE=ijohan.nl,example.nl,internet.nl
+    TEST_DOMAINS_MAIL=
+    EOT
+  }
+
   single-1-10-2 = {
     server_type = "cx22"
     version = "1.10.2"
@@ -49,3 +60,4 @@ servers = {
 # "1.11.0.dev5-geaf7acf" 1.10 log related exceptions to sentry
 # "1.10.0.dev1-ge9f151c" 1.9 allow configuring test domains
 # "1.8.11.dev1-gf647649" 1.8 allow configuring test domains
+# "1.10.0.dev2-gcc1a93d-bisect-1" bisect 1 with configurable test domains
