@@ -20,8 +20,6 @@ asgiref==3.8.1
     #   django-browser-reload
 async-timeout==5.0.1
     # via redis
-attrs==25.3.0
-    # via pytest
 beautifulsoup4==4.13.3
     # via -r requirements.in
 billiard==4.2.1
@@ -64,7 +62,7 @@ cryptography==44.0.2
     # via
     #   -r requirements.in
     #   pgpy-dtc
-    #   sslyze
+    #   pyopenssl
 django==4.2.22
     # via
     #   -r requirements.in
@@ -227,7 +225,6 @@ statshog==1.0.6
 tinycss2==1.1.1
     # via bleach
 tls-parser==2.0.1
-    # via -r requirements.in
     # via sslyze
 tinycss2==1.1.1
     # via bleach
@@ -240,7 +237,6 @@ tomli==2.2.1
 typing-extensions==4.12.2
     # via
     #   asgiref
-    #   exceptiongroup
     #   kombu
     #   pydantic
     #   pydantic-core
