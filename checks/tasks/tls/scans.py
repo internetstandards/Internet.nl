@@ -72,6 +72,7 @@ from checks.tasks.tls.evaluation import (
     TLSCipherOrderEvaluation,
     TLSOCSPEvaluation,
     KeyExchangeRSAPKCSFunctionEvaluation,
+    TLSRenegotiationEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
@@ -620,6 +621,9 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
     key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
     key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
 
+    renegotiation_evaluation = TLSRenegotiationEvaluation.from_session_renegotiation_scan_result(
+        result.scan_result.session_renegotiation.result
+    )
     cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
     # HACK for DANE-TA(2) and hostname mismatch!
@@ -641,18 +645,10 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
         cipher_order_score=cipher_order_evaluation.score,
         cipher_order=cipher_order_evaluation.status,
         cipher_order_violation=cipher_order_evaluation.violation,
-        secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
-        secure_reneg_score=(
-            scoring.WEB_TLS_SECURE_RENEG_GOOD
-            if result.scan_result.session_renegotiation.result.supports_secure_renegotiation
-            else scoring.WEB_TLS_SECURE_RENEG_BAD
-        ),
-        client_reneg=result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos,
-        client_reneg_score=(
-            scoring.WEB_TLS_CLIENT_RENEG_BAD
-            if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
-            else scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        ),
+        secure_reneg=renegotiation_evaluation.status_secure_renegotiation,
+        secure_reneg_score=renegotiation_evaluation.score_secure_renegotiation,
+        client_reneg=renegotiation_evaluation.status_client_initiated_renegotiation,
+        client_reneg_score=renegotiation_evaluation.score_client_initiated_renegotiation,
         compression=result.scan_result.tls_compression.result.supports_compression
         if result.scan_result.tls_compression.result
         else None,
@@ -749,6 +745,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     )
     key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
     key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
+    renegotiation_evaluation = TLSRenegotiationEvaluation.from_session_renegotiation_scan_result(
+        result.scan_result.session_renegotiation.result
+    )
 
     ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
         result.scan_result.certificate_info.result.certificate_deployments[0]
@@ -767,18 +766,10 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         cipher_order_score=cipher_order_evaluation.score,
         cipher_order=cipher_order_evaluation.status,
         cipher_order_violation=cipher_order_evaluation.violation,
-        secure_reneg=result.scan_result.session_renegotiation.result.supports_secure_renegotiation,
-        secure_reneg_score=(
-            scoring.WEB_TLS_SECURE_RENEG_GOOD
-            if result.scan_result.session_renegotiation.result.supports_secure_renegotiation
-            else scoring.WEB_TLS_SECURE_RENEG_BAD
-        ),
-        client_reneg=result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos,
-        client_reneg_score=(
-            scoring.WEB_TLS_CLIENT_RENEG_BAD
-            if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
-            else scoring.WEB_TLS_CLIENT_RENEG_GOOD
-        ),
+        secure_reneg=renegotiation_evaluation.status_secure_renegotiation,
+        secure_reneg_score=renegotiation_evaluation.score_secure_renegotiation,
+        client_reneg=renegotiation_evaluation.status_client_initiated_renegotiation,
+        client_reneg_score=renegotiation_evaluation.score_client_initiated_renegotiation,
         compression=result.scan_result.tls_compression.result.supports_compression,
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
@@ -819,7 +810,10 @@ def run_sslyze(
     This threading is handled inside sslyze.
     """
     log.debug(f"starting sslyze scan for {[scan.server_location for scan in scans]}")
-    scanner = Scanner(per_server_concurrent_connections_limit=connection_limit, concurrent_server_scans_limit=10)
+    scanner = Scanner(
+        per_server_concurrent_connections_limit=connection_limit,
+        concurrent_server_scans_limit=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT,
+    )
     scanner.queue_scans(scans)
     for result in scanner.get_results():
         log.debug(f"sslyze scan for {result.server_location} result: {result.scan_status}")
