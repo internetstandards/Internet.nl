@@ -8,7 +8,13 @@ from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite, Cer
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
-from checks.models import KexHashFuncStatus, CipherOrderStatus, OcspStatus, KexRSAPKCSStatus
+from checks.models import (
+    KexHashFuncStatus,
+    CipherOrderStatus,
+    OcspStatus,
+    KexRSAPKCSStatus,
+    TLSClientInitiatedRenegotiationStatus,
+)
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
@@ -242,6 +248,57 @@ class TLSOCSPEvaluation:
             if self.status in self.GOOD_STATUSES
             else scoring.WEB_TLS_OCSP_STAPLING_BAD
         )
+
+
+@dataclass(frozen=True)
+class TLSRenegotiationEvaluation:
+    """
+    Evaluate the secure renegotiation settings per NCSC 3.4.2
+    """
+
+    supports_secure_renegotiation: bool
+    client_renegotiations_success_count: int
+
+    # What counts as "limited" per NCSC 3.4.2
+    MAX_SECURE_RENEG_ATTEMPTS = 10
+    # The number of attempts the scan should make
+    SCAN_RENEGOTIATION_LIMIT = MAX_SECURE_RENEG_ATTEMPTS + 1
+
+    @classmethod
+    def from_session_renegotiation_scan_result(cls, session_renegotiation_scan_result: SessionRenegotiationScanResult):
+        return cls(
+            supports_secure_renegotiation=session_renegotiation_scan_result.supports_secure_renegotiation,
+            client_renegotiations_success_count=session_renegotiation_scan_result.client_renegotiations_success_count,
+        )
+
+    @property
+    def status_secure_renegotiation(self) -> bool:
+        return self.supports_secure_renegotiation
+
+    @property
+    def status_client_initiated_renegotiation(self) -> TLSClientInitiatedRenegotiationStatus:
+        if not self.client_renegotiations_success_count:
+            return TLSClientInitiatedRenegotiationStatus.not_allowed
+        if self.client_renegotiations_success_count <= self.MAX_SECURE_RENEG_ATTEMPTS:
+            return TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit
+        return TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit
+
+    @property
+    def score_secure_renegotiation(self) -> scoring.Score:
+        return (
+            scoring.WEB_TLS_SECURE_RENEG_GOOD
+            if self.supports_secure_renegotiation
+            else scoring.WEB_TLS_SECURE_RENEG_BAD
+        )
+
+    @property
+    def score_client_initiated_renegotiation(self) -> scoring.Score:
+        scores = {
+            TLSClientInitiatedRenegotiationStatus.not_allowed: scoring.WEB_TLS_CLIENT_RENEG_GOOD,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit: scoring.WEB_TLS_CLIENT_RENEG_OK,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: scoring.WEB_TLS_CLIENT_RENEG_BAD,
+        }
+        return scores[self.status_client_initiated_renegotiation]
 
 
 @dataclass(frozen=True)
