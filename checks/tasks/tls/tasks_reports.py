@@ -467,10 +467,7 @@ def build_report(dttls, category):
             else:
                 category.subtests["renegotiation_secure"].result_bad()
 
-            if dttls.client_reneg:
-                category.subtests["renegotiation_client"].result_bad()
-            else:
-                category.subtests["renegotiation_client"].result_good()
+            category.subtests["renegotiation_client"].save_result(dttls.client_reneg)
 
             if not dttls.cert_chain:
                 category.subtests["cert_trust"].result_could_not_test()
@@ -628,10 +625,7 @@ def build_report(dttls, category):
             else:
                 category.subtests["renegotiation_secure"].result_bad()
 
-            if dttls.client_reneg:
-                category.subtests["renegotiation_client"].result_bad()
-            else:
-                category.subtests["renegotiation_client"].result_good()
+            category.subtests["renegotiation_client"].save_result(dttls.client_reneg)
 
             if not dttls.cert_chain:
                 category.subtests["cert_trust"].result_could_not_test()
