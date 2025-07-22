@@ -15,7 +15,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa, dsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.x509 import Certificate
 from django.conf import settings
-from dns.exception import ValidationFailure
 from dns.name import EmptyLabel
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
 from nassl._nassl import OpenSSLError
@@ -145,13 +144,13 @@ def dane(
     dane_data = None
     dnssec_status = None
     try:
-        rrset, dnssec_status = dns_resolve_tlsa(dane_qname, allow_bogus=False)
+        rrset, dnssec_status = dns_resolve_tlsa(dane_qname)
         dane_data = [(rr.usage, rr.selector, rr.mtype, binascii.hexlify(rr.cert).decode("ascii")) for rr in rrset]
+        if dnssec_status == DNSSECStatus.BOGUS:
+            status = DaneStatus.none_bogus
+            score = score_none_bogus
     except (NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout, EmptyLabel):
         pass
-    except ValidationFailure:
-        status = DaneStatus.none_bogus
-        score = score_none_bogus
 
     if not dane_data or dnssec_status != DNSSECStatus.SECURE:
         return dict(
@@ -860,7 +859,7 @@ def test_key_exchange_hash(
     There are few or no hosts that do not meet this requirement.
     """
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
-    ssl_connection.ssl_client.set_sigalgs(SIGNATURE_ALGORITHMS_SHA2)
+    ssl_connection.ssl_client.set_signature_algorithms(SIGNATURE_ALGORITHMS_SHA2)
 
     try:
         ssl_connection.connect()
