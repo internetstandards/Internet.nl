@@ -20,8 +20,6 @@ asgiref==3.8.1
     #   django-browser-reload
 async-timeout==5.0.1
     # via redis
-attrs==25.3.0
-    # via pytest
 beautifulsoup4==4.13.3
     # via -r requirements.in
 billiard==4.2.1
@@ -65,6 +63,7 @@ cryptography==44.0.2
     #   -r requirements.in
     #   pgpy-dtc
     #   pyopenssl
+    #   sslyze
 django==4.2.28
     # via
     #   -r requirements.in
@@ -129,6 +128,8 @@ markdown==3.7
     # via -r requirements.in
 markdown2==2.5.3
     # via django-markdown-deux
+nassl==5.3.0
+    # via sslyze
 packaging==24.2
     # via
     #   forcediphttpsadapter
@@ -151,7 +152,7 @@ pyasn1==0.6.2
 pycparser==2.22
     # via cffi
 pydantic==2.6.4
-    # via -r requirements.in
+    # via sslyze
 pydantic-core==2.16.3
     # via pydantic
 pyopenssl==25.0.0
@@ -212,6 +213,8 @@ soupsieve==2.6
     # via beautifulsoup4
 sqlparse==0.5.4
     # via django
+sslyze==6.1.0
+    # via -r requirements.in
 statsd==4.0.0
     # via
     #   celery-statsd
@@ -221,12 +224,7 @@ statshog==1.0.6
 tinycss2==1.1.1
     # via bleach
 tls-parser==2.0.1
-    # via -r requirements.in
     # via sslyze
-tinycss2==1.1.1
-    # via bleach
-toml==0.10.2
-    # via pytest
 tomli==2.2.1
     # via
     #   pytest
@@ -234,6 +232,8 @@ tomli==2.2.1
 typing-extensions==4.12.2
     # via
     #   asgiref
+    #   beautifulsoup4
+    #   exceptiongroup
     #   kombu
     #   pydantic
     #   pydantic-core
