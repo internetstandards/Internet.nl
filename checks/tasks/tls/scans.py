@@ -860,7 +860,7 @@ def test_key_exchange_hash(
     There are few or no hosts that do not meet this requirement.
     """
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
-    ssl_connection.ssl_client.set_sigalgs(SIGNATURE_ALGORITHMS_SHA2)
+    ssl_connection.ssl_client.set_signature_algorithms(SIGNATURE_ALGORITHMS_SHA2)
 
     try:
         ssl_connection.connect()
