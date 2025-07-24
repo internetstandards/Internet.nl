@@ -89,16 +89,29 @@ class OcspStatus(Enum):
     not_in_cert = 3
 
 
+class TLSClientInitiatedRenegotiationStatus(Enum):
+    not_allowed = 1
+    allowed_with_low_limit = 2
+    allowed_with_too_high_limit = 3
+
+
 class ZeroRttStatus(Enum):
     bad = 0
     good = 1
     na = 2
 
 
+class KexRSAPKCSStatus(Enum):
+    bad = 0
+    good = 1
+    unknown = 2
+
+
 class KexHashFuncStatus(Enum):
     bad = 0
     good = 1
     unknown = 2
+    phase_out = 3
 
 
 class CipherOrderStatus(Enum):
@@ -517,7 +530,7 @@ class DomainTestTls(BaseTestModel):
     compression_score = models.IntegerField(null=True)
     secure_reneg = models.BooleanField(null=True, default=False)
     secure_reneg_score = models.IntegerField(null=True)
-    client_reneg = models.BooleanField(null=True, default=False)
+    client_reneg = EnumField(TLSClientInitiatedRenegotiationStatus, null=True)
     client_reneg_score = models.IntegerField(null=True)
 
     zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)

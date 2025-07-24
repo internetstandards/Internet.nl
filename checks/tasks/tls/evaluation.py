@@ -4,22 +4,31 @@ from typing import List, Optional, Any, Set, cast
 from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
 from cryptography.x509 import AuthorityInformationAccess, ExtensionNotFound
 from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo, OpenSslEvpPkeyEnum
-from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite, CertificateDeploymentAnalysisResult
+from sslyze import (
+    TlsVersionEnum,
+    CipherSuiteAcceptedByServer,
+    CipherSuite,
+    CertificateDeploymentAnalysisResult,
+    SessionRenegotiationScanResult,
+)
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
-from checks.models import KexHashFuncStatus, CipherOrderStatus, OcspStatus
+from checks.models import (
+    KexHashFuncStatus,
+    CipherOrderStatus,
+    OcspStatus,
+    KexRSAPKCSStatus,
+    TLSClientInitiatedRenegotiationStatus,
+)
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
     PROTOCOLS_PHASE_OUT,
-    FS_ECDH_MIN_KEY_SIZE,
     FS_EC_PHASE_OUT,
     FS_EC_GOOD,
-    FS_DH_MIN_KEY_SIZE,
     FFDHE_GENERATOR,
-    FFDHE2048_PRIME,
-    FFDHE_SUFFICIENT_PRIMES,
+    FFDHE_PHASE_OUT_PRIMES,
     CIPHERS_GOOD,
     CIPHERS_SUFFICIENT,
     CIPHERS_PHASE_OUT,
@@ -105,21 +114,17 @@ class TLSForwardSecrecyParameterEvaluation:
                 continue
 
             if isinstance(key, EcDhEphemeralKeyInfo):
-                if key.size < FS_ECDH_MIN_KEY_SIZE:
-                    bad.add(f"ECDH-{key.size}")
                 if key.curve in FS_EC_PHASE_OUT:
                     phase_out.add(f"ECDH-{key.curve_name}")
                 elif key.curve not in FS_EC_GOOD:
                     bad.add(f"ECDH-{key.curve_name}")
 
             if isinstance(key, DhEphemeralKeyInfo):
-                if key.size < FS_DH_MIN_KEY_SIZE:
-                    bad.add(f"DH-{key.size}")
-                # NCSC table 10
+                # NCSC 3.3.3.1
                 if key.generator == FFDHE_GENERATOR:
-                    if key.prime == FFDHE2048_PRIME:
-                        phase_out.add("FFDHE-2048")
-                    elif key.prime not in FFDHE_SUFFICIENT_PRIMES:
+                    if key.prime in FFDHE_PHASE_OUT_PRIMES:
+                        phase_out.add(f"DH-{key.size}")
+                    else:
                         bad.add(f"DH-{key.size}")
 
         dh_sizes = [
@@ -252,10 +257,72 @@ class TLSOCSPEvaluation:
 
 
 @dataclass(frozen=True)
+class TLSRenegotiationEvaluation:
+    """
+    Evaluate the secure renegotiation settings per NCSC 3.4.2
+    """
+
+    supports_secure_renegotiation: bool
+    client_renegotiations_success_count: int
+
+    # What counts as "limited" per NCSC 3.4.2
+    MAX_SECURE_RENEG_ATTEMPTS = 10
+    # The number of attempts the scan should make
+    SCAN_RENEGOTIATION_LIMIT = MAX_SECURE_RENEG_ATTEMPTS + 1
+
+    @classmethod
+    def from_session_renegotiation_scan_result(cls, session_renegotiation_scan_result: SessionRenegotiationScanResult):
+        return cls(
+            supports_secure_renegotiation=session_renegotiation_scan_result.supports_secure_renegotiation,
+            client_renegotiations_success_count=session_renegotiation_scan_result.client_renegotiations_success_count,
+        )
+
+    @property
+    def status_secure_renegotiation(self) -> bool:
+        return self.supports_secure_renegotiation
+
+    @property
+    def status_client_initiated_renegotiation(self) -> TLSClientInitiatedRenegotiationStatus:
+        if not self.client_renegotiations_success_count:
+            return TLSClientInitiatedRenegotiationStatus.not_allowed
+        if self.client_renegotiations_success_count <= self.MAX_SECURE_RENEG_ATTEMPTS:
+            return TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit
+        return TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit
+
+    @property
+    def score_secure_renegotiation(self) -> scoring.Score:
+        return (
+            scoring.WEB_TLS_SECURE_RENEG_GOOD
+            if self.supports_secure_renegotiation
+            else scoring.WEB_TLS_SECURE_RENEG_BAD
+        )
+
+    @property
+    def score_client_initiated_renegotiation(self) -> scoring.Score:
+        scores = {
+            TLSClientInitiatedRenegotiationStatus.not_allowed: scoring.WEB_TLS_CLIENT_RENEG_GOOD,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit: scoring.WEB_TLS_CLIENT_RENEG_OK,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: scoring.WEB_TLS_CLIENT_RENEG_BAD,
+        }
+        return scores[self.status_client_initiated_renegotiation]
+
+
+@dataclass(frozen=True)
+class KeyExchangeRSAPKCSFunctionEvaluation:
+    """
+    Results of support for PKCS padding for RSA per NCSC 3.3.2.1.
+    NCSC table 5
+    """
+
+    status: KexRSAPKCSStatus
+    score: scoring.Score
+
+
+@dataclass(frozen=True)
 class KeyExchangeHashFunctionEvaluation:
     """
     Results of "hash functions for key exchange" evaluation.
-    NCSC table 5
+    NCSC 3.3.5
     """
 
     status: KexHashFuncStatus
