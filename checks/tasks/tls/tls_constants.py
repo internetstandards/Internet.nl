@@ -119,25 +119,21 @@ PROTOCOLS_PHASE_OUT = []
 # which requires the NIDs in digest+pubkey algorithm tuples.
 # NCSC 3.3.5, connection with this set means bad hashes are enabled
 SIGNATURE_ALGORITHMS_BAD_HASH = [
-    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.EC),
+    # OpenSSL will not support MD5, or SHA1 with RSA_PSS
     (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.EC),
-    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA_PSS),
-    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA_PSS),
-    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.DSA),
     (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.DSA),
 ]
 SIGNATURE_ALGORITHMS_PHASE_OUT_HASH = [
+    # SHA224 not be tested against RSA_PSS
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.EC),
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA_PSS),
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.DSA),
 ]
 # NCSC 3.3.2.1: RSA PKCS must not be used.
 # Failing these algs means the server has no RSA or RSA in PSS only, either is fine.
 SIGNATURE_ALGORITHMS_RSA_PKCS = [
-    (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA),
+    # (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.RSA),
