@@ -917,8 +917,14 @@ def _test_connection_with_limited_sigalgs(
     Test whether the server accepts a connection with limited sigalgs through the signature_algorithms extension.
     Returns a (NID, EVP PKEY) if a match was found, None otherwise.
     """
-    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(should_use_legacy_openssl=False)
-    ssl_connection.ssl_client.set_signature_algorithms(SIGNATURE_ALGORITHMS_BAD_HASH)
+    # This is only interesting on TLS 1.2 or older
+    override_tls_version = None
+    if server_connectivity_info.tls_probing_result.highest_tls_version_supported == TlsVersionEnum.TLS_1_3:
+        override_tls_version = TlsVersionEnum.TLS_1_2
+    ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
+        override_tls_version=override_tls_version, should_use_legacy_openssl=False
+    )
+    ssl_connection.ssl_client.set_signature_algorithms(sigalgs)
 
     try:
         ssl_connection.connect()

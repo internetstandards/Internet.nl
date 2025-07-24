@@ -1799,19 +1799,27 @@ class MailTlsRenegotiationClient(Subtest):
             model_score_field="client_reneg_score",
         )
 
-    def was_tested(self):
-        self.worst_status = scoring.MAIL_TLS_CLIENT_RENEG_WORST_STATUS
+    def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
+        handlers = {
+            TLSClientInitiatedRenegotiationStatus.not_allowed: self.result_not_allowed,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit: self.result_allowed_with_low_limit,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: self.result_allowed_with_too_high_limit,
+        }
+        return handlers[status]()
 
-    def result_good(self):
-        self.was_tested()
+    def result_not_allowed(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail tls renegotiation-client verdict good"
+        self.verdict = "detail mail tls renegotiation-client verdict not-allowed"
         self.tech_data = "detail tech data no"
 
-    def result_bad(self):
-        self.was_tested()
+    def result_allowed_with_low_limit(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls renegotiation-client verdict allowed-with-low-limit"
+        self.tech_data = "detail tech data phase-out"
+
+    def result_allowed_with_too_high_limit(self):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls renegotiation-client verdict bad"
+        self.verdict = "detail mail tls renegotiation-client verdict allowed-with-too-high-limit"
         self.tech_data = "detail tech data yes"
 
 
