@@ -316,17 +316,17 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.ipv6.mail_callback": {"queue": "db_worker"},
     "checks.tasks.ipv6.web_callback": {"queue": "db_worker"},
     "checks.tasks.mail.mail_callback": {"queue": "db_worker"},
-    "checks.tasks.tls.mail_callback": {"queue": "db_worker"},
-    "checks.tasks.tls.web_callback": {"queue": "db_worker"},
+    "checks.tasks.tls.tasks_reports.mail_callback": {"queue": "db_worker"},
+    "checks.tasks.tls.tasks_reports.web_callback": {"queue": "db_worker"},
     "checks.tasks.appsecpriv.web_callback": {"queue": "db_worker"},
     "checks.tasks.rpki.web_callback": {"queue": "db_worker"},
     "checks.tasks.rpki.mail_callback": {"queue": "db_worker"},
     "interface.views.shared.run_stats_queries": {"queue": "slow_db_worker"},
     "interface.views.shared.update_running_status": {"queue": "slow_db_worker"},
     "checks.tasks.update.update_hof": {"queue": "slow_db_worker"},
-    "checks.tasks.tls.web_cert": {"queue": "nassl_worker"},
-    "checks.tasks.tls.web_conn": {"queue": "nassl_worker"},
-    "checks.tasks.tls.mail_smtp_starttls": {"queue": "nassl_worker"},
+    "checks.tasks.tls.tasks_reports.web_cert": {"queue": "nassl_worker"},
+    "checks.tasks.tls.tasks_reports.web_conn": {"queue": "nassl_worker"},
+    "checks.tasks.tls.tasks_reports.mail_smtp_starttls": {"queue": "nassl_worker"},
     # Spread out all the work of all workers, the resolv worker has most issues with
     #  https://github.com/celery/celery/issues/6819 - so that should be rebooted a bit more often.
     "checks.tasks.ipv6.ns": {"queue": "ipv6_worker"},
@@ -335,7 +335,7 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.mail.dmarc": {"queue": "mail_worker"},
     "checks.tasks.mail.dkim": {"queue": "mail_worker"},
     "checks.tasks.mail.spf": {"queue": "mail_worker"},
-    "checks.tasks.tls.web_http": {"queue": "web_worker"},
+    "checks.tasks.tls.tasks_reports.web_http": {"queue": "web_worker"},
     "checks.tasks.appsecpriv.web_appsecpriv": {"queue": "web_worker"},
     "checks.tasks.rpki.mail_ns_rpki": {"queue": "rpki_worker"},
     "checks.tasks.rpki.mail_mx_ns_rpki": {"queue": "rpki_worker"},
@@ -365,12 +365,12 @@ CELERY_BATCH_TASK_ROUTES = {
     "checks.tasks.mail.batch_spf": {"queue": "batch_main"},
     "checks.tasks.shared.batch_mail_get_servers": {"queue": "batch_main"},
     "checks.tasks.shared.batch_resolve_a_aaaa": {"queue": "batch_main"},
-    "checks.tasks.tls.batch_mail_callback": {"queue": "batch_callback"},
-    "checks.tasks.tls.batch_mail_smtp_starttls": {"queue": "batch_main"},
-    "checks.tasks.tls.batch_web_callback": {"queue": "batch_callback"},
-    "checks.tasks.tls.batch_web_cert": {"queue": "batch_nassl"},
-    "checks.tasks.tls.batch_web_conn": {"queue": "batch_nassl"},
-    "checks.tasks.tls.batch_web_http": {"queue": "batch_nassl"},
+    "checks.tasks.tls.tasks_reports.batch_mail_callback": {"queue": "batch_callback"},
+    "checks.tasks.tls.tasks_reports.batch_mail_smtp_starttls": {"queue": "batch_main"},
+    "checks.tasks.tls.tasks_reports.batch_web_callback": {"queue": "batch_callback"},
+    "checks.tasks.tls.tasks_reports.batch_web_cert": {"queue": "batch_nassl"},
+    "checks.tasks.tls.tasks_reports.batch_web_conn": {"queue": "batch_nassl"},
+    "checks.tasks.tls.tasks_reports.batch_web_http": {"queue": "batch_nassl"},
     "checks.tasks.appsecpriv.batch_web_appsecpriv": {"queue": "batch_main"},
     "checks.tasks.appsecpriv.batch_web_callback": {"queue": "batch_callback"},
     "checks.tasks.rpki.batch_mail_callback": {"queue": "batch_callback"},
@@ -540,6 +540,20 @@ if "hosters" in MANUAL_HOF_PAGES:
 
 HOF_UPDATE_INTERVAL = 600  # seconds
 
+color_formatter = {
+    "()": "colorlog.ColoredFormatter",
+    # to get the name of the logger a message came from, add %(name)s.
+    "format": "%(log_color)s%(asctime)s\t%(name)s %(levelname)-8s - %(filename)s:%(lineno)-4s - "
+    "%(funcName)s - %(message)s",
+    "datefmt": "%Y-%m-%d %H:%M:%S",
+    "log_colors": {
+        # "DEBUG": "white",
+        "INFO": "green",
+        "WARNING": "yellow",
+        "ERROR": "red",
+        "CRITICAL": "bold_red",
+    },
+}
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -555,22 +569,7 @@ LOGGING = {
         },
     },
     "formatters": {
-        "debug": {
-            "format": "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - " "%(funcName)20s() - %(message)s",
-        },
-        "color": {
-            "()": "colorlog.ColoredFormatter",
-            # to get the name of the logger a message came from, add %(name)s.
-            "format": "%(log_color)s%(asctime)s\t%(levelname)-8s - " "%(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-            "log_colors": {
-                "DEBUG": "green",
-                "INFO": "white",
-                "WARNING": "yellow",
-                "ERROR": "red",
-                "CRITICAL": "bold_red",
-            },
-        },
+        "color": color_formatter,
     },
     "loggers": {
         # Default Django logging, we expect django to work, and therefore only show INFO messages.
@@ -583,10 +582,22 @@ LOGGING = {
             "handlers": ["console", "file"],
             "level": INTERNETNL_LOG_LEVEL,
         },
+        "checks": {
+            "handlers": ["console", "file"],
+            "level": INTERNETNL_LOG_LEVEL,
+        },
+        "interface": {
+            "handlers": ["console", "file"],
+            "level": INTERNETNL_LOG_LEVEL,
+        },
         # ERROR disables verbose task logging (ie: "received task...", "...succeeded in...")
         "celery.app.trace": {
             "handlers": ["console"],
-            "level": CELERY_LOG_LEVEL,
+            "level": "ERROR",
+        },
+        "celery.utils.functional": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
         "celery.worker.strategy": {
             "level": CELERY_LOG_LEVEL,
