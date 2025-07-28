@@ -479,12 +479,14 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
         public_key = cert.public_key()
         key_type = type(public_key)
         key_size = public_key.key_size
-        curve = getattr(public_key, "curve", None)
+        curve = None
+        if hasattr(public_key, "curve"):
+            curve = public_key.curve.__class__
 
         is_good = (
-            (key_type is rsa.RSAPublicKey and key_size >= CERT_RSA_MIN_GOOD_KEY_SIZE)
-            or (key_type in CERT_CURVES_GOOD)
-            or (key_type is EllipticCurvePublicKey and curve in CERT_EC_CURVES_GOOD)
+            (isinstance(public_key, rsa.RSAPublicKey) and key_size >= CERT_RSA_MIN_GOOD_KEY_SIZE)
+            or (curve in CERT_CURVES_GOOD)
+            or (isinstance(public_key, EllipticCurvePublicKey) and curve in CERT_EC_CURVES_GOOD)
         )
 
         if is_good:
@@ -495,7 +497,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
             message += f", curve: {curve}"
 
         is_phase_out = (curve in CERT_EC_CURVES_PHASE_OUT) or (
-            key_type is rsa.RSAPublicKey and key_size >= CERT_RSA_MIN_PHASE_OUT_KEY_SIZE
+            isinstance(public_key, rsa.RSAPublicKey) and key_size >= CERT_RSA_MIN_PHASE_OUT_KEY_SIZE
         )
 
         if is_phase_out:
