@@ -4,7 +4,15 @@ from typing import List, Optional, Any, Set, cast
 from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
 from cryptography.x509 import AuthorityInformationAccess, ExtensionNotFound
 from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo, OpenSslEvpPkeyEnum
-from sslyze import TlsVersionEnum, CipherSuiteAcceptedByServer, CipherSuite, CertificateDeploymentAnalysisResult
+from nassl.ssl_client import ExtendedMasterSecretSupportEnum
+from sslyze import (
+    TlsVersionEnum,
+    CipherSuiteAcceptedByServer,
+    CipherSuite,
+    CertificateDeploymentAnalysisResult,
+    SessionRenegotiationScanResult,
+)
+from sslyze.connection_helpers.tls_connection import SslConnection
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import _TLS_1_3_CIPHER_SUITES
 
 from checks import scoring
@@ -14,7 +22,9 @@ from checks.models import (
     OcspStatus,
     KexRSAPKCSStatus,
     TLSClientInitiatedRenegotiationStatus,
+    TLSExtendedMasterSecretStatus,
 )
+from checks.scoring import WEB_TLS_EXTENDED_MASTER_SECRET_GOOD, WEB_TLS_EXTENDED_MASTER_SECRET_BAD
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
@@ -336,6 +346,28 @@ class TLSCipherOrderEvaluation:
     violation: List[str]
     status: CipherOrderStatus
     score: scoring.Score
+
+
+@dataclass()
+class TLSExtendedMasterSecretEvaluation:
+    """
+    Results of evaluating TLS 1.2 Extended Master Secret (RFC7627).
+    """
+
+    status: TLSExtendedMasterSecretStatus = TLSExtendedMasterSecretStatus.na_no_tls_1_2
+    score: scoring.Score = WEB_TLS_EXTENDED_MASTER_SECRET_GOOD
+
+    def update_for_connection(self, ssl_connection: SslConnection, tls_version: TlsVersionEnum) -> None:
+        if tls_version != TlsVersionEnum.TLS_1_2:
+            return
+
+        ems_support = ssl_connection.ssl_client.get_extended_master_secret_support()
+        if ems_support == ExtendedMasterSecretSupportEnum.USED_IN_CURRENT_SESSION:
+            self.status = TLSExtendedMasterSecretStatus.supported
+            self.score = WEB_TLS_EXTENDED_MASTER_SECRET_GOOD
+        elif ems_support == ExtendedMasterSecretSupportEnum.NOT_USED_IN_CURRENT_SESSION:
+            self.status = TLSExtendedMasterSecretStatus.not_supported
+            self.score = WEB_TLS_EXTENDED_MASTER_SECRET_BAD
 
 
 def _unique_unhashable(items: List[Any]) -> List[Any]:
