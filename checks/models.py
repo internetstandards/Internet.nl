@@ -122,6 +122,13 @@ class CipherOrderStatus(Enum):
     na = 4  # Don't care about order; only GOOD ciphers.
 
 
+class TLSExtendedMasterSecretStatus(Enum):
+    supported = 0
+    not_supported = 1
+    na_no_tls_1_2 = 2
+    unknown = 3
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
