@@ -73,6 +73,7 @@ from checks.tasks.tls.evaluation import (
     TLSOCSPEvaluation,
     KeyExchangeRSAPKCSFunctionEvaluation,
     TLSRenegotiationEvaluation,
+    TLSExtendedMasterSecretEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_GOOD,
@@ -523,7 +524,7 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
 
         for future in concurrent.futures.as_completed(future_to_server):
             server = future_to_server[future]
-            scan_request = future.result()
+            scan_request, ems_evaluation = future.result()
 
             if scan_request:
                 scans.append(scan_request)
@@ -539,7 +540,7 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
             results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
             continue
         log.debug(f"sslyze mail scan complete for {result.server_location.hostname}, other scans may be pending")
-        results[result.server_location.hostname] = check_mail_tls(result, all_suites)
+        results[result.server_location.hostname] = check_mail_tls(result, all_suites, ems_evaluation)
         log.debug(f"check_mail_tls complete for {result.server_location.hostname}")
     return results
 
@@ -557,7 +558,9 @@ def connection_limit_for_scans(scans: List[ServerScanRequest]):
     return 1
 
 
-def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanRequest]:
+def _generate_mail_server_scan_request(
+    mx_hostname: str,
+) -> Tuple[Optional[ServerScanRequest], TLSExtendedMasterSecretEvaluation]:
     """
     Generate the scan request (sslyze scan commands) for a mail server.
     Includes resolving and determining supported TLS versions.
@@ -566,14 +569,14 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
         server_location = ServerNetworkLocation(hostname=mx_hostname, port=25)
     except ServerHostnameCouldNotBeResolved:
         log.info(f"unable to resolve MX host {mx_hostname}, marking server unreachable")
-        return None
+        return None, TLSExtendedMasterSecretEvaluation()
     network_configuration = ServerNetworkConfiguration(
         tls_server_name_indication=mx_hostname,
         tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
         smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
-    supported_tls_versions = check_supported_tls_versions(
+    supported_tls_versions, extended_master_secret_evaluation = check_supported_tls_versions(
         ServerConnectivityInfo(
             server_location=server_location,
             network_configuration=network_configuration,
@@ -582,22 +585,29 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
     )
     if not supported_tls_versions:
         log.info(f"no TLS version support found for MX host {mx_hostname}, marking server unreachable")
-        return None
+        return None, extended_master_secret_evaluation
     scan_commands = SSLYZE_SCAN_COMMANDS | {
         SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
     }
 
-    return ServerScanRequest(
-        server_location=server_location,
-        network_configuration=network_configuration,
-        scan_commands=scan_commands,
-        scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+    return (
+        ServerScanRequest(
+            server_location=server_location,
+            network_configuration=network_configuration,
+            scan_commands=scan_commands,
+            scan_commands_extra_arguments=ScanCommandsExtraArguments(
+                session_renegotiation=SessionRenegotiationExtraArgument(client_renegotiation_attempts=1),
+            ),
         ),
+        extended_master_secret_evaluation,
     )
 
 
-def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAttempt]):
+def check_mail_tls(
+    result: ServerScanResult,
+    all_suites: List[CipherSuitesScanAttempt],
+    extended_master_secret_evaluation: TLSExtendedMasterSecretEvaluation,
+):
     """
     Perform evaluation and additional probes for a single mail server.
     This happens after sslyze has already been run on it.
@@ -678,6 +688,8 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
         key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
+        extended_master_secret=extended_master_secret_evaluation.status,
+        extended_master_secret_score=extended_master_secret_evaluation.score,
     )
     results.update(cert_results)
     return results
@@ -703,7 +715,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         http_user_agent=settings.USER_AGENT,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
-    supported_tls_versions = check_supported_tls_versions(
+    supported_tls_versions, extended_master_secret_evaluation = check_supported_tls_versions(
         ServerConnectivityInfo(
             server_location=server_location,
             network_configuration=network_configuration,
@@ -799,6 +811,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
+        extended_master_secret=extended_master_secret_evaluation.status,
+        extended_master_secret_score=extended_master_secret_evaluation.score,
     )
     return probe_result
 
@@ -1055,14 +1069,18 @@ def _check_cipher_suite_available(tls_version: TlsVersionEnum, cipher_suite: Cip
         return False
 
 
-def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInfo) -> List[TlsVersionEnum]:
+def check_supported_tls_versions(
+    server_connectivity_info: ServerConnectivityInfo,
+) -> Tuple[List[TlsVersionEnum], TLSExtendedMasterSecretEvaluation]:
     """
-    Determine which TLS versions are supported.
+    Determine which TLS versions are supported, and EMS support.
     Providing this info to sslyze improves on the bluntness of the scans.
+    EMS is combined for efficiency, we just need access to any TLS 1.2 connection to check it.
     """
     supported_tls_versions = []
+    ems_evaluation = TLSExtendedMasterSecretEvaluation()
     for tls_version in TlsVersionEnum:
-        requires_legacy_openssl = tls_version != TlsVersionEnum.TLS_1_3
+        requires_legacy_openssl = tls_version not in [TlsVersionEnum.TLS_1_2, TlsVersionEnum.TLS_1_3]
 
         ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
             override_tls_version=tls_version, should_use_legacy_openssl=requires_legacy_openssl
@@ -1070,6 +1088,7 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
+            ems_evaluation.update_for_connection(ssl_connection, tls_version)
         except (ConnectionToServerFailed, OpenSSLError) as exc:
             log.debug(
                 f"Server {server_connectivity_info.server_location.hostname}"
@@ -1085,4 +1104,4 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         f"support for {supported_tls_versions}"
     )
     supported_tls_versions.sort(key=lambda t: t.value, reverse=True)
-    return supported_tls_versions
+    return supported_tls_versions, ems_evaluation
