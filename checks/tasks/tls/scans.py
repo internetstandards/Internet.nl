@@ -386,7 +386,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
     trusted_score = trusted_score_good if cert_deployment.verified_certificate_chain else trusted_score_bad
     pubkey_score, pubkey_bad, pubkey_phase_out = check_pubkey(cert_deployment.received_certificate_chain, mode)
 
-    # NCSC guideline B3-2
+    # NCSC 3.3.2 / 3.3.5
     sigalg_bad = {}
     sigalg_score = scoring.WEB_TLS_SIGNATURE_GOOD
     for cert in cert_deployment.received_certificate_chain:
@@ -971,7 +971,6 @@ def test_cipher_order(
     by each good, and then expects the server to choose the good cipher.
     That assures us that the server prefers each good cipher over any lower cipher.
     This is tested at all levels that the server supported.
-    NCSC B2-5.
     """
     cipher_order_violation = []
     if (

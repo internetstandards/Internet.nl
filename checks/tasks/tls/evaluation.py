@@ -111,7 +111,7 @@ class TLSForwardSecrecyParameterEvaluation:
         phase_out = set()
         bad = set()
 
-        # Evaluate according to NCSC table 4 and table 10
+        # Evaluate according to NCSC 3.3.2.1 table 3 and 3.3.3.1 table 7
         for suite in _unique_unhashable(ciphers_accepted):
             key = suite.ephemeral_key
             if not key:
@@ -124,7 +124,6 @@ class TLSForwardSecrecyParameterEvaluation:
                     bad.add(f"ECDH-{key.curve_name}")
 
             if isinstance(key, DhEphemeralKeyInfo):
-                # NCSC 3.3.3.1
                 if key.generator == FFDHE_GENERATOR:
                     if key.prime in FFDHE_PHASE_OUT_PRIMES:
                         phase_out.add(f"DH-{key.size}")
@@ -340,7 +339,6 @@ class TLSCipherOrderEvaluation:
     If a violation is found, the violation attribute is a two
     item list with first the cipher preferred by the server,
     second the cipher we expected to be preferred above that.
-    NCSC B2-5
     """
 
     violation: List[str]
