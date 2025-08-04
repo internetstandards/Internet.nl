@@ -1096,6 +1096,11 @@ class WebTlsCipherOrder(Subtest):
         self.verdict = "detail web tls cipher-order verdict na"
         self.tech_data = ""
 
+    def result_sufficient_above_good(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls cipher-order verdict sufficient-above-good"
+        self.tech_data = ""
+
 
 class WebTlsVersion(Subtest):
     def __init__(self):
@@ -1693,6 +1698,11 @@ class MailTlsCipherOrder(Subtest):
         self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls cipher-order verdict na"
+        self.tech_data = ""
+
+    def result_sufficient_above_good(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls cipher-order verdict sufficient-above-good"
         self.tech_data = ""
 
 
