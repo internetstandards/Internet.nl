@@ -1,5 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import itertools
 import time
 from timeit import default_timer as timer
 
@@ -483,10 +484,11 @@ def build_report(dttls, category):
                     pass
                 else:
                     cert_pubkey_all = annotate_and_combine(dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    cert_pubkey_format = list(itertools.chain(*zip(cert_pubkey_all[0], cert_pubkey_all[1])))
                     if len(dttls.cert_pubkey_bad) > 0:
-                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_format)
                     elif len(dttls.cert_pubkey_phase_out) > 0:
-                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_format)
                     else:
                         category.subtests["cert_pubkey"].result_good()
 
@@ -643,10 +645,11 @@ def build_report(dttls, category):
                     pass
                 else:
                     cert_pubkey_all = annotate_and_combine(dttls.cert_pubkey_bad, dttls.cert_pubkey_phase_out)
+                    cert_pubkey_format = list(itertools.chain(*zip(cert_pubkey_all[0], cert_pubkey_all[1])))
                     if len(dttls.cert_pubkey_bad) > 0:
-                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_bad(cert_pubkey_format)
                     elif len(dttls.cert_pubkey_phase_out) > 0:
-                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_all)
+                        category.subtests["cert_pubkey"].result_phase_out(cert_pubkey_format)
                     else:
                         category.subtests["cert_pubkey"].result_good()
 
