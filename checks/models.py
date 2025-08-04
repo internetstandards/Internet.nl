@@ -120,6 +120,7 @@ class CipherOrderStatus(Enum):
     not_prescribed = 2
     not_seclevel = 3
     na = 4  # Don't care about order; only GOOD ciphers.
+    sufficient_above_good = 5
 
 
 class TLSExtendedMasterSecretStatus(Enum):
