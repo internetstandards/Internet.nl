@@ -550,6 +550,12 @@ class DomainTestTls(BaseTestModel):
     kex_hash_func = EnumField(KexHashFuncStatus, default=KexHashFuncStatus.bad)
     kex_hash_func_score = models.IntegerField(null=True)
 
+    key_exchange_rsa_pkcs = EnumField(KexRSAPKCSStatus, default=KexRSAPKCSStatus.unknown)
+    key_exchange_rsa_pkcs_score = models.IntegerField(null=True)
+
+    extended_master_secret = EnumField(TLSExtendedMasterSecretStatus, default=TLSExtendedMasterSecretStatus.unknown)
+    extended_master_secret_score = models.IntegerField(null=True)
+
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
 
@@ -628,6 +634,10 @@ class DomainTestTls(BaseTestModel):
             "ocsp_stapling_score",
             "kex_hash_func",
             "kex_hash_func_score",
+            "key_exchange_rsa_pkcs",
+            "key_exchange_rsa_pkcs_score",
+            "extended_master_secret",
+            "extended_master_secret_score",
             "forced_https",
             "forced_https_score",
             "http_compression_enabled",
@@ -673,6 +683,8 @@ class DomainTestTls(BaseTestModel):
             "zero_rtt": self.zero_rtt.name,
             "ocsp_stapling": self.ocsp_stapling.name,
             "kex_hash_func": self.kex_hash_func.name,
+            "key_exchange_rsa_pkcs": self.key_exchange_rsa_pkcs.name,
+            "extended_master_secret": self.extended_master_secret.name,
             "https_redirect": self.forced_https.name,
             "http_compression": self.http_compression_enabled,
             "hsts": self.hsts_enabled,
@@ -708,6 +720,8 @@ class DomainTestTls(BaseTestModel):
             "client_reneg": self.client_reneg,
             "zero_rtt": self.zero_rtt.name,
             "kex_hash_func": self.kex_hash_func.name,
+            "key_exchange_rsa_pkcs": self.key_exchange_rsa_pkcs.name,
+            "extended_master_secret": self.extended_master_secret.name,
             "cert_chain": self.cert_chain,
             "cert_trusted": self.cert_trusted,
             "cert_pubkey_bad": self.cert_pubkey_bad,

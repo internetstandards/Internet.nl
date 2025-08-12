@@ -24,7 +24,7 @@ from checks.models import (
     TLSClientInitiatedRenegotiationStatus,
     TLSExtendedMasterSecretStatus,
 )
-from checks.scoring import WEB_TLS_EXTENDED_MASTER_SECRET_GOOD, WEB_TLS_EXTENDED_MASTER_SECRET_BAD
+from checks.scoring import TLS_EXTENDED_MASTER_SECRET_GOOD, TLS_EXTENDED_MASTER_SECRET_BAD
 from checks.tasks.tls.tls_constants import (
     PROTOCOLS_GOOD,
     PROTOCOLS_SUFFICIENT,
@@ -353,7 +353,7 @@ class TLSExtendedMasterSecretEvaluation:
     """
 
     status: TLSExtendedMasterSecretStatus = TLSExtendedMasterSecretStatus.na_no_tls_1_2
-    score: scoring.Score = WEB_TLS_EXTENDED_MASTER_SECRET_GOOD
+    score: scoring.Score = TLS_EXTENDED_MASTER_SECRET_GOOD
 
     def update_for_connection(self, ssl_connection: SslConnection, tls_version: TlsVersionEnum) -> None:
         if tls_version != TlsVersionEnum.TLS_1_2:
@@ -362,10 +362,10 @@ class TLSExtendedMasterSecretEvaluation:
         ems_support = ssl_connection.ssl_client.get_extended_master_secret_support()
         if ems_support == ExtendedMasterSecretSupportEnum.USED_IN_CURRENT_SESSION:
             self.status = TLSExtendedMasterSecretStatus.supported
-            self.score = WEB_TLS_EXTENDED_MASTER_SECRET_GOOD
+            self.score = TLS_EXTENDED_MASTER_SECRET_GOOD
         elif ems_support == ExtendedMasterSecretSupportEnum.NOT_USED_IN_CURRENT_SESSION:
             self.status = TLSExtendedMasterSecretStatus.not_supported
-            self.score = WEB_TLS_EXTENDED_MASTER_SECRET_BAD
+            self.score = TLS_EXTENDED_MASTER_SECRET_BAD
 
 
 def _unique_unhashable(items: List[Any]) -> List[Any]:

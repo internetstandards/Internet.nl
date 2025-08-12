@@ -3,7 +3,7 @@
 from typing import Optional
 
 from checks import scoring
-from checks.models import TLSClientInitiatedRenegotiationStatus
+from checks.models import TLSClientInitiatedRenegotiationStatus, KexRSAPKCSStatus, TLSExtendedMasterSecretStatus
 from checks.scoring import (
     ORDERED_STATUSES,
     STATUS_ERROR,
@@ -185,6 +185,8 @@ class WebTls(Category):
             WebTlsZeroRTT,
             WebTlsOCSPStapling,
             WebTlsKexHashFunc,
+            WebTlsKexRSAPKCSStatus,
+            WebTLSExtendedMasterSecret,
             # WebTlsDaneRollover,
         ]
         super().__init__(name, subtests)
@@ -257,6 +259,8 @@ class MailTls(Category):
             MailTlsDaneRollover,
             MailTlsZeroRTT,
             MailTlsKexHashFunc,
+            MailTlsKexRSAPKCSStatus,
+            MailTLSExtendedMasterSecret,
             # MailTlsOCSPStapling,  # Disabled for mail.
         ]
         super().__init__(name, subtests)
@@ -1525,6 +1529,84 @@ class WebTlsKexHashFunc(Subtest):
         self.tech_data = "detail tech data phase-out"
 
 
+class WebTlsKexRSAPKCSStatus(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="key_exchange_rsa_pkcs",
+            label="detail web tls key-exchange-rsa-pkcs label",
+            explanation="detail web tls key-exchange-rsa-pkcs exp",
+            tech_string="detail web tls key-exchange-rsa-pkcs tech table",
+            worst_status=scoring.TLS_KEX_RSA_PKCS_WORST_STATUS,
+            full_score=scoring.TLS_KEX_RSA_PKCS_GOOD,
+            model_score_field="key_exchange_rsa_pkcs_score",
+        )
+
+    def save_result(self, status: KexRSAPKCSStatus):
+        handlers = {
+            KexRSAPKCSStatus.good: self.result_good,
+            KexRSAPKCSStatus.bad: self.result_bad,
+            KexRSAPKCSStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls key-exchange-rsa-pkcs verdict good"
+        self.tech_data = "detail tech data good"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls key-exchange-rsa-pkcs verdict bad"
+        self.tech_data = "detail tech data insufficient"
+
+    def result_unknown(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls key-exchange-rsa-pkcs verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+
+class WebTLSExtendedMasterSecret(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="extended_master_secret",
+            label="detail web tls extended-master-secret label",
+            explanation="detail web tls extended-master-secret exp",
+            tech_string="detail web tls extended-master-secret tech table",
+            worst_status=scoring.TLS_EXTENDED_MASTER_SECRET_WORST_STATUS,
+            full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
+            model_score_field="extended_master_secret_score",
+        )
+
+    def save_result(self, status: TLSExtendedMasterSecretStatus):
+        handlers = {
+            TLSExtendedMasterSecretStatus.supported: self.result_good,
+            TLSExtendedMasterSecretStatus.na_no_tls_1_2: self.result_na_no_tls_1_2,
+            TLSExtendedMasterSecretStatus.not_supported: self.result_bad,
+            TLSExtendedMasterSecretStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls extended-master-secret verdict good"
+        self.tech_data = "detail tech data good"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls extended-master-secret verdict bad"
+        self.tech_data = "detail tech data insufficient"
+
+    def result_unknown(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls extended-master-secret verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+    def result_na_no_tls_1_2(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls extended-master-secret verdict na-no-tls-1-2"
+        self.tech_data = "detail tech data phase-out"
+
+
 class MailTlsStarttlsExists(Subtest):
     def __init__(self):
         super().__init__(
@@ -2112,6 +2194,84 @@ class MailTlsKexHashFunc(Subtest):
     def result_phase_out(self):
         self._status(STATUS_NOTICE)
         self.verdict = "detail web tls kex-hash-func verdict phase-out"
+        self.tech_data = "detail tech data phase-out"
+
+
+class MailTlsKexRSAPKCSStatus(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="key_exchange_rsa_pkcs",
+            label="detail mail tls key-exchange-rsa-pkcs label",
+            explanation="detail mail tls key-exchange-rsa-pkcs exp",
+            tech_string="detail mail tls key-exchange-rsa-pkcs tech table",
+            worst_status=scoring.TLS_KEX_RSA_PKCS_WORST_STATUS,
+            full_score=scoring.TLS_KEX_RSA_PKCS_GOOD,
+            model_score_field="key_exchange_rsa_pkcs_score",
+        )
+
+    def save_result(self, status: KexRSAPKCSStatus):
+        handlers = {
+            KexRSAPKCSStatus.good: self.result_good,
+            KexRSAPKCSStatus.bad: self.result_bad,
+            KexRSAPKCSStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls key-exchange-rsa-pkcs verdict good"
+        self.tech_data = "detail tech data good"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls key-exchange-rsa-pkcs verdict bad"
+        self.tech_data = "detail tech data insufficient"
+
+    def result_unknown(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls key-exchange-rsa-pkcs verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+
+class MailTLSExtendedMasterSecret(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="extended_master_secret",
+            label="detail mail tls extended-master-secret label",
+            explanation="detail mail tls extended-master-secret exp",
+            tech_string="detail mail tls extended-master-secret tech table",
+            worst_status=scoring.TLS_EXTENDED_MASTER_SECRET_WORST_STATUS,
+            full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
+            model_score_field="extended_master_secret_score",
+        )
+
+    def save_result(self, status: TLSExtendedMasterSecretStatus):
+        handlers = {
+            TLSExtendedMasterSecretStatus.supported: self.result_good,
+            TLSExtendedMasterSecretStatus.na_no_tls_1_2: self.result_na_no_tls_1_2,
+            TLSExtendedMasterSecretStatus.not_supported: self.result_bad,
+            TLSExtendedMasterSecretStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_good(self):
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls extended-master-secret verdict good"
+        self.tech_data = "detail tech data good"
+
+    def result_bad(self):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls extended-master-secret verdict bad"
+        self.tech_data = "detail tech data insufficient"
+
+    def result_unknown(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls extended-master-secret verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+    def result_na_no_tls_1_2(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data phase-out"
 
 
