@@ -885,12 +885,12 @@ def test_key_exchange_rsa_pkcs(
         log.info(f"RSA-PKCS key exchange check: negotiated bad sigalg ({rsa_pkcs_result})")
         return KeyExchangeRSAPKCSFunctionEvaluation(
             status=KexRSAPKCSStatus.bad,
-            score=scoring.WEB_TLS_KEX_RSA_PKCS_BAD,
+            score=scoring.TLS_KEX_RSA_PKCS_BAD,
         )
 
     return KeyExchangeRSAPKCSFunctionEvaluation(
         status=KexRSAPKCSStatus.good,
-        score=scoring.WEB_TLS_KEX_RSA_PKCS_GOOD,
+        score=scoring.TLS_KEX_RSA_PKCS_GOOD,
     )
 
 
