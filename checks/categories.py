@@ -1598,7 +1598,7 @@ class WebTLSExtendedMasterSecret(Subtest):
 
     def result_unknown(self):
         self._status(STATUS_INFO)
-        self.verdict = "detail web tls extended-master-secret verdict other"
+        self.verdict = "detail web tls extended-master-secret verdict unknown"
         self.tech_data = "detail tech data not-applicable"
 
     def result_na_no_tls_1_2(self):
@@ -2188,7 +2188,7 @@ class MailTlsKexHashFunc(Subtest):
     def result_unknown(self):
         self.was_tested()
         self._status(STATUS_INFO)
-        self.verdict = "detail mail tls kex-hash-func verdict other"
+        self.verdict = "detail mail tls kex-hash-func verdict unknown"
         self.tech_data = "detail tech data not-applicable"
 
     def result_phase_out(self):
@@ -2229,7 +2229,7 @@ class MailTlsKexRSAPKCSStatus(Subtest):
 
     def result_unknown(self):
         self._status(STATUS_INFO)
-        self.verdict = "detail mail tls key-exchange-rsa-pkcs verdict other"
+        self.verdict = "detail mail tls key-exchange-rsa-pkcs verdict unknown"
         self.tech_data = "detail tech data not-applicable"
 
 
@@ -2266,7 +2266,7 @@ class MailTLSExtendedMasterSecret(Subtest):
 
     def result_unknown(self):
         self._status(STATUS_INFO)
-        self.verdict = "detail mail tls extended-master-secret verdict other"
+        self.verdict = "detail mail tls extended-master-secret verdict unknown"
         self.tech_data = "detail tech data not-applicable"
 
     def result_na_no_tls_1_2(self):
