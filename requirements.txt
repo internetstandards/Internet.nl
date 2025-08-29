@@ -82,7 +82,7 @@ django-statsd-mozilla==0.4.0
     # via -r requirements.in
 dnspython==2.7.0
     # via eventlet
-eventlet==0.38.2
+eventlet==0.40.3
     # via -r requirements.in
 exceptiongroup==1.3.0
     # via pytest
