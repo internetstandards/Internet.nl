@@ -4,9 +4,32 @@
 
 _Compared to the latest 1.10 release._
 
-### Feature changes
 
-- ...
+### TLS updates for NCSC 2025 guidelines
+
+All tests were updated to match the
+[2025-05 version of the NCSC TLS guidelines](https://www.ncsc.nl/documenten/publicaties/2025/juni/01/ict-beveiligingsrichtlijnen-voor-transport-layer-security-2025-05).
+Most significant changes:
+
+- The requirements on TLS versions, TLS authentication, curves, hashes, key exchange algorithms, FFDHE groups, 
+  RSA key lengths, and bulk encryption algorithms were updated to match the new guidelines.
+- A test for RSA PKCS#1 v1.5 was added (only PSS padding is sufficient).
+- A test for Extended Master Secret (RFC7627) was added.
+- Client-initiated renegotiation is now acceptable, if limited to less than 10.
+- All checks on certificates apply only to the TODO TODO certificates.
+
+### Other TLS updates
+
+- Certificates that do not have OCSP enabled, which means stapling is not possible,
+  [are now detected as such](https://github.com/internetstandards/Internet.nl/issues/1641).
+  Several issues with OCSP stapling reliability were also resolved.
+- Issues were fixed where the cipher order failed to detect some bad scenarios,
+  including some where servers preferred RSA over ECDHE, or CBC over POLY1305. 
+- CCM_8 ciphers are now detected when enabled on a server.
+- OLD ciphers are no longer detected.
+- The cipher order test no longer separates between "the server cipher order preference is wrong" 
+  and "the server has no preference".
+  
 
 ### Significant internal changes
 
@@ -18,7 +41,18 @@ _Compared to the latest 1.10 release._
 
 ### API changes
 
-- ...
+This release has API version 2.7.0.
+
+The changes noted above are reflected in the API as well, e.g. which ciphers
+are considered bad, which are listed in the API output, along with score impacts.
+Additionally, the API structure changes are:
+- OCSP stapling has a new status `not_in_cert`, for when a certificate does not have OCSP enabled,
+  therefore stapling is neither required nor possible.
+- The cipher order status no longer returns `not_prescribed` or `not_seclevel` for new tests.
+  The insufficient statuses are now `bad` for preferring phase out over good and/or sufficient;
+  and `sufficient_above_good` for preferring sufficient over good.
+- `extended_master_secret_status` and `kex_rsa_pkcs` were added to the TLS details.
+- `client_reneg` in the TLS details was changed from a boolean to a new enum.
 
 
 ## 1.10.6
