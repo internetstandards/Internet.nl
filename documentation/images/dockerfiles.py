@@ -56,7 +56,7 @@ with Diagram(NAME, show=False, direction="LR", outformat=["png"], graph_attr=gra
             Packages("certbot"),
             File("webserver/authentication.sh,webserver/tls_init.sh"),
             File("webserver/nginx_templates"),
-            File("robots.txt,.well-known/security.txt,favicon.ico"),
+            File("robots.txt,.well-known/security.txt,favicon.svg"),
             File("certbot/entrypoint.sh"),
         ] >> Image("ghcr.io/internetstandards/webserver")
 

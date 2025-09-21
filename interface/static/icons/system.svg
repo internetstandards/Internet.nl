@@ -1,0 +1,11 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Filled semicircle on the left side -->
+    <path
+        d="M10.0014 3.33301C6.32044 3.33301 3.33643 6.31703 3.33643 9.99801C3.33643 13.679 6.32044 16.663 10.0014 16.663V3.33301Z"
+        fill="#34545F" />
+    
+    <!-- Original circle outline -->
+    <path
+        d="M10.0014 16.663C13.6824 16.663 16.6664 13.679 16.6664 9.99801C16.6664 6.31703 13.6824 3.33301 10.0014 3.33301C6.32044 3.33301 3.33643 6.31703 3.33643 9.99801C3.33643 13.679 6.32044 16.663 10.0014 16.663Z"
+        stroke="#34545F" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

@@ -1,142 +1,265 @@
 {% extends "base.html" %}
+{% load static %}
 {% load translate %}
-
-{% block introcontent %}
-      <div class="introwrap">
-        <section class="wrap">
-          <h1 class="hidethis">
-            {% include "string.html" with name='base home' %}
-          </h1>
-          <p>
-            <span>{% include "string.html" with name='home teaser' %}</span>
-          </p>
-        </section>
-      </div>
-      <div class="wrap">
-        <section class="block websitetest">
-          <div class="wrapper">
-            <div class="title-and-explanation">
-              <h2>{% include "string.html" with name="base test website label" %}</h2>
-              {% include "content.html" with name="base test website text" %}
-              <p class="read-more">
-                <a href="/test-site/">{% include "string.html" with name="base test explain" %}</a>
-              </p>
-            </div>
-            <form action="/site/" method="POST">
-              <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-              <input id="web-url" type="text" inputmode="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-              </label>
-              <div class="contains-button">
-                <button>{% include "string.html" with name="base test start" %}</button>
-              </div>
-            </form>
-          </div>
-        </section>
-        <section class="block emailtest">
-          <div class="wrapper">
-            <div class="title-and-explanation">
-              <h2>{% include "string.html" with name="base test mail label" %}</h2>
-              {% include "content.html" with name="base test mail text" %}
-              <p class="read-more">
-                <a href="/test-mail/">{% include "string.html" with name="base test explain" %}</a>
-              </p>
-            </div>
-            <form action="/mail/" method="POST">
-              <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
-                <span class="emailfield before">
-                <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-                </span>
-              </label>
-              <div class="contains-button">
-                <button>{% include "string.html" with name="base test start" %}</button>
-              </div>
-            </form>
-          </div>
-        </section>
-        <section class="block connectiontest">
-          <div class="wrapper">
-            <div class="title-and-explanation">
-              <h2>{% include "string.html" with name="base test connection label" %}</h2>
-              {% include "content.html" with name="base test connection text" %}
-              <p class="read-more">
-                <a href="/test-connection/">{% include "string.html" with name="base test explain" %}</a>
-              </p>
-            </div>
-            <form action="/connection/" method="POST" id="form-connection-test">
-              <div class="contains-button">
-                <button>{% include "string.html" with name="base test start" %}</button>
-              </div>
-            </form>
-          </div>
-        </section>
-      </div>
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
 {% endblock %}
-
+{% block introcontent %}
+  <section class="test-section home-variant bg-primary ellipse">
+    <div class="container">
+      <h1 class="h1 color-secondary">{% include "string.html" with name="test_website_protect_intro_newstring" %}</h1>
+      <article class="test-card-large home-variant">
+        <h2 class="domain icon">{% include "string.html" with name="test_website_domain_title_newstring" %}</h2>
+        <form action="/site/" method="POST">
+          <label>
+            <span>{% include "string.html" with name="test_website_domain_label_newstring" %}</span>
+            <input name="url"
+                   type="text"
+                   placeholder="www.example.nl"
+                   inputmode="url"
+                   autocomplete="url"
+                   required>
+          </label>
+          <button class="primary-button icon" type="submit">
+            {% include "string.html" with name="test_start_button_newstring" %}
+          </button>
+        </form>
+        <a class="icon" href="/test-site">{% include "string.html" with name="test_more_info_link_newstring" %}</a>
+      </article>
+      <ul class="test-card-list home-variant">
+        <li class="test-card-small">
+          <a href="/test-mail">
+            <div class="card-container mail icon">
+              <hgroup>
+                <h2>{% include "string.html" with name="test_email_title_newstring" %}</h2>
+                <p>{% include "string.html" with name="test_email_paragraph_alt_newstring" %}</p>
+              </hgroup>
+            </div>
+            <div class="primary-button rounded icon"></div>
+          </a>
+        </li>
+        <li class="test-card-small">
+          <a href="/test-connection">
+            <div class="card-container connection icon">
+              <hgroup>
+                <h2>{% include "string.html" with name="test_connection_title_newstring" %}</h2>
+                <p>{% include "string.html" with name="test_connection_paragraph_alt_newstring" %}</p>
+              </hgroup>
+            </div>
+            <div class="primary-button rounded icon"></div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+{% endblock %}
 {% block maincontent %}
-      <section class="block news">
-        <h2>{% include "string.html" with name="base news" %}</h2>
-        <ul>
-        {% for article in articles %}
-          {% expand "article {{article}} title" as articletitle %}
-          {% expand "article {{article}} date" as articledate %}
-          {% expand "article {{article}} lead" as articlelead %}
-          <li><a href="/article/{{article}}">{% include "string.html" with name=articletitle %}</a></li>
-        {% endfor %}
-        </ul>
-        <p class="read-more"><a href="/articles/">{% include "string.html" with name="base newslink" %}</a></p>
-      </section>
-      <section class="block hall-of-fame">
-        <h2>{% include "string.html" with name="base halloffame" %}</h2>
-        <p>
-          {% include "string.html" with name="base halloffame lead" %}
+  <section class="knowledge-section">
+    <div class="container">
+      <hgroup>
+        <h2 class="h3 color-secondary">{% include "string.html" with name="about_why_test_title_newstring" %}</h2>
+        <p class="body-l">{% include "string.html" with name="about_why_test_description_newstring" %}</p>
+      </hgroup>
+      <ul class="knowledge-list" id="card-carousel">
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_1_description_newstring" %}</p>
+        </li>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_2_description_newstring" %}</p>
+        </li>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
+          <p>{% include "string.html" with name="about_reason_3_description_newstring" %}</p>
+        </li>
+      </ul>
+      <ul class="dots"
+          aria-label="Scrollbare carousel navigatie"
+          aria-controls="card-carousel">
+        <li class="dot active">
+          <button type="button"></button>
+        </li>
+        <li class="dot">
+          <button type="button"></button>
+        </li>
+        <li class="dot">
+          <button type="button"></button>
+        </li>
+      </ul>
+      <div class="button-container">
+        <a class="secondary-button icon" href="/test-site">
+          {% include "string.html" with name="about_test_button_newstring" %}
+        </a>
+        <p class="body-m">
+          487
+          {% include "string.html" with name="about_successful_tests_newstring" %}
         </p>
-        <ol>
-        {% for member in halloffame %}
-          <li><a href="{{member.permalink}}">{{member.domain|idna}}</a></li>
+      </div>
+    </div>
+  </section>
+  <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
+    <div class="container">
+      <hgroup class="center">
+        <h2 class="h5 color-accent">{% include "string.html" with name="halloffame_intro_title_newstring" %}</h2>
+        <p class="h4">{% include "string.html" with name="halloffame_intro_description_home_newstring" %}</p>
+      </hgroup>
+      <ul class="hall-of-fame-list">
+        <!-- {% for member in halloffame %}
+          <li>
+            <a href="{{member.permalink}}">{{member.domain|idna}}</a>
+          </li>
+        {% endfor %} -->
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+        <li>
+          <a href="/">Vimexx</a>
+        </li>
+      </ul>
+      <div class="button-container">
+        <a class="primary-button icon" href="/test-site">
+          {% include "string.html" with name="halloffame_first_button_home_newstring" %}
+        </a>
+        <a class="secondary-button icon" href="/halloffame">
+          {% include "string.html" with name="halloffame_second_button_home_newstring" %}
+        </a>
+      </div>
+    </div>
+  </section>
+  <section class="about-section">
+    <div class="container">
+      <h2 class="h5 color-accent">{% include "string.html" with name="about_mission_title_newstring" %}</h2>
+      <p class="h4">{% include "string.html" with name="about_mission_heading_newstring" %}</p>
+      <p class="body-xl">{% include "string.html" with name="about_mission_description_newstring" %}</p>
+      <ul class="logo-list">
+        <li>
+          <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
+            <img class="light-visible"
+                 src="/static/images/surf.png"
+                 alt="Surf logo"
+                 loading="lazy"
+                 width="100"
+                 height="52">
+            <img class="dark-visible"
+                 src="/static/images/surf-wit.png"
+                 alt="Surf logo"
+                 loading="lazy"
+                 width="100"
+                 height="52">
+          </a>
+        </li>
+        <li>
+          <a href="https://ncsc.nl" target="_blank" aria-label="NCSC website">
+            <img class="light-visible"
+                 src="/static/images/ncsc.png"
+                 alt="NCSC logo"
+                 loading="lazy"
+                 width="224"
+                 height="90">
+            <img class="dark-visible"
+                 src="/static/images/ncsc-wit.png"
+                 alt="NCSC logo"
+                 loading="lazy"
+                 width="224"
+                 height="90">
+          </a>
+        </li>
+        <li>
+          <a href="https://nlnet.nl/" target="_blank" aria-label="NLnet website">
+            <img class="light-visible"
+                 src="/static/images/nlnet.png"
+                 alt="NLnet logo"
+                 loading="lazy"
+                 width="146"
+                 height="55">
+            <img class="dark-visible"
+                 src="/static/images/nlnet-wit.png"
+                 alt="NLnet logo"
+                 loading="lazy"
+                 width="146"
+                 height="55">
+          </a>
+        </li>
+        <li>
+          <a href="https://ripe.net/"
+             target="_blank"
+             aria-label="Ripe NCC website">
+            <img class="light-visible"
+                 src="/static/images/ncc.png"
+                 alt="Ripe NCC logo"
+                 loading="lazy"
+                 width="180"
+                 height="32">
+            <img class="dark-visible"
+                 src="/static/images/ncc-wit.png"
+                 alt="Ripe NCC logo"
+                 loading="lazy"
+                 width="180"
+                 height="32">
+          </a>
+        </li>
+        <li>
+          <a href="https://verenigingvanregistrars.nl/"
+             target="_blank"
+             aria-label="VVR website">
+            <img class="light-visible"
+                 src="/static/images/vvr.png"
+                 alt="VVR logo"
+                 loading="lazy"
+                 width="200"
+                 height="46">
+            <img class="dark-visible"
+                 src="/static/images/vvr-wit.png"
+                 alt="VVR logo"
+                 loading="lazy"
+                 width="200"
+                 height="46">
+          </a>
+        </li>
+      </ul>
+      <a class="about-link secondary-button icon" href="/about">
+        {% include "string.html" with name="about_section_intro_newstring" %}
+      </a>
+    </div>
+  </section>
+  <section class="card-section">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="articles_latest_news_title_home_newstring" %}</h2>
+      <ul class="card-list">
+        {% for article in articles|slice:":3" %}
+          {% expand "article {{ article }} title" as articletitle %}
+          {% expand "article {{ article }} date" as articledate %}
+          {% expand "article {{ article }} lead" as articlelead %}
+          <li class="card news-card ellipse">
+            <a href="/article/{{ article }}">
+              <hgroup class="flipped">
+                <h3>{% include "string.html" with name=articletitle %}</h3>
+                <p class="card-date">{% include "string.html" with name=articledate %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
         {% endfor %}
-        </ol>
-        <p class="read-more"><a href="/halloffame/">{% include "string.html" with name="base halloffame link" %}</a></p>
-      </section>
-      <section class="block dark stats">
-        <h2>{% include "string.html" with name="home stats header" %}</h2>
-        <h3>{{statswebsite}} {% include "string.html" with name="home stats website" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statswebsitegood}} {% include "string.html" with name="home stats website-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statswebsitebad}} {% include "string.html" with name="home stats website-items" %}</span>
-          </li>
-        </ol>
-        <h3>{{statsmail}} {% include "string.html" with name="home stats mail" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statsmailgood}} {% include "string.html" with name="home stats mail-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statsmailbad}} {% include "string.html" with name="home stats mail-items" %}</span>
-          </li>
-        </ol>
-        <h3>{{statsconnection}} {% include "string.html" with name="home stats connection" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statsconnectiongood}} {% include "string.html" with name="home stats connection-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statsconnectionbad}} {% include "string.html" with name="home stats connection-items" %}</span>
-          </li>
-        </ol>
-      </section>
+      </ul>
+      <a class="secondary-button icon" href="/articles">
+        {% include "string.html" with name="article_read_more_button_newstring" %}
+      </a>
+    </div>
+  </section>
 {% endblock %}
