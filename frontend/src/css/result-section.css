@@ -42,9 +42,16 @@
     gap: 1rem;
   }
 
+  .main-item {
+    &::before {
+      min-width: 1.75rem;
+      min-height: 1.75rem;
+    }
+  }
+
   li:not(.meter-number) {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
     align-items: center;
 
     a {
@@ -58,10 +65,7 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 1.25rem;
-      height: 1.25rem;
-      min-height: 1.25rem;
-      min-width: 1.25rem;
+
     }
 
     &.probing:has(:not(.done))::before {
@@ -73,21 +77,18 @@
     }
 
     &.probing:has(.done)::before {
-      background-image: url("/static/icons/checkmark-circle.svg");
-      width: 1.5rem;
-      height: 1.5rem;
-      min-height: 1.5rem;
-      min-width: 1.5rem;
+      mask-image: url("/static/icons/circle-done.svg");
+      background-color: var(--probing-color);
+      width: 1.75rem;
+      height: 1.75rem
+
     }
 
     &:not(.probing)::before {
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-      width: 1.5rem;
-      height: 1.5rem;
-      min-height: 1.5rem;
-      min-width: 1.5rem;
+
       display: block;
     }
 
@@ -372,11 +373,12 @@ body.connectiontest .action-card-item:has(.connection) {
 .meter-value {
   position: absolute;
   translate: -50% -120%;
-  color: var(--white-100);
-  background-image: url("/static/icons/box.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  color: light-dark(var(--white-100), var(--black-100));
+  background-color: var(--meter-bg-color);
+  mask-image: url("/static/icons/box.svg");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
   padding: 0.375rem 0.375rem 0.625rem;
   display: flex;
   font: var(--heading-font-xxs);
@@ -588,14 +590,24 @@ meter::-moz-meter-bar {
         }
       }
 
+      p {
+        margin-bottom: 1rem;
+      }
+
+      ul {
+        list-style: initial;
+      }
+
       ul,
       ol {
-        list-style: initial;
-        list-style-position: inside;
-
         li {
-          margin-block: 0.5rem;
+          margin-block: 1rem;
+          margin-left: 1.5rem;
         }
+      }
+
+      hr {
+        margin-bottom: 0.5rem;
       }
 
       tbody {

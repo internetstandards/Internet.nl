@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load translate %}
-
 {% block scripting %}
   <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
 {% endblock %}
-
 {% block introcontent %}
   <section class="test-section home-variant bg-primary ellipse">
     <div class="container">
@@ -15,9 +13,16 @@
         <form action="/site/" method="POST">
           <label>
             <span>{% include "string.html" with name="test_website_domain_label_newstring" %}</span>
-            <input name="url" type="text" placeholder="www.example.nl" inputmode="url" autocomplete="url" required>
+            <input name="url"
+                   type="text"
+                   placeholder="www.example.nl"
+                   inputmode="url"
+                   autocomplete="url"
+                   required>
           </label>
-          <button class="primary-button icon" type="submit">{% include "string.html" with name="test_start_button_newstring" %}</button>
+          <button class="primary-button icon" type="submit">
+            {% include "string.html" with name="test_start_button_newstring" %}
+          </button>
         </form>
         <a class="icon" href="/test-site">{% include "string.html" with name="test_more_info_link_newstring" %}</a>
       </article>
@@ -31,7 +36,7 @@
               </hgroup>
             </div>
             <div class="primary-button rounded icon"></div>
-            </a>
+          </a>
         </li>
         <li class="test-card-small">
           <a href="/test-connection">
@@ -48,7 +53,6 @@
     </div>
   </section>
 {% endblock %}
-
 {% block maincontent %}
   <section class="knowledge-section">
     <div class="container">
@@ -57,43 +61,48 @@
         <p class="body-l">{% include "string.html" with name="about_why_test_description_newstring" %}</p>
       </hgroup>
       <ul class="knowledge-list" id="card-carousel">
-        <li class="card home-variant knowledge-card ellipse">
-          <div class="card-container knowledge icon">
-            <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
-          </div>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
           <p>{% include "string.html" with name="about_reason_1_description_newstring" %}</p>
         </li>
-        <li class="card home-variant knowledge-card ellipse">
-          <div class="card-container knowledge icon">
-            <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
-          </div>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
           <p>{% include "string.html" with name="about_reason_2_description_newstring" %}</p>
         </li>
-        <li class="card home-variant knowledge-card ellipse">
-          <div class="card-container knowledge icon">
-            <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
-          </div>
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
           <p>{% include "string.html" with name="about_reason_3_description_newstring" %}</p>
         </li>
       </ul>
-      <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
-        <li class="dot active"><button type="button"></button></li>
-        <li class="dot"><button type="button"></button></li>
-        <li class="dot"><button type="button"></button></li>
+      <ul class="dots"
+          aria-label="Scrollbare carousel navigatie"
+          aria-controls="card-carousel">
+        <li class="dot active">
+          <button type="button"></button>
+        </li>
+        <li class="dot">
+          <button type="button"></button>
+        </li>
+        <li class="dot">
+          <button type="button"></button>
+        </li>
       </ul>
       <div class="button-container">
-        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="about_test_button_newstring" %}</a>
-        <p class="body-m">487 {% include "string.html" with name="about_successful_tests_newstring" %}</p>
+        <a class="secondary-button icon" href="/test-site">
+          {% include "string.html" with name="about_test_button_newstring" %}
+        </a>
+        <p class="body-m">
+          487
+          {% include "string.html" with name="about_successful_tests_newstring" %}
+        </p>
       </div>
     </div>
   </section>
-
   <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
     <div class="container">
       <hgroup class="center">
         <h2 class="h5 color-accent">{% include "string.html" with name="halloffame_intro_title_newstring" %}</h2>
-        <p class="h4">{% include "string.html" with name="halloffame_intro_description_home_newstring" %}
-        </p>
+        <p class="h4">{% include "string.html" with name="halloffame_intro_description_home_newstring" %}</p>
       </hgroup>
       <ul class="hall-of-fame-list">
         <!-- {% for member in halloffame %}
@@ -124,12 +133,15 @@
         </li>
       </ul>
       <div class="button-container">
-        <a class="primary-button icon" href="/test-site">{% include "string.html" with name="halloffame_first_button_home_newstring" %}</a>
-        <a class="secondary-button icon" href="/halloffame">{% include "string.html" with name="halloffame_second_button_home_newstring" %}</a>
+        <a class="primary-button icon" href="/test-site">
+          {% include "string.html" with name="halloffame_first_button_home_newstring" %}
+        </a>
+        <a class="secondary-button icon" href="/halloffame">
+          {% include "string.html" with name="halloffame_second_button_home_newstring" %}
+        </a>
       </div>
     </div>
   </section>
-  
   <section class="about-section">
     <div class="container">
       <h2 class="h5 color-accent">{% include "string.html" with name="about_mission_title_newstring" %}</h2>
@@ -138,59 +150,116 @@
       <ul class="logo-list">
         <li>
           <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
-            <img class="light-visible" src="/static/images/surf.png" alt="Surf logo" loading="lazy" width="100" height="52">
-            <img class="dark-visible" src="/static/images/surf-wit.png" alt="Surf logo" loading="lazy" width="100" height="52">
+            <img class="light-visible"
+                 src="/static/images/surf.png"
+                 alt="Surf logo"
+                 loading="lazy"
+                 width="100"
+                 height="52">
+            <img class="dark-visible"
+                 src="/static/images/surf-wit.png"
+                 alt="Surf logo"
+                 loading="lazy"
+                 width="100"
+                 height="52">
           </a>
         </li>
         <li>
           <a href="https://ncsc.nl" target="_blank" aria-label="NCSC website">
-            <img class="light-visible" src="/static/images/ncsc.png" alt="NCSC logo" loading="lazy" width="224" height="90">
-            <img class="dark-visible" src="/static/images/ncsc-wit.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+            <img class="light-visible"
+                 src="/static/images/ncsc.png"
+                 alt="NCSC logo"
+                 loading="lazy"
+                 width="224"
+                 height="90">
+            <img class="dark-visible"
+                 src="/static/images/ncsc-wit.png"
+                 alt="NCSC logo"
+                 loading="lazy"
+                 width="224"
+                 height="90">
           </a>
         </li>
         <li>
           <a href="https://nlnet.nl/" target="_blank" aria-label="NLnet website">
-            <img class="light-visible" src="/static/images/nlnet.png" alt="NLnet logo" loading="lazy" width="146" height="55">
-            <img class="dark-visible" src="/static/images/nlnet-wit.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+            <img class="light-visible"
+                 src="/static/images/nlnet.png"
+                 alt="NLnet logo"
+                 loading="lazy"
+                 width="146"
+                 height="55">
+            <img class="dark-visible"
+                 src="/static/images/nlnet-wit.png"
+                 alt="NLnet logo"
+                 loading="lazy"
+                 width="146"
+                 height="55">
           </a>
         </li>
         <li>
-          <a href="https://ripe.net/" target="_blank" aria-label="Ripe NCC website">
-            <img class="light-visible" src="/static/images/ncc.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
-            <img class="dark-visible" src="/static/images/ncc-wit.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+          <a href="https://ripe.net/"
+             target="_blank"
+             aria-label="Ripe NCC website">
+            <img class="light-visible"
+                 src="/static/images/ncc.png"
+                 alt="Ripe NCC logo"
+                 loading="lazy"
+                 width="180"
+                 height="32">
+            <img class="dark-visible"
+                 src="/static/images/ncc-wit.png"
+                 alt="Ripe NCC logo"
+                 loading="lazy"
+                 width="180"
+                 height="32">
           </a>
         </li>
         <li>
-          <a href="https://verenigingvanregistrars.nl/" target="_blank" aria-label="VVR website">
-            <img class="light-visible" src="/static/images/vvr.png" alt="VVR logo" loading="lazy" width="200" height="46">
-            <img class="dark-visible" src="/static/images/vvr-wit.png" alt="VVR logo" loading="lazy" width="200" height="46">
+          <a href="https://verenigingvanregistrars.nl/"
+             target="_blank"
+             aria-label="VVR website">
+            <img class="light-visible"
+                 src="/static/images/vvr.png"
+                 alt="VVR logo"
+                 loading="lazy"
+                 width="200"
+                 height="46">
+            <img class="dark-visible"
+                 src="/static/images/vvr-wit.png"
+                 alt="VVR logo"
+                 loading="lazy"
+                 width="200"
+                 height="46">
           </a>
         </li>
       </ul>
-      <a class="about-link secondary-button icon" href="/about">{% include "string.html" with name="about_section_intro_newstring" %}</a>
+      <a class="about-link secondary-button icon" href="/about">
+        {% include "string.html" with name="about_section_intro_newstring" %}
+      </a>
     </div>
   </section>
-
   <section class="card-section">
     <div class="container">
       <h2 class="h3 color-secondary">{% include "string.html" with name="articles_latest_news_title_home_newstring" %}</h2>
       <ul class="card-list">
         {% for article in articles|slice:":3" %}
-          {% expand "article {{article}} title" as articletitle %}
-          {% expand "article {{article}} date" as articledate %}
-          {% expand "article {{article}} lead" as articlelead %}
-        <li class="card news-card ellipse">
-          <a href="/article/{{article}}">
-            <hgroup class="flipped">
-              <h3>{% include "string.html" with name=articletitle %}</h3>
-              <p class="card-date">{% include "string.html" with name=articledate %}</p>
-            </hgroup>
-            <div class="secondary-button rounded icon"></div>
-          </a>
-        </li>
+          {% expand "article {{ article }} title" as articletitle %}
+          {% expand "article {{ article }} date" as articledate %}
+          {% expand "article {{ article }} lead" as articlelead %}
+          <li class="card news-card ellipse">
+            <a href="/article/{{ article }}">
+              <hgroup class="flipped">
+                <h3>{% include "string.html" with name=articletitle %}</h3>
+                <p class="card-date">{% include "string.html" with name=articledate %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
         {% endfor %}
       </ul>
-      <a class="secondary-button icon" href="/articles">{% include "string.html" with name="article_read_more_button_newstring" %}</a>
+      <a class="secondary-button icon" href="/articles">
+        {% include "string.html" with name="article_read_more_button_newstring" %}
+      </a>
     </div>
   </section>
 {% endblock %}

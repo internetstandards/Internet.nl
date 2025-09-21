@@ -34,7 +34,6 @@ const chunks = {
   base: [
     "src/js/base/header.js",
     "src/js/base/theme.js",
-    "src/js/base/language-switch.js",
     "src/js/base/print.js",
     "src/js/lib/matomo.js",
   ],

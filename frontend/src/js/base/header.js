@@ -32,16 +32,20 @@ function header() {
   });
 
   /* TOGGLE DROPDOWN MENU */
-  const toggleSubMenu = document.getElementById("toggle-subnav");
-  const subMenu = document.querySelector(".nav-sublist");
+  const toggleSubMenus = document.querySelectorAll('[id^="toggle-subnav"]');
 
-  toggleSubMenu.addEventListener("click", () => {
-    subMenu.classList.toggle("expanded");
+  toggleSubMenus.forEach((toggleSubMenu, index) => {
+    const navItem = toggleSubMenu.closest(".nav-item");
+    const subMenu = navItem ? navItem.querySelector(".nav-sublist") : null;
 
-    toggleSubMenu.setAttribute(
-      "aria-expanded",
-      subMenu.classList.contains("expanded")
-    );
+    toggleSubMenu.addEventListener("click", () => {
+      subMenu.classList.toggle("expanded");
+
+      toggleSubMenu.setAttribute(
+        "aria-expanded",
+        subMenu.classList.contains("expanded")
+      );
+    });
   });
 
   /* STICKY HEADER */
@@ -77,15 +81,15 @@ function header() {
           } else if (Math.abs(delta) > buffer) {
             if (delta > 0) {
               // Scrolled down
-              header.classList.add('not-scrolling-up');
+              header.classList.add("not-scrolling-up");
             } else {
               // Scrolled up
-              header.classList.remove('not-scrolling-up');
+              header.classList.remove("not-scrolling-up");
             }
 
             lastScrollY = currentY;
           }
-          
+
           ticking = false;
         });
       }

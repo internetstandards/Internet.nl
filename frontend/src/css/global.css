@@ -133,6 +133,11 @@ video {
   padding-inline: 1rem;
 }
 
+.center {
+  display: flex;
+  justify-content: center;
+}
+
 .light-visible {
   display: var(--light-visible);
 }

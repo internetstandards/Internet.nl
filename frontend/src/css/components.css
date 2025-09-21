@@ -230,6 +230,14 @@
   }
 }
 
+[data-theme="dark"] {
+  color-scheme: dark;
+  
+  .card.large.knowledge-card {
+    border: var(--card-border);
+  }
+}
+
 .card {
   border-radius: 0.5rem;
 
@@ -262,7 +270,7 @@
 
   &.news-card {
     background-color: var(--card-bg-color-news);
-  
+
     a {
       color: var(--card-body-color-news);
     }
@@ -270,17 +278,29 @@
 
   &.knowledge-card {
     background-color: var(--card-bg-color-knowledge);
-  
+
     a {
       color: var(--card-heading-color-knowledge);
-
     }
   }
 
 
   &.large {
+    &.knowledge-card {
+      @media (prefers-color-scheme: dark) {
+        border: var(--card-border);
+      }
+
+      @media (prefers-color-scheme: light) {
+        border: none;
+      }
+    }
+
+    &.news-card {
+      border: var(--card-border);
+    }
+
     translate: 0 3rem;
-    border: var(--card-border);
 
     @media (width >= 56.25rem) {
       translate: 0 4rem;
@@ -483,5 +503,18 @@
       transition: transform 0.3s;
       background-color: var(--accordion-heading-color);
     }
+  }
+}
+
+/* Overwrites for light theme */
+[data-theme="light"] {
+  color-scheme: light;
+
+  .card.large.knowledge-card {
+    border: none;
+  }
+
+  .accordion {
+    border: 1px solid var(--green-400);
   }
 }

@@ -51,6 +51,14 @@
   }
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+
+  .faq-item {
+    border: 1px solid var(--green-400);
+  }
+}
+
 .faq-item {
   margin-bottom: 0.5rem;
   background: var(--accordion-bg-color);

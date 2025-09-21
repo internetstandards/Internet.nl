@@ -213,6 +213,18 @@ msgstr "Switch to dark theme"
 msgid "base_theme_toggle_to_light_newstring"
 msgstr "Switch to light theme"
 
+msgid "base_theme_change_button_newstring"
+msgstr "Change theme"
+
+msgid "base_theme_light_newstring"
+msgstr "Light"
+
+msgid "base_theme_dark_newstring"
+msgstr "Dark"
+
+msgid "base_theme_system_newstring"
+msgstr "OS Default"
+
 msgid "about_section_title_newstring"
 msgstr "About us"
 
@@ -4624,6 +4636,12 @@ msgstr ""
 
 msgid "page404 title"
 msgstr "Page not found!"
+
+msgid "page404 contact"
+msgstr "We are happy to help you"
+
+msgid "page404 button"
+msgstr "Back to the homepage"
 
 msgid "privacy content"
 msgstr ""

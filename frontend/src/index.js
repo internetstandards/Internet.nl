@@ -5,7 +5,6 @@ import "./js/lib/matomo.js";
 import "./js/base/header.js";
 import "./js/base/theme.js";
 import "./js/base/print.js";
-import "./js/base/language-switch.js";
 
 import "./js/components/card-list/load-more.js";
 import "./js/components/carousel/carrousel.js";

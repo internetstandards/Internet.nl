@@ -225,6 +225,18 @@ msgstr "Schakel naar donkere thema"
 msgid "base_theme_toggle_to_light_newstring"
 msgstr "Schakel naar lichte thema"
 
+msgid "base_theme_change_button_newstring"
+msgstr "Thema wijziging"
+
+msgid "base_theme_light_newstring"
+msgstr "Licht"
+
+msgid "base_theme_dark_newstring"
+msgstr "Donker"
+
+msgid "base_theme_system_newstring"
+msgstr "Systeem"
+
 msgid "base_footer_test_tools_newstring"
 msgstr "Test tools"
 
@@ -4635,6 +4647,12 @@ msgstr ""
 
 msgid "page404 title"
 msgstr "Pagina niet gevonden!"
+
+msgid "page404 contact"
+msgstr "We helpen je graag verder"
+
+msgid "page404 button"
+msgstr "Terug naar de homepage"
 
 msgid "privacy content"
 msgstr ""

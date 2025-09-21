@@ -1,7 +1,11 @@
 import { validateElements } from "../lib/utils.js";
 
 const elements = {
-  toggleTheme: document.getElementById("theme-toggle"),
+  currentTheme: document.querySelector(".current-theme-desktop"),
+  themeSelector: document.getElementById("toggle-subnav-theme"),
+  light: document.getElementById("theme-light"),
+  dark: document.getElementById("theme-dark"),
+  system: document.getElementById("theme-system"),
 };
 
 /**
@@ -58,8 +62,25 @@ function getPreferredTheme() {
  * @param {string} theme - Theme name
  */
 function setTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
   setCookie("theme", theme, 365);
+
+  document.documentElement.setAttribute("data-theme", theme);
+  elements.themeSelector.classList.remove("moon", "system", "sun");
+
+  switch (theme) {
+    case "light":
+      elements.themeSelector.classList.add("sun");
+      elements.currentTheme.textContent = elements.light.textContent;
+      break;
+    case "dark":
+      elements.themeSelector.classList.add("moon");
+      elements.currentTheme.textContent = elements.dark.textContent;
+      break;
+    default:
+      elements.themeSelector.classList.add("system");
+      elements.currentTheme.textContent = elements.system.textContent;
+      break;
+  }
 }
 
 /**
@@ -67,13 +88,19 @@ function setTheme(theme) {
  */
 function themeSwitch() {
   // Set initial theme
-  if (!getCookie("theme")) setTheme(getPreferredTheme());
+  setTheme(getCookie("theme"));
 
-  // Add click handler for theme toggle
-  elements.toggleTheme.addEventListener("click", () => {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
+  // Add click handler for theme buttons
+  elements.light.addEventListener("click", () => {
+    setTheme("light");
+  });
+
+  elements.dark.addEventListener("click", () => {
+    setTheme("dark");
+  });
+
+  elements.system.addEventListener("click", () => {
+    setTheme("system");
   });
 }
 
