@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.10.4
+
+- Updated our security.txt.
+- Updated Django
+
 ## 1.10.3
 
 - Added [missing User-Agent](https://github.com/NLnetLabs/unbound/issues/1048) to 0-RTT HTTP requests
