@@ -10,7 +10,7 @@ from dns.message import Message, make_query
 from dns.query import udp_with_fallback
 from dns.rdatatype import RdataType
 from dns.rdtypes.ANY import TLSA, CAA
-from dns.resolver import Resolver, NXDOMAIN, NoAnswer
+from dns.resolver import Resolver, NXDOMAIN, NoAnswer, NoNameservers
 import socket
 
 DNS_TIMEOUT = 5
@@ -62,7 +62,7 @@ def dns_resolve_ns(qname: str, allow_bogus=True) -> list[str]:
 
 
 def dns_resolve_tlsa(qname: str, allow_bogus=True) -> tuple[list[TLSA], DNSSECStatus]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.TLSA, allow_bogus)
+    rrset, dnssec_status = dns_resolve(qname, RdataType.TLSA, allow_bogus, true_dnssec_secure_check=True)
     return rrset, dnssec_status
 
 
@@ -78,7 +78,9 @@ def dns_resolve_spf(qname: str, allow_bogus=True) -> Optional[str]:
 
 
 def dns_resolve_soa(qname: str, allow_bogus=True, raise_on_no_answer=True) -> DNSSECStatus:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.SOA, allow_bogus, raise_on_no_answer)
+    rrset, dnssec_status = dns_resolve(
+        qname, RdataType.SOA, allow_bogus, raise_on_no_answer, true_dnssec_secure_check=True
+    )
     return dnssec_status
 
 
@@ -89,7 +91,7 @@ def dns_resolve_caa(qname: str) -> tuple[str, Iterable[CAA.CAA]]:
     """
     while True:
         try:
-            answer = _get_resolver().resolve(dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True)
+            answer = _get_resolver(cd=True).resolve(dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True)
             return str(answer.canonical_name), answer.rrset
         except (NoAnswer, NXDOMAIN):
             qname = dns_climb_tree(qname)
@@ -98,7 +100,7 @@ def dns_resolve_caa(qname: str) -> tuple[str, Iterable[CAA.CAA]]:
 
 
 def dns_resolve_reverse(ipaddr: str) -> list[str]:
-    answer = _get_resolver().resolve_address(ipaddr)
+    answer = _get_resolver(cd=True).resolve_address(ipaddr)
     return [rr.to_text() for rr in answer.rrset]
 
 
@@ -111,9 +113,35 @@ def dns_check_ns_connectivity(probe_qname: str, target_ip: str, port: int = 53) 
         return False
 
 
-def dns_resolve(qname: str, rr_type: RdataType, allow_bogus=True, raise_on_no_answer=True):
-    answer = _get_resolver().resolve(dns.name.from_text(qname), rr_type, raise_on_no_answer=raise_on_no_answer)
-    dnssec_status = DNSSECStatus.from_message(answer.response)
+def dns_resolve(
+    qname: str, rr_type: RdataType, allow_bogus=True, raise_on_no_answer=True, true_dnssec_secure_check=False
+):
+    """
+    Resolve the provided qname/record type.
+    Returns the RRset and the DNSSEC status, with a caveat.
+
+    allow_bogus: if True, returns bogus responses too, if False, raises ValidationFailure
+    raise_on_no_answer: if True, raises NoAnswer for no answer, if False, no exception raised
+
+    true_dnssec_secure_check:
+    Certain caching scenarios may lead us to falsely mark a response as insecure, when it is secure,
+    due to a missing AD bit when a response for the same qname was cached to resolve a different query,
+    in combination with our CD flag.
+    This is OK in most cases, but when it is not, we need to do a double query to prevent this,
+    enabled with true_dnssec_secure_check=True.
+    https://github.com/internetstandards/Internet.nl/issues/1869
+    """
+    resolve_params = {"qname": dns.name.from_text(qname), "rdtype": rr_type, "raise_on_no_answer": raise_on_no_answer}
+    if true_dnssec_secure_check:
+        try:
+            answer = _get_resolver(cd=False).resolve(**resolve_params)
+            dnssec_status = DNSSECStatus.from_message(answer.response)
+        except NoNameservers:  # dnspython's translation for servfail
+            answer = _get_resolver(cd=True).resolve(**resolve_params)
+            dnssec_status = DNSSECStatus.BOGUS
+    else:
+        answer = _get_resolver(cd=True).resolve(**resolve_params)
+        dnssec_status = DNSSECStatus.from_message(answer.response)
     if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
         raise ValidationFailure()
     return answer.rrset, dnssec_status
@@ -127,21 +155,28 @@ def dns_climb_tree(qname: str) -> Optional[str]:
 
 
 _resolver = None
+_resolver_cd = None
 
 
-def _get_resolver():
+def _get_resolver(cd: bool):
     # Resolvers are thread safe once configured
+    global _resolver_cd
+    if not _resolver_cd:
+        _resolver_cd = _create_resolver(cd=True)
     global _resolver
     if not _resolver:
-        _resolver = _create_resolver()
+        _resolver = _create_resolver(cd=False)
+    if cd:
+        return _resolver_cd
     return _resolver
 
 
-def _create_resolver() -> Resolver:
+def _create_resolver(cd: bool) -> Resolver:
     resolver = Resolver(configure=False)
     resolver.nameservers = [socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)]
     resolver.edns = True
-    resolver.flags = Flag.CD
+    if cd:
+        resolver.flags = Flag.CD
     resolver.ednsflags = EDNSFlag.DO
     resolver.lifetime = DNS_TIMEOUT
     return resolver
