@@ -1,9 +1,15 @@
 # Change Log
 
+## 1.10.5
+
+- Fixed an issue in 1.10.x where [DNSSEC test could return false negatives](https://github.com/internetstandards/Internet.nl/issues/1869)
+  due to an interaction between cached responses and the CD and AD flags.
+- Added news post.
+- 
 ## 1.10.4
 
 - Updated our security.txt.
-- Updated Django
+- Updated Django version.
 
 ## 1.10.3
 
