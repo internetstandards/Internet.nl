@@ -1,0 +1,16 @@
+server_name ${SMTP_EHLO_DOMAIN};
+auth_http http://127.0.0.1:9090/;
+
+starttls only;
+
+include conf.d/letsencrypt.conf;
+
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+
+server {
+    listen        25;
+    listen   [::]:25;
+    protocol smtp;
+    smtp_capabilities "SIZE 1099511627776" ENHANCEDSTATUSCODES 8BITMIME DSN SMTPUTF8 REQUIRETLS;
+}

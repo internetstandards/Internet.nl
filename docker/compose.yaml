@@ -27,6 +27,8 @@ services:
       - $WEBSERVER_PORT_IPV6/tcp
       - $WEBSERVER_PORT_IPV6_TLS/tcp
       - $WEBSERVER_PORT_IPV6_TLS/udp
+      - $SMTPSERVER_PORT
+      - $SMTPSERVER_PORT_IPV6
 
     environment:
       - INTERNETNL_DOMAINNAME

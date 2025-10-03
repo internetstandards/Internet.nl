@@ -20,6 +20,7 @@ RUN mkdir -p /etc/nginx/htpasswd/
 RUN touch /etc/nginx/htpasswd/monitoring.htpasswd
 
 COPY docker/webserver/10-variables.envsh /docker-entrypoint.d/
+COPY docker/webserver/40-add-mail-include.sh /docker-entrypoint.d/
 COPY docker/webserver/tls_init.sh /docker-entrypoint.d/
 COPY docker/webserver/authentication.sh /docker-entrypoint.d/
 COPY docker/webserver/generate_quic_host_key.sh /docker-entrypoint.d/
