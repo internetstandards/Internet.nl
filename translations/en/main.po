@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2025-06-08 18:07:12.983915\n"
+"PO-Revision-Date: 2025-10-03 10:27:32.303872\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -1923,6 +1923,9 @@ msgstr "Error: Invalid 'contactemail' value \"{property_value}\""
 msgid "detail tech data caa invalid-property-contactphone-value"
 msgstr "Error: Invalid 'contactphone' value \"{property_value}\""
 
+msgid "detail tech data caa invalid-property-encoding"
+msgstr "Error: Invalid encoding in '{property_name}'"
+
 msgid "detail tech data caa invalid-property-iodef-value"
 msgstr "Error: Invalid 'iodef' value \"{property_value}\""
 
@@ -1934,9 +1937,6 @@ msgstr ""
 "Error: Invalid \"{invalid_character}\" at position "
 "{invalid_character_position} in '{property_name}' value \"{property_value}\""
 " "
-
-msgid "detail tech data caa invalid-property-encoding"
-msgstr "Error: Invalid encoding in '{property_name}'"
 
 msgid "detail tech data caa invalid-reserved-property"
 msgstr "Error: Invalid reserved property \"{property_tag}\""
