@@ -4,7 +4,6 @@ from typing import Optional, Iterable
 import dns
 from django.conf import settings
 from dns.edns import EDECode
-from dns.exception import ValidationFailure
 from dns.flags import Flag, EDNSFlag
 from dns.message import Message, make_query
 from dns.query import udp_with_fallback
@@ -78,9 +77,7 @@ def dns_resolve_spf(qname: str) -> Optional[str]:
 
 
 def dns_resolve_soa(qname: str, raise_on_no_answer=True) -> DNSSECStatus:
-    rrset, dnssec_status = dns_resolve(
-        qname, RdataType.SOA, raise_on_no_answer, guarantee_accurate_secure=True
-    )
+    rrset, dnssec_status = dns_resolve(qname, RdataType.SOA, raise_on_no_answer, guarantee_accurate_secure=True)
     return dnssec_status
 
 
@@ -91,7 +88,9 @@ def dns_resolve_caa(qname: str) -> tuple[str, Iterable[CAA.CAA]]:
     """
     while True:
         try:
-            answer = _get_resolver(cd_flag=True).resolve(dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True)
+            answer = _get_resolver(cd_flag=True).resolve(
+                dns.name.from_text(qname), RdataType.CAA, raise_on_no_answer=True
+            )
             return str(answer.canonical_name), answer.rrset
         except (NoAnswer, NXDOMAIN):
             qname = dns_climb_tree(qname)
@@ -113,9 +112,7 @@ def dns_check_ns_connectivity(probe_qname: str, target_ip: str, port: int = 53) 
         return False
 
 
-def dns_resolve(
-    qname: str, rr_type: RdataType, raise_on_no_answer=True, guarantee_accurate_secure=False
-):
+def dns_resolve(qname: str, rr_type: RdataType, raise_on_no_answer=True, guarantee_accurate_secure=False):
     """
     Resolve the provided qname/record type.
     Returns the RRset and the DNSSEC status, with a caveat.
