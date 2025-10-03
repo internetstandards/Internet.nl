@@ -18,7 +18,7 @@ Test are run by the `test-runner` which spawns as a container inside the isolate
 
 ### Internal resolver
 
-All IP addresses used in the isolated network are in private address ranges (`172.43.0.0/24`, `fd00:43:1::/64`) and all domain names use the `.test` domain. The internal `resolver` runs dnsmasq to provide routing of the internal domain and stub records for external services (eg: Cymru origin ASN query). The resolver configuration file is `docker/integration-tests/dnsmasq/entrypoint.sh`.
+All IP addresses used in the isolated network are in private address ranges (`172.16.43.0/24`, `fd00:43:1::/64`) and all domain names use the `.test` domain. The internal `resolver` runs dnsmasq to provide routing of the internal domain and stub records for external services (eg: Cymru origin ASN query). The resolver configuration file is `docker/integration-tests/dnsmasq/entrypoint.sh`.
 
 During integration test runs the environment variable `INTEGRATION_TESTS` is set to `True` which makes the application's Unbound resolver use the internal resolver, and allows resolving of the `.test` TLD.
 
