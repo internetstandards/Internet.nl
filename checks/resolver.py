@@ -41,45 +41,45 @@ class DNSSECStatus(enum.IntEnum):
         return cls(DNSSECStatus.INSECURE)
 
 
-def dns_resolve_a(qname: str, allow_bogus=True) -> list[str]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.A, allow_bogus)
+def dns_resolve_a(qname: str) -> list[str]:
+    rrset, dnssec_status = dns_resolve(qname, RdataType.A)
     return [rr.address for rr in rrset]
 
 
-def dns_resolve_aaaa(qname: str, allow_bogus=True) -> list[str]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.AAAA, allow_bogus)
+def dns_resolve_aaaa(qname: str) -> list[str]:
+    rrset, dnssec_status = dns_resolve(qname, RdataType.AAAA)
     return [rr.address for rr in rrset]
 
 
-def dns_resolve_mx(qname: str, allow_bogus=True) -> list[tuple[str, int]]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.MX, allow_bogus)
+def dns_resolve_mx(qname: str) -> list[tuple[str, int]]:
+    rrset, dnssec_status = dns_resolve(qname, RdataType.MX)
     return [(str(rr.exchange), rr.preference) for rr in rrset]
 
 
-def dns_resolve_ns(qname: str, allow_bogus=True) -> list[str]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.NS, allow_bogus)
+def dns_resolve_ns(qname: str) -> list[str]:
+    rrset, dnssec_status = dns_resolve(qname, RdataType.NS)
     return [str(rr.target) for rr in rrset]
 
 
-def dns_resolve_tlsa(qname: str, allow_bogus=True) -> tuple[list[TLSA], DNSSECStatus]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.TLSA, allow_bogus, guarantee_accurate_secure=True)
+def dns_resolve_tlsa(qname: str) -> tuple[list[TLSA], DNSSECStatus]:
+    rrset, dnssec_status = dns_resolve(qname, RdataType.TLSA, guarantee_accurate_secure=True)
     return rrset, dnssec_status
 
 
-def dns_resolve_txt(qname: str, allow_bogus=True) -> list[str]:
-    rrset, dnssec_status = dns_resolve(qname, RdataType.TXT, allow_bogus)
+def dns_resolve_txt(qname: str) -> list[str]:
+    rrset, dnssec_status = dns_resolve(qname, RdataType.TXT)
     return ["".join([dns.rdata._escapify(s) for s in rr.strings]) for rr in rrset]
 
 
-def dns_resolve_spf(qname: str, allow_bogus=True) -> Optional[str]:
-    strings = dns_resolve_txt(qname, allow_bogus)
+def dns_resolve_spf(qname: str) -> Optional[str]:
+    strings = dns_resolve_txt(qname)
     spf_records = [s for s in strings if s.lower().startswith("v=spf1")]
     return spf_records[0] if len(spf_records) == 1 else None
 
 
-def dns_resolve_soa(qname: str, allow_bogus=True, raise_on_no_answer=True) -> DNSSECStatus:
+def dns_resolve_soa(qname: str, raise_on_no_answer=True) -> DNSSECStatus:
     rrset, dnssec_status = dns_resolve(
-        qname, RdataType.SOA, allow_bogus, raise_on_no_answer, guarantee_accurate_secure=True
+        qname, RdataType.SOA, raise_on_no_answer, guarantee_accurate_secure=True
     )
     return dnssec_status
 
@@ -114,13 +114,12 @@ def dns_check_ns_connectivity(probe_qname: str, target_ip: str, port: int = 53) 
 
 
 def dns_resolve(
-    qname: str, rr_type: RdataType, allow_bogus=True, raise_on_no_answer=True, guarantee_accurate_secure=False
+    qname: str, rr_type: RdataType, raise_on_no_answer=True, guarantee_accurate_secure=False
 ):
     """
     Resolve the provided qname/record type.
     Returns the RRset and the DNSSEC status, with a caveat.
 
-    allow_bogus: if True, returns bogus responses too, if False, raises ValidationFailure
     raise_on_no_answer: if True, raises NoAnswer for no answer, if False, no exception raised
 
     guarantee_accurate_secure:
@@ -142,8 +141,6 @@ def dns_resolve(
     else:
         answer = _get_resolver(cd_flag=True).resolve(**resolve_params)
         dnssec_status = DNSSECStatus.from_message(answer.response)
-    if dnssec_status == DNSSECStatus.BOGUS and not allow_bogus:
-        raise ValidationFailure()
     return answer.rrset, dnssec_status
 
 
