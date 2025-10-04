@@ -1,11 +1,12 @@
-FROM nginx:1.27.3
+FROM nginx:1.29.1-alpine3.22
 
-RUN apt-get update && apt-get install -y \
+RUN apk add \
+  # for random quic host key
+  openssl \
   # for htpasswd
   apache2-utils \
-  # for gixy install
-  python3-venv \
-  && rm -rf /var/lib/apt/lists/*
+  # for gixy and certbot install
+  python3
 
 # install nginx config static analysis tool
 RUN python3 -m venv /opt/gixy
