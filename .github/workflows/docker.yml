@@ -725,7 +725,7 @@ jobs:
 
       - name: Collect Docker Compose logs
         if: always()
-        run: make logs-all-dump env=test > docker-compose.log
+        run: make logs-all-dump env=batch-test > docker-compose.log
 
       - uses: test-summary/action@v2.3
         with:
