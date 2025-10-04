@@ -59,7 +59,7 @@ services:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
 
     healthcheck:
-      test: ["CMD", "curl", "-kfsSo/dev/null", "https://$INTERNETNL_DOMAINNAME", "--resolve", "$INTERNETNL_DOMAINNAME:443:127.0.0.1"]
+      test: ["CMD", "curl", "-ksSo/dev/null", "https://$INTERNETNL_DOMAINNAME", "--resolve", "$INTERNETNL_DOMAINNAME:443:127.0.0.1"]
       interval: $HEALTHCHECK_INTERVAL
       start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
