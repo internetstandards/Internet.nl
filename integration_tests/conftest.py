@@ -187,8 +187,7 @@ def register_test_user(unique_id):
 
         # reload nginx
         command = (
-            f'docker compose --ansi=never --project-name "{COMPOSE_PROJECT_NAME}"'
-            " exec webserver service nginx reload"
+            f'docker compose --ansi=never --project-name "{COMPOSE_PROJECT_NAME}"' " exec webserver nginx -s reload"
         )
         subprocess.check_call(command, shell=True, universal_newlines=True)
 
