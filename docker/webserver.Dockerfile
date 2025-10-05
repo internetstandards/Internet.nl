@@ -1,6 +1,6 @@
 FROM nginx:1.29.1-alpine3.22
 
-RUN apk add \
+RUN apk add --no-cache \
   # for random quic host key
   openssl \
   # for htpasswd
