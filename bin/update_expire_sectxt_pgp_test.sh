@@ -10,7 +10,7 @@ PGP_PUBKEY_PATH="interface/static/question@internet.nl_0x45028563.asc"
 NOW_TS=$(date +%s)
 SECONDS_IN_DAY=86400
 
-SECTXT_THRESHOLD_MONTHS=9
+SECTXT_THRESHOLD_MONTHS=6
 SECTXT_THRESHOLD_DAYS=$(printf "%.0f\n" $(( SECTXT_THRESHOLD_MONTHS * 31 )) )
 
 SECTXT_EXPIRE_DATE=$(sed -nr 's/^Expires: ([0-9-]+).*/\1/p' "$SECTXT_PATH_PROD")
