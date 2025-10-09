@@ -48,6 +48,7 @@ services:
       - NGINX_PROXY_CACHE
       - INTERNETNL_BRANDING
       - LANGUAGES
+      - SMTP_EHLO_DOMAIN
 
     # webserver does not depend on any of the other services directly. So it can
     # be started and kept running independently from the other services to

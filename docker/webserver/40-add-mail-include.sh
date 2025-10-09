@@ -1,11 +1,19 @@
 #!/bin/sh
 
+# because mail "server" directives need to go into a "mail" block and normal templates are always included
+# in the "http" block we make an exception here for mail server templates.
+
 set -eu
 
-LC_ALL=C
-ME=$(basename "$0")
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# apply variable substitution to mail templates
+export NGINX_ENVSUBST_TEMPLATE_DIR="/etc/nginx/mail_templates"
+export NGINX_ENVSUBST_OUTPUT_DIR="/etc/nginx/conf-mail.d/"
+mkdir -p "$NGINX_ENVSUBST_OUTPUT_DIR"
+/docker-entrypoint.d/20-envsubst-on-templates.sh
 
-touch /etc/nginx/nginx.conf 2>/dev/null || { echo >&2 "$ME: error: can not modify /etc/nginx/nginx.conf (read-only file system?)"; exit 0; }
-
-sed -i -r -z 's@(\}\n)$@\1# Added by '"$ME"' on '"$(date)"'\nmail {\n    include conf.d/*.mail-conf;\n}\n@' /etc/nginx/nginx.conf
+# include mail templates into config file
+cat >> /etc/nginx/nginx.conf <<EOF
+mail {
+  include conf-mail.d/*.conf;
+}
+EOF

@@ -5,6 +5,7 @@ import requests
 from playwright.sync_api import expect
 import socket
 import os
+import time
 
 FOOTER_TEXT_EN = "Internet.nl is an initiative of the Internet community and the Dutch"
 FOOTER_TEXT_NL = "Internet.nl is een initiatief van de internetgemeenschap en de Nederlandse"
@@ -220,3 +221,17 @@ def test_cron_postgres_backups(trigger_cron, docker_compose_exec):
 
     assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.daily.sql.gz")
     assert docker_compose_exec("cron", "ls /var/lib/postgresql/backups/internetnl_db1.weekly.sql.gz")
+
+def test_mail_server(app_domain: str):
+    """Test if dummy SMTP server is running, see: https://github.com/internetstandards/Internet.nl/issues/1875."""
+
+    # connect to SMTP socket and test if HELO message is correct
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((app_domain, 25))
+        s.sendall(b"HELO example.com\r\n")
+        time.sleep(1) # second response line is not sent directly
+        response = s.recv(1024)
+        assert response.decode() == f"220 {app_domain} ESMTP ready\r\n250 {app_domain}\r\n"
+        s.sendall(b"AUTH PLAIN dXNlcgB1c2VyAHB3ZA==\r\n")
+        response = s.recv(1024)
+        assert response == b"500 5.5.1 Invalid command\r\n"

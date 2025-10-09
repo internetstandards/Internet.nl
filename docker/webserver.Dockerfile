@@ -37,6 +37,7 @@ COPY .well-known/security*.txt /var/www/internet.nl/.well-known/
 COPY interface/static/favicon.ico /var/www/internet.nl/
 
 COPY docker/webserver/nginx_templates/* /etc/nginx/templates/
+COPY docker/webserver/mail_templates/* /etc/nginx/mail_templates/
 COPY docker/webserver/mime.types /etc/nginx/
 COPY docker/webserver/http.headers /etc/nginx/
 COPY docker/webserver/hsts_h3.headers /etc/nginx/
