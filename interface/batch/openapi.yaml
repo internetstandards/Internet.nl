@@ -736,7 +736,7 @@ components:
             type: string
 
         caa_enabled:
-          type: bool
+          type: boolean
           description: Whether CAA records were found.
           items:
             type: string
@@ -754,7 +754,7 @@ components:
           type: array
           description: The found CAA records
           items:
-            $ref: string
+            type: string
         caa_found_on_domain:
           type: string
           description: Domain name under which the CAA record was found.

@@ -20,6 +20,11 @@ _Compared to the latest 1.10 release._
 
 - ...
 
+
+## 1.10.6
+
+- Fixed a syntax error in the OpenAPI specification.
+
 ## 1.10.5
 
 - Fixed an issue in 1.10.x where [DNSSEC test could return false negatives](https://github.com/internetstandards/Internet.nl/issues/1869)
