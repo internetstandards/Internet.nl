@@ -20,6 +20,22 @@ _Compared to the latest 1.10 release._
 
 - ...
 
+
+## 1.10.6
+
+- Fixed a syntax error in the OpenAPI specification.
+
+## 1.10.5
+
+- Fixed an issue in 1.10.x where [DNSSEC test could return false negatives](https://github.com/internetstandards/Internet.nl/issues/1869)
+  due to an interaction between cached responses and the CD and AD flags.
+- Added news post.
+
+## 1.10.4
+
+- Updated our security.txt.
+- Updated Django version.
+
 ## 1.10.3
 
 - Added [missing User-Agent](https://github.com/internetstandards/Internet.nl/issues/1048) to 0-RTT HTTP requests

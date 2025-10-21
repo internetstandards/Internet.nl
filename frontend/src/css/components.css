@@ -230,14 +230,6 @@
   }
 }
 
-[data-theme="dark"] {
-  color-scheme: dark;
-  
-  .card.large.knowledge-card {
-    border: var(--card-border);
-  }
-}
-
 .card {
   border-radius: 0.5rem;
 
@@ -457,6 +449,7 @@
 .accordion {
   appearance: none;
   overflow: clip;
+  border: 1px solid var(--accordion-border-color);
 
   &::details-content {
     @media (prefers-reduced-motion: no-preference) {
@@ -513,8 +506,13 @@
   .card.large.knowledge-card {
     border: none;
   }
+}
 
-  .accordion {
-    border: 1px solid var(--green-400);
+/* Overwrites for dark theme */
+[data-theme="dark"] {
+  color-scheme: dark;
+  
+  .card.large.knowledge-card {
+    border: var(--card-border);
   }
 }

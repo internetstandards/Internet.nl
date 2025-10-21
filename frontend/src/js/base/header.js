@@ -46,6 +46,30 @@ function header() {
         subMenu.classList.contains("expanded")
       );
     });
+
+    // Handle focus management for z-index elevation
+    if (subMenu) {
+      const focusIn = () => {
+        document
+          .querySelectorAll(".nav-sublist")
+          .forEach((menu) => menu.classList.remove("focused"));
+        subMenu.classList.add("focused");
+      };
+
+      const focusOut = (event) => {
+        if (
+          !subMenu.contains(event.relatedTarget) &&
+          event.relatedTarget !== toggleSubMenu
+        ) {
+          subMenu.classList.remove("focused");
+        }
+      };
+
+      toggleSubMenu.addEventListener("focusin", focusIn);
+      subMenu.addEventListener("focusin", focusIn);
+      toggleSubMenu.addEventListener("focusout", focusOut);
+      subMenu.addEventListener("focusout", focusOut);
+    }
   });
 
   /* STICKY HEADER */

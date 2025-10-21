@@ -88,7 +88,6 @@
       background-color: unset;
       background-repeat: no-repeat;
       background-size: cover;
-
       display: block;
     }
 
@@ -257,6 +256,7 @@ body.connectiontest .action-card-item:has(.connection) {
   }
 
   .action-card-item a,
+  .action-card-item button,
   .action-card-item .countdown {
     color: var(--card-body-color-action);
     font: var(--card-header-m);
@@ -310,6 +310,21 @@ body.connectiontest .action-card-item:has(.connection) {
 
     &.repeat-test.hidden {
       display: none;
+    }
+  }
+
+  .action-card-item button {
+    background: none;
+    border: none;
+    border-bottom: 0.0625rem solid var(--card-body-color-action);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+  
+    
+    &:focus {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
     }
   }
 }
@@ -614,14 +629,10 @@ meter::-moz-meter-bar {
         font-family: monospace, sans-serif;
       }
 
-      th {
-        border-bottom: 1px solid var(--grey-300);
-      }
-
       td,
       th {
         padding: 0.375rem;
-        font-size: 0.875rem;
+        text-align: left;
 
         &:first-child {
           padding-left: 0;

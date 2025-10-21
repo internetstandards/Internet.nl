@@ -229,6 +229,7 @@
   --accordion-bg-color: light-dark(var(--white-100), var(--black-200));
   --accordion-heading-color: light-dark(var(--black-200), var(--green-100));
   --accordion-body-color: light-dark(var(--black-200), var(--white-100));
+  --accordion-border-color: light-dark(var(--green-400), var(--transparent-600));
 
   /* RESULT STATE COLORS */
   --probing-color: light-dark(var(--green-400), var(--white-100));

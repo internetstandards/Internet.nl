@@ -110,7 +110,10 @@
                         type="button"
                         aria-controls="nav-sublist-language"
                         aria-expanded="false">
-                  <span class="current-language">{% include "string.html" with name="base_language_change_button_newstring" %}</span>
+                  <span class="current-language-desktop">{{ request.current_language_code }}</span>
+                  <span class="current-language-mobile">
+                    {% include "string.html" with name="base_language_change_button_newstring" %}
+                  </span>
                 </button>
                 <form id="language-form" action="/change_language/" method="post">
                   <ul id="nav-sublist-language" class="nav-sublist">

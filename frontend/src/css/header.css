@@ -291,7 +291,15 @@ header nav {
         padding: 0.5rem 0.75rem;
       }
 
-      .current-language {
+      .current-language-desktop {
+        @media (width <= 73.125rem) {
+          display: none;
+        }
+
+        text-transform: uppercase;
+      }
+
+      .current-language-mobile {
         @media (width >= 73.125rem) {
           display: none;
         }
@@ -353,7 +361,7 @@ header nav {
           content: "";
           position: absolute;
           left: 0;
-          width: 150%;
+          width: 100%;
           height: 1.25rem;
         }
       }
@@ -401,10 +409,7 @@ header nav {
     .nav-subitem {
       display: flex;
       width: 100%;
-
-
       
-
       a, button {
         display: flex;
         font: var(--subnav-link);
@@ -499,9 +504,16 @@ header nav {
       translate: -50% 0;
       left: 50%;
       margin-top: 1.25rem;
+      z-index: 10;
 
       @media (scripting: none) {
         z-index: 2;
+      }
+
+      /* Bring focused dropdown to front */
+      &:focus-within,
+      &.focused {
+        z-index: 20;
       }
     }
 

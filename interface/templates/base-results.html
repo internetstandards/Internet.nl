@@ -1,124 +1,141 @@
 {% extends "base.html" %}
 {% load static %}
 {% load translate %}
-
 {% block scripting %}
   <script type="module" src="{% static 'js/results-min.js' %}"></script>
   <script type="module" src="{% static 'js/components/meter-min.js' %}"></script>
   <script type="module" src="{% static 'js/components/action-card-min.js' %}"></script>
 {% endblock %}
-
 {% block maincontent %}
-
-<section class="result-section bg-primary">
-  <div class="container">
-    <h1>
-      <span class="h5 color-secondary visually-hidden">{% include "string.html" with name="base_results_score_for_newstring" %}</span>
-      <span class="h1 color-secondary">
-        {% block testheadcontent %}
-        {% endblock %}
-      </span>
-      <span class="h5 color-secondary">{{permadate|date:'(Y-m-d H:i T)'}}</span>
-    </h1>
-    <div class="meter-container">
-      <div class="meter">
-        <meter min="0" max="100" value="{{score}}" id="testresults-percentage">{{score}}%</meter>
+  <section class="result-section bg-primary">
+    <div class="container">
+      <h1>
+        <span class="h5 color-secondary visually-hidden">
+          {% include "string.html" with name="base_results_score_for_newstring" %}
+        </span>
+        <span class="h1 color-secondary">
+          {% block testheadcontent %}{% endblock %}
+        </span>
+        <span class="h5 color-secondary">{{ permadate|date:'(Y-m-d H:i T)' }}</span>
+      </h1>
+      <div class="meter-container">
+        <div class="meter">
+          <meter min="0" max="100" value="{{ score }}" id="testresults-percentage">{{ score }}%</meter>
+        </div>
+        <ul class="meter-numbers h7 color-secondary">
+          <li class="meter-number">0</li>
+          <li class="meter-number">25</li>
+          <li class="meter-number">50</li>
+          <li class="meter-number">75</li>
+          <li class="meter-number">100</li>
+        </ul>
+        <p class="meter-value h7">{{ score }}%</p>
       </div>
-      <ul class="meter-numbers h7 color-secondary">
-        <li class="meter-number">0</li>
-        <li class="meter-number">25</li>
-        <li class="meter-number">50</li>
-        <li class="meter-number">75</li>
-        <li class="meter-number">100</li>
-      </ul>
-      <p class="meter-value h7">{{score}}%</p>
-    </div>
-    <ul class="main-items">
-      {% for probe in probes %}
-        <li class="main-item {{probe.verdict}} icon" id="{{probe.name}}-results">
-          <a class="h7 color-secondary" href="#{{probe.name}}">
-            <span class="visually-hidden">
-              {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
-            </span>
-            {% include "string.html" with name=probe.summary|safe %}
-          </a>
-        </li>
-      {% endfor %}
-      </ul>
-  </div>
-</section>
-
-<section class="result-details-section">
-  <div class="container">
-    <aside class="action-card">
-      <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
-      <details>
-        <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
-        <ul class="action-card-list">
-          <li class="action-card-item">
-            <a class="icon" href="/test-site">
-              <span class="domain icon">{% include "string.html" with name="base_results_test_website_domain_newstring" %}</span>
-            </a>
-          </li>
-          <li class="action-card-item">
-            <a class="icon" href="/test-mail">
-              <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
-            </a>
-          </li>
-          <li class="action-card-item">
-            <a class="icon" href="/test-connection">
-              <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
-            </a>
-          </li>
-          <li class="action-card-item">
-            <a class="icon repeat-test link {% if retest_time > 0 %} hidden {% endif %}" href="{{retest_link}}">
-              <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
-            </a>
-            <p class="icon repeat-test countdown {% if retest_time < 1 %} hidden {% endif %}">
-              <span class="reset icon">
-                <span class="countdown-time-text">{% include "string.html" with name="results retest-time" %} (<span class="countdown-time">{{retest_time}}</span>)</span>
+      <ul class="main-items">
+        {% for probe in probes %}
+          <li class="main-item {{ probe.verdict }} icon"
+              id="{{ probe.name }}-results">
+            <a class="h7 color-secondary" href="#{{ probe.name }}">
+              <span class="visually-hidden">
+                {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}
+                :
               </span>
-            </p>
-          </li>
-          <li class="action-card-item">
-            <a class="icon" href="/faqs/report/">
-              <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
+              {% include "string.html" with name=probe.summary|safe %}
             </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+  <section class="result-details-section">
+    <div class="container">
+      <aside class="action-card">
+        <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
+        <details>
+          <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
+          <ul class="action-card-list">
+            <li class="action-card-item">
+              <a class="icon" href="/test-site">
+                <span class="domain icon">{% include "string.html" with name="base_results_test_website_domain_newstring" %}</span>
+              </a>
+            </li>
+            <li class="action-card-item">
+              <a class="icon" href="/test-mail">
+                <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
+              </a>
+            </li>
+            <li class="action-card-item">
+              <a class="icon" href="/test-connection">
+                <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
+              </a>
+            </li>
+            <li class="action-card-item">
+              <a class="icon repeat-test link {% if retest_time > 0 %}hidden{% endif %}"
+                 href="{{ retest_link }}">
+                <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
+              </a>
+              <p class="icon repeat-test countdown {% if retest_time < 1 %}hidden{% endif %}">
+                <span class="reset icon">
+                  <span class="countdown-time-text">
+                    {% include "string.html" with name="results retest-time" %}
+                    (<span class="countdown-time">{{ retest_time }}</span>)</span>
+                  </span>
+                </p>
+              </li>
+              <li class="action-card-item">
+                <a class="icon" href="/faqs/report/">
+                  <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
+                </a>
+              </li>
+              {% if pageclass == "websitetest" %}
+                <li class="action-card-item">
+                  <form action="/site/" method="post">
+                    <input hidden
+                           class="visually-hidden"
+                           name="url"
+                           value="{{ prettyaddr_results }}" />
+                    <button class="icon" type="submit">
+                      <span class="globe icon">
+                        {% include "string.html" with name="base test website label" %}
+                        {{ prettyaddr_results }}
+                      </span>
+                    </button>
+                  </form>
+                </li>
+              {% endif %}
+            </ul>
+            <p class="action-card-description">{% include "string.html" with name="action_card_description_newstring" %}</p>
+          </details>
+          <button id="copy-link" class="primary-button icon" type="button">
+            <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>
+            <span class="clicked">{% include "string.html" with name="base_results_share_results_clicked_newstring" %}</span>
+          </button>
+        </aside>
+        <h2 class="h3 color-secondary visually-hidden">
+          {% include "string.html" with name="base_results_test_details_newstring" %}
+        </h2>
+        <ul class="result-details-list">
+          {% for probe in probes %}
+            <li id="{{ probe.name }}" class="result-details-item">
+              <hgroup>
+                <h3 class="h5 color-secondary icon {{ probe.verdict }}">
+                  <span class="visually-hidden">
+                    {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}
+                    :
+                  </span>
+                  {% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}
+                </h3>
+                <p class="body-s">{% include "string.html" with name=probe.description|safe %}</p>
+              </hgroup>
+              <div class="result-details-content">
+                {% for domain_type, domain, details in probe.details_set %}
+                  {% block testdetailitems %}{% endblock %}
+                {% endfor %}
+              {% endfor %}
+            </div>
           </li>
         </ul>
-        <p class="action-card-description">{% include "string.html" with name="action_card_description_newstring" %}</p>
-      </details>
-      <button id="copy-link" class="primary-button icon" type="button">
-        <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>
-        <span class="clicked">{% include "string.html" with name="base_results_share_results_clicked_newstring" %}</span>
-      </button>
-    </aside>
-    <h2 class="h3 color-secondary visually-hidden">{% include "string.html" with name="base_results_test_details_newstring" %}</h2>
-    <ul class="result-details-list">
-      {% for probe in probes %}
-
-      <li id="{{probe.name}}" class="result-details-item">
-        <hgroup>
-          <h3 class="h5 color-secondary icon {{probe.verdict}}">
-            <span class="visually-hidden">
-              {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
-            </span>
-            {% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}
-          </h3>
-          <p class="body-s">{% include "string.html" with name=probe.description|safe %}</p>
-        </hgroup>
-        <div class="result-details-content">
-          {% for domain_type, domain, details in probe.details_set %}
-          {% block testdetailitems %}
-          {% endblock %}
-          {% endfor %}
-          {% endfor %}
-        </div>
-      </li>
-    </ul>
-  </div>
-</section>
-
-   {% block testtailcontent %}
-   {% endblock %}
-{% endblock %}
+      </div>
+    </section>
+    {% block testtailcontent %}{% endblock %}
+  {% endblock %}
