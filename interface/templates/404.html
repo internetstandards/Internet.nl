@@ -1,16 +1,47 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block maincontent %}
-   <article class="block fullwidth center">
-     <section>
-       <div class="wrap">
-         <div class="inner">
-           <h1>404 {{pagetitle}}</h1>
-           <img src="{% static '404-cat-not-found.png' %}" alt="" width="600" height="293">
-         </div>
-         {% include "content.html" with name="page404 content" %}
-       </div>
-     </section>
-   </article>
+  <section class="intro-section bg-primary ellipse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">404</h1>
+        <p class="h1 color-secondary">{% include "string.html" with name="page404 title" %}</p>
+        <div class="center">
+          <a class="primary-button icon" href="/">{% include "string.html" with name="page404 button" %}</a>
+        </div>
+      </hgroup>
+    </div>
+  </section>
+  <section class="faq-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h2 color-secondary">{% include "string.html" with name="page404 contact" %}</h2>
+      <ul class="contact-card-list">
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
+            <p>
+              {% include "string.html" with name="contact_page_email_description_newstring" %}
+              <a href="mailto:vraag@internet.nl">vraag@internet.nl</a>
+            </p>
+          </hgroup>
+        </li>
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
+            <p>
+              {% include "string.html" with name="contact_page_help_description_newstring" %}
+              <a href="https://github.com/internetstandards/Internet.nl"
+                 target="_blank">Github account</a>
+            </p>
+          </hgroup>
+        </li>
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
+            <p>{% include "string.html" with name="contact_page_visit_description_newstring" %}</p>
+          </hgroup>
+        </li>
+      </ul>
+    </div>
+  </section>
 {% endblock %}

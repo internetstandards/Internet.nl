@@ -2,125 +2,254 @@
 {% load static %}
 {% load i18n %}
 {% load translate %}
-<html lang="{{request.current_language_code}}" >
-
-<head>
-  <meta charset="utf-8">
-  <title>{{pagetitle}}</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="description" content="{{_("page metadescription")}}">
-  <meta name="keywords" content="{{_("page metakeywords")}}">
-  <meta name="author" content="Platform Internetstandaarden / Internet Standards Platform">
-  <link rel="icon" href="{% static "favicon.png" %}" sizes="32x32" />
-  <link rel="icon" href="{% static "favicon.png" %}" sizes="192x192" />
-  <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
-  <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
-  <link rel="stylesheet" type="text/css" href="{% static 'css/style-min.css' %}" />
-  <link rel="stylesheet" type="text/css" href="{% static 'css/print-min.css' %}" media="print" />
-
-  <script src="{% static "js/jquery-3.5.1.min.js" %}"></script>
-
-  <script src="{% static 'js/imagecheck-min.js' %}" type="text/javascript" defer></script>
-  <script type="text/javascript" src="{% static "js/headroom-min.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/functions-min.js" %}"></script>
-  {% block scripting %}
-  {% endblock %}
-</head>
-<body class="{{pageclass}}">
-  <div class="hidethis" aria-hidden="true">
-    <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
-    <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
-    <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
-  </div>
-  <div class="skiplink"><a href="#content">{% include "string.html" with name='page gotocontents' %}</a></div>
-  <div class="skiplink" id="skiplink-sitenav"><a href="#sitenav">{% include "string.html" with name='page gotomainmenu' %}</a></div>
-  <div class="skiplink"><a href="#footer">{% include "string.html" with name='page gotofooter' %}</a></div>
-  <header>
-    <div class="wrap">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      <div id="masthead">
-        <p id="site-title"><a href="/"><span class="hidden">{% include "string.html" with name='page sitetitle' %}</span></a></p>
-        <p id="site-description"><span class="hidden">{% include "string.html" with name='page sitedescription' %}</span></p>
-      </div>
-      {% endif %}
-
-      <!-- language switch -->
-      <div id="language-switch-header-container">
-        <ul class="language-switch-list">
-
-      {% with user_language=request.current_language_code %}
-        {% for language in LANGUAGES %}
-        {% get_language_info for language.0 as lang %}
-          <li>
-          {% if language.0 == user_language %}
-            <button class="active-language" disabled>{{lang.name_local}}</button>
-          {% else %}
-            <form action="/change_language/" method="post">
-              <input type="hidden" name="previous-page" value="{{request.path}}"/>
-              <input type="hidden" name="language" value="{{language.0}}"/>
-              <button>{{lang.name_local}}</button>
-            </form>
-          {% endif %}
-          </li>
-        {% endfor %}
-      {% endwith %}
-
-        </ul>
-      </div>
-
-      <nav id="sitenav">
-        <ul>
-          <li class="{% if pagemenu == 'home' %}current{% endif %}"><a href="/">{% include "string.html" with name="base home" %}</a></li>
-          <li class="{% if pagemenu == 'news' %}current{% endif %}"><a href="/news/">{% include "string.html" with name="base news" %}</a></li>
-          <li class="{% if pagemenu == 'faqs' %}current{% endif %}"><a href="/faqs/">{% include "string.html" with name="base faqs" %}</a></li>
-          <li class="{% if pagemenu == 'halloffame' %}current{% endif %}"><a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a></li>
+<html lang="{{ request.current_language_code }}"
+      data-theme="{{ request.COOKIES.theme }}">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ pagetitle }}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="{{ _("page metadescription") }}">
+    <meta name="keywords" content="{{ _("page metakeywords") }}">
+    <meta name="author"
+          content="Platform Internetstandaarden / Internet Standards Platform">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml" />
+    <link rel="icon" href="{% static 'favicon.png' %}" sizes="192x192" />
+    <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
+    <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/style-min.css' %}" />
+    {% block scripting %}
+      <script type="module" src="{% static 'js/base-min.js' %}"></script>
+      <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
+    {% endblock %}
+  </head>
+  <body class="{{ pageclass }}">
+    <div class="matomo" hidden>
+      <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
+      <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
+      <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
+    </div>
+    <header>
+      <a class="skip-link" href="#main-content">
+        {% include "string.html" with name="base_header_skip_to_main_newstring" %}
+      </a>
+      <div class="container">
+        <div class="header-logo-toggle-controls">
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
-          <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about" %}</a></li>
-          {% else %}
-          <li class="{% if pagemenu == 'about' %}current{% endif %}"><a href="/about/">{% include "string.html" with name="base about custom" %}</a></li>
+            <a class="header-logo"
+               href="/"
+               aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
+              <picture class="light-visible">
+                <source srcset="/static/logos/logo.svg" media="(width >= 900px)">
+                <img src="/static/logos/logo.svg"
+                     alt="Internet.nl Logo"
+                     width="227.5"
+                     height="50">
+              </picture>
+              <picture class="dark-visible">
+                <source srcset="/static/logos/logo-white-2.svg" media="(width >= 900px)">
+                <img src="/static/logos/logo-white-2.svg"
+                     alt="Internet.nl Logo"
+                     width="227.5"
+                     height="50">
+              </picture>
+            </a>
           {% endif %}
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <main id="content" class="clearfix" tabindex="-1">
-    <div class="mainwrap">
-      {% block introcontent %}
-      {% endblock %}
-    </div>
-    <div class="wrap">
-      {% block maincontent %}
-      {% endblock %}
-    </div>
-  </main>
-
-  <footer id="footer">
-    <img id="flag" src="{% static "clear.gif" %}" alt="">
-    <div class="wrap">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "string.html" with name="base info" %}
-      {% else %}
-      {% include "string.html" with name="base info custom" %}
-      {% endif %}
-      <div class="version">v{{ "VERSION"|get_settings_value }}</div>
-      <hr>
-      <ul>
-        <li><a class="footlink" href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a></li>
-        <li><a class="footlink" href="/privacy/">{% include "string.html" with name="base privacy" %}</a></li>
-        <li><a class="footlink" href="/copyright/">{% include "string.html" with name="base copyright" %}</a></li>
-        {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
-        <li><a class="footlink" href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a></li>
-        {% endif %}
-        {% if "INTERNETNL_BRANDING"|get_settings_value %}
-        <li class="follow-us"><a class="footlink linkedinfollow" href="https://www.linkedin.com/company/internet-nl/">LinkedIn</a></li>
-        <li class="follow-us"><a class="footlink mastodonfollow" href="https://mastodon.nl/@internet_nl" rel="me">Mastodon</a></li>
-        {% endif %}
-      </ul>
-    </div>
-  </footer>
-  <script type="text/javascript" src="{% static "js/menu-min.js" %}" defer></script>
-  <script type="text/javascript" src="{% static "js/accordion-min.js" %}" defer></script>
-  <script type="text/javascript" src="{% static "js/matomo-min.js" %}"></script>
-</body>
+          <button class="toggle-menu icon large"
+                  type="button"
+                  aria-controls="nav-controls"
+                  aria-expanded="false">
+            <span class="open">{% include "string.html" with name="base_header_menu_newstring" %}</span>
+            <span class="close">{% include "string.html" with name="base_header_close_newstring" %}</span>
+          </button>
+        </div>
+        <div id="nav-controls" class="nav-controls">
+          <nav>
+            <ul class="nav-list">
+              <li class="nav-item {% if pagemenu == 'test-tools' %}current{% endif %}">
+                <button id="toggle-subnav"
+                        class="link-button icon"
+                        type="button"
+                        aria-controls="nav-sublist"
+                        aria-expanded="false">
+                  {% include "string.html" with name="base_header_test_tools_newstring" %}
+                </button>
+                <ul id="nav-sublist" class="nav-sublist">
+                  <li class="nav-subitem">
+                    <a class="icon" href="/test-site">{% include "string.html" with name="base_header_test_website_newstring" %}</a>
+                  </li>
+                  <li class="nav-subitem">
+                    <a class="icon" href="/test-connection">
+                      {% include "string.html" with name="base_header_test_connection_newstring" %}
+                    </a>
+                  </li>
+                  <li class="nav-subitem">
+                    <a class="icon" href="/test-mail">{% include "string.html" with name="base_header_test_email_newstring" %}</a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item {% if pagemenu == 'faqs' %}current{% endif %}">
+                <a href="/faqs">{% include "string.html" with name="base faqs" %}</a>
+              </li>
+              <li class="nav-item {% if pagemenu == 'halloffame' %}current{% endif %}">
+                <a href="/halloffame">{% include "string.html" with name="base halloffame" %}</a>
+              </li>
+              <li class="nav-item {% if pagemenu == 'news' %}current{% endif %}">
+                <a href="/articles">{% include "string.html" with name="base news" %}</a>
+              </li>
+              <li class="nav-item {% if pagemenu == 'about' %}current{% endif %}">
+                <a href="/about">{% include "string.html" with name="base about" %}</a>
+              </li>
+              <li class="nav-item {% if pagemenu == 'contact' %}current{% endif %}">
+                <a href="/contact">{% include "string.html" with name="base_header_contact_newstring" %}</a>
+              </li>
+            </ul>
+            <ul class="nav-list nav-settings">
+              <li class="nav-item">
+                <button id="toggle-subnav-language"
+                        class="settings-button icon globe"
+                        type="button"
+                        aria-controls="nav-sublist-language"
+                        aria-expanded="false">
+                  <span class="current-language-desktop">{{ request.current_language_code }}</span>
+                  <span class="current-language-mobile">
+                    {% include "string.html" with name="base_language_change_button_newstring" %}
+                  </span>
+                </button>
+                <form id="language-form" action="/change_language/" method="post">
+                  <ul id="nav-sublist-language" class="nav-sublist">
+                    {% with user_language=request.current_language_code %}
+                      {% for language in LANGUAGES %}
+                        {% get_language_info for language.0 as lang %}
+                        <li class="nav-subitem">
+                          <button type="submit"
+                                  name="language"
+                                  value="{{ language.0 }}"
+                                  class="icon"
+                                  lang="{{ language.0 }}">{{ lang.name_local }}</button>
+                        </li>
+                      {% endfor %}
+                    {% endwith %}
+                    <input type="hidden" name="previous-page" value="{{ request.path }}" />
+                  </ul>
+                </form>
+              </li>
+              <li class="nav-item">
+                <button id="toggle-subnav-theme"
+                        class="settings-button icon {% if request.COOKIES.theme == 'light' %}sun{% elif request.COOKIES.theme == 'dark' %}moon{% else %}circle{% endif %}"
+                        type="button"
+                        aria-controls="nav-sublist-theme"
+                        aria-expanded="false">
+                  <span class="current-theme-mobile">{% include "string.html" with name="base_theme_change_button_newstring" %}</span>
+                  <span class="current-theme-desktop">
+                    {% if request.COOKIES.theme == 'light' %}
+                      {% include "string.html" with name="base_theme_light_newstring" %}
+                    {% elif request.COOKIES.theme == 'dark' %}
+                      {% include "string.html" with name="base_theme_dark_newstring" %}
+                    {% elif request.COOKIES.theme == 'system' %}
+                      {% include "string.html" with name="base_theme_system_newstring" %}
+                    {% endif %}
+                  </span>
+                </button>
+                <ul id="nav-sublist-theme" class="nav-sublist">
+                  <li class="nav-subitem">
+                    <button class="icon system" id="theme-system" type="button">
+                      {% include "string.html" with name="base_theme_system_newstring" %}
+                    </button>
+                  </li>
+                  <li class="nav-subitem">
+                    <button class="icon sun" id="theme-light" type="button">
+                      {% include "string.html" with name="base_theme_light_newstring" %}
+                    </button>
+                  </li>
+                  <li class="nav-subitem">
+                    <button class="icon moon" id="theme-dark" type="button">
+                      {% include "string.html" with name="base_theme_dark_newstring" %}
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <main id="main-content">
+      {% block introcontent %}{% endblock %}
+      {% block maincontent %}{% endblock %}
+    </main>
+    <footer>
+      <div class="footer-nav">
+        <div class="container">
+          <a class="footer-logo"
+             href="/"
+             aria-label="{% include "string.html" with name="base_header_homepage_label_newstring" %}">
+            <img src="/static/logos/logo-white-2.svg"
+                 alt="Internet.nl Logo"
+                 width="227.5"
+                 height="50"
+                 loading="lazy">
+          </a>
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a class="icon" href="/test-tools">{% include "string.html" with name="base_footer_test_tools_newstring" %}</a>
+            </li>
+            <li class="nav-item">
+              <a class="icon" href="/faqs">{% include "string.html" with name="base_footer_knowledge_base_newstring" %}</a>
+            </li>
+            <li class="nav-item">
+              <a class="icon" href="/halloffame">{% include "string.html" with name="base_footer_hall_of_fame_newstring" %}</a>
+            </li>
+            <li class="nav-item">
+              <a class="icon" href="/articles">{% include "string.html" with name="base_footer_news_newstring" %}</a>
+            </li>
+            <li class="nav-item">
+              <a class="icon" href="/about">{% include "string.html" with name="base_footer_about_us_newstring" %}</a>
+            </li>
+            <li class="nav-item">
+              <a class="icon" href="/contact">{% include "string.html" with name="base_footer_service_contact_newstring" %}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bar">
+        <div class="container">
+          <ul class="footer-links">
+            <li class="footer-link">
+              <a href="/disclosure">{% include "string.html" with name="base_footer_vulnerability_report_newstring" %}</a>
+            </li>
+            <li class="footer-link">
+              <a href="/privacy">{% include "string.html" with name="base_footer_privacy_statement_newstring" %}</a>
+            </li>
+            <li class="footer-link">
+              <a href="/copyright">{% include "string.html" with name="base_footer_copyright_newstring" %}</a>
+            </li>
+            {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
+              <li class="footer-link">
+                <a href="/accessibility">{% include "string.html" with name="base_footer_accessibility_newstring" %}</a>
+              </li>
+            {% endif %}
+          </ul>
+          {% if "INTERNETNL_BRANDING"|get_settings_value %}
+            <ul class="footer-socials">
+              <li class="footer-social">
+                <a class="linkedin icon"
+                   href="https://www.linkedin.com/company/internet-nl/"
+                   target="_blank">
+                  <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_linkedin_newstring" %}</span>
+                </a>
+              </li>
+              <li class="footer-social">
+                <a class="mastodon icon"
+                   href="https://mastodon.nl/@internet_nl"
+                   target="_blank">
+                  <span class="visually-hidden">{% include "string.html" with name="base_footer_goto_mastodon_newstring" %}</span>
+                </a>
+              </li>
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+      <p class="version">v{{ "VERSION"|get_settings_value }}</p>
+    </footer>
+  </body>
 </html>

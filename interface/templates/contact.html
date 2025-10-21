@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block maincontent %}
+
+  <section class="intro-section bg-primary ellipse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">{% include "string.html" with name="contact_intro_title_newstring" %}</h1>
+        <p class="h1 color-secondary">{% include "string.html" with name="contact_intro_description_newstring" %}</p>
+      </hgroup>
+    </div>
+  </section>
+
+  <section class="contact-section alt">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          What is your return policy?
+        </summary>
+        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      </details>
+      <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
+    </div>
+  </section>
+
+  <section class="faq-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h2 color-secondary">{% include "string.html" with name="contact_get_in_touch_title_newstring" %}</h2>
+      <ul class="contact-card-list">
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
+            <p>{% include "string.html" with name="contact_page_email_description_newstring" %} <a href="mailto:vraag@internet.nl">vraag@internet.nl</a></p>
+          </hgroup>
+        </li>
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
+            <p>{% include "string.html" with name="contact_page_help_description_newstring" %}<a href="https://github.com/internetstandards/Internet.nl" target="_blank">Github account</a></p>
+          </hgroup>
+        </li>
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
+            <p>{% include "string.html" with name="contact_page_visit_description_newstring" %}</p>
+          </hgroup>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+{% endblock %}

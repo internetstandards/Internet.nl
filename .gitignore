@@ -27,6 +27,7 @@ __pycache__
 *.log
 *.pid
 /tests/.pytest_cache/
+/node_modules
 
 # Pycharm defaults
 .idea
@@ -79,3 +80,7 @@ docker/local.env
 
 # config dumps from make docker-compose-config-to-file
 config-compose-*
+
+# Frontend
+frontend/node_modules
+frontend/dist

@@ -1,0 +1,341 @@
+.test-section {
+  .container {
+    row-gap: 0.5rem;
+    padding-block: 2.5rem;
+    
+    @media (width >= 56.25rem) {
+      gap: 2rem;
+      padding-block: 3.25rem;
+    }
+  }
+
+  h1 {
+    padding-bottom: 0.5rem;
+
+    @media (width >= 56.25rem) {
+      grid-column: 2 / 12;
+      padding-bottom: 1rem;
+    }
+  }
+
+  &.home-variant {
+    h1 {
+      grid-column: span 12;
+    }
+  }
+}
+
+.test-sub-section {
+  .container {
+    row-gap: 1.5rem;
+    padding-block: 2rem;
+
+    @media (width >= 56.25rem) {
+      row-gap: 2rem;
+      padding-block: 2rem;
+    }
+  }
+
+  h2 {
+    text-align: center;
+
+    @media (width >= 56.25rem) {
+      grid-column: 2 / 12;
+    }
+  }
+}
+
+.test-card-large {
+  background: var(--card-bg-color-test);
+  padding: 2rem 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  
+
+  @media (width >= 56.25rem) {
+    padding: 3rem;
+    grid-column: 2 / 12;
+  }
+
+  h2 {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    color: var(--card-heading-color-test);
+    font: var(--card-header-xl);
+    padding-bottom: 1.5rem;
+
+    &.icon::before {
+      display: block;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
+    }
+  }
+
+  form {
+    display: grid;
+
+    @media (width >= 56.25rem) {
+      column-gap: 1.5rem;
+      row-gap: 0.5rem;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--card-body-color-test);
+    font: var(--card-header-xs);
+    padding-bottom: 1rem;
+    
+    @media (width >= 56.25rem) {
+      padding-bottom: 0;
+      grid-column: 1 / 2;
+    }
+  }
+
+  input {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background: var(--card-input-bg-color-test);
+    font: var(--card-input);
+    color: var(--card-body-color-test);
+    border: 1px solid currentcolor;
+    min-height: 3.25rem;
+
+    &::placeholder {
+      color: var(--placeholder-color);
+      opacity: 1;
+    }
+  }
+
+  button {
+    padding: 0.625rem 1rem;
+
+    @media (width >= 56.25rem) {
+      align-self: end;
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+    }
+  }
+
+  .invalid-domain {
+    color: var(--warning-color);
+    font: var(--card-body-m);
+    padding-bottom: 1rem;
+
+    @media (width >= 56.25rem) {
+      padding-block: 0.5rem 0;
+    }
+  }
+
+  &.home-variant {
+    @media (width >= 56.25rem) {
+      grid-column: span 8;
+    }
+
+    a {
+      display: none;
+      margin-top: 1.5rem;
+      align-items: center;
+      gap: 1rem;
+      color: var(--card-body-color-test);
+      font: var(--card-body-m);
+      border-bottom: 1px solid var(--transparent-100);
+      width: fit-content;
+      transition: border-bottom 0.3s;
+
+      &:hover {
+        border-bottom: 1px solid currentcolor;
+      }
+      
+      @media (width >= 56.25rem) {
+        display: flex;
+      }
+
+      &::after {
+        mask-image: url("/static/icons/arrow-right.svg");
+        display: block;
+      }
+    }
+  }
+
+  &.domain-variant,
+  &.mail-variant {
+    ul {
+      display: none;
+      gap: 3rem;
+      padding-top: 1.5rem;;
+  
+      @media (width >= 56.25rem) {
+        display: flex;
+      }
+    }
+  
+    li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--card-body-color-test);
+      font: var(--card-body-m);
+
+      .icon {
+        padding: 0.25rem;
+        background-color: var(--bg-color-primary);
+        border-radius: 100%;
+
+        &::before {
+          mask-image: url("/static/icons/checkmark.svg");
+          display: block;
+          padding: 0.25rem;
+          border-radius: 100%;
+        }
+      }
+    }
+  }
+
+  &.connection-variant {
+    form {
+      display: flex;
+    }
+
+    .button-container {
+      width: auto;
+    }
+
+    .primary-button {
+      width: 100%;
+    }
+  }
+
+  &.mail-variant {
+    .mail-input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      input {
+        padding-left: 3.125rem;
+        width: 100%;
+        min-height: 3.25rem;;
+      }
+
+      .mail-icon-container {
+        position: absolute;
+        pointer-events: none;
+        background-color: white;
+        padding: 0.375rem;
+        height: calc(100% - 0.125rem);
+        left: 0.125rem;
+        border-right: 1px solid currentcolor;
+        border-radius: 0.25rem 0 0 0.25rem;
+        display: flex;
+        align-items: center;
+
+        &::after {
+          mask-image: url("/static/icons/atsymbol.svg");
+          display: block;
+          background-color: #004654;
+        }
+      }
+    }
+  }
+}
+
+.test-card-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+
+  @media (width >= 56.25rem) {
+    gap: 1.5rem;
+    align-items: center;
+    grid-column: 2 / 12;
+    flex-direction: row;
+  }
+
+  &.home-variant {
+    @media (width >= 56.25rem) {
+      flex-direction: column;
+      grid-column: span 4;
+    }
+  }
+
+  &.hall-of-fame-variant {
+    @media (width >= 56.25rem) {
+      grid-column: span 12;
+    }
+  }
+}
+
+.test-card-small {
+  width: 100%;
+  height: 100%;
+
+  a {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    background: var(--card-bg-color-test);
+    border-radius: 0.5rem;
+    gap: 1rem;
+    justify-content: space-between;
+    height: 100%;
+
+    @media (width >= 56.25rem) {
+      padding: 2.25rem 1.5rem;
+    }
+  }
+
+  .card-container {
+    display: flex;
+    gap: 1rem;
+    color: var(--card-heading-color-test);
+
+    &::before {
+      display: block;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
+    }
+  }
+
+  hgroup {
+    @media (width >= 56.25rem) {
+      gap: 0.5rem;
+    }
+
+    h2, h3 {
+      font: var(--card-header-s);
+    }
+
+    p {
+      font: var(--card-body-m);
+      color: var(--card-body-color-test);
+    }
+  }
+}

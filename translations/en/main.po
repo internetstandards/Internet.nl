@@ -6,6 +6,32 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  main.po (PACKAGE VERSION)  #-#-#-#-#\n"
+"#-#-#-#-#  main.po (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-02-16 23:27+0100\n"
+"PO-Revision-Date: 2025-01-28 12:01:21.412632\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"#-#-#-#-#  63 (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-02-16 23:27+0100\n"
+"PO-Revision-Date: 2025-10-03 10:27:32.303872\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"#-#-#-#-#  63 (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
@@ -18,7 +44,381 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#, md-format
+msgid "action_card_description_newstring"
+msgstr "Forwarding the test results can help identify the causes and provide solutions."
+
+msgid "test_website_page_protect_intro_newstring"
+msgstr "Protect your website by testing"
+
+msgid "articles_latest_news_title_home_newstring"
+msgstr "Latest news"
+
+msgid "halloffame_first_button_home_newstring"
+msgstr "I want to test my domain"
+
+msgid "halloffame_second_button_home_newstring"
+msgstr "Discover the Hall of Fame"
+
+msgid "halloffame_intro_description_home_newstring"
+msgstr "The hosters listed below are included in the Hall of Fame because they meet the criteria for inclusion, such as achieving a double 100% score for their own domain."
+
+msgid "test_email_paragraph_alt_newstring"
+msgstr "Tested within 30 seconds!"
+
+msgid "test_connection_paragraph_alt_newstring"
+msgstr "Result within 30 seconds!"
+
+msgid "contact_intro_title_newstring"
+msgstr "Service & Contact"
+
+msgid "contact_intro_description_newstring"
+msgstr "How can we help you? Search directly for your answer or view our contact information."
+
+msgid "contact_get_in_touch_title_newstring"
+msgstr "Get in touch with us"
+
+msgid "faq_knowledge_title_newstring"
+msgstr "Our knowledge base"
+
+msgid "faq_knowledge_description_newstring"
+msgstr "Check out our knowledge base with all kinds of useful information and tips."
+
+msgid "faq_categories_title_newstring"
+msgstr "Categories"
+
+msgid "faq_knowledge_category_newstring"
+msgstr "Testing"
+
+msgid "faq_knowledge_heading_newstring"
+msgstr "Based on what are your domain names being tested"
+
+msgid "faq_knowledge_description_long_newstring"
+msgstr "Today Internet.nl launches a new version of its test tool in the form of a 'ready-to-use' package based on Docker..."
+
+msgid "faq_docker_title_newstring"
+msgstr "Internet.nl available as 'ready-to-use' Docker package"
+
+msgid "halloffame_intro_title_newstring"
+msgstr "Hall of fame"
+
+msgid "halloffame_intro_description_newstring"
+msgstr "If your website or email scores 100% on Internet.nl, your domain name will be included in the relevant Hall of Fame"
+
+msgid "halloffame_filter_label_newstring"
+msgstr "Filter by:"
+
+msgid "halloffame_filter_champions_newstring"
+msgstr "Champions"
+
+msgid "halloffame_champions_title_newstring"
+msgstr "Champions"
+
+msgid "halloffame_filter_hosters_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_title_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_hosters_description_newstring"
+msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum molestie, laoreet libero. Cras quis augue eget risus porttitor finibus."
+
+msgid "halloffame_what_test_title_newstring"
+msgstr "What do you want to test?"
+
+msgid "base_probe_score_loading_newstring"
+msgstr "Loading score for:"
+
+msgid "base_results_score_for_newstring"
+msgstr "Score for:"
+
+msgid "base_results_test_details_newstring"
+msgstr "Test details"
+
+msgid "base_results_next_actions_newstring"
+msgstr "Next actions"
+
+msgid "base_results_test_website_domain_newstring"
+msgstr "Test your website"
+
+msgid "base_results_test_email_domain_newstring"
+msgstr "Test your email domain"
+
+msgid "base_results_test_connection_newstring"
+msgstr "Test your connection"
+
+msgid "base_results_repeat_test_newstring"
+msgstr "Repeat the test"
+
+msgid "base_results_test_explanation_newstring"
+msgstr "Explanation of test report"
+
+msgid "base_results_share_results_newstring"
+msgstr "Share results with hoster"
+
+msgid "base_results_share_results_clicked_newstring"
+msgstr "Copied to clipboard"
+
+msgid "base_header_skip_to_main_newstring"
+msgstr "Skip to main content"
+
+msgid "base_header_menu_newstring"
+msgstr "Menu"
+
+msgid "base_header_close_newstring"
+msgstr "Close"
+
+msgid "base_header_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_knowledge_base_newstring"
+msgstr "Knowledge base"
+
+msgid "base_footer_hall_of_fame_newstring"
+msgstr "Hall of fame"
+
+msgid "base_footer_news_newstring"
+msgstr "News"
+
+msgid "base_footer_about_us_newstring"
+msgstr "About us"
+
+msgid "base_footer_service_contact_newstring"
+msgstr "Service & contact"
+
+msgid "base_footer_vulnerability_report_newstring"
+msgstr "Report vulnerability"
+
+msgid "base_footer_privacy_statement_newstring"
+msgstr "Privacy statement"
+
+msgid "base_footer_copyright_newstring"
+msgstr "Copyright"
+
+msgid "base_footer_accessibility_newstring"
+msgstr "Accessibility"
+
+msgid "base_footer_goto_x_newstring"
+msgstr "Go to our X profile"
+
+msgid "base_footer_goto_linkedin_newstring"
+msgstr "Go to our LinkedIn profile"
+
+msgid "base_footer_goto_mastodon_newstring"
+msgstr "Go to our Mastodon profile"
+
+msgid "base_header_homepage_label_newstring"
+msgstr "Internet.nl Homepage"
+
+msgid "base_header_test_website_newstring"
+msgstr "Test your website"
+
+msgid "base_header_test_connection_newstring"
+msgstr "Test your connection"
+
+msgid "base_header_test_email_newstring"
+msgstr "Test your email"
+
+msgid "base_header_contact_newstring"
+msgstr "Contact"
+
+msgid "base_language_select_label_newstring"
+msgstr "Choose a language"
+
+msgid "base_language_change_button_newstring"
+msgstr "Change language"
+
+msgid "base_theme_toggle_mode_newstring"
+msgstr "Mode"
+
+msgid "base_theme_toggle_to_dark_newstring"
+msgstr "Switch to dark theme"
+
+msgid "base_theme_toggle_to_light_newstring"
+msgstr "Switch to light theme"
+
+msgid "base_theme_change_button_newstring"
+msgstr "Change theme"
+
+msgid "base_theme_light_newstring"
+msgstr "Light"
+
+msgid "base_theme_dark_newstring"
+msgstr "Dark"
+
+msgid "base_theme_system_newstring"
+msgstr "OS Default"
+
+msgid "about_section_title_newstring"
+msgstr "About us"
+
+msgid "about_section_page_intro_newstring"
+msgstr "We help you test and identify performance issues such as slow load times and server errors."
+
+msgid "about_section_intro_newstring"
+msgstr "I want more information about these organizations"
+
+msgid "about_mission_title_newstring"
+msgstr "Our mission"
+
+msgid "about_mission_heading_newstring"
+msgstr "The goal of the platform is to further increase the use of modern internet standards and make it more accessible, secure, and reliable for everyone."
+
+msgid "about_mission_description_newstring"
+msgstr "The Internet.nl test tool is an initiative of the Platform Internet Standards. It is a collaboration between the Internet community and the Dutch government. Currently, the following parties participate in the platform:"
+
+msgid "about_quote_newstring"
+msgstr "\"The goal of the platform is to further increase the use of modern internet standards and make it more accessible, secure, and reliable for everyone.\""
+
+msgid "about_quote_author_newstring"
+msgstr "Coen Wesselman"
+
+msgid "about_quote_role_newstring"
+msgstr "Founder Internet.nl"
+
+msgid "about_why_test_title_newstring"
+msgstr "Why should you test your standards?"
+
+msgid "about_why_test_description_newstring"
+msgstr "The Internet.nl test tool is an initiative of the Platform Internet Standards. The goal of the platform is to jointly increase the use of modern internet standards to make the internet more accessible, safer and more reliable for everyone."
+
+msgid "about_reason_1_title_newstring"
+msgstr "Find security vulnerabilities and weaknesses"
+
+msgid "about_reason_1_description_newstring"
+msgstr "This helps prevent cyber attacks, hacking, and data breaches."
+
+msgid "about_reason_2_title_newstring"
+msgstr "Ensure compatibility"
+
+msgid "about_reason_2_description_newstring"
+msgstr "Testing ensures users have an accessible, consistent, and optimal experience."
+
+msgid "about_reason_3_title_newstring"
+msgstr "Identify performance issues"
+
+msgid "about_reason_3_description_newstring"
+msgstr "Testing helps identify performance issues like slow loading times and server errors."
+
+msgid "about_test_button_newstring"
+msgstr "I want to test"
+
+msgid "about_successful_tests_newstring"
+msgstr "successful tests!"
+
+msgid "articles_title_newstring"
+msgstr "News & Articles"
+
+msgid "articles_subtitle_newstring"
+msgstr "View our news with updates and useful information."
+
+msgid "articles_latest_news_title_newstring"
+msgstr "Our latest news"
+
+msgid "articles_load_more_button_newstring"
+msgstr "Load more articles"
+
+msgid "article_related_news_title_newstring"
+msgstr "Related news"
+
+msgid "article_read_more_button_newstring"
+msgstr "Read more articles"
+
+msgid "faq_title_newstring"
+msgstr "Frequently asked questions"
+
+msgid "faq_view_all_button_newstring"
+msgstr "View all frequently asked questions"
+
+msgid "contact_card_title_newstring"
+msgstr "Contact us"
+
+msgid "contact_card_subtitle_newstring"
+msgstr "Do you have a question, comment or complaint?<br>We are happy to help."
+
+msgid "contact_email_title_newstring"
+msgstr "Email"
+
+msgid "contact_page_email_description_newstring"
+msgstr "Question or complaint?<br>You can mail us at"
+
+msgid "contact_email_description_newstring"
+msgstr "Contact us whenever"
+
+msgid "contact_help_title_newstring"
+msgstr "Technical help"
+
+msgid "contact_page_help_description_newstring"
+msgstr "We are happy to help you on our"
+
+msgid "contact_help_description_newstring"
+msgstr "We are happy to help you"
+
+msgid "contact_visit_title_newstring"
+msgstr "Visit"
+
+msgid "contact_page_visit_description_newstring"
+msgstr "Maanweg 174 (8e verdieping)<br>2516 AB Den Haag"
+
+msgid "contact_visit_description_newstring"
+msgstr "Our office address"
+
+msgid "load_more_button_newstring"
+msgstr "Load more"
+
+msgid "test_website_protect_intro_newstring"
+msgstr "Protect your website and your users by testing."
+
+msgid "test_website_domain_title_newstring"
+msgstr "Test your website domain"
+
+msgid "test_website_domain_label_newstring"
+msgstr "Your website domain"
+
+msgid "test_start_button_newstring"
+msgstr "Start the test"
+
+msgid "test_usp_one_newstring"
+msgstr "USP 1 stands here"
+
+msgid "test_usp_two_newstring"
+msgstr "USP 2 stands here"
+
+msgid "test_usp_three_newstring"
+msgstr "USP 3 stands here"
+
+msgid "test_more_tests_title_newstring"
+msgstr "What else do you want to test?"
+
+msgid "test_email_title_newstring"
+msgstr "Test your email"
+
+msgid "test_email_stats_newstring"
+msgstr "tests with 100% score this week!"
+
+msgid "test_connection_title_newstring"
+msgstr "Test your connection"
+
+msgid "test_connection_stats_newstring"
+msgstr "tests with 100% score this week!"
+
+msgid "test_email_protect_intro_newstring"
+msgstr "Protect your email by testing."
+
+msgid "test_email_domain_label_newstring"
+msgstr "Your email domain"
+
+msgid "test_website_stats_newstring"
+msgstr "successful tests conducted this week!"
+
+msgid "test_connection_protect_intro_newstring"
+msgstr "Protect your connection by testing."
+
+msgid "test_more_info_link_newstring"
+msgstr "More information about the test"
+
 msgid "about contact"
 msgstr ""
 "## Contact\n"
@@ -37,7 +437,6 @@ msgstr ""
 "Fingerprint: ACB7 8829 4C7E 12BA E922 8C60 D894 E15F 4502 8563  \n"
 "Expiration date: 28th of March 2028"
 
-#, md-format
 msgid "about content"
 msgstr ""
 "# About Internet.nl\n"
@@ -256,8 +655,7 @@ msgid "base test website label"
 msgstr "Test your website"
 
 msgid "base test website text"
-msgstr ""
-"Modern address? Signed domain? Secure connection? Route authorisation?"
+msgstr "Modern address? Signed domain? Secure connection? Route authorisation?"
 
 msgid "base test website title"
 msgstr "About the website test"
@@ -437,8 +835,7 @@ msgid "detail conn ipv6 privacy verdict bad"
 msgstr "You are using SLAAC *without* 'IPv6 Privacy Extensions'."
 
 msgid "detail conn ipv6 privacy verdict good"
-msgstr ""
-"You have enabled 'IPv6 Privacy Extensions' (or you are not using SLAAC)."
+msgstr "You have enabled 'IPv6 Privacy Extensions' (or you are not using SLAAC)."
 
 msgid "detail conn ipv6 resolver-conn exp"
 msgstr ""
@@ -485,10 +882,7 @@ msgid "detail mail auth dkim verdict good"
 msgstr "Your domain supports DKIM records."
 
 msgid "detail mail auth dkim verdict no-email"
-msgstr ""
-"Your domain does *not* support DKIM records. However because your DMARC and "
-"SPF records hint that no mail is sent from your domain, DKIM is not "
-"necessary and this subtest is skipped."
+msgstr "Your domain does *not* support DKIM records. However because your DMARC and SPF records hint that no mail is sent from your domain, DKIM is not necessary and this subtest is skipped."
 
 msgid "detail mail auth dmarc exp"
 msgstr ""
@@ -554,10 +948,7 @@ msgid "detail mail auth dmarc-policy verdict bad"
 msgstr "Your DMARC policy is *not* syntactically correct."
 
 msgid "detail mail auth dmarc-policy verdict external"
-msgstr ""
-"The domain of the external mail address following `rua=` and/or `ruf=` has "
-"*no* (valid) authorisation record for receiving DMARC reports for the tested"
-" domain. "
+msgstr "The domain of the external mail address following `rua=` and/or `ruf=` has *no* (valid) authorisation record for receiving DMARC reports for the tested domain. "
 
 msgid "detail mail auth dmarc-policy verdict good"
 msgstr "Your DMARC policy is sufficiently strict."
@@ -611,23 +1002,13 @@ msgid "detail mail auth spf-policy verdict good"
 msgstr "Your SPF policy is sufficiently strict."
 
 msgid "detail mail auth spf-policy verdict include"
-msgstr ""
-"Your SPF policy is *not* sufficiently strict. The 'include' mechanism in "
-"your SPF record points to an insufficiently strict SPF policy or a non-"
-"existing SPF record."
+msgstr "Your SPF policy is *not* sufficiently strict. The 'include' mechanism in your SPF record points to an insufficiently strict SPF policy or a non-existing SPF record."
 
 msgid "detail mail auth spf-policy verdict max-lookups"
-msgstr ""
-"Your SPF policy is *not* effective as it requires more than the allowed 10 "
-"DNS lookups. Each of the following SPF terms counts as a DNS lookup: "
-"`redirect`, `include`, `a`, `mx`, `ptr` and `exist`. The SPF terms `all`, "
-"`ip4`, `ip6` and `exp` do not count as DNS lookups."
+msgstr "Your SPF policy is *not* effective as it requires more than the allowed 10 DNS lookups. Each of the following SPF terms counts as a DNS lookup: `redirect`, `include`, `a`, `mx`, `ptr` and `exist`. The SPF terms `all`, `ip4`, `ip6` and `exp` do not count as DNS lookups."
 
 msgid "detail mail auth spf-policy verdict redirect"
-msgstr ""
-"Your SPF policy is *not* sufficiently strict. The 'redirect' modifier in "
-"your SPF record points to an insufficiently strict SPF policy or a non-"
-"existing SPF record."
+msgstr "Your SPF policy is *not* sufficiently strict. The 'redirect' modifier in your SPF record points to an insufficiently strict SPF policy or a non-existing SPF record."
 
 msgid "detail mail dnssec exists exp"
 msgstr ""
@@ -644,8 +1025,7 @@ msgid "detail mail dnssec exists tech table"
 msgstr "Email address domain|Registrar"
 
 msgid "detail mail dnssec exists verdict bad"
-msgstr ""
-"Your email address domain is insecure, because it is *not* DNSSEC signed."
+msgstr "Your email address domain is insecure, because it is *not* DNSSEC signed."
 
 msgid "detail mail dnssec exists verdict good"
 msgstr "Your email address domain is DNSSEC signed."
@@ -687,52 +1067,22 @@ msgid "detail mail dnssec mx-exists verdict good"
 msgstr "All your mail server domains are DNSSEC signed."
 
 msgid "detail mail dnssec mx-exists verdict invalid-null-mx"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, either your domain does not have A/AAAA records, "
-"making the \"Null MX\" record unnecessary. Or on your domain a receiving "
-"mail server is set by another MX record, making the \"Null MX\" conflicting."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, either your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary. Or on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting."
 
 msgid "detail mail dnssec mx-exists verdict no-mailservers"
-msgstr ""
-"The SPF record on your domain indicates that your domain may be used for "
-"sending mail. However, your domain does not have a receiving mail server "
-"(MX), which could hinder deliverability of your sent mails because not "
-"having an MX may be seen by receivers as an indicator for spam. Therefore if"
-" you really want to send mail from this domain, configure an MX. However, if"
-" you do not want to send mail from this domain, configure an SPF record with"
-" the `-all` term only and besides a \"Null MX\" record if your domain has "
-"A/AAAA records. Because of your configuration, the subtests in the STARTTLS "
-"and DANE category and the mail server specific subtests in the IPv6 and "
-"DNSSEC categories are not applicable."
+msgstr "The SPF record on your domain indicates that your domain may be used for sending mail. However, your domain does not have a receiving mail server (MX), which could hinder deliverability of your sent mails because not having an MX may be seen by receivers as an indicator for spam. Therefore if you really want to send mail from this domain, configure an MX. However, if you do not want to send mail from this domain, configure an SPF record with the `-all` term only and besides a \"Null MX\" record if your domain has A/AAAA records. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "detail mail dnssec mx-exists verdict no-null-mx"
-msgstr ""
-"No receiving mail servers (MX) are set on your domain that has A/AAAA "
-"records. We recommend you to explicitly indicate that your domain does not "
-"accept email by configuring a \"Null MX\" record. Do not use a \"Null MX\" "
-"record and set an MX if you do want to send email from this domain name, as "
-"receiving servers may reject email that has an invalid return address."
+msgstr "No receiving mail servers (MX) are set on your domain that has A/AAAA records. We recommend you to explicitly indicate that your domain does not accept email by configuring a \"Null MX\" record. Do not use a \"Null MX\" record and set an MX if you do want to send email from this domain name, as receiving servers may reject email that has an invalid return address."
 
 msgid "detail mail dnssec mx-exists verdict null-mx"
-msgstr ""
-"Your domain name that has A/AAAA records clearly indicates with a \"Null "
-"MX\" record that it does not accept e-mail. This is fine if you do not want "
-"to receive email. Do not use a \"Null MX\" record and set an MX if you do "
-"want to send email from this domain name, as receiving servers may reject "
-"email that has an invalid return address."
+msgstr "Your domain name that has A/AAAA records clearly indicates with a \"Null MX\" record that it does not accept e-mail. This is fine if you do not want to receive email. Do not use a \"Null MX\" record and set an MX if you do want to send email from this domain name, as receiving servers may reject email that has an invalid return address."
 
 msgid "detail mail dnssec mx-exists verdict null-mx-with-other-mx"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, on your domain a receiving mail server is set by "
-"another MX record, making the \"Null MX\" conflicting."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting."
 
 msgid "detail mail dnssec mx-exists verdict null-mx-without-a-aaaa"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, your domain does not have A/AAAA records, making the "
-"\"Null MX\" record unnecessary."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary."
 
 msgid "detail mail dnssec mx-exists verdict resolver-error"
 msgstr ""
@@ -776,10 +1126,7 @@ msgstr ""
 " valid."
 
 msgid "detail mail dnssec mx-valid verdict unsupported-ds-algo"
-msgstr ""
-"At least one of your mail server domains is signed with an algorithm that "
-"our validating resolver currently does not support. Therefore we are not "
-"able to check the validity of its DNSSEC signature."
+msgstr "At least one of your mail server domains is signed with an algorithm that our validating resolver currently does not support. Therefore we are not able to check the validity of its DNSSEC signature."
 
 msgid "detail mail dnssec valid exp"
 msgstr ""
@@ -805,14 +1152,10 @@ msgstr ""
 "soon as possible."
 
 msgid "detail mail dnssec valid verdict good"
-msgstr ""
-"Your email address domain is secure, because its DNSSEC signature is valid."
+msgstr "Your email address domain is secure, because its DNSSEC signature is valid."
 
 msgid "detail mail dnssec valid verdict unsupported-ds-algo"
-msgstr ""
-"Your email address domain is signed with an algorithm that our validating "
-"resolver currently does not support. Therefore we are not able to check the "
-"validity of its DNSSEC signature."
+msgstr "Your email address domain is signed with an algorithm that our validating resolver currently does not support. Therefore we are not able to check the validity of its DNSSEC signature."
 
 msgid "detail mail ipv6 mx-AAAA exp"
 msgstr ""
@@ -840,53 +1183,22 @@ msgid "detail mail ipv6 mx-AAAA verdict good"
 msgstr "All receiving mail servers on your domain have an IPv6 address."
 
 msgid "detail mail ipv6 mx-AAAA verdict invalid-null-mx"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, either your domain does not have A/AAAA records, "
-"making the \"Null MX\" record unnecessary. Or on your domain a receiving "
-"mail server is set by another MX record, making the \"Null MX\" conflicting."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, either your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary. Or on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting."
 
 msgid "detail mail ipv6 mx-AAAA verdict no-null-mx"
-msgstr ""
-"No receiving mail servers (MX) are set on your domain that has A/AAAA "
-"records and has an SPF record with only the term -all. We recommend you to "
-"set a \"Null MX\" record to explicitly indicate that your domain does not "
-"accept email. Because of your configuration, the subtests in the STARTTLS "
-"and DANE category and the mail server specific subtests in the IPv6 and "
-"DNSSEC categories are not applicable."
+msgstr "No receiving mail servers (MX) are set on your domain that has A/AAAA records and has an SPF record with only the term -all. We recommend you to set a \"Null MX\" record to explicitly indicate that your domain does not accept email. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "detail mail ipv6 mx-AAAA verdict null-mx"
-msgstr ""
-"Your domain name that has A/AAAA records clearly indicates with a \"Null "
-"MX\" record that it does not accept e-mail. This is fine if you do not want "
-"to receive email. Do not use a \"Null MX\" record and set an MX if you do "
-"want to send email from this domain name, as receiving servers may reject "
-"email that has an invalid return address."
+msgstr "Your domain name that has A/AAAA records clearly indicates with a \"Null MX\" record that it does not accept e-mail. This is fine if you do not want to receive email. Do not use a \"Null MX\" record and set an MX if you do want to send email from this domain name, as receiving servers may reject email that has an invalid return address."
 
 msgid "detail mail ipv6 mx-AAAA verdict null-mx-with-other-mx"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, on your domain a receiving mail server is set by "
-"another MX record, making the \"Null MX\" conflicting."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting."
 
 msgid "detail mail ipv6 mx-AAAA verdict null-mx-without-a-aaaa"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, your domain does not have A/AAAA records, making the "
-"\"Null MX\" record unnecessary."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary."
 
 msgid "detail mail ipv6 mx-AAAA verdict other"
-msgstr ""
-"The SPF record on your domain indicates that your domain may be used for "
-"sending mail. However, your domain does not have a receiving mail server "
-"(MX), which could hinder deliverability of your sent mails because not "
-"having an MX may be seen by receivers as an indicator for spam. Therefore if"
-" you really want to send mail from this domain, configure an MX. However, if"
-" you do not want to send mail from this domain, configure an SPF record with"
-" the `-all` term only and besides a \"Null MX\" record if your domain has "
-"A/AAAA records. Because of your configuration, the subtests in the STARTTLS "
-"and DANE category and the mail server specific subtests in the IPv6 and "
-"DNSSEC categories are not applicable."
+msgstr "The SPF record on your domain indicates that your domain may be used for sending mail. However, your domain does not have a receiving mail server (MX), which could hinder deliverability of your sent mails because not having an MX may be seen by receivers as an indicator for spam. Therefore if you really want to send mail from this domain, configure an MX. However, if you do not want to send mail from this domain, configure an SPF record with the `-all` term only and besides a \"Null MX\" record if your domain has A/AAAA records. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "detail mail ipv6 mx-reach exp"
 msgstr ""
@@ -929,19 +1241,13 @@ msgid "detail mail rpki exists tech table"
 msgstr "Mail server|IP address|RPKI Route Origin Authorization"
 
 msgid "detail mail rpki exists verdict bad"
-msgstr ""
-"For at least one of the IP addresses of your receiving mail server(s) *no* "
-"RPKI Route Origin Authorisation (ROA) is published."
+msgstr "For at least one of the IP addresses of your receiving mail server(s) *no* RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail mail rpki exists verdict good"
-msgstr ""
-"For all IP addresses of your receiving mail server(s) an RPKI Route Origin "
-"Authorisation (ROA) is published."
+msgstr "For all IP addresses of your receiving mail server(s) an RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail mail rpki exists verdict no-addresses"
-msgstr ""
-"Your domain does *not* contain any receiving mail servers. Therefore, this "
-"subtest could not be performed."
+msgstr "Your domain does *not* contain any receiving mail servers. Therefore, this subtest could not be performed."
 
 msgid "detail mail rpki mx-ns-exists exp"
 msgstr ""
@@ -960,19 +1266,13 @@ msgid "detail mail rpki mx-ns-exists tech table"
 msgstr "Name server of MX|IP address|RPKI Route Origin Authorization"
 
 msgid "detail mail rpki mx-ns-exists verdict bad"
-msgstr ""
-"For at least one of the IP addresses of the name servers of your mail "
-"server(s) *no* RPKI Route Origin Authorisation (ROA) is published."
+msgstr "For at least one of the IP addresses of the name servers of your mail server(s) *no* RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail mail rpki mx-ns-exists verdict good"
-msgstr ""
-"For all IP addresses of the name servers of your mail server(s) an RPKI "
-"Route Origin Authorisation (ROA) is published."
+msgstr "For all IP addresses of the name servers of your mail server(s) an RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail mail rpki mx-ns-exists verdict no-addresses"
-msgstr ""
-"Your domain does *not* contain any mail servers. Therefore, this subtest "
-"could not be performed."
+msgstr "Your domain does *not* contain any mail servers. Therefore, this subtest could not be performed."
 
 msgid "detail mail rpki mx-ns-valid exp"
 msgstr ""
@@ -1005,40 +1305,19 @@ msgid "detail mail rpki mx-ns-valid label"
 msgstr "Route announcement validity"
 
 msgid "detail mail rpki mx-ns-valid tech table"
-msgstr ""
-"Name server of MX|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin "
-"Validation state"
+msgstr "Name server of MX|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation state"
 
 msgid "detail mail rpki mx-ns-valid verdict bad"
-msgstr ""
-"At least one IP address of the name servers of your receiving mail servers "
-"has a `NotFound` validation state. There is *no* RPKI Route Origin "
-"Authorization (ROA) published for the route announcement of each of the "
-"affected IP addresses."
+msgstr "At least one IP address of the name servers of your receiving mail servers has a `NotFound` validation state. There is *no* RPKI Route Origin Authorization (ROA) published for the route announcement of each of the affected IP addresses."
 
 msgid "detail mail rpki mx-ns-valid verdict good"
-msgstr ""
-"All IP addresses of the name servers of your receiving mail servers have a "
-"`Valid` validation state. The route announcement of these IP addresses is "
-"matched by the published RPKI Route Origin Authorisation (ROA)."
+msgstr "All IP addresses of the name servers of your receiving mail servers have a `Valid` validation state. The route announcement of these IP addresses is matched by the published RPKI Route Origin Authorisation (ROA)."
 
 msgid "detail mail rpki mx-ns-valid verdict invalid"
-msgstr ""
-"At least one IP address of the name servers of your receiving mail servers "
-"has an `Invalid` validation state. The route announcement of the affected IP"
-" addresses is *not* matched by the published RPKI Route Origin Authorisation"
-" (ROA). This indicates an unintentional or malicious route configuration "
-"error, that can be caused by your mail hoster (internal error) or by a third"
-" party (external error). In either case, it increases the risk for "
-"unreachability of your server or for interception of Internet traffic to "
-"your server. Contact your mail hoster as soon as possible. In the case of an"
-" internal error, your mail hoster should ask its network provider that owns "
-"your server's IP addresses to fix the route configuration error."
+msgstr "At least one IP address of the name servers of your receiving mail servers has an `Invalid` validation state. The route announcement of the affected IP addresses is *not* matched by the published RPKI Route Origin Authorisation (ROA). This indicates an unintentional or malicious route configuration error, that can be caused by your mail hoster (internal error) or by a third party (external error). In either case, it increases the risk for unreachability of your server or for interception of Internet traffic to your server. Contact your mail hoster as soon as possible. In the case of an internal error, your mail hoster should ask its network provider that owns your server's IP addresses to fix the route configuration error."
 
 msgid "detail mail rpki mx-ns-valid verdict not-routed"
-msgstr ""
-"This subtest did *not* run, because *no* route announcement was available "
-"for any of the IP addresses."
+msgstr "This subtest did *not* run, because *no* route announcement was available for any of the IP addresses."
 
 msgid "detail mail rpki valid exp"
 msgstr ""
@@ -1071,79 +1350,19 @@ msgid "detail mail rpki valid label"
 msgstr "Route announcement validity"
 
 msgid "detail mail rpki valid tech table"
-msgstr ""
-"Mail server|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation "
-"state"
+msgstr "Mail server|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation state"
 
 msgid "detail mail rpki valid verdict bad"
-msgstr ""
-"At least one IP address of your receiving mail servers has a `NotFound` "
-"validation state. There is *no* RPKI Route Origin Authorization (ROA) "
-"published for the route announcement of each of the affected IP addresses."
+msgstr "At least one IP address of your receiving mail servers has a `NotFound` validation state. There is *no* RPKI Route Origin Authorization (ROA) published for the route announcement of each of the affected IP addresses."
 
 msgid "detail mail rpki valid verdict good"
-msgstr ""
-"All IP addresses of your receiving mail servers have a `Valid` validation "
-"state. The route announcement of these IP addresses is matched by the "
-"published RPKI Route Origin Authorisation (ROA)."
+msgstr "All IP addresses of your receiving mail servers have a `Valid` validation state. The route announcement of these IP addresses is matched by the published RPKI Route Origin Authorisation (ROA)."
 
 msgid "detail mail rpki valid verdict invalid"
-msgstr ""
-"At least one IP address of your receiving mail servers has an `Invalid` "
-"validation state. The route announcement of the affected IP addresses is "
-"*not* matched by the published RPKI Route Origin Authorisation (ROA). This "
-"indicates an unintentional or malicious route configuration error, that can "
-"be caused by your mail hoster (internal error) or by a third party (external"
-" error). In either case, it increases the risk for unreachability of your "
-"server or for interception of Internet traffic to your server. Contact your "
-"mail hoster as soon as possible. In the case of an internal error, your mail"
-" hoster should ask its network provider that owns your server's IP addresses"
-" to fix the route configuration error."
+msgstr "At least one IP address of your receiving mail servers has an `Invalid` validation state. The route announcement of the affected IP addresses is *not* matched by the published RPKI Route Origin Authorisation (ROA). This indicates an unintentional or malicious route configuration error, that can be caused by your mail hoster (internal error) or by a third party (external error). In either case, it increases the risk for unreachability of your server or for interception of Internet traffic to your server. Contact your mail hoster as soon as possible. In the case of an internal error, your mail hoster should ask its network provider that owns your server's IP addresses to fix the route configuration error."
 
 msgid "detail mail rpki valid verdict not-routed"
-msgstr ""
-"This subtest did *not* run, because *no* route announcement was available "
-"for any of the IP addresses."
-
-msgid "detail mail tls caa exp"
-msgstr ""
-"We check if the name servers of each of your receiving mail servers (MX) contain one or more CAA records, that are syntactically valid and sufficiently protective.\n"
-"\n"
-"Certification Authority Authorisation (CAA) allows you as a domain name holder to specify one or more certificate authority authorised to issue certificates for your mail server domain names.\n"
-"A certificate authority must not issue a certificate unless the certificate authority determines that the certificate request is consistent with the applicable CAA records.\n"
-"\n"
-"Note that CAA records are located during validation by walking up the DNS hierarchy until one or more records are found.\n"
-"For example, if no CAA records are found on `sub.example.nl`, `example.nl` will be queried.\n"
-"The domain were the applicable CAA records are found is shown in the table with technical details below.\n"
-"\n"
-"The verdict is good if one or more CAA records were found that all have correct syntax, and at least one of these CAA records has the `issue` tag.\n"
-"Otherwise, the test will result in a fail.\n"
-"It is not checked whether the certificate authority of the current TLS certificate matches one or more of the `issue` and `issuewild` values, i.e., whether the current certificate could be reissued at this time.\n"
-"\n"
-"If your are using the Automatic Certificate Management Environment (ACME) standard and your certificate authority supports it, we recommend you to use the parameters `validationmethods` and `accounturi` to further restrict isssuance by the authorised certificate authority. Furthermore, it is recommended to add `issuewild`, `issuemail` and `issuevmc` with an empty `;` if you do not use wildcard, S/MIME and/or BIMI certificates respectively. This is especially important for `issuemail` and `issuevmc`, because in their absence there is no fallback to `issue` and thus any certificate authority can still issue S/MIME and/or BIMI certificates for your domain.\n"
-"\n"
-"We expect URLs in `iodef` to be secure (i.e. use HTTPS scheme).\n"
-"Furthermore, to prevent suppression or spoofing of CAA records we strongly recommend you to use DNSSEC, although this CAA test does not specifically test for DNSSEC.\n"
-"\n"
-"*Requirement level: Recommended*"
-
-msgid "detail mail tls caa label"
-msgstr "CAA for mail server"
-
-msgid "detail mail tls caa tech table"
-msgstr "Mail server|Findings"
-
-msgid "detail mail tls caa verdict bad"
-msgstr "Your mail server does *not* have CAA."
-
-msgid "detail mail tls caa verdict good"
-msgstr "Your mail server has a valid, sufficiently protective CAA. "
-
-msgid "detail mail tls caa verdict insufficient"
-msgstr "Your mail server has a valid, but *unsufficiently* protective CAA."
-
-msgid "detail mail tls caa verdict syntax-error"
-msgstr "Your mail server has an *invalid* CAA."
+msgstr "This subtest did *not* run, because *no* route announcement was available for any of the IP addresses."
 
 msgid "detail mail tls cert-hostmatch exp"
 msgstr ""
@@ -1204,20 +1423,13 @@ msgid "detail mail tls cert-pubkey tech table"
 msgstr "Mail server (MX)|Affected signature parameters|Status"
 
 msgid "detail mail tls cert-pubkey verdict bad"
-msgstr ""
-"The digital signature of at least one of your mail server certificates uses "
-"*insufficiently* secure parameters."
+msgstr "The digital signature of at least one of your mail server certificates uses *insufficiently* secure parameters."
 
 msgid "detail mail tls cert-pubkey verdict good"
-msgstr ""
-"The digital signatures of all your mail server certificates use secure "
-"parameters."
+msgstr "The digital signatures of all your mail server certificates use secure parameters."
 
 msgid "detail mail tls cert-pubkey verdict phase-out"
-msgstr ""
-"The digital signature of at least one of your mail server certificates uses "
-"parameters that have a *phase out* status, because they are known to be "
-"fragile and are at risk of of becoming *insufficiently* secure."
+msgstr "The digital signature of at least one of your mail server certificates uses parameters that have a *phase out* status, because they are known to be fragile and are at risk of of becoming *insufficiently* secure."
 
 msgid "detail mail tls cert-signature exp"
 msgstr ""
@@ -1239,13 +1451,10 @@ msgid "detail mail tls cert-signature tech table"
 msgstr "Mail server (MX)|Affected hash algorithm|Status"
 
 msgid "detail mail tls cert-signature verdict bad"
-msgstr ""
-"At least one of your mail server certificates is signed using a hash "
-"algorithm that is *insufficiently* secure."
+msgstr "At least one of your mail server certificates is signed using a hash algorithm that is *insufficiently* secure."
 
 msgid "detail mail tls cert-signature verdict good"
-msgstr ""
-"All your mail server certificates are signed using a secure hash algorithm."
+msgstr "All your mail server certificates are signed using a secure hash algorithm."
 
 msgid "detail mail tls cert-trust exp"
 msgstr ""
@@ -1293,28 +1502,19 @@ msgid "detail mail tls cipher-order label"
 msgstr "Cipher order"
 
 msgid "detail mail tls cipher-order tech table"
-msgstr ""
-"Mail server (MX)|First found affected cipher pair|Violated rule # ('II-B')"
+msgstr "Mail server (MX)|First found affected cipher pair|Violated rule # ('II-B')"
 
 msgid "detail mail tls cipher-order verdict bad"
-msgstr ""
-"At least one of your mail servers does *not* enforce its own cipher "
-"preference ('I')."
+msgstr "At least one of your mail servers does *not* enforce its own cipher preference ('I')."
 
 msgid "detail mail tls cipher-order verdict good"
-msgstr ""
-"All your mail servers enforce their own cipher preference ('I'), and offer "
-"ciphers in accordance with the prescribed ordering ('II')."
+msgstr "All your mail servers enforce their own cipher preference ('I'), and offer ciphers in accordance with the prescribed ordering ('II')."
 
 msgid "detail mail tls cipher-order verdict na"
-msgstr ""
-"This subtest is not applicable as your mail server supports 'Good' ciphers "
-"only."
+msgstr "This subtest is not applicable as your mail server supports 'Good' ciphers only."
 
 msgid "detail mail tls cipher-order verdict seclevel-bad"
-msgstr ""
-"At least one of your mail servers does *not* prefer 'Good' over 'Sufficient'"
-" over 'Phase out' ciphers ('II')."
+msgstr "At least one of your mail servers does *not* prefer 'Good' over 'Sufficient' over 'Phase out' ciphers ('II')."
 
 msgid "detail mail tls cipher-order verdict warning"
 msgstr ""
@@ -1387,18 +1587,13 @@ msgid "detail mail tls ciphers tech table"
 msgstr "Mail server (MX)|First found affected cipher|Status"
 
 msgid "detail mail tls ciphers verdict bad"
-msgstr ""
-"At least one of your mail servers supports one or more *insufficiently* "
-"secure ciphers."
+msgstr "At least one of your mail servers supports one or more *insufficiently* secure ciphers."
 
 msgid "detail mail tls ciphers verdict good"
 msgstr "All your mail servers support secure ciphers only."
 
 msgid "detail mail tls ciphers verdict phase-out"
-msgstr ""
-"At least one of your mail servers supports one or more ciphers that have a "
-"*phase out* status, because they are known to be fragile and are at risk of "
-"becoming *insufficiently* secure."
+msgstr "At least one of your mail servers supports one or more ciphers that have a *phase out* status, because they are known to be fragile and are at risk of becoming *insufficiently* secure."
 
 msgid "detail mail tls compression exp"
 msgstr ""
@@ -1422,9 +1617,7 @@ msgid "detail mail tls compression tech table"
 msgstr "Mail server (MX)|TLS compression"
 
 msgid "detail mail tls compression verdict bad"
-msgstr ""
-"At least on of your mail servers supports TLS compression, which is *not* "
-"secure."
+msgstr "At least on of your mail servers supports TLS compression, which is *not* secure."
 
 msgid "detail mail tls compression verdict good"
 msgstr "All your mail servers do not support TLS compression."
@@ -1453,11 +1646,7 @@ msgstr ""
 "for DANE."
 
 msgid "detail mail tls dane-exists verdict bogus"
-msgstr ""
-"At least one of your mail server domains does *not* provide DNSSEC proof "
-"that DANE TLSA records do not exist. This could lead to non-deliverability "
-"of mail sent to you by DANE validating mail senders. You should ask your "
-"name server operator to fix this issue."
+msgstr "At least one of your mail server domains does *not* provide DNSSEC proof that DANE TLSA records do not exist. This could lead to non-deliverability of mail sent to you by DANE validating mail senders. You should ask your name server operator to fix this issue."
 
 msgid "detail mail tls dane-exists verdict good"
 msgstr "All your mail server domains provide a TLSA record for DANE."
@@ -1486,14 +1675,10 @@ msgid "detail mail tls dane-rollover tech table"
 msgstr "Mail server (MX)|DANE rollover scheme"
 
 msgid "detail mail tls dane-rollover verdict bad"
-msgstr ""
-"At least one of your mail server domains does *not* have an active DANE "
-"scheme for a reliable rollover of certificate keys."
+msgstr "At least one of your mail server domains does *not* have an active DANE scheme for a reliable rollover of certificate keys."
 
 msgid "detail mail tls dane-rollover verdict good"
-msgstr ""
-"All your mail server domains have an active DANE scheme for a reliable "
-"rollover of certificate keys."
+msgstr "All your mail server domains have an active DANE scheme for a reliable rollover of certificate keys."
 
 msgid "detail mail tls dane-valid exp"
 msgstr ""
@@ -1508,19 +1693,10 @@ msgid "detail mail tls dane-valid tech table"
 msgstr "Mail server (MX)|DANE TLSA record valid"
 
 msgid "detail mail tls dane-valid verdict bad"
-msgstr ""
-"At least one of your mail servers does *not* have any valid DANE "
-"fingerprints. Either someone manipulated the response of your mail server, "
-"or your mail server has a serious DANE configuration error. The latter makes"
-" your domain unreachable for any sending mail server that checks DANE "
-"fingerprints. You should contact your mail provider as soon as possible."
+msgstr "At least one of your mail servers does *not* have any valid DANE fingerprints. Either someone manipulated the response of your mail server, or your mail server has a serious DANE configuration error. The latter makes your domain unreachable for any sending mail server that checks DANE fingerprints. You should contact your mail provider as soon as possible."
 
 msgid "detail mail tls dane-valid verdict good"
-msgstr ""
-"Each of your mail servers has at least one valid DANE fingerprint. This "
-"allows sending mail servers that support DANE verification to set up an "
-"authenticated encrypted transport connection with your receiving mail "
-"servers."
+msgstr "Each of your mail servers has at least one valid DANE fingerprint. This allows sending mail servers that support DANE verification to set up an authenticated encrypted transport connection with your receiving mail servers."
 
 msgid "detail mail tls fs-params exp"
 msgstr ""
@@ -1571,26 +1747,16 @@ msgid "detail mail tls fs-params tech table"
 msgstr "Mail server (MX)|Affected parameters|Security level"
 
 msgid "detail mail tls fs-params verdict bad"
-msgstr ""
-"At least one of your mail servers supports *insufficiently* secure "
-"parameters for Diffie-Hellman key exchange."
+msgstr "At least one of your mail servers supports *insufficiently* secure parameters for Diffie-Hellman key exchange."
 
 msgid "detail mail tls fs-params verdict good"
-msgstr ""
-"All your mail servers support secure parameters for Diffie-Hellman key "
-"exchange."
+msgstr "All your mail servers support secure parameters for Diffie-Hellman key exchange."
 
 msgid "detail mail tls fs-params verdict na"
-msgstr ""
-"This subtest is not applicable as your mail servers do not support Diffie-"
-"Hellman key exchange. Note that RSA is an alternative for key exchange, but "
-"has the *phase out* status."
+msgstr "This subtest is not applicable as your mail servers do not support Diffie-Hellman key exchange. Note that RSA is an alternative for key exchange, but has the *phase out* status."
 
 msgid "detail mail tls fs-params verdict phase-out"
-msgstr ""
-"At least one of your mail servers supports parameters for Diffie-Hellman key"
-" exchange that have a *phase out* status, because they are known to be "
-"fragile and are at risk of of becoming *insufficiently* secure."
+msgstr "At least one of your mail servers supports parameters for Diffie-Hellman key exchange that have a *phase out* status, because they are known to be fragile and are at risk of of becoming *insufficiently* secure."
 
 msgid "detail mail tls kex-hash-func exp"
 msgstr ""
@@ -1618,17 +1784,10 @@ msgid "detail mail tls kex-hash-func verdict good"
 msgstr "All your mail servers support secure hash functions for key exchange."
 
 msgid "detail mail tls kex-hash-func verdict other"
-msgstr ""
-"We were unable to determine the hash function used by at least one of your "
-"mail servers. This could be because the cipher combination used has no "
-"signature for certificate verification (e.g. it uses RSA key exchange or is "
-"anonymous i.e. `anon`)."
+msgstr "We were unable to determine the hash function used by at least one of your mail servers. This could be because the cipher combination used has no signature for certificate verification (e.g. it uses RSA key exchange or is anonymous i.e. `anon`)."
 
 msgid "detail mail tls kex-hash-func verdict phase-out"
-msgstr ""
-"At least one of your mail servers does *not* support a secure hash function "
-"for key exchange. You should *phase out* this setting deliberately, because "
-"it is at risk of becoming *insufficiently* secure in the future."
+msgstr "At least one of your mail servers does *not* support a secure hash function for key exchange. You should *phase out* this setting deliberately, because it is at risk of becoming *insufficiently* secure in the future."
 
 msgid "detail mail tls ocsp-stapling exp"
 msgstr ""
@@ -1696,13 +1855,10 @@ msgid "detail mail tls renegotiation-client tech table"
 msgstr "Mail server (MX)|Client-initiated renegotiation"
 
 msgid "detail mail tls renegotiation-client verdict bad"
-msgstr ""
-"At least one of your mail servers allows for client-initiated renegotiation,"
-" which could have negative impact on the availability of your mail server."
+msgstr "At least one of your mail servers allows for client-initiated renegotiation, which could have negative impact on the availability of your mail server."
 
 msgid "detail mail tls renegotiation-client verdict good"
-msgstr ""
-"All your mail servers do not allow for client-initiated renegotiation."
+msgstr "All your mail servers do not allow for client-initiated renegotiation."
 
 msgid "detail mail tls renegotiation-secure exp"
 msgstr ""
@@ -1763,56 +1919,25 @@ msgid "detail mail tls starttls-exists verdict good"
 msgstr "All your mail servers offer STARTTLS."
 
 msgid "detail mail tls starttls-exists verdict invalid-null-mx"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, either your domain does not have A/AAAA records, "
-"making the \"Null MX\" record unnecessary. Or on your domain a receiving "
-"mail server is set by another MX record, making the \"Null MX\" conflicting."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, either your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary. Or on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting."
 
 msgid "detail mail tls starttls-exists verdict no-null-mx"
-msgstr ""
-"No receiving mail servers (MX) are set on your domain that has A/AAAA "
-"records and has an SPF record with only the term -all. We recommend you to "
-"set a \"Null MX\" record to explicitly indicate that your domain does not "
-"accept email. Because of your configuration, the subtests in the STARTTLS "
-"and DANE category and the mail server specific subtests in the IPv6 and "
-"DNSSEC categories are not applicable."
+msgstr "No receiving mail servers (MX) are set on your domain that has A/AAAA records and has an SPF record with only the term -all. We recommend you to set a \"Null MX\" record to explicitly indicate that your domain does not accept email. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "detail mail tls starttls-exists verdict null-mx"
-msgstr ""
-"Your domain name that has A/AAAA records clearly indicates with a \"Null "
-"MX\" record that it does not accept e-mail. This is fine if you do not want "
-"to receive email. Do not use a \"Null MX\" record and set an MX if you do "
-"want to send email from this domain name, as receiving servers may reject "
-"email that has an invalid return address."
+msgstr "Your domain name that has A/AAAA records clearly indicates with a \"Null MX\" record that it does not accept e-mail. This is fine if you do not want to receive email. Do not use a \"Null MX\" record and set an MX if you do want to send email from this domain name, as receiving servers may reject email that has an invalid return address."
 
 msgid "detail mail tls starttls-exists verdict null-mx-with-other-mx"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, on your domain a receiving mail server is set by "
-"another MX record, making the \"Null MX\" conflicting."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting."
 
 msgid "detail mail tls starttls-exists verdict null-mx-without-a-aaaa"
-msgstr ""
-"Your domain advertises a \"Null MX\" record indicating that it does not "
-"accept email. However, your domain does not have A/AAAA records, making the "
-"\"Null MX\" record unnecessary."
+msgstr "Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary."
 
 msgid "detail mail tls starttls-exists verdict other"
 msgstr "At least one of your mail servers is unreachable."
 
 msgid "detail mail tls starttls-exists verdict other-2"
-msgstr ""
-"The SPF record on your domain indicates that your domain may be used for "
-"sending mail. However, your domain does not have a receiving mail server "
-"(MX), which could hinder deliverability of your sent mails because not "
-"having an MX may be seen by receivers as an indicator for spam. Therefore if"
-" you really want to send mail from this domain, configure an MX. However, if"
-" you do not want to send mail from this domain, configure an SPF record with"
-" the `-all` term only and besides a \"Null MX\" record if your domain has "
-"A/AAAA records. Because of your configuration, the subtests in the STARTTLS "
-"and DANE category and the mail server specific subtests in the IPv6 and "
-"DNSSEC categories are not applicable."
+msgstr "The SPF record on your domain indicates that your domain may be used for sending mail. However, your domain does not have a receiving mail server (MX), which could hinder deliverability of your sent mails because not having an MX may be seen by receivers as an indicator for spam. Therefore if you really want to send mail from this domain, configure an MX. However, if you do not want to send mail from this domain, configure an SPF record with the `-all` term only and besides a \"Null MX\" record if your domain has A/AAAA records. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "detail mail tls version exp"
 msgstr ""
@@ -1839,18 +1964,13 @@ msgid "detail mail tls version tech table"
 msgstr "Mail server (MX)|TLS versions|Status"
 
 msgid "detail mail tls version verdict bad"
-msgstr ""
-"At least one of your mail servers supports one or more *insufficiently* "
-"secure TLS versions."
+msgstr "At least one of your mail servers supports one or more *insufficiently* secure TLS versions."
 
 msgid "detail mail tls version verdict good"
 msgstr "All your mail servers support secure TLS versions only."
 
 msgid "detail mail tls version verdict phase-out"
-msgstr ""
-"At least one of your mail servers supports one or more TLS versions that "
-"should be *phased out* deliberately, because they are known to be fragile "
-"and at risk of becoming *insufficiently* secure."
+msgstr "At least one of your mail servers supports one or more TLS versions that should be *phased out* deliberately, because they are known to be fragile and at risk of becoming *insufficiently* secure."
 
 msgid "detail mail tls zero-rtt exp"
 msgstr ""
@@ -1886,114 +2006,25 @@ msgid "detail mail tls zero-rtt tech table"
 msgstr "Mail server (MX)|0-RTT"
 
 msgid "detail mail tls zero-rtt verdict bad"
-msgstr ""
-"At least one of your mail servers supports 0-RTT, which is *not* secure."
+msgstr "At least one of your mail servers supports 0-RTT, which is *not* secure."
 
 msgid "detail mail tls zero-rtt verdict good"
 msgstr "None of your mail servers support 0-RTT."
 
 msgid "detail mail tls zero-rtt verdict na"
-msgstr ""
-"This subtest is not applicable as your mail servers do not support TLS 1.3."
+msgstr "This subtest is not applicable as your mail servers do not support TLS 1.3."
 
 msgid "detail tech data bogus"
 msgstr "bogus"
-
-msgid "detail tech data caa caa-record"
-msgstr "Record: {record}"
-
-msgid "detail tech data caa caa_record"
-msgstr "caa record found: {record}"
-
-msgid "detail tech data caa found-host"
-msgstr "CAA found on: {host}"
-
-msgid "detail tech data caa found_host"
-msgstr "found CAA on host {host}"
-
-msgid "detail tech data caa invalid-flags-reserved-bits"
-msgstr "Error: Invalid reserved flags \"{flags}\""
-
-msgid "detail tech data caa invalid-parameter-validation-methods"
-msgstr "Error: Invalid 'validationmethods' value \"{parameter_value}\""
-
-msgid "detail tech data caa invalid-property-contactemail-value"
-msgstr "Error: Invalid 'contactemail' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-contactphone-value"
-msgstr "Error: Invalid 'contactphone' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-encoding"
-msgstr "Error: Invalid encoding in '{property_name}'"
-
-msgid "detail tech data caa invalid-property-iodef-value"
-msgstr "Error: Invalid 'iodef' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-issuemail-value"
-msgstr "Error: Invalid 'issuemail' value \"{property_value}\""
-
-msgid "detail tech data caa invalid-property-syntax"
-msgstr ""
-"Error: Invalid \"{invalid_character}\" at position "
-"{invalid_character_position} in '{property_name}' value \"{property_value}\""
-" "
-
-msgid "detail tech data caa invalid-reserved-property"
-msgstr "Error: Invalid reserved property \"{property_tag}\""
-
-msgid "detail tech data caa invalid-unknown-property"
-msgstr "Error: Unknown property \"{property_tag}\""
-
-msgid "detail tech data caa invalid_flags_reserved_bits"
-msgstr "invalid_flags_reserved_bits {value}"
-
-msgid "detail tech data caa invalid_property_contactemail_value"
-msgstr "invalid_property_contactemail_value {value}"
-
-msgid "detail tech data caa invalid_property_contactphone_value"
-msgstr "invalid_property_contactphone_value {value}"
-
-msgid "detail tech data caa invalid_property_iodef_value"
-msgstr "invalid_property_iodef_value {value}"
-
-msgid "detail tech data caa invalid_property_issue_validation_method"
-msgstr "invalid_property_issue_validation_method {value}"
-
-msgid "detail tech data caa invalid_property_issuemail_value"
-msgstr "invalid_property_issuemail_value {value}"
-
-msgid "detail tech data caa invalid_property_syntax"
-msgstr ""
-"invalid_property_syntax name {property_name} value {property_value} invalid "
-"character {invalid_character} at pos {invalid_character_position}"
-
-msgid "detail tech data caa invalid_reserved_property"
-msgstr "invalid_reserved_property {value}"
-
-msgid "detail tech data caa invalid_unknown_property"
-msgstr "invalid_unknown_property {value}"
-
-msgid "detail tech data caa missing-required-property-issue"
-msgstr "Error: Required 'issue' property missing"
-
-msgid "detail tech data caa not-found"
-msgstr "Error: CAA not found"
-
-msgid "detail tech data caa not_found"
-msgstr "CAA not found"
 
 msgid "detail tech data good"
 msgstr "good"
 
 msgid "detail tech data http-csp has-bare-https"
-msgstr ""
-"Recommendation: 'https:' scheme without a specific main domain should not be"
-" used (#9)."
+msgstr "Recommendation: 'https:' scheme without a specific main domain should not be used (#9)."
 
 msgid "detail tech data http-csp has-data"
-msgstr ""
-"Recommendation: 'data:' scheme should not be used where that is not "
-"permitted (#7)."
+msgstr "Recommendation: 'data:' scheme should not be used where that is not permitted (#7)."
 
 msgid "detail tech data http-csp has-host-without-scheme"
 msgstr "Recommendation: A domain without a scheme should not be used (#8)."
@@ -2002,9 +2033,7 @@ msgid "detail tech data http-csp has-http"
 msgstr "Recommendation: 'http:' scheme should not be used (#8)."
 
 msgid "detail tech data http-csp has-invalid-host"
-msgstr ""
-"Recommendation: A wildcard (i.e. '*') or '127.0.0.1' should not be used (#9 "
-"and #10)."
+msgstr "Recommendation: A wildcard (i.e. '*') or '127.0.0.1' should not be used (#9 and #10)."
 
 msgid "detail tech data http-csp has-unsafe-eval"
 msgstr "Recommendation: 'unsafe-eval' should not be used (#6)."
@@ -2016,29 +2045,19 @@ msgid "detail tech data http-csp has-unsafe-inline"
 msgstr "Recommendation: 'unsafe-inline' should not be used (#6)."
 
 msgid "detail tech data http-csp missing-invalid-base-uri"
-msgstr ""
-"Recommendation: 'base-uri' with sufficiently secure value should be defined "
-"(#2)."
+msgstr "Recommendation: 'base-uri' with sufficiently secure value should be defined (#2)."
 
 msgid "detail tech data http-csp missing-invalid-default-src"
-msgstr ""
-"Recommendation: 'default-src' with sufficiently secure value should be "
-"defined (#1)."
+msgstr "Recommendation: 'default-src' with sufficiently secure value should be defined (#1)."
 
 msgid "detail tech data http-csp missing-invalid-form-action"
-msgstr ""
-"Recommendation: 'form-action' with sufficiently secure value should be "
-"defined (#5)."
+msgstr "Recommendation: 'form-action' with sufficiently secure value should be defined (#5)."
 
 msgid "detail tech data http-csp missing-invalid-frame-ancestors"
-msgstr ""
-"Recommendation: 'frame-ancestors' with sufficiently secure value should be "
-"defined (#4)."
+msgstr "Recommendation: 'frame-ancestors' with sufficiently secure value should be defined (#4)."
 
 msgid "detail tech data http-csp missing-invalid-frame-src"
-msgstr ""
-"Recommendation: 'frame-src' (or 'child-src' or 'default-src' as fallback) "
-"with sufficiently secure value should be defined (#3)."
+msgstr "Recommendation: 'frame-src' (or 'child-src' or 'default-src' as fallback) with sufficiently secure value should be defined (#3)."
 
 msgid "detail tech data http-csp no-policy-found"
 msgstr "No CSP found."
@@ -2067,24 +2086,17 @@ msgstr "No Referrer-Policy found."
 msgid "detail tech data http-referrer-policy recommendation-strict-origin"
 msgstr "Recommendation: 'strict-origin' should not be used."
 
-msgid ""
-"detail tech data http-referrer-policy recommendation-strict-origin-when-"
-"cross-origin"
+msgid "detail tech data http-referrer-policy recommendation-strict-origin-when-cross-origin"
 msgstr "Recommendation: 'strict-origin-when-cross-origin' should not be used."
 
 msgid "detail tech data http-referrer-policy values"
 msgstr "Found policy: {values}"
 
 msgid "detail tech data http-securitytxt bom_in_file"
-msgstr ""
-"Error: The Byte Order Mark (\"BOM\") signature must not appear at the "
-"beginning of the content that must be encoded using UTF-8 in Net-Unicode "
-"form."
+msgstr "Error: The Byte Order Mark (\"BOM\") signature must not appear at the beginning of the content that must be encoded using UTF-8 in Net-Unicode form."
 
 msgid "detail tech data http-securitytxt data_after_sig"
-msgstr ""
-"Error: Signed security.txt must not contain data after the signature (line "
-"{line_no})."
+msgstr "Error: Signed security.txt must not contain data after the signature (line {line_no})."
 
 msgid "detail tech data http-securitytxt empty_key"
 msgstr "Error: Field name must not be empty (line {line_no})."
@@ -2093,9 +2105,7 @@ msgid "detail tech data http-securitytxt empty_value"
 msgstr "Error: Field value must not be empty (line {line_no})."
 
 msgid "detail tech data http-securitytxt expired"
-msgstr ""
-"Error: Date and time in 'Expires' field must not be in the past (line "
-"{line_no})."
+msgstr "Error: Date and time in 'Expires' field must not be in the past (line {line_no})."
 
 msgid "detail tech data http-securitytxt invalid_cert"
 msgstr ""
@@ -2104,24 +2114,16 @@ msgstr ""
 "[Note: this content label is currently not used. See #1046.]"
 
 msgid "detail tech data http-securitytxt invalid_charset"
-msgstr ""
-"Error: Charset parameter in Content-Type header must be 'utf-8' if present."
+msgstr "Error: Charset parameter in Content-Type header must be 'utf-8' if present."
 
 msgid "detail tech data http-securitytxt invalid_expiry"
-msgstr ""
-"Error: Date and time in 'Expires' field must be formatted according to ISO "
-"8601 (line {line_no})."
+msgstr "Error: Date and time in 'Expires' field must be formatted according to ISO 8601 (line {line_no})."
 
 msgid "detail tech data http-securitytxt invalid_lang"
-msgstr ""
-"Error: Value in 'Preferred-Languages' field must match one or more language "
-"tags as defined in [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646), "
-"separated by commas (line {line_no})."
+msgstr "Error: Value in 'Preferred-Languages' field must match one or more language tags as defined in [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646), separated by commas (line {line_no})."
 
 msgid "detail tech data http-securitytxt invalid_line"
-msgstr ""
-"Error: Line must contain a field name and value, unless the line is blank or"
-" contains a comment (line {line_no})."
+msgstr "Error: Line must contain a field name and value, unless the line is blank or contains a comment (line {line_no})."
 
 msgid "detail tech data http-securitytxt invalid_media"
 msgstr "Error: Media type in Content-Type header must be 'text/plain'."
@@ -2133,14 +2135,10 @@ msgstr ""
 "[Note: this content label is currently not used. See #1046.]"
 
 msgid "detail tech data http-securitytxt location"
-msgstr ""
-"Error: security.txt was located on the top-level path (legacy place), but "
-"must be placed under the '/.well-known/' path."
+msgstr "Error: security.txt was located on the top-level path (legacy place), but must be placed under the '/.well-known/' path."
 
 msgid "detail tech data http-securitytxt long_expiry"
-msgstr ""
-"Recommendation: Date and time in 'Expires' field should be less than a year "
-"into the future (line {line_no})."
+msgstr "Recommendation: Date and time in 'Expires' field should be less than a year into the future (line {line_no})."
 
 msgid "detail tech data http-securitytxt multi_expire"
 msgstr "Error: 'Expires' field must not appear more than once."
@@ -2149,17 +2147,13 @@ msgid "detail tech data http-securitytxt multi_lang"
 msgstr "Error: 'Preferred-Languages' field must not appear more than once."
 
 msgid "detail tech data http-securitytxt multiple_csaf_fields"
-msgstr ""
-"Recommendation: Multiple 'CSAF' fields should be brought back to one 'CSAF' "
-"field."
+msgstr "Recommendation: Multiple 'CSAF' fields should be brought back to one 'CSAF' field."
 
 msgid "detail tech data http-securitytxt no_canonical"
 msgstr "Recommendation: 'Canonical' field should be present in a signed file."
 
 msgid "detail tech data http-securitytxt no_canonical_match"
-msgstr ""
-"Error: The web URI of security.txt (i.e. when redirecting at least the last "
-"URI of the redirect chain) must be listed in a 'Canonical' field if present."
+msgstr "Error: The web URI of security.txt (i.e. when redirecting at least the last URI of the redirect chain) must be listed in a 'Canonical' field if present."
 
 msgid "detail tech data http-securitytxt no_contact"
 msgstr "Error: 'Contact' field must appear at least once."
@@ -2168,14 +2162,10 @@ msgid "detail tech data http-securitytxt no_content_type"
 msgstr "Error: HTTP Content-Type header must be sent."
 
 msgid "detail tech data http-securitytxt no_csaf_file"
-msgstr ""
-"Error: Every optional 'CSAF' field must point to a file named 'provider-"
-"metadata.json'."
+msgstr "Error: Every optional 'CSAF' field must point to a file named 'provider-metadata.json'."
 
 msgid "detail tech data http-securitytxt no_encryption"
-msgstr ""
-"Recommendation: 'Encryption' field should be present when 'Contact' field "
-"contains an email address."
+msgstr "Recommendation: 'Encryption' field should be present when 'Contact' field contains an email address."
 
 msgid "detail tech data http-securitytxt no_expire"
 msgstr "Error: 'Expires' field must be present."
@@ -2184,41 +2174,31 @@ msgid "detail tech data http-securitytxt no_https"
 msgstr "Error: Web URI must begin with 'https://' (line {line_no})."
 
 msgid "detail tech data http-securitytxt no_line_separators"
-msgstr ""
-"Error: Every line must end with either a carriage return and line feed "
-"characters or just a line feed character."
+msgstr "Error: Every line must end with either a carriage return and line feed characters or just a line feed character."
 
 msgid "detail tech data http-securitytxt no_security_txt_404"
 msgstr "Error: security.txt could not be located."
 
 msgid "detail tech data http-securitytxt no_security_txt_other"
-msgstr ""
-"Error: security.txt could not be located (unexpected HTTP response code "
-"{status_code})."
+msgstr "Error: security.txt could not be located (unexpected HTTP response code {status_code})."
 
 msgid "detail tech data http-securitytxt no_space"
-msgstr ""
-"Error: Field separator (colon) must be followed by a space (line {line_no})."
+msgstr "Error: Field separator (colon) must be followed by a space (line {line_no})."
 
 msgid "detail tech data http-securitytxt no_uri"
-msgstr ""
-"Error: Field value must be a URI (e.g. beginning with 'mailto:') (line "
-"{line_no})."
+msgstr "Error: Field value must be a URI (e.g. beginning with 'mailto:') (line {line_no})."
 
 msgid "detail tech data http-securitytxt not_signed"
 msgstr "Recommendation: security.txt should be digitally signed."
 
 msgid "detail tech data http-securitytxt pgp_data_error"
-msgstr ""
-"Error: Signed security.txt must contain a correct ASCII-armored PGP block."
+msgstr "Error: Signed security.txt must contain a correct ASCII-armored PGP block."
 
 msgid "detail tech data http-securitytxt pgp_error"
 msgstr "Error: Decoding or parsing of the signed security.txt must succeed."
 
 msgid "detail tech data http-securitytxt prec_ws"
-msgstr ""
-"Error: There must be no whitespace before the field separator (colon) (line "
-"{line_no})."
+msgstr "Error: There must be no whitespace before the field separator (colon) (line {line_no})."
 
 msgid "detail tech data http-securitytxt requested-from"
 msgstr "security.txt requested from {hostname}."
@@ -2227,15 +2207,10 @@ msgid "detail tech data http-securitytxt retrieved-from"
 msgstr "security.txt retrieved from {hostname}."
 
 msgid "detail tech data http-securitytxt signed_format_issue"
-msgstr ""
-"Error: Signed security.txt must start with the header '-----BEGIN PGP SIGNED"
-" MESSAGE-----'."
+msgstr "Error: Signed security.txt must start with the header '-----BEGIN PGP SIGNED MESSAGE-----'."
 
 msgid "detail tech data http-securitytxt unknown_field"
-msgstr ""
-"Notification: security.txt contains an unknown field. Either this is a "
-"custom field which may not be widely supported, or there is a typo in a "
-"standardised field name (line {line_no})."
+msgstr "Notification: security.txt contains an unknown field. Either this is a custom field which may not be widely supported, or there is a typo in a standardised field name (line {line_no})."
 
 msgid "detail tech data http-securitytxt utf8"
 msgstr "Error: Content must encoded using UTF-8 in Net-Unicode form."
@@ -2277,10 +2252,7 @@ msgid "detail verdict could-not-test"
 msgstr "Test error. Please try again later."
 
 msgid "detail verdict not-tested"
-msgstr ""
-"This subtest did not run, because either a parent test that this subtest "
-"depends on gave a negative result, or not enough information was available "
-"to run this subtest."
+msgstr "This subtest did not run, because either a parent test that this subtest depends on gave a negative result, or not enough information was available to run this subtest."
 
 msgid "detail web appsecpriv http-csp exp"
 msgstr ""
@@ -2328,14 +2300,10 @@ msgid "detail web appsecpriv http-csp tech table"
 msgstr "Web server IP address|Findings"
 
 msgid "detail web appsecpriv http-csp verdict bad"
-msgstr ""
-"Your web server does *not* offer Content-Security-Policy (CSP), or does "
-"offer CSP with certain *insecure* settings. "
+msgstr "Your web server does *not* offer Content-Security-Policy (CSP), or does offer CSP with certain *insecure* settings. "
 
 msgid "detail web appsecpriv http-csp verdict good"
-msgstr ""
-"Your web server offers Content-Security-Policy (CSP) and does not use "
-"certain insecure CSP settings."
+msgstr "Your web server offers Content-Security-Policy (CSP) and does not use certain insecure CSP settings."
 
 msgid "detail web appsecpriv http-referrer-policy exp"
 msgstr ""
@@ -2386,21 +2354,13 @@ msgid "detail web appsecpriv http-referrer-policy tech table"
 msgstr "Web server IP address|Findings"
 
 msgid "detail web appsecpriv http-referrer-policy verdict bad"
-msgstr ""
-"Your web server offers a Referrer-Policy with a policy value that is *not* "
-"sufficiently secure and privacy-protecting."
+msgstr "Your web server offers a Referrer-Policy with a policy value that is *not* sufficiently secure and privacy-protecting."
 
 msgid "detail web appsecpriv http-referrer-policy verdict good"
-msgstr ""
-"Your web server offers a Referrer-Policy with a policy value that is "
-"sufficiently secure and privacy-protecting."
+msgstr "Your web server offers a Referrer-Policy with a policy value that is sufficiently secure and privacy-protecting."
 
 msgid "detail web appsecpriv http-referrer-policy verdict recommendations"
-msgstr ""
-"Your web server either does *not* offer a Referrer-Policy and thus relies on"
-" the default browser policy, or your web server offers a Referrer-Policy "
-"with a policy value that should be used with caution because of its "
-"potential impact on security and privacy."
+msgstr "Your web server either does *not* offer a Referrer-Policy and thus relies on the default browser policy, or your web server offers a Referrer-Policy with a policy value that should be used with caution because of its potential impact on security and privacy."
 
 msgid "detail web appsecpriv http-securitytxt exp"
 msgstr ""
@@ -2433,20 +2393,13 @@ msgid "detail web appsecpriv http-securitytxt tech table"
 msgstr "Web server IP address|Findings"
 
 msgid "detail web appsecpriv http-securitytxt verdict bad"
-msgstr ""
-"Your web server does *not* offer a security.txt file in the right location, "
-"it could *not* be retrieved, or its content is *not* syntactically valid."
+msgstr "Your web server does *not* offer a security.txt file in the right location, it could *not* be retrieved, or its content is *not* syntactically valid."
 
 msgid "detail web appsecpriv http-securitytxt verdict good"
-msgstr ""
-"Your web server offers a security.txt file in the right location and its "
-"content is syntactically valid."
+msgstr "Your web server offers a security.txt file in the right location and its content is syntactically valid."
 
 msgid "detail web appsecpriv http-securitytxt verdict recommendations"
-msgstr ""
-"Your web server offers a security.txt file in the right location and its "
-"content is syntactically valid. However, there are one or more "
-"recommendations for improvement."
+msgstr "Your web server offers a security.txt file in the right location and its content is syntactically valid. However, there are one or more recommendations for improvement."
 
 msgid "detail web appsecpriv http-x-content-type exp"
 msgstr ""
@@ -2597,10 +2550,7 @@ msgid "detail web dnssec valid verdict good"
 msgstr "Your domain is secure, because its DNSSEC signature is valid."
 
 msgid "detail web dnssec valid verdict unsupported-ds-algo"
-msgstr ""
-"Your domain is signed with an algorithm that our validating resolver "
-"currently does not support. Therefore we are not able to check the validity "
-"of its DNSSEC signature."
+msgstr "Your domain is signed with an algorithm that our validating resolver currently does not support. Therefore we are not able to check the validity of its DNSSEC signature."
 
 msgid "detail web ipv6 web-AAAA exp"
 msgstr ""
@@ -2641,21 +2591,16 @@ msgid "detail web ipv6 web-ipv46 label"
 msgstr "Same website on IPv6 and IPv4"
 
 msgid "detail web ipv6 web-ipv46 verdict bad"
-msgstr ""
-"Available ports or offered headers of your website via IPv4 are *not* the "
-"same via IPv6."
+msgstr "Available ports or offered headers of your website via IPv4 are *not* the same via IPv6."
 
 msgid "detail web ipv6 web-ipv46 verdict good"
 msgstr "Your website via IPv6 looks identical via IPv4."
 
 msgid "detail web ipv6 web-ipv46 verdict notice"
-msgstr ""
-"The HTML content of your website via IPv4 is *not* the same via IPv6. "
+msgstr "The HTML content of your website via IPv4 is *not* the same via IPv6. "
 
 msgid "detail web ipv6 web-ipv46 verdict notice-status-code"
-msgstr ""
-"Your website via IPv6 looks identical via IPv4, but the HTTP response code "
-"is in the 4xx or 5xx range. This may indicate a configuration issue."
+msgstr "Your website via IPv6 looks identical via IPv4, but the HTTP response code is in the 4xx or 5xx range. This may indicate a configuration issue."
 
 msgid "detail web ipv6 web-reach exp"
 msgstr ""
@@ -2696,19 +2641,13 @@ msgid "detail web rpki exists tech table"
 msgstr "Web server|IP address|RPKI Route Origin Authorization"
 
 msgid "detail web rpki exists verdict bad"
-msgstr ""
-"For at least one of the IP addresses of your web server *no* RPKI Route "
-"Origin Authorisation (ROA) is published."
+msgstr "For at least one of the IP addresses of your web server *no* RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail web rpki exists verdict good"
-msgstr ""
-"For all IP addresses of your web server an RPKI Route Origin Authorisation "
-"(ROA) is published."
+msgstr "For all IP addresses of your web server an RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail web rpki exists verdict no-addresses"
-msgstr ""
-"Your domain does *not* contain any web server IP addresses. Therefore, this "
-"subtest could not be performed."
+msgstr "Your domain does *not* contain any web server IP addresses. Therefore, this subtest could not be performed."
 
 msgid "detail web rpki valid exp"
 msgstr ""
@@ -2741,78 +2680,19 @@ msgid "detail web rpki valid label"
 msgstr "Route announcement validity"
 
 msgid "detail web rpki valid tech table"
-msgstr ""
-"Web server|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation "
-"state"
+msgstr "Web server|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation state"
 
 msgid "detail web rpki valid verdict bad"
-msgstr ""
-"At least one IP address of your web server has a `NotFound` validation "
-"state. There is *no* RPKI Route Origin Authorization (ROA) published for the"
-" route announcement of each of the affected IP addresses."
+msgstr "At least one IP address of your web server has a `NotFound` validation state. There is *no* RPKI Route Origin Authorization (ROA) published for the route announcement of each of the affected IP addresses."
 
 msgid "detail web rpki valid verdict good"
-msgstr ""
-"All IP addresses of your web server have a `Valid` validation state. The "
-"route announcement of these IP addresses is matched by the published RPKI "
-"Route Origin Authorisation (ROA)."
+msgstr "All IP addresses of your web server have a `Valid` validation state. The route announcement of these IP addresses is matched by the published RPKI Route Origin Authorisation (ROA)."
 
 msgid "detail web rpki valid verdict invalid"
-msgstr ""
-"At least one IP address of your web server has an `Invalid` validation "
-"state. The route announcement of the affected IP addresses is *not* matched "
-"by the published RPKI Route Origin Authorisation (ROA). This indicates an "
-"unintentional or malicious route configuration error, that can be caused by "
-"your web hoster (internal error) or by a third party (external error). In "
-"either case, it increases the risk for unreachability of your server or for "
-"interception of Internet traffic to your server. Contact your web hoster as "
-"soon as possible. In the case of an internal error, your web hoster should "
-"ask its network provider that owns your server's IP addresses to fix the "
-"route configuration error."
+msgstr "At least one IP address of your web server has an `Invalid` validation state. The route announcement of the affected IP addresses is *not* matched by the published RPKI Route Origin Authorisation (ROA). This indicates an unintentional or malicious route configuration error, that can be caused by your web hoster (internal error) or by a third party (external error). In either case, it increases the risk for unreachability of your server or for interception of Internet traffic to your server. Contact your web hoster as soon as possible. In the case of an internal error, your web hoster should ask its network provider that owns your server's IP addresses to fix the route configuration error."
 
 msgid "detail web rpki valid verdict not-routed"
-msgstr ""
-"This subtest did *not* run, because *no* route announcement was available "
-"for any of the IP addresses."
-
-msgid "detail web tls caa exp"
-msgstr ""
-"We check if the name servers of your website domain contain one or more CAA records, that are syntactically valid and sufficiently protective.\n"
-"\n"
-"Certification Authority Authorisation (CAA) allows you as a domain name holder to specify one or more certificate authorities authorised to issue certificates for your domain name.\n"
-"A certificate authority must not issue a certificate unless the CA determines that the certificate request is consistent with the applicable CAA records.\n"
-"\n"
-"Note that CAA records are located during validation by walking up the DNS hierarchy until one or more records are found.\n"
-"For example, if no CAA records are found on `sub.example.nl`, `example.nl` will be queried.\n"
-"The domain were the applicable CAA records are found is shown in the table with technical details below.\n"
-"\n"
-"The verdict is good if one or more CAA records were found that all have correct syntax, and at least one of these CAA records has the `issue` tag with a valid value.\n"
-"Otherwise, the test will result in a fail. It is not checked whether the certificate authority of the current certificate matches one or more of the `issue` and `issuewild` values, i.e., whether the current certificate could be reissued at this time.\n"
-"\n"
-"If your are using the Automatic Certificate Management Environment (ACME) standard and your certificate authority supports it, we recommend you to use the parameters `validationmethods` and `accounturi` to further restrict isssuance by the authorised certificate authority. Furthermore, it is recommended to add `issuewild`, `issuemail` and `issuevmc` with an empty `;` if you do not use wildcard, S/MIME and/or BIMI certificates respectively. This is especially important for `issuemail` and `issuevmc`, because in their absence there is no fallback to `issue` and thus any certificate authority can still issue S/MIME and/or BIMI certificates for your domain.\n"
-"\n"
-"We expect URLs in `iodef` to be secure (i.e. use HTTPS scheme). \n"
-"Furthermore, to prevent suppression or spoofing of CAA records we strongly recommend you to use DNSSEC, although this CAA test does not specifically test for DNSSEC.\n"
-"\n"
-"*Requirement level: Recommended*"
-
-msgid "detail web tls caa label"
-msgstr "CAA for domain"
-
-msgid "detail web tls caa tech table"
-msgstr "Findings"
-
-msgid "detail web tls caa verdict bad"
-msgstr "Your domain does *not* have CAA."
-
-msgid "detail web tls caa verdict good"
-msgstr "Your domain has a valid, sufficiently protective CAA. "
-
-msgid "detail web tls caa verdict insufficient"
-msgstr "Your domain has a valid, but *unsufficiently* protective CAA."
-
-msgid "detail web tls caa verdict syntax-error"
-msgstr "Your domain has an *invalid* CAA."
+msgstr "This subtest did *not* run, because *no* route announcement was available for any of the IP addresses."
 
 msgid "detail web tls cert-hostmatch exp"
 msgstr ""
@@ -2869,19 +2749,13 @@ msgid "detail web tls cert-pubkey tech table"
 msgstr "Web server IP address|Affected signature parameters|Status"
 
 msgid "detail web tls cert-pubkey verdict bad"
-msgstr ""
-"The digital signature of your website certificate uses *insufficiently* "
-"secure parameters."
+msgstr "The digital signature of your website certificate uses *insufficiently* secure parameters."
 
 msgid "detail web tls cert-pubkey verdict good"
-msgstr ""
-"The digital signature of your website certificate uses secure parameters."
+msgstr "The digital signature of your website certificate uses secure parameters."
 
 msgid "detail web tls cert-pubkey verdict phase-out"
-msgstr ""
-"The digital signature of your website certificate uses parameters that have "
-"a *phase out* status, because they are known to be fragile and are at risk "
-"of of becoming *insufficiently* secure."
+msgstr "The digital signature of your website certificate uses parameters that have a *phase out* status, because they are known to be fragile and are at risk of of becoming *insufficiently* secure."
 
 msgid "detail web tls cert-signature exp"
 msgstr ""
@@ -2903,9 +2777,7 @@ msgid "detail web tls cert-signature tech table"
 msgstr "Web server IP address|Affected hash algorithm|Status"
 
 msgid "detail web tls cert-signature verdict bad"
-msgstr ""
-"Your website certificate is signed using a hash algorithm that is "
-"*insufficiently* secure."
+msgstr "Your website certificate is signed using a hash algorithm that is *insufficiently* secure."
 
 msgid "detail web tls cert-signature verdict good"
 msgstr "Your website certificate is signed using a secure hash algorithm."
@@ -2952,27 +2824,19 @@ msgid "detail web tls cipher-order label"
 msgstr "Cipher order"
 
 msgid "detail web tls cipher-order tech table"
-msgstr ""
-"Web server IP address|First found affected cipher pair|Violated rule # "
-"('II-B')"
+msgstr "Web server IP address|First found affected cipher pair|Violated rule # ('II-B')"
 
 msgid "detail web tls cipher-order verdict bad"
 msgstr "Your web server does *not* enforce its own cipher preference ('I')."
 
 msgid "detail web tls cipher-order verdict good"
-msgstr ""
-"Your web server enforces its own cipher preference ('I'), and offers ciphers"
-" in accordance with the prescribed ordering ('II')."
+msgstr "Your web server enforces its own cipher preference ('I'), and offers ciphers in accordance with the prescribed ordering ('II')."
 
 msgid "detail web tls cipher-order verdict na"
-msgstr ""
-"This subtest is not applicable as your web server supports 'Good' ciphers "
-"only."
+msgstr "This subtest is not applicable as your web server supports 'Good' ciphers only."
 
 msgid "detail web tls cipher-order verdict seclevel-bad"
-msgstr ""
-"Your web server does *not* prefer 'Good' over 'Sufficient' over 'Phase out' "
-"ciphers ('II')."
+msgstr "Your web server does *not* prefer 'Good' over 'Sufficient' over 'Phase out' ciphers ('II')."
 
 msgid "detail web tls cipher-order verdict warning"
 msgstr ""
@@ -3049,10 +2913,7 @@ msgid "detail web tls ciphers verdict good"
 msgstr "Your web server supports secure ciphers only."
 
 msgid "detail web tls ciphers verdict phase-out"
-msgstr ""
-"Your web server supports one or more ciphers that have a *phase out* status,"
-" because they are known to be fragile and are at risk of becoming "
-"*insufficiently* secure."
+msgstr "Your web server supports one or more ciphers that have a *phase out* status, because they are known to be fragile and are at risk of becoming *insufficiently* secure."
 
 msgid "detail web tls compression exp"
 msgstr ""
@@ -3101,9 +2962,7 @@ msgid "detail web tls dane-exists verdict bad"
 msgstr "Your website domain does *not* contain a TLSA record for DANE."
 
 msgid "detail web tls dane-exists verdict bogus"
-msgstr ""
-"Your website domain does *not* provide DNSSEC proof that DANE TLSA records "
-"do not exist. You should ask your name server operator to fix this issue."
+msgstr "Your website domain does *not* provide DNSSEC proof that DANE TLSA records do not exist. You should ask your name server operator to fix this issue."
 
 msgid "detail web tls dane-exists verdict good"
 msgstr "Your website domain contains a TLSA record for DANE."
@@ -3173,8 +3032,7 @@ msgstr ""
 "your name server operator and/or your hosting provider as soon as possible."
 
 msgid "detail web tls dane-valid verdict good"
-msgstr ""
-"The DANE fingerprint on your domain is valid for your web certificate."
+msgstr "The DANE fingerprint on your domain is valid for your web certificate."
 
 msgid "detail web tls fs-params exp"
 msgstr ""
@@ -3225,25 +3083,16 @@ msgid "detail web tls fs-params tech table"
 msgstr "Web server IP address|Affected parameters|Status"
 
 msgid "detail web tls fs-params verdict bad"
-msgstr ""
-"Your web server supports *insufficiently* secure parameters for Diffie-"
-"Hellman key exchange."
+msgstr "Your web server supports *insufficiently* secure parameters for Diffie-Hellman key exchange."
 
 msgid "detail web tls fs-params verdict good"
-msgstr ""
-"Your web server supports secure parameters for Diffie-Hellman key exchange."
+msgstr "Your web server supports secure parameters for Diffie-Hellman key exchange."
 
 msgid "detail web tls fs-params verdict na"
-msgstr ""
-"This subtest is not applicable as your web server does *not* support Diffie-"
-"Hellman key exchange. Note that RSA is an alternative for key exchange, but "
-"has the *phase out* status."
+msgstr "This subtest is not applicable as your web server does *not* support Diffie-Hellman key exchange. Note that RSA is an alternative for key exchange, but has the *phase out* status."
 
 msgid "detail web tls fs-params verdict phase-out"
-msgstr ""
-"Your web server supports parameters for Diffie-Hellman key exchange that "
-"have a *phase out* status, because they are known to be fragile and are at "
-"risk of of becoming *insufficiently* secure."
+msgstr "Your web server supports parameters for Diffie-Hellman key exchange that have a *phase out* status, because they are known to be fragile and are at risk of of becoming *insufficiently* secure."
 
 msgid "detail web tls http-compression exp"
 msgstr ""
@@ -3272,8 +3121,7 @@ msgid "detail web tls http-compression tech table"
 msgstr "Web server IP address|HTTP compression"
 
 msgid "detail web tls http-compression verdict bad"
-msgstr ""
-"Your web server supports HTTP compression, which could be a security risk."
+msgstr "Your web server supports HTTP compression, which could be a security risk."
 
 msgid "detail web tls http-compression verdict good"
 msgstr "Your web server does not support HTTP compression."
@@ -3323,19 +3171,13 @@ msgid "detail web tls https-forced tech table"
 msgstr "Web server IP address|HTTPS redirect"
 
 msgid "detail web tls https-forced verdict bad"
-msgstr ""
-"Your web server does offer support for both HTTP and HTTPS, but does *not* "
-"automatically redirect visitors from HTTP to HTTPS on the same domain."
+msgstr "Your web server does offer support for both HTTP and HTTPS, but does *not* automatically redirect visitors from HTTP to HTTPS on the same domain."
 
 msgid "detail web tls https-forced verdict good"
-msgstr ""
-"Your web server automatically redirects visitors from HTTP to HTTPS on the "
-"same domain."
+msgstr "Your web server automatically redirects visitors from HTTP to HTTPS on the same domain."
 
 msgid "detail web tls https-forced verdict no-https"
-msgstr ""
-"This test could not be performed, because your web server offers either no "
-"HTTPS or HTTPS with a very outdated, insecure TLS configuration."
+msgstr "This test could not be performed, because your web server offers either no HTTPS or HTTPS with a very outdated, insecure TLS configuration."
 
 msgid "detail web tls https-forced verdict other"
 msgstr "Your web server only offers support for HTTPS and not for HTTP."
@@ -3386,9 +3228,7 @@ msgid "detail web tls https-hsts verdict good"
 msgstr "Your web server offers an HSTS policy."
 
 msgid "detail web tls https-hsts verdict other"
-msgstr ""
-"Your web server offers an HSTS policy with a cache validity period (`max-"
-"age`) that is *not* sufficiently long (i.e. less than 1 year)."
+msgstr "Your web server offers an HSTS policy with a cache validity period (`max-age`) that is *not* sufficiently long (i.e. less than 1 year)."
 
 msgid "detail web tls kex-hash-func exp"
 msgstr ""
@@ -3417,17 +3257,10 @@ msgid "detail web tls kex-hash-func verdict good"
 msgstr "Your web server supports a secure hash function for key exchange."
 
 msgid "detail web tls kex-hash-func verdict other"
-msgstr ""
-"We were unable to determine the hash function used by your web server. This "
-"could be because the cipher combination used has no signature for "
-"certificate verification (e.g. it uses RSA key exchange or is anonymous i.e."
-" `anon`)."
+msgstr "We were unable to determine the hash function used by your web server. This could be because the cipher combination used has no signature for certificate verification (e.g. it uses RSA key exchange or is anonymous i.e. `anon`)."
 
 msgid "detail web tls kex-hash-func verdict phase-out"
-msgstr ""
-"Your web server does *not* support a secure hash function for key exchange. "
-"You should *phase out* this setting deliberately, because it is at risk of "
-"becoming *insufficiently* secure in the future."
+msgstr "Your web server does *not* support a secure hash function for key exchange. You should *phase out* this setting deliberately, because it is at risk of becoming *insufficiently* secure in the future."
 
 msgid "detail web tls ocsp-stapling exp"
 msgstr ""
@@ -3457,14 +3290,10 @@ msgid "detail web tls ocsp-stapling tech table"
 msgstr "Web server IP address|OCSP stapling"
 
 msgid "detail web tls ocsp-stapling verdict bad"
-msgstr ""
-"Your web server supports OCSP stapling but the data in the response is *not*"
-" valid."
+msgstr "Your web server supports OCSP stapling but the data in the response is *not* valid."
 
 msgid "detail web tls ocsp-stapling verdict good"
-msgstr ""
-"Your web server supports OCSP stapling and the data in the response is "
-"valid."
+msgstr "Your web server supports OCSP stapling and the data in the response is valid."
 
 msgid "detail web tls ocsp-stapling verdict ok"
 msgstr "Your web server does *not* support OCSP stapling."
@@ -3493,9 +3322,7 @@ msgid "detail web tls renegotiation-client tech table"
 msgstr "Web server IP address|Client-initiated renegotiation"
 
 msgid "detail web tls renegotiation-client verdict bad"
-msgstr ""
-"Your web server allows for client-initiated renegotiation, which could have "
-"negative impact on the availability of your website."
+msgstr "Your web server allows for client-initiated renegotiation, which could have negative impact on the availability of your website."
 
 msgid "detail web tls renegotiation-client verdict good"
 msgstr "Your web server does not allow for client-initiated renegotiation."
@@ -3559,10 +3386,7 @@ msgid "detail web tls version verdict good"
 msgstr "Your web server supports secure TLS versions only."
 
 msgid "detail web tls version verdict phase-out"
-msgstr ""
-"Your web server supports TLS versions that should be *phased out* "
-"deliberately, because they are known to be fragile and at risk of becoming "
-"*insufficiently* secure."
+msgstr "Your web server supports TLS versions that should be *phased out* deliberately, because they are known to be fragile and at risk of becoming *insufficiently* secure."
 
 msgid "detail web tls zero-rtt exp"
 msgstr ""
@@ -3608,8 +3432,7 @@ msgid "detail web tls zero-rtt verdict good"
 msgstr "Your web server does not support 0-RTT."
 
 msgid "detail web tls zero-rtt verdict na"
-msgstr ""
-"This subtest is not applicable as your web server does not support TLS 1.3."
+msgstr "This subtest is not applicable as your web server does not support TLS 1.3."
 
 msgid "detail web-mail ipv6 ns-AAAA exp"
 msgstr ""
@@ -3646,8 +3469,7 @@ msgid "detail web-mail ipv6 ns-reach tech table"
 msgstr "Name server|Unreachable IPv6 address"
 
 msgid "detail web-mail ipv6 ns-reach verdict bad"
-msgstr ""
-"*Not* all name servers that have an IPv6 address are reachable over IPv6."
+msgstr "*Not* all name servers that have an IPv6 address are reachable over IPv6."
 
 msgid "detail web-mail ipv6 ns-reach verdict good"
 msgstr "All name servers that have an IPv6 address are reachable over IPv6."
@@ -3669,19 +3491,13 @@ msgid "detail web-mail rpki ns-exists tech table"
 msgstr "Name server|IP address|RPKI Route Origin Authorization"
 
 msgid "detail web-mail rpki ns-exists verdict bad"
-msgstr ""
-"For at least one of the IP addresses of your name servers *no* RPKI Route "
-"Origin Authorisation (ROA) is published."
+msgstr "For at least one of the IP addresses of your name servers *no* RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail web-mail rpki ns-exists verdict good"
-msgstr ""
-"For all IP addresses of your name servers an RPKI Route Origin Authorisation"
-" (ROA) is published."
+msgstr "For all IP addresses of your name servers an RPKI Route Origin Authorisation (ROA) is published."
 
 msgid "detail web-mail rpki ns-exists verdict no-addresses"
-msgstr ""
-"Your domain does *not* contain any name servers. Therefore, this subtest "
-"could not be performed."
+msgstr "Your domain does *not* contain any name servers. Therefore, this subtest could not be performed."
 
 msgid "detail web-mail rpki ns-valid exp"
 msgstr ""
@@ -3714,39 +3530,19 @@ msgid "detail web-mail rpki ns-valid label"
 msgstr "Route announcement validity"
 
 msgid "detail web-mail rpki ns-valid tech table"
-msgstr ""
-"Name server|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation "
-"state"
+msgstr "Name server|BGP Route Prefix|BGP Route Origin ASN|RPKI Origin Validation state"
 
 msgid "detail web-mail rpki ns-valid verdict bad"
-msgstr ""
-"At least one IP address of your name servers has a `NotFound` validation "
-"state. There is *no* RPKI Route Origin Authorisation (ROA) is published for "
-"its route announcement."
+msgstr "At least one IP address of your name servers has a `NotFound` validation state. There is *no* RPKI Route Origin Authorisation (ROA) is published for its route announcement."
 
 msgid "detail web-mail rpki ns-valid verdict good"
-msgstr ""
-"All IP addresses of your name servers have a `Valid` validation state. The "
-"route announcement of these IP addresses is matched by the published RPKI "
-"Route Origin Authorisation (ROA)."
+msgstr "All IP addresses of your name servers have a `Valid` validation state. The route announcement of these IP addresses is matched by the published RPKI Route Origin Authorisation (ROA)."
 
 msgid "detail web-mail rpki ns-valid verdict invalid"
-msgstr ""
-"At least one IP address of your name servers has an `Invalid` validation "
-"state. The route announcement of the affected IP addresses is *not* matched "
-"by the published RPKI Route Origin Authorisation (ROA). This indicates an "
-"unintentional or malicious route configuration error, that can be caused by "
-"your name server hoster (internal error) or by a third party (external "
-"error). In either case, it increases the risk for unreachability of your "
-"server or for interception of Internet traffic to your server. Contact your "
-"name server hoster as soon as possible. In the case of an internal error, "
-"your name server hoster should ask its network provider that owns your "
-"server's IP addresses to fix the route configuration error."
+msgstr "At least one IP address of your name servers has an `Invalid` validation state. The route announcement of the affected IP addresses is *not* matched by the published RPKI Route Origin Authorisation (ROA). This indicates an unintentional or malicious route configuration error, that can be caused by your name server hoster (internal error) or by a third party (external error). In either case, it increases the risk for unreachability of your server or for interception of Internet traffic to your server. Contact your name server hoster as soon as possible. In the case of an internal error, your name server hoster should ask its network provider that owns your server's IP addresses to fix the route configuration error."
 
 msgid "detail web-mail rpki ns-valid verdict not-routed"
-msgstr ""
-"This subtest did *not* run, because *no* route announcement was available "
-"for any of the IP addresses."
+msgstr "This subtest did *not* run, because *no* route announcement was available for any of the IP addresses."
 
 msgid "disclosure content"
 msgstr ""
@@ -3826,15 +3622,12 @@ msgstr ""
 msgid "domain pagetitle"
 msgstr "Website test:"
 
-#, md-format
 msgid "domain title"
 msgstr "Website test: {{prettyaddr}}"
 
 msgid "domain tweetmessage"
-msgstr ""
-"The%20website%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20website%20test%20of%20%40Internet_nl%3A"
+msgstr "The%20website%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20website%20test%20of%20%40Internet_nl%3A"
 
-#, md-format
 msgid "faqs appsecpriv content"
 msgstr ""
 "## HTTP security headers \n"
@@ -3872,7 +3665,6 @@ msgstr ""
 "- [\"Wat is security.txt?\"](https://www.digitaltrustcenter.nl/securitytxt) (in Dutch) by Digital Trust Center\n"
 "- [\"Handreiking security.txt\"](https://www.ncsc.nl/documenten/publicaties/2023/maart/2/handreiking-security.txt) (in Dutch) by NCSC-NL"
 
-#, md-format
 msgid "faqs appsecpriv title"
 msgstr "Security options"
 
@@ -3909,7 +3701,6 @@ msgstr ""
 msgid "faqs batch-and-dashboard title"
 msgstr "Batch API and web-based dashboard"
 
-#, md-format
 msgid "faqs content"
 msgstr ""
 "## Tests\n"
@@ -3935,7 +3726,6 @@ msgstr ""
 "* [Batch API and web-based dashboard](/faqs/batch-and-dashboard/)\n"
 "* [Measurements using Internet.nl](/faqs/measurements/)"
 
-#, md-format
 msgid "faqs dnssec content"
 msgstr ""
 "## Why\n"
@@ -3971,7 +3761,6 @@ msgstr ""
 "* [RFC 8624: Algorithm Implementation Requirements and Usage Guidance for DNSSEC](https://www.rfc-editor.org/rfc/rfc8624)\n"
 "* [RFC 9276: Guidance for NSEC3 Parameter Settings](https://www.rfc-editor.org/rfc/rfc9276)"
 
-#, md-format
 msgid "faqs dnssec title"
 msgstr "Domain signature (DNSSEC)"
 
@@ -4008,7 +3797,6 @@ msgstr ""
 msgid "faqs halloffame title"
 msgstr "Criteria for 'Hall of Fame for Hosters'"
 
-#, md-format
 msgid "faqs https content"
 msgstr ""
 "## Why\n"
@@ -4046,11 +3834,9 @@ msgstr ""
 "### DANE\n"
 "* [RFC 6698: The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA](https://www.rfc-editor.org/rfc/rfc6698)"
 
-#, md-format
 msgid "faqs https title"
 msgstr "Secure website connection (HTTPS)"
 
-#, md-format
 msgid "faqs ipv6 content"
 msgstr ""
 "## Why\n"
@@ -4078,11 +3864,9 @@ msgstr ""
 "## Specifications\n"
 "* [RFC 8200: Internet Protocol, Version 6 (IPv6) Specification](https://www.rfc-editor.org/rfc/rfc8200)"
 
-#, md-format
 msgid "faqs ipv6 title"
 msgstr "Modern address (IPv6)"
 
-#, md-format
 msgid "faqs mailauth content"
 msgstr ""
 "## Why\n"
@@ -4107,7 +3891,6 @@ msgstr ""
 "* [RFC 6376: DomainKeys Identified Mail (DKIM) Signatures](https://www.rfc-editor.org/rfc/rfc6376)\n"
 "* [RFC 7208: Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1](https://www.rfc-editor.org/rfc/rfc7208)"
 
-#, md-format
 msgid "faqs mailauth title"
 msgstr "Protection against email phishing (DMARC, DKIM and SPF)"
 
@@ -4126,7 +3909,6 @@ msgstr ""
 msgid "faqs measurements title"
 msgstr "Measurements using Internet.nl"
 
-#, md-format
 msgid "faqs report score content"
 msgstr ""
 "### What norm is Internet.nl using?\n"
@@ -4164,65 +3946,44 @@ msgstr ""
 msgid "faqs report score title"
 msgstr "Norm and score"
 
-#, md-format
 msgid "faqs report subtest bad"
 msgstr "Bad: fail on REQUIRED subtest ⇒ null score"
 
-#, md-format
 msgid "faqs report subtest error"
 msgstr "Test error: error encountered during testing ⇒ null score"
 
-#, md-format
 msgid "faqs report subtest good"
-msgstr ""
-"Good: pass on REQUIRED, RECOMMENDED or OPTIONAL subtest ⇒ first: full score "
-"/ latter two: no score impact"
+msgstr "Good: pass on REQUIRED, RECOMMENDED or OPTIONAL subtest ⇒ first: full score / latter two: no score impact"
 
-#, md-format
 msgid "faqs report subtest info"
 msgstr "Informational: fail on OPTIONAL subtest ⇒ no score impact"
 
-#, md-format
 msgid "faqs report subtest not-tested"
-msgstr ""
-"Not tested, because already failed related parent subtest ⇒ null score"
+msgstr "Not tested, because already failed related parent subtest ⇒ null score"
 
 msgid "faqs report subtest title"
 msgstr "Icons per subtest"
 
-#, md-format
 msgid "faqs report subtest warning"
 msgstr "Warning: fail on RECOMMENDED subtest ⇒ no score impact"
 
-#, md-format
 msgid "faqs report test bad"
-msgstr ""
-"Bad: failed at least one REQUIRED subtest ⇒ no full score in test category"
+msgstr "Bad: failed at least one REQUIRED subtest ⇒ no full score in test category"
 
-#, md-format
 msgid "faqs report test error"
-msgstr ""
-"Test error: execution error for at least one subtest ⇒ no result in test "
-"category"
+msgstr "Test error: execution error for at least one subtest ⇒ no result in test category"
 
-#, md-format
 msgid "faqs report test good"
 msgstr "Good: passed all subtests ⇒ full score in test category"
 
-#, md-format
 msgid "faqs report test info"
-msgstr ""
-"Informational: failed at least one OPTIONAL subtest ⇒ full score in test "
-"category "
+msgstr "Informational: failed at least one OPTIONAL subtest ⇒ full score in test category "
 
 msgid "faqs report test title"
 msgstr "Icons per test category"
 
-#, md-format
 msgid "faqs report test warning"
-msgstr ""
-"Warning: failed at least one RECOMMENDED subtest ⇒ full score in test "
-"category "
+msgstr "Warning: failed at least one RECOMMENDED subtest ⇒ full score in test category "
 
 msgid "faqs report title"
 msgstr "Explanation of test report"
@@ -4252,7 +4013,6 @@ msgstr ""
 msgid "faqs rpki title"
 msgstr "Authorisation for routing (RPKI)"
 
-#, md-format
 msgid "faqs starttls content"
 msgstr ""
 "## Why\n"
@@ -4278,73 +4038,51 @@ msgstr ""
 "* [RFC 7672: SMTP Security via Opportunistic DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS)](https://www.rfc-editor.org/rfc/rfc7672) \n"
 "* [RFC 7671: The DNS-Based Authentication of Named Entities (DANE) Protocol: Updates and Operational Guidance](https://www.rfc-editor.org/rfc/rfc7671)"
 
-#, md-format
 msgid "faqs starttls title"
 msgstr "Secure email transport (STARTTLS and DANE)"
 
-#, md-format
 msgid "faqs title"
 msgstr "Knowledge base"
 
-#, md-format
 msgid "halloffame champions menu"
 msgstr "Champions!"
 
-#, md-format
 msgid "halloffame champions subtitle"
 msgstr "100% in website *and* email test"
 
-#, md-format
 msgid "halloffame champions text"
-msgstr ""
-"The {{count}} domains below score 100% in both the website test and the "
-"email test. Inductees of this Hall of Fame are allowed to [use both 100% "
-"badges](/faqs/badges/)."
+msgstr "The {{count}} domains below score 100% in both the website test and the email test. Inductees of this Hall of Fame are allowed to [use both 100% badges](/faqs/badges/)."
 
-#, md-format
 msgid "halloffame champions title"
 msgstr "Hall of Fame - Champions!"
 
 msgid "halloffame mail badge"
 msgstr "Badge with text: 100% score in email test"
 
-#, md-format
 msgid "halloffame mail menu"
 msgstr "Email"
 
-#, md-format
 msgid "halloffame mail subtitle"
 msgstr "100% in email test"
 
-#, md-format
 msgid "halloffame mail text"
-msgstr ""
-"The {{count}} domains below score 100% in the email test. Inductees of this "
-"Hall of Fame are allowed to [use the 100% mail badge](/faqs/badges/)."
+msgstr "The {{count}} domains below score 100% in the email test. Inductees of this Hall of Fame are allowed to [use the 100% mail badge](/faqs/badges/)."
 
-#, md-format
 msgid "halloffame mail title"
 msgstr "Hall of Fame - Email"
 
 msgid "halloffame web badge"
 msgstr "Badge with text: 100% score in website test"
 
-#, md-format
 msgid "halloffame web menu"
 msgstr "Websites"
 
-#, md-format
 msgid "halloffame web subtitle"
 msgstr "100% in website test"
 
-#, md-format
 msgid "halloffame web text"
-msgstr ""
-"The {{count}} domains below score 100% in the website test. Inductees of "
-"this Hall of Fame are allowed to [use the 100% website "
-"badge](/faqs/badges/)."
+msgstr "The {{count}} domains below score 100% in the website test. Inductees of this Hall of Fame are allowed to [use the 100% website badge](/faqs/badges/)."
 
-#, md-format
 msgid "halloffame web title"
 msgstr "Hall of Fame - Websites"
 
@@ -4380,7 +4118,6 @@ msgstr "unique web domains"
 msgid "home stats website-items"
 msgstr ""
 
-#, md-format
 msgid "home teaser"
 msgstr ""
 "Modern Internet Standards provide for more reliability and further growth of the Internet.   \n"
@@ -4393,8 +4130,7 @@ msgid "mail title"
 msgstr "Email test: {{prettyaddr}}"
 
 msgid "mail tweetmessage"
-msgstr ""
-"The%20mail%20server%20at%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20email%20test%20of%20%40Internet_nl%3A"
+msgstr "The%20mail%20server%20at%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20email%20test%20of%20%40Internet_nl%3A"
 
 msgid "page gotocontents"
 msgstr "Go to the content"
@@ -4406,19 +4142,10 @@ msgid "page gotomainmenu"
 msgstr "Go to the main menu"
 
 msgid "page metadescription"
-msgstr ""
-"Test for modern Internet Standards IPv6, DNSSEC, HTTPS, HSTS, DMARC, DKIM, "
-"SPF, STARTTLS, DANE, RPKI and security.txt"
+msgstr "Test for modern Internet Standards IPv6, DNSSEC, HTTPS, HSTS, DMARC, DKIM, SPF, STARTTLS, DANE, RPKI and security.txt"
 
 msgid "page metakeywords"
-msgstr ""
-"IPv6, DNSSEC, HTTPS, HSTS, TLS, DMARC, DKIM, SPF, STARTTLS, DANE, RPKI, "
-"security.txt, CSP, Content Security Policy, security headers, test, test "
-"tool, check, validation, Internet, Internet Standards, open standards, "
-"modern standards, security, internet security, mail, email security, "
-"website, website security, internet connection, secure connection, email "
-"authentication, encryption, ciphers, cipher suites, PKI, SSL certificate, "
-"TLS certificate, website certificate, Internet Standards Platform"
+msgstr "IPv6, DNSSEC, HTTPS, HSTS, TLS, DMARC, DKIM, SPF, STARTTLS, DANE, RPKI, security.txt, CSP, Content Security Policy, security headers, test, test tool, check, validation, Internet, Internet Standards, open standards, modern standards, security, internet security, mail, email security, website, website security, internet connection, secure connection, email authentication, encryption, ciphers, cipher suites, PKI, SSL certificate, TLS certificate, website certificate, Internet Standards Platform"
 
 msgid "page sitedescription"
 msgstr "Is your Internet up-to-date?"
@@ -4433,6 +4160,12 @@ msgstr ""
 
 msgid "page404 title"
 msgstr "Page not found!"
+
+msgid "page404 contact"
+msgstr "We are happy to help you"
+
+msgid "page404 button"
+msgstr "Back to the homepage"
 
 msgid "privacy content"
 msgstr ""
@@ -4562,8 +4295,7 @@ msgstr ""
 " instead."
 
 msgid "probes no-javascript-connection"
-msgstr ""
-"JavaScript inactive. Please enable JavaScript in order to execute the test."
+msgstr "JavaScript inactive. Please enable JavaScript in order to execute the test."
 
 msgid "probes no-redirection"
 msgstr "Test error. Please try again later, or test another domain name."
@@ -4741,8 +4473,7 @@ msgid "results panel-button show"
 msgstr "Show details"
 
 msgid "results perfect-score"
-msgstr ""
-"Congratulations, your domain will be added to the **Hall of Fame** soon!"
+msgstr "Congratulations, your domain will be added to the **Hall of Fame** soon!"
 
 msgid "results permalink"
 msgstr "Permalink test result {{permadate|date:'(Y-m-d H:i T)'}}"
@@ -4875,8 +4606,7 @@ msgstr ""
 "and SPF."
 
 msgid "test mailauth failed summary"
-msgstr ""
-"*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
+msgstr "*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
 
 msgid "test mailauth info description"
 msgstr ""
@@ -4887,8 +4617,7 @@ msgstr ""
 "and SPF."
 
 msgid "test mailauth info summary"
-msgstr ""
-"*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
+msgstr "*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
 
 msgid "test mailauth label"
 msgstr "Authenticity marks against phishing (DMARC, DKIM and SPF)"
@@ -4915,8 +4644,7 @@ msgstr ""
 "and SPF."
 
 msgid "test mailauth warning summary"
-msgstr ""
-"*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
+msgstr "*Not* all authenticity marks against email phishing (DMARC, DKIM and SPF)"
 
 msgid "test maildnssec failed description"
 msgstr ""
@@ -4981,8 +4709,7 @@ msgstr ""
 " enable IPv6."
 
 msgid "test mailipv6 failed summary"
-msgstr ""
-"*Not* reachable via modern internet address, or improvement possible (IPv6)"
+msgstr "*Not* reachable via modern internet address, or improvement possible (IPv6)"
 
 msgid "test mailipv6 info description"
 msgstr ""
@@ -4992,8 +4719,7 @@ msgstr ""
 " enable IPv6."
 
 msgid "test mailipv6 info summary"
-msgstr ""
-"*Not* reachable via modern internet address, or improvement possible (IPv6)"
+msgstr "*Not* reachable via modern internet address, or improvement possible (IPv6)"
 
 msgid "test mailipv6 label"
 msgstr "Modern address (IPv6)"
@@ -5017,39 +4743,22 @@ msgstr ""
 " enable IPv6."
 
 msgid "test mailipv6 warning summary"
-msgstr ""
-"*Not* reachable via modern internet address, or improvement possible (IPv6)"
+msgstr "*Not* reachable via modern internet address, or improvement possible (IPv6)"
 
 msgid "test mailrpki error description"
-msgstr ""
-"Test not ready to run yet. Please try again later. Sorry for the "
-"inconvenience."
+msgstr "Test not ready to run yet. Please try again later. Sorry for the inconvenience."
 
 msgid "test mailrpki error summary"
 msgstr "Test not ready to run (RPKI)"
 
 msgid "test mailrpki failed description"
-msgstr ""
-"Too bad! At least one of the IP addresses of your receiving mail server(s) "
-"and associated name servers has a route announcement that is *not*  matched "
-"by the published route authorisation ([RPKI](/faqs/rpki/)). This indicates "
-"an unintentional or malicious route configuration error, that can be caused "
-"by your mail hoster or your name server hoster (internal error) or by a "
-"third party (external error). In either case, it increases the risk for "
-"unreachability of your server or for interception of Internet traffic to "
-"your server. Contact your mail hoster or name server hoster as soon as "
-"possible. In the case of an internal error, they should ask their network "
-"provider that owns your server's IP addresses to fix the route configuration"
-" error."
+msgstr "Too bad! At least one of the IP addresses of your receiving mail server(s) and associated name servers has a route announcement that is *not*  matched by the published route authorisation ([RPKI](/faqs/rpki/)). This indicates an unintentional or malicious route configuration error, that can be caused by your mail hoster or your name server hoster (internal error) or by a third party (external error). In either case, it increases the risk for unreachability of your server or for interception of Internet traffic to your server. Contact your mail hoster or name server hoster as soon as possible. In the case of an internal error, they should ask their network provider that owns your server's IP addresses to fix the route configuration error."
 
 msgid "test mailrpki failed summary"
 msgstr "*Unauthorised* route announcement (RPKI)"
 
 msgid "test mailrpki info description"
-msgstr ""
-"Informational: Your domain does *not* contain any name servers and thus "
-"contains no receiving mail server(s). There are no routable IP addresses "
-"that could be tested ([RPKI](/faqs/rpki/))."
+msgstr "Informational: Your domain does *not* contain any name servers and thus contains no receiving mail server(s). There are no routable IP addresses that could be tested ([RPKI](/faqs/rpki/))."
 
 msgid "test mailrpki info summary"
 msgstr "*No* routable IP addresses found (RPKI)"
@@ -5058,14 +4767,7 @@ msgid "test mailrpki label"
 msgstr "Route authorisation (RPKI)"
 
 msgid "test mailrpki passed description"
-msgstr ""
-"Well done! All IP addresses of your receiving mail server(s) and associated "
-"name servers have a route announcement that is matched by the published "
-"route authorisation ([RPKI](/faqs/rpki/)). As a result, email transport "
-"between sending mail servers with enabled route validation and your "
-"receiving mail server(s) is better protected against various unintentional "
-"or malicious route configuration errors, that can lead to the unreachability"
-" of your servers or the interception of Internet traffic to your servers."
+msgstr "Well done! All IP addresses of your receiving mail server(s) and associated name servers have a route announcement that is matched by the published route authorisation ([RPKI](/faqs/rpki/)). As a result, email transport between sending mail servers with enabled route validation and your receiving mail server(s) is better protected against various unintentional or malicious route configuration errors, that can lead to the unreachability of your servers or the interception of Internet traffic to your servers."
 
 msgid "test mailrpki passed summary"
 msgstr "Authorised route announcement (RPKI)"
@@ -5074,17 +4776,7 @@ msgid "test mailrpki title"
 msgstr "Route authorisation?"
 
 msgid "test mailrpki warning description"
-msgstr ""
-"Too bad! At least one of the IP addresses of your receiving mail server(s) "
-"and associated name servers has a route announcement for which *no* route "
-"authorisation is published ([RPKI](/faqs/rpki/)). As a result, email "
-"transport between sending mail servers with enabled route validation and "
-"your receiving mail server(s) is *not* (fully) protected against various "
-"unintentional or malicious route configuration errors, that can lead to the "
-"unreachability of your servers or the interception of Internet traffic to "
-"your servers. Contact your mail hoster or name server hoster about this. "
-"They can ask their network provider that owns your server's IP addresses to "
-"publish routing authorizations."
+msgstr "Too bad! At least one of the IP addresses of your receiving mail server(s) and associated name servers has a route announcement for which *no* route authorisation is published ([RPKI](/faqs/rpki/)). As a result, email transport between sending mail servers with enabled route validation and your receiving mail server(s) is *not* (fully) protected against various unintentional or malicious route configuration errors, that can lead to the unreachability of your servers or the interception of Internet traffic to your servers. Contact your mail hoster or name server hoster about this. They can ask their network provider that owns your server's IP addresses to publish routing authorizations."
 
 msgid "test mailrpki warning summary"
 msgstr "Route authorisation *not* published (RPKI)"
@@ -5095,8 +4787,7 @@ msgstr ""
 " *insufficiently* secure connection with your receiving mail server(s). Passive and/or active attackers will therefore be able to read emails in transit to you. You should ask your mail provider to enable STARTTLS and DANE, and configure it securely."
 
 msgid "test mailtls failed summary"
-msgstr ""
-"Mail server connection *not* or insufficiently secured (STARTTLS and DANE)"
+msgstr "Mail server connection *not* or insufficiently secured (STARTTLS and DANE)"
 
 msgid "test mailtls info description"
 msgstr ""
@@ -5104,84 +4795,46 @@ msgstr ""
 " *insufficiently* secure connection with your receiving mail server(s). Passive and/or active attackers will therefore be able to read emails in transit to you. You should ask your mail provider to enable STARTTLS and DANE, and configure it securely."
 
 msgid "test mailtls info summary"
-msgstr ""
-"Mail server connection *not* or insufficiently secured (STARTTLS and DANE)"
+msgstr "Mail server connection *not* or insufficiently secured (STARTTLS and DANE)"
 
 msgid "test mailtls invalid-null-mx description"
-msgstr ""
-"Warning: Your domain advertises a \"Null MX\" record indicating that it does"
-" not accept email. However, either your domain does not have A/AAAA records,"
-" making the \"Null MX\" record unnecessary. Or on your domain a receiving "
-"mail server is set by another MX record, making the \"Null MX\" conflicting."
-" "
+msgstr "Warning: Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, either your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary. Or on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting. "
 
 msgid "test mailtls invalid-null-mx summary"
-msgstr ""
-"Inconsistently configured non-receiving mail domain (STARTTLS and DANE)"
+msgstr "Inconsistently configured non-receiving mail domain (STARTTLS and DANE)"
 
 msgid "test mailtls label"
 msgstr "Secure mail server connection (STARTTLS and DANE)"
 
 msgid "test mailtls no-mx description"
-msgstr ""
-"Informational: The SPF record on your domain indicates that your domain may "
-"be used for sending mail. However, your domain does not have a receiving "
-"mail server (MX), which could hinder deliverability of your sent mails "
-"because not having an MX may be seen by receivers as an indicator for spam. "
-"Therefore if you really want to send mail from this domain, configure an MX."
-" However, if you do not want to send mail from this domain, configure an SPF"
-" record with the `-all` term only and besides a \"Null MX\" record if your "
-"domain has A/AAAA records. Because of your configuration, the subtests in "
-"the STARTTLS and DANE category and the mail server specific subtests in the "
-"IPv6 and DNSSEC categories are not applicable."
+msgstr "Informational: The SPF record on your domain indicates that your domain may be used for sending mail. However, your domain does not have a receiving mail server (MX), which could hinder deliverability of your sent mails because not having an MX may be seen by receivers as an indicator for spam. Therefore if you really want to send mail from this domain, configure an MX. However, if you do not want to send mail from this domain, configure an SPF record with the `-all` term only and besides a \"Null MX\" record if your domain has A/AAAA records. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "test mailtls no-mx summary"
 msgstr "Properly configured non-receiving mail domain (STARTTLS and DANE)"
 
 msgid "test mailtls no-null-mx description"
-msgstr ""
-"Informational: No receiving mail servers (MX) are set on your domain that "
-"has A/AAAA records and has an SPF record with only the term `-all`. We "
-"recommend you to set a \"Null MX\" record to explicitly indicate that your "
-"domain does not accept email. Because of your configuration, the subtests in"
-" the STARTTLS and DANE category and the mail server specific subtests in the"
-" IPv6 and DNSSEC categories are not applicable."
+msgstr "Informational: No receiving mail servers (MX) are set on your domain that has A/AAAA records and has an SPF record with only the term `-all`. We recommend you to set a \"Null MX\" record to explicitly indicate that your domain does not accept email. Because of your configuration, the subtests in the STARTTLS and DANE category and the mail server specific subtests in the IPv6 and DNSSEC categories are not applicable."
 
 msgid "test mailtls no-null-mx summary"
-msgstr ""
-"Not explicitly configured non-receiving mail domain (STARTTLS and DANE)"
+msgstr "Not explicitly configured non-receiving mail domain (STARTTLS and DANE)"
 
 msgid "test mailtls null-mx description"
-msgstr ""
-"Informational: Your domain that has A/AAAA records, clearly indicates that "
-"it does not accept email by advertising a \"Null MX\" record. This is fine "
-"if you do not want to receive email. Your configuration makes the subtests "
-"in the STARTTLS and DANE category not applicable. This also goes for the "
-"mail server specific subtests in the categories for IPv6 and DNSSEC."
+msgstr "Informational: Your domain that has A/AAAA records, clearly indicates that it does not accept email by advertising a \"Null MX\" record. This is fine if you do not want to receive email. Your configuration makes the subtests in the STARTTLS and DANE category not applicable. This also goes for the mail server specific subtests in the categories for IPv6 and DNSSEC."
 
 msgid "test mailtls null-mx summary"
 msgstr "Properly configured non-receiving mail domain (STARTTLS and DANE)"
 
 msgid "test mailtls null-mx-with-other-mx description"
-msgstr ""
-"Warning: Your domain advertises a \"Null MX\" record indicating that it does"
-" not accept email. However, on your domain a receiving mail server is set by"
-" another MX record, making the \"Null MX\" conflicting. "
+msgstr "Warning: Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, on your domain a receiving mail server is set by another MX record, making the \"Null MX\" conflicting. "
 
 msgid "test mailtls null-mx-with-other-mx summary"
-msgstr ""
-"Inconsistently configured non-receiving mail domain (STARTTLS and DANE)"
+msgstr "Inconsistently configured non-receiving mail domain (STARTTLS and DANE)"
 
 msgid "test mailtls null-mx-without-a-aaaa description"
-msgstr ""
-"Warning: Your domain advertises a \"Null MX\" record indicating that it does"
-" not accept email. However, your domain does not have A/AAAA records, making"
-" the \"Null MX\" record unnecessary."
+msgstr "Warning: Your domain advertises a \"Null MX\" record indicating that it does not accept email. However, your domain does not have A/AAAA records, making the \"Null MX\" record unnecessary."
 
 msgid "test mailtls null-mx-without-a-aaaa summary"
-msgstr ""
-"Properly configured non-receiving mail domain, though with unnecessary "
-"record (STARTTLS and DANE)"
+msgstr "Properly configured non-receiving mail domain, though with unnecessary record (STARTTLS and DANE)"
 
 msgid "test mailtls passed description"
 msgstr ""
@@ -5195,21 +4848,13 @@ msgid "test mailtls title"
 msgstr "Secure mail server connection?"
 
 msgid "test mailtls unreachable description"
-msgstr ""
-"Test error: at least one of your receiving mail servers was not reachable "
-"for us, making it impossible to (fully) test for STARTTLS and DANE. This "
-"could be caused by network connectivity problems or by the mail server(s) "
-"not accepting connections."
+msgstr "Test error: at least one of your receiving mail servers was not reachable for us, making it impossible to (fully) test for STARTTLS and DANE. This could be caused by network connectivity problems or by the mail server(s) not accepting connections."
 
 msgid "test mailtls unreachable summary"
 msgstr "Unreachable receiving mail server (STARTTLS and DANE)"
 
 msgid "test mailtls untestable description"
-msgstr ""
-"Test error: at least one of your receiving mail servers was not testable for"
-" us,  making it impossible to (fully) test for STARTTLS and DANE. This could"
-" be caused by, among other things, SMTP errors and rate limiting measures "
-"engaging and dropping connections."
+msgstr "Test error: at least one of your receiving mail servers was not testable for us,  making it impossible to (fully) test for STARTTLS and DANE. This could be caused by, among other things, SMTP errors and rate limiting measures engaging and dropping connections."
 
 msgid "test mailtls untestable summary"
 msgstr "Untestable mail server (STARTTLS and DANE)"
@@ -5220,40 +4865,16 @@ msgstr ""
 " *insufficiently* secure connection with your receiving mail server(s). Passive and/or active attackers will therefore be able to read emails in transit to you. You should ask your mail provider to enable STARTTLS and DANE, and configure it securely."
 
 msgid "test mailtls warning summary"
-msgstr ""
-"Mail server connection *not* or insufficiently secured (STARTTLS and DANE)"
+msgstr "Mail server connection *not* or insufficiently secured (STARTTLS and DANE)"
 
 msgid "test siteappsecpriv failed description"
-msgstr ""
-"Too bad! *Not* all required security options, i.e. security headers and "
-"security.txt, are set for your website ([Security "
-"options](/faqs/appsecpriv/)). With security headers you can activate browser"
-" mechanisms to protect visitors against attacks involving, for example, "
-"cross-site scripting (XSS) or framing. Security headers are also relevant "
-"for domains with response codes such as '301 Redirect' and '404 Not Found', "
-"because they create their own browsing context (MIME type 'text/html') that "
-"may be vulnerable to certain attacks. Through a security.txt file you can "
-"provide researchers who have found a vulnerability on your systems, with "
-"your contact information and your Coordinated Vulnerability Disclosure "
-"policy. Note that HTTPS is a prerequisite for all tested security options."
+msgstr "Too bad! *Not* all required security options, i.e. security headers and security.txt, are set for your website ([Security options](/faqs/appsecpriv/)). With security headers you can activate browser mechanisms to protect visitors against attacks involving, for example, cross-site scripting (XSS) or framing. Security headers are also relevant for domains with response codes such as '301 Redirect' and '404 Not Found', because they create their own browsing context (MIME type 'text/html') that may be vulnerable to certain attacks. Through a security.txt file you can provide researchers who have found a vulnerability on your systems, with your contact information and your Coordinated Vulnerability Disclosure policy. Note that HTTPS is a prerequisite for all tested security options."
 
 msgid "test siteappsecpriv failed summary"
 msgstr "One or more required security options *not* set (Security options)"
 
 msgid "test siteappsecpriv info description"
-msgstr ""
-"Informational: *Not* all optional security options, i.e. security headers "
-"and security.txt, are set for your website ([Security "
-"options](/faqs/appsecpriv/)). With security headers you can activate browser"
-" mechanisms to protect visitors against attacks involving, for example, "
-"cross-site scripting (XSS) or framing. Security headers are also relevant "
-"for domains with HTTP response codes such as '301 Redirect' and '404 Not "
-"Found', because they create their own browsing context (MIME type "
-"'text/html') that may be vulnerable to certain attacks. Through a "
-"security.txt file you can provide researchers who have found a vulnerability"
-" on your systems, with your contact information and your Coordinated "
-"Vulnerability Disclosure policy. Note that HTTPS is a prerequisite for all "
-"tested security options."
+msgstr "Informational: *Not* all optional security options, i.e. security headers and security.txt, are set for your website ([Security options](/faqs/appsecpriv/)). With security headers you can activate browser mechanisms to protect visitors against attacks involving, for example, cross-site scripting (XSS) or framing. Security headers are also relevant for domains with HTTP response codes such as '301 Redirect' and '404 Not Found', because they create their own browsing context (MIME type 'text/html') that may be vulnerable to certain attacks. Through a security.txt file you can provide researchers who have found a vulnerability on your systems, with your contact information and your Coordinated Vulnerability Disclosure policy. Note that HTTPS is a prerequisite for all tested security options."
 
 msgid "test siteappsecpriv info summary"
 msgstr "One or more optional security options *not* set (Security options)"
@@ -5262,18 +4883,7 @@ msgid "test siteappsecpriv label"
 msgstr "Security options"
 
 msgid "test siteappsecpriv passed description"
-msgstr ""
-"Well done! All security options, i.e. security headers and security.txt, are"
-" set for your website ([Security options](/faqs/appsecpriv/)). With security"
-" headers you can activate browser mechanisms to protect visitors against "
-"attacks involving, for example, cross-site scripting (XSS) or framing. "
-"Security headers are also relevant for domains with HTTP response codes such"
-" as '301 Redirect' and '404 Not Found', because they create their own "
-"browsing context (MIME type 'text/html') that may be vulnerable to certain "
-"attacks. Through a security.txt file you can provide researchers who have "
-"found a vulnerability on your systems, with your contact information and "
-"your Coordinated Vulnerability Disclosure policy. Note that HTTPS is a "
-"prerequisite for all tested security options."
+msgstr "Well done! All security options, i.e. security headers and security.txt, are set for your website ([Security options](/faqs/appsecpriv/)). With security headers you can activate browser mechanisms to protect visitors against attacks involving, for example, cross-site scripting (XSS) or framing. Security headers are also relevant for domains with HTTP response codes such as '301 Redirect' and '404 Not Found', because they create their own browsing context (MIME type 'text/html') that may be vulnerable to certain attacks. Through a security.txt file you can provide researchers who have found a vulnerability on your systems, with your contact information and your Coordinated Vulnerability Disclosure policy. Note that HTTPS is a prerequisite for all tested security options."
 
 msgid "test siteappsecpriv passed summary"
 msgstr "All security options set (Security options) "
@@ -5282,19 +4892,7 @@ msgid "test siteappsecpriv title"
 msgstr "Security options set?"
 
 msgid "test siteappsecpriv warning description"
-msgstr ""
-"Warning: *Not* all recommended security options, , i.e. security headers and"
-" security.txt, are set for your website ([Security "
-"options](/faqs/appsecpriv/)). With security headers you can activate browser"
-" mechanisms to protect visitors against attacks involving, for example, "
-"cross-site scripting (XSS) or framing. Security headers are also relevant "
-"for domains with HTTP response codes such as '301 Redirect' and '404 Not "
-"Found', because they create their own browsing context (MIME type "
-"'text/html') that may be vulnerable to certain attacks. Through a "
-"security.txt file you can provide researchers who have found a vulnerability"
-" on your systems, with your contact information and your Coordinated "
-"Vulnerability Disclosure policy. Note that HTTPS is a prerequisite for all "
-"tested security options. "
+msgstr "Warning: *Not* all recommended security options, , i.e. security headers and security.txt, are set for your website ([Security options](/faqs/appsecpriv/)). With security headers you can activate browser mechanisms to protect visitors against attacks involving, for example, cross-site scripting (XSS) or framing. Security headers are also relevant for domains with HTTP response codes such as '301 Redirect' and '404 Not Found', because they create their own browsing context (MIME type 'text/html') that may be vulnerable to certain attacks. Through a security.txt file you can provide researchers who have found a vulnerability on your systems, with your contact information and your Coordinated Vulnerability Disclosure policy. Note that HTTPS is a prerequisite for all tested security options. "
 
 msgid "test siteappsecpriv warning summary"
 msgstr "One or more recommended security options *not* set (Security options)"
@@ -5355,8 +4953,7 @@ msgstr ""
 "fully enable IPv6."
 
 msgid "test siteipv6 failed summary"
-msgstr ""
-"*Not* reachable via modern internet address, or improvement possible (IPv6)"
+msgstr "*Not* reachable via modern internet address, or improvement possible (IPv6)"
 
 msgid "test siteipv6 info description"
 msgstr ""
@@ -5366,8 +4963,7 @@ msgstr ""
 "fully enable IPv6."
 
 msgid "test siteipv6 info summary"
-msgstr ""
-"*Not* reachable via modern internet address, or improvement possible (IPv6)"
+msgstr "*Not* reachable via modern internet address, or improvement possible (IPv6)"
 
 msgid "test siteipv6 label"
 msgstr "Modern address (IPv6)"
@@ -5391,39 +4987,22 @@ msgstr ""
 "fully enable IPv6."
 
 msgid "test siteipv6 warning summary"
-msgstr ""
-"*Not* reachable via modern internet address, or improvement possible (IPv6)"
+msgstr "*Not* reachable via modern internet address, or improvement possible (IPv6)"
 
 msgid "test siterpki error description"
-msgstr ""
-"Test not ready to run yet. Please try again later. Sorry for the "
-"inconvenience."
+msgstr "Test not ready to run yet. Please try again later. Sorry for the inconvenience."
 
 msgid "test siterpki error summary"
 msgstr "Test not ready to run (RPKI)"
 
 msgid "test siterpki failed description"
-msgstr ""
-"Too bad! At least one of the IP addresses of your web server and associated "
-"name servers has a route announcement that is *not*  matched by the "
-"published route authorisation ([RPKI](/faqs/rpki/)). This indicates an "
-"unintentional or malicious route configuration error, that can be caused by "
-"your web hoster or your name server hoster (internal error) or by a third "
-"party (external error). In either case, it increases the risk for "
-"unreachability of your server or for interception of Internet traffic to "
-"your server. Contact your web hoster or name server hoster as soon as "
-"possible. In the case of an internal error, they should ask their network "
-"provider that owns your server's IP addresses to fix the route configuration"
-" error."
+msgstr "Too bad! At least one of the IP addresses of your web server and associated name servers has a route announcement that is *not*  matched by the published route authorisation ([RPKI](/faqs/rpki/)). This indicates an unintentional or malicious route configuration error, that can be caused by your web hoster or your name server hoster (internal error) or by a third party (external error). In either case, it increases the risk for unreachability of your server or for interception of Internet traffic to your server. Contact your web hoster or name server hoster as soon as possible. In the case of an internal error, they should ask their network provider that owns your server's IP addresses to fix the route configuration error."
 
 msgid "test siterpki failed summary"
 msgstr "*Unauthorised* route announcement (RPKI)"
 
 msgid "test siterpki info description"
-msgstr ""
-"Informational: Your domain does *not* contain any name servers and thus "
-"contains no web server IP addresses. There are no routable IP addresses that"
-" could be tested ([RPKI](/faqs/rpki/))."
+msgstr "Informational: Your domain does *not* contain any name servers and thus contains no web server IP addresses. There are no routable IP addresses that could be tested ([RPKI](/faqs/rpki/))."
 
 msgid "test siterpki info summary"
 msgstr "*No* routable IP addresses found (RPKI)"
@@ -5432,13 +5011,7 @@ msgid "test siterpki label"
 msgstr "Route authorisation (RPKI)"
 
 msgid "test siterpki passed description"
-msgstr ""
-"Well done! All IP addresses of your web server and associated name servers "
-"have a route announcement that is matched by the published route "
-"authorisation ([RPKI](/faqs/rpki/)). As a result, visitors with enabled "
-"route validation are better protected against various unintentional or "
-"malicious route configuration errors, that can lead to the unreachability of"
-" your servers or the interception of Internet traffic to your servers."
+msgstr "Well done! All IP addresses of your web server and associated name servers have a route announcement that is matched by the published route authorisation ([RPKI](/faqs/rpki/)). As a result, visitors with enabled route validation are better protected against various unintentional or malicious route configuration errors, that can lead to the unreachability of your servers or the interception of Internet traffic to your servers."
 
 msgid "test siterpki passed summary"
 msgstr "Authorised route announcement (RPKI)"
@@ -5447,16 +5020,7 @@ msgid "test siterpki title"
 msgstr "Route authorisation?"
 
 msgid "test siterpki warning description"
-msgstr ""
-"Too bad! At least one of the IP addresses of your web server and associated "
-"name servers has a route announcement for which *no* route authorisation is "
-"published ([RPKI](/faqs/rpki/)). As a result, visitors with enabled route "
-"validation are *not* (fully) protected against various unintentional or "
-"malicious route configuration errors, that can lead to the unreachability of"
-" your servers or the interception of Internet traffic to your servers. "
-"Contact your mail hoster or name server hoster about this. They can ask "
-"their network provider that owns your server's IP addresses to publish "
-"routing authorizations."
+msgstr "Too bad! At least one of the IP addresses of your web server and associated name servers has a route announcement for which *no* route authorisation is published ([RPKI](/faqs/rpki/)). As a result, visitors with enabled route validation are *not* (fully) protected against various unintentional or malicious route configuration errors, that can lead to the unreachability of your servers or the interception of Internet traffic to your servers. Contact your mail hoster or name server hoster about this. They can ask their network provider that owns your server's IP addresses to publish routing authorizations."
 
 msgid "test siterpki warning summary"
 msgstr "Route authorisation *not* published (RPKI)"
@@ -5497,10 +5061,7 @@ msgid "test sitetls title"
 msgstr "Secure connection?"
 
 msgid "test sitetls unreachable description"
-msgstr ""
-"Your web server was not reachable for us, making it impossible to (fully) "
-"test for HTTPS. This could be caused by network connectivity problems or by "
-"the web server not accepting connections."
+msgstr "Your web server was not reachable for us, making it impossible to (fully) test for HTTPS. This could be caused by network connectivity problems or by the web server not accepting connections."
 
 msgid "test sitetls unreachable summary"
 msgstr "Unreachable web server (HTTPS)"
@@ -5539,3 +5100,172 @@ msgstr ""
 "# Website test widget\n"
 "Would you like visitors of your website to be able to directly start a website test?  \n"
 "Copy the HTML and CSS code from the text fields below into the source code of your website."
+
+msgid "detail web caa label"
+msgstr "CAA web"
+
+msgid "detail mail caa label"
+msgstr "CAA mail"
+
+msgid "detail web caa tech table"
+msgstr "Findings"
+
+msgid "detail mail caa tech table"
+msgstr "Mail server|Findings"
+
+msgid "detail tech data caa invalid_property_syntax"
+msgstr "invalid_property_syntax name {property_name} value {property_value} invalid character {invalid_character} at pos {invalid_character_position}"
+
+msgid "detail tech data caa invalid_unknown_property"
+msgstr "invalid_unknown_property {value}"
+
+msgid "detail tech data caa invalid_reserved_property"
+msgstr "invalid_reserved_property {value}"
+
+msgid "detail tech data caa invalid_flags_reserved_bits"
+msgstr "invalid_flags_reserved_bits {value}"
+
+msgid "detail tech data caa invalid_property_issuemail_value"
+msgstr "invalid_property_issuemail_value {value}"
+
+msgid "detail tech data caa invalid_property_contactphone_value"
+msgstr "invalid_property_contactphone_value {value}"
+
+msgid "detail tech data caa invalid_property_contactemail_value"
+msgstr "invalid_property_contactemail_value {value}"
+
+msgid "detail tech data caa invalid_property_iodef_value"
+msgstr "invalid_property_iodef_value {value}"
+
+msgid "detail tech data caa invalid_property_issue_validation_method"
+msgstr "invalid_property_issue_validation_method {value}"
+
+msgid "detail tech data caa found_host"
+msgstr "found CAA on host {host}"
+
+msgid "detail tech data caa not_found"
+msgstr "CAA not found"
+
+msgid "detail mail tls caa exp"
+msgstr ""
+"We check if the name servers of each of your receiving mail servers (MX) contain one or more CAA records, that are syntactically valid and sufficiently protective.\n"
+"\n"
+"Certification Authority Authorisation (CAA) allows you as a domain name holder to specify one or more certificate authority authorised to issue certificates for your mail server domain names.\n"
+"A certificate authority must not issue a certificate unless the certificate authority determines that the certificate request is consistent with the applicable CAA records.\n"
+"\n"
+"Note that CAA records are located during validation by walking up the DNS hierarchy until one or more records are found.\n"
+"For example, if no CAA records are found on `sub.example.nl`, `example.nl` will be queried.\n"
+"The domain were the applicable CAA records are found is shown in the table with technical details below.\n"
+"\n"
+"The verdict is good if one or more CAA records were found that all have correct syntax, and at least one of these CAA records has the `issue` tag.\n"
+"Otherwise, the test will result in a fail.\n"
+"It is not checked whether the certificate authority of the current TLS certificate matches one or more of the `issue` and `issuewild` values, i.e., whether the current certificate could be reissued at this time.\n"
+"\n"
+"If your are using the Automatic Certificate Management Environment (ACME) standard and your certificate authority supports it, we recommend you to use the parameters `validationmethods` and `accounturi` to further restrict isssuance by the authorised certificate authority. Furthermore, it is recommended to add `issuewild`, `issuemail` and `issuevmc` with an empty `;` if you do not use wildcard, S/MIME and/or BIMI certificates respectively. This is especially important for `issuemail` and `issuevmc`, because in their absence there is no fallback to `issue` and thus any certificate authority can still issue S/MIME and/or BIMI certificates for your domain.\n"
+"\n"
+"We expect URLs in `iodef` to be secure (i.e. use HTTPS scheme).\n"
+"Furthermore, to prevent suppression or spoofing of CAA records we strongly recommend you to use DNSSEC, although this CAA test does not specifically test for DNSSEC.\n"
+"\n"
+"*Requirement level: Recommended*"
+
+msgid "detail mail tls caa label"
+msgstr "CAA for mail server"
+
+msgid "detail mail tls caa tech table"
+msgstr "Mail server|Findings"
+
+msgid "detail mail tls caa verdict bad"
+msgstr "Your mail server does *not* have CAA."
+
+msgid "detail mail tls caa verdict good"
+msgstr "Your mail server has a valid, sufficiently protective CAA. "
+
+msgid "detail mail tls caa verdict insufficient"
+msgstr "Your mail server has a valid, but *unsufficiently* protective CAA."
+
+msgid "detail mail tls caa verdict syntax-error"
+msgstr "Your mail server has an *invalid* CAA."
+
+msgid "detail tech data caa caa-record"
+msgstr "Record: {record}"
+
+msgid "detail tech data caa caa_record"
+msgstr "caa record found: {record}"
+
+msgid "detail tech data caa found-host"
+msgstr "CAA found on: {host}"
+
+msgid "detail tech data caa invalid-flags-reserved-bits"
+msgstr "Error: Invalid reserved flags \"{flags}\""
+
+msgid "detail tech data caa invalid-parameter-validation-methods"
+msgstr "Error: Invalid 'validationmethods' value \"{parameter_value}\""
+
+msgid "detail tech data caa invalid-property-contactemail-value"
+msgstr "Error: Invalid 'contactemail' value \"{property_value}\""
+
+msgid "detail tech data caa invalid-property-contactphone-value"
+msgstr "Error: Invalid 'contactphone' value \"{property_value}\""
+
+msgid "detail tech data caa invalid-property-encoding"
+msgstr "Error: Invalid encoding in '{property_name}'"
+
+msgid "detail tech data caa invalid-property-iodef-value"
+msgstr "Error: Invalid 'iodef' value \"{property_value}\""
+
+msgid "detail tech data caa invalid-property-issuemail-value"
+msgstr "Error: Invalid 'issuemail' value \"{property_value}\""
+
+msgid "detail tech data caa invalid-property-syntax"
+msgstr "Error: Invalid \"{invalid_character}\" at position {invalid_character_position} in '{property_name}' value \"{property_value}\" "
+
+msgid "detail tech data caa invalid-reserved-property"
+msgstr "Error: Invalid reserved property \"{property_tag}\""
+
+msgid "detail tech data caa invalid-unknown-property"
+msgstr "Error: Unknown property \"{property_tag}\""
+
+msgid "detail tech data caa missing-required-property-issue"
+msgstr "Error: Required 'issue' property missing"
+
+msgid "detail tech data caa not-found"
+msgstr "Error: CAA not found"
+
+msgid "detail web tls caa exp"
+msgstr ""
+"We check if the name servers of your website domain contain one or more CAA records, that are syntactically valid and sufficiently protective.\n"
+"\n"
+"Certification Authority Authorisation (CAA) allows you as a domain name holder to specify one or more certificate authorities authorised to issue certificates for your domain name.\n"
+"A certificate authority must not issue a certificate unless the CA determines that the certificate request is consistent with the applicable CAA records.\n"
+"\n"
+"Note that CAA records are located during validation by walking up the DNS hierarchy until one or more records are found.\n"
+"For example, if no CAA records are found on `sub.example.nl`, `example.nl` will be queried.\n"
+"The domain were the applicable CAA records are found is shown in the table with technical details below.\n"
+"\n"
+"The verdict is good if one or more CAA records were found that all have correct syntax, and at least one of these CAA records has the `issue` tag with a valid value.\n"
+"Otherwise, the test will result in a fail. It is not checked whether the certificate authority of the current certificate matches one or more of the `issue` and `issuewild` values, i.e., whether the current certificate could be reissued at this time.\n"
+"\n"
+"If your are using the Automatic Certificate Management Environment (ACME) standard and your certificate authority supports it, we recommend you to use the parameters `validationmethods` and `accounturi` to further restrict isssuance by the authorised certificate authority. Furthermore, it is recommended to add `issuewild`, `issuemail` and `issuevmc` with an empty `;` if you do not use wildcard, S/MIME and/or BIMI certificates respectively. This is especially important for `issuemail` and `issuevmc`, because in their absence there is no fallback to `issue` and thus any certificate authority can still issue S/MIME and/or BIMI certificates for your domain.\n"
+"\n"
+"We expect URLs in `iodef` to be secure (i.e. use HTTPS scheme). \n"
+"Furthermore, to prevent suppression or spoofing of CAA records we strongly recommend you to use DNSSEC, although this CAA test does not specifically test for DNSSEC.\n"
+"\n"
+"*Requirement level: Recommended*"
+
+msgid "detail web tls caa label"
+msgstr "CAA for domain"
+
+msgid "detail web tls caa tech table"
+msgstr "Findings"
+
+msgid "detail web tls caa verdict bad"
+msgstr "Your domain does *not* have CAA."
+
+msgid "detail web tls caa verdict good"
+msgstr "Your domain has a valid, sufficiently protective CAA. "
+
+msgid "detail web tls caa verdict insufficient"
+msgstr "Your domain has a valid, but *unsufficiently* protective CAA."
+
+msgid "detail web tls caa verdict syntax-error"
+msgstr "Your domain has an *invalid* CAA."

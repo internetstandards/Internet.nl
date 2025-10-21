@@ -1,21 +1,68 @@
-{% extends "faqarticle.html" %}
+{% extends "base.html" %}
 
-{% block faqarticlecontent %}
-    <div class="title-and-explanation">
-      <h1>{% include "string.html" with name="base test website title" %}</h1>
-      {% include "content.html" with name="base test website explain" %}
+{% block maincontent %}
+  <section class="test-section bg-primary ellipse">
+    <div class="container">
+      <h1 class="h1 color-secondary">{% include "string.html" with name="test_website_page_protect_intro_newstring" %}</h1>
+      <article class="test-card-large domain-variant">
+        <h2 class="domain icon">{% include "string.html" with name="test_website_domain_title_newstring" %}</h2>
+        <form action="/site/" method="POST">
+          <label>
+            <span>{% include "string.html" with name="test_website_domain_label_newstring" %}</span>
+            <input name="url" type="text" placeholder="www.example.nl" inputmode="url" autocomplete="url" required>
+          </label>
+          {% if request.GET.invalid != None %}
+          <p class="invalid-domain">
+            {% include "string.html" with name="base test prechecks invalid domain" %}
+          </p>
+          {% endif %}
+          <button class="primary-button icon" type="submit">{% include "string.html" with name="test_start_button_newstring" %}</button>
+        </form>
+        <ul>
+          <li>
+            <div class="icon"></div>
+            <span>{% include "string.html" with name="test_usp_one_newstring" %}</span>
+          </li>
+          <li>
+            <div class="icon"></div>
+            <span>{% include "string.html" with name="test_usp_two_newstring" %}</span>
+          </li>
+          <li>
+            <div class="icon"></div>
+            <span>{% include "string.html" with name="test_usp_three_newstring" %}</span>
+          </li>
+        </ul>
+      </article>
     </div>
-    <form action="/site/" method="POST">
-      <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-        <input id="web-url" type="text" inputmode="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-      </label>
-      {% if request.GET.invalid != None %}
-      <div class="invalid-domain">
-        {% include "string.html" with name="base test prechecks invalid domain" %}
-      </div>
-      {% endif %}
-      <div class="contains-button">
-        <button>{% include "string.html" with name="base test start" %}</button>
-      </div>
-    </form>
+  </section>
+
+  <section class="test-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="test_more_tests_title_newstring" %}</h2>
+      <ul class="test-card-list">
+        <li class="test-card-small">
+          <a href="/test-mail">
+            <div class="card-container mail icon">
+              <hgroup>
+                <h3>{% include "string.html" with name="test_email_title_newstring" %}</h3>
+                <p>537 {% include "string.html" with name="test_email_stats_newstring" %}</p>
+              </hgroup>
+            </div>
+            <div class="primary-button rounded icon"></div>
+          </a>
+        </li>
+        <li class="test-card-small">
+          <a href="/test-connection">
+            <div class="card-container connection icon">
+              <hgroup>
+                <h3>{% include "string.html" with name="test_connection_title_newstring" %}</h3>
+                <p>537 {% include "string.html" with name="test_connection_stats_newstring" %}</p>
+              </hgroup>
+            </div>
+            <div class="primary-button rounded icon"></div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
 {% endblock %}

@@ -1,216 +1,141 @@
 {% extends "base.html" %}
 {% load static %}
 {% load translate %}
-
 {% block scripting %}
-  <script type="text/javascript" src="{% static 'js/internetnl.results-min.js' %}"></script>
+  <script type="module" src="{% static 'js/results-min.js' %}"></script>
+  <script type="module" src="{% static 'js/components/meter-min.js' %}"></script>
+  <script type="module" src="{% static 'js/components/action-card-min.js' %}"></script>
 {% endblock %}
-
 {% block maincontent %}
-  <div class="hidethis" aria-hidden="true">
-    <span id="panel-button-show">
-      {% include "string.html" with name="results panel-button show" %}
-    </span>
-    <span id="panel-button-hide">
-      {% include "string.html" with name="results panel-button hide" %}
-    </span>
-    <span id="panel-item-open">
-      {% include "string.html" with name="results no-icon-detail open" %}
-    </span>
-    <span id="panel-item-close">
-      {% include "string.html" with name="results no-icon-detail close" %}
-    </span>
-  </div>
-
-  <article class="result wide">
-    <div id="testresults-overview" class="block">
-      {% block testheadcontent %}
-        <div class="testresults-percentage" data-resultscore="{{score}}">
-          <div class="visuallyhidden">
-            {% include "string.html" with name="results score-description"%}
-          </div>
-        {% block perfectscore %}
-          {% if score == 100 %}
-          <div class="perfect-score">
-            {% include "string.html" with name="results perfect-score" %}
-          </div>
-          {% endif %}
-        {% endblock %}
-          <div class="score-container">
-            <p class="score" aria-hidden="true">{{score}}%</p>
-            <div class="meter">
-              <!-- The following span is controlled by js -->
-              <span></span>
-            </div>
-          </div>
+  <section class="result-section bg-primary">
+    <div class="container">
+      <h1>
+        <span class="h5 color-secondary visually-hidden">
+          {% include "string.html" with name="base_results_score_for_newstring" %}
+        </span>
+        <span class="h1 color-secondary">
+          {% block testheadcontent %}{% endblock %}
+        </span>
+        <span class="h5 color-secondary">{{ permadate|date:'(Y-m-d H:i T)' }}</span>
+      </h1>
+      <div class="meter-container">
+        <div class="meter">
+          <meter min="0" max="100" value="{{ score }}" id="testresults-percentage">{{ score }}%</meter>
         </div>
-      {% endblock %}
-      <ul class="main-items">
-      {% for probe in probes %} <!-- probe.name probe.icon probe.summary|safe -->
-        <li class="main-item {{probe.verdict}}" id="{{probe.name}}-results">
-          <a href="#{{probe.name}}">
-            <span class="visuallyhidden">
-              {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
-            </span>
-            {% include "string.html" with name=probe.summary|safe %}
-          </a>
-        </li>
-      {% endfor %}
-      </ul>
-      {% block testmiddlecontent %}
-          <div class="timestamp">
-            <a href="{% url "faqs_report" %}" class="icon-testinfo">{% include "string.html" with name="results test-info" %}</a>
-            <br>
-            <a href="{{permalink}}" class="permalink">{% include "string.html" with name="results permalink" %}</a>
-            <br>
-            <span id="retest-time" class="hidethis" aria-hidden="true">{{retest_time}}</span>
-            <span
-            {% if retest_time < 1 %}
-                class="retest-text reruntest hidethis" aria-hidden="true"
-            {% else %}
-                class="retest-text reruntest"
-            {% endif %}>
-              {% include "string.html" with name="results retest-time" %}
-              <span class="retest-time"> {{retest_time}}</span>
-            </span>
-            <a href="{{retest_link}}" rel="nofollow"
-            {% if retest_time > 0 %}
-                class="retest-link reruntest hidethis" aria-hidden="true"
-            {% else %}
-                class="retest-link reruntest"
-            {% endif %}>
-              {% include "string.html" with name="results rerun-test" %}
-            </a>
-          </div>
-      {% endblock %}
-      {% if probes|probes_contain_dated_results %}
-      <div id="dated-results-warning">
-        <a href="{{retest_link}}" rel="nofollow">
-          {% include "string.html" with name="results dated-presentation" %}
-        </a>
+        <ul class="meter-numbers h7 color-secondary">
+          <li class="meter-number">0</li>
+          <li class="meter-number">25</li>
+          <li class="meter-number">50</li>
+          <li class="meter-number">75</li>
+          <li class="meter-number">100</li>
+        </ul>
+        <p class="meter-value h7">{{ score }}%</p>
       </div>
-      {% endif %}
-    </div>
-
-    <div class="block">
-    {% for probe in probes %}
-      <section class="test-header">
-      {% if not forloop.first %}
-        <hr/>
-      {% endif %}
-        <div class="test-title">
-            <h2 id="{{probe.name}}" class="{{probe.verdict}}">
-              <span class="visuallyhidden">
-                {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}:
+      <ul class="main-items">
+        {% for probe in probes %}
+          <li class="main-item {{ probe.verdict }} icon"
+              id="{{ probe.name }}-results">
+            <a class="h7 color-secondary" href="#{{ probe.name }}">
+              <span class="visually-hidden">
+                {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}
+                :
               </span>
-              {% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}
-            </h2>
-        </div>
-        <div id="{{probe.name}}-description" class="description">
-          {% include "string.html" with name=probe.description|safe %}
-        </div>
-        <div class="panel-button-container">
-          <button class="panel-button-show hidethis" aria-hidden="true"></button>
-        </div>
-      </section>
-      <section class="testresults">
-        <br/>
-        {% for domain_type, domain, details in probe.details_set %}
-          {% block testdetailitems %}
-          {% endblock %}
+              {% include "string.html" with name=probe.summary|safe %}
+            </a>
+          </li>
         {% endfor %}
-      </section>
-      {% endfor %}
-     </div>
-   </article>
-
-   {% block testtailcontent %}
-   <aside>
-     <div id="first-aside-block" class="block">
-     <section class="websitetest">
-       <h2>
-         {% include "string.html" with name="results test website label" %}
-       </h2>
-       <form action="/site/" method="POST">
-         <label class="text-input" for="web-url">
-           {% include "string.html" with name="base test website input" %}
-           <input id="web-url" type="text" inputmode="url" name="url" placeholder="www.example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-         </label>
-         <div class="contains-button">
-           <button>
-             {% include "string.html" with name="base test start" %}
-           </button>
-         </div>
-       </form>
-    {% if webtest_direct %}
-       <div class="test-direct">
-         <h3>
-           {% include "string.html" with name="results test direct" %}
-         </h3>
-         <ol>
-      {% for addr in webtest_direct %}
-           <li><a href="/site/{{addr}}/" rel="nofollow">{{addr}}</a></li>
-      {% endfor %}
-         </ol>
-       </div>
-    {% endif %}
-     </section>
-     </div>
-
-
-     <div class="block">
-     <section class="emailtest">
-       <h2>
-         {% include "string.html" with name="results test email label" %}
-       </h2>
-       <form action="/mail/" method="POST">
-         <label class="text-input" for="mail-url">
-           {% include "string.html" with name="base test mail input" %}
-           <span class="emailfield before">
-             <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="example.nl" autocorrect="off" autocapitalize="none" spellcheck="false">
-           </span>
-         </label>
-         <div class="contains-button">
-           <button>
-             {% include "string.html" with name="base test start" %}
-           </button>
-         </div>
-       </form>
-    {% if mailtest_direct %}
-       <div class="test-direct">
-         <h3>
-           {% include "string.html" with name="results test direct" %}
-         </h3>
-         <ol>
-       {% for addr in mailtest_direct %}
-           <li><a href="/mail/{{addr}}/" rel="nofollow">@{{addr}}</a></li>
-       {% endfor %}
-         </ol>
-       </div>
-    {% endif %}
-     </section>
-     </div>
-
-
-     <div class="block">
-     <section class="connectiontest">
-       <div class="title-and-explanation">
-         <h2>
-           {% include "string.html" with name="base test connection label" %}
-         </h2>
-       </div>
-       <form action="/connection/" method="POST" id="form-connection-test">
-         <div class="contains-button">
-           <button>
-             {% include "string.html" with name="base test start" %}
-           </button>
-         </div>
-       </form>
-     </section>
-     </div>
-
-     {% block furthertesting %}
-     {% endblock %}
-   </aside>
-   {% endblock %}
-{% endblock %}
+      </ul>
+    </div>
+  </section>
+  <section class="result-details-section">
+    <div class="container">
+      <aside class="action-card">
+        <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
+        <details>
+          <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
+          <ul class="action-card-list">
+            <li class="action-card-item">
+              <a class="icon" href="/test-site">
+                <span class="domain icon">{% include "string.html" with name="base_results_test_website_domain_newstring" %}</span>
+              </a>
+            </li>
+            <li class="action-card-item">
+              <a class="icon" href="/test-mail">
+                <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
+              </a>
+            </li>
+            <li class="action-card-item">
+              <a class="icon" href="/test-connection">
+                <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
+              </a>
+            </li>
+            <li class="action-card-item">
+              <a class="icon repeat-test link {% if retest_time > 0 %}hidden{% endif %}"
+                 href="{{ retest_link }}">
+                <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
+              </a>
+              <p class="icon repeat-test countdown {% if retest_time < 1 %}hidden{% endif %}">
+                <span class="reset icon">
+                  <span class="countdown-time-text">
+                    {% include "string.html" with name="results retest-time" %}
+                    (<span class="countdown-time">{{ retest_time }}</span>)</span>
+                  </span>
+                </p>
+              </li>
+              <li class="action-card-item">
+                <a class="icon" href="/faqs/report/">
+                  <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
+                </a>
+              </li>
+              {% if pageclass == "websitetest" %}
+                <li class="action-card-item">
+                  <form action="/site/" method="post">
+                    <input hidden
+                           class="visually-hidden"
+                           name="url"
+                           value="{{ prettyaddr_results }}" />
+                    <button class="icon" type="submit">
+                      <span class="globe icon">
+                        {% include "string.html" with name="base test website label" %}
+                        {{ prettyaddr_results }}
+                      </span>
+                    </button>
+                  </form>
+                </li>
+              {% endif %}
+            </ul>
+            <p class="action-card-description">{% include "string.html" with name="action_card_description_newstring" %}</p>
+          </details>
+          <button id="copy-link" class="primary-button icon" type="button">
+            <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>
+            <span class="clicked">{% include "string.html" with name="base_results_share_results_clicked_newstring" %}</span>
+          </button>
+        </aside>
+        <h2 class="h3 color-secondary visually-hidden">
+          {% include "string.html" with name="base_results_test_details_newstring" %}
+        </h2>
+        <ul class="result-details-list">
+          {% for probe in probes %}
+            <li id="{{ probe.name }}" class="result-details-item">
+              <hgroup>
+                <h3 class="h5 color-secondary icon {{ probe.verdict }}">
+                  <span class="visually-hidden">
+                    {% include "string.html" with name="results no-icon-status "|addstr:probe.verdict %}
+                    :
+                  </span>
+                  {% include "string.html" with name="test "|addstr:probe.name|addstr:" label" %}
+                </h3>
+                <p class="body-s">{% include "string.html" with name=probe.description|safe %}</p>
+              </hgroup>
+              <div class="result-details-content">
+                {% for domain_type, domain, details in probe.details_set %}
+                  {% block testdetailitems %}{% endblock %}
+                {% endfor %}
+              {% endfor %}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+    {% block testtailcontent %}{% endblock %}
+  {% endblock %}

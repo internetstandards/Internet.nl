@@ -1,0 +1,281 @@
+:root {
+  /* MARK: THEME PROPERTIES 
+  */
+  
+  /* COLORS */
+  --black-100: #000;
+  --black-200: #191919;
+  --green-100: #E3F0F5;
+  --green-200: #EEF6F9;
+  --green-300: #8BF1FF;
+  --green-350: #219653;
+  --green-375: #21BD54;
+  --green-400: #037584;
+  --green-500: #34545F;
+  --green-600: #22363C;
+  --orange-100: #FFEBD2;
+  --orange-200: #FFC170;
+  --orange-300: #FFAC40;
+  --orange-350: #FFAD33;
+  --orange-375: #D45C00;
+  --orange-400: #E98400;
+  --orange-500: #BC6D07;
+  --orange-600: #CF7604;
+  --blue-100: #1565C0;
+  --red-100: #C00000;
+  --red-200: #FD2121;
+  --grey-100: #757575;
+  --grey-200: #828282;
+  --grey-300: #C5C5C5;
+  --grey-400: #707070;
+  --white-100: #FFF;
+  --transparent-100: transparent;
+  --transparent-200: #E3F0F500;
+  --transparent-300: #0000001A;
+  --transparent-400: #FFC17014;
+  --transparent-500: #FFFFFF80;
+  --transparent-600: #0000000A;
+
+  /* HEADING FONTS */
+  --heading-font-xxs: 700 0.875rem/1.5 'Montserrat', sans-serif; /* 14px */
+  --heading-font-xxs-semibold: 500 0.875rem/1.5 'Montserrat', sans-serif; /* 14px */
+  --heading-font-xs: 700 1rem/1.5 'Montserrat', sans-serif; /* 16px */
+  --heading-font-s: 700 1.25rem/1.5 'Montserrat', sans-serif; /* 20px */
+  --heading-font-m: 700 1.5rem/1.3 'Montserrat', sans-serif; /* 24px */
+  --heading-font-l: 700 2rem/1.3 'Montserrat', sans-serif; /* 32px */
+  --heading-font-xl: 700 2.5rem/1.3 'Montserrat', sans-serif; /* 40px */
+
+  /* BODY FONTS */
+  --body-font-xxs: 400 0.875rem/1.5 'Roboto', sans-serif; /* 14px */
+  --body-font-xxs-bold: 700 0.875rem/1.5 'Roboto', sans-serif; /* 14px */
+  --body-font-xs: 400 1rem/1.5 'Roboto', sans-serif; /* 16px */
+  --body-font-xs-bold: 700 1rem/1.5 'Roboto', sans-serif; /* 16px */
+  --body-font-s: 400 1.125rem/1.75 'Roboto', sans-serif; /* 18px */
+  --body-font-s-bold: 700 1.125rem/1.75 'Roboto', sans-serif; /* 18px */
+
+  /* BUTTON FONTS */
+  --button-link-font-xxs: 700 0.875rem/2 'Montserrat', sans-serif; /* 14px */
+  --button-link-font-xs: 700 1rem/2 'Montserrat', sans-serif; /* 16px */
+  --button-link-font-s: 700 1.125rem/2 'Montserrat', sans-serif; /* 18px */
+  --button-link-font-m: 700 1.25rem/2 'Montserrat', sans-serif; /* 20px */
+  --button-link-font-l: 700 1.5rem/2 'Montserrat', sans-serif; /* 24px */
+
+  /* MARK: FONT VARIABLES
+*/
+
+  /* NAV FONTS MOBILE */
+  --nav-link: var(--button-link-font-m);
+  --nav-button: var(--button-link-font-xs);
+  --subnav-link: var(--button-link-font-xs);
+  --footer-link: var(--button-link-font-xs);
+  --footer-bar-link: var(--button-link-font-xxs);
+
+  /* SECTION FONTS MOBILE */
+  --section-header-xxl: var(--heading-font-m);
+  --section-header-xl: var(--heading-font-s);
+  --section-header-l: var(--heading-font-s);
+  --section-header-m: var(--heading-font-xs);
+  --section-header-s: var(--heading-font-xs);
+  --section-header-xs: var(--heading-font-xxs);
+  --section-header-xxs: var(--heading-font-xxs);
+  --section-body-xl: var(--body-font-xs);
+  --section-body-l: var(--body-font-xxs);
+  --section-body-m: var(--body-font-xs);
+  --section-body-s: var(--body-font-xxs);
+  --section-button-l: var(--button-link-font-s);
+  --section-button-m: var(--button-link-font-xs);
+
+  /* CARD FONTS MOBILE */
+  --card-header-xl: var(--heading-font-s);
+  --card-header-l: var(--heading-font-xs);
+  --card-header-m: var(--heading-font-xs);
+  --card-header-s: var(--heading-font-xxs);
+  --card-header-xs: var(--heading-font-xxs);
+  --card-body-l: var(--body-font-xs);
+  --card-body-m: var(--body-font-xxs);
+  --card-body-s: var(--body-font-xxs);
+  --card-body-xs: var(--body-font-xxs);
+  --card-input: var(--body-font-s);
+
+  /* ACCORDION FONTS MOBILE */
+  --accordion-header: var(--heading-font-xxs);
+  --accordion-header-semibold: var(--heading-font-xxs-semibold);
+  --accordion-body: var(--body-font-xxs);
+  --accordion-body-semibold: var(--body-font-xxs-semibold);
+
+  @media (width >= 56.25rem) {
+    /* NAV FONTS DESKTOP */
+    --nav-link: var(--button-link-font-xs);
+    --nav-button: var(--button-link-font-xs);
+    --subnav-link: var(--button-link-font-xs);
+    --footer-link: var(--button-link-font-m);
+    --footer-bar-link: var(--button-link-font-xs);
+
+    /* SECTION FONTS DESKTOP */
+    --section-header-xxl: var(--heading-font-xl);
+    --section-header-xl: var(--heading-font-l);
+    --section-header-l: var(--heading-font-m);
+    --section-header-m: var(--heading-font-m);
+    --section-header-s: var(--heading-font-s);
+    --section-header-xs: var(--heading-font-m);
+    --section-header-xxs: var(--heading-font-xs);
+    --section-body-xl: var(--body-font-s);
+    --section-body-l: var(--body-font-s);
+    --section-body-m: var(--body-font-xs);
+    --section-body-s: var(--body-font-xs);
+    --section-button-l: var(--button-link-font-s);
+    --section-button-m: var(--button-link-font-xs);
+
+    /* CARD FONTS DESKTOP */
+    --card-header-xl: var(--heading-font-m);
+    --card-header-l: var(--heading-font-s);
+    --card-header-m: var(--heading-font-xs);
+    --card-header-s: var(--heading-font-xs);
+    --card-header-xs: var(--heading-font-xs);
+    --card-body-l: var(--body-font-xs);
+    --card-body-m: var(--body-font-xs);
+    --card-body-s: var(--body-font-xs);
+    --card-body-xs: var(--body-font-s);
+    --card-input: var(--body-font-s);
+
+    /* ACCORDION FONTS DESKTOP */
+    --accordion-header: var(--heading-font-xs);
+    --accordion-header-semibold: var(--heading-font-xs-semibold);
+    --accordion-body: var(--body-font-xs);
+    --accordion-body-semibold: var(--body-font-xs-semibold);
+  }
+
+  /* MARK: COLOR VARIABLES
+*/
+
+  /* COLORS */
+  color-scheme: light dark;
+
+  /* HEADER COLORS LIGHTMODE */
+  --nav-bg-color: light-dark(var(--white-100), var(--black-200));
+  --nav-sublist-border-color: light-dark(var(--green-400), var(--white-100));
+  --nav-text-color: light-dark(var(--green-500), var(--white-100));
+  --nav-mobile-bg-color: light-dark(var(--green-200), var(--green-600));
+  --nav-mobile-border: 0.5px solid light-dark(var(--green-400), var(--black-200));
+  --nav-dropdown-bg-color: light-dark(var(--green-200), var(--green-600));
+  --nav-sticky-border: 1.5px solid light-dark(var(--green-400), var(--green-400));
+  --nav-sticky-shadow: 0px 4px 32px 0px light-dark(var(--transparent-300), var(--transparent-300));
+  --nav-lang-bg-color: light-dark(var(--green-200), var(--green-600));
+  --nav-mobile-lang-bg-color: light-dark(var(--white-100), var(--white-100));
+  --nav-mobile-lang-text-color: light-dark(var(--green-500), var(--green-500));
+  --nav-theme-button-bg-color: light-dark(var(--orange-500), var(--green-500));
+  --nav-theme-button-color: light-dark(var(--white-100), var(--white-100));
+
+  /* FOOTER COLORS LIGHTMODE */
+  --footer-bg-color: light-dark(var(--green-400), var(--green-600));
+  --footer-text-color: light-dark(var(--white-100), var(--white-100));
+  --footer-bar-bg-color: light-dark(var(--white-100), var(--green-500));
+  --footer-bar-text-color: light-dark(var(--green-500), var(--white-100));
+
+  /* GENERAL COLORS LIGHTMODE */
+  --bg-color-body: light-dark(var(--white-100), var(--black-200));
+  --bg-color-primary: light-dark(var(--green-200), var(--green-600));
+  --bg-color-secondary: light-dark(var(--orange-100), var(--green-600));
+  --heading-color-primary: light-dark(var(--black-200), var(--white-100));
+  --heading-color-secondary: light-dark(var(--green-500), var(--white-100));
+  --heading-color-accent: light-dark(var(--green-400), var(--green-300));
+  --heading-color-alt: light-dark(var(--orange-500), var(--white-100));
+  --body-color-primary: light-dark(var(--black-200), var(--white-100));
+  --body-color-secondary: light-dark(var(--green-500), var(--white-100));
+  --body-link-color: light-dark(var(--green-400), var(--green-300));
+
+  /* BUTTON COLORS LIGHTMODE */
+  --button-bg-color-primary: light-dark(var(--orange-300), var(--orange-300));
+  --button-bg-color-hover-primary: light-dark(var(--orange-200), var(--orange-200));
+  --button-text-color-primary: light-dark(var(--black-200), var(--black-200));
+  --button-bg-color-secondary: light-dark(var(--transparent-100), var(--transparent-100));
+  --button-bg-color-hover-secondary: light-dark(var(--orange-300), var(--green-400));
+  --button-text-color-secondary: light-dark(var(--green-500), var(--white-100));
+  --button-bg-color-contact: light-dark(var(--green-500), var(--black-200));
+  --button-text-color-contact: light-dark(var(--white-100), var(--white-100));
+  --button-bg-color-hoster: light-dark(var(--green-100), var(--black-200));
+  --button-text-color-hoster: light-dark(var(--green-500), var(--white-100));
+
+  /* CARD COLORS LIGHTMODE */
+  --card-bg-color-test: light-dark(var(--white-100), var(--black-200));
+  --card-heading-color-test: light-dark(var(--green-400), var(--white-100));
+  --card-body-color-test: light-dark(var(--green-500), var(--white-100));
+  --card-input-bg-color-test: light-dark(var(--green-200), var(--green-500));
+  --card-bg-color-knowledge: light-dark(var(--orange-200), var(--green-600));
+  --card-heading-color-knowledge: light-dark(var(--black-200), var(--white-100));
+  --card-body-color-knowledge: light-dark(var(--black-200), var(--white-100));
+  --card-bg-color-news: light-dark(var(--green-100), var(--green-600));
+  --card-heading-color-news: light-dark(var(--green-500), var(--white-100));
+  --card-body-color-news: light-dark(var(--green-500), var(--white-100));
+  --card-bg-color-contact: light-dark(var(--green-400), var(--green-500));
+  --card-heading-color-contact: light-dark(var(--white-100), var(--white-100));
+  --card-body-color-contact: light-dark(var(--white-100), var(--white-100));
+  --card-border: 2px solid light-dark(var(--green-400), var(--white-100));
+  --card-box-shadow: 0 4px 32px 0 light-dark(var(--transparent-600), var(--transparent-600));
+  --card-bg-color-action: light-dark(var(--green-400), var(--green-500));
+  --card-heading-color-action: var(--white-100);
+  --card-body-color-action: var(--white-100);
+
+  /* ELLIPSES LIGHTMODE */
+  --ellipse-color-light: linear-gradient(0deg,light-dark(var(--white-100), var(--green-500)),light-dark(var(--transparent-200), var(--green-600)));
+
+  @media (width >= 56.25rem) {
+    --ellipse-color-light: linear-gradient(45deg,light-dark(var(--white-100), var(--green-500)),light-dark(var(--transparent-200), var(--green-600)));
+  }
+
+  --ellipse-color-dark: linear-gradient(135deg,light-dark(var(--orange-200), var(--green-600)),light-dark(var(--transparent-400), var(--green-500)));
+
+  /* ACCORDION COLORS LIGHTMODE */
+  --accordion-bg-color: light-dark(var(--white-100), var(--black-200));
+  --accordion-heading-color: light-dark(var(--black-200), var(--green-100));
+  --accordion-body-color: light-dark(var(--black-200), var(--white-100));
+  --accordion-border-color: light-dark(var(--green-400), var(--transparent-600));
+
+  /* RESULT STATE COLORS */
+  --probing-color: light-dark(var(--green-400), var(--white-100));
+  --success-color: light-dark(var(--green-350), var(--green-375));
+  --warning-color: light-dark(var(--orange-375), var(--orange-350));
+  --failed-color: light-dark(var(--red-100), var(--red-200));
+  --not-tested-color: light-dark(var(--grey-100), var(--grey-300));
+  --info-color: light-dark(var(--blue-100), var(--green-300));
+  --error-color: light-dark(var(--grey-100), var(--grey-200));
+
+  /* OTHER COLORS */
+  --placeholder-color: light-dark(var(--grey-400), var(--grey-300));
+  --meter-bg-color: light-dark(var(--green-400), var(--orange-350));
+}
+
+/* MARK: OTHER VARIABLES
+*/
+
+@media (prefers-color-scheme: light) {
+  :root {
+    /* IMAGE VISIBILITY LIGHTMODE */
+    --light-visible: block;
+    --dark-visible: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* IMAGE VISIBILITY DARKMODE */
+    --light-visible: none;
+    --dark-visible: block;
+  }
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* IMAGE VISIBILITY LIGHTMODE */
+  --light-visible: block;
+  --dark-visible: none;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* IMAGE VISIBILITY DARKMODE */
+  --light-visible: none;
+  --dark-visible: block;
+}
