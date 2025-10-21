@@ -3,5 +3,5 @@
 	url = https://github.com/internetstandards/unbound.git
 [submodule "vendor/nassl6"]
 	path = vendor/nassl6
-	url = https://github.com/mxsasha/nassl
-	branch = sigalg
+	url = https://github.com/jmcrawford45/nassl.git
+	branch = feature/openssl3-support

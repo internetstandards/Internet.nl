@@ -47,7 +47,8 @@ pyopenssl
 dnspython
 
 # sslyze dependencies, which is installed from outside this file
-sslyze
+tls-parser>=2,<3
+pydantic>=2.2,<2.7
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
