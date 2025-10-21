@@ -273,6 +273,9 @@ def batch_async_generate_results(self, user, batch_request, site_url):
                 results = gather_batch_results_technical(user, batch_request, site_url)
                 save_batch_results_to_file(user, batch_request, results, technical=True)
 
+    request_lock_id = redis_id.batch_results_request_lock.id.format(batch_request.request_id)
+    cache.delete(request_lock_id)
+
 
 def gather_batch_results(user, batch_request, site_url):
     """

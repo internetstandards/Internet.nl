@@ -3,6 +3,7 @@ import uuid
 from django.core.cache import cache
 from checks.models import BatchRequest, BatchRequestType, BatchUser, BatchRequestStatus
 from interface.batch.util import get_request, register_request
+from interface.batch.views import results
 from django.test.client import RequestFactory
 import pytest
 from interface.batch.util import batch_async_generate_results
@@ -68,15 +69,27 @@ def test_batch_request_result_generation(db, client, mocker):
     batch_request.save()
 
     # if batch request is done, a batch_async_generate_results task should be put on the queue to generate the results
-    get_request(request, batch_request, test_user)
+    response = get_request(request, batch_request, test_user)
+    assert response.status_code == 200
+    assert json.loads(response.content)["request"]["status"] == "generating"
     assert batch_async_generate_results.delay.call_count == 1
 
     # there should not be an additional task put on the queue when one is already present
-    get_request(request, batch_request, test_user)
+    response = get_request(request, batch_request, test_user)
+    assert response.status_code == 200
+    assert json.loads(response.content)["request"]["status"] == "generating"
+    assert batch_async_generate_results.delay.call_count == 1
+
+    # when directly accessing results there should also not be a extra task added to the queue
+    assert (
+        results(request, batch_request.request_id, batch_user=test_user).status_code == 400
+    ), "should return `bad_client_request_response`"
     assert batch_async_generate_results.delay.call_count == 1
 
     # if the cache expires a new batch_async_generate_results task can be added
     lock_id = redis_id.batch_results_request_lock.id.format(batch_request.request_id)
     cache.delete(lock_id)
-    get_request(request, batch_request, test_user)
+    response = get_request(request, batch_request, test_user)
+    assert response.status_code == 200
+    assert json.loads(response.content)["request"]["status"] == "generating"
     assert batch_async_generate_results.delay.call_count == 2
