@@ -64,7 +64,7 @@ def test_batch_openapi(page):
     expect(response).to_be_ok()
 
 
-def test_batch_request(unique_id, register_test_user, test_domain):
+def test_batch_request(unique_id, register_test_user, test_domain, docker_compose_exec):
     """A test via the Batch API should succeed."""
     request_data = {"type": "web", "domains": [test_domain], "name": unique_id}
 
@@ -128,6 +128,24 @@ def test_batch_request(unique_id, register_test_user, test_domain):
     report_url = results_response_data["domains"][test_domain]["report"]["url"]
     response = requests.get(report_url, verify=False)
     assert response.status_code == 200, "test results should be publicly accessible without authentication"
+
+    # delete result files (this can happen in production when cleanup is done by a cron job)
+    docker_compose_exec("app", "sh -c 'rm -v /app/batch_results/*'")
+
+    # try to get batch results again after files have been deleted (this should trigger a new generation task)
+    results_response = requests.get(INTERNETNL_API + "requests/" + test_id + "/results", auth=auth, verify=False)
+    # expect error because result need to be generated again
+    assert results_response.status_code == 400
+    assert "Report is being generated." in results_response.text
+
+    # wait for report generation and batch to be done
+    wait_for_request_status(INTERNETNL_API + "requests/" + test_id, "done", timeout=60, auth=auth)
+
+    # get batch results again after starting generation
+    results_response = requests.get(INTERNETNL_API + "requests/" + test_id + "/results", auth=auth, verify=False)
+    print(f"{results_response.text=}")
+    results_response.raise_for_status()
+    print("api results JSON:", results_response.text)
 
 
 def test_batch_static_requires_no_auth():
