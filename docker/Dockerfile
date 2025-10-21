@@ -52,6 +52,17 @@ RUN ./configure \
 RUN make
 RUN make install
 
+FROM build-deps AS build-nassl
+
+COPY vendor/nassl6 /src/vendor/nassl
+WORKDIR /src/vendor/nassl
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+RUN pip3 install -r requirements-dev.txt
+RUN invoke build.all
+RUN python3 setup.py install
+
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
@@ -60,6 +71,10 @@ COPY requirements.txt /src/
 WORKDIR /src
 
 RUN pip3 install --system -r requirements.txt
+# sslyze is installed from our own fork, and installed
+# without deps to avoid it trying to install nassl, when
+# we have our custom nassl
+RUN pip3 install --no-deps sslyze==6.2.0
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps
@@ -145,6 +160,9 @@ RUN apt update && \
 # copy unbound library and unbound Python module into image
 COPY --from=build-unbound /opt/unbound /opt/unbound
 COPY --from=build-unbound /usr/lib/python3/dist-packages/*unbound* /usr/lib/python3/dist-packages/
+
+# copy nassl Python module into image
+COPY --from=build-nassl /usr/local/lib/python${PYTHON_VERSION}/dist-packages/nassl-*.egg /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 
 # copy application dependencies into image
 COPY --from=build-app-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/

@@ -82,6 +82,7 @@ with Diagram("Dockerfile", show=False, direction="LR", outformat=["png"], graph_
         with Cluster("Stages"):
             build_deps = Stage("build-deps")
             build_unbound = Stage("build-unbound")
+            build_nassl = Stage("build-nassl")
             build_app_deps = Stage("build-app-deps")
             build_linttest_deps = Stage("build-linttest-deps")
             build_app = Stage("build-app")
@@ -95,6 +96,9 @@ with Diagram("Dockerfile", show=False, direction="LR", outformat=["png"], graph_
 
         build_deps >> build_unbound
         vendor_unbound >> build_unbound
+
+        build_deps >> build_nassl
+        vendor_openssl >> build_nassl
 
         build_deps >> build_app_deps
         requirements >> build_app_deps
