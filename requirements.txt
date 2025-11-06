@@ -60,7 +60,7 @@ cryptography==38.0.4
     # via
     #   -r requirements.in
     #   pgpy-dtc
-django==4.2.24
+django==4.2.26
     # via
     #   -r requirements.in
     #   django-bleach
