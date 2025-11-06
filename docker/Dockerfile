@@ -242,6 +242,8 @@ RUN apt update && \
     make \
     python3-pip \
     docker.io \
+    gpg \
+    gpg-agent \
     shellcheck \
     bsdmainutils \
     # since this stage ends up in the final image we care about size and remove cache files
