@@ -42,6 +42,7 @@ help:
 	@echo '   make frontend                              (re)generate CSS and Javascript'
 	@echo '   make update_cert_fingerprints              update certificate fingerprint information'
 	@echo '   make update_container_documentation        update container table for documentation'
+	@echo '   make update_expire_sectxt_pgp_test         test if security.txt or PGP key needs an update'
 	@echo '   make update_padded_macs                    update padded MAC information'
 	@echo '   make update_root_key_file                  update DNS root key file'
 
@@ -81,6 +82,9 @@ update_cert_fingerprints:
 
 update_container_documentation:
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_container_documentation.sh
+
+update_expire_sectxt_pgp_test:
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_expire_sectxt_pgp_test.sh
 
 update_padded_macs:
 	chmod +x $(MACSDIR)/update-macs.sh
