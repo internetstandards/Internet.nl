@@ -4,33 +4,11 @@ from typing import Callable, Optional
 from django.core.management.base import BaseCommand
 
 from checks.caa.retrieval import retrieve_parse_caa
-from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, tls, rpki
+from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, rpki
+from checks.tasks.tls import tasks_reports as tls_tasks
 
 
-def force_debug_logging():
-    debug_log = logging.getLogger(__package__)
-
-    formatter = logging.Formatter(
-        "%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - %(funcName)20s() - %(message)s"
-    )
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-    stream_handler.setLevel(logging.DEBUG)
-    debug_log.addHandler(stream_handler)
-    debug_log.setLevel(logging.DEBUG)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-    logger = logging.getLogger("internetnl")
-    logger.setLevel(logging.DEBUG)
-    logger = logging.getLogger("django")
-    logger.setLevel(logging.DEBUG)
-    logger = logging.getLogger("celery")
-    logger.setLevel(logging.DEBUG)
-
-    return debug_log
-
-
-log = force_debug_logging()
+log = logging.getLogger(__package__)
 
 PROBES: dict[str, Optional[Callable]] = {
     "ipv6_web": ipv6.web,
@@ -44,10 +22,10 @@ PROBES: dict[str, Optional[Callable]] = {
     "shared_mail_get_servers": shared.mail_get_servers,
     "shared_resolve_a_aaaa": shared.resolve_a_aaaa,
     "appsecpriv_web_appsecpriv": appsecpriv.web_appsecpriv,
-    "tls_web_cert": tls.web_cert,
-    "tls_web_conn": tls.web_conn,
-    "tls_web_http": tls.web_http,
-    "tls_mail_smtp_starttls": tls.mail_smtp_starttls,
+    "tls_web_cert": tls_tasks.web_cert,
+    "tls_web_conn": tls_tasks.web_conn,
+    "tls_web_http": tls_tasks.web_http,
+    "tls_mail_smtp_starttls": tls_tasks.mail_smtp_starttls,
     "mail_rpki": rpki.mail_rpki,
     "web_rpki": rpki.web_rpki,
     "caa": retrieve_parse_caa,
