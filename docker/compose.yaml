@@ -333,6 +333,7 @@ services:
 
     command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
+    hostname: worker-slow
 
   # celery task queue
   beat:
@@ -612,6 +613,7 @@ services:
       - CRON_DAILY_DELETE_BATCH_RESULTS
       - CRON_15MIN_RUN_TESTS
       - CRON_DAILY_TRUNCATE_EXPORTER_LOGS
+      - CRON_15MIN_RUN_TESTS_BATCH
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
       - TEST_DOMAINS_SITE
