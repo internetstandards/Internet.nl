@@ -945,9 +945,10 @@ def _test_connection_with_limited_sigalgs(
     try:
         ssl_connection.connect()
         sigalg_nid = ssl_connection.ssl_client.get_peer_signature_nid()
-        # Extra check as some servers will ignore the client, and force a secure hash anyways.
+        # Extra check as some servers will ignore the client and force a secure hash anyways.
         # OpenSSL will accept this, as it does know about the secure hash.
-        if sigalg_nid in sigalgs:
+        # Note that while we can double-check this for the digest hash, we cannot check it for EVP PKEY.
+        if sigalg_nid in [sa[0] for sa in sigalgs]:
             return sigalg_nid
     except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError):
         pass
