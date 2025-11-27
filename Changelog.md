@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.10.7
+
+- Update [PostgreSQL to 15.14](https://github.com/internetstandards/Internet.nl/pull/1898)
+- Added [PGP key expiry test](https://github.com/internetstandards/Internet.nl/pull/1870)
+- Added news post.
+
 ## 1.10.6
 
 - Fixed a syntax error in the OpenAPI specification.
