@@ -21,6 +21,8 @@ CERT_RSA_MIN_GOOD_KEY_SIZE = 3072
 CERT_RSA_MIN_PHASE_OUT_KEY_SIZE = 2048
 
 # NCSC 3.3.2.1
+# Note that there appears to be no standard allowing insufficient
+# curves with EdDSA, so this list is not check against it.
 CERT_CURVES_GOOD = [x25519.X25519PublicKey, x448.X448PublicKey]
 CERT_EC_CURVES_GOOD = [
     ec.SECP521R1,

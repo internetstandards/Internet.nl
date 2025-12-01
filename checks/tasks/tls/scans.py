@@ -461,7 +461,7 @@ def _certificate_matches_hostname(certificate: Certificate, server_hostname: str
 
 def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     """
-    Check that all provided certificates meet NCSC requirements.
+    Check that all provided certificates meet NCSC requirements, except root.
     """
     # NCSC guidelines 3.3.2.x
     bad_pubkey = []
@@ -476,6 +476,9 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
         raise ValueError(f"Unknown checks mode: {mode}")
     pubkey_score = pubkey_score_good
     for cert in certificates:
+        if is_root_cert(cert):
+            continue
+
         common_name = get_common_name(cert)
         public_key = cert.public_key()
         key_type = type(public_key)
