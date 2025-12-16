@@ -79,3 +79,7 @@ docker/local.env
 
 # config dumps from make docker-compose-config-to-file
 config-compose-*
+
+# Frontend
+frontend/node_modules
+frontend/build
