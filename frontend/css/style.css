@@ -1,6 +1,26 @@
 /* internet.nl
    style.css
 */
+.experimental-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff3cd;
+    border-bottom: 1px solid #ffc107;
+    color: #111111;
+    padding: 12px 20px;
+    text-align: center;
+    text-wrap: balance;
+    font-size: 14px;
+    z-index: 9999;
+}
+
+.experimental-banner p {
+  margin-bottom: 10px;
+}
+
+
 
 @font-face {
     font-family: 'robotobold';
