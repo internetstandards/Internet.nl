@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2025-11-27 13:35:11.578092\n"
+"PO-Revision-Date: 2026-01-14 12:52:37.521945\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -1318,14 +1318,12 @@ msgid "detail mail tls cipher-order label"
 msgstr "Cipher-volgorde"
 
 msgid "detail mail tls cipher-order tech table"
-msgstr ""
-"Mail server (MX)|Server preferred cipher|Verwachte preferred cipher"
-
+msgstr "Mail server (MX)|Cipher preferred by server|Expected preferred cipher"
 
 msgid "detail mail tls cipher-order verdict bad"
 msgstr ""
-"Tenminste één van je mailservers dwingt *niet* zijn eigen cipher-voorkeur af"
-" ('I')."
+"Tenminste één van je mailservers dwingt *niet* zijn eigen cipher-voorkeur af ('I').\n"
+"Tenminste één van je mailservers prefereert *niet* 'Goede' boven 'Voldoende' en dan pas 'Uit te faseren' ciphers ('II')."
 
 msgid "detail mail tls cipher-order verdict good"
 msgstr ""
@@ -1342,6 +1340,9 @@ msgstr ""
 "Tenminste één van je mailservers prefereert *niet* 'Goede' boven 'Voldoende'"
 " en dan pas 'Uit te faseren' ciphers ('II')."
 
+msgid "detail mail tls cipher-order verdict sufficient-above-good"
+msgstr ""
+
 msgid "detail mail tls cipher-order verdict warning"
 msgstr ""
 "OUTDATED TEXT; VERDICT NOT USED\n"
@@ -1350,6 +1351,8 @@ msgstr ""
 
 msgid "detail mail tls ciphers exp"
 msgstr ""
+"**UPDATE OF EXPLANATION PENDING**\n"
+"\n"
 "We testen of je ontvangende mailservers (MX) alleen veilige, d.w.z. 'Goede' en/of 'Voldoende', ciphers (ook algoritmeselecties genoemd) ondersteunen. Om te voorkomen dat we tegen 'rate limits' van ontvangende mailservers aanlopen, bevat het testresultaat **alleen de eerstgevonden getroffen algoritmeselectie**.\n"
 "\n"
 "Een algoritmeselectie bestaat uit ciphers voor vier cryptografische functies: 1) sleuteluitwisseling, 2) certificaatverificatie, 3) bulkversleuteling, en 4) hashing.\n"
@@ -1547,6 +1550,27 @@ msgstr ""
 "een geauthenticeerde versleutelde transportverbinding met je ontvangende "
 "mailserver(s) opzetten."
 
+msgid "detail mail tls extended-master-secret exp"
+msgstr "This test checks for Extended Master Secret."
+
+msgid "detail mail tls extended-master-secret label"
+msgstr "Extended Master Secret (EMS)"
+
+msgid "detail mail tls extended-master-secret tech table"
+msgstr "Mail server|EMS result"
+
+msgid "detail mail tls extended-master-secret verdict bad"
+msgstr "EMS is not supported."
+
+msgid "detail mail tls extended-master-secret verdict good"
+msgstr "EMS is supported."
+
+msgid "detail mail tls extended-master-secret verdict na-no-tls-1-2"
+msgstr "EMS is only available in TLS 1.2, which is not enabled."
+
+msgid "detail mail tls extended-master-secret verdict unknown"
+msgstr "We could not determine the EMS status."
+
 msgid "detail mail tls fs-params exp"
 msgstr ""
 "We testen of de publieke parameters, die in de Diffie-Hellman sleuteluitwisseling worden gebruikt door je mailservers (MX), veilig zijn. \n"
@@ -1623,25 +1647,23 @@ msgstr ""
 "\n"
 "Een ontvangende mailserver maakt tijdens de sleuteluitwisseling gebruik van een digitale handtekening om het eigenaarschap te bewijzen van de geheime sleutel die bij het certificaat hoort. De mailserver creëert deze digitale handtekening door het ondertekenen van de output van een hashfunctie.\n"
 "\n"
-"Zie ['ICT-beveiligingsrichtlijnen voor Transport Layer Security (TLS) v2.1'](https://www.ncsc.nl/documenten/publicaties/2021/januari/19/ict-beveiligingsrichtlijnen-voor-transport-layer-security-2.1) van NCSC, tabel 5.\n"
-"\n"
 "*Niveau van vereistheid: Aanbevolen*\n"
 "\n"
 "---\n"
-"**SHA2-ondersteuning voor handtekeningen**\n"
+"**Ondersteuning voor verouderde handtekeningen**\n"
 "\n"
-"* Goed: Ja (ondersteuning van SHA-256, SHA-384 of SHA-512)\n"
-"* Uit te faseren: Nee (*geen* ondersteuning van SHA-256, SHA-384 of SHA-512)"
+"* Good: Only SHA-256, SHA-384 or SHA-512 supported\n"
+"* Phase out: SHA1 or SHA224 supported"
 
 msgid "detail mail tls kex-hash-func label"
 msgstr "Hashfunctie voor sleuteluitwisseling"
 
 msgid "detail mail tls kex-hash-func tech table"
-msgstr "Mailserver (MX)|SHA-2-ondersteuning voor handtekeningen"
+msgstr "Mail server (MX)|Outdated signature algorithm result"
 
 msgid "detail mail tls kex-hash-func verdict good"
 msgstr ""
-"Al je mailservers ondersteunen veilige hashfuncties voor "
+"Al je mailservers ondersteunen alleen veilige hashfuncties voor "
 "sleuteluitwisseling."
 
 msgid "detail mail tls kex-hash-func verdict other"
@@ -1657,6 +1679,29 @@ msgstr ""
 "voor sleuteluitwisseling. Deze instelling dien je weloverwogen *uit te "
 "faseren*, omdat deze het risico loopt in de toekomst *onvoldoende* veilig te"
 " worden.  "
+
+msgid "detail mail tls kex-hash-func verdict {phase-out}"
+msgstr ""
+
+msgid "detail mail tls key-exchange-rsa-pkcs exp"
+msgstr ""
+"RSA with PKCS padding (instead of only more secure PSS) supported in key "
+"exchange."
+
+msgid "detail mail tls key-exchange-rsa-pkcs label"
+msgstr "RSA with PKCS padding"
+
+msgid "detail mail tls key-exchange-rsa-pkcs tech table"
+msgstr "Mailserver (MX)|PKCS result"
+
+msgid "detail mail tls key-exchange-rsa-pkcs verdict bad"
+msgstr ""
+
+msgid "detail mail tls key-exchange-rsa-pkcs verdict good"
+msgstr ""
+
+msgid "detail mail tls key-exchange-rsa-pkcs verdict unknown"
+msgstr ""
 
 msgid "detail mail tls ocsp-stapling exp"
 msgstr ""
@@ -1682,6 +1727,9 @@ msgid "detail mail tls ocsp-stapling verdict good"
 msgstr ""
 "OUTDATED TEXT; TEST NOT USED  \n"
 "TODO"
+
+msgid "detail mail tls ocsp-stapling verdict not-in-cert"
+msgstr ""
 
 msgid "detail mail tls ocsp-stapling verdict ok"
 msgstr ""
@@ -1711,6 +1759,13 @@ msgstr "Client-initiated renegotiation"
 msgid "detail mail tls renegotiation-client tech table"
 msgstr "Mailserver (MX)|Client-initiated renegotiation"
 
+msgid "detail mail tls renegotiation-client verdict allowed-with-low-limit"
+msgstr ""
+
+msgid ""
+"detail mail tls renegotiation-client verdict allowed-with-too-high-limit"
+msgstr ""
+
 msgid "detail mail tls renegotiation-client verdict bad"
 msgstr ""
 "Tenminste één van je mailservers staat client-initiated renegotiation toe, "
@@ -1719,6 +1774,9 @@ msgstr ""
 
 msgid "detail mail tls renegotiation-client verdict good"
 msgstr "Al je mailservers staan geen client-initiated renegotiation toe."
+
+msgid "detail mail tls renegotiation-client verdict not-allowed"
+msgstr ""
 
 msgid "detail mail tls renegotiation-secure exp"
 msgstr ""
@@ -2978,12 +3036,12 @@ msgid "detail web tls cipher-order label"
 msgstr "Cipher-volgorde"
 
 msgid "detail web tls cipher-order tech table"
-msgstr ""
-"Webserver IP-adres|Eerst gevonden getroffen cipher-paren|Overtreden regel # "
-"('II-B')"
+msgstr "Web server IP|Cipher preferred by server|Expected preferred cipher"
 
 msgid "detail web tls cipher-order verdict bad"
-msgstr "Je webserver dwingt *niet* zijn eigen cipher-voorkeur af ('I')."
+msgstr ""
+"Je webserver dwingt *niet* zijn eigen cipher-voorkeur af ('I').\n"
+"Je webserver prefereert *niet* 'Goede' boven 'Voldoende' en dan pas 'Uit te faseren' ciphers ('II')."
 
 msgid "detail web tls cipher-order verdict good"
 msgstr ""
@@ -3000,6 +3058,9 @@ msgstr ""
 "Je webserver prefereert *niet* 'Goede' boven 'Voldoende' en dan pas 'Uit te "
 "faseren' ciphers ('II')."
 
+msgid "detail web tls cipher-order verdict sufficient-above-good"
+msgstr ""
+
 msgid "detail web tls cipher-order verdict warning"
 msgstr ""
 "OUTDATED TEXT; VERDICT NOT USED\n"
@@ -3008,6 +3069,8 @@ msgstr ""
 
 msgid "detail web tls ciphers exp"
 msgstr ""
+"**UPDATE OF EXPLANATION PENDING**\n"
+"\n"
 "We testen of je webserver alleen veilige, d.w.z. 'Goede' en/of 'Voldoende', ciphers (ook algoritmeselecties genoemd) ondersteunt.\n"
 "\n"
 "Een algoritmeselectie bestaat uit ciphers voor vier cryptografische functies: 1) sleuteluitwisseling, 2) certificaatverificatie, 3) bulkversleuteling, en 4) hashing. Een webserver kan meer dan één algoritmeselectie ondersteunen.\n"
@@ -3205,6 +3268,27 @@ msgstr ""
 msgid "detail web tls dane-valid verdict good"
 msgstr ""
 "De DANE-fingerprint op je domeinnaam is geldig voor je websitecertificaat."
+
+msgid "detail web tls extended-master-secret exp"
+msgstr "This test checks for Extended Master Secret."
+
+msgid "detail web tls extended-master-secret label"
+msgstr "Extended Master Secret (EMS)"
+
+msgid "detail web tls extended-master-secret tech table"
+msgstr "Web server|EMS result"
+
+msgid "detail web tls extended-master-secret verdict bad"
+msgstr "EMS is not supported."
+
+msgid "detail web tls extended-master-secret verdict good"
+msgstr "EMS is supported."
+
+msgid "detail web tls extended-master-secret verdict na-no-tls-1-2"
+msgstr "EMS is only available in TLS 1.2, which is not enabled."
+
+msgid "detail web tls extended-master-secret verdict unknown"
+msgstr "We could not determine the EMS status."
 
 msgid "detail web tls fs-params exp"
 msgstr ""
@@ -3425,25 +3509,24 @@ msgstr ""
 "\n"
 "De webserver maakt tijdens de sleuteluitwisseling gebruik van een digitale handtekening om het eigenaarschap te bewijzen van de geheime sleutel die bij het certificaat hoort. De webserver creëert deze digitale handtekening door het ondertekenen van de output van een hashfunctie.\n"
 "\n"
-"Zie ['ICT-beveiligingsrichtlijnen voor Transport Layer Security (TLS) v2.1'](https://www.ncsc.nl/documenten/publicaties/2021/januari/19/ict-beveiligingsrichtlijnen-voor-transport-layer-security-2.1) van NCSC, tabel 5.\n"
-"\n"
 "*Niveau van vereistheid: Aanbevolen*\n"
 "\n"
 "---\n"
-"**SHA2-ondersteuning voor handtekeningen**\n"
+"**Ondersteuning voor verouderde handtekeningen**\n"
 "\n"
-"* Goed: Ja (ondersteuning van SHA-256, SHA-384 of SHA-512)\n"
-"* Uit te faseren: Nee (*geen* ondersteuning van SHA-256, SHA-384 of SHA-512)"
+"* Good: Only SHA-256, SHA-384 or SHA-512 supported\n"
+"* Phase out: SHA1 or SHA224 supported"
 
 msgid "detail web tls kex-hash-func label"
 msgstr "Hashfunctie voor sleuteluitwisseling"
 
 msgid "detail web tls kex-hash-func tech table"
-msgstr "Webserver-IP-adress|SHA-2-ondersteuning voor handtekeningen"
+msgstr "Web server IP address|Outdated signature algorithm result"
 
 msgid "detail web tls kex-hash-func verdict good"
 msgstr ""
-"Je webserver ondersteunt een veilige hashfunctie voor sleuteluitwisseling."
+"Je webserver ondersteunt alleen veilige hashfuncties voor "
+"sleuteluitwisseling."
 
 msgid "detail web tls kex-hash-func verdict other"
 msgstr ""
@@ -3454,9 +3537,32 @@ msgstr ""
 
 msgid "detail web tls kex-hash-func verdict phase-out"
 msgstr ""
-"Je webserver ondersteunt *geen* veilige hashfunctie voor "
+"Je webserver ondersteunt *onvoldoende* veilige hashfunctie voor "
 "sleuteluitwisseling. Deze instelling dien je weloverwogen *uit te faseren*, "
 "omdat deze het risico loopt in de toekomst *onvoldoende* veilig te worden.  "
+
+msgid "detail web tls kex-hash-func verdict {phase-out}"
+msgstr ""
+
+msgid "detail web tls key-exchange-rsa-pkcs exp"
+msgstr ""
+"RSA with PKCS padding (instead of only more secure PSS) supported in key "
+"exchange."
+
+msgid "detail web tls key-exchange-rsa-pkcs label"
+msgstr "RSA with PKCS padding"
+
+msgid "detail web tls key-exchange-rsa-pkcs tech table"
+msgstr "Mailserver (MX)|PKCS result"
+
+msgid "detail web tls key-exchange-rsa-pkcs verdict bad"
+msgstr ""
+
+msgid "detail web tls key-exchange-rsa-pkcs verdict good"
+msgstr ""
+
+msgid "detail web tls key-exchange-rsa-pkcs verdict unknown"
+msgstr ""
 
 msgid "detail web tls ocsp-stapling exp"
 msgstr ""
@@ -3490,6 +3596,9 @@ msgstr ""
 msgid "detail web tls ocsp-stapling verdict good"
 msgstr "Je webserver ondersteunt OCSP en de data in het antwoord is valide."
 
+msgid "detail web tls ocsp-stapling verdict not-in-cert"
+msgstr ""
+
 msgid "detail web tls ocsp-stapling verdict ok"
 msgstr "Je webserver ondersteunt OCSP *niet*."
 
@@ -3516,12 +3625,26 @@ msgstr "Client-initiated renegotiation"
 msgid "detail web tls renegotiation-client tech table"
 msgstr "Webserver-IP-adres|Client-initiated renegotiation"
 
+msgid "detail web tls renegotiation-client verdict allowed-with-low-limit"
+msgstr ""
+"Je webserver staat client-initiated renegotiation toe, terwijl het aantal "
+"toegestane renegotiations voldoende beperkt is."
+
+msgid ""
+"detail web tls renegotiation-client verdict allowed-with-too-high-limit"
+msgstr ""
+"Je webserver staat client-initiated renegotiation toe, terwijl het aantal "
+"toegestane renegotiations te hoog is."
+
 msgid "detail web tls renegotiation-client verdict bad"
 msgstr ""
 "Je webserver staat client-initiated renegotiation toe, wat een negatieve "
 "invloed kan hebben op de beschikbaarheid van je website."
 
 msgid "detail web tls renegotiation-client verdict good"
+msgstr "Je webserver staat geen client-initiated renegotiation toe."
+
+msgid "detail web tls renegotiation-client verdict not-allowed"
 msgstr "Je webserver staat geen client-initiated renegotiation toe."
 
 msgid "detail web tls renegotiation-secure exp"
