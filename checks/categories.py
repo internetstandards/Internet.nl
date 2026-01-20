@@ -1536,7 +1536,7 @@ class WebTlsKexRSAPKCSStatus(Subtest):
             label="detail web tls key-exchange-rsa-pkcs label",
             explanation="detail web tls key-exchange-rsa-pkcs exp",
             tech_string="detail web tls key-exchange-rsa-pkcs tech table",
-            worst_status=scoring.TLS_KEX_RSA_PKCS_WORST_STATUS,
+            worst_status=scoring.STATUS_INFO,
             full_score=scoring.TLS_KEX_RSA_PKCS_GOOD,
             model_score_field="key_exchange_rsa_pkcs_score",
         )
@@ -1572,7 +1572,7 @@ class WebTLSExtendedMasterSecret(Subtest):
             label="detail web tls extended-master-secret label",
             explanation="detail web tls extended-master-secret exp",
             tech_string="detail web tls extended-master-secret tech table",
-            worst_status=scoring.TLS_EXTENDED_MASTER_SECRET_WORST_STATUS,
+            worst_status=scoring.STATUS_INFO,
             full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
             model_score_field="extended_master_secret_score",
         )
@@ -2204,7 +2204,7 @@ class MailTlsKexRSAPKCSStatus(Subtest):
             label="detail mail tls key-exchange-rsa-pkcs label",
             explanation="detail mail tls key-exchange-rsa-pkcs exp",
             tech_string="detail mail tls key-exchange-rsa-pkcs tech table",
-            worst_status=scoring.TLS_KEX_RSA_PKCS_WORST_STATUS,
+            worst_status=scoring.STATUS_INFO,
             full_score=scoring.TLS_KEX_RSA_PKCS_GOOD,
             model_score_field="key_exchange_rsa_pkcs_score",
         )
@@ -2240,7 +2240,7 @@ class MailTLSExtendedMasterSecret(Subtest):
             label="detail mail tls extended-master-secret label",
             explanation="detail mail tls extended-master-secret exp",
             tech_string="detail mail tls extended-master-secret tech table",
-            worst_status=scoring.TLS_EXTENDED_MASTER_SECRET_WORST_STATUS,
+            worst_status=scoring.STATUS_INFO,
             full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
             model_score_field="extended_master_secret_score",
         )
