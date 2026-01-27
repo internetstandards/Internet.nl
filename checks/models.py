@@ -101,12 +101,6 @@ class ZeroRttStatus(Enum):
     na = 2
 
 
-class KexRSAPKCSStatus(Enum):
-    bad = 0
-    good = 1
-    unknown = 2
-
-
 class KexHashFuncStatus(Enum):
     bad = 0
     good = 1
@@ -551,9 +545,6 @@ class DomainTestTls(BaseTestModel):
     kex_hash_func_score = models.IntegerField(null=True)
     kex_hash_func_bad_hash = models.CharField(max_length=255, null=True, default=None)
 
-    key_exchange_rsa_pkcs = EnumField(KexRSAPKCSStatus, default=KexRSAPKCSStatus.unknown)
-    key_exchange_rsa_pkcs_score = models.IntegerField(null=True)
-
     extended_master_secret = EnumField(TLSExtendedMasterSecretStatus, default=TLSExtendedMasterSecretStatus.unknown)
     extended_master_secret_score = models.IntegerField(null=True)
 
@@ -635,8 +626,6 @@ class DomainTestTls(BaseTestModel):
             "ocsp_stapling_score",
             "kex_hash_func",
             "kex_hash_func_score",
-            "key_exchange_rsa_pkcs",
-            "key_exchange_rsa_pkcs_score",
             "extended_master_secret",
             "extended_master_secret_score",
             "forced_https",
@@ -684,7 +673,6 @@ class DomainTestTls(BaseTestModel):
             "zero_rtt": self.zero_rtt.name,
             "ocsp_stapling": self.ocsp_stapling.name,
             "kex_hash_func": self.kex_hash_func.name,
-            "key_exchange_rsa_pkcs": self.key_exchange_rsa_pkcs.name,
             "extended_master_secret": self.extended_master_secret.name,
             "https_redirect": self.forced_https.name,
             "http_compression": self.http_compression_enabled,
@@ -721,7 +709,6 @@ class DomainTestTls(BaseTestModel):
             "client_reneg": self.client_reneg.name if self.client_reneg else None,
             "zero_rtt": self.zero_rtt.name,
             "kex_hash_func": self.kex_hash_func.name,
-            "key_exchange_rsa_pkcs": self.key_exchange_rsa_pkcs.name,
             "extended_master_secret": self.extended_master_secret.name,
             "cert_chain": self.cert_chain,
             "cert_trusted": self.cert_trusted,
