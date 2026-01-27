@@ -689,14 +689,6 @@ components:
             * `not_allowed` - not allowed by server.
             * `allowed_with_low_limit` - allowed by server, but with a sufficiently low limit (<10).
             * `allowed_with_too_high_limit` - allowed by server, with a limit that is too high (>=10).
-        kex_rsa_pkcs:
-          type: string
-          enumClass: KexRSAPKCSStatus
-          description: |
-            RSA PKCS#1 v1.5 support:
-            * `good` - server does not support RSA PKCS#1 v1.5 padding.
-            * `bad` - server supports RSA PKCS#1 v1.5 padding.
-            * `unknown` - support could not be determined or test ran before this feature was added.
         kex_hash_func:
           type: string
           enumClass: KexHashFuncStatus
