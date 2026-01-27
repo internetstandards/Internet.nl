@@ -132,16 +132,6 @@ SIGNATURE_ALGORITHMS_PHASE_OUT_HASH = [
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.DSA),
 ]
-# NCSC 3.3.2.1: RSA PKCS must not be used.
-# Failing these algs means the server has no RSA or RSA in PSS only, either is fine.
-SIGNATURE_ALGORITHMS_RSA_PKCS = [
-    # (OpenSslDigestNidEnum.MD5, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA1, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA512, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA384, OpenSslEvpPkeyEnum.RSA),
-    (OpenSslDigestNidEnum.SHA256, OpenSslEvpPkeyEnum.RSA),
-]
 
 # Mail servers with an increased connection limit,
 # matched by substring matching on their hostname.
