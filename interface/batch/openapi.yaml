@@ -636,7 +636,6 @@ components:
               the configured order is not based on security level (deprecated).
             * `na` - The server only supports GOOD ciphers; cipher order is
               not relevant.
-            * `sufficient_above_good` - the server prefers sufficient ciphers over good.
         cipher_order_violation:
           type: array
           description: |
