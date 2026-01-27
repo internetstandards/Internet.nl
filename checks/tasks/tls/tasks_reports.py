@@ -275,8 +275,6 @@ def save_results(model, results, addr, domain, category):
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
-                    model.key_exchange_rsa_pkcs = result.get("key_exchange_rsa_pkcs")
-                    model.key_exchange_rsa_pkcs_score = result.get("key_exchange_rsa_pkcs_score")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
 
@@ -354,8 +352,6 @@ def save_results(model, results, addr, domain, category):
                     # model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
-                    model.key_exchange_rsa_pkcs = result.get("key_exchange_rsa_pkcs")
-                    model.key_exchange_rsa_pkcs_score = result.get("key_exchange_rsa_pkcs_score")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
                 if result.get("tls_cert"):
@@ -582,7 +578,6 @@ def build_report(dttls, category):
             elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
                 category.subtests["kex_hash_func"].result_phase_out()
 
-            category.subtests["key_exchange_rsa_pkcs"].save_result(dttls.key_exchange_rsa_pkcs)
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
     elif isinstance(category, categories.MailTls):
@@ -747,7 +742,6 @@ def build_report(dttls, category):
             elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
                 category.subtests["kex_hash_func"].result_phase_out()
 
-            category.subtests["key_exchange_rsa_pkcs"].save_result(dttls.key_exchange_rsa_pkcs)
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
     dttls.report = category.gen_report()
