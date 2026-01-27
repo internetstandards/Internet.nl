@@ -972,19 +972,11 @@ def test_cipher_order(
 
     order_tuples = [
         (
-            CipherOrderStatus.sufficient_above_good,
-            cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out + cipher_evaluation.ciphers_sufficient,
-            # Make sure we do not mix in TLS 1.3 ciphers, all TLS 1.3 ciphers are good.
-            cipher_evaluation.ciphers_good_no_tls13,
+            cipher_evaluation.ciphers_phase_out,
+            cipher_evaluation.ciphers_sufficient + cipher_evaluation.ciphers_good_no_tls13,
         ),
-        (
-            CipherOrderStatus.bad,
-            cipher_evaluation.ciphers_bad + cipher_evaluation.ciphers_phase_out,
-            cipher_evaluation.ciphers_sufficient,
-        ),
-        (CipherOrderStatus.bad, cipher_evaluation.ciphers_bad, cipher_evaluation.ciphers_phase_out),
     ]
-    for fail_status, expected_less_preferred, expected_more_preferred_list in order_tuples:
+    for expected_less_preferred, expected_more_preferred_list in order_tuples:
         if cipher_order_violation:
             break
         # Sort CHACHA as later in the list, in case SSL_OP_PRIORITIZE_CHACHA is enabled #461
@@ -997,10 +989,10 @@ def test_cipher_order(
             )
             if preferred_suite != expected_more_preferred:
                 cipher_order_violation = [preferred_suite.name, expected_more_preferred.name]
-                status = fail_status
+                status = CipherOrderStatus.bad
                 log.info(
                     f"found cipher order violation for {server_connectivity_info.server_location.hostname}:"
-                    f" preferred {preferred_suite.name} instead of {expected_more_preferred.name}, status {fail_status}"
+                    f" preferred {preferred_suite.name} instead of {expected_more_preferred.name}, status {status}"
                 )
                 break
 

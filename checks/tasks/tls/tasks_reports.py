@@ -449,8 +449,6 @@ def build_report(dttls, category):
                 category.subtests["tls_cipher_order"].result_bad(dttls.cipher_order_violation)
             elif dttls.cipher_order == CipherOrderStatus.na:
                 category.subtests["tls_cipher_order"].result_na()
-            elif dttls.cipher_order == CipherOrderStatus.sufficient_above_good:
-                category.subtests["tls_cipher_order"].result_sufficient_above_good()
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
@@ -612,8 +610,6 @@ def build_report(dttls, category):
                 category.subtests["tls_cipher_order"].result_bad(dttls.cipher_order_violation)
             elif dttls.cipher_order == CipherOrderStatus.na:
                 category.subtests["tls_cipher_order"].result_na()
-            elif dttls.cipher_order == CipherOrderStatus.sufficient_above_good:
-                category.subtests["tls_cipher_order"].result_sufficient_above_good()
             else:
                 category.subtests["tls_cipher_order"].result_good()
 
