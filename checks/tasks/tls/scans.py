@@ -60,7 +60,6 @@ from checks.models import (
     ZeroRttStatus,
     KexHashFuncStatus,
     CipherOrderStatus,
-    KexRSAPKCSStatus,
 )
 from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
 from checks.tasks.tls import TLSException
@@ -71,7 +70,6 @@ from checks.tasks.tls.evaluation import (
     KeyExchangeHashFunctionEvaluation,
     TLSCipherOrderEvaluation,
     TLSOCSPEvaluation,
-    KeyExchangeRSAPKCSFunctionEvaluation,
     TLSRenegotiationEvaluation,
     TLSExtendedMasterSecretEvaluation,
 )
@@ -85,7 +83,6 @@ from checks.tasks.tls.tls_constants import (
     CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
-    SIGNATURE_ALGORITHMS_RSA_PKCS,
 )
 from internetnl import log
 
@@ -637,7 +634,6 @@ def check_mail_tls(
         prots_accepted,
         cipher_evaluation,
     )
-    key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
     key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
 
     renegotiation_evaluation = TLSRenegotiationEvaluation.from_session_renegotiation_scan_result(
@@ -691,8 +687,6 @@ def check_mail_tls(
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        key_exchange_rsa_pkcs=key_exchange_rsa_pkcs_evaluation.status,
-        key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
         extended_master_secret=extended_master_secret_evaluation.status,
@@ -766,7 +760,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         supported_tls_versions,
         cipher_evaluation,
     )
-    key_exchange_rsa_pkcs_evaluation = test_key_exchange_rsa_pkcs(server_conn_info)
     key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
     renegotiation_evaluation = TLSRenegotiationEvaluation.from_session_renegotiation_scan_result(
         result.scan_result.session_renegotiation.result
@@ -818,8 +811,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ),
         ocsp_stapling=ocsp_evaluation.status,
         ocsp_stapling_score=ocsp_evaluation.score,
-        key_exchange_rsa_pkcs=key_exchange_rsa_pkcs_evaluation.status,
-        key_exchange_rsa_pkcs_score=key_exchange_rsa_pkcs_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
         extended_master_secret=extended_master_secret_evaluation.status,
@@ -881,27 +872,6 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
             log.info(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
     if last_error_trace:
         raise TLSException(str(last_error_trace))
-
-
-def test_key_exchange_rsa_pkcs(
-    server_connectivity_info: ServerConnectivityInfo,
-) -> KeyExchangeRSAPKCSFunctionEvaluation:
-    """
-    Test key exchange for RSA PKCS support per NCSC 3.3.2.1.
-    See also RFC8446 1.3 and 4.2.3, RFC 5246 7.4.1.4.1.
-    """
-    rsa_pkcs_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_RSA_PKCS)
-    if rsa_pkcs_result:
-        log.info(f"RSA-PKCS key exchange check: negotiated bad sigalg ({rsa_pkcs_result})")
-        return KeyExchangeRSAPKCSFunctionEvaluation(
-            status=KexRSAPKCSStatus.bad,
-            score=scoring.TLS_KEX_RSA_PKCS_BAD,
-        )
-
-    return KeyExchangeRSAPKCSFunctionEvaluation(
-        status=KexRSAPKCSStatus.good,
-        score=scoring.TLS_KEX_RSA_PKCS_GOOD,
-    )
 
 
 def test_key_exchange_hash(
