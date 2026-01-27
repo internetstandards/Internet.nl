@@ -16,6 +16,10 @@
     z-index: 9999;
 }
 
+.experimental-banner p {
+  margin-bottom: 10px;
+}
+
 
 
 @font-face {
