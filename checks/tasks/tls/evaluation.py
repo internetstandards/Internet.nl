@@ -20,7 +20,6 @@ from checks.models import (
     KexHashFuncStatus,
     CipherOrderStatus,
     OcspStatus,
-    KexRSAPKCSStatus,
     TLSClientInitiatedRenegotiationStatus,
     TLSExtendedMasterSecretStatus,
 )
@@ -308,17 +307,6 @@ class TLSRenegotiationEvaluation:
             TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: scoring.WEB_TLS_CLIENT_RENEG_BAD,
         }
         return scores[self.status_client_initiated_renegotiation]
-
-
-@dataclass(frozen=True)
-class KeyExchangeRSAPKCSFunctionEvaluation:
-    """
-    Results of support for PKCS padding for RSA per NCSC 3.3.2.1.
-    NCSC table 5
-    """
-
-    status: KexRSAPKCSStatus
-    score: scoring.Score
 
 
 @dataclass(frozen=True)
