@@ -25,14 +25,4 @@ class Migration(migrations.Migration):
             name="extended_master_secret_score",
             field=models.IntegerField(null=True),
         ),
-        migrations.AddField(
-            model_name="domaintesttls",
-            name="key_exchange_rsa_pkcs",
-            field=enumfields.fields.EnumField(default=2, enum=checks.models.KexRSAPKCSStatus, max_length=10),
-        ),
-        migrations.AddField(
-            model_name="domaintesttls",
-            name="key_exchange_rsa_pkcs_score",
-            field=models.IntegerField(null=True),
-        ),
     ]
