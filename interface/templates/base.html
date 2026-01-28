@@ -35,6 +35,20 @@
   <div class="skiplink"><a href="#content">{% include "string.html" with name='page gotocontents' %}</a></div>
   <div class="skiplink" id="skiplink-sitenav"><a href="#sitenav">{% include "string.html" with name='page gotomainmenu' %}</a></div>
   <div class="skiplink"><a href="#footer">{% include "string.html" with name='page gotofooter' %}</a></div>
+  <div class="experimental-banner">
+    <p><strong>⚠️ Caution:</strong> This is an early demo of our test updates for NCSC's 2025 TLS guidelines, to allow
+      you to test against the new guidelines.</p>
+      <p>
+      Some explanation text is still missing, out of date, or in rough draft state. Test evaluations may still change.
+          <br>
+      This URL is an active development environment and has limited availability - it may be down for hours or days.
+      </p>
+      <p>
+      Tests from this instance originate from different IPs than those used in production.
+      If you use allowlisting on our production IPs, results may vary, particularly for email TLS.
+      To include this instance, allowlist 62.204.66.0/26 and 2a00:d00:ff:162::/64.
+      </p>
+  </div>
   <header>
     <div class="wrap">
       {% if "INTERNETNL_BRANDING"|get_settings_value %}
