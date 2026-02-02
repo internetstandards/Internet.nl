@@ -558,7 +558,7 @@ def _generate_mail_server_scan_request(mx_hostname: str) -> Optional[ServerScanR
         log.info(f"unable to resolve MX host {mx_hostname}, marking server unreachable")
         return None
     network_configuration = ServerNetworkConfiguration(
-        tls_server_name_indication=mx_hostname,
+        tls_server_name_indication=mx_hostname.rstrip("."),
         tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
         smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
@@ -687,7 +687,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     """
     server_location = ServerNetworkLocation(hostname=url, ip_address=af_ip_pair[1])
     network_configuration = ServerNetworkConfiguration(
-        tls_server_name_indication=url,
+        tls_server_name_indication=url.rstrip("."),
         http_user_agent=settings.USER_AGENT,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
     )
