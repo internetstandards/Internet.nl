@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2026-01-28 14:30:01.614262\n"
+"PO-Revision-Date: 2026-02-02 16:58:25.024082\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -1661,6 +1661,9 @@ msgstr "Hashfunctie voor sleuteluitwisseling"
 msgid "detail mail tls kex-hash-func tech table"
 msgstr "Mail server (MX)|Outdated signature algorithm result"
 
+msgid "detail mail tls kex-hash-func verdict bad"
+msgstr ""
+
 msgid "detail mail tls kex-hash-func verdict good"
 msgstr ""
 "Al je mailservers ondersteunen alleen veilige hashfuncties voor "
@@ -2346,6 +2349,15 @@ msgstr "secure"
 
 msgid "detail tech data sufficient"
 msgstr "voldoende"
+
+msgid "detail tech data tls-renegotiation-client allowed-with-low-limit"
+msgstr ""
+
+msgid "detail tech data tls-renegotiation-client allowed-with-too-high-limit"
+msgstr ""
+
+msgid "detail tech data tls-renegotiation-client not-allowed"
+msgstr ""
 
 msgid "detail tech data yes"
 msgstr "ja"
@@ -3522,6 +3534,9 @@ msgstr "Hashfunctie voor sleuteluitwisseling"
 
 msgid "detail web tls kex-hash-func tech table"
 msgstr "Web server IP address|Outdated signature algorithm result"
+
+msgid "detail web tls kex-hash-func verdict bad"
+msgstr ""
 
 msgid "detail web tls kex-hash-func verdict good"
 msgstr ""
