@@ -124,7 +124,7 @@ To create the `docker/host.env` configuration file, the following inputs are req
 
   Public IPv4 address (eg: `192.0.2.1`)
 
-  This is the address by which the website and Unbound DNS is accessible over IPv4 on public internet.
+  This is the address by which the website and Unbound DNS is accessible over IPv4 on public internet. And also the address used as source IP for all outgoing traffic.
 
   To determine the current IPv4 address you can use: `ip -4 addr show dev eth0` or `curl -4 ifconfig.io`.
 
@@ -132,9 +132,9 @@ To create the `docker/host.env` configuration file, the following inputs are req
 
   Public IPv4 address (eg: `2001:db8:1::1`)
 
-  This is the address by which the website and Unbound DNS is accessible over IPv6 on public internet.
+  This is the address by which the website and Unbound DNS is accessible over IPv6 on public internet. And also the address used as source IP for all outgoing traffic.
 
-  To determine the current IPv4 address you can use: `ip -6 addr show dev eth0` or `curl -6 ifconfig.io`.
+  To determine the current IPv6 address you can use: `ip -6 addr show dev eth0` or `curl -6 ifconfig.io`.
 
 All IPv6 addresses must be in condensed form, i.e. `2001:db8:1::1` and not `2001:db8:0000:0000:0000:0000:0000:1`.
 
