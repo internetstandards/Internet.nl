@@ -1319,8 +1319,8 @@ msgstr "Cipher-volgorde"
 
 msgid "detail mail tls cipher-order tech table"
 msgstr ""
-"Mail server (MX)|Eerst gevonden getroffen cipher-paren|Overtreden regel # "
-"('II-B')"
+"Mail server (MX)|Server preferred cipher|Verwachte preferred cipher"
+
 
 msgid "detail mail tls cipher-order verdict bad"
 msgstr ""
