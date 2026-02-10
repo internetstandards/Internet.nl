@@ -11,12 +11,14 @@ All tests were updated to match the
 [2025-05 version of the NCSC TLS guidelines](https://www.ncsc.nl/documenten/publicaties/2025/juni/01/ict-beveiligingsrichtlijnen-voor-transport-layer-security-2025-05).
 Most significant changes:
 
-- The requirements on TLS versions, TLS authentication, curves, hashes, key exchange algorithms, FFDHE groups, 
-  RSA key lengths, and bulk encryption algorithms were updated to match the new guidelines.
-- A test for RSA PKCS#1 v1.5 was added (only PSS padding is sufficient).
+- The list of good/sufficient/phase out/insufficient TLS versions, TLS authentication, curves, hashes, 
+  key exchange algorithms, FFDHE groups, RSA key lengths, and bulk encryption algorithms were updated
+  to match the new guidelines.
 - A test for Extended Master Secret (RFC7627) was added.
 - Client-initiated renegotiation is now acceptable, if limited to less than 10.
-- All checks on certificates apply only to the TODO TODO certificates.
+- All checks on certificates apply to all certificates sent by the server,
+  except root certificates (according to our trust store). In previous versions,
+  the certificate selection was different per test.
 
 ### Other TLS updates
 
@@ -49,9 +51,9 @@ Additionally, the API structure changes are:
 - OCSP stapling has a new status `not_in_cert`, for when a certificate does not have OCSP enabled,
   therefore stapling is neither required nor possible.
 - The cipher order status no longer returns `not_prescribed` or `not_seclevel` for new tests.
-  The insufficient statuses are now `bad` for preferring phase out over good and/or sufficient;
-  and `sufficient_above_good` for preferring sufficient over good.
-- `extended_master_secret_status` and `kex_rsa_pkcs` were added to the TLS details.
+  The insufficient statuses is now `bad` for preferring phase out over good and/or sufficient,
+  regardless of the reason (server not enforcing any preference or server enforcing wrong preference).
+- `extended_master_secret_status` was added to the TLS details.
 - `client_reneg` in the TLS details was changed from a boolean to a new enum.
 
 ## 1.10.7
