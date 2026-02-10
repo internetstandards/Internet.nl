@@ -1111,6 +1111,9 @@ networks:
       com.docker.network.enable_ipv6: "true"
       # network for internal communication between services
       com.docker.network.bridge.enable_icc: "true"
+      # set NAT source IPs to the configured public IPs
+      com.docker.network.host_ipv4: $IPV4_IP_PUBLIC
+      com.docker.network.host_ipv6: $IPV6_IP_PUBLIC
     ipam:
       driver: default
       config:
