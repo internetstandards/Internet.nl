@@ -143,7 +143,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
                 # Invalid NULL MX next to other MX.
                 return [(None, MxStatus.null_mx_with_other_mx)]
             elif not do_resolve_single_a_aaaa(url):
-                return [(None, None, MxStatus.null_mx_without_a_aaaa)]
+                return [(None, MxStatus.null_mx_without_a_aaaa)]
             return [(None, MxStatus.null_mx)]
 
         rdata = rdata.lower().strip()
