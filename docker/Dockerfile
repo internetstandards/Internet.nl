@@ -1,5 +1,9 @@
-ARG PYTHON_VERSION=3.9
+ARG PYTHON_VERSION=3.13
 ARG YQ_VERSION=4.45.4
+ARG DOCKER_CLI_VERSION=29.2.1
+
+# Named stage to allow ARG expansion in --from (BuildKit does not support variable expansion directly)
+FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 
 # This Dockerfile consists of multiple stages in order to parallize and speed up
 # building. It also reduces image size as only build artifacts are copied into
@@ -13,7 +17,7 @@ ARG YQ_VERSION=4.45.4
 # generic stage used by all build stages
 # explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
 # platform can probably be removed after #1218
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-deps
+FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -22,7 +26,6 @@ RUN apt update && \
       build-essential \
       # unbound dependencies
       python${PYTHON_VERSION}-dev \
-      python3-distutils \
       python3-pip \
       libssl-dev \
       libevent-dev \
@@ -36,7 +39,9 @@ RUN apt update && \
       flex \
       bison
 
-RUN pip3 install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+ENV UV_SYSTEM_PYTHON=1
+ENV UV_BREAK_SYSTEM_PACKAGES=1
 
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
@@ -61,6 +66,7 @@ COPY requirements.txt /src/
 WORKDIR /src
 
 ENV UV_LINK_MODE=copy
+ENV UV_SYSTEM_PYTHON=1
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system -r requirements.txt
 
@@ -75,15 +81,15 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system -r requirements-dev.txt
 
 # build unbound target
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS unbound
+FROM --platform=linux/amd64 debian:trixie-20260202-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
 RUN apt update && \
     apt install --no-install-recommends -yqq \
     # unbound dependencies
-    libevent-2.1-7 \
-    libhiredis0.14 \
+    libevent-2.1-7t64 \
+    libhiredis1.1.0 \
     procps \
     ldnsutils \
     openssl \
@@ -123,7 +129,7 @@ USER unbound
 ENTRYPOINT ["/entrypoint.sh"]
 
 # build main application image target
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-app
+FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
 
 RUN apt update && \
@@ -133,8 +139,8 @@ RUN apt update && \
     gettext \
     ldnsutils \
     # unbound dependencies
-    libevent-2.1-7 \
-    libhiredis0.14 \
+    libevent-2.1-7t64 \
+    libhiredis1.1.0 \
     # used for healthchecks
     curl \
     # debug tools
@@ -142,7 +148,7 @@ RUN apt update && \
     dnsutils \
     iproute2 \
     # healthcheck
-    netcat \
+    netcat-traditional \
     procps \
     # since this stage ends up in the final image we care about size and remove cache files
     && rm -rf /var/lib/apt/lists/*
@@ -197,7 +203,7 @@ RUN python3 bin/frontend.py css
 RUN python3 bin/pofiles.py to_django
 
 # use fake version to prevent building the next steps when only the version changes
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0-build0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0.dev0
 
 # disable secret key check and cache for commands that run standalone tasks
 RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py compilemessages
@@ -217,6 +223,7 @@ CMD ["runserver", "0.0.0.0:8080"]
 FROM build-app AS linttest
 ARG PYTHON_VERSION
 ARG YQ_VERSION
+ARG DOCKER_CLI_VERSION
 
 USER root
 
@@ -226,7 +233,6 @@ RUN apt update && \
     git \
     make \
     python3-pip \
-    docker.io \
     gpg \
     gpg-agent \
     shellcheck \
@@ -236,6 +242,9 @@ RUN apt update && \
 
 # Install yq
 RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
+
+# docker.io is not available in Debian Trixie, copy docker CLI binary from official image
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 
 # copy application dependencies into image
 COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
