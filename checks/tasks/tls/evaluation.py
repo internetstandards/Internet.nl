@@ -223,7 +223,7 @@ class TLSOCSPEvaluation:
             ocsp_in_cert = False
 
         has_ocsp_response = certificate_deployment.ocsp_response is not None
-        ocsp_response_trusted = certificate_deployment.ocsp_response is True
+        ocsp_response_trusted = certificate_deployment.ocsp_response_is_trusted is True
 
         return cls(
             ocsp_in_cert=ocsp_in_cert,

@@ -118,7 +118,7 @@ def callback(results, domain, test_type):
     if "mx_status" in results:
         return callback_null_mx(results, domain, test_type)
     testdomain = test_map[test_type]["model"](domain=domain)
-    if testdomain is MailTestTls:
+    if isinstance(testdomain, MailTestTls):
         testdomain.mx_status = MxStatus.has_mx
     testdomain.save()
     category = test_map[test_type]["category"]
@@ -831,16 +831,13 @@ def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
             # Pull in any cached results
             cache_id = redis_id.mail_starttls.id.format(server)
             results[server] = cache.get(cache_id, False)
-            log.debug(f"=========== pulled {cache_id=} for {server=} data {results[server]}")
         while timer() - start < cache_ttl and (not results or not all(results.values())):
             servers_to_check = [server for server, _ in mailservers if not results[server]]
-            log.debug(f"=========== checking remaining {servers_to_check=}")
             results.update(check_mail_tls_multiple(servers_to_check))
             time.sleep(1)
         for server, server_result in results.items():
             cache_id = redis_id.mail_starttls.id.format(server)
             cache.set(cache_id, server_result, cache_ttl)
-            log.debug(f"=========== writing to {cache_id=} for {server=}")
             if results[server] is False:
                 results[server] = dict(tls_enabled=False, could_not_test_smtp_starttls=True)
     except SoftTimeLimitExceeded:
