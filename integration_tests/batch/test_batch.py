@@ -6,7 +6,6 @@ from .results import EXPECTED_DOMAIN_RESULTS, EXPECTED_DOMAIN_TECHNICAL_RESULTS
 from ..conftest import APP_DOMAIN
 from playwright.sync_api import expect
 
-
 INTERNETNL_API = f"https://{APP_DOMAIN}/api/batch/v2/"
 
 TEST_DOMAIN = "target.test"
