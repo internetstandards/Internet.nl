@@ -103,9 +103,6 @@ CIPHERS_PHASE_OUT = [
     "TLS_RSA_WITH_AES_128_CBC_SHA256",
     "TLS_RSA_WITH_AES_128_CBC_SHA",
     "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
-    # CCM is not in appendix C, but footnote 31 makes it Good (on its own)
-    "TLS_RSA_WITH_AES_128_CCM",
-    "TLS_RSA_WITH_AES_256_CCM",
 ]
 
 # NCSC table 1

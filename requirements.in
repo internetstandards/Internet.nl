@@ -46,7 +46,6 @@ abnf
 pyopenssl
 dnspython
 
-# sslyze dependencies, which is installed from outside this file
 sslyze
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
