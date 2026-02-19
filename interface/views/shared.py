@@ -26,7 +26,6 @@ from checks.tasks.dispatcher import ProbeTaskResult
 from interface import redis_id
 from internetnl import log
 
-
 # See: https://stackoverflow.com/a/53875771 for a good summary of the various
 # RFCs and other rulings that combine to define what is a valid domain name.
 # Of particular note are xn-- which is used for internationalized TLDs, and

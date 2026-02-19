@@ -7,7 +7,6 @@ from checks.caa.retrieval import retrieve_parse_caa
 from checks.tasks import ipv6, dnssec, mail, shared, appsecpriv, rpki
 from checks.tasks.tls import tasks_reports as tls_tasks
 
-
 log = logging.getLogger(__package__)
 
 PROBES: dict[str, Optional[Callable]] = {

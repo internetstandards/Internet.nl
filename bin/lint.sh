@@ -6,8 +6,8 @@ set -x
 
 fail=0
 
-if ! pylama --skip "**/migrations/*" ${@}; then
-    echo -e "\e[31mSome pylama checks failed.\e[0m"
+if ! flake8 --exclude="*/migrations/*" ${@}; then
+    echo -e "\e[31mSome flake8 checks failed.\e[0m"
     fail=1
 fi
 if ! black --line-length 120 --check ${@}; then
