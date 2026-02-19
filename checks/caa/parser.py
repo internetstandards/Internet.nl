@@ -38,11 +38,11 @@ def node_get_named_child_value(node: Node, name: str) -> Optional[str]:
 ACME_VALIDATION_METHODS = {
     "http-01",
     "dns-01",
-    "http-01",
-    "tls-alpn-01",
     "tls-alpn-01",
     "email-reply-00",
     "tkauth-01",
+    "onion-csr-01",
+    "bp-nodeid-00",
 }
 
 # RFC 8657 4
