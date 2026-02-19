@@ -4,7 +4,8 @@ from binascii import hexlify
 from enum import Enum
 from pathlib import Path
 import socket
-from ssl import match_hostname, CertificateError
+from service_identity.cryptography import verify_certificate_hostname
+from service_identity.exceptions import VerificationError, CertificateError
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import subprocess
@@ -433,26 +434,10 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
 
 def _certificate_matches_hostname(certificate: Certificate, server_hostname: str) -> bool:
     """Verify that the certificate was issued for the given hostname."""
-    # Extract the names from the certificate to create the properly-formatted dictionary
     try:
-        cert_subject = certificate.subject
-    except ValueError:
-        # Cryptography could not parse the certificate https://github.com/nabla-c0d3/sslyze/issues/495
-        return False
-
-    subj_alt_name_ext = parse_subject_alternative_name_extension(certificate)
-    subj_alt_name_as_list = [("DNS", name) for name in subj_alt_name_ext.dns_names]
-    subj_alt_name_as_list.extend([("IP Address", ip) for ip in subj_alt_name_ext.ip_addresses])
-
-    certificate_names = {
-        "subject": (tuple([("commonName", name) for name in get_common_names(cert_subject)]),),
-        "subjectAltName": tuple(subj_alt_name_as_list),
-    }
-    # CertificateError is raised on failure
-    try:
-        match_hostname(certificate_names, server_hostname)  # type: ignore
+        verify_certificate_hostname(certificate, server_hostname)
         return True
-    except CertificateError:
+    except (VerificationError, CertificateError):
         return False
 
 

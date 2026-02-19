@@ -14,10 +14,11 @@ pytest-mock
 requests_mock
 freezegun
 pytest-html
-pytest-selenium<4
+pytest-selenium
+py
 
 # linting
-autoflake<2.2  # 3.7
+autoflake
 black
 pylama
 
