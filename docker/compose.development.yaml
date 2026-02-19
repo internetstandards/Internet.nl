@@ -70,3 +70,11 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+
+networks:
+  public-internet:
+    driver_opts: !override # to remove com.docker.network.host_ipv[46] in dev
+      # required to enable IPv6 on Colima Docker runtime
+      com.docker.network.enable_ipv6: "true"
+      # network for internal communication between services
+      com.docker.network.bridge.enable_icc: "true"
