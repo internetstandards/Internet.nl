@@ -490,7 +490,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
             message = f"{common_name}: {failed_key_type}-{key_size} key_size"
             if curve:
                 message += f", curve: {curve}"
-            if public_key.curve in CERT_EC_CURVES_PHASE_OUT:
+            if isinstance(public_key, EllipticCurvePublicKey) and type(public_key.curve) in CERT_EC_CURVES_PHASE_OUT:
                 phase_out_pubkey.append(message)
             else:
                 bad_pubkey.append(message)
@@ -599,15 +599,17 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+    server_connectivity_info = ServerConnectivityInfo(
+        server_location=result.server_location,
+        network_configuration=result.network_configuration,
+        tls_probing_result=result.connectivity_result,
+    )
     cipher_order_evaluation = test_cipher_order(
-        ServerConnectivityInfo(
-            server_location=result.server_location,
-            network_configuration=result.network_configuration,
-            tls_probing_result=result.connectivity_result,
-        ),
+        server_connectivity_info,
         prots_accepted,
         cipher_evaluation,
     )
+    key_exchange_hash_evaluation = test_key_exchange_hash(server_connectivity_info)
     cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
     # HACK for DANE-TA(2) and hostname mismatch!
@@ -646,7 +648,8 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
         else None,
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
-            if result.scan_result.tls_compression.result.supports_compression
+            if result.scan_result.tls_compression.result
+            and result.scan_result.tls_compression.result.supports_compression
             else scoring.WEB_TLS_COMPRESSION_GOOD
         ),
         dh_param=fs_evaluation.max_dh_size,
@@ -664,8 +667,8 @@ def check_mail_tls(result: ServerScanResult, all_suites: List[CipherSuitesScanAt
             if result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        kex_hash_func=KexHashFuncStatus.good,
-        kex_hash_func_score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+        kex_hash_func=key_exchange_hash_evaluation.status,
+        kex_hash_func_score=key_exchange_hash_evaluation.score,
     )
     results.update(cert_results)
     return results
@@ -768,10 +771,13 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             if result.scan_result.session_renegotiation.result.is_vulnerable_to_client_renegotiation_dos
             else scoring.WEB_TLS_CLIENT_RENEG_GOOD
         ),
-        compression=result.scan_result.tls_compression.result.supports_compression,
+        compression=result.scan_result.tls_compression.result.supports_compression
+        if result.scan_result.tls_compression.result
+        else None,
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
-            if result.scan_result.tls_compression.result.supports_compression
+            if result.scan_result.tls_compression.result
+            and result.scan_result.tls_compression.result.supports_compression
             else scoring.WEB_TLS_COMPRESSION_GOOD
         ),
         dh_param=fs_evaluation.max_dh_size,
@@ -842,7 +848,7 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
     """
     last_error_trace = None
     for scan_result in vars(result.scan_result).values():
-        error_trace = getattr(scan_result, "error_trace")
+        error_trace = getattr(scan_result, "error_trace", None)
         if error_trace:
             last_error_trace = error_trace
             log.info(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
@@ -1013,7 +1019,7 @@ def check_supported_tls_versions(server_connectivity_info: ServerConnectivityInf
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
-        except (ConnectionToServerFailed, OpenSSLError) as exc:
+        except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut) as exc:
             log.debug(
                 f"Server {server_connectivity_info.server_location.hostname}"
                 f"/{server_connectivity_info.server_location.ip_address}"
