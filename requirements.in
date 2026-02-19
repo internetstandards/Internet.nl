@@ -2,8 +2,8 @@
 # virtual environments
 wheel
 
-# The current LTS of django is 4.2, see: https://www.djangoproject.com/download/#supported-versions
-Django<5
+# The current LTS of django is 5.2, see: https://www.djangoproject.com/download/#supported-versions
+Django>=5.2,<6
 
 django-redis<5
 
@@ -42,12 +42,15 @@ sentry-sdk
 forcediphttpsadapter
 pytz
 sectxt
+# cgi.parse_header was removed in Python 3.13
+legacy-cgi
 abnf
 pyopenssl
 dnspython
+service-identity
 
 # sslyze dependencies, which is installed from outside this file
-sslyze
+sslyze>=6.3.0
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
