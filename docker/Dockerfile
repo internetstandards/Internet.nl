@@ -1,5 +1,9 @@
 ARG PYTHON_VERSION=3.13
 ARG YQ_VERSION=4.45.4
+ARG DOCKER_CLI_VERSION=29.2.1
+
+# Named stage to allow ARG expansion in --from (BuildKit does not support variable expansion directly)
+FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 
 # This Dockerfile consists of multiple stages in order to parallize and speed up
 # building. It also reduces image size as only build artifacts are copied into
@@ -219,6 +223,7 @@ CMD ["runserver", "0.0.0.0:8080"]
 FROM build-app AS linttest
 ARG PYTHON_VERSION
 ARG YQ_VERSION
+ARG DOCKER_CLI_VERSION
 
 USER root
 
@@ -228,7 +233,6 @@ RUN apt update && \
     git \
     make \
     python3-pip \
-    docker.io \
     gpg \
     gpg-agent \
     shellcheck \
@@ -238,6 +242,9 @@ RUN apt update && \
 
 # Install yq
 RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
+
+# docker.io is not available in Debian Trixie, copy docker CLI binary from official image
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 
 # copy application dependencies into image
 COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
