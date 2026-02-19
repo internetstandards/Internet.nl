@@ -414,9 +414,9 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         tls_cert=True,
         chain=chain_str,
         # The trusted value is originally an errno from the validation call
-        trusted=0
-        if trusted_score == scoring.MAIL_TLS_TRUSTED_GOOD
-        else 20,  # X509VerificationCodes.ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY,
+        trusted=(
+            0 if trusted_score == scoring.MAIL_TLS_TRUSTED_GOOD else 20
+        ),  # X509VerificationCodes.ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY,
         trusted_score=trusted_score,
         pubkey_bad=pubkey_bad,
         pubkey_phase_out=pubkey_phase_out,
@@ -649,9 +649,11 @@ def check_mail_tls(
         secure_reneg_score=renegotiation_evaluation.score_secure_renegotiation,
         client_reneg=renegotiation_evaluation.status_client_initiated_renegotiation,
         client_reneg_score=renegotiation_evaluation.score_client_initiated_renegotiation,
-        compression=result.scan_result.tls_compression.result.supports_compression
-        if result.scan_result.tls_compression.result
-        else None,
+        compression=(
+            result.scan_result.tls_compression.result.supports_compression
+            if result.scan_result.tls_compression.result
+            else None
+        ),
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
             if result.scan_result.tls_compression.result
@@ -772,9 +774,11 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         secure_reneg_score=renegotiation_evaluation.score_secure_renegotiation,
         client_reneg=renegotiation_evaluation.status_client_initiated_renegotiation,
         client_reneg_score=renegotiation_evaluation.score_client_initiated_renegotiation,
-        compression=result.scan_result.tls_compression.result.supports_compression
-        if result.scan_result.tls_compression.result
-        else None,
+        compression=(
+            result.scan_result.tls_compression.result.supports_compression
+            if result.scan_result.tls_compression.result
+            else None
+        ),
         compression_score=(
             scoring.WEB_TLS_COMPRESSION_BAD
             if result.scan_result.tls_compression.result
@@ -984,9 +988,9 @@ def test_cipher_order(
     return TLSCipherOrderEvaluation(
         violation=cipher_order_violation,
         status=status,
-        score=scoring.WEB_TLS_CIPHER_ORDER_BAD
-        if status == CipherOrderStatus.bad
-        else scoring.WEB_TLS_CIPHER_ORDER_GOOD,
+        score=(
+            scoring.WEB_TLS_CIPHER_ORDER_BAD if status == CipherOrderStatus.bad else scoring.WEB_TLS_CIPHER_ORDER_GOOD
+        ),
     )
 
 

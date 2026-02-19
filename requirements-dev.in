@@ -4,7 +4,6 @@
 pytest
 pytest-cov
 pytest-django
-pylama
 coverage
 pytest-responses
 # output logging when test fails
@@ -19,7 +18,7 @@ pytest-selenium<4
 # linting
 autoflake<2.2  # 3.7
 black
-pylama
+flake8
 
 # requirements management
 pip-tools>7

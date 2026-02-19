@@ -8,7 +8,6 @@ import time
 from internetnl import log
 from internetnl.celery import waitsome
 
-
 TEST_WORKER_TIMEOUT = 5
 
 # -----------------------------------------------------------------------------
@@ -30,7 +29,7 @@ subresult_mappings = {
 # coloured square with subtest name and status shown in a tooltip (via
 # 'title').
 def make_result_square(subtest_name, result):
-    (status, c) = subresult_mappings[result]
+    status, c = subresult_mappings[result]
     return html.div(
         "",
         style=f"display:inline-block; background-color:{c}; " "width:5px; height:5px; margin-right:1px;",
@@ -126,7 +125,7 @@ def pytest_runtest_makereport(item, call):
         report._subresults = getattr(item, "_subresults", [None])
         report._failures = getattr(item, "_failures", set())
         report._warnings = getattr(item, "_warnings", set())
-        (report._reference, report._demo) = item.config.getoption("--batch-base-names").split(",")
+        report._reference, report._demo = item.config.getoption("--batch-base-names").split(",")
 
 
 # -----------------------------------------------------------------------------

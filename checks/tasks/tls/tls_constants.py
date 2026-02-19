@@ -4,7 +4,6 @@ from nassl.ephemeral_key_info import OpenSslEcNidEnum, OpenSslEvpPkeyEnum
 from nassl.ssl_client import OpenSslDigestNidEnum
 from sslyze import TlsVersionEnum
 
-
 # NCSC 3.3.2 / 3.3.5
 CERT_SIGALG_GOOD = [
     SignatureAlgorithmOID.RSA_WITH_SHA256,
