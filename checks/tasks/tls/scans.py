@@ -74,7 +74,7 @@ from checks.tasks.tls.evaluation import (
     TLSExtendedMasterSecretEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
-    CERT_SIGALG_GOOD,
+    CERT_SIGALG_SUFFICIENT,
     CERT_CURVES_GOOD,
     CERT_EC_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
@@ -389,7 +389,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
     for cert in cert_deployment.received_certificate_chain:
         if not is_root_cert(cert):
             sigalg = cert.signature_algorithm_oid
-            if sigalg not in CERT_SIGALG_GOOD:
+            if sigalg not in CERT_SIGALG_SUFFICIENT:
                 sigalg_bad[get_common_name(cert)] = sigalg._name
                 sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
 
