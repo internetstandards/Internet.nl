@@ -6,14 +6,15 @@ from sslyze import TlsVersionEnum
 
 
 # NCSC 3.3.2 / 3.3.5
-CERT_SIGALG_GOOD = [
+CERT_SIGALG_SUFFICIENT = [
     SignatureAlgorithmOID.RSA_WITH_SHA256,
     SignatureAlgorithmOID.RSA_WITH_SHA384,
     SignatureAlgorithmOID.RSA_WITH_SHA512,
     SignatureAlgorithmOID.ECDSA_WITH_SHA256,
     SignatureAlgorithmOID.ECDSA_WITH_SHA384,
     SignatureAlgorithmOID.ECDSA_WITH_SHA512,
-    SignatureAlgorithmOID.DSA_WITH_SHA256,
+    SignatureAlgorithmOID.ED25519,
+    SignatureAlgorithmOID.ED448,
 ]
 
 # NCSC 3.3.2.1
