@@ -114,11 +114,11 @@ Letsencrypt account ID and private key are stored in a Docker volume for persist
 
 When deploying a new instance, first complete the full setup. After that perform the following steps to restore the account:
 
-    docker compose --project-name=internetnl-prod stop webserver
+    /opt/Internet.nl/docker/compose.sh stop webserver
     rm -rf /var/lib/docker/volumes/internetnl-prod_certbot-config/_data/*
     cp -r <location of backed up _data directory> /var/lib/docker/volumes/internetnl-prod_certbot-config/_data/
-    docker compose --project-name=internetnl-prod start webserver
+    /opt/Internet.nl/docker/compose.sh start webserver
 
 The certbot instance in the webserver container should start requesting a certificate for the domain after at most 1 minute. You can check the progress using:
 
-    docker compose --project-name=internetnl-prod exec webserver cat /var/log/letsencrypt/letsencrypt.log
+    /opt/Internet.nl/docker/compose.sh exec webserver cat /var/log/letsencrypt/letsencrypt.log

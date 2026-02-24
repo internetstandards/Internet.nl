@@ -15,13 +15,13 @@ To save on resources the routinator service can be shared between the instances.
 - Additional public IPv4 and IPv6 address pairs bound to the server, one pair for each extra instance
 - Unique public (sub)domain names for each IP pair
 - Additional server resources (CPU, Memory (~1GB), disk space) depending on the number of instances
-- Existing deployment of the Internet.nl application stack (see: [Application setup](#application-setup))
+- Existing deployment of the Internet.nl application stack (see: [Application setup](Docker-deployment.md#application-setup))
 
 ## Renaming initial instance
 
 Bring down the initial instance and rename it to `dev1`, renaming all existing volumes:
 
-    docker compose --project-name internetnl-prod down
+    /opt/Internet.nl/docker/compose.sh down
     mv /opt/Internet.nl /opt/Internet.nl-dev1
     cd /var/lib/docker/volumes
     rename 's/prod/dev1/' internetnl-prod_*
@@ -29,7 +29,7 @@ Bring down the initial instance and rename it to `dev1`, renaming all existing v
     echo INTERNETNL_INSTALL_BASE=/opt/Internet.nl-dev1 >> docker/host.env
     sed -i 's/dev-docker/dev1/' docker/host.env
     sed -i 's/internetnl-prod/internetnl-dev1/' docker/host.env
-    docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+    /opt/Internet.nl-dev1/docker/compose.sh up --remove-orphans --wait --no-build
 
 Add the following lines to `docker/host.env` and change the IP's to the public IP's for the dev1 instances:
 
@@ -101,7 +101,7 @@ If you have manually defined user/password added using the `docker/user_manage.s
 
 Getting DS records for all instances:
 
-    for i in {1..5}; do docker compose --project-name internetnl-dev$i restart unbound 2>&1;  docker compose --project-name internetnl-dev$i logs unbound 2>&1 | grep -A2 "Please add the following DS records for domain";done | grep "IN	DS"
+    for i in {1..5}; do /opt/Internet.nl-dev$i/docker/compose.sh restart unbound;  /opt/Internet.nl-dev$i/docker/compose.sh logs unbound | grep -A2 "Please add the following DS records for domain";done | grep "IN	DS"
 
 Copy password file from `dev1` to all other instances
 

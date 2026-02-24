@@ -19,11 +19,12 @@ env:
   # should be used to transfer images between jobs. Forked and dependabot builds don't
   # have permission to push to registry.
   use_registry: ${{ ! (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || startsWith(github.head_ref, 'dependabot/'))) }}
+  COMPOSE_VERSION: 2.40.3
 
 jobs:
   # builds all docker images in parallel
   build-docker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
@@ -227,7 +228,7 @@ jobs:
           retention-days: 1
 
   docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
@@ -272,7 +273,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -374,7 +375,7 @@ jobs:
   lintcheck:
     name: lint/check
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     env:
       # used in `compose.yaml` files to determine version of images to pull
@@ -452,7 +453,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -539,7 +540,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -657,7 +658,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |

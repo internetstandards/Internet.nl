@@ -35,29 +35,21 @@ A domain name is recommended to access the server and have Letsencrypt TLS be se
 
 After installation and basic configuration of the OS switch to `root` user.
 
-Run the following command to install required dependencies:
+Run the following commands to configure Docker for IPv6 and Live restore and to install required dependencies, setup Docker Apt repository, and install Docker:
 
-    apt update
-    apt install -yqq ca-certificates curl gnupg
-
-Setup Docker Apt repository:
-
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    chmod a+r /etc/apt/keyrings/docker.gpg
-    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" > /etc/apt/sources.list.d/docker.list
-    apt update
-
-Install Docker:
-
-    apt install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-Configure Docker for IPv6 and Live restore:
-
-    echo '{"experimental": true, "ip6tables": true, "live-restore": true}' > /etc/docker/daemon.json
-    systemctl stop docker
-    systemctl start docker
+    mkdir -p /etc/docker && \
+    echo '{"ip6tables": true, "live-restore": true}' > /etc/docker/daemon.json && \
+    apt update && \
+    apt install -yqq --no-install-recommends --no-install-suggests ca-certificates curl jq gnupg && \
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o - > /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo -e "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable\n \
+    deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" test" \
+    > /etc/apt/sources.list.d/docker.list && apt update && \
+    apt install -yqq --no-install-recommends --no-install-suggests docker-ce
 
 ## Application setup
 
@@ -127,7 +119,7 @@ This command should complete without an error, indicating the application stack 
 
 Create database indexes:
 
-    docker compose --project-name=internetnl-prod exec app ./manage.py api_create_db_indexes
+    /opt/Internet.nl/docker/compose.sh exec app ./manage.py api_create_db_indexes
 
 ## DNS setup
 
@@ -169,9 +161,9 @@ Please see the generic troubleshooting documentation in [Deployment#Troubleshoot
 If batch jobs seem to be stuck, check the `Batch` dashboard in Grafana (see [Deployment#Grafana](Docker-deployment.md#metrics-grafanaprometheus)). The `Individual task completion rate` graph should show a variaty of tasks being completed per second. If this graph is empty or shows gaps this might indicate the batch jobs got stuck in a deadlock. In this case bring down the environment, remove the Redis and RabbitMQ volumes and start the environment again:
 
     cd /opt/Internet.nl
-    docker compose --project-name=internetnl-prod down
+    /opt/Internet.nl/docker/compose.sh down
     docker volume rm internetnl-prod_rabbitmq
     docker volume rm internetnl-prod_redis
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    env -i /opt/Internet.nl/docker/compose.sh up --wait --no-build
 
 This issue can happen on rare occasions, is you encounter this persistently please create an issue in the Internet.nl repository: https://github.com/internetstandards/Internet.nl/issues/new
