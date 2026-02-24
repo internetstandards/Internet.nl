@@ -641,7 +641,7 @@ try:
     # connect to resolve is during import and will fail cryptically if it can't.
     socket.gethostbyname(STATSD_HOST)
 except socket.gaierror:
-    log.exception("Failed to resolve statsd host, disabling statsd metrics collection.")
+    log.warning("Failed to resolve statsd host, disabling statsd metrics collection.")
     # set to localhost so import of statsd client does not fail
     STATSD_HOST = "127.0.0.1"
 STATSD_PORT = os.environ.get("STATSD_PORT", "8125")
