@@ -70,3 +70,10 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+
+networks:
+  public-internet:
+    driver_opts:
+      # development environments break connectivity when outgoing IP is set to the internal public IP
+      com.docker.network.host_ipv4: !reset null
+      com.docker.network.host_ipv6: !reset null
