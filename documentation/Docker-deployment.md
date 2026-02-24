@@ -38,68 +38,21 @@ A public domain name or subdomain is required. It should be possible to set the 
 
 After installation and basic configuration of the OS switch to `root` user.
 
-Currently some Docker and Compose versions cause issues during setup (see: `documentation/Docker-getting-started.md#Prerequisites`). The following command will install a file that will prevent installing unsupported versions:
+Run the following commands to configure Docker for IPv6 and Live restore and to install required dependencies, setup Docker Apt repository, and install Docker:
 
-    cat > /etc/apt/preferences.d/internetnl-docker-supported-versions <<EOF
-    # prevent installation of unsupported versions of Docker/Compose
-    # https://github.com/internetstandards/Internet.nl/pull/1419
-    Package: docker-ce
-    Pin: version 5:25.*
-    Pin-priority: -1
-
-    Package: docker-ce
-    Pin: version 5:26.0.*
-    Pin-priority: -1
-
-    Package: docker-ce
-    Pin: version 5:26.1.0-*
-    Pin-priority: -1
-
-    Package: docker-ce
-    Pin: version 5:26.1.1-*
-    Pin-priority: -1
-
-    Package: docker-ce
-    Pin: version 5:26.1.2-*
-    Pin-priority: -1
-
-    Package: docker-compose-plugin
-    Pin: version 2.24.*
-    Pin-priority: -1
-
-    Package: docker-compose-plugin
-    Pin: version 2.25.*
-    Pin-priority: -1
-
-    Package: docker-compose-plugin
-    Pin: version 2.26.*
-    Pin-priority: -1
-
-    Package: docker-compose-plugin
-    Pin: version 2.27.1-*
-    Pin-priority: -1
-    EOF
-
-Run the following command to install required dependencies, setup Docker Apt repository, and install Docker:
-
-
+    mkdir -p /etc/docker && \
+    echo '{"ip6tables": true, "live-restore": true}' > /etc/docker/daemon.json && \
     apt update && \
-    apt install -yqq ca-certificates curl jq gnupg && \
+    apt install -yqq --no-install-recommends --no-install-suggests ca-certificates curl jq gnupg && \
     install -m 0755 -d /etc/apt/keyrings && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o - > /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
     echo -e "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
     https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" stable\n \
     deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] \
     https://download.docker.com/linux/"$(. /etc/os-release && echo "$ID $VERSION_CODENAME")" test" \
     > /etc/apt/sources.list.d/docker.list && apt update && \
-    apt install -yqq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-Configure Docker for IPv6 and Live restore:
-
-    echo '{"experimental": true, "ip6tables": true, "live-restore": true}' > /etc/docker/daemon.json && \
-    systemctl stop docker && \
-    systemctl start docker
+    apt install -yqq --no-install-recommends --no-install-suggests docker-ce
 
 ## Application setup
 
@@ -177,15 +130,19 @@ After deployment is complete, all services are healthy and DNS is setup you can 
 
 For more information see: [documentation/Docker-live-tests.md](Docker-live-tests.md)
 
+## Compose command
+
+To reduce issues with different versions a Compose command is included in the installation and can be accessed using `/opt/Internet.nl/docker/compose.sh`. Use this command for everything where you would normaly use `docker compose` to manage the Compose project.
+
 ## Logging
 
 Log output from containers/services can be obtained using the following command:
 
-    docker compose --project-name=internetnl-prod logs -f
+    /opt/Internet.nl/docker/compose.sh logs -f
 
 Or only for specific services:
 
-    docker compose --project-name=internetnl-prod logs -f app
+    /opt/Internet.nl/docker/compose.sh logs -f app
 
 These same logs are also sent to the `journald` daemon to be logged by the OS. This can then be used to forward to remote logging, etc.
 
@@ -205,11 +162,11 @@ By default task start and completion is not logged. To enable this set the `CELE
 
 When things don't seem to be working as expected and the logs don't give clear indications of the cause the first thing to do is check the status of the running containers/services:
 
-    docker compose --project-name=internetnl-prod  ps -a
+    /opt/Internet.nl/docker/compose.sh  ps -a
 
 Or use this command to omit the `COMMAND` and `PORTS` columns for a more compact view with only relevant information:
 
-    docker compose --project-name=internetnl-prod  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
+    /opt/Internet.nl/docker/compose.sh  ps -a --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.RunningFor}}\t{{.Status}}"
 
 Containers/services should have a `STATUS` of `Up` and there should be no containers/services with `unhealthy`. The `db-migrate` having status `Exited (0)` is expected. Containers/services with a short uptime (seconds/minutes) might indicate it restarted recently due to an error.
 
@@ -219,12 +176,12 @@ If a container/service is not up and healthy the cause might be deduced by inspe
 
 It might be possible not all containers that should be running are running. To have Docker Compose check the running instance and bring up any missing components run:
 
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    env -i /opt/Internet.nl/docker/compose.sh up --wait --no-build
 
 If this does not solve the issue you might want to reset the instance by bringing everything down and up again:
 
-    docker compose --project-name=internetnl-prod down
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    /opt/Internet.nl/docker/compose.sh down
+    env -i /opt/Internet.nl/docker/compose.sh up --wait --no-build
 
 If this does not work problems might lay deeper and OS level troubleshooting might be required.
 
@@ -242,7 +199,7 @@ Docker Compose relies on an internal DNS resolver to resolve container/services 
 
 The issue can be resolved by restarting the application:
 
-    docker compose --project-name=internetnl-prod restart
+    /opt/Internet.nl/docker/compose.sh restart
 
 ## Updating
 
@@ -280,11 +237,11 @@ This variable can be set to either of these values:
 
 Auto upgrades are performed by the `cron-docker` container/service. Progress/errors can be viewed by inspecting the container's logs:
 
-    docker compose --project-name=internetnl-prod logs --follow cron-docker
+    /opt/Internet.nl/docker/compose.sh logs --follow cron-docker
 
 To manually kick off the update process use the following command:
 
-    docker compose --project-name=internetnl-prod exec cron-docker /etc/periodic-docker/15min/auto_update
+    /opt/Internet.nl/docker/compose.sh exec cron-docker /etc/periodic-docker/5min/auto_update
 
 **notice**: the update logging might be cut-off at the end because the `cron-docker` container/service will be restarted in the process.
 
@@ -313,11 +270,11 @@ In essence downgrading is the same procedure as upgrading. For example, to roll 
 
 By default the installation will try to request a HTTPS certificate with Letsencrypt for the domain and it's subdomains. If this is not possible it will fall back to a self-signed 'localhost' certificate. If requesting a certificate fails you can debug it by viewing the logs using:
 
-    docker compose --project-name=internetnl-prod logs webserver
+    /opt/Internet.nl/docker/compose.sh logs webserver
 
 and
 
-    docker compose --project-name=internetnl-prod exec webserver cat /var/log/letsencrypt/letsencrypt.log
+    /opt/Internet.nl/docker/compose.sh exec webserver cat /var/log/letsencrypt/letsencrypt.log
 
 It may take a few minutes after starting for the Letsencrypt certificates to be registered and loaded.
 
@@ -405,7 +362,7 @@ Current alert status can seen at: https://example.com/prometheus/alerts or https
 
 If notification emails are not being sent even though alert status shows red see Alertmanager logging for debugging:
 
-    docker compose --project-name=internetnl-prod logs --follow alertmanager
+    /opt/Internet.nl/docker/compose.sh logs --follow alertmanager
 
 ## Restricting access
 
@@ -437,7 +394,7 @@ When adding both users and IPs in `ALLOW_LIST`, users connecting from an IP in t
 
 After changing the IP or hostname in the `docker/host.env` file run:
 
-    env -i docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --wait --no-build
+    env -i /opt/Internet.nl/docker/compose.sh up --wait --no-build
 
 to update the DNSSEC accordingly.
 
