@@ -1,6 +1,6 @@
 # Docker container profiles overview
 
-This overview was last generated at 2025-05-27T12:11:00Z with `make update_container_documentation`.
+This overview was last generated at 2026-02-26T14:43:11Z with `make update_container_documentation`.
 
 
 | container             | profiles     | description                                                                                                                      |
