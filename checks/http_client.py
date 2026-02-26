@@ -10,13 +10,18 @@ from dns.resolver import NXDOMAIN, NoAnswer, LifetimeTimeout
 from forcediphttpsadapter.adapters import ForcedIPHTTPSAdapter
 
 from checks.resolver import dns_resolve_aaaa, dns_resolve_a
-from checks.tasks.tls_connection import DEFAULT_TIMEOUT
-from checks.tasks.tls_connection_exceptions import NoIpError
 from django.conf import settings
 from internetnl import log
 
 # Disable HTTPS warnings as we intentionally disable HTTPS verification
 urllib3.disable_warnings()
+
+
+DEFAULT_TIMEOUT = 10
+
+
+class NoIpError(Exception):
+    pass
 
 
 def _do_request(args, headers, kwargs, session, url):

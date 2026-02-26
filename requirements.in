@@ -12,7 +12,7 @@ celery>5.3
 
 setuptools-rust
 beautifulsoup4
-cryptography<39.0.0
+cryptography
 django-bleach
 django-enumfields
 django-hosts
@@ -43,6 +43,11 @@ forcediphttpsadapter
 pytz
 sectxt
 abnf
+pyopenssl
+dnspython
+
+# sslyze dependencies, which is installed from outside this file
+sslyze
 
 # https://stackoverflow.com/questions/73933432/django-celery-cannot-import-name-celery-from-celery-after-rebuilding-dockerf
 importlib-metadata<5
