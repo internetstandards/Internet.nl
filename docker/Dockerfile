@@ -47,8 +47,8 @@ ENV UV_BREAK_SYSTEM_PACKAGES=1
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
 
-COPY vendor/unbound /src/vendor/unbound
-WORKDIR /src/vendor/unbound
+COPY vendor/unbound /source/vendor/unbound
+WORKDIR /source/vendor/unbound
 ENV CCACHE_DIR=/var/cache/ccache
 RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
   ./configure CC='ccache gcc' \
@@ -65,10 +65,10 @@ RUN make install
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
-COPY pyproject.toml /src/
-COPY uv.lock /src/
+COPY pyproject.toml /source/
+COPY uv.lock /source/
 
-WORKDIR /src
+WORKDIR /source
 
 # install into system Python because otherwise Unbound build becomes to hard
 # https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
@@ -78,7 +78,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --link-mode=copy --no-dev
 
 # stage with app dependencies and lint/test depencencies
-FROM build-app-deps AS linttest-deps
+FROM build-app-deps AS tools-deps
 
 # install into system Python because otherwise Unbound build becomes to hard
 # https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
@@ -224,7 +224,7 @@ ENTRYPOINT [ "python3","./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
 # supplement application with unittest, lint dependencies
-FROM build-app AS linttest
+FROM build-app AS tools
 ARG PYTHON_VERSION
 ARG YQ_VERSION
 ARG DOCKER_CLI_VERSION
@@ -238,6 +238,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     git \
     make \
     build-essential \
+    libpython${PYTHON_VERSION}-dev \
     ca-certificates \
     gpg \
     gpg-agent \
@@ -251,8 +252,8 @@ RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/downl
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 
 # copy application dependencies into image
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
-COPY --from=linttest-deps /usr/local/bin/* /usr/local/bin/
+COPY --from=tools-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
+COPY --from=tools-deps /usr/local/bin/* /usr/local/bin/
 
 RUN mkdir /source
 WORKDIR /source

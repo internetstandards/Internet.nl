@@ -34,9 +34,9 @@ jobs:
           - image: unbound
             dockerfile: docker/Dockerfile
             target: unbound
-          - image: linttest
+          - image: tools
             dockerfile: docker/Dockerfile
-            target: linttest
+            target: tools
           - image: test-runner
             dockerfile: docker/test-runner.Dockerfile
             target:

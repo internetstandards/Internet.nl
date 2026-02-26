@@ -2,7 +2,7 @@ services:
   # environment for checks, linting and unit tests
   test:
     platform: linux/amd64
-    image: ${DOCKER_IMAGE_LINTTEST:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/linttest:$RELEASE}
+    image: ${DOCKER_IMAGE_tools:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/tools:$RELEASE}
 
     networks:
       - internal
