@@ -2,7 +2,8 @@
 
 import pytest
 import subprocess
-from ..conftest import ipv6_available
+
+from integration_tests.develop.conftest import ipv6_available
 
 
 def docker_compose_exec(service, command, env="develop"):
@@ -20,9 +21,12 @@ def docker_compose_exec(service, command, env="develop"):
 
 @pytest.mark.skipif(not ipv6_available(), reason="IPv6 networking not available")
 def test_validating_resolver():
+    returncode, output = docker_compose_exec("app", "getent ahostsv4 resolver-validating|grep STREAM")
+    print(output)
+    resolver_address = output.split()[0]
     returncode, output = docker_compose_exec(
         "app",
-        "ldns-dane -n -T verify internet.nl 443 -r $(getent ahostsv4 resolver-validating|grep STREAM|cut -d' ' -f1)",
+        "ldns-dane -n -T verify internet.nl 443 -r " + resolver_address,
     )
     print(output)
     assert "dane-validated successfully" in output

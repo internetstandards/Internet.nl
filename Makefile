@@ -273,6 +273,7 @@ test-all: ## run all tests on all environments
 	# build all images
 	$(MAKE) build
 	# run checks
+	$(MAKE) lint
 	$(MAKE) check
 	# run development environment tests
 	$(MAKE) up environment=develop
@@ -289,6 +290,7 @@ test-all: ## run all tests on all environments
 	# run unittests
 	$(MAKE) test
 	$(MAKE) down environment=test
+	@echo "All tests passed 🥳"
 
 makemigrations: ## run `./manage.py makemigrations` to update Django migrations
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools env SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py makemigrations
@@ -296,9 +298,7 @@ makemigrations: ## run `./manage.py makemigrations` to update Django migrations
 lint: ## run linter
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
-check: ## run checks (eg: shellcheck)
 check: ## run checks (eg: package locks, migrations, document generation, etc)
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh ${pysrcdirs}
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh
 
 fix: ## fix trivial linting error automatically
