@@ -2,7 +2,6 @@ import pytest
 import os
 import time
 import subprocess
-from integration_tests.conftest import IPV6_AVAILABLE
 
 APP_URLS = (os.environ.get("APP_URLS")).split(",")
 
@@ -14,12 +13,28 @@ TEST_EMAILS = (os.environ.get("TEST_EMAILS") or (os.environ.get("TEST_DOMAINS") 
 BATCH_API_AUTH = os.environ.get("BATCH_API_AUTH")
 
 
+IPV6_AVAILABILITY_DOMAIN = "internet.nl"
+
+
+def ipv6_available():
+    """Test if IPv6 is available inside development environment"""
+    try:
+        command = (
+            "docker compose --ansi=never --project-name=internetnl-develop exec -ti app "
+            + f"curl -6 --show-error --fail {IPV6_AVAILABILITY_DOMAIN}",
+        )
+        subprocess.check_output(command, shell=True)
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
 def pytest_report_header(config):
     return [
         f"app_urls: {','.join(APP_URLS)}",
         f"test_domains: {','.join(TEST_DOMAINS)}",
         f"test_emails: {','.join(TEST_EMAILS)}",
-        f"ipv6_available: {IPV6_AVAILABLE}",
+        f"ipv6_available: {ipv6_available()}",
     ]
 
 

@@ -30,25 +30,6 @@ REGEX_LOGGING_EXCLUDE = "GET /static"
 COMPOSE_PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME")
 
 
-IPV6_AVAILABILITY_DOMAIN = "internet.nl"
-
-
-def ipv6_available():
-    """Test if IPv6 is available inside development environment"""
-    try:
-        command = (
-            "docker compose --ansi=never --project-name=internetnl-develop exec -ti app "
-            + f"curl -6 --show-error --fail {IPV6_AVAILABILITY_DOMAIN}",
-        )
-        subprocess.check_output(command, shell=True)
-    except subprocess.CalledProcessError:
-        return False
-    return True
-
-
-IPV6_AVAILABLE = ipv6_available()
-
-
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args, register_test_user):
     """Overwrite default context to ignore TLS errors."""
