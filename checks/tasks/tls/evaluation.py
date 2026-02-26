@@ -318,6 +318,7 @@ class KeyExchangeHashFunctionEvaluation:
 
     status: KexHashFuncStatus
     score: scoring.Score
+    found_hash: Optional[str] = None
 
 
 @dataclass(frozen=True)

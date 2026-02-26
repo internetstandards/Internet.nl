@@ -689,6 +689,7 @@ def check_mail_tls(
         ),
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
+        kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
     )
@@ -813,6 +814,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ocsp_stapling_score=ocsp_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
+        kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
     )
@@ -888,6 +890,7 @@ def test_key_exchange_hash(
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.bad,
             score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
+            found_hash=bad_hash_result.name,
         )
 
     phase_out_hash_result = _test_connection_with_limited_sigalgs(
@@ -898,6 +901,7 @@ def test_key_exchange_hash(
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.phase_out,
             score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+            found_hash=phase_out_hash_result.name,
         )
 
     return KeyExchangeHashFunctionEvaluation(
