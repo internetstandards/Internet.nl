@@ -208,7 +208,8 @@ def custom_celery_worker(request):
     Tests on both implementations of worker."""
     pool = request.param
     # there is a set and limited number of queues, for convenience listen to all of them.
-    worker_command = ["make", "run-test-worker", pool]  # "--queues", ",".join(queues)
+
+    worker_command = f"python3 -m celery --app internetnl worker -E -ldebug --pool {pool} --time-limit=300".split()
     worker_env = dict(os.environ, WORKER_ROLE="default_ipv4")
 
     log.info("Running worker with: %s", " ".join(worker_command))
@@ -216,7 +217,7 @@ def custom_celery_worker(request):
         worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer, preexec_fn=os.setsid, env=worker_env
     )
     # catch early errors
-    time.sleep(1)
+    time.sleep(0.1)
     assert not worker_process.poll(), "Worker exited early."
 
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
