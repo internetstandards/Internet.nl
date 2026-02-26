@@ -122,7 +122,7 @@ if settings.ENABLE_BATCH is True:
             batch.endpoint_metadata_report,
             name="batch_endpoint_metadata_report",
         ),
-        re_path(r"^api/batch/openapi.yaml$", batch.documentation, name="batch_documentation"),
+        path("api/batch/openapi.yaml", batch.documentation, name="batch_documentation"),
         # The following should always be the last to catch now-invalid urls.
         re_path(r"^api/batch/", batch.old_url, name="batch_old"),
     ]

@@ -122,7 +122,7 @@ def render_details_table(tech_type, table_headers, table_content):
                     ]:
                         value = _(value)
                     elif tech_type == "table_translatable":
-                        if type(value) == dict:
+                        if isinstance(value, dict):
                             value = _(value["msgid"]).format(**value.get("context", {}))
                     row.append(value)
                 else:

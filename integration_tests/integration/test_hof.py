@@ -1,4 +1,5 @@
 """Basis functionality that should always be present."""
+
 from playwright.sync_api import expect
 
 

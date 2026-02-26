@@ -11,7 +11,6 @@ from checks.tasks.securitytxt import (
     SECURITYTXT_LEGACY_PATH,
 )
 
-
 # This test is limited to evaluation, as network retrieval is more appropriately
 # tested in an integration test
 

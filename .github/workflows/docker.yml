@@ -83,10 +83,12 @@ jobs:
         id: get_version
         run: |
           pip -q install setuptools_scm
-          # '+' and '/' is not supported in Docker Image tags
           scm_version=$(echo 'from setuptools_scm import get_version; print(get_version(version_scheme="release-branch-semver"))' | python)
           branch_version_suffix=${GITHUB_HEAD_REF:+-$GITHUB_HEAD_REF}
+          # '+' and '/' is not supported in Docker Image tags
           echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
+          # scm_version is valid PEP 440 and used as SETUPTOOLS_SCM_PRETEND_VERSION in Docker builds
+          echo "scm_version=$scm_version" | tee -a "$GITHUB_OUTPUT"
           # generate docker image tag used for PR specific caching and PR specific auto deploy
           echo "github_ref_name_slug=${{github.ref_name}}" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
 
@@ -135,7 +137,7 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.scm_version }}
 
       - name: Build ${{ matrix.image }} (for main)
         # build for pushes to the main branch
@@ -161,7 +163,7 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.scm_version }}
 
       - name: Build ${{ matrix.image }} (for release)
         # build for tagged releases
@@ -186,7 +188,7 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.scm_version }}
 
       - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
         # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
@@ -209,7 +211,7 @@ jobs:
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
           build-args: |
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            RELEASE=${{ steps.get_version.outputs.scm_version }}
 
       - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
