@@ -20,8 +20,9 @@ FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
       # generic build dependencies
       build-essential \
       # unbound dependencies
@@ -36,6 +37,7 @@ RUN apt update && \
       # nassl dependencies
       python3-setuptools \
       # unbound dependencies
+      ccache \
       flex \
       bison
 
@@ -48,14 +50,17 @@ ARG PYTHON_VERSION
 
 COPY vendor/unbound /src/vendor/unbound
 WORKDIR /src/vendor/unbound
-RUN ./configure \
+ENV CCACHE_DIR=/var/cache/ccache
+RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
+  ./configure CC='ccache gcc' \
   --prefix=/opt/unbound \
   --enable-internetnl \
   --with-pyunbound \
   --with-libevent \
   --with-libhiredis \
   PYTHON_VERSION=${PYTHON_VERSION}
-RUN make
+RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
+  make
 RUN make install
 
 # intermediate stage with apt and python dependencies
@@ -66,7 +71,6 @@ COPY requirements.txt /src/
 WORKDIR /src
 
 ENV UV_LINK_MODE=copy
-ENV UV_SYSTEM_PYTHON=1
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system -r requirements.txt
 
@@ -85,8 +89,9 @@ FROM --platform=linux/amd64 debian:trixie-20260202-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     # unbound dependencies
     libevent-2.1-7t64 \
     libhiredis1.1.0 \
@@ -96,8 +101,6 @@ RUN apt update && \
     expat \
     # for envsubst
     gettext \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/opt/unbound/sbin:$PATH"
 
@@ -132,9 +135,10 @@ ENTRYPOINT ["/entrypoint.sh"]
 FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
     python3 \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     libpython${PYTHON_VERSION} \
     gettext \
     ldnsutils \
@@ -149,9 +153,7 @@ RUN apt update && \
     iproute2 \
     # healthcheck
     netcat-traditional \
-    procps \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    procps
 
 # copy unbound library and unbound Python module into image
 COPY --from=build-unbound /opt/unbound /opt/unbound
@@ -228,17 +230,16 @@ ARG DOCKER_CLI_VERSION
 USER root
 
 # install additional development dependencies
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     git \
     make \
     python3-pip \
     gpg \
     gpg-agent \
     shellcheck \
-    bsdmainutils \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    bsdmainutils
 
 # Install yq
 RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
