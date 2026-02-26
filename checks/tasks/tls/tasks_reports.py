@@ -275,6 +275,7 @@ def save_results(model, results, addr, domain, category):
                     model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
+                    model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
 
@@ -352,6 +353,7 @@ def save_results(model, results, addr, domain, category):
                     # model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
+                    model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
                 if result.get("tls_cert"):
@@ -570,11 +572,11 @@ def build_report(dttls, category):
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests["kex_hash_func"].result_good()
             elif dttls.kex_hash_func == KexHashFuncStatus.bad:
-                category.subtests["kex_hash_func"].result_bad()
+                category.subtests["kex_hash_func"].result_bad(dttls.kex_hash_func_bad_hash)
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
             elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
-                category.subtests["kex_hash_func"].result_phase_out()
+                category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
 
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 
@@ -732,11 +734,11 @@ def build_report(dttls, category):
             if dttls.kex_hash_func == KexHashFuncStatus.good:
                 category.subtests["kex_hash_func"].result_good()
             elif dttls.kex_hash_func == KexHashFuncStatus.bad:
-                category.subtests["kex_hash_func"].result_bad()
+                category.subtests["kex_hash_func"].result_bad(dttls.kex_hash_func_bad_hash)
             elif dttls.kex_hash_func == KexHashFuncStatus.unknown:
                 category.subtests["kex_hash_func"].result_unknown()
             elif dttls.kex_hash_func == KexHashFuncStatus.phase_out:
-                category.subtests["kex_hash_func"].result_phase_out()
+                category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
 
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
 

@@ -542,6 +542,7 @@ class DomainTestTls(BaseTestModel):
 
     kex_hash_func = EnumField(KexHashFuncStatus, default=KexHashFuncStatus.bad)
     kex_hash_func_score = models.IntegerField(null=True)
+    kex_hash_func_bad_hash = models.CharField(max_length=255, null=True, default=None)
 
     extended_master_secret = EnumField(TLSExtendedMasterSecretStatus, default=TLSExtendedMasterSecretStatus.unknown)
     extended_master_secret_score = models.IntegerField(null=True)
