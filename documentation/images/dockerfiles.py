@@ -83,12 +83,12 @@ with Diagram("Dockerfile", show=False, direction="LR", outformat=["png"], graph_
             build_deps = Stage("build-deps")
             build_unbound = Stage("build-unbound")
             build_app_deps = Stage("build-app-deps")
-            build_linttest_deps = Stage("build-linttest-deps")
+            build_tools_deps = Stage("build-tools-deps")
             build_app = Stage("build-app")
 
         with Cluster("Output images"):
             image_internetnl = Image("ghcr.io/internetstandards/internet.nl")
-            image_linttest = Image("ghcr.io/internetstandards/linttest")
+            image_tools = Image("ghcr.io/internetstandards/tools")
             image_unbound = Image("ghcr.io/internetstandards/unbound")
 
         source_image >> build_deps
@@ -99,8 +99,8 @@ with Diagram("Dockerfile", show=False, direction="LR", outformat=["png"], graph_
         build_deps >> build_app_deps
         requirements >> build_app_deps
 
-        build_app_deps >> build_linttest_deps
-        requirements_dev >> build_linttest_deps
+        build_app_deps >> build_tools_deps
+        requirements_dev >> build_tools_deps
 
         source_image >> image_unbound
         build_unbound >> Edge(label="/opt/unbound") >>  image_unbound
@@ -118,6 +118,6 @@ with Diagram("Dockerfile", show=False, direction="LR", outformat=["png"], graph_
 
         build_app >> image_internetnl
 
-        build_app >> image_linttest
-        build_linttest_deps >> Edge(label="dev dependencies") >>  image_linttest
-        tools_dependencies >> image_linttest
+        build_app >> image_tools
+        build_tools_deps >> Edge(label="dev dependencies") >>  image_tools
+        tools_dependencies >> image_tools
