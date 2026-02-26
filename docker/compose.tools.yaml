@@ -1,7 +1,7 @@
 services:
   tools:
     platform: linux/amd64
-    image: ${DOCKER_IMAGE_tools:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/tools:${RELEASE:-latest}}
+    image: ${DOCKER_IMAGE_TOOLS:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/tools:${RELEASE:-latest}}
 
     volumes:
       - ../:/source/

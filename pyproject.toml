@@ -138,4 +138,6 @@ dev = [
     "pytest-selenium",
     "requests-mock",
     "uv",
+    "python-lsp-server",
+    "basedpyright",
 ]

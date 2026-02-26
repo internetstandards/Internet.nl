@@ -243,7 +243,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     gpg \
     gpg-agent \
     shellcheck \
-    bsdmainutils
+    bsdmainutils \
+    vim
 
 # Install yq
 RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
