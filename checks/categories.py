@@ -1496,27 +1496,34 @@ class WebTlsKexHashFunc(Subtest):
             label="detail web tls kex-hash-func label",
             explanation="detail web tls kex-hash-func exp",
             tech_string="detail web tls kex-hash-func tech table",
-            worst_status=scoring.WEB_TLS_KEX_HASH_FUNC_WORST_STATUS,
+            worst_status=STATUS_INFO,
             full_score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
             model_score_field="kex_hash_func_score",
         )
 
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
+
     def result_good(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls kex-hash-func verdict good"
         self.tech_data = "detail tech data good"
 
     def result_bad(self):
+        self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls kex-hash-func verdict bad"
         self.tech_data = "detail tech data insufficient"
 
     def result_unknown(self):
+        self.was_tested()
         self._status(STATUS_INFO)
         self.verdict = "detail web tls kex-hash-func verdict other"
         self.tech_data = "detail tech data not-applicable"
 
     def result_phase_out(self):
+        self.was_tested()
         self._status(STATUS_NOTICE)
         self.verdict = "detail web tls kex-hash-func verdict phase-out"
         self.tech_data = "detail tech data phase-out"
@@ -2123,7 +2130,7 @@ class MailTlsKexHashFunc(Subtest):
         )
 
     def was_tested(self):
-        self.worst_status = scoring.MAIL_TLS_KEX_HASH_FUNC_WORST_STATUS
+        self.worst_status = STATUS_FAIL
 
     def result_good(self):
         self.was_tested()
@@ -2133,7 +2140,7 @@ class MailTlsKexHashFunc(Subtest):
 
     def result_bad(self):
         self.was_tested()
-        self._status(STATUS_NOTICE)
+        self._status(STATUS_FAIL)
         self.verdict = "detail mail tls kex-hash-func verdict bad"
         self.tech_data = "detail tech data insufficient"
 
