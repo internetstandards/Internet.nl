@@ -95,7 +95,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-      target: linttest
+      target: tools
       args:
         RELEASE: 0.0.0-dev0
       platforms:
@@ -121,7 +121,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-      target: linttest
+      target: tools
       args:
         RELEASE: 0.0.0-dev0
       platforms:

@@ -1,0 +1,143 @@
+[project]
+name = "Internet.nl"
+description = "Internet standards compliance test suite"
+readme = "README.md"
+requires-python = ">=3.13"
+dynamic = ["version"]
+dependencies = [
+    "abnf",
+    "argparse",
+    "beautifulsoup4",
+    "cached-property",
+    "celery>5.3",
+    "celery-statsd",
+    "chardet",
+    "colorlog",
+    "cryptography",
+    "django>=5.2,<6",
+    "django-bleach",
+    "django-browser-reload",
+    "django-enumfields",
+    "django-hosts",
+    "django-markdown-deux",
+    "django-redis<5",
+    "django-statsd-mozilla",
+    "dnspython",
+    "eventlet",
+    "forcediphttpsadapter",
+    "gevent",
+    "gitpython",
+    "hiredis",
+    "importlib-metadata<5",
+    "ip-address",
+    "legacy-cgi",
+    "libsass",
+    "markdown",
+    "pathlib2",
+    "polib",
+    "psycopg2-binary<3",
+    "pyopenssl",
+    "pyparsing",
+    "pyrabbit2",
+    "pythonwhois-internet-nl",
+    "pytz",
+    "pyyaml",
+    "requests",
+    "rjsmin",
+    "sectxt",
+    "selenium",
+    "sentry-sdk",
+    "service-identity",
+    "setuptools-rust",
+    "setuptools-scm",
+    "sslyze>=6.3.0",
+    "statshog",
+    "uwsgi",
+    "wheel",
+    "whitenoise",
+]
+
+[tool.setuptools]
+packages = []
+
+[tool.coverage.run]
+omit = [
+    # omit anything in a .venv directory anywhere
+    "*/.venv/*",
+    "*/tests/*",
+    "*/test/*",
+    "*unbound*",
+    "*vendor*",
+    "*migrations*",
+]
+
+# Also make sure every branch is checked, which lowers the score but increases coverage when done right
+branch = true
+
+[tool.hatch.version]
+
+
+[tool.coverage.report]
+# Skip everything that is already 100% covered
+skip_covered = true
+skip_empty = true
+show_missing = true
+
+[tool.pytest]
+# the following is needed because of https://github.com/ClearcodeHQ/pytest-redis/issues/310
+addopts = ["--basetemp=/tmp/pytest"]
+# redis_exec = redis-server
+# Speed up finding tests
+norecursedirs = [
+  "*venv*",
+  "*.venv*",
+  "*.pytest_cache*",
+  "*documentation*",
+  "*unbound*",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:aiofiles.*:",
+    "ignore::DeprecationWarning:.*",
+#    ignore:.*Django now detects this configuration.*:django.utils.deprecation.RemovedInDjango41Warning
+]
+
+# flake8 does not support pyproject.toml, config moved to bin/lint.sh
+# [tool.flake8]
+# max-line-length = 120
+# # E203: black uses [1 : 2] style which conflicts with pycodestyle
+# # E252: missing whitespace around parameter default (black handles formatting)
+# # W605: invalid escape sequence (false positives in some string patterns)
+# extend-ignore = ["E203","E252","W605"]
+# per-file-ignores = [
+#   "*/migrations/*:F401,F811"
+# ]
+
+[tool.uv.sources]
+pythonwhois-internet-nl = { url = "https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz" }
+
+[setuptools_scm]
+version_scheme = "release_branch_semver"
+
+[dependency-groups]
+dev = [
+    "autoflake",
+    "black",
+    "coverage",
+    "django-coverage",
+    "flake8",
+    "freezegun",
+    "pip-tools>7",
+    "py",
+    "pytest",
+    "pytest-cov",
+    "pytest-django",
+    "pytest-html",
+    "pytest-logging",
+    "pytest-mock",
+    "pytest-responses",
+    "pytest-selenium",
+    "requests-mock",
+    "uv",
+    "python-lsp-server",
+    "basedpyright",
+]

@@ -27,6 +27,7 @@ __pycache__
 *.log
 *.pid
 /tests/.pytest_cache/
+Internet.nl.egg-info/
 
 # Pycharm defaults
 .idea

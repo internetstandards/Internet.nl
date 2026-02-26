@@ -17,16 +17,16 @@ FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 # generic stage used by all build stages
 # explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
 # platform can probably be removed after #1218
-FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-deps
+FROM debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
       # generic build dependencies
       build-essential \
       # unbound dependencies
       python${PYTHON_VERSION}-dev \
-      python3-pip \
       libssl-dev \
       libevent-dev \
       libhiredis-dev \
@@ -36,57 +36,65 @@ RUN apt update && \
       # nassl dependencies
       python3-setuptools \
       # unbound dependencies
+      ccache \
       flex \
       bison
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:python3.13-trixie /usr/local/bin/uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1
 ENV UV_BREAK_SYSTEM_PACKAGES=1
 
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
 
-COPY vendor/unbound /src/vendor/unbound
-WORKDIR /src/vendor/unbound
-RUN ./configure \
+COPY vendor/unbound /source/vendor/unbound
+WORKDIR /source/vendor/unbound
+ENV CCACHE_DIR=/var/cache/ccache
+RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
+  ./configure CC='ccache gcc' \
   --prefix=/opt/unbound \
   --enable-internetnl \
   --with-pyunbound \
   --with-libevent \
   --with-libhiredis \
   PYTHON_VERSION=${PYTHON_VERSION}
-RUN make
+RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
+  make
 RUN make install
 
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
-COPY requirements.txt /src/
+COPY pyproject.toml /source/
+COPY uv.lock /source/
 
-WORKDIR /src
+WORKDIR /source
 
-ENV UV_LINK_MODE=copy
-ENV UV_SYSTEM_PYTHON=1
+# install into system Python because otherwise Unbound build becomes to hard
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV UV_PROJECT_ENVIRONMENT=/usr/
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements.txt
+  uv sync --link-mode=copy --no-dev
 
 # stage with app dependencies and lint/test depencencies
-FROM build-app-deps AS linttest-deps
-ARG PYTHON_VERSION
+FROM build-app-deps AS tools-deps
 
-COPY requirements-dev.txt /src/
+# install into system Python because otherwise Unbound build becomes to hard
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV UV_PROJECT_ENVIRONMENT=/usr/
 
-ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements-dev.txt
+  uv sync --link-mode=copy
 
 # build unbound target
-FROM --platform=linux/amd64 debian:trixie-20260202-slim AS unbound
+FROM debian:trixie-20260202-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     # unbound dependencies
     libevent-2.1-7t64 \
     libhiredis1.1.0 \
@@ -95,9 +103,7 @@ RUN apt update && \
     openssl \
     expat \
     # for envsubst
-    gettext \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    gettext
 
 ENV PATH="/opt/unbound/sbin:$PATH"
 
@@ -129,11 +135,12 @@ USER unbound
 ENTRYPOINT ["/entrypoint.sh"]
 
 # build main application image target
-FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-app
+FROM debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     python3 \
     libpython${PYTHON_VERSION} \
     gettext \
@@ -149,21 +156,17 @@ RUN apt update && \
     iproute2 \
     # healthcheck
     netcat-traditional \
-    procps \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    procps
 
 # copy unbound library and unbound Python module into image
 COPY --from=build-unbound /opt/unbound /opt/unbound
-COPY --from=build-unbound /usr/lib/python3/dist-packages/*unbound* /usr/lib/python3/dist-packages/
+COPY --from=build-unbound /usr/local/lib/python${PYTHON_VERSION}/dist-packages/*unbound* /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 
 # copy application dependencies into image
 COPY --from=build-app-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 COPY --from=build-app-deps /usr/local/bin/* /usr/local/bin/
 
 # basic verification of installed components
-# The python3 package currently installs version 3.9 but that might change with
-# OS updates, verify we run the desired Python version.
 RUN python3 --version | grep "$PYTHON_VERSION."
 RUN /opt/unbound/sbin/unbound -V
 RUN python3 -c 'import nassl; print(nassl.__version__)'
@@ -176,6 +179,7 @@ RUN chown nobody:nogroup /app
 USER nobody:nogroup
 
 # copy all required sources from the application
+COPY --chown=nobody:nogroup pyproject.toml ./pyproject.toml
 COPY --chown=nobody:nogroup bin ./bin
 COPY --chown=nobody:nogroup manage.py ./
 COPY --chown=nobody:nogroup checks ./checks
@@ -188,7 +192,7 @@ COPY --chown=nobody:nogroup assets ./assets
 
 ENV LDNS_DANE=/usr/bin/ldns-dane
 
-ENV STATIC_ROOT /app/static
+ENV STATIC_ROOT=/app/static
 
 VOLUME /app/batch_results
 RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
@@ -216,11 +220,11 @@ ARG RELEASE
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 
 # define default entrypoint and command
-ENTRYPOINT [ "python3", "./manage.py"]
+ENTRYPOINT [ "python3","./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
 # supplement application with unittest, lint dependencies
-FROM build-app AS linttest
+FROM build-app AS tools
 ARG PYTHON_VERSION
 ARG YQ_VERSION
 ARG DOCKER_CLI_VERSION
@@ -228,17 +232,19 @@ ARG DOCKER_CLI_VERSION
 USER root
 
 # install additional development dependencies
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     git \
     make \
-    python3-pip \
+    build-essential \
+    libpython${PYTHON_VERSION}-dev \
+    ca-certificates \
     gpg \
     gpg-agent \
     shellcheck \
     bsdmainutils \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    vim
 
 # Install yq
 RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
@@ -247,8 +253,8 @@ RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/downl
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 
 # copy application dependencies into image
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
-COPY --from=linttest-deps /usr/local/bin/* /usr/local/bin/
+COPY --from=tools-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
+COPY --from=tools-deps /usr/local/bin/* /usr/local/bin/
 
 RUN mkdir /source
 WORKDIR /source
