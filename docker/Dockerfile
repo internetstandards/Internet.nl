@@ -17,7 +17,7 @@ FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 # generic stage used by all build stages
 # explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
 # platform can probably be removed after #1218
-FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-deps
+FROM debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -27,7 +27,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       build-essential \
       # unbound dependencies
       python${PYTHON_VERSION}-dev \
-      python3-pip \
       libssl-dev \
       libevent-dev \
       libhiredis-dev \
@@ -41,7 +40,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       flex \
       bison
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:python3.13-trixie /usr/local/bin/uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1
 ENV UV_BREAK_SYSTEM_PACKAGES=1
 
@@ -66,26 +65,30 @@ RUN make install
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
-COPY requirements.txt /src/
+COPY pyproject.toml /src/
+COPY uv.lock /src/
 
 WORKDIR /src
 
-ENV UV_LINK_MODE=copy
+# install into system Python because otherwise Unbound build becomes to hard
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV UV_PROJECT_ENVIRONMENT=/usr/
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements.txt
+  uv sync --link-mode=copy --no-dev
 
 # stage with app dependencies and lint/test depencencies
 FROM build-app-deps AS linttest-deps
-ARG PYTHON_VERSION
 
-COPY requirements-dev.txt /src/
+# install into system Python because otherwise Unbound build becomes to hard
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV UV_PROJECT_ENVIRONMENT=/usr/
 
-ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements-dev.txt
+  uv sync --link-mode=copy
 
 # build unbound target
-FROM --platform=linux/amd64 debian:trixie-20260202-slim AS unbound
+FROM debian:trixie-20260202-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
@@ -100,7 +103,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     openssl \
     expat \
     # for envsubst
-    gettext \
+    gettext
 
 ENV PATH="/opt/unbound/sbin:$PATH"
 
@@ -132,13 +135,13 @@ USER unbound
 ENTRYPOINT ["/entrypoint.sh"]
 
 # build main application image target
-FROM --platform=linux/amd64 debian:trixie-20260202-slim AS build-app
+FROM debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
 
-    python3 \
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && apt install -yqq --no-install-recommends \
+    python3 \
     libpython${PYTHON_VERSION} \
     gettext \
     ldnsutils \
@@ -157,15 +160,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 # copy unbound library and unbound Python module into image
 COPY --from=build-unbound /opt/unbound /opt/unbound
-COPY --from=build-unbound /usr/lib/python3/dist-packages/*unbound* /usr/lib/python3/dist-packages/
+COPY --from=build-unbound /usr/local/lib/python${PYTHON_VERSION}/dist-packages/*unbound* /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 
 # copy application dependencies into image
 COPY --from=build-app-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 COPY --from=build-app-deps /usr/local/bin/* /usr/local/bin/
 
 # basic verification of installed components
-# The python3 package currently installs version 3.9 but that might change with
-# OS updates, verify we run the desired Python version.
 RUN python3 --version | grep "$PYTHON_VERSION."
 RUN /opt/unbound/sbin/unbound -V
 RUN python3 -c 'import nassl; print(nassl.__version__)'
@@ -178,6 +179,7 @@ RUN chown nobody:nogroup /app
 USER nobody:nogroup
 
 # copy all required sources from the application
+COPY --chown=nobody:nogroup pyproject.toml ./pyproject.toml
 COPY --chown=nobody:nogroup bin ./bin
 COPY --chown=nobody:nogroup manage.py ./
 COPY --chown=nobody:nogroup checks ./checks
@@ -190,7 +192,7 @@ COPY --chown=nobody:nogroup assets ./assets
 
 ENV LDNS_DANE=/usr/bin/ldns-dane
 
-ENV STATIC_ROOT /app/static
+ENV STATIC_ROOT=/app/static
 
 VOLUME /app/batch_results
 RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
@@ -218,7 +220,7 @@ ARG RELEASE
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
 
 # define default entrypoint and command
-ENTRYPOINT [ "python3", "./manage.py"]
+ENTRYPOINT [ "python3","./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
 # supplement application with unittest, lint dependencies
@@ -235,7 +237,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt update && apt install -yqq --no-install-recommends \
     git \
     make \
-    python3-pip \
+    build-essential \
+    ca-certificates \
     gpg \
     gpg-agent \
     shellcheck \

@@ -297,8 +297,8 @@ lint: ## run linter
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
 check: ## run checks (eg: shellcheck)
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh
 check: ## run checks (eg: package locks, migrations, document generation, etc)
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh ${pysrcdirs}
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh
 
 fix: ## fix trivial linting error automatically
@@ -314,14 +314,6 @@ build-tools tools-build: ## build tools image
 
 shell tools-shell: ## open shell in tools container
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bash
-
-requirements: requirements.txt requirements-dev.txt
-
-requirements.txt: requirements.in
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile --resolver=backtracking requirements.in
-
-requirements-dev.txt: requirements-dev.in
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools pip-compile --resolver=backtracking requirements-dev.in
 
 integration-tests-against-develop: _env:=${_env} INTERNETNL_USE_DOCKER_COMPOSE_PROJECT="internetnl"
 integration-tests-against-develop: integration-tests ## run integration-tests against development environment instance
@@ -397,3 +389,6 @@ develop_frontend: ## same as develop, but focus on frontend only
 	${MAKE} build run env=develop services='app webserver port-expose'
 	# shut everything down
 	${MAKE} down env=develop
+
+uv_lock: ## update the uv.lock file after changing pyproject.toml
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools uv lock
