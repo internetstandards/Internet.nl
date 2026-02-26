@@ -839,6 +839,13 @@ services:
     profiles:
       - monitoring
 
+    healthcheck:
+      # container image includes the test command, setting interval and start_interval here
+      interval: $HEALTHCHECK_INTERVAL
+      start_interval: $HEALTHCHECK_START_INTERVAL
+      start_period: 1m
+      retries: 10
+
   celery-exporter:
     platform: linux/amd64
     image: ${DOCKER_IMAGE_CELERY_EXPORTER}
