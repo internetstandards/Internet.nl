@@ -89,6 +89,12 @@ class OcspStatus(Enum):
     not_in_cert = 3
 
 
+class TLSClientInitiatedRenegotiationStatus(Enum):
+    not_allowed = 1
+    allowed_with_low_limit = 2
+    allowed_with_too_high_limit = 3
+
+
 class ZeroRttStatus(Enum):
     bad = 0
     good = 1
@@ -99,6 +105,7 @@ class KexHashFuncStatus(Enum):
     bad = 0
     good = 1
     unknown = 2
+    phase_out = 3
 
 
 class CipherOrderStatus(Enum):
@@ -107,6 +114,13 @@ class CipherOrderStatus(Enum):
     not_prescribed = 2
     not_seclevel = 3
     na = 4  # Don't care about order; only GOOD ciphers.
+
+
+class TLSExtendedMasterSecretStatus(Enum):
+    supported = 0
+    not_supported = 1
+    na_no_tls_1_2 = 2
+    unknown = 3
 
 
 def conn_test_id():
@@ -517,7 +531,7 @@ class DomainTestTls(BaseTestModel):
     compression_score = models.IntegerField(null=True)
     secure_reneg = models.BooleanField(null=True, default=False)
     secure_reneg_score = models.IntegerField(null=True)
-    client_reneg = models.BooleanField(null=True, default=False)
+    client_reneg = EnumField(TLSClientInitiatedRenegotiationStatus, null=True)
     client_reneg_score = models.IntegerField(null=True)
 
     zero_rtt = EnumField(ZeroRttStatus, default=ZeroRttStatus.bad)
@@ -528,6 +542,10 @@ class DomainTestTls(BaseTestModel):
 
     kex_hash_func = EnumField(KexHashFuncStatus, default=KexHashFuncStatus.bad)
     kex_hash_func_score = models.IntegerField(null=True)
+    kex_hash_func_bad_hash = models.CharField(max_length=255, null=True, default=None)
+
+    extended_master_secret = EnumField(TLSExtendedMasterSecretStatus, default=TLSExtendedMasterSecretStatus.unknown)
+    extended_master_secret_score = models.IntegerField(null=True)
 
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
@@ -607,6 +625,8 @@ class DomainTestTls(BaseTestModel):
             "ocsp_stapling_score",
             "kex_hash_func",
             "kex_hash_func_score",
+            "extended_master_secret",
+            "extended_master_secret_score",
             "forced_https",
             "forced_https_score",
             "http_compression_enabled",
@@ -648,10 +668,11 @@ class DomainTestTls(BaseTestModel):
             "protocols_phase_out": self.protocols_phase_out,
             "compression": self.compression,
             "secure_reneg": self.secure_reneg,
-            "client_reneg": self.client_reneg,
+            "client_reneg": self.client_reneg.name if self.client_reneg else None,
             "zero_rtt": self.zero_rtt.name,
             "ocsp_stapling": self.ocsp_stapling.name,
             "kex_hash_func": self.kex_hash_func.name,
+            "extended_master_secret": self.extended_master_secret.name,
             "https_redirect": self.forced_https.name,
             "http_compression": self.http_compression_enabled,
             "hsts": self.hsts_enabled,
@@ -684,9 +705,10 @@ class DomainTestTls(BaseTestModel):
             "protocols_phase_out": self.protocols_phase_out,
             "compression": self.compression,
             "secure_reneg": self.secure_reneg,
-            "client_reneg": self.client_reneg,
+            "client_reneg": self.client_reneg.name if self.client_reneg else None,
             "zero_rtt": self.zero_rtt.name,
             "kex_hash_func": self.kex_hash_func.name,
+            "extended_master_secret": self.extended_master_secret.name,
             "cert_chain": self.cert_chain,
             "cert_trusted": self.cert_trusted,
             "cert_pubkey_bad": self.cert_pubkey_bad,

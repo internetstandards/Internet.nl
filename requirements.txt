@@ -25,7 +25,9 @@ beautifulsoup4==4.13.3
 billiard==4.2.1
     # via celery
 bleach[css]==5.0.1
-    # via django-bleach
+    # via
+    #   bleach
+    #   django-bleach
 cached-property==2.0.1
     # via -r requirements.in
 celery==5.4.0
@@ -64,7 +66,7 @@ cryptography==44.0.2
     #   pgpy-dtc
     #   pyopenssl
     #   sslyze
-django==4.2.28
+django==4.2.24
     # via
     #   -r requirements.in
     #   django-bleach
@@ -85,8 +87,10 @@ django-redis==4.12.1
 django-statsd-mozilla==0.4.0
     # via -r requirements.in
 dnspython==2.7.0
-    # via eventlet
-eventlet==0.40.3
+    # via
+    #   -r requirements.in
+    #   eventlet
+eventlet==0.39.1
     # via -r requirements.in
 exceptiongroup==1.3.0
     # via pytest
@@ -147,7 +151,7 @@ prompt-toolkit==3.0.50
     # via click-repl
 psycopg2-binary==2.9.10
     # via -r requirements.in
-pyasn1==0.6.2
+pyasn1==0.6.1
     # via pgpy-dtc
 pycparser==2.22
     # via cffi
@@ -211,7 +215,7 @@ smmap==5.0.2
     # via gitdb
 soupsieve==2.6
     # via beautifulsoup4
-sqlparse==0.5.4
+sqlparse==0.5.3
     # via django
 sslyze==6.1.0
     # via -r requirements.in

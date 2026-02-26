@@ -628,12 +628,12 @@ components:
           enumClass: CipherOrderStatus
           description: |
             Cipher order preference of the server:
-            * `bad` - The server does not enforce his own preference.
-            * `good` - The server enforces his own preference.
+            * `bad` - The server does not enforce good+sufficient over phase out ciphers.
+            * `good` - The server enforces his own preference in a correct order.
             * `not_prescribed` - The server enforces his own preference but
-              the cipher order is not based on prescribed ordering.
+              the cipher order is not based on prescribed ordering (deprecated).
             * `not_seclevel` - The server enforces his own preference but
-              the configured order is not based on security level.
+              the configured order is not based on security level (deprecated).
             * `na` - The server only supports GOOD ciphers; cipher order is
               not relevant.
         cipher_order_violation:
@@ -652,6 +652,15 @@ components:
           maxItems: 3
           items:
             type: string
+        extended_master_secret_status:
+          type: string
+          enumClass: TLSExtendedMasterSecretStatus
+          description: |
+            Server support for Extended Master Secret (RFC7627):
+            * `supported` - EMS is supported.
+            * `not_supported` - EMS is not supported.
+            * `na_no_tls_1_2` - EMS is not applicable, because the server does not support TLS 1.2.
+            * `unknown` - support could not be determined or test ran before this feature was added.
         protocols_bad:
           type: array
           description: List of BAD protocols.
@@ -672,18 +681,22 @@ components:
             If secure renegotiation is supported by the server. (TLS1.3
             offers only secure renegotiation)
         client_reneg:
-          type: boolean
-          description: >
-            If client initiated renegotiation is supported by the server.
-            (TLS1.3 does not support client renegotiation).
+          type: string
+          enumClass: TLSClientInitiatedRenegotiationStatus
+          description: |
+            Client-initiated renegotiation:
+            * `not_allowed` - not allowed by server.
+            * `allowed_with_low_limit` - allowed by server, but with a sufficiently low limit (<10).
+            * `allowed_with_too_high_limit` - allowed by server, with a limit that is too high (>=10).
         kex_hash_func:
           type: string
           enumClass: KexHashFuncStatus
           description: |
-            SHA2 support for signatures of the server:
-            * `bad` - SHA2 is not supported.
-            * `good` - SHA2 is supported.
-            * `unknown` - SHA2 support could not be determined (the server
+            Supported hashes for signatures:
+            * `good` - server supports only good hashes (SHA256 or newer).
+            * `bad` - server supports MD5 or SHA1.
+            * `phase_out` - server supports SHA224.
+            * `unknown` - hash support could not be determined (the server
               uses RSA key exchange or anonymous ciphers).
         zero_rtt:
           type: string

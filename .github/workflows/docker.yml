@@ -18,7 +18,7 @@ env:
   # determine whether this pull request has permissions to push to registry, or artifacts
   # should be used to transfer images between jobs. Forked and dependabot builds don't
   # have permission to push to registry.
-  use_registry: ${{ ! (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || startsWith(github.head_ref, 'dependabot/'))) }}
+  use_registry: true
   COMPOSE_VERSION: 2.40.3
 
 jobs:
