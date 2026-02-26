@@ -23,9 +23,3 @@ networks:
     driver_opts:
       # required to enable IPv6 on Colima Docker runtime
       com.docker.network.enable_ipv6: "true"
-    ipam:
-      driver: default
-      config:
-        # configure a private IPv6 subnet
-        # https://docs.docker.com/config/daemon/ipv6/#create-an-ipv6-network
-        - subnet: fd00:44::/80
