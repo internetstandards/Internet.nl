@@ -76,7 +76,7 @@ def create_report(domain, ipv6, dnssec, tls=None, appsecpriv=None, rpki=None):
     return report
 
 
-def get_direct_domains(address):
+def get_direct_domains(address, redirect_domain=None):
     webtest_direct = []
     # Add either the 'www.' version or the non 'www.' version, whichever we are
     # not, to the direct links.
@@ -86,6 +86,15 @@ def get_direct_domains(address):
         domain = get_valid_domain_web("www." + address, timeout=2)
     if domain:
         webtest_direct.append(pretty_domain_name(domain))
+
+    # Add redirection domain to direct web test if stored and testable
+    if (
+        redirect_domain
+        and get_valid_domain_web(redirect_domain)
+        and redirect_domain != address
+        and pretty_domain_name(redirect_domain) not in webtest_direct
+    ):
+        webtest_direct.append(pretty_domain_name(get_valid_domain_web(redirect_domain)))
 
     mailtest_direct = []
     # Add the current domain and the non 'www.' version, if applicable, to the
@@ -98,6 +107,15 @@ def get_direct_domains(address):
     if domain:
         mailtest_direct.append(pretty_domain_name(domain))
 
+    # Add redirection domain to direct mail test if stored and testable
+    if (
+        redirect_domain
+        and get_valid_domain_mail(redirect_domain)
+        and redirect_domain != address
+        and pretty_domain_name(redirect_domain) not in mailtest_direct
+    ):
+        mailtest_direct.append(pretty_domain_name(get_valid_domain_mail(redirect_domain)))
+
     return webtest_direct, mailtest_direct
 
 
@@ -107,7 +125,7 @@ def resultsrender(addr, report, request):
     score = webprobes.count_probe_reports_score(probe_reports)
     add_score_to_report(report, score)
     retest_time = get_retest_time(report)
-    webtest_direct, mailtest_direct = get_direct_domains(addr)
+    webtest_direct, mailtest_direct = get_direct_domains(addr, report.tls.webtestset.first().redirect_domain)
     prettyaddr = pretty_domain_name(addr)
     return render(
         request,
