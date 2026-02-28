@@ -80,7 +80,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "topk(1, internetnl_version_info)",
+          "expr": "internetnl_version_info",
           "format": "table",
           "instant": false,
           "key": "Q-8aff2f4f-f2ed-4c19-a41a-e69b7c8d3e4e-0",
@@ -698,6 +698,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisSoftMin": 0,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -746,74 +747,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "batch_callback",
-                  "batch_callback_appsecpriv_batch_web_callback",
-                  "batch_callback_dnssec_batch_mail_callback",
-                  "batch_callback_dnssec_batch_web_callback",
-                  "batch_callback_ipv6_batch_mail_callback",
-                  "batch_callback_ipv6_batch_web_callback",
-                  "batch_callback_mail_batch_mail_callback",
-                  "batch_callback_rpki_batch_mail_callback",
-                  "batch_callback_rpki_batch_web_callback",
-                  "batch_callback_tls_batch_mail_callback",
-                  "batch_callback_tls_batch_web_callback",
-                  "batch_main",
-                  "batch_main_appsecpriv_batch_web_appsecpriv",
-                  "batch_main_batch_dkim",
-                  "batch_main_batch_dmarc",
-                  "batch_main_batch_mail_get_servers",
-                  "batch_main_batch_mail_is_secure",
-                  "batch_main_batch_mail_smtp_starttls",
-                  "batch_main_batch_mx",
-                  "batch_main_batch_ns",
-                  "batch_main_batch_resolve_a_aaaa",
-                  "batch_main_batch_spf",
-                  "batch_main_batch_web",
-                  "batch_main_batch_web_appsecpriv",
-                  "batch_main_batch_web_cert",
-                  "batch_main_batch_web_conn",
-                  "batch_main_batch_web_http",
-                  "batch_main_batch_web_is_secure",
-                  "batch_main_dnssec_batch_mail_is_secure",
-                  "batch_main_dnssec_batch_web_is_secure",
-                  "batch_main_ipv6_batch_mx",
-                  "batch_main_ipv6_batch_ns",
-                  "batch_main_ipv6_batch_web",
-                  "batch_main_mail_batch_dkim",
-                  "batch_main_mail_batch_dmarc",
-                  "batch_main_mail_batch_spf",
-                  "batch_main_shared_batch_mail_get_servers",
-                  "batch_main_shared_batch_resolve_a_aaaa",
-                  "batch_main_tls_batch_mail_smtp_starttls",
-                  "batch_main_tls_batch_web_http",
-                  "batch_nassl",
-                  "batch_nassl-batch_web_cert",
-                  "batch_nassl_tls_batch_web_cert",
-                  "batch_nassl_tls_batch_web_conn",
-                  "batch_scheduler",
-                  "batch_scheduler_scheduler_run",
-                  "batch_slow",
-                  "batch_slow_util_batch_async_generate_results",
-                  "batch_slow_util_batch_async_register",
-                  "celery",
-                  "db_worker",
-                  "default",
-                  "dnssec_worker",
-                  "ipv6_worker",
-                  "mail_worker",
-                  "nassl_worker",
-                  "nassl_worker-mail_smtp_starttls",
-                  "nassl_worker-web_cert",
-                  "nassl_worker-web_conn",
-                  "resolv_worker",
-                  "rpki_worker",
-                  "rpki_worker_rpki_batch_mail_mx_ns_rpki",
-                  "rpki_worker_rpki_batch_mail_ns_rpki",
-                  "rpki_worker_rpki_batch_mail_rpki",
-                  "rpki_worker_rpki_batch_ns_rpki",
-                  "rpki_worker_rpki_batch_web_rpki",
-                  "slow_db_worker",
-                  "web_worker"
+                  "batch_slow"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -1957,8 +1891,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 12,
-        "x": 12,
+        "w": 24,
+        "x": 0,
         "y": 42
       },
       "id": 5,
@@ -2050,8 +1984,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2172,7 +2105,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "1m",
+  "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
@@ -2180,13 +2113,13 @@
     "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Batch",
   "uid": "bdd9dac3-b85a-4420-8158-bd92e06da08d",
-  "version": 6,
+  "version": 1,
   "weekStart": ""
 }
