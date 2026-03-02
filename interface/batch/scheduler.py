@@ -530,7 +530,9 @@ def find_stalled_tests_and_update_db():
 
 
 def update_batch_request_status():
-    batch_requests = BatchRequest.objects.filter(status__in=(BatchRequestStatus.live, BatchRequestStatus.running))
+    batch_requests = BatchRequest.objects.filter(
+        status__in=(BatchRequestStatus.live, BatchRequestStatus.running)
+    ).prefetch_related("domains")
     for batch_request in batch_requests:
         update_batch_status(batch_request)
 
