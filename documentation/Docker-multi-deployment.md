@@ -37,6 +37,8 @@ Add the following lines to `docker/host.env` and change the IP's to the public I
     WEBSERVER_PORT_TLS=192.0.2.2:443:443
     WEBSERVER_PORT_IPV6=[2001:db8:1::2]:80:80/tcp
     WEBSERVER_PORT_IPV6_TLS=[2001:db8:1::2]:443:443/tcp
+    SMTPSERVER_PORT=192.0.2.2:25:25
+    SMTPSERVER_PORT_IPV6=[2001:db8:1::2]:25:25
 
 ## Adding a new instance
 
@@ -52,7 +54,7 @@ Modify the `docker/host.env` file with the following steps:
 - Update `ALLOWED_HOSTS` and `CSP_DEFAULT_SRC` values to the new domain name (eg: `dev2.example.com`)
 - Change `IPV4_IP_PUBLIC`, `IPV6_IP_PUBLIC`, `IPV6_TEST_ADDR` to the public IPv4/IPv6 addresses specific for this instance
 - Update `UNBOUND_PORT_TCP`, `UNBOUND_PORT_UDP`, `UNBOUND_PORT_IPV6_TCP` and `UNBOUND_PORT_IPV6_UDP` to the public IPv4/IPv6 addresses for this instance
-- Add `WEBSERVER_PORT`, `WEBSERVER_PORT_TLS`, `WEBSERVER_PORT_IPV6`, `WEBSERVER_PORT_IPV6_TLS` with the public IPv4/IPv6 addresses for this instance and the respective ports
+- Add `WEBSERVER_PORT`, `WEBSERVER_PORT_TLS`, `WEBSERVER_PORT_IPV6`, `WEBSERVER_PORT_IPV6_TLS`, `SMTPSERVER_PORT`, `SMTPSERVER_PORT_IPV6` with the public IPv4/IPv6 addresses for this instance and the respective ports
 - Add `IPV4_SUBNET_PUBLIC`, `IPV4_SUBNET_INTERNAL`, `IPV6_SUBNET_PUBLIC` and `IPV6_GATEWAY_PUBLIC` with unique subnet/address from private address space, this should not conflict with the existing instances. Suggested is to iterate over subnets for the existing instance (`172.16.42.0/24`, `192.168.42.0/24`, `fd00:42:1::/48`, `fd00:42:1::1`) so the first ones would become: `172.16.43.0/24`, `192.168.43.0/24`, `fd00:43:1::/48` and `fd00:43:1::1`.
 - Add a `ROUTINATOR_URL` with a URL to the first instance routinator proxy endpoint, so the extra instances don't have to run a resource heavy extra routinator, eg: `https://example.com/routinator/api/v1/validity`. This also requires removing the `routinator` entry from `COMPOSE_PROFILES` on the extra instance.
 - Add `INTERNETNL_INSTALL_BASE` with the path to the new instance directory, eg: `/opt/Internet.nl-dev2`
