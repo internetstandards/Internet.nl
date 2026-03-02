@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.10.8
+
+- Fixed an issue where [to many batch requests would stall batch test throughput](https://github.com/internetstandards/Internet.nl/pull/1951).
+
 ## 1.10.7
 
 - Update [PostgreSQL to 15.14](https://github.com/internetstandards/Internet.nl/pull/1898)
@@ -15,7 +19,7 @@
 - Fixed an issue in 1.10.x where [DNSSEC test could return false negatives](https://github.com/internetstandards/Internet.nl/issues/1869)
   due to an interaction between cached responses and the CD and AD flags.
 - Added news post.
-- 
+-
 ## 1.10.4
 
 - Updated our security.txt.
@@ -44,7 +48,7 @@ The API version is updated to 2.6.0 due to the new CAA fields.
 - Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
 - Fixed possible exception in [mail test prechecks](https://github.com/internetstandards/Internet.nl/pull/1787).
 - Fixed an [issue with rate limiting](https://github.com/internetstandards/Internet.nl/pull/1792).
-- Update [Django to 4.2.22](https://github.com/internetstandards/Internet.nl/pull/1795) to fix 
+- Update [Django to 4.2.22](https://github.com/internetstandards/Internet.nl/pull/1795) to fix
   [CVE-2025-48432](https://www.djangoproject.com/weblog/2025/jun/04/security-releases/).
 
 ## 1.10.0
@@ -65,7 +69,7 @@ _Compared to the latest 1.9 release._
 
 ### Significant internal changes
 
-- The test code no longer interfaces with libunbound, but 
+- The test code no longer interfaces with libunbound, but
  [uses dnspython as a stub resolver](https://github.com/internetstandards/Internet.nl/pull/1578).
 - Periodic tests [are no longer enabled by default](https://github.com/internetstandards/Internet.nl/pull/1628).
 - UWSGI [cheaper](https://uwsgi-docs.readthedocs.io/en/latest/Cheaper.html) options are used to reduce idle processes and reduce memory consumption.
@@ -96,7 +100,7 @@ docker network rm internetnl-prod_public-internet
 ## 1.9.3
 
 - Updated the [expired PGP key](https://github.com/internetstandards/Internet.nl_content/pull/57).
-  
+
 ## 1.9.2
 
 - Fixed an issue where static files incorrectly required authentication (#1676)
@@ -151,7 +155,7 @@ jobs to generate the same report over and over.
 
 1.8.7 mainly contains various important fixes to support batch deployment.
 
-* Updated sectxt to use a patched version of PGPy with a fix for a 
+* Updated sectxt to use a patched version of PGPy with a fix for a
   [catastrophic regex backtracking issue](https://github.com/SecurityInnovation/PGPy/pull/467)
 * Updated nassl to fix memory leak in OCSP check.
 * Connection test zones are now re-signed every week instead of every month.
@@ -238,7 +242,7 @@ This release has API version 2.4.0:
 
 ## 1.7.1
 
-- Fixed the new [display of TLS versions](https://github.com/internetstandards/Internet.nl/issues/944) for mail tests. 
+- Fixed the new [display of TLS versions](https://github.com/internetstandards/Internet.nl/issues/944) for mail tests.
 - Fixed a [language mix-up](https://github.com/internetstandards/Internet.nl/issues/941) in the security.txt labels.
 - Fixed an [issue with the connection test and CSP form-action](https://github.com/internetstandards/Internet.nl/issues/945)
 
@@ -348,7 +352,7 @@ Bugfixes
 - Fix some minor typos and broken link [(#574)] [(#575)]
 - Add a missing ' in the frame-ancestors explanation [(#578)]
 - An empty part of Content Security Policy gives an error [(#583)]
-- Recursion error when stripping nonces in IPv4 and IPv6 comparison [(#587)] 
+- Recursion error when stripping nonces in IPv4 and IPv6 comparison [(#587)]
 - Remove certificate from the certificate chain in the shipped cert chain file [(#614)]
 
 Dependencies
@@ -655,19 +659,19 @@ Initial public release.
 --- Brief description for next version ---
 
 New
-- 
+-
 
 Changes
-- 
+-
 
 Bug Fixes
 -
 
 Dependencies
-- 
+-
 
 Migrations
-- 
+-
 
 Settings
-- 
+-
