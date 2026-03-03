@@ -20,6 +20,10 @@ _Compared to the latest 1.10 release._
 
 - ...
 
+## 1.10.8
+
+- Fixed an issue where [to many batch requests would stall batch test throughput](https://github.com/internetstandards/Internet.nl/pull/1951).
+
 ## 1.10.7
 
 - Update [PostgreSQL to 15.14](https://github.com/internetstandards/Internet.nl/pull/1898)
