@@ -60,10 +60,10 @@ if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     BATCH_MAILTEST["subtests"]["dnssec"] = dnssec_mail_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    from checks.tasks.tls import batch_web_registered as tls_web_taskset
+    from checks.tasks.tls.tasks_reports import batch_web_registered as tls_web_taskset
 
     BATCH_WEBTEST["subtests"]["tls"] = tls_web_taskset
-    from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
+    from checks.tasks.tls.tasks_reports import batch_mail_registered as tls_mail_taskset
 
     BATCH_MAILTEST["subtests"]["tls"] = tls_mail_taskset
 
