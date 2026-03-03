@@ -410,8 +410,9 @@ def update_batch_status(batch_request: BatchRequest):
     ):
         return
 
-    waiting = batch_request.domains.filter(status=BatchDomainStatus.waiting).exists()
-    running = batch_request.domains.filter(status=BatchDomainStatus.running).exists()
+    # not using queryset filter here because data is prefetched for performance
+    waiting = any(r for r in batch_request.domains.all() if r.status == BatchDomainStatus.waiting)
+    running = any(r for r in batch_request.domains.all() if r.status == BatchDomainStatus.running)
     if not waiting:
         if running:
             batch_request.status = BatchRequestStatus.running
