@@ -34,6 +34,7 @@ services:
       - MONITORING_AUTH_RAW
       - AUTH_ALL_URLS
       - ALLOW_LIST
+      - ROUTINATOR_ALLOW_LIST
       # required for authentication.sh to restrict access when debug is on
       - DEBUG
       - ENABLE_BATCH

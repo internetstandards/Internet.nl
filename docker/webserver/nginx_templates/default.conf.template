@@ -332,6 +332,8 @@ server {
         allow 172.16.0.0/12;
         allow 192.168.0.0/16;
         allow fd00::/8;
+        # also allow configured IP(v6) adresses
+        include /etc/nginx/conf.d/routinator_allow_list.include;
         deny all;
 
         # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to routinator profile being disabled
