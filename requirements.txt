@@ -85,7 +85,9 @@ django-redis==4.12.1
 django-statsd-mozilla==0.4.0
     # via -r requirements.in
 dnspython==2.7.0
-    # via eventlet
+    # via
+    #   -r requirements.in
+    #   eventlet
 eventlet==0.40.3
     # via -r requirements.in
 exceptiongroup==1.3.0
@@ -124,7 +126,7 @@ libsass==0.23.0
     # via -r requirements.in
 marisa-trie==1.2.1
     # via language-data
-markdown==3.7
+markdown==3.8.1
     # via -r requirements.in
 markdown2==2.5.3
     # via django-markdown-deux
