@@ -126,7 +126,7 @@ libsass==0.23.0
     # via -r requirements.in
 marisa-trie==1.2.1
     # via language-data
-markdown==3.7
+markdown==3.8.1
     # via -r requirements.in
 markdown2==2.5.3
     # via django-markdown-deux
