@@ -408,3 +408,31 @@ There are various cron jobs configured during normal deployments that perform ta
 ## Routinator
 
 For the development environment the Routinator service/container is not started but instead an external routinator service is used. This reduces resource usage and wait time.
+
+## Testdata/fixtures
+
+For frontend development purposes a set of testresults can be loaded into the database to so these don't have to be generated manually.
+
+To load this testdata run:
+
+    docker exec -ti internetnl-develop-app-1 ./manage.py loaddata example_reports
+
+The following urls can be used to view the testresults:
+
+http://localhost:8080/site/internet.nl/9000/
+http://localhost:8080/site/example.nl/9001/
+http://localhost:8080/site/ipv6.internet.nl/9002/
+http://localhost:8080/site/forfun.net/9003/
+http://localhost:8080/site/ipv6.google.com/9004/
+http://localhost:8080/site/brokendnssec.net/9005/
+http://localhost:8080/site/ok.bogussig.ok.bad-dnssec.wb.sidnlabs.nl/9006/
+http://localhost:8080/site/badhash.dane.huque.com/9007/
+http://localhost:8080/site/expired.badssl.com/9008/
+http://localhost:8080/site/wrong.host.badssl.com/9009/
+http://localhost:8080/site/self-signed.badssl.com/9010/
+http://localhost:8080/site/untrusted-root.badssl.com/9011/
+http://localhost:8080/site/revoked.badssl.com/9012/
+http://localhost:8080/site/pinning-test.badssl.com/9013/
+http://localhost:8080/site/invalid.rpki.isbgpsafeyet.com/9014/
+
+There are several scenarios with different failures in the testresults.
