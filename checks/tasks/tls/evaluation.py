@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional, Any, Set, cast
+from typing import Any, cast
 
 from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
 from cryptography.x509 import AuthorityInformationAccess, ExtensionNotFound
@@ -44,18 +44,18 @@ class TLSProtocolEvaluation:
     Evaluate the accepted TLS protocols, i.e. SSL 3.0/TLS 1.1/etc.
     """
 
-    good: List[TlsVersionEnum]
-    sufficient: List[TlsVersionEnum]
-    phase_out: List[TlsVersionEnum]
-    bad: List[TlsVersionEnum]
+    good: list[TlsVersionEnum]
+    sufficient: list[TlsVersionEnum]
+    phase_out: list[TlsVersionEnum]
+    bad: list[TlsVersionEnum]
 
-    good_str: List[str]
-    sufficient_str: List[str]
-    phase_out_str: List[str]
-    bad_str: List[str]
+    good_str: list[str]
+    sufficient_str: list[str]
+    phase_out_str: list[str]
+    bad_str: list[str]
 
     @classmethod
-    def from_protocols_accepted(cls, protocols_accepted: List[TlsVersionEnum]):
+    def from_protocols_accepted(cls, protocols_accepted: list[TlsVersionEnum]):
         good = []
         sufficient = []
         phase_out = []
@@ -83,7 +83,7 @@ class TLSProtocolEvaluation:
         )
 
     @staticmethod
-    def _format_str(protocols: List[TlsVersionEnum]) -> List[str]:
+    def _format_str(protocols: list[TlsVersionEnum]) -> list[str]:
         return [p.name.replace("_", " ", 1).replace("_", ".") for p in protocols]
 
     @property
@@ -97,15 +97,15 @@ class TLSForwardSecrecyParameterEvaluation:
     Evaluate the FS (DH/DHE/EC) params from the accepted cipher suites.
     """
 
-    max_dh_size: Optional[int]
-    max_ec_size: Optional[int]
+    max_dh_size: int | None
+    max_ec_size: int | None
 
-    good_str: Set[str]
-    phase_out_str: Set[str]
-    bad_str: Set[str]
+    good_str: set[str]
+    phase_out_str: set[str]
+    bad_str: set[str]
 
     @classmethod
-    def from_ciphers_accepted(cls, ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+    def from_ciphers_accepted(cls, ciphers_accepted: list[CipherSuiteAcceptedByServer]):
         good = set()
         phase_out = set()
         bad = set()
@@ -161,19 +161,19 @@ class TLSCipherEvaluation:
     Evaluate the accepted TLS ciphers (across all TLS versions).
     """
 
-    ciphers_good: List[CipherSuite]
-    ciphers_good_no_tls13: List[CipherSuite]
-    ciphers_sufficient: List[CipherSuite]
-    ciphers_phase_out: List[CipherSuite]
-    ciphers_bad: List[CipherSuite]
+    ciphers_good: list[CipherSuite]
+    ciphers_good_no_tls13: list[CipherSuite]
+    ciphers_sufficient: list[CipherSuite]
+    ciphers_phase_out: list[CipherSuite]
+    ciphers_bad: list[CipherSuite]
 
-    ciphers_good_str: List[str]
-    ciphers_sufficient_str: List[str]
-    ciphers_phase_out_str: List[str]
-    ciphers_bad_str: List[str]
+    ciphers_good_str: list[str]
+    ciphers_sufficient_str: list[str]
+    ciphers_phase_out_str: list[str]
+    ciphers_bad_str: list[str]
 
     @classmethod
-    def from_ciphers_accepted(cls, ciphers_accepted: List[CipherSuiteAcceptedByServer]):
+    def from_ciphers_accepted(cls, ciphers_accepted: list[CipherSuiteAcceptedByServer]):
         ciphers_good = []
         ciphers_sufficient = []
         ciphers_phase_out = []
@@ -200,7 +200,7 @@ class TLSCipherEvaluation:
         )
 
     @staticmethod
-    def _format_str(suites: List[CipherSuite]) -> List[str]:
+    def _format_str(suites: list[CipherSuite]) -> list[str]:
         return [f"{suite.name}" for suite in suites]
 
     @property
@@ -320,7 +320,7 @@ class KeyExchangeHashFunctionEvaluation:
 
     status: KexHashFuncStatus
     score: scoring.Score
-    found_hash: Optional[str] = None
+    found_hash: str | None = None
 
 
 @dataclass(frozen=True)
@@ -332,7 +332,7 @@ class TLSCipherOrderEvaluation:
     second the cipher we expected to be preferred above that.
     """
 
-    violation: List[str]
+    violation: list[str]
     status: CipherOrderStatus
     score: scoring.Score
 
@@ -359,7 +359,7 @@ class TLSExtendedMasterSecretEvaluation:
             self.score = TLS_EXTENDED_MASTER_SECRET_BAD
 
 
-def _unique_unhashable(items: List[Any]) -> List[Any]:
+def _unique_unhashable(items: list[Any]) -> list[Any]:
     """
     Keep only unique items from a list of unhashable types.
     Lives here as we use it only for CipherSuite, which is

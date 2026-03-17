@@ -1,5 +1,5 @@
 import enum
-from typing import Optional, Iterable
+from collections.abc import Iterable
 
 import dns
 from django.conf import settings
@@ -70,7 +70,7 @@ def dns_resolve_txt(qname: str) -> list[str]:
     return ["".join([dns.rdata._escapify(s) for s in rr.strings]) for rr in rrset]
 
 
-def dns_resolve_spf(qname: str) -> Optional[str]:
+def dns_resolve_spf(qname: str) -> str | None:
     strings = dns_resolve_txt(qname)
     spf_records = [s for s in strings if s.lower().startswith("v=spf1")]
     return spf_records[0] if len(spf_records) == 1 else None
@@ -141,7 +141,7 @@ def dns_resolve(qname: str, rr_type: RdataType, raise_on_no_answer=True, guarant
     return answer.rrset, dnssec_status
 
 
-def dns_climb_tree(qname: str) -> Optional[str]:
+def dns_climb_tree(qname: str) -> str | None:
     parent = dns.name.from_text(qname).parent()
     if parent == dns.name.root:
         return None

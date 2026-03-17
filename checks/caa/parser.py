@@ -1,5 +1,4 @@
 import textwrap
-from typing import Optional
 from urllib.parse import urlparse
 
 from abnf.grammars.misc import load_grammar_rulelist
@@ -22,7 +21,7 @@ class CAAParseError(ValueError):
         return TranslatableTechTableItem(self.msg_id, self.context)
 
 
-def node_get_named_child_value(node: Node, name: str) -> Optional[str]:
+def node_get_named_child_value(node: Node, name: str) -> str | None:
     """Search an ABNF tree from a node, for a node with a certain name, return the value of first match."""
     queue = [node]
     while queue:
