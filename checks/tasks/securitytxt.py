@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 from cgi import parse_header
 from dataclasses import dataclass
-from typing import Optional
 from urllib.parse import urlparse
 
 import requests
@@ -19,10 +18,10 @@ SECURITYTXT_MAX_LENGTH = 100 * 1024
 @dataclass
 class SecuritytxtRetrieveResult:
     found: bool
-    content: Optional[bytes]
+    content: bytes | None
     url: str
     found_host: str
-    found_url: Optional[str]
+    found_url: str | None
     errors: list[dict[str, str]]
 
 
@@ -68,13 +67,13 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str) -> SecuritytxtRetrieveResul
 
 
 def _evaluate_response(
-    status: Optional[int],
-    content_type: Optional[str],
+    status: int | None,
+    content_type: str | None,
     domain: str,
     path: str,
     content: bytes,
     found_host: str,
-    found_url: Optional[str],
+    found_url: str | None,
 ) -> SecuritytxtRetrieveResult:
     errors = []
     media_type, charset = None, None

@@ -6,7 +6,8 @@ from pathlib import Path
 import socket
 from service_identity.cryptography import verify_certificate_hostname
 from service_identity.exceptions import VerificationError, CertificateError
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any
+from collections.abc import Generator
 
 import subprocess
 from cryptography.hazmat._oid import NameOID
@@ -128,7 +129,7 @@ class ChecksMode(Enum):
 def dane(
     url: str,
     port: int,
-    chain: List[Certificate],
+    chain: list[Certificate],
     score_none: scoring.Score,
     score_none_bogus: scoring.Score,
     score_failed: scoring.Score,
@@ -441,7 +442,7 @@ def _certificate_matches_hostname(certificate: Certificate, server_hostname: str
         return False
 
 
-def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
+def check_pubkey(certificates: list[Certificate], mode: ChecksMode):
     """
     Check that all provided certificates meet NCSC requirements, except root.
     """
@@ -496,7 +497,7 @@ def check_pubkey(certificates: List[Certificate], mode: ChecksMode):
     return pubkey_score, bad_pubkey, phase_out_pubkey
 
 
-def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
+def check_mail_tls_multiple(server_tuples) -> dict[str, dict[str, Any]]:
     """
     Perform sslyze probing on all mail servers, in parallel.
     """
@@ -537,7 +538,7 @@ def check_mail_tls_multiple(server_tuples) -> Dict[str, Dict[str, Any]]:
     return results
 
 
-def connection_limit_for_scans(scans: List[ServerScanRequest]):
+def connection_limit_for_scans(scans: list[ServerScanRequest]):
     """
     Determine the appropriate connection limit for a mail server.
     Sometimes we set this higher, due to anti-spam slowness.
@@ -552,7 +553,7 @@ def connection_limit_for_scans(scans: List[ServerScanRequest]):
 
 def _generate_mail_server_scan_request(
     mx_hostname: str,
-) -> Tuple[Optional[ServerScanRequest], TLSExtendedMasterSecretEvaluation]:
+) -> tuple[ServerScanRequest | None, TLSExtendedMasterSecretEvaluation]:
     """
     Generate the scan request (sslyze scan commands) for a mail server.
     Includes resolving and determining supported TLS versions.
@@ -599,7 +600,7 @@ def _generate_mail_server_scan_request(
 
 def check_mail_tls(
     result: ServerScanResult,
-    all_suites: List[CipherSuitesScanAttempt],
+    all_suites: list[CipherSuitesScanAttempt],
     extended_master_secret_evaluation: TLSExtendedMasterSecretEvaluation,
 ):
     """
@@ -836,8 +837,8 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
 
 
 def run_sslyze(
-    scans: List[ServerScanRequest], connection_limit: int
-) -> Generator[Tuple[List[CipherSuitesScanAttempt], ServerScanResult, Optional[TLSException]], None, None]:
+    scans: list[ServerScanRequest], connection_limit: int
+) -> Generator[tuple[list[CipherSuitesScanAttempt], ServerScanResult, TLSException | None]]:
     """
     Run a set of sslyze scans in parallel.
     Starts each scan request at the same time, and yields them as soon as they are finished.
@@ -926,7 +927,7 @@ def test_key_exchange_hash(
 
 def _test_connection_with_limited_sigalgs(
     server_connectivity_info: ServerConnectivityInfo, sigalgs: list[tuple[OpenSslDigestNidEnum, OpenSslEvpPkeyEnum]]
-) -> Optional[OpenSslDigestNidEnum]:
+) -> OpenSslDigestNidEnum | None:
     """
     Test whether the server accepts a connection with limited sigalgs through the signature_algorithms extension.
     Returns the digest NID if a match was found, None otherwise.
@@ -958,7 +959,7 @@ def _test_connection_with_limited_sigalgs(
 
 def test_cipher_order(
     server_connectivity_info: ServerConnectivityInfo,
-    tls_versions: List[TlsVersionEnum],
+    tls_versions: list[TlsVersionEnum],
     cipher_evaluation: TLSCipherEvaluation,
 ) -> TLSCipherOrderEvaluation:
     """
@@ -1034,7 +1035,7 @@ def test_cipher_order(
 
 # adapted from sslyze.plugins.openssl_cipher_suites._test_cipher_suite.connect_with_cipher_suite
 def find_most_preferred_cipher_suite(
-    server_connectivity_info: ServerConnectivityInfo, tls_version: TlsVersionEnum, cipher_suites: List[CipherSuite]
+    server_connectivity_info: ServerConnectivityInfo, tls_version: TlsVersionEnum, cipher_suites: list[CipherSuite]
 ) -> CipherSuite:
     suite_names = [suite.openssl_name for suite in cipher_suites]
 
@@ -1081,7 +1082,7 @@ def _check_cipher_suite_available(tls_version: TlsVersionEnum, cipher_suite: Cip
 
 def check_supported_tls_versions(
     server_connectivity_info: ServerConnectivityInfo,
-) -> Tuple[List[TlsVersionEnum], TLSExtendedMasterSecretEvaluation]:
+) -> tuple[list[TlsVersionEnum], TLSExtendedMasterSecretEvaluation]:
     """
     Determine which TLS versions are supported, and EMS support.
     Providing this info to sslyze improves on the bluntness of the scans.

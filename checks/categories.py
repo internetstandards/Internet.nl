@@ -1,6 +1,5 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from typing import Optional
 
 from checks import scoring
 from checks.models import TLSClientInitiatedRenegotiationStatus, TLSExtendedMasterSecretStatus
@@ -79,7 +78,7 @@ class Subtest:
         tech_data_translation_root="",
         # override_mandatory overrides whether this is mandatory (True), or not mandatory (False)
         # rather than base this on worst_status (the default, for None)
-        override_mandatory: Optional[bool] = None,
+        override_mandatory: bool | None = None,
     ):
         self.name = name
         self.label = label
@@ -1313,7 +1312,7 @@ class WebTlsCertHostmatch(Subtest):
 
 class WebCaa(Subtest):
     def __init__(self):
-        super(WebCaa, self).__init__(
+        super().__init__(
             name="web_caa",
             label="detail web tls caa label",
             explanation="detail web tls caa exp",
