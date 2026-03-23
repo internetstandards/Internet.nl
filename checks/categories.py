@@ -1483,7 +1483,7 @@ class WebTlsOCSPStapling(Subtest):
         self.tech_data = "detail tech data no"
 
     def result_not_in_cert(self):
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls ocsp-stapling verdict not-in-cert"
         self.tech_data = "detail tech data not-applicable"
 
