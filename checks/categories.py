@@ -1281,6 +1281,11 @@ class WebTlsCertSignature(Subtest):
         self.verdict = "detail web tls cert-signature verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls cert-signature verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls cert-signature verdict bad"
@@ -1959,6 +1964,12 @@ class MailTlsCertSignature(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls cert-signature verdict good"
         self.tech_data = ""
+
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls cert-signature verdict phase-out"
+        self.tech_data = tech_data
 
     def result_bad(self, tech_data):
         self.was_tested()

@@ -77,6 +77,7 @@ from checks.tasks.tls.evaluation import (
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_SUFFICIENT,
+    CERT_SIGALG_PHASE_OUT,
     CERT_CURVES_GOOD,
     CERT_EC_CURVES_GOOD,
     CERT_EC_CURVES_PHASE_OUT,
@@ -387,13 +388,17 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
 
     # NCSC 3.3.2 / 3.3.5
     sigalg_bad = {}
+    sigalg_phase_out = {}
     sigalg_score = scoring.WEB_TLS_SIGNATURE_GOOD
     for cert in cert_deployment.received_certificate_chain:
         if not is_root_cert(cert):
             sigalg = cert.signature_algorithm_oid
             if sigalg not in CERT_SIGALG_SUFFICIENT:
-                sigalg_bad[get_common_name(cert)] = sigalg._name
-                sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
+                if sigalg in CERT_SIGALG_PHASE_OUT:
+                    sigalg_phase_out[get_common_name(cert)] = sigalg._name
+                else:
+                    sigalg_bad[get_common_name(cert)] = sigalg._name
+                    sigalg_score = scoring.WEB_TLS_SIGNATURE_BAD
 
     chain_str = []
     for cert in cert_deployment.received_certificate_chain:
@@ -423,6 +428,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         pubkey_phase_out=pubkey_phase_out,
         pubkey_score=pubkey_score,
         sigalg_bad=sigalg_bad,
+        sigalg_phase_out=sigalg_phase_out,
         sigalg_score=sigalg_score,
         hostmatch_bad=hostmatch_bad,
         hostmatch_score=hostmatch_score,

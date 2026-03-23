@@ -569,6 +569,7 @@ class DomainTestTls(BaseTestModel):
     cert_pubkey_score = models.IntegerField(null=True)
 
     cert_signature_bad = ListField(null=True)
+    cert_signature_phase_out = ListField(null=True)
     cert_signature_score = models.IntegerField(null=True)
 
     cert_hostmatch_bad = ListField(null=True)
@@ -641,6 +642,7 @@ class DomainTestTls(BaseTestModel):
             "cert_pubkey_phase_out",
             "cert_pubkey_score",
             "cert_signature_bad",
+            "cert_signature_phase_out",
             "cert_signature_score",
             "cert_hostmatch_bad",
             "cert_hostmatch_score",
@@ -682,6 +684,7 @@ class DomainTestTls(BaseTestModel):
             "cert_pubkey_bad": self.cert_pubkey_bad,
             "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
             "cert_signature_bad": self.cert_signature_bad,
+            "cert_signature_phase_out": self.cert_signature_phase_out,
             "cert_hostmatch_bad": self.cert_hostmatch_bad,
             "caa_enabled": self.caa_enabled,
             "caa_errors": self.caa_errors,
@@ -714,6 +717,7 @@ class DomainTestTls(BaseTestModel):
             "cert_pubkey_bad": self.cert_pubkey_bad,
             "cert_pubkey_phase_out": self.cert_pubkey_phase_out,
             "cert_signature_bad": self.cert_signature_bad,
+            "cert_signature_phase_out": self.cert_signature_phase_out,
             "cert_hostmatch_bad": self.cert_hostmatch_bad,
         }
 

@@ -92,6 +92,7 @@ EXPECTED_DOMAIN_TECHNICAL_RESULTS = {
                 "cert_pubkey_bad": [],
                 "cert_pubkey_phase_out": [],
                 "cert_signature_bad": {},
+                "cert_signature_phase_out": {},
                 "cert_hostmatch_bad": [],
                 "caa_enabled": False,
                 "caa_errors": [
@@ -157,6 +158,7 @@ EXPECTED_DOMAIN_TECHNICAL_RESULTS = {
                 "cert_pubkey_bad": [],
                 "cert_pubkey_phase_out": [],
                 "cert_signature_bad": {},
+                "cert_signature_phase_out": {},
                 "cert_hostmatch_bad": [],
                 "caa_enabled": False,
                 "caa_errors": [

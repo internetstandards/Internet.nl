@@ -53,6 +53,7 @@ Additionally, the API structure changes are:
 - The cipher order status no longer returns `not_prescribed` or `not_seclevel` for new tests.
   The insufficient statuses is now `bad` for preferring phase out over good and/or sufficient,
   regardless of the reason (server not enforcing any preference or server enforcing wrong preference).
+- `cert_signature_phase_out` was added to the TLS details.
 - `extended_master_secret_status` was added to the TLS details.
 - `client_reneg` in the TLS details was changed from a boolean to a new enum.
 
