@@ -287,6 +287,7 @@ def save_results(model, results, addr, domain, category):
                 model.cert_pubkey_phase_out = result.get("pubkey_phase_out")
                 model.cert_pubkey_score = result.get("pubkey_score")
                 model.cert_signature_bad = result.get("sigalg_bad")
+                model.cert_signature_phase_out = result.get("sigalg_phase_out")
                 model.cert_signature_score = result.get("sigalg_score")
                 model.cert_hostmatch_score = result.get("hostmatch_score")
                 model.cert_hostmatch_bad = result.get("hostmatch_bad")
@@ -364,6 +365,7 @@ def save_results(model, results, addr, domain, category):
                     model.cert_pubkey_phase_out = result.get("pubkey_phase_out")
                     model.cert_pubkey_score = result.get("pubkey_score")
                     model.cert_signature_bad = result.get("sigalg_bad")
+                    model.cert_signature_phase_out = result.get("sigalg_phase_out")
                     model.cert_signature_score = result.get("sigalg_score")
                     model.cert_hostmatch_score = result.get("hostmatch_score")
                     model.cert_hostmatch_bad = result.get("hostmatch_bad")
@@ -500,6 +502,8 @@ def build_report(dttls, category):
                     pass
                 elif len(dttls.cert_signature_bad) > 0:
                     category.subtests["cert_signature"].result_bad(dttls.cert_signature_bad)
+                elif len(dttls.cert_signature_phase_out) > 0:
+                    category.subtests["cert_signature"].result_phase_out(dttls.cert_signature_phase_out)
                 else:
                     category.subtests["cert_signature"].result_good()
 
@@ -661,6 +665,8 @@ def build_report(dttls, category):
                     pass
                 elif len(dttls.cert_signature_bad) > 0:
                     category.subtests["cert_signature"].result_bad(dttls.cert_signature_bad)
+                elif len(dttls.cert_signature_phase_out) > 0:
+                    category.subtests["cert_signature"].result_phase_out(dttls.cert_signature_phase_out)
                 else:
                     category.subtests["cert_signature"].result_good()
 

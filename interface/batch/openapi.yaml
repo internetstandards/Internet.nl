@@ -737,6 +737,14 @@ components:
             x-additionalPropertiesName: <certificate common name>
             type: string
             description: BAD hash description.
+        cert_signature_phase_out:
+          type: object
+          description: >
+            Collection of PHASE_OUT hashes used for certificate signing.
+          additionalProperties:
+            x-additionalPropertiesName: <certificate common name>
+            type: string
+            description: PHASE_OUT hash description.
         cert_hostmatch_bad:
           type: array
           description: >

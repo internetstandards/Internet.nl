@@ -15,6 +15,10 @@ CERT_SIGALG_SUFFICIENT = [
     SignatureAlgorithmOID.ED25519,
     SignatureAlgorithmOID.ED448,
 ]
+CERT_SIGALG_PHASE_OUT = [
+    SignatureAlgorithmOID.RSA_WITH_SHA224,
+    SignatureAlgorithmOID.ECDSA_WITH_SHA224,
+]
 
 # NCSC 3.3.2.1
 CERT_RSA_MIN_GOOD_KEY_SIZE = 3072
