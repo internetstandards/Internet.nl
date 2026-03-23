@@ -1552,17 +1552,17 @@ class WebTLSExtendedMasterSecret(Subtest):
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls extended-master-secret verdict good"
-        self.tech_data = "detail tech data good"
+        self.tech_data = "detail tech data yes"
 
     def result_bad(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls extended-master-secret verdict bad"
-        self.tech_data = "detail tech data insufficient"
+        self.tech_data = "detail tech data no"
 
     def result_unknown(self):
-        self._status(STATUS_INFO)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls extended-master-secret verdict unknown"
-        self.tech_data = "detail tech data not-applicable"
+        self.tech_data = "detail tech data not-tested"
 
     def result_na_no_tls_1_2(self):
         self._status(STATUS_SUCCESS)
@@ -2180,17 +2180,17 @@ class MailTLSExtendedMasterSecret(Subtest):
     def result_good(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls extended-master-secret verdict good"
-        self.tech_data = "detail tech data good"
+        self.tech_data = "detail tech data yes"
 
     def result_bad(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls extended-master-secret verdict bad"
-        self.tech_data = "detail tech data insufficient"
+        self.tech_data = "detail tech data no"
 
     def result_unknown(self):
-        self._status(STATUS_INFO)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls extended-master-secret verdict unknown"
-        self.tech_data = "detail tech data not-applicable"
+        self.tech_data = "detail tech data not-tested"
 
     def result_na_no_tls_1_2(self):
         self._status(STATUS_SUCCESS)
