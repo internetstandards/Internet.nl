@@ -207,7 +207,7 @@ RUN python3 bin/frontend.py css
 RUN python3 bin/pofiles.py to_django
 
 # use fake version to prevent building the next steps when only the version changes
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0.dev0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0+dev0
 
 # disable secret key check and cache for commands that run standalone tasks
 RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py compilemessages
@@ -216,8 +216,10 @@ RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py api_gen
 
 FROM build-app AS app
 
-ARG RELEASE
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
+ARG SCM_VERSION
+# do not determine version from SCM, as we don't copy that data into the build environment
+# we need to convert back the '-' to a '+' for the version as otherwise setuptools_scm won't accept the pretend version
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SCM_VERSION}
 
 # define default entrypoint and command
 ENTRYPOINT [ "python3","./manage.py"]

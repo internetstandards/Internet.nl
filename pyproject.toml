@@ -115,9 +115,6 @@ filterwarnings = [
 [tool.uv.sources]
 pythonwhois-internet-nl = { url = "https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz" }
 
-[setuptools_scm]
-version_scheme = "release_branch_semver"
-
 [dependency-groups]
 dev = [
     "autoflake",
