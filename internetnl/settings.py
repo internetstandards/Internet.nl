@@ -626,6 +626,7 @@ CLIENT_RATE_LIMIT = int(getenv("CLIENT_RATE_LIMIT", 30))
 #
 ROUTINATOR_URL = getenv("ROUTINATOR_URL", "http://localhost:9556/api/v1/validity")
 
+# parse the version information from SETUPTOOLS_SCM_PRETEND_VERSION or fall back to generating a version
 VERSION = get_version(version_scheme="release-branch-semver")
 
 # Sentry reads SENTRY_DSN directly from environment
