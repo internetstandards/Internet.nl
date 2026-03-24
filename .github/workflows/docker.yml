@@ -142,6 +142,7 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Build ${{ matrix.image }} (for main)
         # build for pushes to the main branch
@@ -168,6 +169,7 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Build ${{ matrix.image }} (for release)
         # build for tagged releases
@@ -193,6 +195,7 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
         # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
@@ -216,6 +219,7 @@ jobs:
           # pass in version information
           build-args: |
             SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry

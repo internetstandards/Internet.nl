@@ -216,9 +216,11 @@ RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py api_gen
 
 FROM build-app AS app
 
-ARG SCM_VERSION
+# is needed for eg: deploy.sh script
+ARG RELEASE
 # do not determine version from SCM, as we don't copy that data into the build environment
 # we need to convert back the '-' to a '+' for the version as otherwise setuptools_scm won't accept the pretend version
+ARG SCM_VERSION
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SCM_VERSION}
 
 # define default entrypoint and command
