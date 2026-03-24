@@ -177,7 +177,9 @@ services:
       - internal
     command: migrate
     # this container runs to completion and exits with 0
-    restart: on-failure
+    # don't restart forever, as it will result in and endless loop with little feedback, but some restart
+    # is desired as the DB might not be completely ready
+    restart: on-failure:3
     logging:
       driver: $LOGGING_DRIVER
       options:
