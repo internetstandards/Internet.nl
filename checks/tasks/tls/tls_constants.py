@@ -1,5 +1,5 @@
 from cryptography.hazmat._oid import SignatureAlgorithmOID
-from cryptography.hazmat.primitives.asymmetric import x25519, x448, ec
+from cryptography.hazmat.primitives.asymmetric import ed25519, ed448, ec
 from nassl.ephemeral_key_info import OpenSslEcNidEnum, OpenSslEvpPkeyEnum
 from nassl.ssl_client import OpenSslDigestNidEnum
 from sslyze import TlsVersionEnum
@@ -27,7 +27,7 @@ CERT_RSA_MIN_PHASE_OUT_KEY_SIZE = 2048
 # NCSC 3.3.2.1
 # Note that there appears to be no standard allowing insufficient
 # curves with EdDSA, so this list is not check against it.
-CERT_CURVES_GOOD = [x25519.X25519PublicKey, x448.X448PublicKey]
+CERT_CURVES_GOOD = [ed25519.Ed25519PublicKey, ed448.Ed448PublicKey]
 CERT_EC_CURVES_GOOD = [
     ec.SECP521R1,
     ec.SECP384R1,
