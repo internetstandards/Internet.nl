@@ -119,7 +119,9 @@ build-no-cache: build ## build all docker images without using cache
 build-no-cache: build_args=--no-cache
 
 up: ## bring up an environment, and keep it running in the background, use env=x for a specific environment (test, dev)
-	${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans --timeout=0 ${services}
+	if ! ${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans --timeout=0 ${services}; then \
+  	 docker logs $$(docker compose  --env-file=docker/defaults.env --env-file=docker/test.env ps --filter status=exited -q); exit 1; \
+	fi
 	@if [ "${environment}" = "test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 	@if [ "${environment}" = "develop" ]; then echo -e "\n🚀 Running on http://localhost:8080"; fi
 	@if [ "${environment}" = "batch-test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
