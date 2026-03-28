@@ -98,6 +98,7 @@ For example:
     cat >> docker/local.env <<EOF
     ENABLE_BATCH=True
     ENABLE_HOF=False
+    CRON_15MIN_RUN_TESTS_BATCH=True
     # user/password(s) for access to /grafana monitoring
     MONITORING_AUTH_RAW=user:<htpasswd hash>
     # allowed IP's to visit web interface without password
