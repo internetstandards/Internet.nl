@@ -347,7 +347,11 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
     if result.scan_status == ServerScanStatusEnum.ERROR_NO_CONNECTIVITY:
         log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: no connectivity")
         return dict(tls_cert=False)
-    raise_sslyze_errors(result)
+    try:
+        raise_sslyze_errors(result)
+    except TLSException:
+        log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: certificate parsing error")
+        return dict(tls_cert=False)
 
     if mode == ChecksMode.WEB:
         trusted_score_good = scoring.WEB_TLS_TRUSTED_GOOD
