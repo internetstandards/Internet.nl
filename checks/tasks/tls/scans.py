@@ -470,14 +470,13 @@ def check_pubkey(certificates: list[Certificate], mode: ChecksMode):
 
         common_name = get_common_name(cert)
         public_key = cert.public_key()
-        key_type = type(public_key)
         curve = None
         if hasattr(public_key, "curve"):
             curve = public_key.curve.__class__
 
         is_good = (
             (isinstance(public_key, rsa.RSAPublicKey) and public_key.key_size >= CERT_RSA_MIN_GOOD_KEY_SIZE)
-            or (key_type in CERT_CURVES_GOOD)
+            or isinstance(public_key, tuple(CERT_CURVES_GOOD))
             or (isinstance(public_key, EllipticCurvePublicKey) and curve in CERT_EC_CURVES_GOOD)
         )
 
@@ -485,7 +484,7 @@ def check_pubkey(certificates: list[Certificate], mode: ChecksMode):
             continue
 
         key_size = getattr(public_key, "key_size", None)
-        message = f"{common_name}: {key_type.__name__}"
+        message = f"{common_name}: {type(public_key).__name__}"
         if key_size is not None:
             message += f"-{key_size}"
         if curve:
