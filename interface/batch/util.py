@@ -731,6 +731,15 @@ def gather_batch_results_technical(user, batch_request, site_url):
     return data
 
 
+class BatchResultEncoder(json.JSONEncoder):
+    """Add unsupported objects for Batch Result JSON."""
+
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 def save_batch_results_to_file(user, batch_request, results, technical=False):
     """
     Save results to file using the Django's ORM utilities.
@@ -738,7 +747,12 @@ def save_batch_results_to_file(user, batch_request, results, technical=False):
     """
     technical_text = "-technical" if technical else ""
     filename = f"{user.username}-{batch_request.type.label}-{batch_request.id}{technical_text}.json"
-    batch_request.get_report_file(technical).save(filename, ContentFile(json.dumps(results)))
+    try:
+        batch_request.get_report_file(technical).save(
+            filename, ContentFile(json.dumps(results, cls=BatchResultEncoder))
+        )
+    except Exception:
+        log.exception("failed to save report file for user %s, request %s", user.username, batch_request.id)
 
 
 @batch_shared_task(bind=True, ignore_result=True)
