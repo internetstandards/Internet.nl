@@ -7,6 +7,7 @@ DNSDIR=$(REMOTEDATADIR)/dns
 
 # default version if nothing is provided by environment
 RELEASE ?= 0.0.0-dev0
+SCM_VERSION ?= ${RELEASE}
 
 # directories used to find python sources for things like linting etc
 pysrcdirs = internetnl tests interface checks integration_tests docker
@@ -113,7 +114,7 @@ DOCKER_COMPOSE_TEST_CMD=COMPOSE_FILE=docker/compose.yaml:docker/compose.test.yam
 DOCKER_COMPOSE_TOOLS_CMD=COMPOSE_FILE=docker/compose.tools.yaml docker compose
 
 build: ## build all docker images
-	${DOCKER_COMPOSE_BUILD_CMD} build ${build_args} --build-arg=RELEASE=${RELEASE} ${services}
+	${DOCKER_COMPOSE_BUILD_CMD} build ${build_args} --build-arg=RELEASE=${RELEASE} --build-arg=SCM_VERSION=${SCM_VERSION} ${services}
 
 build-no-cache: build ## build all docker images without using cache
 build-no-cache: build_args=--no-cache
