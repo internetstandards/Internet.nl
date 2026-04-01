@@ -120,7 +120,7 @@ build-no-cache: build_args=--no-cache
 
 up: ## bring up an environment, and keep it running in the background, use env=x for a specific environment (test, dev)
 	if ! ${DOCKER_COMPOSE_UP_PULL_CMD} up --wait --no-build --remove-orphans --timeout=0 ${services}; then \
-  	 docker logs $$(docker compose  --env-file=docker/defaults.env --env-file=docker/test.env ps --filter status=exited -q); exit 1; \
+  	 docker logs $$(docker compose  --env-file=docker/defaults.env --env-file=docker/${environment}.env ps --filter status=exited -q); exit 1; \
 	fi
 	@if [ "${environment}" = "test" ]; then echo -e "\n🚀 Running on http://localhost:8081"; fi
 	@if [ "${environment}" = "develop" ]; then echo -e "\n🚀 Running on http://localhost:8080"; fi
@@ -128,7 +128,7 @@ up: ## bring up an environment, and keep it running in the background, use env=x
 
 up-no-wait: ## bring up an environment but don't wait for it to be ready
 	if ! ${DOCKER_COMPOSE_UP_PULL_CMD} up --detach --no-build --remove-orphans --timeout=0 ${services}; then \
-  	 docker logs $$(docker compose  --env-file=docker/defaults.env --env-file=docker/test.env ps --filter status=exited -q); exit 1; \
+  	 docker logs $$(docker compose  --env-file=docker/defaults.env --env-file=docker/${environment}.env ps --filter status=exited -q); exit 1; \
 	fi
 
 run: ## bring up an environment but run it in the foreground with logging enabled, ctrl-c to bring the environment down
