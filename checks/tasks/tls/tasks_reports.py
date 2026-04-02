@@ -880,7 +880,7 @@ def do_web_http(af_ip_pairs, url, *args, **kwargs):
         for af_ip_pair in af_ip_pairs:
             if not results.get(af_ip_pair[1]):
                 results[af_ip_pair[1]] = dict(
-                    forced_https=False,
+                    forced_https=ForcedHttpsStatus.bad,
                     forced_https_score=scoring.WEB_TLS_FORCED_HTTPS_BAD,
                     http_compression_enabled=True,
                     http_compression_score=scoring.WEB_TLS_HTTP_COMPRESSION_BAD,
