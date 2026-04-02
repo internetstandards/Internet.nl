@@ -296,6 +296,10 @@ def aggregate_subreports(subreports, report):
                     verdict = subreport[test_item]["verdict"]
                     report[test_item]["status"] = status
                     report[test_item]["verdict"] = verdict
+                    # Propagate override_mandatory from the subreport with the
+                    # worst status, so that _verdict respects it in the summary.
+                    if subreport[test_item].get("override_mandatory") is not None:
+                        report[test_item]["override_mandatory"] = subreport[test_item]["override_mandatory"]
                 if ORDERED_STATUSES[subworststatus] <= ORDERED_STATUSES[worst_status]:
                     worst_status = subworststatus
                     report[test_item]["worst_status"] = worst_status

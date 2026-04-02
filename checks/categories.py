@@ -948,6 +948,7 @@ class WebTlsHttpsForced(Subtest):
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls https-forced verdict no-https"
         self.tech_data = "detail tech data not-applicable"
+        self.override_mandatory = False
 
     def result_bad(self):
         self._status(STATUS_FAIL)
