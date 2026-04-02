@@ -1,6 +1,6 @@
 # Docker container profiles overview
 
-This overview was last generated at 2026-02-26T16:25:16Z with `make update_container_documentation`.
+This overview was last generated with `make update_container_documentation`.
 
 
 | container             | profiles     | description                                                                                                                      |
@@ -30,3 +30,4 @@ This overview was last generated at 2026-02-26T16:25:16Z with `make update_conta
 | node-exporter         | monitoring   |                                                                                                                                  |
 | docker_stats_exporter | monitoring   |                                                                                                                                  |
 | nginx_logs_exporter   | monitoring   |                                                                                                                                  |
+| query-exporter        | monitoring   |                                                                                                                                  |
