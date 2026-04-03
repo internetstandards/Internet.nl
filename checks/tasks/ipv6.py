@@ -542,6 +542,10 @@ def simhash(url, task=None):
         except requests.RequestException:
             pass
 
+    if not v4_response or not v6_response:
+        log.debug(f"simhash unable to get response on both address families (v4={v4_response}, v6={v6_response})")
+        return simhash_score, distance, v6_response.status_code if v6_response else None
+
     if v4_ports != v6_ports:
         log.debug(f"simhash found different ports on IPv4 ({v4_ports}) and IPv6 ({v6_ports})")
         return simhash_score, distance, v6_response.status_code if v6_response else None
