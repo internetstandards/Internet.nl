@@ -41,7 +41,6 @@ from sslyze import (
 )
 
 from sslyze.errors import (
-    ServerRejectedTlsHandshake,
     TlsHandshakeTimedOut,
     ConnectionToServerFailed,
     ServerHostnameCouldNotBeResolved,
@@ -959,8 +958,10 @@ def _test_connection_with_limited_sigalgs(
         # Note that while we can double-check this for the digest hash, we cannot check it for EVP PKEY.
         if sigalg_nid in [sa[0] for sa in sigalgs]:
             return sigalg_nid
-    except (ClientCertificateRequested, ServerRejectedTlsHandshake, TlsHandshakeTimedOut, OpenSSLError):
+    except ClientCertificateRequested:
         pass
+    except (ConnectionToServerFailed, OpenSSLError, ValueError) as exc:
+        log.info(f"Sigalg test for {server_connectivity_info.server_location.hostname} failed: {exc}")
     finally:
         ssl_connection.close()
 
@@ -1069,7 +1070,7 @@ def find_most_preferred_cipher_suite(
         ssl_connection.connect()
     except ClientCertificateRequested:
         pass
-    except (ServerRejectedTlsHandshake, TlsHandshakeTimedOut) as exc:
+    except ConnectionToServerFailed as exc:
         raise TLSException(
             f"Unable to connect with (previously accepted) cipher suites {suite_names} to determine cipher order: {exc}"
         )
