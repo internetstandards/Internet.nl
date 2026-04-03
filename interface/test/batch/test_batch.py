@@ -2,7 +2,7 @@ import json
 import uuid
 from django.core.cache import cache
 from checks.models import BatchRequest, BatchRequestType, BatchUser, BatchRequestStatus
-from interface.batch.util import get_request, register_request
+from interface.batch.util import get_request, register_request, save_batch_results_to_file
 from interface.batch.views import results
 from django.test.client import RequestFactory
 import pytest
@@ -93,3 +93,28 @@ def test_batch_request_result_generation(db, client, mocker):
     assert response.status_code == 200
     assert json.loads(response.content)["request"]["status"] == "generating"
     assert batch_async_generate_results.delay.call_count == 2
+
+
+@pytest.mark.withoutresponses
+def test_save_batch_results_to_file_serializes_set_in_results(db, mocker):
+    test_user = BatchUser.objects.create(username="test_user")
+    batch_request = BatchRequest.objects.create(
+        user=test_user,
+        name="test_batch_request",
+        type=BatchRequestType.web,
+        status=BatchRequestStatus.done,
+    )
+
+    saved_reports = []
+    mock_report_file = mocker.Mock()
+    mock_report_file.save.side_effect = lambda filename, content: saved_reports.append((filename, content.read()))
+    mocker.patch.object(batch_request, "get_report_file", return_value=mock_report_file)
+
+    save_batch_results_to_file(
+        test_user,
+        batch_request,
+        {"domains": {"example.nl": {"bad": set()}}},
+    )
+
+    assert len(saved_reports) == 1
+    assert json.loads(saved_reports[0][1]) == {"domains": {"example.nl": {"bad": []}}}

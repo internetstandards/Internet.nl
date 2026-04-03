@@ -938,10 +938,6 @@ services:
     configs:
       - source: nginx_logs_exporter_config
         target: /config.hcl
-        # permissions should be set correctly, temporary workaround until fix is released:
-        # https://github.com/docker/compose/pull/12666
-        mode: 0444
-
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -954,6 +950,30 @@ services:
       - internal
     volumes:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
+
+    profiles:
+      - monitoring
+
+  query-exporter:
+    image: ${DOCKER_IMAGE_QUERY_EXPORTER}
+    command:
+      - --config=/config.yaml
+    configs:
+      - source: query_exporter_config
+        target: /config.yaml
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
 
     profiles:
       - monitoring
@@ -980,6 +1000,111 @@ volumes:
   nginx-logs-exporter: {}
 
 configs:
+  query_exporter_config:
+    content: |
+      databases:
+        db:
+          dsn: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+
+      metrics:
+        internetnl_batch_requests:
+          type: gauge
+          description: "Number of batch requests by status and type"
+          labels: [status, type, username]
+
+        internetnl_batch_domains:
+          type: gauge
+          description: "Number of batch domains by status"
+          labels: [status]
+
+        internetnl_domain_test_reports_total:
+          type: gauge
+          description: "Total number of domain test reports"
+
+        internetnl_mail_test_reports_total:
+          type: gauge
+          description: "Total number of mail test reports"
+
+        internetnl_batch_request_runtime_seconds:
+          type: gauge
+          description: "Batch request runtime in seconds"
+          labels: [quantile]
+
+      queries:
+        batch_requests_by_status:
+          interval: 60
+          databases: [db]
+          metrics: [internetnl_batch_requests]
+          sql: >
+            SELECT
+              CASE status
+                WHEN 0 THEN 'registering'
+                WHEN 10 THEN 'live'
+                WHEN 11 THEN 'running'
+                WHEN 20 THEN 'done'
+                WHEN 38 THEN 'error'
+                WHEN 39 THEN 'cancelled'
+                ELSE 'unknown'
+              END AS status,
+              CASE type
+                WHEN 0 THEN 'web'
+                WHEN 1 THEN 'mail'
+                ELSE 'unknown'
+              END AS type,
+              u.username,
+              COUNT(*) AS internetnl_batch_requests
+            FROM checks_batchrequest r
+            JOIN checks_batchuser u ON u.id = r.user_id
+            GROUP BY status, type, u.username
+
+        batch_domains_by_status:
+          interval: 60
+          databases: [db]
+          metrics: [internetnl_batch_domains]
+          sql: >
+            SELECT
+              CASE status
+                WHEN 0 THEN 'waiting'
+                WHEN 10 THEN 'running'
+                WHEN 20 THEN 'done'
+                WHEN 38 THEN 'error'
+                WHEN 39 THEN 'cancelled'
+                ELSE 'unknown'
+              END AS status,
+              COUNT(*) AS internetnl_batch_domains
+            FROM checks_batchdomain
+            GROUP BY status
+
+        domain_test_reports_total:
+          interval: 300
+          databases: [db]
+          metrics: [internetnl_domain_test_reports_total]
+          sql: SELECT COUNT(*) AS internetnl_domain_test_reports_total FROM checks_domaintestreport
+
+        mail_test_reports_total:
+          interval: 300
+          databases: [db]
+          metrics: [internetnl_mail_test_reports_total]
+          sql: SELECT COUNT(*) AS internetnl_mail_test_reports_total FROM checks_mailtestreport
+
+        batch_request_runtime:
+          interval: 60
+          databases: [db]
+          metrics: [internetnl_batch_request_runtime_seconds]
+          sql: >
+            SELECT
+              quantile::text AS quantile,
+              runtime AS internetnl_batch_request_runtime_seconds
+            FROM (
+              SELECT
+                UNNEST(ARRAY[0.5, 0.9, 0.99]) AS quantile,
+                UNNEST(PERCENTILE_CONT(ARRAY[0.5, 0.9, 0.99]) WITHIN GROUP (
+                  ORDER BY EXTRACT(EPOCH FROM (finished_date - submit_date))
+                )) AS runtime
+              FROM checks_batchrequest
+              WHERE finished_date IS NOT NULL
+            ) t
+
   nginx_logs_exporter_config:
     content: |
       namespace "nginx" {
@@ -1045,6 +1170,9 @@ configs:
         - <<: *scrape_config
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
+        - <<: *scrape_config
+          job_name: query_exporter
+          static_configs: [{targets: ["query-exporter:9560"]}]
   prometheus_rules_config:
     content: |
       groups:

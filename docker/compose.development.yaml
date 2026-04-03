@@ -71,6 +71,16 @@ services:
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
 
+  grafana:
+    develop:
+      watch:
+        # restart grafana when dashboards change
+        - path: ./grafana/provisioning/dashboards
+          action: restart
+
+    volumes:
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+
 networks:
   public-internet:
     driver_opts:
