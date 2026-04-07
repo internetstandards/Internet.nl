@@ -753,9 +753,11 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         ),
     )
     all_suites, result, error = next(run_sslyze([scan], connection_limit=25))
-    if error:
+    if error and not all_suites:
         log.info(f"sslyze scan for web on {url} failed: {error}")
         return dict(server_reachable=False, tls_enabled=False)
+    if error:
+        log.warning(f"sslyze scan for web on {url} partially failed (continuing with available results): {error}")
 
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
@@ -784,9 +786,12 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             supports_secure_renegotiation=False, client_renegotiations_success_count=0
         )
 
-    ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
-        result.scan_result.certificate_info.result.certificate_deployments[0]
-    )
+    if result.scan_result.certificate_info.result:
+        ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
+            result.scan_result.certificate_info.result.certificate_deployments[0]
+        )
+    else:
+        ocsp_evaluation = TLSOCSPEvaluation(ocsp_in_cert=False, has_ocsp_response=False, ocsp_response_trusted=False)
 
     probe_result = dict(
         tls_enabled=True,
