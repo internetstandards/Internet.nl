@@ -16,10 +16,11 @@ code changes for the next release are already in the main branch.
    make translate_content_to_main
    ```
 4. Make a release branch for the x.y version if not already present (e.g., release/1.8.x).
-5. Make a release on GitHub:
+5. When updating major/minor versions, make sure to update the documentation link in `README.md` to point to the latest release documentation.
+6. Make a release on GitHub:
    1. Use tag 'vx.x.x' e.g., v1.2.3 for the release
    2. Use release title: x.x.x
    3. For the description use the contents of the Changelog.md for this release
-6. Update the Changelog.md for the next release and commit with something like:
+7. Update the Changelog.md for the next release and commit with something like:
    "- Bump for next version.".
-7. Done.
+8. Done.
