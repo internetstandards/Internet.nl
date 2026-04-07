@@ -194,7 +194,7 @@ services:
         ipv4_address: $IPV4_WEBSERVER_IP_PUBLIC
     volumes:
       # mount monitoring credentials for testing/development
-      - ./webserver/dev.htpasswd:/etc/nginx/htpasswd/monitoring.htpasswd:ro
+      - ./webserver/dev.htpasswd:/etc/nginx/htpasswd/monitoring.htpasswd
 
   unbound:
     networks:

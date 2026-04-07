@@ -801,6 +801,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters
 
   redis-exporter:
     image: ${DOCKER_IMAGE_REDIS_EXPORTER}
@@ -821,6 +822,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters
 
   statsd-exporter:
     image: ${DOCKER_IMAGE_STATSD_EXPORTER}
@@ -844,6 +846,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters
 
     healthcheck:
       # container image includes the test command, setting interval and start_interval here
@@ -909,6 +912,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
@@ -932,6 +936,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters
 
   nginx_logs_exporter:
     platform: linux/amd64
@@ -956,6 +961,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters
 
   query-exporter:
     image: ${DOCKER_IMAGE_QUERY_EXPORTER}
