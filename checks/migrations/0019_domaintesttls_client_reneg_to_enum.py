@@ -44,9 +44,10 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(set_client_reneg_new, set_client_reneg_old),
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name="domaintesttls",
-            name="client_reneg",
+            old_name="client_reneg",
+            new_name="client_reneg_old",
         ),
         migrations.RenameField(
             model_name="domaintesttls",

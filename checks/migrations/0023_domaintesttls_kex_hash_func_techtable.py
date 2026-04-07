@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("checks", "0020_domaintesttls_extended_master_secret_and_more"),
+        ("checks", "0021_domaintesttls_extended_master_secret_and_more"),
     ]
 
     operations = [
