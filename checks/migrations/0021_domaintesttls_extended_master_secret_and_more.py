@@ -7,7 +7,7 @@ import enumfields.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("checks", "0019_domaintesttls_client_reneg_to_enum"),
+        ("checks", "0020_domaintesttls_client_reneg_to_enum"),
     ]
 
     operations = [

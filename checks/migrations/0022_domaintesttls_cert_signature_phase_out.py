@@ -4,7 +4,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("checks", "0021_domaintesttls_kex_hash_func_techtable"),
+        ("checks", "0023_domaintesttls_kex_hash_func_techtable"),
     ]
 
     operations = [
