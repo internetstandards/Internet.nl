@@ -114,22 +114,8 @@ def test_monitoring_auth(page, app_url, path):
     response = requests.get(app_url + path, verify=False)
     assert response.status_code == 401
 
-    # MONITORING_AUTH provided in docker/test.env
+    # credentials provided in docker/test.env
     auth = ("test", "test")
-
-    response = requests.get(app_url + path, auth=auth, verify=False)
-    response.raise_for_status()
-
-
-def test_monitoring_auth_raw(page, app_url):
-    """Monitoring endpoints must be behind basic auth."""
-    path = "/grafana"
-
-    response = requests.get(app_url + path, verify=False)
-    assert response.status_code == 401
-
-    # MONITORING_AUTH_RAW provided in docker/test.env
-    auth = ("test_raw", "test_raw")
 
     response = requests.get(app_url + path, auth=auth, verify=False)
     response.raise_for_status()
