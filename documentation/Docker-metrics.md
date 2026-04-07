@@ -4,11 +4,34 @@ The Docker deployment includes a metrics collection system which is available on
 
 To view metrics and graphs visit the `/grafana/` endpoint. Eg: `http://localhost:8080/grafana/` for development and `https://example.com/grafana/` for production. For development the user/password is set to `test/test`, for production users can be configured using the `MONITORING_AUTH_RAW` variable in `docker/local.env` (see `docker/defaults.env` for information).
 
-Metrics collection is defined in the `docker/compose.monitoring.yaml` file.
+Metrics collection is defined in the `docker/compose.yaml` file.
 
 ## Overview
 
 ![Metrics system overview](images/metrics.png)
+
+## External monitoring
+
+To allow an external monitoring system to scrape the metrics exporters, add `ENABLE_EXTERNAL_MONITORING=True` to `docker/local.env`.
+
+The following exporter base paths are available:
+
+- /node-exporter
+- /postgresql-exporter
+- /redis-exporter
+- /rabbitmq-exporter
+- /statsd-exporter
+- /celery-exporter
+- /docker-stats-exporter
+- /nginx-logs-exporter
+
+Append `/metrics` to scrape an exporter, for example `https://example.com/node-exporter/metrics`.
+
+Authentication is required using the same credentials as the other monitoring endpoints.
+
+### Disabling prometheus
+
+To use an external monitoring system without running the bundled Prometheus and Grafana, use  `ENABLE_EXTERNAL_MONITORING=True` and replace `monitoring` with `monitoring-exporters-only` in `COMPOSE_PROFILES`.
 
 ## Missing metrics
 
