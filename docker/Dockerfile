@@ -223,6 +223,9 @@ ARG RELEASE
 ARG SCM_VERSION
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SCM_VERSION}
 
+# suppress pythonwhois deprecation warnings as it will be removed in the near future
+ENV PYTHONWARNINGS="ignore:invalid escape sequence:SyntaxWarning"
+
 # define default entrypoint and command
 ENTRYPOINT [ "python3","./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
