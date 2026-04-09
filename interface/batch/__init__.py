@@ -219,6 +219,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
                             "translation_key": "web tls renegotiation-client",
                         },
                         {
+                            "name": "web_https_tls_extendedmastersecret",
+                            "name_on_report": "extended_master_secret",
+                            "type": "test",
+                            "translation_key": "web tls extended-master-secret",
+                        },
+                        {
                             "name": "web_https_tls_0rtt",
                             "name_on_report": "zero_rtt",
                             "type": "test",
@@ -617,6 +623,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
                             "name_on_report": "renegotiation_client",
                             "type": "test",
                             "translation_key": "mail tls renegotiation-client",
+                        },
+                        {
+                            "name": "mail_starttls_tls_extendedmastersecret",
+                            "name_on_report": "extended_master_secret",
+                            "type": "test",
+                            "translation_key": "mail tls extended-master-secret",
                         },
                         {
                             "name": "mail_starttls_tls_0rtt",

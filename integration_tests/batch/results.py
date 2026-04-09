@@ -41,6 +41,7 @@ EXPECTED_DOMAIN_RESULTS = {
         "web_https_tls_caa": {"status": "warning", "verdict": "bad"},
         "web_https_tls_ocsp": {"status": "not_tested", "verdict": "not-in-cert"},
         "web_https_tls_keyexchangehash": {"status": "warning", "verdict": "phase-out"},
+        "web_https_tls_extendedmastersecret": {"status": "passed", "verdict": "good"},
         "web_appsecpriv_x_frame_options": {"status": "passed", "verdict": "good"},
         "web_appsecpriv_referrer_policy": {"status": "passed", "verdict": "good"},
         "web_appsecpriv_csp": {"status": "warning", "verdict": "bad"},
