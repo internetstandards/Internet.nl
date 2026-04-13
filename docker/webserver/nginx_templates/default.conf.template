@@ -278,7 +278,7 @@ server {
     # batch API, requires authentication and passes basic auth user to Django App via headers
     location /api/batch/v2 {
         auth_basic "Please enter your batch username and password";
-        auth_basic_user_file /etc/nginx/htpasswd/external/users.htpasswd;
+        auth_basic_user_file /etc/nginx/htpasswd/users.htpasswd;
 
         # pass logged in user to Django
         proxy_set_header REMOTE-USER $remote_user;
@@ -319,6 +319,80 @@ server {
         # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
         set $alertmanager http://alertmanager:9093;
         proxy_pass $alertmanager;
+    }
+
+    # expose all metrics exporters for external monitoring
+    location /node-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $node_exporter http://node-exporter:9100;
+        proxy_pass $node_exporter;
+    }
+    location /postgresql-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $postgresql_exporter http://postgresql-exporter:9187/metrics;
+        proxy_pass $postgresql_exporter;
+    }
+    location /redis-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $redis_exporter http://redis-exporter:9121/metrics;
+        proxy_pass $redis_exporter;
+    }
+    location /rabbitmq-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $rabbitmq_exporter http://rabbitmq:15692/metrics;
+        proxy_pass $rabbitmq_exporter;
+    }
+    location /statsd-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $statsd_exporter http://statsd-exporter:9102/metrics;
+        proxy_pass $statsd_exporter;
+    }
+    location /celery-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $celery_exporter http://celery-exporter:9808/metrics;
+        proxy_pass $celery_exporter;
+    }
+    location /docker-stats-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $docker_stats_exporter http://docker_stats_exporter:9338/metrics;
+        proxy_pass $docker_stats_exporter;
+    }
+    location /nginx-logs-exporter {
+        include http.headers;
+        include hsts_h3.headers;
+        auth_basic "Please enter your monitoring username and password";
+        auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+        # set proxy_pass argument as variable, this makes sure nginx will still start even if this hostname is unresolvable due to monitoring profile being disabled
+        set $nginx_logs_exporter http://nginx_logs_exporter:4040/metrics;
+        proxy_pass $nginx_logs_exporter;
     }
 
     # routinator proxy for internal use on multi instance setups

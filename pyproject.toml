@@ -98,7 +98,7 @@ norecursedirs = [
 filterwarnings = [
     "ignore::DeprecationWarning:aiofiles.*:",
     "ignore::DeprecationWarning:.*",
-#    ignore:.*Django now detects this configuration.*:django.utils.deprecation.RemovedInDjango41Warning
+    "ignore::SyntaxWarning: invalid escape sequence.*",
 ]
 
 # flake8 does not support pyproject.toml, config moved to bin/lint.sh

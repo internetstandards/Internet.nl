@@ -26,6 +26,9 @@ services:
         # auto rebuild/reload when config files change
         - path: ./webserver/
           action: rebuild
+    volumes:
+      # mount monitoring credentials for testing/development
+      - ./webserver/dev.htpasswd:/etc/nginx/htpasswd/monitoring.htpasswd
 
   app:
     develop:

@@ -18,8 +18,8 @@ Platform which is a collaboration of partners from the internet community and
 the Dutch government. The platform's mission is to jointly promote the use of
 modern internet standards keeping the internet reliable and accessible for
 everybody. [ECP](https://ecp.nl/) provides for the administrative home of the
-platform. [NLnet Labs](https://nlnetlabs.nl/) laid the foundation for 
-Internet.nl and the underlying tooling. 
+platform. [NLnet Labs](https://nlnetlabs.nl/) laid the foundation for
+Internet.nl and the underlying tooling.
 
 From 1 April 2021 onwards, maintenance and further development will be carried
 out by the project team of the Internet Standards Platform.
@@ -52,6 +52,7 @@ intended as an internet standards compliance test and not as a security test.
 To develop or run your own instance, see the
 [documentation overview](https://github.com/internetstandards/Internet.nl/blob/main/documentation/README.md).
 
+For deployment instructions please refer to the documentation for the current release version: https://github.com/internetstandards/Internet.nl/tree/release/1.10.x/documentation
 
 ## Building blocks
 

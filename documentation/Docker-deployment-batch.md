@@ -87,19 +87,13 @@ Batch installations require the following settings:
 
 - `ENABLE_BATCH`: Must be set to `True`, to enable batch API
 - `ENABLE_HOF`: Must be set to `False`, to disable Hall of Fame processing
-
-And optionally:
-
-- `MONITORING_AUTH_RAW`: May be a comma separated list of `user:hashed-password` pairs which are allowed to access the metrics at `https://example.com/grafana/`.
-- `AUTH_ALL_URLS` and `ALLOW_LIST`: Can be set to restrict access to the single scan webpage. See [Restricting Access](Docker-deployment.md#restricting-access) for more information.
+- `ALLOW_LIST` : Can be set to allow visitors to the 'frontpage' which allows single tests to be performed. This is normally not needed but can be useful for manually testing. Batch test result pages are always accessible.
 
 For example:
 
     cat >> docker/local.env <<EOF
     ENABLE_BATCH=True
     ENABLE_HOF=False
-    # user/password(s) for access to /grafana monitoring
-    MONITORING_AUTH_RAW=user:<htpasswd hash>
     # allowed IP's to visit web interface without password
     ALLOW_LIST=198.51.100.1,2001:db8:2::1
     EOF

@@ -11,6 +11,7 @@ cp -v /dist/docker/* docker
 # put $RELEASE into the compose.sh file
 envsubst '$RELEASE' < docker/compose-dist.sh > docker/compose.sh
 chmod a+x docker/compose.sh
+chmod a+x docker/user_manage.sh
 
 # set release version in local.env config
 echo "RELEASE='$RELEASE' # deploy $(date)" >> docker/local.env

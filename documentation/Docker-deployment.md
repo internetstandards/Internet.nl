@@ -114,7 +114,7 @@ Spin up instance:
       ghcr.io/internetstandards/util:latest \
       /deploy.sh
 
-This command will take a long time (up to 30 minutes) due to RPKI data that needs to be synced initially. After that it should complete without an error, indicating the application stack is up and running healthy. You can already prepare continue with the DNS setup below in the meantime.
+This command will take a a few minutes. After that it should complete without an error, indicating the application stack is up and running healthy. You can already prepare continue with the DNS setup below in the meantime.
 
 ## DNS setup
 
@@ -129,6 +129,10 @@ After deployment is complete, all services are healthy and DNS is setup you can 
     docker run -ti --rm --env=APP_URLS=$APP_URL ghcr.io/internetstandards/test-runner
 
 For more information see: [documentation/Docker-live-tests.md](Docker-live-tests.md)
+
+It might be that RPKI tests are not giving proper results yet. This might be because the RPKI database needs to be synced. This happens automatically and should be finished ~30 minutes after deployment.
+
+
 
 ## Compose command
 
@@ -286,9 +290,7 @@ Besides the single scan webpage, the Internet.nl application also contains a Bat
 
 ## Metrics (grafana/prometheus)
 
-The default deployment includes a metrics collection system. It consists of a Prometheus metrics server with various exporters and a Grafana frontend. To view metrics and graphs visit: `https://example.com/grafana/`. Authentication is configured using the `MONITORING_AUTH_RAW` variable.
-
-Also see: [Metrics](Docker-metrics.md)
+The default deployment includes a metrics collection system. It consists of a Prometheus metrics server with various exporters and a Grafana frontend. To view metrics and graphs visit: `https://example.com/grafana/`. For authentication and other information see: [Metrics](Docker-metrics.md)
 
 ## Monitoring/alerting
 
@@ -375,8 +377,6 @@ Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable
 To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
 and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
 and `verify` to verify a user's existence and password. Passwords are entered interactively.
-
-If you would like users on the host to manage batch users, set sudo access for this script.
 
 ### IP allow/deny lists
 
