@@ -192,6 +192,9 @@ services:
       public-internet:
         ipv6_address: $IPV6_IP_PUBLIC
         ipv4_address: $IPV4_WEBSERVER_IP_PUBLIC
+    volumes:
+      # mount monitoring credentials for testing/development
+      - ./webserver/dev.htpasswd:/etc/nginx/htpasswd/monitoring.htpasswd:ro
 
   unbound:
     networks:

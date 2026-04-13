@@ -31,7 +31,6 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
       - IPV6_TEST_ADDR
-      - MONITORING_AUTH_RAW
       - AUTH_ALL_URLS
       - ALLOW_LIST
       - ROUTINATOR_ALLOW_LIST
@@ -56,7 +55,11 @@ services:
     volumes:
       # persist certbot configuration between restarts
       - certbot-config:/etc/letsencrypt
-      - htpasswd-files:/etc/nginx/htpasswd/external
+      # include configured password for http basic auth (if enabled)
+      - $INTERNETNL_INSTALL_BASE/volumes/webserver/htpasswd:/etc/nginx/htpasswd
+      # mount old static password configuration for migration
+      - htpasswd-files:/etc/nginx/htpasswd-old
+      # share logs with logs exporter
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
 
     healthcheck:

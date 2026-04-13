@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.11.x (upcoming)
+
+- MONITORING_AUTH_RAW, is no longer used to configure monitoring authentication. Instead password entries must be entered directly in `/opt/Internet.nl/volumes/webserver/htpasswd/monitoring.htpasswd`. See: [Docker-Metrics](https://github.com/internetstandards/Internet.nl/blob/main/documentation/Docker-metrics.md#monitoring-user/allowlist-management). If you had configured monitoring auth previously you need to move this into the new file.
+
 ## 1.11.0 (in progress)
 
 _Compared to the latest 1.10 release._
@@ -11,7 +15,7 @@ All tests were updated to match the
 [2025-05 version of the NCSC TLS guidelines](https://www.ncsc.nl/en/transport-layer-security-tls/security-guidelines-for-transport-layer-security-2025-05).
 Most significant changes:
 
-- The list of good/sufficient/phase out/insufficient TLS versions, TLS authentication, curves, hashes, 
+- The list of good/sufficient/phase out/insufficient TLS versions, TLS authentication, curves, hashes,
   key exchange algorithms, FFDHE groups, RSA key lengths, and bulk encryption algorithms were updated
   to match the new guidelines.
 - A test for Extended Master Secret (RFC7627) was added.
@@ -29,13 +33,12 @@ Most significant changes:
   including some where servers preferred RSA over ECDHE, or CBC over POLY1305.
 - CCM_8 ciphers are now detected when enabled on a server.
 - OLD ciphers are no longer detected.
-- The cipher order test no longer separates between "the server cipher order preference is wrong" 
+- The cipher order test no longer separates between "the server cipher order preference is wrong"
   and "the server has no preference".
 
 ### Significant internal changes
 
 - ...
-### Possibly required changes to deployments
 
 ...
 
@@ -107,7 +110,7 @@ The API version is updated to 2.6.0 due to the new CAA fields.
 - Fixed handling for [CAA with non-ascii characters](https://github.com/internetstandards/Internet.nl/pull/1788).
 - Fixed possible exception in [mail test prechecks](https://github.com/internetstandards/Internet.nl/pull/1787).
 - Fixed an [issue with rate limiting](https://github.com/internetstandards/Internet.nl/pull/1792).
-- Update [Django to 4.2.22](https://github.com/internetstandards/Internet.nl/pull/1795) to fix 
+- Update [Django to 4.2.22](https://github.com/internetstandards/Internet.nl/pull/1795) to fix
   [CVE-2025-48432](https://www.djangoproject.com/weblog/2025/jun/04/security-releases/).
 
 ## 1.10.0
@@ -128,7 +131,7 @@ _Compared to the latest 1.9 release._
 
 ### Significant internal changes
 
-- The test code no longer interfaces with libunbound, but 
+- The test code no longer interfaces with libunbound, but
  [uses dnspython as a stub resolver](https://github.com/internetstandards/Internet.nl/pull/1578).
 - Periodic tests [are no longer enabled by default](https://github.com/internetstandards/Internet.nl/pull/1628).
 - UWSGI [cheaper](https://uwsgi-docs.readthedocs.io/en/latest/Cheaper.html) options are used to reduce idle processes and reduce memory consumption.
@@ -159,7 +162,7 @@ docker network rm internetnl-prod_public-internet
 ## 1.9.3
 
 - Updated the [expired PGP key](https://github.com/internetstandards/Internet.nl_content/pull/57).
-  
+
 ## 1.9.2
 
 - Fixed an issue where static files incorrectly required authentication (#1676)
@@ -214,7 +217,7 @@ jobs to generate the same report over and over.
 
 1.8.7 mainly contains various important fixes to support batch deployment.
 
-* Updated sectxt to use a patched version of PGPy with a fix for a 
+* Updated sectxt to use a patched version of PGPy with a fix for a
   [catastrophic regex backtracking issue](https://github.com/SecurityInnovation/PGPy/pull/467)
 * Updated nassl to fix memory leak in OCSP check.
 * Connection test zones are now re-signed every week instead of every month.
@@ -301,7 +304,7 @@ This release has API version 2.4.0:
 
 ## 1.7.1
 
-- Fixed the new [display of TLS versions](https://github.com/internetstandards/Internet.nl/issues/944) for mail tests. 
+- Fixed the new [display of TLS versions](https://github.com/internetstandards/Internet.nl/issues/944) for mail tests.
 - Fixed a [language mix-up](https://github.com/internetstandards/Internet.nl/issues/941) in the security.txt labels.
 - Fixed an [issue with the connection test and CSP form-action](https://github.com/internetstandards/Internet.nl/issues/945)
 
@@ -411,7 +414,7 @@ Bugfixes
 - Fix some minor typos and broken link [(#574)] [(#575)]
 - Add a missing ' in the frame-ancestors explanation [(#578)]
 - An empty part of Content Security Policy gives an error [(#583)]
-- Recursion error when stripping nonces in IPv4 and IPv6 comparison [(#587)] 
+- Recursion error when stripping nonces in IPv4 and IPv6 comparison [(#587)]
 - Remove certificate from the certificate chain in the shipped cert chain file [(#614)]
 
 Dependencies
@@ -718,19 +721,19 @@ Initial public release.
 --- Brief description for next version ---
 
 New
-- 
+-
 
 Changes
-- 
+-
 
 Bug Fixes
 -
 
 Dependencies
-- 
+-
 
 Migrations
-- 
+-
 
 Settings
-- 
+-

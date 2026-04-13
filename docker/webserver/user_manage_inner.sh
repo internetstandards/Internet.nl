@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-HTPASSWD_FILE="/etc/nginx/htpasswd/external/users.htpasswd"
+HTPASSWD_FILE="/etc/nginx/htpasswd/users.htpasswd"
 
 if [ ! -f "$HTPASSWD_FILE" ]; then
   touch "$HTPASSWD_FILE"
