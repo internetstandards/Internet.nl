@@ -1541,10 +1541,13 @@ class WebTLSExtendedMasterSecret(Subtest):
             label="detail web tls extended-master-secret label",
             explanation="detail web tls extended-master-secret exp",
             tech_string="detail web tls extended-master-secret tech table",
-            worst_status=scoring.STATUS_INFO,
+            worst_status=STATUS_INFO,
             full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
             model_score_field="extended_master_secret_score",
         )
+
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
 
     def save_result(self, status: TLSExtendedMasterSecretStatus):
         handlers = {
@@ -1556,21 +1559,25 @@ class WebTLSExtendedMasterSecret(Subtest):
         return handlers[status]()
 
     def result_good(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls extended-master-secret verdict good"
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
+        self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls extended-master-secret verdict bad"
         self.tech_data = "detail tech data no"
 
     def result_unknown(self):
+        self.was_tested()
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls extended-master-secret verdict unknown"
         self.tech_data = "detail tech data not-tested"
 
     def result_na_no_tls_1_2(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
@@ -2175,10 +2182,13 @@ class MailTLSExtendedMasterSecret(Subtest):
             label="detail mail tls extended-master-secret label",
             explanation="detail mail tls extended-master-secret exp",
             tech_string="detail mail tls extended-master-secret tech table",
-            worst_status=scoring.STATUS_INFO,
+            worst_status=STATUS_INFO,
             full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
             model_score_field="extended_master_secret_score",
         )
+
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
 
     def save_result(self, status: TLSExtendedMasterSecretStatus):
         handlers = {
@@ -2190,21 +2200,25 @@ class MailTLSExtendedMasterSecret(Subtest):
         return handlers[status]()
 
     def result_good(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls extended-master-secret verdict good"
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
+        self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls extended-master-secret verdict bad"
         self.tech_data = "detail tech data no"
 
     def result_unknown(self):
+        self.was_tested()
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls extended-master-secret verdict unknown"
         self.tech_data = "detail tech data not-tested"
 
     def result_na_no_tls_1_2(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
