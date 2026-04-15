@@ -17,7 +17,7 @@ msgstr ""
 "\n"
 "These hosters are allowed to use the 'Internet.nl compliant badge' that is shown on this page in their own communications.\n"
 "\n"
-"The scores of the listed hosters' own domains are automatically [checked and published](https://dashboard.internet.nl/#/published/103/). \n"
+"The scores of the listed hosters' own domains are automatically [checked and published](https://dashboard.internet.nl/published/103/). \n"
 "\n"
 "---"
 
