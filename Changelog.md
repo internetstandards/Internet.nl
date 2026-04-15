@@ -1,9 +1,8 @@
 # Change Log
 
-## 1.11.0 (in progress)
+## 1.11.0
 
 _Compared to the latest 1.10 release._
-
 
 ### TLS updates for NCSC 2025 guidelines
 
@@ -34,10 +33,18 @@ Most significant changes:
 
 ### Significant internal changes
 
-- ...
-### Possibly required changes to deployments
+- Upgraded to Django 5, Python 3.13, and Debian Trixie base image.
+- Switched TLS implementation to sslyze/nassl based reimplementation.
+- Switched to pyproject/uv.lock for project dependencies, replacing requirements files.
+- Added post-quantum hybrid ECDHE-MLKEM for TLS 1.3 in our web server.
+- Outgoing traffic now uses the configured public IPv4/IPv6 addresses.
+- Routinator can now be configured with an allowlist for shared instances.
 
-...
+### Bug fixes
+
+- Fixed [simhash exception when both address families fail](https://github.com/internetstandards/Internet.nl/issues/1893).
+- Fixed JSON serialization of sets in batch results.
+- Fixed [report generation locking](https://github.com/internetstandards/Internet.nl/issues/1749) for results views.
 
 ### API changes
 
