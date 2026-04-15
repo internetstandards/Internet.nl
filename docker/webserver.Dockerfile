@@ -1,6 +1,9 @@
 FROM nginx:1.29.1-alpine3.22
 
-RUN apk add --no-cache \
+RUN apk upgrade --no-cache \
+  # upgrade libexpat to match python3's pyexpat native module
+  libexpat \
+  && apk add --no-cache \
   # for random quic host key
   openssl \
   # for htpasswd
