@@ -7,7 +7,7 @@ _Compared to the latest 1.10 release._
 ### TLS updates for NCSC 2025 guidelines
 
 All tests were updated to match the
-[2025-05 version of the NCSC TLS guidelines](https://www.ncsc.nl/en/transport-layer-security-tls/security-guidelines-for-transport-layer-security-2025-05).
+[2025-05 version of the NCSC TLS guidelines](https://www.ncsc.nl/en/transport-layer-security/ICT-beveiligingsrichtlijnen-voor-TLS).
 Most significant changes:
 
 - The list of good/sufficient/phase out/insufficient TLS versions, TLS authentication, curves, hashes, 
