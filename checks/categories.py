@@ -1581,7 +1581,7 @@ class WebTLSExtendedMasterSecret(Subtest):
 
     def result_na_no_tls_1_2(self):
         self.was_tested()
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
 
@@ -2225,7 +2225,7 @@ class MailTLSExtendedMasterSecret(Subtest):
 
     def result_na_no_tls_1_2(self):
         self.was_tested()
-        self._status(STATUS_SUCCESS)
+        self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
 
