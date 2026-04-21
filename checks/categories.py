@@ -1184,6 +1184,7 @@ class WebTlsRenegotiationClient(Subtest):
             worst_status=scoring.WEB_TLS_CLIENT_RENEG_WORST_STATUS,
             full_score=scoring.WEB_TLS_CLIENT_RENEG_GOOD,
             model_score_field="client_reneg_score",
+            init_tech_type="table_translatable",
         )
 
     def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
@@ -1860,6 +1861,7 @@ class MailTlsRenegotiationClient(Subtest):
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_CLIENT_RENEG_GOOD,
             model_score_field="client_reneg_score",
+            init_tech_type="table_translatable",
         )
 
     def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
