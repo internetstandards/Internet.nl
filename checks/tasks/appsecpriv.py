@@ -123,6 +123,7 @@ def save_results(model, results, addr, domain):
                 model.securitytxt_errors = result.get("securitytxt_errors")
                 model.securitytxt_recommendations = result.get("securitytxt_recommendations")
                 model.securitytxt_found_host = result.get("securitytxt_found_host")
+                model.securitytxt_found_url = result.get("securitytxt_found_url")
                 model.content_security_policy_enabled = result.get("content_security_policy_enabled")
                 model.content_security_policy_score = result.get("content_security_policy_score")
                 model.content_security_policy_values = result.get("content_security_policy_values")
@@ -188,7 +189,7 @@ def build_report(model, category):
             default_message = [
                 {
                     "msgid": "retrieved-from",
-                    "context": {"hostname": model.securitytxt_found_host},
+                    "context": {"url": model.securitytxt_found_url},
                 }
             ]
         else:
