@@ -1185,7 +1185,9 @@ class WebTlsRenegotiationClient(Subtest):
             full_score=scoring.WEB_TLS_CLIENT_RENEG_GOOD,
             model_score_field="client_reneg_score",
             init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data tls-renegotiation-client",
         )
+        self.tech_data = [[self.tech_data]]
 
     def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
         handlers = {
@@ -1198,17 +1200,17 @@ class WebTlsRenegotiationClient(Subtest):
     def result_not_allowed(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls renegotiation-client verdict not-allowed"
-        self.tech_data = "detail tech data tls-renegotiation-client not-allowed"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "not-allowed"}])
 
     def result_allowed_with_low_limit(self):
         self._status(STATUS_INFO)
         self.verdict = "detail web tls renegotiation-client verdict allowed-with-low-limit"
-        self.tech_data = "detail tech data tls-renegotiation-client allowed-with-low-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-low-limit"}])
 
     def result_allowed_with_too_high_limit(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls renegotiation-client verdict allowed-with-too-high-limit"
-        self.tech_data = "detail tech data tls-renegotiation-client allowed-with-too-high-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-too-high-limit"}])
 
 
 class WebTlsCertTrust(Subtest):
@@ -1862,7 +1864,9 @@ class MailTlsRenegotiationClient(Subtest):
             full_score=scoring.MAIL_TLS_CLIENT_RENEG_GOOD,
             model_score_field="client_reneg_score",
             init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data tls-renegotiation-client",
         )
+        self.tech_data = [[self.tech_data]]
 
     def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
         handlers = {
@@ -1875,17 +1879,17 @@ class MailTlsRenegotiationClient(Subtest):
     def result_not_allowed(self):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls renegotiation-client verdict not-allowed"
-        self.tech_data = "detail tech data tls-renegotiation-client not-allowed"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "not-allowed"}])
 
     def result_allowed_with_low_limit(self):
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls renegotiation-client verdict allowed-with-low-limit"
-        self.tech_data = "detail tech data tls-renegotiation-client allowed-with-low-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-low-limit"}])
 
     def result_allowed_with_too_high_limit(self):
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls renegotiation-client verdict allowed-with-too-high-limit"
-        self.tech_data = "detail tech data tls-renegotiation-client allowed-with-too-high-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-too-high-limit"}])
 
 
 class MailTlsCertTrust(Subtest):
