@@ -105,6 +105,24 @@ SSLYZE_SCAN_COMMANDS_FOR_TLS = {
     TlsVersionEnum.TLS_1_2: ScanCommand.TLS_1_2_CIPHER_SUITES,
     TlsVersionEnum.TLS_1_3: ScanCommand.TLS_1_3_CIPHER_SUITES,
 }
+
+
+def cipher_scan_commands_for_versions(supported_tls_versions: list[TlsVersionEnum]) -> set[ScanCommand]:
+    """
+    Determine which cipher suite scan commands to run.
+    All TLS 1.3 ciphers are good/sufficient, so there is no need to scan them.
+    For any non-1.3 version, only the highest is scanned.
+    Potentially differing ciphers on lower versions are not independently interesting,
+    because the TLS version test already fails on those.
+    See also #2031
+    """
+    non_tls13 = [v for v in supported_tls_versions if v != TlsVersionEnum.TLS_1_3]
+    if not non_tls13:
+        return set()
+    highest = max(non_tls13, key=lambda v: v.value)
+    return {SSLYZE_SCAN_COMMANDS_FOR_TLS[highest]}
+
+
 # Some of the code in this file calls
 # ServerConnectivityInfo.get_preconfigured_tls_connection
 # before any other scans are done. This call requires a ServerTLSProbingResult,
@@ -514,6 +532,8 @@ def check_mail_tls_multiple(server_tuples) -> dict[str, dict[str, Any]]:
     """
     scans = []
     results = {}
+    ems_evaluations = {}
+    tls_versions_per_server = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         future_to_server = {}
 
@@ -524,7 +544,7 @@ def check_mail_tls_multiple(server_tuples) -> dict[str, dict[str, Any]]:
         for future in concurrent.futures.as_completed(future_to_server):
             server = future_to_server[future]
             try:
-                scan_request, ems_evaluation = future.result()
+                scan_request, ems_evaluation, supported_tls_versions = future.result()
             except Exception as exc:
                 log.error(f"Unexpected error generating scan request for mail server {server}: {exc}", exc_info=True)
                 results[server] = dict(server_reachable=False, tls_enabled=False)
@@ -532,6 +552,8 @@ def check_mail_tls_multiple(server_tuples) -> dict[str, dict[str, Any]]:
 
             if scan_request:
                 scans.append(scan_request)
+                ems_evaluations[scan_request.server_location.hostname] = ems_evaluation
+                tls_versions_per_server[scan_request.server_location.hostname] = supported_tls_versions
             else:
                 results[server] = dict(server_reachable=False, tls_enabled=False)
 
@@ -539,13 +561,16 @@ def check_mail_tls_multiple(server_tuples) -> dict[str, dict[str, Any]]:
         return results
     connection_limit = connection_limit_for_scans(scans)
     for all_suites, result, error in run_sslyze(scans, connection_limit=connection_limit):
+        hostname = result.server_location.hostname
         if error:
             log.info(f"sslyze scan for mail failed: {error}")
-            results[result.server_location.hostname] = dict(server_reachable=False, tls_enabled=False)
+            results[hostname] = dict(server_reachable=False, tls_enabled=False)
             continue
-        log.debug(f"sslyze mail scan complete for {result.server_location.hostname}, other scans may be pending")
-        results[result.server_location.hostname] = check_mail_tls(result, all_suites, ems_evaluation)
-        log.debug(f"check_mail_tls complete for {result.server_location.hostname}")
+        log.debug(f"sslyze mail scan complete for {hostname}, other scans may be pending")
+        results[hostname] = check_mail_tls(
+            result, all_suites, ems_evaluations[hostname], tls_versions_per_server[hostname]
+        )
+        log.debug(f"check_mail_tls complete for {hostname}")
     return results
 
 
@@ -564,7 +589,7 @@ def connection_limit_for_scans(scans: list[ServerScanRequest]):
 
 def _generate_mail_server_scan_request(
     mx_hostname: str,
-) -> tuple[ServerScanRequest | None, TLSExtendedMasterSecretEvaluation]:
+) -> tuple[ServerScanRequest | None, TLSExtendedMasterSecretEvaluation, list[TlsVersionEnum]]:
     """
     Generate the scan request (sslyze scan commands) for a mail server.
     Includes resolving and determining supported TLS versions.
@@ -573,7 +598,7 @@ def _generate_mail_server_scan_request(
         server_location = ServerNetworkLocation(hostname=mx_hostname, port=25)
     except ServerHostnameCouldNotBeResolved:
         log.info(f"unable to resolve MX host {mx_hostname}, marking server unreachable")
-        return None, TLSExtendedMasterSecretEvaluation()
+        return None, TLSExtendedMasterSecretEvaluation(), []
     network_configuration = ServerNetworkConfiguration(
         tls_server_name_indication=mx_hostname.rstrip("."),
         tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
@@ -590,10 +615,8 @@ def _generate_mail_server_scan_request(
     )
     if not supported_tls_versions:
         log.info(f"no TLS version support found for MX host {mx_hostname}, marking server unreachable")
-        return None, extended_master_secret_evaluation
-    scan_commands = SSLYZE_SCAN_COMMANDS | {
-        SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions
-    }
+        return None, extended_master_secret_evaluation, []
+    scan_commands = SSLYZE_SCAN_COMMANDS | cipher_scan_commands_for_versions(supported_tls_versions)
 
     return (
         ServerScanRequest(
@@ -607,6 +630,7 @@ def _generate_mail_server_scan_request(
             ),
         ),
         extended_master_secret_evaluation,
+        supported_tls_versions,
     )
 
 
@@ -614,16 +638,15 @@ def check_mail_tls(
     result: ServerScanResult,
     all_suites: list[CipherSuitesScanAttempt],
     extended_master_secret_evaluation: TLSExtendedMasterSecretEvaluation,
+    supported_tls_versions: list[TlsVersionEnum],
 ):
     """
     Perform evaluation and additional probes for a single mail server.
     This happens after sslyze has already been run on it.
     """
-    prots_accepted = [suites.result.tls_version_used for suites in all_suites if suites.result.is_tls_version_supported]
     ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
-    prots_accepted.sort(key=lambda t: t.value, reverse=True)
 
-    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(prots_accepted)
+    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
     fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
 
@@ -634,7 +657,7 @@ def check_mail_tls(
     )
     cipher_order_evaluation = test_cipher_order(
         server_conn_info,
-        prots_accepted,
+        supported_tls_versions,
         cipher_evaluation,
     )
     key_exchange_hash_evaluation = test_key_exchange_hash(server_conn_info)
@@ -742,7 +765,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     )
     scan_commands = (
         SSLYZE_SCAN_COMMANDS
-        | {SSLYZE_SCAN_COMMANDS_FOR_TLS[tls_version] for tls_version in supported_tls_versions}
+        | cipher_scan_commands_for_versions(supported_tls_versions)
         | {ScanCommand.CERTIFICATE_INFO}
     )
     log.info(f"==== precheck on {server_location} supports {supported_tls_versions} {scan_commands=}")
