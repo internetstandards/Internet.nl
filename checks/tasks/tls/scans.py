@@ -1033,7 +1033,7 @@ def test_cipher_order(
     order_tuples = [
         (
             cipher_evaluation.ciphers_phase_out,
-            cipher_evaluation.ciphers_sufficient + cipher_evaluation.ciphers_good_no_tls13,
+            cipher_evaluation.ciphers_sufficient_no_tls13 + cipher_evaluation.ciphers_good_no_tls13,
         ),
     ]
     for expected_less_preferred, expected_more_preferred_list in order_tuples:
