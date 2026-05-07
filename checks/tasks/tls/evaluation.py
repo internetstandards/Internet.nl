@@ -164,6 +164,7 @@ class TLSCipherEvaluation:
     ciphers_good: list[CipherSuite]
     ciphers_good_no_tls13: list[CipherSuite]
     ciphers_sufficient: list[CipherSuite]
+    ciphers_sufficient_no_tls13: list[CipherSuite]
     ciphers_phase_out: list[CipherSuite]
     ciphers_bad: list[CipherSuite]
 
@@ -191,6 +192,7 @@ class TLSCipherEvaluation:
             ciphers_good=ciphers_good,
             ciphers_good_no_tls13=[c for c in ciphers_good if c.name not in _TLS_1_3_CIPHER_SUITES],
             ciphers_sufficient=ciphers_sufficient,
+            ciphers_sufficient_no_tls13=[c for c in ciphers_sufficient if c.name not in _TLS_1_3_CIPHER_SUITES],
             ciphers_phase_out=ciphers_phase_out,
             ciphers_bad=ciphers_bad,
             ciphers_good_str=cls._format_str(ciphers_good),
