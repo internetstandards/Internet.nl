@@ -89,6 +89,7 @@ from checks.tasks.tls.tls_constants import (
 from internetnl import log
 
 SSLYZE_NETWORK_TIMEOUT = 10
+SSLYZE_NETWORK_MAX_RETRIES = 0
 
 SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
@@ -321,6 +322,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
                 tls_server_name_indication=hostname_no_trailing_dot,
                 http_user_agent=settings.USER_AGENT,
                 network_timeout=SSLYZE_NETWORK_TIMEOUT,
+                network_max_retries=SSLYZE_NETWORK_MAX_RETRIES,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
             scan_commands_extra_arguments=scan_commands_extra_arguments,
@@ -334,6 +336,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
                 tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
                 smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
                 network_timeout=SSLYZE_NETWORK_TIMEOUT,
+                network_max_retries=SSLYZE_NETWORK_MAX_RETRIES,
             ),
             scan_commands={ScanCommand.CERTIFICATE_INFO},
             scan_commands_extra_arguments=scan_commands_extra_arguments,
@@ -576,6 +579,7 @@ def _generate_mail_server_scan_request(
         tls_opportunistic_encryption=ProtocolWithOpportunisticTlsEnum.SMTP,
         smtp_ehlo_hostname=settings.SMTP_EHLO_DOMAIN,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
+        network_max_retries=SSLYZE_NETWORK_MAX_RETRIES,
     )
     supported_tls_versions, extended_master_secret_evaluation = check_supported_tls_versions(
         ServerConnectivityInfo(
@@ -727,6 +731,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         tls_server_name_indication=url.rstrip("."),
         http_user_agent=settings.USER_AGENT,
         network_timeout=SSLYZE_NETWORK_TIMEOUT,
+        network_max_retries=SSLYZE_NETWORK_MAX_RETRIES,
     )
     supported_tls_versions, extended_master_secret_evaluation = check_supported_tls_versions(
         ServerConnectivityInfo(
