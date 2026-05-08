@@ -14,7 +14,7 @@ dependencies = [
     "chardet",
     "colorlog",
     "cryptography",
-    "django>=5.2,<6",
+    "django>=5.2.14,<6",
     "django-bleach",
     "django-browser-reload",
     "django-enumfields",
