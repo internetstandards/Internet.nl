@@ -55,6 +55,7 @@ batch_mail_registered = check_registry("batch_mail_auth", batch_mail_callback)
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def dmarc(self, url, *args, **kwargs):
     return do_dmarc(url, *args, **kwargs)
@@ -65,6 +66,7 @@ def dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_dmarc(self, url, *args, **kwargs):
     return do_dmarc(url, *args, **kwargs)
@@ -75,6 +77,7 @@ def batch_dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def dkim(self, url, *args, **kwargs):
     return do_dkim(url, *args, **kwargs)
@@ -85,6 +88,7 @@ def dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_dkim(self, url, *args, **kwargs):
     return do_dkim(url, *args, **kwargs)
@@ -95,6 +99,7 @@ def batch_dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)
@@ -105,6 +110,7 @@ def spf(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)

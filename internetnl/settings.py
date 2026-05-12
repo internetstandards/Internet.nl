@@ -11,6 +11,8 @@ Note that the most important settings, which commonly change, can also be set us
 For an example, see internet.nl.dist.env.
 """
 
+from datetime import timedelta
+
 import os
 from os import getenv
 import socket
@@ -430,6 +432,13 @@ SHARED_TASK_TIME_LIMIT_MEDIUM = 60  # was 30
 
 SHARED_TASK_SOFT_TIME_LIMIT_LOW = 20  # was 10
 SHARED_TASK_TIME_LIMIT_LOW = 30  # was 15
+
+# Amount of time after which a task from the queue won't be executed by a worker but discarded instead
+# Setting to CACHE_TTL because this is the frontend polling timeout as defined in shared.py:process()
+SHARED_TASK_EXPIRY_TIME = int(CACHE_TTL * 1.1)
+# Batch does not have a polling user waiting for results, but set a expiry nontheless, so tasks that keep
+# getting requeued for some reason (eg: worker periodic restart before task completion) eventually get dropped as well.
+BATCH_SHARED_TASK_EXPIRY_TIME = timedelta(hours=1).seconds
 
 # --- TLS configuration
 #
