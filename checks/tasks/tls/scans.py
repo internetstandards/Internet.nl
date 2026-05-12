@@ -93,10 +93,12 @@ SSLYZE_NETWORK_MAX_RETRIES = 0
 
 SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
-    ScanCommand.TLS_1_3_EARLY_DATA,
     ScanCommand.SESSION_RENEGOTIATION,
     ScanCommand.ELLIPTIC_CURVES,
 }
+# TLS_1_3_EARLY_DATA only works for HTTPS - it sends an HTTP GET request
+# which breaks SMTP sessions. See #2055.
+SSLYZE_WEB_SCAN_COMMANDS = {ScanCommand.TLS_1_3_EARLY_DATA}
 SSLYZE_SCAN_COMMANDS_FOR_TLS = {
     TlsVersionEnum.SSL_2_0: ScanCommand.SSL_2_0_CIPHER_SUITES,
     TlsVersionEnum.SSL_3_0: ScanCommand.SSL_3_0_CIPHER_SUITES,
@@ -713,18 +715,8 @@ def check_mail_tls(
         fs_bad=list(fs_evaluation.bad_str),
         fs_phase_out=list(fs_evaluation.phase_out_str),
         fs_score=fs_evaluation.score,
-        zero_rtt=(
-            ZeroRttStatus.bad
-            if result.scan_result.tls_1_3_early_data.result
-            and result.scan_result.tls_1_3_early_data.result.supports_early_data
-            else ZeroRttStatus.good
-        ),
-        zero_rtt_score=(
-            scoring.WEB_TLS_ZERO_RTT_BAD
-            if result.scan_result.tls_1_3_early_data.result
-            and result.scan_result.tls_1_3_early_data.result.supports_early_data
-            else scoring.WEB_TLS_ZERO_RTT_GOOD
-        ),
+        zero_rtt=ZeroRttStatus.na,
+        zero_rtt_score=scoring.MAIL_TLS_ZERO_RTT_GOOD,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
@@ -765,6 +757,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     )
     scan_commands = (
         SSLYZE_SCAN_COMMANDS
+        | SSLYZE_WEB_SCAN_COMMANDS
         | cipher_scan_commands_for_versions(supported_tls_versions)
         | {ScanCommand.CERTIFICATE_INFO}
     )
