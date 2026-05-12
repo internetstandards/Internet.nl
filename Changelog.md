@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.11.1
+
+- Fixed [false positive cipher order violation](https://github.com/internetstandards/Internet.nl/issues/2046)
+  when TLS 1.3 sufficient ciphers were incorrectly included in the TLS 1.2 cipher order test.
+- Fixed [Extended Master Secret incorrectly set to not-tested](https://github.com/internetstandards/Internet.nl/issues/2036)
+  when it should be not-applicable.
+- Fixed [0-RTT test breaking SMTP sessions](https://github.com/internetstandards/Internet.nl/issues/2055)
+  by disabling the test for mail servers [for now](https://github.com/internetstandards/Internet.nl/issues/2058).
+- Reduced TLS scan time by only testing ciphers for the highest supported non-1.3 TLS version
+  and disabling sslyze network retries ([#2031](https://github.com/internetstandards/Internet.nl/issues/2031)).
+
 ## 1.11.0
 
 _Compared to the latest 1.10 release._
