@@ -102,6 +102,7 @@ def ns(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
@@ -122,6 +123,7 @@ def mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
@@ -132,6 +134,7 @@ def batch_mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -142,6 +145,7 @@ def web(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)

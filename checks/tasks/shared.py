@@ -38,6 +38,7 @@ with open(settings.CA_FINGERPRINTS) as f:
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def mail_get_servers(self, url, *args, **kwargs):
     return do_mail_get_servers(self, url, *args, **kwargs)
@@ -47,6 +48,7 @@ def mail_get_servers(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mail_get_servers(self, url, *args, **kwargs):
     return do_mail_get_servers(self, url, *args, **kwargs)
@@ -56,6 +58,7 @@ def batch_mail_get_servers(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def resolve_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_single_a_aaaa(qname)
@@ -65,6 +68,7 @@ def resolve_a_aaaa(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_single_a_aaaa(qname)
@@ -74,6 +78,7 @@ def batch_resolve_a_aaaa(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def resolve_all_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_all_a_aaaa(qname)
@@ -83,6 +88,7 @@ def resolve_all_a_aaaa(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_resolve_all_a_aaaa(self, qname, *args, **kwargs):
     return do_resolve_all_a_aaaa(qname)
@@ -92,6 +98,7 @@ def batch_resolve_all_a_aaaa(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def resolve_mx(self, qname, *args, **kwargs):
     return do_resolve_mx_ips(self, qname, *args, **kwargs)
@@ -101,6 +108,7 @@ def resolve_mx(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_resolve_mx(self, qname, *args, **kwargs):
     return do_resolve_mx_ips(self, qname, *args, **kwargs)
@@ -110,6 +118,7 @@ def batch_resolve_mx(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def resolve_ns(self, qname, *args, **kwargs):
     return do_resolve_ns_ips(qname)
@@ -119,6 +128,7 @@ def resolve_ns(self, qname, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_resolve_ns(self, qname, *args, **kwargs):
     return do_resolve_ns_ips(qname)
