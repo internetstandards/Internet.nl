@@ -227,7 +227,7 @@ services:
     # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
     user: root
     entrypoint: /entrypoint-worker.sh
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+    command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
@@ -295,7 +295,7 @@ services:
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
-      # even though eventlet is used and childs are not really threads or processes, this settings reduces
+      # even though gevent is used and childs are not really threads or processes, this settings reduces
       # issues with high memory usage, probably because some objects are freed?
       - CELERYD_MAX_TASKS_PER_CHILD=100
 
@@ -317,7 +317,7 @@ services:
     # disable swap by settings swap to the memory limit
     memswap_limit: $WORKER_NASSL_MEMORY_LIMIT
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+    command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues nassl_worker,batch_nassl
     # set hostname for Sentry
     hostname: worker-nassl
@@ -334,7 +334,7 @@ services:
     deploy:
       replicas: $WORKER_SLOW_REPLICAS
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
+    command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
 
   # celery task queue
