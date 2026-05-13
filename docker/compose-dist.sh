@@ -7,7 +7,7 @@ set -e
 # determine install base for multi environment deployments (parent of directory containing this file)
 INTERNETNL_INSTALL_BASE=$(dirname "$(dirname "$(readlink -f "$0")")")
 
-exec docker run -ti --rm --pull=never \
+exec docker run -ti --rm --pull=missing \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume "$INTERNETNL_INSTALL_BASE:/opt/Internet.nl" \
   --workdir /opt/Internet.nl \
