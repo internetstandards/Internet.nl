@@ -395,5 +395,5 @@ develop_frontend: ## same as develop, but focus on frontend only
 	# shut everything down
 	${MAKE} down env=develop
 
-uv_lock: ## update the uv.lock file after changing pyproject.toml
+uv_lock uv.lock: ## update the uv.lock file after changing pyproject.toml
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools uv lock

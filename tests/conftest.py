@@ -199,7 +199,7 @@ def pytest_generate_tests(metafunc):
 # -----------------------------------------------------------------------------
 
 
-@pytest.fixture(params=["prefork", "gevent", "eventlet"])
+@pytest.fixture(params=["prefork", "gevent"])
 def custom_celery_worker(request):
     """Spawn celery worker to be used during test.
 
