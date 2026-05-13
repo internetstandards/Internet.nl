@@ -633,19 +633,6 @@ wheels = [
 ]
 
 [[package]]
-name = "eventlet"
-version = "0.40.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "dnspython" },
-    { name = "greenlet" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d1/d8/f72d8583db7c559445e0e9500a9b9787332370c16980802204a403634585/eventlet-0.40.4.tar.gz", hash = "sha256:69bef712b1be18b4930df6f0c495d2a882bf7b63aa111e7b6eeff461cfcaf26f", size = 565920, upload-time = "2025-11-26T13:57:31.126Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/22/6d/8e1fa901f6a8307f90e7bd932064e27a0062a4a7a16af38966a9c3293c52/eventlet-0.40.4-py3-none-any.whl", hash = "sha256:6326c6d0bf55810bece151f7a5750207c610f389ba110ffd1541ed6e5215485b", size = 364588, upload-time = "2025-11-26T13:57:29.09Z" },
-]
-
-[[package]]
 name = "flake8"
 version = "7.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -880,7 +867,6 @@ dependencies = [
     { name = "django-redis" },
     { name = "django-statsd-mozilla" },
     { name = "dnspython" },
-    { name = "eventlet" },
     { name = "forcediphttpsadapter" },
     { name = "gevent" },
     { name = "gitpython" },
@@ -958,7 +944,6 @@ requires-dist = [
     { name = "django-redis", specifier = "<5" },
     { name = "django-statsd-mozilla" },
     { name = "dnspython" },
-    { name = "eventlet" },
     { name = "forcediphttpsadapter" },
     { name = "gevent" },
     { name = "gitpython" },

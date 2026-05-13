@@ -38,10 +38,6 @@ from checks.tasks.shared import (
 from checks.tasks.tls.http import http_checks
 from interface import batch, batch_shared_task, redis_id
 
-# Workaround for https://github.com/eventlet/eventlet/issues/413 for eventlet
-# while monkey patching. That way we can still catch subprocess.TimeoutExpired
-# instead of just Exception which may intervene with Celery's own exceptions.
-# Gevent does not have the same issue.
 from internetnl import log
 
 from checks.tasks.tls.scans import ChecksMode, cert_checks, has_daneTA, check_web_tls, check_mail_tls_multiple
