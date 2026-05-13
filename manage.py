@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
 
-#from gevent import monkey
-#monkey.patch_all(aggressive=True)
-#from psycogreen.gevent import patch_psycopg
-#patch_psycopg()
-
-#import eventlet
-#eventlet.monkey_patch()
-#from psycogreen.eventlet import patch_psycopg
-#patch_psycopg()
-
 import os
 import sys
 
