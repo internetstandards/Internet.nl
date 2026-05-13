@@ -23,7 +23,6 @@ dependencies = [
     "django-redis<5",
     "django-statsd-mozilla",
     "dnspython",
-    "eventlet",
     "forcediphttpsadapter",
     "gevent",
     "gitpython",
