@@ -32,7 +32,7 @@ For a domain that does not otherwise send email, use:
 
     example.com.		               TXT	"v=spf1 a -all"	; The "a" mechanism is needed for the mail test (see rfc7208, section-2.3).
     *._domainkey.example.com.	     TXT	"v=DKIM1; p="	; empty DKIM, also to score 100% for this non-sending subdomain that does have SPF "a" mechanism which is needed for mail test.
-    _dmarc.example.com.	           TXT	"v=DMARC1; p=reject; sp=reject;"
+    _dmarc.example.com.	           TXT	"v=DMARC1; p=reject; sp=reject"
 
     ; optionally set an CAA record to Let's Encrypt or any other used ACME supporting certificate authority (note that if CAA is used, the correct certificate authority must be present)
     ; example.com.                 CAA 0 issue "letsencrypt.org;"
