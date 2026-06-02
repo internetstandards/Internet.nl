@@ -22,7 +22,7 @@ DEBUG = "--debug" in sys.argv
 OUTPUT_TEXTFILE = "/prometheus-textfile-directory/tests.prom"
 
 
-DEFAULT_TEST_TIMEOUT = 200
+DEFAULT_TEST_TIMEOUT = 500
 TEST_TIMEOUT = int(os.environ.get("INTERNETNL_CACHE_TTL", DEFAULT_TEST_TIMEOUT))
 REQUEST_TIMEOUT = 30
 
