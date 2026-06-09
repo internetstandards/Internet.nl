@@ -3,7 +3,29 @@ from unittest import skip
 from django.test import SimpleTestCase
 
 import checks
+from checks.models import DmarcPolicyStatus
 from checks.tasks import mail
+from checks.tasks.dmarc_parser import parse as dmarc_parse
+
+
+class DmarcVerifySufficientPolicyTestCase(SimpleTestCase):
+    def _verify(self, record, is_org_domain=False):
+        parsed = dmarc_parse(record)
+        status, _ = mail.dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list=[])
+        return status
+
+    def test_strict_policy_is_valid(self):
+        self.assertEqual(self._verify("v=DMARC1; p=reject"), DmarcPolicyStatus.valid)
+
+    def test_none_policy_is_insufficient(self):
+        self.assertEqual(self._verify("v=DMARC1; p=none"), DmarcPolicyStatus.invalid_p_sp)
+
+    def test_test_mode_makes_strict_policy_insufficient(self):
+        """RFC 9989 `t=y` puts the policy in test mode; treat as `p=none`."""
+        self.assertEqual(self._verify("v=DMARC1; p=reject; t=y"), DmarcPolicyStatus.invalid_p_sp)
+
+    def test_test_mode_off_keeps_strict_policy_valid(self):
+        self.assertEqual(self._verify("v=DMARC1; p=reject; t=n"), DmarcPolicyStatus.valid)
 
 
 class DmarcNonSendingPolicyRegexTestCase(SimpleTestCase):
