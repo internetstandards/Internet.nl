@@ -1580,7 +1580,11 @@ class WebTLSExtendedMasterSecret(Subtest):
         self.tech_data = "detail tech data not-tested"
 
     def result_na_no_tls_1_2(self):
-        self.was_tested()
+        # Do not call was_tested(): no TLS 1.2 means EMS isn't available,
+        # so there is no result, and we should not make it mandatory.
+        # was_tested() would set worst_status=STATUS_FAIL; combined with
+        # STATUS_NOT_TESTED, _verdict then counts the subtest as a fail
+        # and flips the category icon to failed (#2068).
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
@@ -2224,7 +2228,7 @@ class MailTLSExtendedMasterSecret(Subtest):
         self.tech_data = "detail tech data not-tested"
 
     def result_na_no_tls_1_2(self):
-        self.was_tested()
+        # See WebTLSExtendedMasterSecret.result_na_no_tls_1_2 (#2068).
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
