@@ -1061,8 +1061,9 @@ components:
                     The validation status of the DMARC policy:
                     * `valid` - The policy is valid and compliant.
                     * `invalid_syntax` - The policy is not syntactically correct.
-                    * `invalid_p_sp` - The 'p=' or 'sp=' tag result in a less
-                      than compliant policy.
+                    * `invalid_p_sp` - The policy provides insufficient
+                      protection: either the effective 'p='/'sp=' value is
+                      'none', or the record is in test mode ('t=y').
                     * `invalid_external` - The external destinations specified
                       in 'rua=' and/or 'ruf=' are not valid.
 
