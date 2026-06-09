@@ -1038,6 +1038,11 @@ class MxDomain(IPv6TestDomain):
 
 
 class DmarcPolicyStatus(LabelEnum):
+    """
+    `invalid_p_sp` is broader than its name suggests: it is also returned for
+    `t=y` (RFC 9989 test mode). Name is kept for batch API backwards compatibility
+    """
+
     valid = 0
     invalid_syntax = 1
     invalid_p_sp = 2
