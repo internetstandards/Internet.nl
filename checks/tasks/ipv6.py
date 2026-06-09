@@ -546,18 +546,20 @@ def simhash(url, task=None):
         except requests.RequestException:
             pass
 
-    if not v4_response or not v6_response:
+    # Only short-circuit when an address family has no response at all (#2069, #1267)
+    if v4_response is None or v6_response is None:
         log.debug(f"simhash unable to get response on both address families (v4={v4_response}, v6={v6_response})")
-        return simhash_score, distance, v6_response.status_code if v6_response else None
+        return simhash_score, distance, v6_response.status_code if v6_response is not None else None
 
     if v4_ports != v6_ports:
         log.debug(f"simhash found different ports on IPv4 ({v4_ports}) and IPv6 ({v6_ports})")
-        return simhash_score, distance, v6_response.status_code if v6_response else None
+        return simhash_score, distance, v6_response.status_code
 
     # Regardless of content, status code must be identical (#1267)
+    # Leaving distance at SIMHASH_NOT_CALCULABLE makes the callback emit a
+    # fail icon (the score itself is unused on this branch).
     if v4_response.status_code != v6_response.status_code:
         log.debug(f"simhash found {v4_response.status_code=} != {v6_response.status_code=}")
-        # FAIL: Could not establish a connection on both addresses.
         return scoring.WEB_IPV6_WS_SIMHASH_OK, distance, v6_response.status_code
     log.debug(f"simhash found status code {v4_response.status_code}, consistent for IPv4 and IPv6")
 
