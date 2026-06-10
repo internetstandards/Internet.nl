@@ -1038,6 +1038,14 @@ class MxDomain(IPv6TestDomain):
 
 
 class DmarcPolicyStatus(LabelEnum):
+    """
+    `invalid_p_sp` is broader than its name suggests: it also covers
+    `p=quarantine; t=y` (RFC9989 test mode, which downgrades the applied
+    policy one level). `p=reject; t=y` is still valid
+    (downgrades to quarantine, which we accept). Name is kept for
+    batch API backwards compatibility.
+    """
+
     valid = 0
     invalid_syntax = 1
     invalid_p_sp = 2
