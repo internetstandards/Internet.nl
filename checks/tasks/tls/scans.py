@@ -49,7 +49,11 @@ from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
 )
-from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import _set_cipher_suite_string
+from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import (
+    CipherSuiteAcceptedByServer,
+    _set_cipher_suite_string,
+    connect_with_cipher_suite,
+)
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import CipherSuitesRepository
 from sslyze.scanner.models import CipherSuitesScanAttempt
 from sslyze.server_connectivity import ServerConnectivityInfo
@@ -85,6 +89,7 @@ from checks.tasks.tls.tls_constants import (
     CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
+    TLS_1_3_BAD_CIPHERS,
 )
 from internetnl import log
 
@@ -112,7 +117,8 @@ SSLYZE_SCAN_COMMANDS_FOR_TLS = {
 def cipher_scan_commands_for_versions(supported_tls_versions: list[TlsVersionEnum]) -> set[ScanCommand]:
     """
     Determine which cipher suite scan commands to run.
-    All TLS 1.3 ciphers are good/sufficient, so there is no need to scan them.
+    All TLS 1.3 ciphers but one are good/sufficient, so we skip the full scan;
+    `detect_tls_1_3_bad_ciphers` probes the one bad cipher separately (#2078).
     For any non-1.3 version, only the highest is scanned.
     Potentially differing ciphers on lower versions are not independently interesting,
     because the TLS version test already fails on those.
@@ -646,17 +652,19 @@ def check_mail_tls(
     Perform evaluation and additional probes for a single mail server.
     This happens after sslyze has already been run on it.
     """
-    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
-
-    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
-    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
-    cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-
     server_conn_info = ServerConnectivityInfo(
         server_location=result.server_location,
         network_configuration=result.network_configuration,
         tls_probing_result=result.connectivity_result,
     )
+
+    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+    ciphers_accepted.extend(detect_tls_1_3_bad_ciphers(server_conn_info, supported_tls_versions, TLS_1_3_BAD_CIPHERS))
+
+    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
+    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
+    cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
+
     cipher_order_evaluation = test_cipher_order(
         server_conn_info,
         supported_tls_versions,
@@ -780,16 +788,18 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     if error:
         log.warning(f"sslyze scan for web on {url} partially failed (continuing with available results): {error}")
 
-    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
-    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
-    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
-    cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
-
     server_conn_info = ServerConnectivityInfo(
         server_location=result.server_location,
         network_configuration=result.network_configuration,
         tls_probing_result=result.connectivity_result,
     )
+
+    ciphers_accepted = [cipher for suites in all_suites for cipher in suites.result.accepted_cipher_suites]
+    ciphers_accepted.extend(detect_tls_1_3_bad_ciphers(server_conn_info, supported_tls_versions, TLS_1_3_BAD_CIPHERS))
+
+    protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
+    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
+    cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_order_evaluation = test_cipher_order(
         server_conn_info,
         supported_tls_versions,
@@ -1114,6 +1124,35 @@ def _check_cipher_suite_available(tls_version: TlsVersionEnum, cipher_suite: Cip
         return True
     except ValueError:
         return False
+
+
+def detect_tls_1_3_bad_ciphers(
+    server_conn_info: ServerConnectivityInfo,
+    supported_tls_versions: list[TlsVersionEnum],
+    cipher_names: list[str],
+) -> list[CipherSuiteAcceptedByServer]:
+    """
+    Targeted probes for TLS 1.3 ciphers, as TLS 1.3 is common, and all
+    but one cipher are good/sufficient. (#2078, #2050, #2031)
+    """
+    if TlsVersionEnum.TLS_1_3 not in supported_tls_versions:
+        return []
+    accepted: list[CipherSuiteAcceptedByServer] = []
+    for cipher_name in cipher_names:
+        try:
+            cipher_suite = CipherSuitesRepository.get_cipher_suite_with_openssl_name(
+                TlsVersionEnum.TLS_1_3, cipher_name
+            )
+            result = connect_with_cipher_suite(server_conn_info, TlsVersionEnum.TLS_1_3, cipher_suite)
+        except Exception as exc:
+            log.warning(
+                f"TLS 1.3 cipher probe for {cipher_name} failed on"
+                f" {server_conn_info.server_location.hostname}: {exc}"
+            )
+            continue
+        if isinstance(result, CipherSuiteAcceptedByServer):
+            accepted.append(result)
+    return accepted
 
 
 def check_supported_tls_versions(
