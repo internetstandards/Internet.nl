@@ -73,6 +73,11 @@ CIPHERS_SUFFICIENT = [
     "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
     "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
 ]
+# TLS 1.3 is special: it's really common, and there is only one
+# rare bad cipher. So we reverse the usual testing and only
+# verify the one bad cipher (#2078, #2050, #2031)
+TLS_1_3_BAD_CIPHERS = ["TLS_AES_128_CCM_8_SHA256"]
+
 CIPHERS_PHASE_OUT = [
     "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384",
     "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384",
