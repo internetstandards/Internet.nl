@@ -515,8 +515,8 @@ def dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list):
     """
     Verify that the DMARC record provides effective protection.
 
-    The effective policy (`sp=` for org domains when present, else
-    `p=`) must not be `none`, and the record must not be in test mode (`t=y`).
+    The effective policy is `sp=` for org domains when present, else `p=`.
+    A `t=y` (test mode, RFC9989) downgrades the applied policy one level.
     """
     status = DmarcPolicyStatus.valid
     score = scoring.MAIL_AUTH_DMARC_POLICY_PASS
@@ -550,7 +550,7 @@ def dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list):
                 value = request.split("=")[1].lower()
                 testing = parsed["directives"].get("testing")
                 in_test_mode = testing is not None and testing.split("=")[1].lower() == "y"
-                if value == "none" or in_test_mode:
+                if value == "none" or (in_test_mode and value == "quarantine"):
                     status = DmarcPolicyStatus.invalid_p_sp
                     score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
     return (status, score)
