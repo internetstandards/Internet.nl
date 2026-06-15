@@ -50,7 +50,7 @@ dependencies = [
     "service-identity",
     "setuptools-rust",
     "setuptools-scm",
-    "sslyze>=6.3.0",
+    "sslyze>=6.3.0,<7",
     "statshog",
     "uwsgi",
     "wheel",
