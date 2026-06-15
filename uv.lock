@@ -970,7 +970,7 @@ requires-dist = [
     { name = "service-identity" },
     { name = "setuptools-rust" },
     { name = "setuptools-scm" },
-    { name = "sslyze", specifier = ">=6.3.0" },
+    { name = "sslyze", specifier = ">=6.3.0,<7" },
     { name = "statshog" },
     { name = "uwsgi" },
     { name = "wheel" },

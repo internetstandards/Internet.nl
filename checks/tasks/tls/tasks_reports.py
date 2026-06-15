@@ -1,5 +1,6 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+import concurrent.futures
 import itertools
 import time
 from timeit import default_timer as timer
@@ -40,7 +41,13 @@ from interface import batch, batch_shared_task, redis_id
 
 from internetnl import log
 
-from checks.tasks.tls.scans import ChecksMode, cert_checks, has_daneTA, check_web_tls, check_mail_tls_multiple
+from checks.tasks.tls.scans import (
+    ChecksMode,
+    cert_checks,
+    has_daneTA,
+    check_web_tls,
+    scan_one_mail_server,
+)
 
 # Maximum number of tries on failure to establish a connection.
 # Useful on one-time errors on SMTP.
@@ -808,12 +815,19 @@ def do_web_cert(af_ip_pairs, url, *args, **kwargs):
 def do_web_conn(af_ip_pairs, url, *args, **kwargs):
     """
     Start all the TLS related checks for the web test.
-
+    IPv4 and IPv6 pairs are scanned in parallel.
     """
+    results = {}
     try:
-        results = {}
-        for af_ip_pair in af_ip_pairs:
-            results[af_ip_pair[1]] = check_web_tls(url, af_ip_pair, args, kwargs)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(len(af_ip_pairs), 1)) as executor:
+            future_to_ip = {
+                executor.submit(check_web_tls, url, af_ip_pair, args, kwargs): af_ip_pair[1]
+                for af_ip_pair in af_ip_pairs
+            }
+            for future in concurrent.futures.as_completed(future_to_ip):
+                ip = future_to_ip[future]
+                results[ip] = future.result()
+                log.debug(f"do_web_conn {url}: result for {ip} collected")
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded. Url: %s", url)
         for af_ip_pair in af_ip_pairs:
@@ -821,6 +835,24 @@ def do_web_conn(af_ip_pairs, url, *args, **kwargs):
                 results[af_ip_pair[1]] = dict(server_reachable=False, tls_enabled=False)
 
     return ("tls_conn", results)
+
+
+def check_mail_tls_multiple(mx_hostnames) -> dict[str, dict]:
+    """
+    Run per-MX TLS analysis in parallel across MX servers, with each MX handled end-to-end
+    on its own thread.
+    """
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_hostname = {executor.submit(scan_one_mail_server, mx): mx for mx in mx_hostnames}
+        for future in concurrent.futures.as_completed(future_to_hostname):
+            mx = future_to_hostname[future]
+            try:
+                results[mx] = future.result()
+            except Exception as exc:
+                log.error(f"unexpected error scanning mail server {mx}: {exc}", exc_info=True)
+                results[mx] = dict(server_reachable=False, tls_enabled=False)
+    return results
 
 
 def do_mail_smtp_starttls(mailservers, url, *args, **kwargs):
