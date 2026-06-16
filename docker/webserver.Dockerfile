@@ -1,4 +1,6 @@
-FROM nginx:1.29.1-alpine3.22
+ARG CERTBOT_VERSION=5.6.0
+
+FROM nginx:1.31.2-alpine3.23
 
 RUN apk upgrade --no-cache \
   # upgrade libexpat to match python3's pyexpat native module
@@ -17,7 +19,8 @@ RUN /opt/gixy/bin/pip install gixy==0.1.21
 
 # install certbot
 RUN python3 -m venv /opt/certbot
-RUN /opt/certbot/bin/pip install certbot==3.0.1
+ARG CERTBOT_VERSION
+RUN /opt/certbot/bin/pip install certbot==${CERTBOT_VERSION}
 COPY docker/webserver/certbot.sh /docker-entrypoint.d/
 
 RUN mkdir -p /etc/nginx/htpasswd/
