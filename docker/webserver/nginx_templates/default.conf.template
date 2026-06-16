@@ -294,6 +294,7 @@ server {
 
     # monitoring, requires authentication, override headers, since CSP is too strict
     location /grafana {
+        add_header_inherit off;
         include http.headers;
         include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
@@ -303,6 +304,7 @@ server {
         proxy_pass $grafana;
     }
     location /prometheus {
+        add_header_inherit off;
         include http.headers;
         include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
@@ -312,6 +314,7 @@ server {
         proxy_pass $prometheus;
     }
     location /alertmanager {
+        add_header_inherit off;
         include http.headers;
         include hsts_h3.headers;
         auth_basic "Please enter your monitoring username and password";
@@ -323,6 +326,7 @@ server {
 
     # routinator proxy for internal use on multi instance setups
     location /routinator/ {
+        add_header_inherit off;
         include http.headers;
         include hsts_h3.headers;
 
