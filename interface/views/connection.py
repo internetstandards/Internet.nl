@@ -88,7 +88,7 @@ def results(request, request_id):
         connectionprobes["resolver"].rated_results_by_model(ct),
     ]
     scores = [pr["totalscore"] for pr in probereports]
-    score = max(min(sum(scores) / len(scores), 100), 0)
+    score = max(min(int(sum(scores) / len(scores)), 100), 0)
 
     return render(
         request,
