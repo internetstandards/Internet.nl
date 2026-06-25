@@ -292,6 +292,7 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
 # prevent issues with gevent based workers
+# https://github.com/internetstandards/Internet.nl/pull/2102
 CELERY_RESULT_BACKEND_THREAD_SAFE = False
 
 # used for celery-exporter
