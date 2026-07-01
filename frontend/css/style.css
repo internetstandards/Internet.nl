@@ -1284,6 +1284,14 @@ table td {
   margin: 0;
 }
 
+.batch-notice {
+  background: #ffab4c;
+  padding: 1em 1.25em;
+  margin-bottom: .5em;
+  font-weight: bold;
+  box-shadow: 0px 1px 4px #888888;
+}
+
 .retest-text {
   color: #6D6D6D;
 }

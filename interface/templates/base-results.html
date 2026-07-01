@@ -23,6 +23,11 @@
   </div>
 
   <article class="result wide">
+    {% if "ENABLE_BATCH"|get_settings_value %}
+    <div class="batch-notice" role="note">
+      {% include "string.html" with name="results batch-tls-notice" %}
+    </div>
+    {% endif %}
     <div id="testresults-overview" class="block">
       {% block testheadcontent %}
         <div class="testresults-percentage" data-resultscore="{{score}}">

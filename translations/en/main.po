@@ -4975,6 +4975,9 @@ msgstr "The items below are being tested."
 msgid "probes tests-duration"
 msgstr "The duration of the test is between 5 and {{cache_ttl}} seconds."
 
+msgid "results batch-tls-notice"
+msgstr "Notice: the TLS test has recently been updated. See [release 1.11](https://internet.nl/article/release-1.11/) for details."
+
 msgid "results dated-presentation"
 msgstr "Dated result presentation. Please rerun the test."
 
