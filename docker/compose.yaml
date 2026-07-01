@@ -228,7 +228,7 @@ services:
     user: root
     entrypoint: /entrypoint-worker.sh
     command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
     stop_grace_period: 10m
@@ -336,6 +336,15 @@ services:
 
     command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
+
+  # prefork worker for batch scheduling. Avoids issue https://github.com/internetstandards/Internet.nl/pull/2106 after switching to gevent
+  worker-scheduler:
+    <<: *worker
+    deploy:
+      replicas: $WORKER_SCHEDULER_REPLICAS
+    command: celery --app internetnl worker --without-gossip --pool=prefork --time-limit=300 --concurrency=$WORKER_SCHEDULER_CONCURRENCY
+      --queues batch_scheduler
+    hostname: worker-scheduler
 
   # celery task queue
   beat:
