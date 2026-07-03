@@ -141,6 +141,7 @@ SIGNATURE_ALGORITHMS_PHASE_OUT_HASH = [
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.DSA),
 ]
+SIGNATURE_ALGORITHMS_BAD_HASH_NIDS = {sa[0] for sa in SIGNATURE_ALGORITHMS_BAD_HASH}
 
 # Mail servers with an increased connection limit,
 # matched by substring matching on their hostname.
