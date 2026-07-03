@@ -291,9 +291,12 @@ class RpkiExists(Subtest):
         raise NotImplementedError
 
     def result_bad(self, tech_data):
+        # STATUS_NOTICE (not STATUS_FAIL) so the category verdict is "warning"
+        # and the missing-ROA text is shown, worst_status=STATUS_FAIL is unchanged,
+        # so the subtest is still counted as mandatory and scores 0, see #1900
         self.was_tested()
         self.tech_data = tech_data
-        self._status(STATUS_FAIL)
+        self._status(STATUS_NOTICE)
         self.verdict = f"detail {self._label} rpki {self._test_label} verdict bad"
 
     def result_good(self, tech_data):
