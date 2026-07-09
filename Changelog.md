@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.11.2
+
+- Reduced TLS scan time by [rewriting the cipher check to use fewer connections](https://github.com/internetstandards/Internet.nl/issues/2031).
+- Re-enabled [CCM_8 cipher detection on TLS 1.3](https://github.com/internetstandards/Internet.nl/issues/2078).
+- Fixed TLS category incorrectly failing on Extended Master Secret for TLS 1.3-only servers
+  ([#2068](https://github.com/internetstandards/Internet.nl/issues/2068)).
+- Updated [DMARC parser](https://github.com/internetstandards/Internet.nl/issues/2045)
+  to accept `psd` and `t` tags from RFC9989, and reject `t=y p=quarantine`.
+- Fixed the DMARC example in the documentation.
+- Fixed [IPv4/IPv6 similarity hash 4xx/5xx regression](https://github.com/internetstandards/Internet.nl/issues/2069).
+- Fixed [labels shown for the ROA existence check](https://github.com/internetstandards/Internet.nl/issues/1900).
+- Fixed rounding of the score in the connection test.
+- Added a TLS notice to the batch interface.
+
 ## 1.11.1
 
 - Fixed [false positive cipher order violation](https://github.com/internetstandards/Internet.nl/issues/2046)
