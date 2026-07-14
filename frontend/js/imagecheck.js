@@ -15,7 +15,7 @@ function ImageCheck() {
          * #unique is added to always get the file from the server if a newer
          * version exists.
          */
-        objCSS_noimages.href = '/static/css/alt-min.css'+'#'+unique;
+        objCSS_noimages.href = '/static/css/alt.css'+'#'+unique;
         objCSS_noimages.type = 'text/css';
     }
     if (check_if_browser_in_high_contrast()) {
@@ -28,7 +28,7 @@ function ImageCheck() {
          * #unique is added to always get the file from the server if a newer
          * version exists.
          */
-        objCSS_highcontrast.href = '/static/css/high-contrast-min.css'+'#'+unique;
+        objCSS_highcontrast.href = '/static/css/high-contrast.css'+'#'+unique;
         objCSS_highcontrast.type = 'text/css';
     }
 }
