@@ -1,4 +1,5 @@
 ARG CERTBOT_VERSION=5.6.0
+ARG GIXY_NG_VERSION=0.2.48
 
 FROM nginx:1.31.2-alpine3.23
 
@@ -15,7 +16,8 @@ RUN apk upgrade --no-cache \
 
 # install nginx config static analysis tool
 RUN python3 -m venv /opt/gixy
-RUN /opt/gixy/bin/pip install gixy==0.1.21
+ARG GIXY_NG_VERSION
+RUN /opt/gixy/bin/pip install gixy-ng==${GIXY_NG_VERSION}
 
 # install certbot
 RUN python3 -m venv /opt/certbot
