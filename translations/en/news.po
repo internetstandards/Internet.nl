@@ -911,7 +911,7 @@ msgstr ""
 "  `not_allowed` (good), `allowed_with_low_limit` (info), `allowed_with_too_high_limit` (failed)."
 
 msgid "article release-1.11 date"
-msgstr "April 21, 2026 (updated July #TODO, 2026)"
+msgstr "April 21, 2026 (updated July 14, 2026)"
 
 msgid "article release-1.11 lead"
 msgstr ""
