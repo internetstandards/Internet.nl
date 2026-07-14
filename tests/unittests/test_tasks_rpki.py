@@ -1,8 +1,17 @@
+from unittest import skip
+
 import responses
 
 from django.test import SimpleTestCase, override_settings
-from unittest import skip
 
+from checks.tasks.routing import (
+    Asn,
+    InvalidIPError,
+    Ip,
+    Prefix,
+    RisWhoisIPtoASN,
+    _truncate_ip_for_lookup,
+)
 from checks.tasks.rpki import do_rpki
 from checks.tasks.shared import do_resolve_single_a_aaaa
 
@@ -85,3 +94,36 @@ class RpkiTestCase(SimpleTestCase):
             response["validated_route"]["validity"]["reason"] = "as"
             response["validated_route"]["validity"]["VRPs"]["unmatched_as"] = [vrp]
         return response
+
+
+RISWHOIS_RESPONSE = """\
+% This is the RIPE Database query service.
+
+route:          192.0.2.0/24
+descr:          well-visible v4
+origin:         AS64496
+num-rispeers:   373
+source:         RISWHOIS
+
+route6:         2001:db8::/32
+origin:         AS64496
+num-rispeers:   312
+
+route6:         2001:db8:1::/48
+descr:          low-visibility leak, must be dropped
+origin:         AS64497
+num-rispeers:   1
+"""
+
+
+class RisWhoisIPtoASNTestCase(SimpleTestCase):
+    def test_truncate_to_routing_prefix(self):
+        self.assertEqual(str(_truncate_ip_for_lookup(Ip("192.0.2.42"))), "192.0.2.0")
+        self.assertEqual(str(_truncate_ip_for_lookup(Ip("2001:db8:1:2:3::4"))), "2001:db8:1::")
+        self.assertEqual(str(_truncate_ip_for_lookup(Ip("::ffff:192.0.2.42"))), "192.0.2.0")
+        with self.assertRaises(InvalidIPError):
+            _truncate_ip_for_lookup(Ip("not-an-ip"))
+
+    def test_parse_keeps_visible_v4_and_v6_drops_low_visibility(self):
+        pairs = RisWhoisIPtoASN._records_to_pairs(RisWhoisIPtoASN._parse_rpsl(RISWHOIS_RESPONSE))
+        self.assertEqual(pairs, [(Asn(64496), Prefix("192.0.2.0/24")), (Asn(64496), Prefix("2001:db8::/32"))])
