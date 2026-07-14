@@ -308,7 +308,7 @@ msgstr ""
 "Voor meer informatie over moderne internetstandaarden of activiteiten van het Platform Internetstandaarden, volg ons op [Mastodon](https://dashboard.internet.nl/signup) of [LinkedIn](https://www.linkedin.com/company/internet-nl/)."
 
 msgid "article api-meeting-jan-2026 date"
-msgstr "15 juli 2026"
+msgstr "14 juli 2026"
 
 msgid "article api-meeting-jan-2026 lead"
 msgstr ""
@@ -1450,7 +1450,7 @@ msgstr ""
 "Voor meer informatie over moderne internetstandaarden of activiteiten van het Platform Internetstandaarden, volg ons op [Mastodon](https://mastodon.nl/@internet_nl) of [LinkedIn](https://www.linkedin.com/company/internet-nl/)."
 
 msgid "article plis-meeting-mar-2026 date"
-msgstr "15 juli 2026"
+msgstr "14 juli 2026"
 
 msgid "article plis-meeting-mar-2026 lead"
 msgstr ""
@@ -1772,7 +1772,7 @@ msgstr ""
 "  `not_allowed` (good), `allowed_with_low_limit` (info), `allowed_with_too_high_limit` (failed)."
 
 msgid "article release-1.11 date"
-msgstr "21 april 2026 (bijgewerkt #TODO juli 2026)"
+msgstr "21 april 2026 (bijgewerkt 14 juli 2026)"
 
 msgid "article release-1.11 lead"
 msgstr ""
