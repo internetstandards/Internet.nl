@@ -79,6 +79,9 @@ conn_test_v4 = REDIS_RECORD("conn:{}:ipv4", settings.CACHE_TTL)
 # Connection test AS
 conn_test_as = REDIS_RECORD("asn:{}", settings.CACHE_TTL)
 
+# IP to ASN/prefix pairs, retrieved from riswhois, key is truncated to /24 or /48.
+ip_asn = REDIS_RECORD("ip_asn:{}", 4 * 60 * 60)
+
 # Simple request cache for batch users
 simple_cache_page = REDIS_RECORD("cached_page:{}:{}:{}", getattr(settings, "PAGE_CACHE_TIME", 60 * 5))
 

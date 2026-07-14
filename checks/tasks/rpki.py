@@ -16,8 +16,8 @@ from .routing import (
     BGPSourceUnavailableError,
     InvalidIPError,
     NoRoutesError,
+    RisWhoisIPtoASN,
     Routinator,
-    TeamCymruIPtoASN,
     RelyingPartyUnvailableError,
 )
 from .. import categories, scoring
@@ -471,7 +471,7 @@ def do_rpki(fqdn_ips_pairs, *args, **kwargs) -> TestResult:
 
                 try:
                     # fetch ASN, prefixes from BGP
-                    routeview = TeamCymruIPtoASN.from_bgp(ip)
+                    routeview = RisWhoisIPtoASN.from_bgp(ip)
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
                     routeview = None
                     logger.error(repr(e))
@@ -488,7 +488,7 @@ def do_rpki(fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                         # but validation is meaningless
                         result["errors"].append(NoRoutesError.__name__)
 
-                        routeview = TeamCymruIPtoASN.from_rpki(Routinator, ip)
+                        routeview = RisWhoisIPtoASN.from_rpki(Routinator, ip)
                 except RelyingPartyUnvailableError as e:
                     logger.error(repr(e))
                     result["errors"].append(e.__class__.__name__)
