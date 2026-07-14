@@ -27,7 +27,7 @@
 
 ## 1.11.0
 
-_Compared to the latest 1.10 release._r
+_Compared to the latest 1.10 release._
 
 ### TLS updates for NCSC 2025 guidelines
 
