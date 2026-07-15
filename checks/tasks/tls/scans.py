@@ -89,6 +89,7 @@ from checks.tasks.tls.tls_constants import (
     CERT_RSA_MIN_GOOD_KEY_SIZE,
     CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
+    SIGNATURE_ALGORITHMS_BAD_HASH_NIDS,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
     TLS_1_3_PROBE_CIPHERS,
 )
@@ -867,31 +868,43 @@ def test_key_exchange_hash(
     """
     Test key exchange hashes per NCSC 3.3.5.
     Note that this is not the certificate hash, or TLS cipher hash.
-    There are few or no hosts that do not meet this requirement.
+    The initial test is phase_out+bad to keep happy path connections low.
     """
-    bad_hash_result = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH)
-    if bad_hash_result:
-        log.info(f"SHA2 key exchange check: negotiated bad sigalg ({bad_hash_result})")
+    probe_bad_phase_out = _test_connection_with_limited_sigalgs(
+        server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH + SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
+    )
+    if not probe_bad_phase_out:
+        return KeyExchangeHashFunctionEvaluation(
+            status=KexHashFuncStatus.good,
+            score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
+        )
+
+    if probe_bad_phase_out in SIGNATURE_ALGORITHMS_BAD_HASH_NIDS:
+        log.info(f"key exchange check: negotiated bad sigalg ({probe_bad_phase_out.name})")
         return KeyExchangeHashFunctionEvaluation(
             status=KexHashFuncStatus.bad,
             score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
-            found_hash=bad_hash_result.name,
+            found_hash=probe_bad_phase_out.name,
         )
 
-    phase_out_hash_result = _test_connection_with_limited_sigalgs(
-        server_connectivity_info, SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
+    log.info(
+        f"key exchange check: initial probe negotiated phase_out sigalg ({probe_bad_phase_out.name}), "
+        "testing with only bad sigalgs"
     )
-    if phase_out_hash_result:
-        log.info(f"SHA2 key exchange check: negotiated phase_out hash ({phase_out_hash_result})")
+    probe_bad = _test_connection_with_limited_sigalgs(server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH)
+    if probe_bad:
+        log.info(f"key exchange check: negotiated bad sigalg ({probe_bad.name})")
         return KeyExchangeHashFunctionEvaluation(
-            status=KexHashFuncStatus.phase_out,
-            score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
-            found_hash=phase_out_hash_result.name,
+            status=KexHashFuncStatus.bad,
+            score=scoring.WEB_TLS_KEX_HASH_FUNC_BAD,
+            found_hash=probe_bad.name,
         )
 
+    log.info(f"key exchange check: negotiated phase_out sigalg ({probe_bad_phase_out.name})")
     return KeyExchangeHashFunctionEvaluation(
-        status=KexHashFuncStatus.good,
-        score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
+        status=KexHashFuncStatus.phase_out,
+        score=scoring.WEB_TLS_KEX_HASH_FUNC_OK,
+        found_hash=probe_bad_phase_out.name,
     )
 
 
