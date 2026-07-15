@@ -146,7 +146,7 @@ SIGNATURE_ALGORITHMS_PHASE_OUT_HASH = [
 # matched by substring matching on their hostname.
 # Used for servers that make connections very slow,
 # but that don't care about multiple simultaneous connections.
-MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS = {".googlemail.com": 40, ".google.com": 40}
+MAIL_ALTERNATE_CONNLIMIT_HOST_SUBSTRS = {".googlemail.com": 40, ".google.com": 40, ".smtp.goog": 40}
 
 # Based on: https://tools.ietf.org/html/rfc7919#appendix-A
 FFDHE3072_PRIME = bytearray.fromhex(
