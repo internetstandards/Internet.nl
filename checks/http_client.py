@@ -74,9 +74,11 @@ def http_get(
         # Retry, once, then log and raise the exception
         try:
             response = _do_request(args, headers, kwargs, session, url)
-        except requests.RequestException as exc:
+        except (requests.RequestException, urllib3.exceptions.LocationParseError) as exc:
             log.debug(f"HTTP request raised exception: {url} (headers: {headers}): {exc}")
-            raise exc
+            if isinstance(exc, requests.RequestException):
+                raise
+            raise requests.exceptions.InvalidURL(str(exc)) from exc
 
     log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")
     return response
