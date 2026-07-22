@@ -11,7 +11,7 @@
     {% translate 'widget site html-block' %}
   &lt;/p&gt;
   &lt;label for="internetnl-site-url"&gt;{% translate 'base test website input'%}&lt;/label&gt;
-  &lt;input id="internetnl-site-url" type="text" inputmode="url" name="url" placeholder="www.example.nl"&gt;
+  &lt;input id="internetnl-site-url" type="text" inputmode="url" name="url" placeholder="{% include "string.html" with name="base test website placeholder" %}"&gt;
   &lt;button class="internetnl"&gt;{% translate 'base test start'%}&lt;/button&gt;
 &lt;/form&gt;</textarea>
     </div>
