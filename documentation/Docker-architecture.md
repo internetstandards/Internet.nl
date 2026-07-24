@@ -24,7 +24,7 @@ The following images are build from the sources in this repository using the `do
 
   - ghcr.io/internetstandards/internet.nl (used by app, worker and beat)
   - ghcr.io/internetstandards/unbound (custom build unbound server)
-  - ghcr.io/internetstandards/linttest (development tooling)
+  - ghcr.io/internetstandards/tools (development tooling)
 
 Images are build by Github Actions CI and pushed to the Github Registry. They can be found at: https://github.com/orgs/internetstandards/packages
 

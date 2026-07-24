@@ -4,11 +4,13 @@
 from abc import ABC, abstractmethod
 import ipaddress
 import json
+import socket
 
 import dns
 import requests
 
 from django.conf import settings
+from django.core.cache import cache
 
 from typing import Any, NewType, TypeVar
 
@@ -16,6 +18,8 @@ from dns.exception import DNSException
 
 from checks.http_client import http_get
 from checks.resolver import dns_resolve_txt
+from interface import redis_id
+from internetnl import log
 
 Asn = NewType("Asn", int)
 Ip = NewType("Ip", str)
@@ -47,6 +51,23 @@ class BGPSourceUnavailableError(NoRoutesError):
 
 class RelyingPartyUnvailableError(Error):
     """There was a problem with the availability of the Relying Party Software."""
+
+
+def _truncate_ip_for_lookup(ip_in: Ip) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
+    """
+    Parse, unwrap IPv4-mapped IPv6, and truncate to /24 (v4) or /48 (v6).
+    More specifics aren't globally routable, and truncating improves cache hit
+    rate and privacy.
+    """
+    try:
+        ip = ipaddress.ip_address(ip_in)
+    except ValueError as exc:
+        raise InvalidIPError(f"Error parsing IP address {ip_in}.") from exc
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    if isinstance(ip, ipaddress.IPv4Address):
+        return ipaddress.ip_network(f"{ip}/24", strict=False).network_address
+    return ipaddress.ip_network(f"{ip}/48", strict=False).network_address
 
 
 class RouteView(ABC):
@@ -192,35 +213,111 @@ class TeamCymruIPtoASN(RouteView):
         """
         Convert an IP address to a Cymru origin ASN query DNS label.
         """
-        try:
-            ip = ipaddress.ip_address(ip_in)
-            if getattr(ip, "ipv4_mapped", None):
-                ip = ip.ipv4_mapped
+        truncated = _truncate_ip_for_lookup(Ip(ip_in))
+        if isinstance(truncated, ipaddress.IPv4Address):
+            reversed_ip = ".".join(reversed(str(truncated).split(".")[0:3]))
+            return f"{reversed_ip}.origin.asn.cymru.com."
+        reversed_ip = ".".join(str(truncated.exploded).replace(":", "")[11::-1])
+        return f"{reversed_ip}.origin6.asn.cymru.com."
 
-            # Reverse the IP. In case of IPv6 we need the exploded address.
-            if ip.version == 4:
-                # note we query for the /24 on the assumption that more
-                # specifics are not globally routable.  This anonymizes the
-                # specific IPs looked up and improves our chances of hitting
-                # our resolver cache.
-                split_ip = str(ip).split(".")[0:3]
-                split_ip.reverse()
-                reversed_ip = ".".join(split_ip)
-                ip2asn_query = f"{reversed_ip}.origin.asn.cymru.com."
-            elif ip.version == 6:
-                exploded_ip = str(ip.exploded)
-                # note we query for the /48 on the assumption that more
-                # specifics are not globally routable.  This anonymizes the
-                # specific IPs looked up and improves our chances of hitting
-                # our resolver cache.
-                reversed_ip = exploded_ip.replace(":", "")[11::-1]
-                reversed_ip = ".".join(reversed_ip)
-                ip2asn_query = f"{reversed_ip}.origin6.asn.cymru.com."
-            else:
-                raise InvalidIPError(f"Unknown IP version for address {ip_in}.")
-        except ValueError:
-            raise InvalidIPError(f"Error parsing IP address {ip_in}.")
-        return ip2asn_query
+
+class RisWhoisIPtoASN(RouteView):
+    HOST = "riswhois.ripe.net"
+    PORT = 43
+    CONNECT_TIMEOUT = 3
+    READ_TIMEOUT = 8
+    MAX_RESPONSE_BYTES = 1024 * 1024
+    # Drop low-visibility routes. RIPE's RIS aggregates many peers, so a route only seen
+    # by a handful is probably a "leak" or test announcement, not the real origin.
+    MIN_RIS_PEERS = 10
+
+    @classmethod
+    def from_bgp(cls: type[Rv], ip: Ip) -> Rv:
+        return cls(ip, cls.asn_prefix_pairs_for_ip(ip))
+
+    @staticmethod
+    def asn_prefix_pairs_for_ip(ip_in: Ip) -> list[AsnPrefix]:
+        truncated = _truncate_ip_for_lookup(ip_in)
+        if not truncated.is_global:
+            return []
+        query_target = str(truncated)
+
+        cache_id = redis_id.ip_asn.id.format(query_target)
+        cached = cache.get(cache_id)
+        if cached is not None:
+            return cached
+
+        raw = RisWhoisIPtoASN._query_riswhois(query_target)
+        records = RisWhoisIPtoASN._parse_rpsl(raw)
+        pairs = RisWhoisIPtoASN._records_to_pairs(records)
+        # Don't cache empty responses: a transient issue might otherwise hide
+        # routes for the full TTL.
+        if pairs:
+            cache.set(cache_id, pairs, redis_id.ip_asn.ttl)
+        return pairs
+
+    @staticmethod
+    def _parse_rpsl(raw: str) -> list[dict[str, str]]:
+        """Splits on blank lines, allowing for CRLF."""
+        records = []
+        for record in raw.replace("\r\n", "\n").split("\n\n"):
+            fields: dict[str, str] = {}
+            for line in record.splitlines():
+                if line.startswith("%") or ":" not in line:
+                    continue
+                key, _, value = line.partition(":")
+                fields[key.strip()] = value.strip()
+            if fields:
+                records.append(fields)
+        return records
+
+    @staticmethod
+    def _query_riswhois(query_target: str) -> str:
+        try:
+            with socket.create_connection(
+                (RisWhoisIPtoASN.HOST, RisWhoisIPtoASN.PORT),
+                timeout=RisWhoisIPtoASN.CONNECT_TIMEOUT,
+            ) as sock:
+                sock.settimeout(RisWhoisIPtoASN.READ_TIMEOUT)
+                sock.sendall(f"-L {query_target}\n".encode("ascii"))
+                buffer = bytearray()
+                while True:
+                    chunk = sock.recv(4096)
+                    if not chunk:
+                        break
+                    buffer.extend(chunk)
+                    if len(buffer) > RisWhoisIPtoASN.MAX_RESPONSE_BYTES:
+                        raise BGPSourceUnavailableError(
+                            f"riswhois response for {query_target} exceeded "
+                            f"{RisWhoisIPtoASN.MAX_RESPONSE_BYTES} bytes"
+                        )
+            return buffer.decode("utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            raise BGPSourceUnavailableError(f"riswhois query for {query_target} failed: {exc}") from exc
+
+    @staticmethod
+    def _records_to_pairs(records: list[dict[str, str]]) -> list[AsnPrefix]:
+        pairs: list[AsnPrefix] = []
+        for fields in records:
+            prefix = fields.get("route") or fields.get("route6")
+            if not prefix:
+                continue
+            origin = fields.get("origin")
+            peers = fields.get("num-rispeers")
+            if not (origin and peers):
+                log.warning(f"riswhois route record skipped, missing origin or num-rispeers: {fields}")
+                continue
+            try:
+                peer_count = int(peers)
+                asn = int(origin.removeprefix("AS"))
+                ipaddress.ip_network(prefix)
+            except ValueError as exc:
+                log.error(f"riswhois route record skipped, unparseable value ({exc}): {fields}")
+                continue
+            if peer_count < RisWhoisIPtoASN.MIN_RIS_PEERS:
+                continue
+            pairs.append((Asn(asn), Prefix(prefix)))
+        return pairs
 
 
 class RelyingPartySoftware:

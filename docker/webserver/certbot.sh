@@ -115,7 +115,6 @@ configure_letsencrypt() {
 # delay certificate request in background because nginx needs to be up when starting letsencrypt configuration
 (sleep 1m; configure_letsencrypt)&
 
-# check certificates for renewal twice a day, make sure the schedule is a moving window so we
-# don't accidentally fall in line with the busiest time (eg: 00:00) and get errors due to ACME
-# servers being overloaded at that moment
-while sleep 11h; do /opt/certbot/bin/certbot renew --post-hook "nginx -s reload"; done&
+# Check certificates for renewal and update ARI renewal information at regular interval
+# https://github.com/internetstandards/Internet.nl/issues/2084#issuecomment-4740600200
+while sleep 3h; do /opt/certbot/bin/certbot renew --post-hook "nginx -s reload"; done&

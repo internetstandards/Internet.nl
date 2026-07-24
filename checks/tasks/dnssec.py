@@ -81,6 +81,7 @@ batch_mail_registered = check_registry("batch_mail_dnssec", batch_mail_callback,
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
@@ -91,6 +92,7 @@ def web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_web_is_secure(self, url, *args, **kwargs):
     return do_web_is_secure(self, url, *args, **kwargs)
@@ -101,6 +103,7 @@ def batch_web_is_secure(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
@@ -111,6 +114,7 @@ def mail_is_secure(self, mailservers, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mail_is_secure(self, mailservers, url, *args, **kwargs):
     return do_mail_is_secure(self, mailservers, url, *args, **kwargs)
@@ -328,12 +332,12 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
     try:
         mx_status = shared.get_mail_servers_mxstatus(mailservers)
         if mx_status != MxStatus.has_mx:
-            mailservers = [(url, None, mx_status)]
+            mailservers = [(url, mx_status)]
         else:
-            mailservers.insert(0, (url, None, mx_status))
+            mailservers.insert(0, (url, mx_status))
 
         res = OrderedDict()
-        for domain, _, mx_status in mailservers:
+        for domain, mx_status in mailservers:
             if domain != "":
                 res[domain] = dnssec_status(
                     domain,
@@ -346,7 +350,7 @@ def do_mail_is_secure(self, mailservers, url, *args, **kwargs):
 
     except SoftTimeLimitExceeded:
         log.debug("Soft time limit exceeded.")
-        for domain, _, mx_status in mailservers:
+        for domain, mx_status in mailservers:
             if domain != "" and not res.get(domain):
                 res[domain] = dict(
                     status=DnssecStatus.dnserror.value,

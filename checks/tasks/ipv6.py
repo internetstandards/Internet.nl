@@ -102,6 +102,7 @@ def ns(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_ns(self, url, *args, **kwargs):
     return do_ns(self, url, *args, **kwargs)
@@ -122,6 +123,7 @@ def mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mx(self, url, *args, **kwargs):
     return do_mx(self, url, *args, **kwargs)
@@ -132,6 +134,7 @@ def batch_mx(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -142,6 +145,7 @@ def web(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_web(self, url, *args, **kwargs):
     return do_web(self, url, *args, **kwargs)
@@ -394,7 +398,7 @@ def do_mx(self, url, *args, **kwargs):
         if mx_status != MxStatus.has_mx:
             mailservers = []
 
-        for mailserver, _, _ in mailservers:
+        for mailserver, _ in mailservers:
             # Check if we already have cached results.
             cache_id = redis_id.mail_ipv6.id.format(mailserver)
             cache_ttl = redis_id.mail_ipv6.ttl
@@ -542,14 +546,20 @@ def simhash(url, task=None):
         except requests.RequestException:
             pass
 
+    # Only short-circuit when an address family has no response at all (#2069, #1267)
+    if v4_response is None or v6_response is None:
+        log.debug(f"simhash unable to get response on both address families (v4={v4_response}, v6={v6_response})")
+        return simhash_score, distance, v6_response.status_code if v6_response is not None else None
+
     if v4_ports != v6_ports:
         log.debug(f"simhash found different ports on IPv4 ({v4_ports}) and IPv6 ({v6_ports})")
-        return simhash_score, distance, v6_response.status_code if v6_response else None
+        return simhash_score, distance, v6_response.status_code
 
     # Regardless of content, status code must be identical (#1267)
+    # Leaving distance at SIMHASH_NOT_CALCULABLE makes the callback emit a
+    # fail icon (the score itself is unused on this branch).
     if v4_response.status_code != v6_response.status_code:
         log.debug(f"simhash found {v4_response.status_code=} != {v6_response.status_code=}")
-        # FAIL: Could not establish a connection on both addresses.
         return scoring.WEB_IPV6_WS_SIMHASH_OK, distance, v6_response.status_code
     log.debug(f"simhash found status code {v4_response.status_code}, consistent for IPv4 and IPv6")
 

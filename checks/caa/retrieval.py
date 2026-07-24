@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, InitVar
-from typing import Optional, Iterable
+from collections.abc import Iterable
 
 import dns
 from dns.rdtypes.ANY.CAA import CAA
@@ -22,7 +22,7 @@ class CAAEvaluation:
     """
 
     caa_found: bool
-    canonical_name: Optional[str] = None
+    canonical_name: str | None = None
     errors: list[TranslatableTechTableItem] = field(default_factory=list)
     recommendations: list[TranslatableTechTableItem] = field(default_factory=list)
     caa_records_str: list[str] = field(default_factory=list)

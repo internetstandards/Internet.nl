@@ -1,25 +1,105 @@
 # Change Log
 
-## 1.11.0 (in progress)
+## 1.11.2
+
+- Reduced TLS scan time by [rewriting the cipher check to use fewer connections](https://github.com/internetstandards/Internet.nl/issues/2031).
+- Re-enabled [CCM_8 cipher detection on TLS 1.3](https://github.com/internetstandards/Internet.nl/issues/2078).
+- Fixed TLS category incorrectly failing on Extended Master Secret for TLS 1.3-only servers
+  ([#2068](https://github.com/internetstandards/Internet.nl/issues/2068)).
+- Updated [DMARC parser](https://github.com/internetstandards/Internet.nl/issues/2045)
+  to accept `psd` and `t` tags from RFC9989, and reject `t=y p=quarantine`.
+- Fixed the DMARC example in the documentation.
+- Fixed [IPv4/IPv6 similarity hash 4xx/5xx regression](https://github.com/internetstandards/Internet.nl/issues/2069).
+- Fixed [labels shown for the ROA existence check](https://github.com/internetstandards/Internet.nl/issues/1900).
+- Fixed rounding of the score in the connection test.
+- Added a TLS notice to the batch interface.
+
+## 1.11.1
+
+- Fixed [false positive cipher order violation](https://github.com/internetstandards/Internet.nl/issues/2046)
+  when TLS 1.3 sufficient ciphers were incorrectly included in the TLS 1.2 cipher order test.
+- Fixed [Extended Master Secret incorrectly set to not-tested](https://github.com/internetstandards/Internet.nl/issues/2036)
+  when it should be not-applicable.
+- Fixed [0-RTT test breaking SMTP sessions](https://github.com/internetstandards/Internet.nl/issues/2055)
+  by disabling the test for mail servers [for now](https://github.com/internetstandards/Internet.nl/issues/2058).
+- Reduced TLS scan time by only testing ciphers for the highest supported non-1.3 TLS version
+  and disabling sslyze network retries ([#2031](https://github.com/internetstandards/Internet.nl/issues/2031)).
+
+## 1.11.0
 
 _Compared to the latest 1.10 release._
 
-### Feature changes
+### TLS updates for NCSC 2025 guidelines
 
-- ...
+All tests were updated to match the
+[2025-05 version of the NCSC TLS guidelines](https://www.ncsc.nl/en/transport-layer-security/ICT-beveiligingsrichtlijnen-voor-TLS).
+Most significant changes:
+
+- The list of good/sufficient/phase out/insufficient TLS versions, TLS authentication, curves, hashes, 
+  key exchange algorithms, FFDHE groups, RSA key lengths, and bulk encryption algorithms were updated
+  to match the new guidelines.
+- A test for Extended Master Secret (RFC7627) was added.
+- Client-initiated renegotiation is now acceptable, if limited to less than 10 renegotiations.
+- All checks on certificates apply to all certificates sent by the server,
+  except root certificates (according to our trust store). In previous versions,
+  the certificate selection was different per test.
+
+### Other TLS updates
+
+- Certificates that do not have OCSP enabled, which means stapling is not possible,
+  [are now detected as such](https://github.com/internetstandards/Internet.nl/issues/1641).
+  Several issues with OCSP stapling reliability were also resolved.
+- Issues were fixed where the cipher order failed to detect some bad scenarios,
+  including some where servers preferred RSA over ECDHE, or CBC over POLY1305.
+- CCM_8 ciphers are now detected when enabled on a server.
+- OLD ciphers are no longer detected.
+- The cipher order test no longer separates between "the server cipher order preference is wrong" 
+  and "the server has no preference".
 
 ### Significant internal changes
 
-- ...
-- 
-### Possibly required changes to deployments
+- Upgraded to Django 5, Python 3.13, and Debian Trixie base image.
+- Switched TLS implementation to sslyze/nassl based reimplementation.
+- Switched to pyproject/uv.lock for project dependencies, replacing requirements files.
+- Added post-quantum hybrid ECDHE-MLKEM for TLS 1.3 in our web server.
+- Outgoing traffic now uses the configured public IPv4/IPv6 addresses.
+- Routinator can now be configured with an allowlist for shared instances.
 
-...
+### Bug fixes
+
+- Fixed [simhash exception when both address families fail](https://github.com/internetstandards/Internet.nl/issues/1893).
+- Fixed JSON serialization of sets in batch results.
+- Fixed [report generation locking](https://github.com/internetstandards/Internet.nl/issues/1749) for results views.
 
 ### API changes
 
-- ...
+This release has API version 2.7.0.
 
+The changes noted above are reflected in the API as well, e.g. which ciphers
+are considered bad, as listed in the API output, along with score impacts.
+
+Additionally, the API structure changes are:
+- OCSP stapling has a new status `not_in_cert` (not_tested), for when a certificate does not have
+  OCSP enabled, therefore stapling is neither required nor possible.
+- The cipher order status no longer returns `not_prescribed` or `not_seclevel` for new tests.
+  The insufficient status is now `bad` (failed) for preferring phase out over good and/or sufficient,
+  regardless of the reason (server not enforcing any preference or server enforcing wrong preference).
+- `cert_signature_phase_out` was added to the TLS details, listing certificate signature algorithms
+  that are at phase-out level (warning). Analogous to the existing `cert_signature_bad`.
+- `extended_master_secret` was added to the TLS details, with values: `supported` (good),
+  `not_supported` (failed), `na_no_tls_1_2` (good), `unknown` (not_tested).
+- `client_reneg` in the TLS details was changed from a boolean to a string enum with values:
+  `not_allowed` (good), `allowed_with_low_limit` (info), `allowed_with_too_high_limit` (failed).
+
+## 1.10.8
+
+- Fixed an issue where [to many batch requests would stall batch test throughput](https://github.com/internetstandards/Internet.nl/pull/1951).
+
+## 1.10.7
+
+- Update [PostgreSQL to 15.14](https://github.com/internetstandards/Internet.nl/pull/1898)
+- Added [PGP key expiry test](https://github.com/internetstandards/Internet.nl/pull/1870)
+- Added news post.
 
 ## 1.10.6
 

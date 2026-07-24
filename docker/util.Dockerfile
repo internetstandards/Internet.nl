@@ -1,6 +1,6 @@
-FROM alpine:3.20.3
+FROM alpine:3.22
 
-RUN apk add --no-cache curl postgresql15 python3 py3-prometheus-client py3-requests jq docker-cli docker-cli-compose pigz jq
+RUN apk add --no-cache curl postgresql15 python3 py3-prometheus-client py3-requests jq docker-cli docker-cli-compose pigz jq envsubst
 
 # install cron tasks
 COPY docker/cron/periodic /etc/periodic/
@@ -25,6 +25,7 @@ COPY docker/host-dist.env /dist/docker/
 COPY docker/host-multi-dist.env /dist/docker/
 COPY docker/compose.yaml /dist/docker/
 COPY docker/user_manage.sh /dist/docker/
+COPY docker/compose-dist.sh /dist/docker/
 RUN chmod a-w /dist/docker/*
 
 # add release as label for auto_update feature

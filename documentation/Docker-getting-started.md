@@ -4,17 +4,13 @@ This documented is intended as a quick simple guide to setup a development envir
 
 ## Prerequisites
 
-An OCI compatible container runtime with [Compose V2](https://docs.docker.com/compose/migrate/) is required to run the project. For example one of the following:
+An OCI compatible container runtime (Docker) with a recent [Compose](https://github.com/docker/compose) is required to run the project. For example one of the following:
 
 - [Docker](https://docs.docker.com/get-docker/) for Linux, (supported)
 - [Colima](https://github.com/abiosoft/colima) for Mac (recommended)
-- [OrbStack](https://orbstack.dev/download) for Mac (non open source, free, tested version 1.10.2)
+- [OrbStack](https://orbstack.dev/download) for Mac (non open source, free, tested version 2.0.5)
 - [Docker](https://docs.docker.com/get-docker/) for Mac (supported)
 - [Docker](https://docs.docker.com/get-docker/) for Windows (untested)
-
-**notice**: some versions of Docker Engine might experience issues with internal DNS resolving and will cause tests to fail. Versions from and including `25.0.5` to and including `26.1.2` should be avoided.
-
-**notice**: Docker Compose Plugin versions below and up to `2.27.2` should be avoided due to missing features.
 
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 

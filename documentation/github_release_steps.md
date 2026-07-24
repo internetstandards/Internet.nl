@@ -12,6 +12,7 @@ code changes for the next release are already in the main branch.
    make update_container_documentation
    make update_padded_macs
    make update_root_key_file
+   make update_expire_sectxt_pgp_test
    make translate_content_to_main
    ```
 4. Make a release branch for the x.y version if not already present (e.g., release/1.8.x).

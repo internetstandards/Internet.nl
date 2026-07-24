@@ -107,14 +107,12 @@ def _batch_startup_checks():
 
         for table, index_field, index_name in BATCH_INDEXES:
             with connection.cursor() as cursor:
-                cursor.execute(
-                    f"""
+                cursor.execute(f"""
 SELECT
     FROM   pg_class c
     JOIN   pg_namespace n ON n.oid = c.relnamespace
     JOIN   pg_index i on c.oid = i.indexrelid
-    WHERE  c.relname = '{index_name}'"""
-                )
+    WHERE  c.relname = '{index_name}'""")
                 res = cursor.fetchall()
                 if len(res) == 0:
                     logger.warning(

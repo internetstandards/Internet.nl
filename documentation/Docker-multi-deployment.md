@@ -8,20 +8,20 @@ However this requires some additional configuration for the additional instances
 
 To keep the configuration files for each instance separate, it is recommended to create a new directory for each instance. Each instance will also have its own Compose project name.
 
-To save on resources the routinator service can be shared between the instances. This requires the routinator service to be running on only the first instance and the other instances to configure the `ROUTINATOR_URL` variable to point to the routinator service on the first instance.
+To save on resources the routinator service can be shared between the instances. This requires the routinator service to be running on only the first instance and the other instances to configure the `ROUTINATOR_URL` variable to point to the routinator service on the first instance. Also the `IPV4_IP_PUBLIC` and `IPV6_IP_PUBLIC` addresses of each instance that needs to access the routinator url needs to be added to the `ROUTINATOR_ALLOW_LIST` variable for the first instance.
 
 ## Requirements
 
 - Additional public IPv4 and IPv6 address pairs bound to the server, one pair for each extra instance
 - Unique public (sub)domain names for each IP pair
 - Additional server resources (CPU, Memory (~1GB), disk space) depending on the number of instances
-- Existing deployment of the Internet.nl application stack (see: [Application setup](#application-setup))
+- Existing deployment of the Internet.nl application stack (see: [Application setup](Docker-deployment.md#application-setup))
 
 ## Renaming initial instance
 
 Bring down the initial instance and rename it to `dev1`, renaming all existing volumes:
 
-    docker compose --project-name internetnl-prod down
+    /opt/Internet.nl/docker/compose.sh down
     mv /opt/Internet.nl /opt/Internet.nl-dev1
     cd /var/lib/docker/volumes
     rename 's/prod/dev1/' internetnl-prod_*
@@ -29,7 +29,7 @@ Bring down the initial instance and rename it to `dev1`, renaming all existing v
     echo INTERNETNL_INSTALL_BASE=/opt/Internet.nl-dev1 >> docker/host.env
     sed -i 's/dev-docker/dev1/' docker/host.env
     sed -i 's/internetnl-prod/internetnl-dev1/' docker/host.env
-    docker compose --env-file=docker/defaults.env --env-file=docker/host.env --env-file=docker/local.env up --remove-orphans --wait --no-build
+    /opt/Internet.nl-dev1/docker/compose.sh up --remove-orphans --wait --no-build
 
 Add the following lines to `docker/host.env` and change the IP's to the public IP's for the dev1 instances:
 
@@ -54,7 +54,7 @@ Modify the `docker/host.env` file with the following steps:
 - Update `UNBOUND_PORT_TCP`, `UNBOUND_PORT_UDP`, `UNBOUND_PORT_IPV6_TCP` and `UNBOUND_PORT_IPV6_UDP` to the public IPv4/IPv6 addresses for this instance
 - Add `WEBSERVER_PORT`, `WEBSERVER_PORT_TLS`, `WEBSERVER_PORT_IPV6`, `WEBSERVER_PORT_IPV6_TLS` with the public IPv4/IPv6 addresses for this instance and the respective ports
 - Add `IPV4_SUBNET_PUBLIC`, `IPV4_SUBNET_INTERNAL`, `IPV6_SUBNET_PUBLIC` and `IPV6_GATEWAY_PUBLIC` with unique subnet/address from private address space, this should not conflict with the existing instances. Suggested is to iterate over subnets for the existing instance (`172.16.42.0/24`, `192.168.42.0/24`, `fd00:42:1::/48`, `fd00:42:1::1`) so the first ones would become: `172.16.43.0/24`, `192.168.43.0/24`, `fd00:43:1::/48` and `fd00:43:1::1`.
-- Add a `ROUTINATOR_URL` with a URL to the first instance routinator proxy endpoint, so the extra instances don't have to run a resource heavy extra routinator, eg: `https://example.com/routinator/api/v1/validity`. This also requires removing the `routinator` entry from `COMPOSE_PROFILES` on the extra instance.
+- Add a `ROUTINATOR_URL` with a URL to the first instance routinator proxy endpoint, so the extra instances don't have to run a resource heavy extra routinator, eg: `https://example.com/routinator/api/v1/validity`. This also requires removing the `routinator` entry from `COMPOSE_PROFILES` on the extra instance and adding the `IPV4_IP_PUBLIC` and `IPV6_IP_PUBLIC` adresses to the `ROUTINATOR_ALLOW_LIST` on the first instance.
 - Add `INTERNETNL_INSTALL_BASE` with the path to the new instance directory, eg: `/opt/Internet.nl-dev2`
 
 For convenience you can use the following command to create a new `docker/host.env` file:
@@ -101,7 +101,7 @@ If you have manually defined user/password added using the `docker/user_manage.s
 
 Getting DS records for all instances:
 
-    for i in {1..5}; do docker compose --project-name internetnl-dev$i restart unbound 2>&1;  docker compose --project-name internetnl-dev$i logs unbound 2>&1 | grep -A2 "Please add the following DS records for domain";done | grep "IN	DS"
+    for i in {1..5}; do /opt/Internet.nl-dev$i/docker/compose.sh restart unbound;  /opt/Internet.nl-dev$i/docker/compose.sh logs unbound | grep -A2 "Please add the following DS records for domain";done | grep "IN	DS"
 
 Copy password file from `dev1` to all other instances
 
