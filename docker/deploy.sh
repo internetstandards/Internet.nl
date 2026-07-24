@@ -8,6 +8,9 @@ echo "Deploying release: $RELEASE"
 
 # copy release specific support files
 cp -v /dist/docker/* docker
+# put $RELEASE into the compose.sh file
+envsubst '$RELEASE' < docker/compose-dist.sh > docker/compose.sh
+chmod a+x docker/compose.sh
 
 # set release version in local.env config
 echo "RELEASE='$RELEASE' # deploy $(date)" >> docker/local.env

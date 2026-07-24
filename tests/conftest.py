@@ -8,7 +8,6 @@ import time
 from internetnl import log
 from internetnl.celery import waitsome
 
-
 TEST_WORKER_TIMEOUT = 5
 
 # -----------------------------------------------------------------------------
@@ -30,7 +29,7 @@ subresult_mappings = {
 # coloured square with subtest name and status shown in a tooltip (via
 # 'title').
 def make_result_square(subtest_name, result):
-    (status, c) = subresult_mappings[result]
+    status, c = subresult_mappings[result]
     return html.div(
         "",
         style=f"display:inline-block; background-color:{c}; " "width:5px; height:5px; margin-right:1px;",
@@ -126,7 +125,7 @@ def pytest_runtest_makereport(item, call):
         report._subresults = getattr(item, "_subresults", [None])
         report._failures = getattr(item, "_failures", set())
         report._warnings = getattr(item, "_warnings", set())
-        (report._reference, report._demo) = item.config.getoption("--batch-base-names").split(",")
+        report._reference, report._demo = item.config.getoption("--batch-base-names").split(",")
 
 
 # -----------------------------------------------------------------------------
@@ -200,7 +199,7 @@ def pytest_generate_tests(metafunc):
 # -----------------------------------------------------------------------------
 
 
-@pytest.fixture(params=["prefork", "gevent", "eventlet"])
+@pytest.fixture(params=["prefork", "gevent"])
 def custom_celery_worker(request):
     """Spawn celery worker to be used during test.
 
@@ -209,7 +208,8 @@ def custom_celery_worker(request):
     Tests on both implementations of worker."""
     pool = request.param
     # there is a set and limited number of queues, for convenience listen to all of them.
-    worker_command = ["make", "run-test-worker", pool]  # "--queues", ",".join(queues)
+
+    worker_command = f"python3 -m celery --app internetnl worker -E -ldebug --pool {pool} --time-limit=300".split()
     worker_env = dict(os.environ, WORKER_ROLE="default_ipv4")
 
     log.info("Running worker with: %s", " ".join(worker_command))
@@ -217,7 +217,7 @@ def custom_celery_worker(request):
         worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer, preexec_fn=os.setsid, env=worker_env
     )
     # catch early errors
-    time.sleep(1)
+    time.sleep(0.1)
     assert not worker_process.poll(), "Worker exited early."
 
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code

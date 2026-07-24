@@ -1,5 +1,9 @@
-ARG PYTHON_VERSION=3.9
+ARG PYTHON_VERSION=3.13
 ARG YQ_VERSION=4.45.4
+ARG DOCKER_CLI_VERSION=29.2.1
+
+# Named stage to allow ARG expansion in --from (BuildKit does not support variable expansion directly)
+FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 
 # This Dockerfile consists of multiple stages in order to parallize and speed up
 # building. It also reduces image size as only build artifacts are copied into
@@ -13,17 +17,16 @@ ARG YQ_VERSION=4.45.4
 # generic stage used by all build stages
 # explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
 # platform can probably be removed after #1218
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-deps
+FROM debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
       # generic build dependencies
       build-essential \
       # unbound dependencies
       python${PYTHON_VERSION}-dev \
-      python3-distutils \
-      python3-pip \
       libssl-dev \
       libevent-dev \
       libhiredis-dev \
@@ -33,77 +36,74 @@ RUN apt update && \
       # nassl dependencies
       python3-setuptools \
       # unbound dependencies
+      ccache \
       flex \
       bison
 
-RUN pip3 install uv
+COPY --from=ghcr.io/astral-sh/uv:python3.13-trixie /usr/local/bin/uv /usr/local/bin/uv
+ENV UV_SYSTEM_PYTHON=1
+ENV UV_BREAK_SYSTEM_PACKAGES=1
 
 FROM build-deps AS build-unbound
 ARG PYTHON_VERSION
 
-COPY vendor/unbound /src/vendor/unbound
-WORKDIR /src/vendor/unbound
-RUN ./configure \
+COPY vendor/unbound /source/vendor/unbound
+WORKDIR /source/vendor/unbound
+ENV CCACHE_DIR=/var/cache/ccache
+RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
+  ./configure CC='ccache gcc' \
   --prefix=/opt/unbound \
   --enable-internetnl \
   --with-pyunbound \
   --with-libevent \
   --with-libhiredis \
   PYTHON_VERSION=${PYTHON_VERSION}
-RUN make
+RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
+  make
 RUN make install
-
-FROM build-deps AS build-nassl
-
-COPY vendor/nassl /src/vendor/nassl
-WORKDIR /src/vendor/nassl
-
-ADD vendor/zlib-1.2.13.tar.gz ./
-COPY vendor/openssl-1.0.2e ./openssl-1.0.2e
-COPY vendor/openssl-master ./openssl-master
-
-RUN python3 build_from_scratch.py
-RUN python3 setup.py install
 
 # intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
 
-COPY requirements.txt /src/
+COPY pyproject.toml /source/
+COPY uv.lock /source/
 
-WORKDIR /src
+WORKDIR /source
 
-ENV UV_LINK_MODE=copy
+# install into system Python because otherwise Unbound build becomes to hard
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV UV_PROJECT_ENVIRONMENT=/usr/
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements.txt
+  uv sync --link-mode=copy --no-dev
 
 # stage with app dependencies and lint/test depencencies
-FROM build-app-deps AS linttest-deps
-ARG PYTHON_VERSION
+FROM build-app-deps AS tools-deps
 
-COPY requirements-dev.txt /src/
+# install into system Python because otherwise Unbound build becomes to hard
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV UV_PROJECT_ENVIRONMENT=/usr/
 
-ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -r requirements-dev.txt
+  uv sync --link-mode=copy
 
 # build unbound target
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS unbound
+FROM debian:trixie-20260202-slim AS unbound
 
 COPY --from=build-unbound /opt/unbound /opt/unbound
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     # unbound dependencies
-    libevent-2.1-7 \
-    libhiredis0.14 \
+    libevent-2.1-7t64 \
+    libhiredis1.1.0 \
     procps \
     ldnsutils \
     openssl \
     expat \
     # for envsubst
-    gettext \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    gettext
 
 ENV PATH="/opt/unbound/sbin:$PATH"
 
@@ -134,31 +134,20 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-# build frontend image target
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS frontend
-
-# install npm from official image
-COPY --from=node:22-slim /usr/local/bin/ /usr/local/bin/
-COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-
-ADD frontend/ /app/frontend
-WORKDIR /app/frontend
-RUN npm install
-RUN npm run docker:build
-
 # build main application image target
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS build-app
+FROM debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
 
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     python3 \
     libpython${PYTHON_VERSION} \
     gettext \
     ldnsutils \
     # unbound dependencies
-    libevent-2.1-7 \
-    libhiredis0.14 \
+    libevent-2.1-7t64 \
+    libhiredis1.1.0 \
     # used for healthchecks
     curl \
     # debug tools
@@ -166,25 +155,18 @@ RUN apt update && \
     dnsutils \
     iproute2 \
     # healthcheck
-    netcat \
-    procps \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    netcat-traditional \
+    procps
 
 # copy unbound library and unbound Python module into image
 COPY --from=build-unbound /opt/unbound /opt/unbound
-COPY --from=build-unbound /usr/lib/python3/dist-packages/*unbound* /usr/lib/python3/dist-packages/
-
-# copy nassl Python module into image
-COPY --from=build-nassl /usr/local/lib/python${PYTHON_VERSION}/dist-packages/nassl-*.egg /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
+COPY --from=build-unbound /usr/local/lib/python${PYTHON_VERSION}/dist-packages/*unbound* /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 
 # copy application dependencies into image
 COPY --from=build-app-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 COPY --from=build-app-deps /usr/local/bin/* /usr/local/bin/
 
 # basic verification of installed components
-# The python3 package currently installs version 3.9 but that might change with
-# OS updates, verify we run the desired Python version.
 RUN python3 --version | grep "$PYTHON_VERSION."
 RUN /opt/unbound/sbin/unbound -V
 RUN python3 -c 'import nassl; print(nassl.__version__)'
@@ -197,6 +179,7 @@ RUN chown nobody:nogroup /app
 USER nobody:nogroup
 
 # copy all required sources from the application
+COPY --chown=nobody:nogroup pyproject.toml ./pyproject.toml
 COPY --chown=nobody:nogroup bin ./bin
 COPY --chown=nobody:nogroup manage.py ./
 COPY --chown=nobody:nogroup checks ./checks
@@ -209,7 +192,7 @@ COPY --chown=nobody:nogroup assets ./assets
 
 ENV LDNS_DANE=/usr/bin/ldns-dane
 
-ENV STATIC_ROOT /app/static
+ENV STATIC_ROOT=/app/static
 
 VOLUME /app/batch_results
 RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
@@ -217,16 +200,14 @@ RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
 # some js/css files use a separate script to generate minimized versions
 # storage these in a place for django to find
 RUN mkdir -p /app/static_frontend
-# copy build/minimized CSS files from frontend stage
-COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/css/*.css /app/static_frontend/css/
-# copy build/minimized JS files from frontend stage
-COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/js/ /app/static_frontend/js/
+RUN python3 bin/frontend.py js
+RUN python3 bin/frontend.py css
 
 # generate language files
 RUN python3 bin/pofiles.py to_django
 
 # use fake version to prevent building the next steps when only the version changes
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0-build0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0+dev0
 
 # disable secret key check and cache for commands that run standalone tasks
 RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py compilemessages
@@ -235,51 +216,52 @@ RUN SKIP_SECRET_KEY_CHECK=True CACHE_LOCATION= ENABLE_BATCH= ./manage.py api_gen
 
 FROM build-app AS app
 
+# is needed for eg: deploy.sh script
 ARG RELEASE
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=$RELEASE
+# do not determine version from SCM, as we don't copy that data into the build environment
+# we need to convert back the '-' to a '+' for the version as otherwise setuptools_scm won't accept the pretend version
+ARG SCM_VERSION
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SCM_VERSION}
+
+# suppress pythonwhois deprecation warnings as it will be removed in the near future
+ENV PYTHONWARNINGS="ignore:invalid escape sequence:SyntaxWarning"
 
 # define default entrypoint and command
-ENTRYPOINT [ "python3", "./manage.py"]
+ENTRYPOINT [ "python3","./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
 
-# app image with development tools for better live reloading
-FROM app AS app-dev
-
-# required for compose `develop` mode file sync/copy
-USER root
-
-# copy dependencies to rebuild CSS (postcss)
-COPY --from=frontend /usr/local/bin/ /usr/local/bin/
-COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
-
-# copy browser reload module
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
-
 # supplement application with unittest, lint dependencies
-FROM build-app AS linttest
+FROM build-app AS tools
 ARG PYTHON_VERSION
 ARG YQ_VERSION
+ARG DOCKER_CLI_VERSION
 
 USER root
 
 # install additional development dependencies
-RUN apt update && \
-    apt install --no-install-recommends -yqq \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends \
     git \
     make \
-    python3-pip \
-    docker.io \
+    build-essential \
+    libpython${PYTHON_VERSION}-dev \
+    ca-certificates \
+    gpg \
+    gpg-agent \
     shellcheck \
     bsdmainutils \
-    # since this stage ends up in the final image we care about size and remove cache files
-    && rm -rf /var/lib/apt/lists/*
+    vim
 
 # Install yq
 RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
 
+# docker.io is not available in Debian Trixie, copy docker CLI binary from official image
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
+
 # copy application dependencies into image
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
-COPY --from=linttest-deps /usr/local/bin/* /usr/local/bin/
+COPY --from=tools-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
+COPY --from=tools-deps /usr/local/bin/* /usr/local/bin/
 
 RUN mkdir /source
 WORKDIR /source

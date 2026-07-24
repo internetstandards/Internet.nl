@@ -60,10 +60,10 @@ if settings.INTERNET_NL_CHECK_SUPPORT_DNSSEC:
     BATCH_MAILTEST["subtests"]["dnssec"] = dnssec_mail_taskset
 
 if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
-    from checks.tasks.tls import batch_web_registered as tls_web_taskset
+    from checks.tasks.tls.tasks_reports import batch_web_registered as tls_web_taskset
 
     BATCH_WEBTEST["subtests"]["tls"] = tls_web_taskset
-    from checks.tasks.tls import batch_mail_registered as tls_mail_taskset
+    from checks.tasks.tls.tasks_reports import batch_mail_registered as tls_mail_taskset
 
     BATCH_MAILTEST["subtests"]["tls"] = tls_mail_taskset
 
@@ -410,8 +410,9 @@ def update_batch_status(batch_request: BatchRequest):
     ):
         return
 
-    waiting = batch_request.domains.filter(status=BatchDomainStatus.waiting).exists()
-    running = batch_request.domains.filter(status=BatchDomainStatus.running).exists()
+    # not using queryset filter here because data is prefetched for performance
+    waiting = any(r for r in batch_request.domains.all() if r.status == BatchDomainStatus.waiting)
+    running = any(r for r in batch_request.domains.all() if r.status == BatchDomainStatus.running)
     if not waiting:
         if running:
             batch_request.status = BatchRequestStatus.running
@@ -530,7 +531,9 @@ def find_stalled_tests_and_update_db():
 
 
 def update_batch_request_status():
-    batch_requests = BatchRequest.objects.filter(status__in=(BatchRequestStatus.live, BatchRequestStatus.running))
+    batch_requests = BatchRequest.objects.filter(
+        status__in=(BatchRequestStatus.live, BatchRequestStatus.running)
+    ).prefetch_related("domains")
     for batch_request in batch_requests:
         update_batch_status(batch_request)
 

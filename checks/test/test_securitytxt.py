@@ -1,6 +1,5 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from typing import Optional
 
 from checks import scoring
 from checks.tasks.securitytxt import (
@@ -11,7 +10,6 @@ from checks.tasks.securitytxt import (
     SECURITYTXT_LEGACY_PATH,
 )
 
-
 # This test is limited to evaluation, as network retrieval is more appropriately
 # tested in an integration test
 
@@ -21,7 +19,7 @@ def test_evaluate_response():
 
     def _evaluate_with_valid_defaults(
         status=200,
-        content_type: Optional[str] = "text/plain; charset=csutf8",
+        content_type: str | None = "text/plain; charset=csutf8",
         domain="example.com",
         path=SECURITYTXT_EXPECTED_PATH,
         content=sectxt_content,

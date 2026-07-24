@@ -1,4 +1,5 @@
 """Basis functionality that should always be present."""
+
 import pytest
 from playwright.sync_api import expect
 from ..conftest import print_details_test_results, print_red
@@ -8,9 +9,9 @@ import requests
 import re
 
 ALL_CONNECTION_PROBES = {"ipv6", "resolver"}
-TEST_CONNECTION_EXPECTED_SCORE = 100.0
+TEST_CONNECTION_EXPECTED_SCORE = 100
 # TODO: improve test environment to allow 100% score result
-TEST_CONNECTION_EXPECTED_SCORE = 50.0
+TEST_CONNECTION_EXPECTED_SCORE = 50
 
 
 def test_your_connection_score(page, app_url, app_domain):

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import time
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import Any
 
 from celery import group
 from celery.result import AsyncResult
@@ -28,7 +28,7 @@ def user_limit_exceeded(req_limit_id):
 @dataclass(frozen=True)
 class ProbeTaskResult:
     done: bool
-    success: Optional[bool] = None
+    success: bool | None = None
     results: dict[Any, Any] = field(default_factory=dict)
 
 

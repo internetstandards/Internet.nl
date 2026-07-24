@@ -1,6 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
+Hash: SHA512
+
 # Canonical URLs
 Canonical: https://internet.nl/.well-known/security.txt
 Canonical: https://www.internet.nl/.well-known/security.txt
@@ -28,20 +30,21 @@ Encryption: https://internet.nl/static/question@internet.nl_0x45028563.asc
 # Our security policy
 Policy: https://internet.nl/disclosure/
 
-Expires: 2026-09-25T00:00:00Z
+Expires: 2027-04-10T00:00:00Z
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmjWfAcACgkQ2JThX0UC
-hWNptw/8ChAXXJcowrTy5y0xYw2YPx0a26M/bTBIZ2TsH0ewmhOHJEOXK9S1V6+I
-oszXGBmm9fUDEXlMC7+f1QfXWXt8Xh1OVd9HOTqVvQ4lmb2XbefGuR6hFuHaveEx
-Ac5nVVpkxwUzBJOQ0idK3bA+cLdosx6JEMPQoKWVPceaTake3TckQ22TEHBRro5z
-i7FAdEfqCjMT1r682cjNa95Q2gj7To06SmU4f/+0O2sjA64FVpOGRjC/Ka5YolZ6
-xLnnHQGz3FuQnKKVSF29l2RnbtNiL9Arr9xUekY8RoO7c7t7/Hwslp/lyYBHWHUZ
-3eeh4bkLgbfLICsjFWhQjU5uHp92ObMF+2N55d4C2oZp+o5C6BfdXW5nACLBreOV
-AjIUpzn59qpRPwV8dni6qzE0+BodIp6yAzBynXoCFoc7+mRK4Njtsr5Ci8Mz7Y2R
-7iBkor6xHmEssyJi2tCWSuZlQUcKx/JKRAKZI3yIOQab7lqfB8cLXogaEgtpAt1U
-8miL7wxKONyJM5bYOcf7UmpQutvRIWB3ZKtw/b0V8i/HCl7IzpyRASgwGbi93cqD
-EQw6/W5v4AtqoktNdxvWKyi+3NORfBdYHkCnLDGWtMMJpbW17iD4RVg866ode0Sv
-ukBLiBbSZTIJjv9294oKjRgKnZgy9PZ1+6bxLjmBl8k9XQJrQ18=
-=LFEm
+iQJiBAEBCgBMFiEErLeIKUx+ErrpIoxg2JThX0UChWMFAmniJ8wbFIAAAAAABAAO
+bWFudTIsMi41KzEuMTIsMCwzEhx2cmFhZ0BpbnRlcm5ldC5ubAAKCRDYlOFfRQKF
+YzrhD/9e3YMNFNWG4mviKceBABcJzEnuIqzC98f4dv+1rE4NCfrSJBWSFdqJqtsJ
+q5C34/Ny93PpuzhKB49FWZaASarmf7sBvWkwIVnOGY8BLLUT64XxPAOB8GCa2Lzl
+92KRWm3idBvsP4ovh/rdwuEl/pTuCFj4fUNGeK1gJdnE/b9hn2Hc8ozlNXPINYhE
+mcfZrw8Ez2XrJ3iJZ2yvRyui/btJGo0b912eb94g0uI1bQszOt7hq3Ah8I4DagHK
+yNPrJ/en9M4hyZepz/4I3Qzxtwrv4SloMwcF1fYn7ZyWY47OlQILrqauGzzLAXH4
+UT8c09LKEapc5ISNrq5MYnn6jMSIR78rLkcd37KVpeU9wKD/anDbSfa3++pT5M+A
+mYhTNh8CyU9FZD/f3Ux7R6RTPPCytiAocas5HC5NmPhc8vEx0TZ2J2l8uZorBwri
+46A2+4AaVCIo/QYl4yWpjt/734Om4wegmOdUTMMW6o39sxQLvjGs0JfwwhTbUdLc
+OeYRV4WOQRexxOxEQi28uLt0UOp/kuBHVmvMKSUQgxfykHMn7lIZgfuiFavNge28
+ofXtxLP+0vRR2oJusb47yIAerLUUQmPt12pqI3awn2qgHOpb8zmrBMS3mC0j1+VI
+EtSsBnMpBqJBqCzG2odFkSy/7cip8ybwchSVfJQ+Zrmf80bcUQ==
+=zDK4
 -----END PGP SIGNATURE-----

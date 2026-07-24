@@ -28,10 +28,12 @@ __pycache__
 *.pid
 /tests/.pytest_cache/
 /node_modules
+Internet.nl.egg-info/
 
 # Pycharm defaults
 .idea
 .venv
+venv/
 
 # When compiling unbound as per installation instructions, do that in the virtual env in the IDE. Ignore the code.
 ./unbound

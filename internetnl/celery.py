@@ -7,7 +7,6 @@ from celery import Celery
 from django.utils.autoreload import autoreload_started
 from django.dispatch import receiver
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 
 app = Celery("internetnl")

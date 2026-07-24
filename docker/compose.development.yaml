@@ -1,7 +1,7 @@
 services:
   # terminate tls so we don't need to have exceptions in the nginx config file for development
   port-expose:
-    image: nginx:1.27.3-alpine
+    image: nginx:1.31.2-alpine3.23
     networks:
       - public-internet
       - internal
@@ -17,9 +17,25 @@ services:
     environment:
       - INTERNETNL_DOMAINNAME
 
-  app:
+  webserver:
     build:
-      target: app-dev
+      context: ..
+      dockerfile: docker/webserver.Dockerfile
+    develop:
+      watch:
+        # auto rebuild/reload when config files change
+        - path: ./webserver/
+          action: rebuild
+
+  app:
+    develop:
+      watch:
+        # auto rebuild/reload when CSS/JS changes
+        - path: ../frontend/
+          action: sync+exec
+          target: /app/frontend
+          exec:
+            command: /bin/sh -c "python3 bin/frontend.py js;python3 bin/frontend.py css;"
     # use Django runserver for better debug abilities during development
     entrypoint: ["/bin/bash"]
     # run CSS auto rebuild in the background and start devserver
@@ -27,13 +43,6 @@ services:
       - "-c"
       - >
         if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
-          # install npm dependencies and watch CSS and JS files for rebuild
-          cd /app/frontend;
-          # It's needed to install the rollup linux dependency
-          npm install;
-          npm run docker:watch &
-          cd /app;
-          # start development server with auto reloading
           ./manage.py runserver 0.0.0.0:8080
         else
           ./manage.py runserver 0.0.0.0:8080 --noreload
@@ -46,8 +55,6 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
-      # mount frontend files so build tools can detect changes and rebuild
-      - ../frontend/src:/app/frontend/src
 
   worker:
     volumes:
@@ -63,3 +70,20 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+
+  grafana:
+    develop:
+      watch:
+        # restart grafana when dashboards change
+        - path: ./grafana/provisioning/dashboards
+          action: restart
+
+    volumes:
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+
+networks:
+  public-internet:
+    driver_opts:
+      # development environments break connectivity when outgoing IP is set to the internal public IP
+      com.docker.network.host_ipv4: !reset null
+      com.docker.network.host_ipv6: !reset null
