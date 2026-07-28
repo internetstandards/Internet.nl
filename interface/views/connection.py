@@ -18,9 +18,10 @@ from checks.models import ASRecord, ConnectionTest, Resolver
 from checks.probes import Probe, ProbeSet
 from checks.resolver import dns_resolve_txt, dns_resolve_reverse
 from checks.scoring import STATUS_FAIL, STATUS_INFO, STATUS_NOT_TESTED, STATUS_NOTICE, STATUS_SUCCESS
-from checks.tasks.routing import TeamCymruIPtoASN, BGPSourceUnavailableError
+from checks.tasks.routing import RisWhoisIPtoASN, BGPSourceUnavailableError, InvalidIPError
 from interface import redis_id
 from interface.views.shared import get_client_ip, get_javascript_retries
+from internetnl import log
 
 probe_ipv6 = Probe("ipv6", "conn", scorename="ipv6", nourl=True, maxscore=100)
 probe_resolver = Probe("resolver", "conn", scorename="dnssec", nourl=True, maxscore=100, reportfield="reportdnssec")
@@ -88,7 +89,7 @@ def results(request, request_id):
         connectionprobes["resolver"].rated_results_by_model(ct),
     ]
     scores = [pr["totalscore"] for pr in probereports]
-    score = max(min(sum(scores) / len(scores), 100), 0)
+    score = max(min(int(sum(scores) / len(scores)), 100), 0)
 
     return render(
         request,
@@ -346,18 +347,21 @@ def find_AS_by_IP(ip):
 
     - Creates/Updates the appropriate ASRecord model in the DB.
     - Stores the ASRecord model in cache.
-    Relies heavily on the 'IP to ASN Mapping' DNS service of Team Cymru.
-    http://www.team-cymru.org/IP-ASN-mapping.html#dns
+    IP->ASN mapping uses RISwhois (https://ris.ripe.net/docs/ris-whois/)
+    AS description is resolved separately via AS<n>.asn.cymru.com TXT records
 
     :param ip: ipv4 or ipv6 address
     :returns: AS number or None on error
 
     """
     try:
-        asns_prefixes = TeamCymruIPtoASN.asn_prefix_pairs_for_ip(ip)
-        (asn, _) = asns_prefixes[0]
-    except (BGPSourceUnavailableError, IndexError):
+        asns_prefixes = RisWhoisIPtoASN.asn_prefix_pairs_for_ip(ip)
+    except (BGPSourceUnavailableError, InvalidIPError) as exc:
+        log.warning(f"riswhois lookup failed for {ip}: {exc}")
         return None
+    if not asns_prefixes:
+        return None
+    asn, _ = asns_prefixes[0]
 
     as_record = cache.get(redis_id.conn_test_as.id.format(asn))
     if not as_record:
@@ -373,7 +377,7 @@ def find_AS_by_IP(ip):
         description = txt.split("|")[-1].strip()
 
         # Some ASes include their ASN in the description
-        description = description.replace(asn, "").strip()
+        description = description.replace(str(asn), "").strip()
 
         # Filter out the Country Code at the end of the description
         l, sep, _ = description.rpartition(",")

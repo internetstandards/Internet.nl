@@ -1,7 +1,7 @@
 services:
   # terminate tls so we don't need to have exceptions in the nginx config file for development
   port-expose:
-    image: nginx:1.27.3-alpine
+    image: nginx:1.31.2-alpine3.23
     networks:
       - public-internet
       - internal
@@ -63,3 +63,20 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+
+  grafana:
+    develop:
+      watch:
+        # restart grafana when dashboards change
+        - path: ./grafana/provisioning/dashboards
+          action: restart
+
+    volumes:
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+
+networks:
+  public-internet:
+    driver_opts:
+      # development environments break connectivity when outgoing IP is set to the internal public IP
+      com.docker.network.host_ipv4: !reset null
+      com.docker.network.host_ipv6: !reset null

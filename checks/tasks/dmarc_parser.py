@@ -23,8 +23,8 @@ ParserElement.setDefaultWhitespaceChars("")  # Whitespace is in the grammar
 
 # Parser for DMARC records.
 #
-# The record is parsed based on section 6.4 (Formal Definition) of RFC-7489.
-# [ https://tools.ietf.org/html/rfc7489#section-6.4 ]
+# The record is parsed based on section 6.4 (Formal Definition) of RFC-7489,
+# [ https://tools.ietf.org/html/rfc7489#section-6.4 ], RFC 9091 and RFC9989.
 #
 # Most of the tokens have been combined together for easier access to the
 # records parts.
@@ -33,6 +33,8 @@ ParserElement.setDefaultWhitespaceChars("")  # Whitespace is in the grammar
 #     - request, (p=);
 #     - nrequest, (np=);
 #     - srequest, (sp=);
+#     - psd, (psd=);
+#     - testing, (t=);
 #     - auri, (rua=);
 #     - furi, (ruf=);
 #     - adkim, (adkim=);
@@ -111,6 +113,10 @@ nrequest = Combine(
     + equal
     + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
 )("nrequest")
+psd = Combine(CaselessLiteral("psd") + equal + (CaselessLiteral("y") | CaselessLiteral("n") | CaselessLiteral("u")))(
+    "psd"
+)
+testing = Combine(CaselessLiteral("t") + equal + (CaselessLiteral("y") | CaselessLiteral("n")))("testing")
 request = Combine(
     CaselessLiteral("p") + equal + (CaselessLiteral("none") | CaselessLiteral("quarantine") | CaselessLiteral("reject"))
 )("request")
@@ -120,6 +126,8 @@ directives = (
     + (
         Optional(sep + srequest)
         & Optional(sep + nrequest)
+        & Optional(sep + psd)
+        & Optional(sep + testing)
         & Optional(sep + auri)
         & Optional(sep + furi)
         & Optional(sep + adkim)

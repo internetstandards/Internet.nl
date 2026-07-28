@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # solve chickenegg problem with letsencrypt
 
 # create initial dummy TLS certificate to allow nginx to start

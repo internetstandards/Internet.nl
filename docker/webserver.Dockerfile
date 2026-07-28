@@ -1,11 +1,17 @@
-FROM nginx:1.27.3
+ARG CERTBOT_VERSION=5.6.0
 
-RUN apt-get update && apt-get install -y \
+FROM nginx:1.31.2-alpine3.23
+
+RUN apk upgrade --no-cache \
+  # upgrade libexpat to match python3's pyexpat native module
+  libexpat \
+  && apk add --no-cache \
+  # for random quic host key
+  openssl \
   # for htpasswd
   apache2-utils \
-  # for gixy install
-  python3-venv \
-  && rm -rf /var/lib/apt/lists/*
+  # for gixy and certbot install
+  python3
 
 # install nginx config static analysis tool
 RUN python3 -m venv /opt/gixy
@@ -13,7 +19,8 @@ RUN /opt/gixy/bin/pip install gixy==0.1.21
 
 # install certbot
 RUN python3 -m venv /opt/certbot
-RUN /opt/certbot/bin/pip install certbot==3.0.1
+ARG CERTBOT_VERSION
+RUN /opt/certbot/bin/pip install certbot==${CERTBOT_VERSION}
 COPY docker/webserver/certbot.sh /docker-entrypoint.d/
 
 RUN mkdir -p /etc/nginx/htpasswd/
@@ -23,6 +30,7 @@ COPY docker/webserver/10-variables.envsh /docker-entrypoint.d/
 COPY docker/webserver/tls_init.sh /docker-entrypoint.d/
 COPY docker/webserver/authentication.sh /docker-entrypoint.d/
 COPY docker/webserver/generate_quic_host_key.sh /docker-entrypoint.d/
+COPY docker/webserver/routinator_allowlist.sh /docker-entrypoint.d/
 
 COPY docker/webserver/user_manage_inner.sh /
 

@@ -55,6 +55,7 @@ batch_mail_registered = check_registry("batch_mail_auth", batch_mail_callback)
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def dmarc(self, url, *args, **kwargs):
     return do_dmarc(url, *args, **kwargs)
@@ -65,6 +66,7 @@ def dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_dmarc(self, url, *args, **kwargs):
     return do_dmarc(url, *args, **kwargs)
@@ -75,6 +77,7 @@ def batch_dmarc(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def dkim(self, url, *args, **kwargs):
     return do_dkim(url, *args, **kwargs)
@@ -85,6 +88,7 @@ def dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_dkim(self, url, *args, **kwargs):
     return do_dkim(url, *args, **kwargs)
@@ -95,6 +99,7 @@ def batch_dkim(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_LOW,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_LOW,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)
@@ -105,6 +110,7 @@ def spf(self, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_spf(self, url, *args, **kwargs):
     return do_spf(url, *args, **kwargs)
@@ -507,8 +513,10 @@ def dmarc_check_policy(dmarc_record, domain, is_org_domain, public_suffix_list):
 
 def dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list):
     """
-    Verify that the s=(sp=) policy is not 'none'.
+    Verify that the DMARC record provides effective protection.
 
+    The effective policy is `sp=` for org domains when present, else `p=`.
+    A `t=y` (test mode, RFC9989) downgrades the applied policy one level.
     """
     status = DmarcPolicyStatus.valid
     score = scoring.MAIL_AUTH_DMARC_POLICY_PASS
@@ -539,8 +547,10 @@ def dmarc_verify_sufficient_policy(parsed, is_org_domain, public_suffix_list):
                     request = parsed["directives"]["request"]
 
             if request is not None:
-                value = request.split("=")[1]
-                if value.lower() == "none":
+                value = request.split("=")[1].lower()
+                testing = parsed["directives"].get("testing")
+                in_test_mode = testing is not None and testing.split("=")[1].lower() == "y"
+                if value == "none" or (in_test_mode and value == "quarantine"):
                     status = DmarcPolicyStatus.invalid_p_sp
                     score = scoring.MAIL_AUTH_DMARC_POLICY_PARTIAL
     return (status, score)

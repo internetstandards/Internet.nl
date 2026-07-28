@@ -83,6 +83,7 @@ batch_web_registered = check_registry("batch_web_appsecpriv", batch_web_callback
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_appsecpriv(af_ip_pairs, url, *args, **kwargs)
@@ -93,6 +94,7 @@ def web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_web_appsecpriv(self, af_ip_pairs, url, *args, **kwargs):
     return do_web_appsecpriv(af_ip_pairs, url, *args, **kwargs)

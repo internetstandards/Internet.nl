@@ -1,0 +1,9 @@
+{
+  // "image": "ghcr.io/internetstandards/tools:latest",
+  "dockerFile": "${localWorkspaceFolder}/docker/Dockerfile",
+  "target": "tools",
+  "context": "${localWorkspaceFolder}/",
+  "options": ["--platform=linux/amd64"],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/source,type=bind,consistency=cached",
+  "workspaceFolder": "/source"
+}

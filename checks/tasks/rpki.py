@@ -16,8 +16,8 @@ from .routing import (
     BGPSourceUnavailableError,
     InvalidIPError,
     NoRoutesError,
+    RisWhoisIPtoASN,
     Routinator,
-    TeamCymruIPtoASN,
     RelyingPartyUnvailableError,
 )
 from .. import categories, scoring
@@ -133,6 +133,7 @@ batch_mail_registered = check_registry("batch_mail_rpki", batch_mail_callback, s
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on webservers for a domain."""
@@ -145,6 +146,7 @@ def web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def ns_rpki(self, _, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for a domain.
@@ -160,6 +162,7 @@ def ns_rpki(self, _, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on webservers for a domain."""
@@ -172,6 +175,7 @@ def batch_web_rpki(self, af_ip_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_ns_rpki(self, _, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for a domain.
@@ -187,6 +191,7 @@ def batch_ns_rpki(self, _, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on mailservers for a domain."""
@@ -198,6 +203,7 @@ def mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.SHARED_TASK_EXPIRY_TIME,
 )
 def mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for the mx records of a domain."""
@@ -209,6 +215,7 @@ def mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on mailservers for a domain."""
@@ -220,6 +227,7 @@ def batch_mail_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mail_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for a domain.
@@ -234,6 +242,7 @@ def batch_mail_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     bind=True,
     soft_time_limit=settings.BATCH_SHARED_TASK_SOFT_TIME_LIMIT_HIGH,
     time_limit=settings.BATCH_SHARED_TASK_TIME_LIMIT_HIGH,
+    expires=settings.BATCH_SHARED_TASK_EXPIRY_TIME,
 )
 def batch_mail_mx_ns_rpki(self, mx_ips_pairs, url, *args, **kwargs):
     """Celery task to perform rpki test on nameservers for the mx records of a domain."""
@@ -462,7 +471,7 @@ def do_rpki(fqdn_ips_pairs, *args, **kwargs) -> TestResult:
 
                 try:
                     # fetch ASN, prefixes from BGP
-                    routeview = TeamCymruIPtoASN.from_bgp(ip)
+                    routeview = RisWhoisIPtoASN.from_bgp(ip)
                 except (InvalidIPError, BGPSourceUnavailableError) as e:
                     routeview = None
                     logger.error(repr(e))
@@ -479,7 +488,7 @@ def do_rpki(fqdn_ips_pairs, *args, **kwargs) -> TestResult:
                         # but validation is meaningless
                         result["errors"].append(NoRoutesError.__name__)
 
-                        routeview = TeamCymruIPtoASN.from_rpki(Routinator, ip)
+                        routeview = RisWhoisIPtoASN.from_rpki(Routinator, ip)
                 except RelyingPartyUnvailableError as e:
                     logger.error(repr(e))
                     result["errors"].append(e.__class__.__name__)

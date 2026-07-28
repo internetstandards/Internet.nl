@@ -19,11 +19,12 @@ env:
   # should be used to transfer images between jobs. Forked and dependabot builds don't
   # have permission to push to registry.
   use_registry: ${{ ! (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || startsWith(github.head_ref, 'dependabot/'))) }}
+  COMPOSE_VERSION: 2.40.3
 
 jobs:
   # builds all docker images in parallel
   build-docker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
@@ -34,9 +35,9 @@ jobs:
           - image: unbound
             dockerfile: docker/Dockerfile
             target: unbound
-          - image: linttest
+          - image: tools
             dockerfile: docker/Dockerfile
-            target: linttest
+            target: tools
           - image: test-runner
             dockerfile: docker/test-runner.Dockerfile
             target:
@@ -51,7 +52,8 @@ jobs:
             target:
 
     outputs:
-      internetnl_version: ${{ steps.get_version.outputs.internetnl_version }}
+      release: ${{ steps.get_version.outputs.release }}
+      scm_version: ${{ steps.get_version.outputs.scm_version }}
 
     steps:
       - name: Debug info
@@ -83,10 +85,14 @@ jobs:
         id: get_version
         run: |
           pip -q install setuptools_scm
-          # '+' and '/' is not supported in Docker Image tags
+          # determine version number from Git information
           scm_version=$(echo 'from setuptools_scm import get_version; print(get_version(version_scheme="release-branch-semver"))' | python)
           branch_version_suffix=${GITHUB_HEAD_REF:+-$GITHUB_HEAD_REF}
-          echo "internetnl_version=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
+          # release is the version used for the docker image tag
+          # '+' and '/' is not supported in Docker Image tags, so replace those from the SCM version with '-'
+          echo "release=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
+          # scm_version is valid PEP 440 and used as SETUPTOOLS_SCM_PRETEND_VERSION in Docker builds
+          echo "scm_version=$scm_version$branch_version_suffix" | tee -a "$GITHUB_OUTPUT"
           # generate docker image tag used for PR specific caching and PR specific auto deploy
           echo "github_ref_name_slug=${{github.ref_name}}" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
 
@@ -123,7 +129,7 @@ jobs:
           # tag image with current setuptools_scm generated version
           # and tag with PR source branch (eg: feature-x)
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.release }}
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.github_ref_name_slug }}
           # use latest build from main, or image previously build by this PR for caching
           cache-from: |
@@ -135,7 +141,8 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Build ${{ matrix.image }} (for main)
         # build for pushes to the main branch
@@ -150,7 +157,7 @@ jobs:
           # tag image with current setuptools_scm generated version
           # and tag with current branch name (eg: main)
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.release }}
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
           # use latest build from main for caching
           cache-from: |
@@ -161,7 +168,8 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Build ${{ matrix.image }} (for release)
         # build for tagged releases
@@ -175,7 +183,7 @@ jobs:
           target: ${{ matrix.target }}
           # tag image with current setuptools_scm generated version and tag 'latest'
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.release }}
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:latest
           # use latest build from main for caching
           cache-from: |
@@ -186,7 +194,8 @@ jobs:
           # pass in version information
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Build ${{ matrix.image }} (for forked PR's or dependabot)
         # build for forked PR's that don't have permissions to push to the container registry or dependabot PR's
@@ -200,7 +209,7 @@ jobs:
           target: ${{ matrix.target }}
           # tag image with current setuptools_scm generated version
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.release }}
           # use latest build from main for caching
           cache-from: |
             ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:main
@@ -209,12 +218,13 @@ jobs:
           # makes build images better usable as cache by allowing individual layers to be pulled from cache
           # pass in version information
           build-args: |
-            RELEASE=${{ steps.get_version.outputs.internetnl_version }}
+            SCM_VERSION=${{ steps.get_version.outputs.scm_version }}
+            RELEASE=${{ steps.get_version.outputs.release }}
 
       - name: Save image to disk (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
         if: ${{ env.use_registry == 'false' }}
-        run: docker save ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.internetnl_version }} | gzip > "${{ matrix.image }}.tar.gz"
+        run: docker save ${{ env.DOCKER_REGISTRY }}/${{ matrix.image }}:${{ steps.get_version.outputs.release }} | gzip > "${{ matrix.image }}.tar.gz"
 
       - name: Upload image as build artifact (for forked PR's or dependabot)
         # trigger only for forked PR's that don't have permissions to push to the container registry
@@ -227,7 +237,7 @@ jobs:
           retention-days: 1
 
   docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [build-docker]
     steps:
       - name: Branch deployment docs
@@ -242,7 +252,7 @@ jobs:
                 --volume /opt/Internet.nl:/opt/Internet.nl \\
                 --network none \\
                 --env DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }} \\
-                ${{ env.DOCKER_REGISTRY }}/util:${{ needs.build-docker.outputs.internetnl_version }} \\
+                ${{ env.DOCKER_REGISTRY }}/util:${{ needs.build-docker.outputs.release }} \\
                 /deploy.sh
           EOF
 
@@ -253,7 +263,7 @@ jobs:
 
     env:
       # used in `compose.yaml` files to determine version of images to pull
-      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      RELEASE: "${{ needs.build-docker.outputs.release }}"
       PY_COLORS: "1"
 
     steps:
@@ -272,7 +282,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -374,11 +384,11 @@ jobs:
   lintcheck:
     name: lint/check
     needs: [build-docker]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     env:
       # used in `compose.yaml` files to determine version of images to pull
-      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      RELEASE: "${{ needs.build-docker.outputs.release }}"
 
     steps:
       - name: Debug info
@@ -433,7 +443,7 @@ jobs:
 
     env:
       # used in `compose.yaml` files to determine version of images to pull
-      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      RELEASE: "${{ needs.build-docker.outputs.release }}"
       PY_COLORS: "1"
 
     steps:
@@ -452,7 +462,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -521,7 +531,7 @@ jobs:
 
     env:
       # used in `compose.yaml` files to determine version of images to pull
-      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      RELEASE: "${{ needs.build-docker.outputs.release }}"
 
     steps:
       - name: Install specific Docker/Compose versions that are known to work
@@ -539,7 +549,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -638,7 +648,7 @@ jobs:
 
     env:
       # used in `compose.yaml` files to determine version of images to pull
-      RELEASE: "${{ needs.build-docker.outputs.internetnl_version }}"
+      RELEASE: "${{ needs.build-docker.outputs.release }}"
       PY_COLORS: "1"
 
     steps:
@@ -657,7 +667,7 @@ jobs:
           sudo apt-get update
 
           # upgrade Docker
-          sudo apt install --upgrade docker-ce docker-compose-plugin=2.33.0\*
+          sudo apt install --upgrade docker-ce docker-compose-plugin=$COMPOSE_VERSION\*
 
       - name: Debug info
         run: |
@@ -725,7 +735,7 @@ jobs:
 
       - name: Collect Docker Compose logs
         if: always()
-        run: make logs-all-dump env=test > docker-compose.log
+        run: make logs-all-dump env=batch-test > docker-compose.log
 
       - uses: test-summary/action@v2.3
         with:

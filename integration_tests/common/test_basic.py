@@ -1,4 +1,5 @@
 """Basis functionality that should always be present."""
+
 import re
 import pytest
 import requests

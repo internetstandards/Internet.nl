@@ -34,6 +34,7 @@ services:
       - MONITORING_AUTH_RAW
       - AUTH_ALL_URLS
       - ALLOW_LIST
+      - ROUTINATOR_ALLOW_LIST
       # required for authentication.sh to restrict access when debug is on
       - DEBUG
       - ENABLE_BATCH
@@ -59,7 +60,7 @@ services:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
 
     healthcheck:
-      test: ["CMD", "service", "nginx", "status"]
+      test: ["CMD", "curl", "-ksSo/dev/null", "https://$INTERNETNL_DOMAINNAME", "--resolve", "$INTERNETNL_DOMAINNAME:443:127.0.0.1"]
       interval: $HEALTHCHECK_INTERVAL
       start_interval: $HEALTHCHECK_START_INTERVAL
       start_period: 1m
@@ -176,7 +177,9 @@ services:
       - internal
     command: migrate
     # this container runs to completion and exits with 0
-    restart: on-failure
+    # don't restart forever, as it will result in and endless loop with little feedback, but some restart
+    # is desired as the DB might not be completely ready
+    restart: on-failure:3
     logging:
       driver: $LOGGING_DRIVER
       options:
@@ -224,8 +227,8 @@ services:
     # run as root because permission need to be set on batch_results directory, drop privileges in entrypoint.sh
     user: root
     entrypoint: /entrypoint-worker.sh
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
-      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback,batch_scheduler
+    command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+      --queues default,celery,db_worker,ipv6_worker,mail_worker,web_worker,resolv_worker,dnssec_worker,rpki_worker,batch_main,batch_callback
     # time after which a SIGKILL is sent to celery after a SIGTERM (warm shutdown), default 10s
     # insufficient short grace period causes issues on batch when tasks are killed during the hourly worker restart
     stop_grace_period: 10m
@@ -292,7 +295,7 @@ services:
       - SENTRY_DSN
       - SENTRY_ENVIRONMENT
       - SENTRY_SERVER_NAME
-      # even though eventlet is used and childs are not really threads or processes, this settings reduces
+      # even though gevent is used and childs are not really threads or processes, this settings reduces
       # issues with high memory usage, probably because some objects are freed?
       - CELERYD_MAX_TASKS_PER_CHILD=100
 
@@ -314,7 +317,7 @@ services:
     # disable swap by settings swap to the memory limit
     memswap_limit: $WORKER_NASSL_MEMORY_LIMIT
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=300 --concurrency=$WORKER_CONCURRENCY
+    command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=300 --concurrency=$WORKER_CONCURRENCY
       --queues nassl_worker,batch_nassl
     # set hostname for Sentry
     hostname: worker-nassl
@@ -331,8 +334,17 @@ services:
     deploy:
       replicas: $WORKER_SLOW_REPLICAS
 
-    command: celery --app internetnl worker --without-gossip --pool=eventlet --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
+    command: celery --app internetnl worker --without-gossip --pool=gevent --time-limit=600 --concurrency=$WORKER_SLOW_CONCURRENCY
       --queues slow_db_worker,batch_slow
+
+  # prefork worker for batch scheduling. Avoids issue https://github.com/internetstandards/Internet.nl/pull/2106 after switching to gevent
+  worker-scheduler:
+    <<: *worker
+    deploy:
+      replicas: $WORKER_SCHEDULER_REPLICAS
+    command: celery --app internetnl worker --without-gossip --pool=prefork --time-limit=300 --concurrency=$WORKER_SCHEDULER_CONCURRENCY
+      --queues batch_scheduler
+    hostname: worker-scheduler
 
   # celery task queue
   beat:
@@ -614,6 +626,7 @@ services:
       - CRON_DAILY_TRUNCATE_EXPORTER_LOGS
       - INTERNETNL_DOMAINNAME
       - INTERNETNL_CACHE_TTL
+      - INTERNETNL_TEST_TIMEOUT
       - TEST_DOMAINS_SITE
       - TEST_DOMAINS_MAIL
 
@@ -839,6 +852,13 @@ services:
     profiles:
       - monitoring
 
+    healthcheck:
+      # container image includes the test command, setting interval and start_interval here
+      interval: $HEALTHCHECK_INTERVAL
+      start_interval: $HEALTHCHECK_START_INTERVAL
+      start_period: 1m
+      retries: 10
+
   celery-exporter:
     platform: linux/amd64
     image: ${DOCKER_IMAGE_CELERY_EXPORTER}
@@ -928,10 +948,6 @@ services:
     configs:
       - source: nginx_logs_exporter_config
         target: /config.hcl
-        # permissions should be set correctly, temporary workaround until fix is released:
-        # https://github.com/docker/compose/pull/12666
-        mode: 0444
-
     restart: unless-stopped
     logging:
       driver: $LOGGING_DRIVER
@@ -944,6 +960,30 @@ services:
       - internal
     volumes:
       - nginx-logs-exporter:/var/log/nginx/prometheus-nginxlog-exporter/
+
+    profiles:
+      - monitoring
+
+  query-exporter:
+    image: ${DOCKER_IMAGE_QUERY_EXPORTER}
+    command:
+      - --config=/config.yaml
+    configs:
+      - source: query_exporter_config
+        target: /config.yaml
+    restart: unless-stopped
+    logging:
+      driver: $LOGGING_DRIVER
+      options:
+        tag: '{{.Name}}'
+    mem_limit: $DEFAULT_MEMORY_LIMIT
+    # disable swap by settings swap to the memory limit
+    memswap_limit: $DEFAULT_MEMORY_LIMIT
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
 
     profiles:
       - monitoring
@@ -970,6 +1010,111 @@ volumes:
   nginx-logs-exporter: {}
 
 configs:
+  query_exporter_config:
+    content: |
+      databases:
+        db:
+          dsn: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+
+      metrics:
+        internetnl_batch_requests:
+          type: gauge
+          description: "Number of batch requests by status and type"
+          labels: [status, type, username]
+
+        internetnl_batch_domains:
+          type: gauge
+          description: "Number of batch domains by status"
+          labels: [status]
+
+        internetnl_domain_test_reports_total:
+          type: gauge
+          description: "Total number of domain test reports"
+
+        internetnl_mail_test_reports_total:
+          type: gauge
+          description: "Total number of mail test reports"
+
+        internetnl_batch_request_runtime_seconds:
+          type: gauge
+          description: "Batch request runtime in seconds"
+          labels: [quantile]
+
+      queries:
+        batch_requests_by_status:
+          interval: 60
+          databases: [db]
+          metrics: [internetnl_batch_requests]
+          sql: >
+            SELECT
+              CASE status
+                WHEN 0 THEN 'registering'
+                WHEN 10 THEN 'live'
+                WHEN 11 THEN 'running'
+                WHEN 20 THEN 'done'
+                WHEN 38 THEN 'error'
+                WHEN 39 THEN 'cancelled'
+                ELSE 'unknown'
+              END AS status,
+              CASE type
+                WHEN 0 THEN 'web'
+                WHEN 1 THEN 'mail'
+                ELSE 'unknown'
+              END AS type,
+              u.username,
+              COUNT(*) AS internetnl_batch_requests
+            FROM checks_batchrequest r
+            JOIN checks_batchuser u ON u.id = r.user_id
+            GROUP BY status, type, u.username
+
+        batch_domains_by_status:
+          interval: 60
+          databases: [db]
+          metrics: [internetnl_batch_domains]
+          sql: >
+            SELECT
+              CASE status
+                WHEN 0 THEN 'waiting'
+                WHEN 10 THEN 'running'
+                WHEN 20 THEN 'done'
+                WHEN 38 THEN 'error'
+                WHEN 39 THEN 'cancelled'
+                ELSE 'unknown'
+              END AS status,
+              COUNT(*) AS internetnl_batch_domains
+            FROM checks_batchdomain
+            GROUP BY status
+
+        domain_test_reports_total:
+          interval: 300
+          databases: [db]
+          metrics: [internetnl_domain_test_reports_total]
+          sql: SELECT COUNT(*) AS internetnl_domain_test_reports_total FROM checks_domaintestreport
+
+        mail_test_reports_total:
+          interval: 300
+          databases: [db]
+          metrics: [internetnl_mail_test_reports_total]
+          sql: SELECT COUNT(*) AS internetnl_mail_test_reports_total FROM checks_mailtestreport
+
+        batch_request_runtime:
+          interval: 60
+          databases: [db]
+          metrics: [internetnl_batch_request_runtime_seconds]
+          sql: >
+            SELECT
+              quantile::text AS quantile,
+              runtime AS internetnl_batch_request_runtime_seconds
+            FROM (
+              SELECT
+                UNNEST(ARRAY[0.5, 0.9, 0.99]) AS quantile,
+                UNNEST(PERCENTILE_CONT(ARRAY[0.5, 0.9, 0.99]) WITHIN GROUP (
+                  ORDER BY EXTRACT(EPOCH FROM (finished_date - submit_date))
+                )) AS runtime
+              FROM checks_batchrequest
+              WHERE finished_date IS NOT NULL
+            ) t
+
   nginx_logs_exporter_config:
     content: |
       namespace "nginx" {
@@ -1035,6 +1180,9 @@ configs:
         - <<: *scrape_config
           job_name: nginx_logs_exporter
           static_configs: [{targets: ["nginx_logs_exporter:4040"]}]
+        - <<: *scrape_config
+          job_name: query_exporter
+          static_configs: [{targets: ["query-exporter:9560"]}]
   prometheus_rules_config:
     content: |
       groups:
@@ -1111,6 +1259,9 @@ networks:
       com.docker.network.enable_ipv6: "true"
       # network for internal communication between services
       com.docker.network.bridge.enable_icc: "true"
+      # set NAT source IPs to the configured public IPs
+      com.docker.network.host_ipv4: $IPV4_IP_PUBLIC
+      com.docker.network.host_ipv6: $IPV6_IP_PUBLIC
     ipam:
       driver: default
       config:

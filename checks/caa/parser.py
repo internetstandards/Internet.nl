@@ -1,5 +1,4 @@
 import textwrap
-from typing import Optional
 from urllib.parse import urlparse
 
 from abnf.grammars.misc import load_grammar_rulelist
@@ -22,7 +21,7 @@ class CAAParseError(ValueError):
         return TranslatableTechTableItem(self.msg_id, self.context)
 
 
-def node_get_named_child_value(node: Node, name: str) -> Optional[str]:
+def node_get_named_child_value(node: Node, name: str) -> str | None:
     """Search an ABNF tree from a node, for a node with a certain name, return the value of first match."""
     queue = [node]
     while queue:
@@ -38,11 +37,11 @@ def node_get_named_child_value(node: Node, name: str) -> Optional[str]:
 ACME_VALIDATION_METHODS = {
     "http-01",
     "dns-01",
-    "http-01",
-    "tls-alpn-01",
     "tls-alpn-01",
     "email-reply-00",
     "tkauth-01",
+    "onion-csr-01",
+    "bp-nodeid-00",
 }
 
 # RFC 8657 4
@@ -56,12 +55,10 @@ class CAAValidationMethodsGrammar(_Rule):
     Per RFC8657 4
     """
 
-    grammar = textwrap.dedent(
-        """
+    grammar = textwrap.dedent("""
         value = [*(label ",") label]
         label = 1*(ALPHA / DIGIT / "-")
-    """
-    )
+    """)
 
 
 def validate_issue_validation_methods(parameter_value: str) -> set[str]:
@@ -90,8 +87,7 @@ class CAAPropertyIssueGrammar(_Rule):
     Per RFC8659 4.2
     """
 
-    grammar = textwrap.dedent(
-        """
+    grammar = textwrap.dedent("""
         issue-value = *WSP [issuer-domain-name *WSP]
            [";" *WSP [parameters *WSP]]
 
@@ -102,8 +98,7 @@ class CAAPropertyIssueGrammar(_Rule):
         parameter = tag *WSP "=" *WSP value
         tag = (ALPHA / DIGIT) *( *("-") (ALPHA / DIGIT))
         value = *(%x21-3A / %x3C-7E)
-    """
-    )
+    """)
 
 
 class CAAPropertyIssueVisitor(NodeVisitor):
@@ -175,8 +170,7 @@ class PhoneNumberRule(_Rule):
     as the ABNF parser had issues with it, and they are not used by us now.
     """
 
-    grammar = textwrap.dedent(
-        """
+    grammar = textwrap.dedent("""
    telephone-uri        = "tel:" telephone-subscriber
    telephone-subscriber = global-number
    global-number        = global-number-digits *par
@@ -206,8 +200,7 @@ class PhoneNumberRule(_Rule):
    reserved             = ";" / "/" / "?" / ":" / "@" / "&" /
                           "=" / "+" / "$" / ","
    uric                 = reserved / unreserved / pct-encoded
-    """
-    )
+    """)
 
 
 def validate_property_contactphone(value: str):
@@ -223,8 +216,7 @@ class CAAPropertyIssueMailRule(_Rule):
     Grammar for CAA issuemail property per RFC9495.
     """
 
-    grammar = textwrap.dedent(
-        """
+    grammar = textwrap.dedent("""
         issuemail-value = *WSP [issuer-domain-name *WSP]
             [";" *WSP [parameters *WSP]]
 
@@ -235,8 +227,7 @@ class CAAPropertyIssueMailRule(_Rule):
         parameter = tag *WSP "=" *WSP value
         tag = (ALPHA / DIGIT) *( *("-") (ALPHA / DIGIT))
         value = *(%x21-3A / %x3C-7E)
-    """
-    )
+    """)
 
 
 def validate_property_issuemail(value: str):

@@ -4,11 +4,9 @@
 
 fail=0
 
-requirements_files="requirements.in requirements-dev.in"
-echo $requirements_files | xargs -n1 pip-compile --quiet --resolver=backtracking
-if [ ! -z "$(git status --porcelain $requirements_files)" ];then
-  echo -e "\e[31mRequirements .in files have not all been compiled into .txt files and commited to Git!"
-  git status --porcelain $requirements_files
+if ! uv lock --check &>/dev/null;then
+  echo -e "\e[31mThe uv.lock file needs updating, please run 'make uv_lock' and commit the changes to Git!"
+  uv lock --dry-run
   fail=1
 fi
 

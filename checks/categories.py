@@ -1,8 +1,8 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
-from typing import Optional
 
 from checks import scoring
+from checks.models import TLSClientInitiatedRenegotiationStatus, TLSExtendedMasterSecretStatus
 from checks.scoring import (
     ORDERED_STATUSES,
     STATUS_ERROR,
@@ -78,7 +78,7 @@ class Subtest:
         tech_data_translation_root="",
         # override_mandatory overrides whether this is mandatory (True), or not mandatory (False)
         # rather than base this on worst_status (the default, for None)
-        override_mandatory: Optional[bool] = None,
+        override_mandatory: bool | None = None,
     ):
         self.name = name
         self.label = label
@@ -184,6 +184,7 @@ class WebTls(Category):
             WebTlsZeroRTT,
             WebTlsOCSPStapling,
             WebTlsKexHashFunc,
+            WebTLSExtendedMasterSecret,
             # WebTlsDaneRollover,
         ]
         super().__init__(name, subtests)
@@ -256,6 +257,7 @@ class MailTls(Category):
             MailTlsDaneRollover,
             MailTlsZeroRTT,
             MailTlsKexHashFunc,
+            MailTLSExtendedMasterSecret,
             # MailTlsOCSPStapling,  # Disabled for mail.
         ]
         super().__init__(name, subtests)
@@ -289,9 +291,12 @@ class RpkiExists(Subtest):
         raise NotImplementedError
 
     def result_bad(self, tech_data):
+        # STATUS_NOTICE (not STATUS_FAIL) so the category verdict is "warning"
+        # and the missing-ROA text is shown, worst_status=STATUS_FAIL is unchanged,
+        # so the subtest is still counted as mandatory and scores 0, see #1900
         self.was_tested()
         self.tech_data = tech_data
-        self._status(STATUS_FAIL)
+        self._status(STATUS_NOTICE)
         self.verdict = f"detail {self._label} rpki {self._test_label} verdict bad"
 
     def result_good(self, tech_data):
@@ -946,6 +951,7 @@ class WebTlsHttpsForced(Subtest):
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail web tls https-forced verdict no-https"
         self.tech_data = "detail tech data not-applicable"
+        self.override_mandatory = False
 
     def result_bad(self):
         self._status(STATUS_FAIL)
@@ -1085,24 +1091,9 @@ class WebTlsCipherOrder(Subtest):
         self.verdict = "detail web tls cipher-order verdict good"
         self.tech_data = ""
 
-    def result_bad(self):
+    def result_bad(self, cipher_order_violation):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls cipher-order verdict bad"
-        self.tech_data = ""
-
-    def result_seclevel_bad(self, cipher_order_violation):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web tls cipher-order verdict seclevel-bad"
-        self.tech_data = cipher_order_violation
-
-    def result_score_warning(self, cipher_order_violation):
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail web tls cipher-order verdict warning"
-        self.tech_data = cipher_order_violation
-
-    def result_score_info(self, cipher_order_violation):
-        self._status(STATUS_INFO)
-        self.verdict = "detail web tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
     def result_na(self):
@@ -1196,17 +1187,33 @@ class WebTlsRenegotiationClient(Subtest):
             worst_status=scoring.WEB_TLS_CLIENT_RENEG_WORST_STATUS,
             full_score=scoring.WEB_TLS_CLIENT_RENEG_GOOD,
             model_score_field="client_reneg_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data tls-renegotiation-client",
         )
+        self.tech_data = [[self.tech_data]]
 
-    def result_good(self):
+    def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
+        handlers = {
+            TLSClientInitiatedRenegotiationStatus.not_allowed: self.result_not_allowed,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit: self.result_allowed_with_low_limit,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: self.result_allowed_with_too_high_limit,
+        }
+        return handlers[status]()
+
+    def result_not_allowed(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail web tls renegotiation-client verdict good"
-        self.tech_data = "detail tech data no"
+        self.verdict = "detail web tls renegotiation-client verdict not-allowed"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "not-allowed"}])
 
-    def result_bad(self):
+    def result_allowed_with_low_limit(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls renegotiation-client verdict allowed-with-low-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-low-limit"}])
+
+    def result_allowed_with_too_high_limit(self):
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls renegotiation-client verdict bad"
-        self.tech_data = "detail tech data yes"
+        self.verdict = "detail web tls renegotiation-client verdict allowed-with-too-high-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-too-high-limit"}])
 
 
 class WebTlsCertTrust(Subtest):
@@ -1281,6 +1288,11 @@ class WebTlsCertSignature(Subtest):
         self.verdict = "detail web tls cert-signature verdict good"
         self.tech_data = ""
 
+    def result_phase_out(self, tech_data):
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls cert-signature verdict phase-out"
+        self.tech_data = tech_data
+
     def result_bad(self, tech_data):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls cert-signature verdict bad"
@@ -1312,7 +1324,7 @@ class WebTlsCertHostmatch(Subtest):
 
 class WebCaa(Subtest):
     def __init__(self):
-        super(WebCaa, self).__init__(
+        super().__init__(
             name="web_caa",
             label="detail web tls caa label",
             explanation="detail web tls caa exp",
@@ -1482,6 +1494,11 @@ class WebTlsOCSPStapling(Subtest):
         self.verdict = "detail web tls ocsp-stapling verdict bad"
         self.tech_data = "detail tech data no"
 
+    def result_not_in_cert(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web tls ocsp-stapling verdict not-in-cert"
+        self.tech_data = "detail tech data not-applicable"
+
 
 class WebTlsKexHashFunc(Subtest):
     def __init__(self):
@@ -1490,24 +1507,89 @@ class WebTlsKexHashFunc(Subtest):
             label="detail web tls kex-hash-func label",
             explanation="detail web tls kex-hash-func exp",
             tech_string="detail web tls kex-hash-func tech table",
-            worst_status=scoring.WEB_TLS_KEX_HASH_FUNC_WORST_STATUS,
+            worst_status=STATUS_INFO,
             full_score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
             model_score_field="kex_hash_func_score",
         )
 
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
+
     def result_good(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls kex-hash-func verdict good"
+        self.tech_data = "detail tech data good"
+
+    def result_bad(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls kex-hash-func verdict bad"
+        self.tech_data = tech_data
+
+    def result_unknown(self):
+        self.was_tested()
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls kex-hash-func verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail web tls kex-hash-func verdict phase-out"
+        self.tech_data = tech_data
+
+
+class WebTLSExtendedMasterSecret(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="extended_master_secret",
+            label="detail web tls extended-master-secret label",
+            explanation="detail web tls extended-master-secret exp",
+            tech_string="detail web tls extended-master-secret tech table",
+            worst_status=STATUS_INFO,
+            full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
+            model_score_field="extended_master_secret_score",
+        )
+
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
+
+    def save_result(self, status: TLSExtendedMasterSecretStatus):
+        handlers = {
+            TLSExtendedMasterSecretStatus.supported: self.result_good,
+            TLSExtendedMasterSecretStatus.na_no_tls_1_2: self.result_na_no_tls_1_2,
+            TLSExtendedMasterSecretStatus.not_supported: self.result_bad,
+            TLSExtendedMasterSecretStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_good(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail web tls extended-master-secret verdict good"
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
+        self.was_tested()
         self._status(STATUS_FAIL)
-        self.verdict = "detail web tls kex-hash-func verdict phase-out"
+        self.verdict = "detail web tls extended-master-secret verdict bad"
         self.tech_data = "detail tech data no"
 
     def result_unknown(self):
-        self._status(STATUS_INFO)
-        self.verdict = "detail web tls kex-hash-func verdict other"
+        self.was_tested()
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web tls extended-master-secret verdict unknown"
+        self.tech_data = "detail tech data not-tested"
+
+    def result_na_no_tls_1_2(self):
+        # Do not call was_tested(): no TLS 1.2 means EMS isn't available,
+        # so there is no result, and we should not make it mandatory.
+        # was_tested() would set worst_status=STATUS_FAIL; combined with
+        # STATUS_NOT_TESTED, _verdict then counts the subtest as a fail
+        # and flips the category icon to failed (#2068).
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail web tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
 
 
@@ -1674,28 +1756,10 @@ class MailTlsCipherOrder(Subtest):
         self.verdict = "detail mail tls cipher-order verdict good"
         self.tech_data = ""
 
-    def result_bad(self):
+    def result_bad(self, cipher_order_violation):
         self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail mail tls cipher-order verdict bad"
-        self.tech_data = ""
-
-    def result_seclevel_bad(self, cipher_order_violation):
-        self.was_tested()
-        self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls cipher-order verdict seclevel-bad"
-        self.tech_data = cipher_order_violation
-
-    def result_warning(self, cipher_order_violation):
-        self.was_tested()
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail mail tls cipher-order verdict warning"
-        self.tech_data = cipher_order_violation
-
-    def result_info(self, cipher_order_violation):
-        self.was_tested()
-        self._status(STATUS_INFO)
-        self.verdict = "detail mail tls cipher-order verdict warning"
         self.tech_data = cipher_order_violation
 
     def result_na(self):
@@ -1806,22 +1870,33 @@ class MailTlsRenegotiationClient(Subtest):
             worst_status=STATUS_INFO,
             full_score=scoring.MAIL_TLS_CLIENT_RENEG_GOOD,
             model_score_field="client_reneg_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data tls-renegotiation-client",
         )
+        self.tech_data = [[self.tech_data]]
 
-    def was_tested(self):
-        self.worst_status = scoring.MAIL_TLS_CLIENT_RENEG_WORST_STATUS
+    def save_result(self, status: TLSClientInitiatedRenegotiationStatus):
+        handlers = {
+            TLSClientInitiatedRenegotiationStatus.not_allowed: self.result_not_allowed,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_low_limit: self.result_allowed_with_low_limit,
+            TLSClientInitiatedRenegotiationStatus.allowed_with_too_high_limit: self.result_allowed_with_too_high_limit,
+        }
+        return handlers[status]()
 
-    def result_good(self):
-        self.was_tested()
+    def result_not_allowed(self):
         self._status(STATUS_SUCCESS)
-        self.verdict = "detail mail tls renegotiation-client verdict good"
-        self.tech_data = "detail tech data no"
+        self.verdict = "detail mail tls renegotiation-client verdict not-allowed"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "not-allowed"}])
 
-    def result_bad(self):
-        self.was_tested()
+    def result_allowed_with_low_limit(self):
+        self._status(STATUS_INFO)
+        self.verdict = "detail mail tls renegotiation-client verdict allowed-with-low-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-low-limit"}])
+
+    def result_allowed_with_too_high_limit(self):
         self._status(STATUS_FAIL)
-        self.verdict = "detail mail tls renegotiation-client verdict bad"
-        self.tech_data = "detail tech data yes"
+        self.verdict = "detail mail tls renegotiation-client verdict allowed-with-too-high-limit"
+        self.tech_data = self.add_tech_data_translation_root([{"msgid": "allowed-with-too-high-limit"}])
 
 
 class MailTlsCertTrust(Subtest):
@@ -1910,6 +1985,12 @@ class MailTlsCertSignature(Subtest):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls cert-signature verdict good"
         self.tech_data = ""
+
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls cert-signature verdict phase-out"
+        self.tech_data = tech_data
 
     def result_bad(self, tech_data):
         self.was_tested()
@@ -2080,24 +2161,79 @@ class MailTlsKexHashFunc(Subtest):
         )
 
     def was_tested(self):
-        self.worst_status = scoring.MAIL_TLS_KEX_HASH_FUNC_WORST_STATUS
+        self.worst_status = STATUS_FAIL
 
     def result_good(self):
         self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail mail tls kex-hash-func verdict good"
-        self.tech_data = "detail tech data yes"
+        self.tech_data = "detail tech data good"
 
-    def result_bad(self):
+    def result_bad(self, tech_data):
         self.was_tested()
-        self._status(STATUS_NOTICE)
-        self.verdict = "detail mail tls kex-hash-func verdict phase-out"
-        self.tech_data = "detail tech data no"
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls kex-hash-func verdict bad"
+        self.tech_data = tech_data
 
     def result_unknown(self):
         self.was_tested()
         self._status(STATUS_INFO)
         self.verdict = "detail mail tls kex-hash-func verdict other"
+        self.tech_data = "detail tech data not-applicable"
+
+    def result_phase_out(self, tech_data):
+        self.was_tested()
+        self._status(STATUS_NOTICE)
+        self.verdict = "detail mail tls kex-hash-func verdict phase-out"
+        self.tech_data = tech_data
+
+
+class MailTLSExtendedMasterSecret(Subtest):
+    def __init__(self):
+        super().__init__(
+            name="extended_master_secret",
+            label="detail mail tls extended-master-secret label",
+            explanation="detail mail tls extended-master-secret exp",
+            tech_string="detail mail tls extended-master-secret tech table",
+            worst_status=STATUS_INFO,
+            full_score=scoring.TLS_EXTENDED_MASTER_SECRET_GOOD,
+            model_score_field="extended_master_secret_score",
+        )
+
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
+
+    def save_result(self, status: TLSExtendedMasterSecretStatus):
+        handlers = {
+            TLSExtendedMasterSecretStatus.supported: self.result_good,
+            TLSExtendedMasterSecretStatus.na_no_tls_1_2: self.result_na_no_tls_1_2,
+            TLSExtendedMasterSecretStatus.not_supported: self.result_bad,
+            TLSExtendedMasterSecretStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_good(self):
+        self.was_tested()
+        self._status(STATUS_SUCCESS)
+        self.verdict = "detail mail tls extended-master-secret verdict good"
+        self.tech_data = "detail tech data yes"
+
+    def result_bad(self):
+        self.was_tested()
+        self._status(STATUS_FAIL)
+        self.verdict = "detail mail tls extended-master-secret verdict bad"
+        self.tech_data = "detail tech data no"
+
+    def result_unknown(self):
+        self.was_tested()
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail tls extended-master-secret verdict unknown"
+        self.tech_data = "detail tech data not-tested"
+
+    def result_na_no_tls_1_2(self):
+        # See WebTLSExtendedMasterSecret.result_na_no_tls_1_2 (#2068).
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = "detail mail tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
 
 

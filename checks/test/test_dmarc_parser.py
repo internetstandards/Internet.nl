@@ -28,3 +28,33 @@ def test_parse():
     assert result.version == "v=DMARC1"
     assert result.directives.request == "p=none"
     assert result.directives.auri == "rua=mailto:dmarc@example.com"
+
+
+def test_parse_rfc9989_tags():
+    sample_record = "v=DMARC1; p=reject; sp=reject; np=reject; psd=n; t=y; rua=mailto:dmarc@example.com"
+    result = parse(sample_record)
+    assert result is not None
+    assert result.directives.psd == "psd=n"
+    assert result.directives.testing == "t=y"
+
+
+@pytest.mark.parametrize("value", ["y", "n", "u"])
+def test_parse_psd_values(value):
+    result = parse(f"v=DMARC1; p=none; psd={value}")
+    assert result is not None
+    assert result.directives.psd == f"psd={value}"
+
+
+def test_parse_psd_invalid_value():
+    assert parse("v=DMARC1; p=none; psd=x") is None
+
+
+@pytest.mark.parametrize("value", ["y", "n"])
+def test_parse_testing_values(value):
+    result = parse(f"v=DMARC1; p=none; t={value}")
+    assert result is not None
+    assert result.directives.testing == f"t={value}"
+
+
+def test_parse_testing_invalid_value():
+    assert parse("v=DMARC1; p=none; t=x") is None
