@@ -108,6 +108,7 @@ a {
 
 p a { 
   text-decoration: underline;
+  display: inline;
 }
 
 button {

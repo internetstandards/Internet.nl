@@ -11,7 +11,7 @@
     <div class="container">
       <h1>
         <span class="h5 color-secondary visually-hidden">
-          {% include "string.html" with name="base_results_score_for_newstring" %}
+          {% include "string.html" with name="results score-for" %}
         </span>
         <span class="h1 color-secondary">
           {% block testheadcontent %}{% endblock %}
@@ -50,29 +50,29 @@
   <section class="result-details-section">
     <div class="container">
       <aside class="action-card">
-        <h2>{% include "string.html" with name="base_results_next_actions_newstring" %}</h2>
+        <h2>{% include "string.html" with name="results follow-up" %}</h2>
         <details>
-          <summary class="icon">{% include "string.html" with name="base_results_next_actions_newstring" %}</summary>
+          <summary class="icon">{% include "string.html" with name="results follow-up" %}</summary>
           <ul class="action-card-list">
             <li class="action-card-item">
               <a class="icon" href="/test-site">
-                <span class="domain icon">{% include "string.html" with name="base_results_test_website_domain_newstring" %}</span>
+                <span class="domain icon">{% include "string.html" with name="base test website label" %}</span>
               </a>
             </li>
             <li class="action-card-item">
               <a class="icon" href="/test-mail">
-                <span class="mail icon">{% include "string.html" with name="base_results_test_email_domain_newstring" %}</span>
+                <span class="mail icon">{% include "string.html" with name="base test mail label" %}</span>
               </a>
             </li>
             <li class="action-card-item">
               <a class="icon" href="/test-connection">
-                <span class="connection icon">{% include "string.html" with name="base_results_test_connection_newstring" %}</span>
+                <span class="connection icon">{% include "string.html" with name="base test connection label" %}</span>
               </a>
             </li>
             <li class="action-card-item">
               <a class="icon repeat-test link {% if retest_time > 0 %}hidden{% endif %}"
                  href="{{ retest_link }}">
-                <span class="reset icon">{% include "string.html" with name="base_results_repeat_test_newstring" %}</span>
+                <span class="reset icon">{% include "string.html" with name="results rerun-test" %}</span>
               </a>
               <p class="icon repeat-test countdown {% if retest_time < 1 %}hidden{% endif %}">
                 <span class="reset icon">
@@ -84,10 +84,10 @@
               </li>
               <li class="action-card-item">
                 <a class="icon" href="/faqs/report/">
-                  <span class="clipboard icon">{% include "string.html" with name="base_results_test_explanation_newstring" %}</span>
+                  <span class="clipboard icon">{% include "string.html" with name="results test-info" %}</span>
                 </a>
               </li>
-              {% if pageclass == "websitetest" %}
+              {% if pageclass != "websitetest" %}
                 <li class="action-card-item">
                   <form action="/site/" method="post">
                     <input hidden
@@ -104,15 +104,15 @@
                 </li>
               {% endif %}
             </ul>
-            <p class="action-card-description">{% include "string.html" with name="action_card_description_newstring" %}</p>
+            <p class="action-card-description">{% include "string.html" with name="results follow-up-description" %}</p>
           </details>
           <button id="copy-link" class="primary-button icon" type="button">
-            <span class="not-clicked">{% include "string.html" with name="base_results_share_results_newstring" %}</span>
-            <span class="clicked">{% include "string.html" with name="base_results_share_results_clicked_newstring" %}</span>
+            <span class="not-clicked">{% include "string.html" with name="results share" %}</span>
+            <span class="clicked">{% include "string.html" with name="results copied" %}</span>
           </button>
         </aside>
         <h2 class="h3 color-secondary visually-hidden">
-          {% include "string.html" with name="base_results_test_details_newstring" %}
+          {% include "string.html" with name="results explanation label" %}
         </h2>
         <ul class="result-details-list">
           {% for probe in probes %}
