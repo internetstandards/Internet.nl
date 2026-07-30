@@ -21,7 +21,7 @@
 
 <section class="card-section">
   <div class="container">
-    <h2 class="h2 color-secondary">{% include "string.html" with name="article_related_news_title_newstring" %}</h2>
+    <h2 class="h2 color-secondary">{% include "string.html" with name="news other" %}</h2>
     <ul class="card-list">
       {% for article in articles|slice:":3" %}
         {% expand "article {{article}} title" as articletitle %}
@@ -38,73 +38,64 @@
       </li>
       {% endfor %}
     </ul>
-    <a class="secondary-button icon" href="/articles">{% include "string.html" with name="article_read_more_button_newstring" %}</a>
+    <a class="secondary-button icon" href="/articles">{% include "string.html" with name="news link" %}</a>
   </div>
 </section>
 
 <section class="contact-section ellipse hidden-mobile">
   <div class="container">
-    <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
+    <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
     <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
-        What is your return policy?
+        {% include "string.html" with name="faqs section question-1" %}
       </summary>
-      <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      <p>{% include "string.html" with name="faqs section answer-1" %}</p>
     </details>
     <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
-        What is your return policy?
+        {% include "string.html" with name="faqs section question-2" %}
       </summary>
-      <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      <p>{% include "string.html" with name="faqs section answer-2" %}</p>
     </details>      
     <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
-        What is your return policy?
+        {% include "string.html" with name="faqs section question-3" %}
       </summary>
-      <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      <p>{% include "string.html" with name="faqs section answer-3" %}</p>
     </details>      
     <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
-        What is your return policy?
+        {% include "string.html" with name="faqs section question-4" %}
       </summary>
-      <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      <p>{% include "string.html" with name="faqs section answer-4" %}</p>
     </details>      
     <details class="faq-item accordion" name="faq-item">
       <summary class="icon">
-        What is your return policy?
+        {% include "string.html" with name="faqs section question-5" %}
       </summary>
-      <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+      <p>{% include "string.html" with name="faqs section answer-5" %}</p>
     </details>
-    <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
+    <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
     <article class="contact-card">
       <hgroup>
-        <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
-        <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
+        <h3>{% include "string.html" with name="base contact" %}</h3>
+        <p>{% include "string.html" with name="contact section description" %}</p>
       </hgroup>
       <ul>
         <li class="contact-card-small">
-          <a href="/">
+          <a href="mailto:question@internet.nl">
             <hgroup>
-              <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
-              <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
+              <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+              <p>{% include "string.html" with name="contact section mail-description" %}</p>
             </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>
         </li>
         <li class="contact-card-small">
-          <a href="/">
+          <a href="https://github.com/internetstandards/Internet.nl">
             <hgroup>
-              <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
-              <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
-            </hgroup>
-            <div class="secondary-button rounded icon"></div>
-          </a>
-        </li>
-        <li class="contact-card-small">
-          <a href="/">
-            <hgroup>
-              <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
-              <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
+              <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+              <p>{% include "string.html" with name="contact section issue-description" %}</p>
             </hgroup>
             <div class="secondary-button rounded icon"></div>
           </a>

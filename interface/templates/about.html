@@ -10,17 +10,17 @@
   <section class="intro-section bg-primary ellipse reverse">
     <div class="container">
       <hgroup class="center">
-        <h1 class="h5 color-secondary">{% include "string.html" with name="about_section_title_newstring" %}</h1>
-        <p class="h1 color-secondary">{% include "string.html" with name="about_section_page_intro_newstring" %}</p>
+        <h1 class="h5 color-secondary">{% include "string.html" with name="base about" %}</h1>
+        <p class="h1 color-secondary">{% include "string.html" with name="home teaser" %}</p>
       </hgroup>
     </div>
   </section>
 
   <section class="about-section home-variant">
     <div class="container">
-      <h2 class="h5 color-accent">{% include "string.html" with name="about_mission_title_newstring" %}</h2>
-      <p class="h4">{% include "string.html" with name="about_mission_heading_newstring" %}</p>
-      <p class="body-xl">{% include "string.html" with name="about_mission_description_newstring" %}</p>
+      <h2 class="h5 color-accent">{% include "string.html" with name="about mission-title" %}</h2>
+      <p class="h4">{% include "string.html" with name="about mission" %}</p>
+      <p class="body-xl">{% include "string.html" with name="about platform" %}</p>
       <ul class="logo-list">
         <li>
           <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
@@ -58,10 +58,10 @@
 
   <aside class="quote-section bg-primary ellipse reverse">
     <div class="container">
-      <img src="/static/images/portret-oprichter-internetnl.png" alt="Portret van Coen Wesselman, oprichter van Internet.nl" class="quote-image" loading="lazy" width="100" height="100">
+      <img src="/static/author/gerben-klein-baltink/picture.jpg" alt="Portret van Coen Wesselman, oprichter van Internet.nl" class="quote-image" loading="lazy" width="100" height="100">
       <blockquote>
-        <p class="h4 color-secondary">{% include "string.html" with name="about_quote_newstring" %}</p>
-        <cite class="body-m color-secondary"><strong>{% include "string.html" with name="about_quote_author_newstring" %}</strong> - {% include "string.html" with name="about_quote_role_newstring" %}</cite>
+        <p class="h4 color-secondary">{% include "string.html" with name="about quote" %}</p>
+        <cite class="body-m color-secondary"><strong>{% include "string.html" with name="author gerben-klein-baltink name" %}</strong> - {% include "string.html" with name="author gerben-klein-baltink role" %}</cite>
       </blockquote>
     </div>
   </aside>
@@ -69,27 +69,27 @@
   <section class="knowledge-section">
     <div class="container">
       <hgroup>
-        <h2 class="h3 color-secondary">{% include "string.html" with name="about_why_test_title_newstring" %}</h2>
-        <p class="body-l">{% include "string.html" with name="about_why_test_description_newstring" %}</p>
+        <h2 class="h3 color-secondary">{% include "string.html" with name="home why title" %}</h2>
+        <p class="body-l">{% include "string.html" with name="home why explain" %}</p>
       </hgroup>
       <ul class="knowledge-list" id="card-carousel">
         <li class="card home-variant knowledge-card ellipse">
           <div class="card-container knowledge icon">
-            <h3 id="knowledge-dia-1">{% include "string.html" with name="about_reason_1_title_newstring" %}</h3>
+            <h3 id="knowledge-dia-1">{% include "string.html" with name="home why reason-1 title" %}</h3>
           </div>
-          <p>{% include "string.html" with name="about_reason_1_description_newstring" %}</p>
+          <p>{% include "string.html" with name="home why reason-1 text" %}</p>
         </li>
         <li class="card home-variant knowledge-card ellipse">
           <div class="card-container knowledge icon">
-            <h3 id="knowledge-dia-2">{% include "string.html" with name="about_reason_2_title_newstring" %}</h3>
+            <h3 id="knowledge-dia-2">{% include "string.html" with name="home why reason-2 title" %}</h3>
           </div>
-          <p>{% include "string.html" with name="about_reason_2_description_newstring" %}</p>
+          <p>{% include "string.html" with name="home why reason-2 text" %}</p>
         </li>
         <li class="card home-variant knowledge-card ellipse">
           <div class="card-container knowledge icon">
-            <h3 id="knowledge-dia-3">{% include "string.html" with name="about_reason_3_title_newstring" %}</h3>
+            <h3 id="knowledge-dia-3">{% include "string.html" with name="home why reason-3 title" %}</h3>
           </div>
-          <p>{% include "string.html" with name="about_reason_3_description_newstring" %}</p>
+          <p>{% include "string.html" with name="home why reason-3 text" %}</p>
         </li>
       </ul>
       <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
@@ -98,75 +98,66 @@
         <li class="dot"><button type="button"></button></li>
       </ul>
       <div class="button-container">
-        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="about_test_button_newstring" %}</a>
-        <p class="body-m">487 {% include "string.html" with name="about_successful_tests_newstring" %}</p>
+        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="home why button" %}</a>
+        <p class="body-m">{% include "string.html" with name="home why numbers" %}</p>
       </div>
     </div>
   </section>
 
   <section class="contact-section ellipse hidden-mobile">
     <div class="container">
-      <h2 class="h3 color-secondary">{% include "string.html" with name="faq_title_newstring" %}</h2>
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
       <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
-          What is your return policy?
+          {% include "string.html" with name="faqs section question-1" %}
         </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+        <p>{% include "string.html" with name="faqs section answer-1" %}</p>
       </details>
       <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
-          What is your return policy?
+          {% include "string.html" with name="faqs section question-2" %}
         </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+        <p>{% include "string.html" with name="faqs section answer-2" %}</p>
       </details>      
       <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
-          What is your return policy?
+          {% include "string.html" with name="faqs section question-3" %}
         </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+        <p>{% include "string.html" with name="faqs section answer-3" %}</p>
       </details>      
       <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
-          What is your return policy?
+          {% include "string.html" with name="faqs section question-4" %}
         </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+        <p>{% include "string.html" with name="faqs section answer-4" %}</p>
       </details>      
       <details class="faq-item accordion" name="faq-item">
         <summary class="icon">
-          What is your return policy?
+          {% include "string.html" with name="faqs section question-5" %}
         </summary>
-        <p>We accept returns within 30 days of purchase with a valid receipt.</p>
+        <p>{% include "string.html" with name="faqs section answer-5" %}</p>
       </details>
-      <a class="secondary-button icon" href="/">{% include "string.html" with name="faq_view_all_button_newstring" %}</a>
+      <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
       <article class="contact-card">
         <hgroup>
-          <h3>{% include "string.html" with name="contact_card_title_newstring" %}</h3>
-          <p>{% include "string.html" with name="contact_card_subtitle_newstring" %}</p>
+          <h3>{% include "string.html" with name="base contact" %}</h3>
+          <p>{% include "string.html" with name="contact section description" %}</p>
         </hgroup>
         <ul>
           <li class="contact-card-small">
-            <a href="/">
+            <a href="mailto:question@internet.nl">
               <hgroup>
-                <h4 class="mail icon">{% include "string.html" with name="contact_email_title_newstring" %}</h4>
-                <p>{% include "string.html" with name="contact_email_description_newstring" %}</p>
+                <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+                <p>{% include "string.html" with name="contact section mail-description" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
           </li>
           <li class="contact-card-small">
-            <a href="/">
+            <a href="https://github.com/internetstandards/Internet.nl">
               <hgroup>
-                <h4 class="help icon">{% include "string.html" with name="contact_help_title_newstring" %}</h4>
-                <p>{% include "string.html" with name="contact_help_description_newstring" %}</p>
-              </hgroup>
-              <div class="secondary-button rounded icon"></div>
-            </a>
-          </li>
-          <li class="contact-card-small">
-            <a href="/">
-              <hgroup>
-                <h4 class="visit icon">{% include "string.html" with name="contact_visit_title_newstring" %}</h4>
-                <p>{% include "string.html" with name="contact_visit_description_newstring" %}</p>
+                <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+                <p>{% include "string.html" with name="contact section issue-description" %}</p>
               </hgroup>
               <div class="secondary-button rounded icon"></div>
             </a>
