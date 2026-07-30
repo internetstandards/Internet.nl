@@ -255,7 +255,7 @@ COPY --from=frontend /usr/local/bin/ /usr/local/bin/
 COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # copy browser reload module
-COPY --from=linttest-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
+COPY --from=tools-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
 
 # supplement application with unittest, lint dependencies
 FROM build-app AS tools
