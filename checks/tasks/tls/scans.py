@@ -100,7 +100,6 @@ SSLYZE_NETWORK_MAX_RETRIES = 0
 SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
     ScanCommand.SESSION_RENEGOTIATION,
-    ScanCommand.ELLIPTIC_CURVES,
 }
 # TLS_1_3_EARLY_DATA only works for HTTPS - it sends an HTTP GET request
 # which breaks SMTP sessions. See #2055.
