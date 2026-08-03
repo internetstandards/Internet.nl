@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.11.3
+
+- Upgraded bundled routinator to 0.15.2 [to reduce disk use](https://github.com/internetstandards/Internet.nl/issues/2132).
+- Removed obsolete `ScanCommand.ELLIPTIC_CURVES` from TLS scan to [reduce connection count](https://github.com/internetstandards/internet.nl/issues/2031).
+
 ## 1.11.2
 
 - Reduced TLS scan time by [rewriting the cipher check to use fewer connections](https://github.com/internetstandards/Internet.nl/issues/2031).
