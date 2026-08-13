@@ -372,6 +372,10 @@ By default the installation is open to everyone. If you like to restrict access 
 
 Site wide HTTP Basic Authentication is enabled with the `AUTH_ALL_URLS` variable.
 
+After changing `AUTH_ALL_URLS` run the following to apply changes to the webserver:
+
+    env -i /opt/Internet.nl/docker/compose.sh up --wait --no-build
+
 To manage users, call the `/opt/Internet.nl/docker/user_manage.sh` script. This takes two arguments: an operation
 and a username. The operation can be `add_update` to add or update a user's password, `delete` to delete a user,
 and `verify` to verify a user's existence and password. Passwords are entered interactively.
@@ -385,6 +389,10 @@ Site wide IP(v6) allow lists can be configured by specifying the `ALLOW_LIST` va
 For example, to only allow the IP addresses `198.51.100.1` and `2001:db8:2::1` access add the following in the `docker/local.env` file:
 
     ALLOW_LIST="198.51.100.1,2001:db8:2::1"
+
+After changing `ALLOW_LIST` run the following to apply changes to the webserver:
+
+    env -i /opt/Internet.nl/docker/compose.sh up --wait --no-build
 
 ### Combining HTTP Basic Authentication and IP allow lists
 
