@@ -1,4 +1,4 @@
-ARG CERTBOT_VERSION=5.6.0
+ARG CERTBOT_VERSION=5.7.0
 
 FROM nginx:1.31.2-alpine3.23
 
@@ -21,6 +21,8 @@ RUN /opt/gixy/bin/pip install gixy==0.1.21
 RUN python3 -m venv /opt/certbot
 ARG CERTBOT_VERSION
 RUN /opt/certbot/bin/pip install certbot==${CERTBOT_VERSION}
+# certbot smoketest
+RUN /opt/certbot/bin/certbot --version
 COPY docker/webserver/certbot.sh /docker-entrypoint.d/
 
 RUN mkdir -p /etc/nginx/htpasswd/
