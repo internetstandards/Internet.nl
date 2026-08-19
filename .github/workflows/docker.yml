@@ -62,7 +62,7 @@ jobs:
           docker compose version --short
 
       - uses: actions/checkout@v4
-        # include vendor/ submodules used to build dependencies like nassl and unbound
+        # include vendor/ submodules used to build dependencies like unbound
         with:
           # submodules are required for building containers
           submodules: recursive

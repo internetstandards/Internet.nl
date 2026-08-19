@@ -33,8 +33,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       bison \
       # TODO: swig3.0 hard requirements? get from oldstable
       swig \
-      # nassl dependencies
-      python3-setuptools \
+      # uv installs into /usr, which needs a python3 executable there
+      python3 \
+      # git fetches the sslyze pin over HTTPS, in build-app-deps
+      ca-certificates \
       # unbound dependencies
       ccache \
       flex \
@@ -62,8 +64,12 @@ RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
   make
 RUN make install
 
-# intermediate stage with apt and python dependencies
 FROM build-deps AS build-app-deps
+
+# git is needed by uv to fetch the sslyze git pin.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends git
 
 COPY pyproject.toml /source/
 COPY uv.lock /source/
@@ -253,8 +259,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     bsdmainutils \
     vim
 
-# Install yq
-RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
+# Install yq (TARGETARCH is amd64/arm64, matching yq's release asset names)
+ARG TARGETARCH
+RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH} && chmod +x /usr/local/bin/yq
 
 # docker.io is not available in Debian Trixie, copy docker CLI binary from official image
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
