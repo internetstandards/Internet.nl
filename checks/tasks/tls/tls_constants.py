@@ -1,7 +1,7 @@
 from cryptography.hazmat._oid import SignatureAlgorithmOID
 from cryptography.hazmat.primitives.asymmetric import ed25519, ed448, ec
 from nassl.ephemeral_key_info import OpenSslEcNidEnum, OpenSslEvpPkeyEnum
-from nassl.ssl_client import OpenSslDigestNidEnum
+from nassl.openssl_1_1_1.ssl_client import OpenSslDigestNidEnum
 from sslyze import TlsVersionEnum
 
 # NCSC 3.3.2 / 3.3.5
