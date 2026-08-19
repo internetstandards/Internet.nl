@@ -3,8 +3,8 @@ from typing import Any, cast
 
 from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
 from cryptography.x509 import AuthorityInformationAccess, ExtensionNotFound
-from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo, OpenSslEvpPkeyEnum
-from nassl.ssl_client import ExtendedMasterSecretSupportEnum
+from nassl.ephemeral_key_info import EcDhEphemeralKeyInfo, DhEphemeralKeyInfo
+from nassl.openssl_1_1_1.ssl_client import ExtendedMasterSecretSupportEnum
 from sslyze import (
     TlsVersionEnum,
     CipherSuiteAcceptedByServer,
@@ -134,12 +134,12 @@ class TLSForwardSecrecyParameterEvaluation:
         dh_sizes = [
             suite.ephemeral_key.size
             for suite in ciphers_accepted
-            if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.DH
+            if isinstance(suite.ephemeral_key, DhEphemeralKeyInfo)
         ]
         ec_sizes = [
             suite.ephemeral_key.size
             for suite in ciphers_accepted
-            if suite.ephemeral_key and suite.ephemeral_key.type == OpenSslEvpPkeyEnum.EC
+            if isinstance(suite.ephemeral_key, EcDhEphemeralKeyInfo)
         ]
 
         return cls(

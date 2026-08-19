@@ -49,7 +49,8 @@ dependencies = [
     "service-identity",
     "setuptools-rust",
     "setuptools-scm",
-    "sslyze>=6.3.0,<7",
+    "nassl",
+    "sslyze",
     "statshog",
     "uwsgi",
     "wheel",
@@ -113,6 +114,10 @@ filterwarnings = [
 
 [tool.uv.sources]
 pythonwhois-internet-nl = { url = "https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz" }
+# nassl 7 and an unreleased sslyze are needed for PQ scan support.
+# Remove this block once both are on PyPI.
+nassl = { path = "./vendor/nassl6" }
+sslyze = { git = "https://github.com/nabla-c0d3/sslyze", rev = "5b3f36b5e0b524915580232f463bd639eb30d447" }
 
 [dependency-groups]
 dev = [

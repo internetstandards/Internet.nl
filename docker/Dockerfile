@@ -35,6 +35,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       swig \
       # nassl dependencies
       python3-setuptools \
+      # `invoke build.deps` fetches OpenSSL/zlib tarballs over HTTPS.
+      ca-certificates \
       # unbound dependencies
       ccache \
       flex \
@@ -62,11 +64,27 @@ RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
   make
 RUN make install
 
-# intermediate stage with apt and python dependencies
+# nassl (in vendor/nassl6/) has no PyPI wheel yet, so build its vendored OpenSSL from
+# source here. build.deps builds only OpenSSL/zlib, not nassl's C extension: uv sync in
+# build-app-deps builds that itself, so building it here too would just be redundant.
+FROM build-deps AS build-nassl
+
+COPY vendor/nassl6 /source/vendor/nassl6
+WORKDIR /source/vendor/nassl6
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+  uv tool run --from invoke --with setuptools inv build.deps
+
 FROM build-deps AS build-app-deps
+
+# git is needed by uv to fetch the sslyze git pin.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends git
 
 COPY pyproject.toml /source/
 COPY uv.lock /source/
+COPY --from=build-nassl /source/vendor/nassl6 /source/vendor/nassl6
 
 WORKDIR /source
 
