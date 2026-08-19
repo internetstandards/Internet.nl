@@ -1,7 +1,7 @@
 from cryptography.hazmat._oid import SignatureAlgorithmOID
 from cryptography.hazmat.primitives.asymmetric import ed25519, ed448, ec
-from nassl.ephemeral_key_info import OpenSslEcNidEnum, OpenSslEvpPkeyEnum
-from nassl.ssl_client import OpenSslDigestNidEnum
+from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum, OpenSslGroupNameEnum
+from nassl.openssl_1_1_1.ssl_client import OpenSslDigestNidEnum
 from sslyze import TlsVersionEnum
 
 # NCSC 3.3.2 / 3.3.5
@@ -40,17 +40,17 @@ CERT_EC_CURVES_PHASE_OUT = [ec.SECP224R1]
 
 # NCSC 3.3.2.1
 FS_EC_GOOD = [
-    OpenSslEcNidEnum.SECP521R1,
-    OpenSslEcNidEnum.SECP384R1,
-    OpenSslEcNidEnum.SECP256R1,
-    OpenSslEcNidEnum.brainpoolP512r1,
-    OpenSslEcNidEnum.brainpoolP384r1,
-    OpenSslEcNidEnum.brainpoolP256r1,
-    OpenSslEcNidEnum.X25519,
-    OpenSslEcNidEnum.X448,
+    OpenSslGroupNameEnum.secp521r1,
+    OpenSslGroupNameEnum.secp384r1,
+    OpenSslGroupNameEnum.secp256r1,
+    OpenSslGroupNameEnum.brainpoolP512r1,
+    OpenSslGroupNameEnum.brainpoolP384r1,
+    OpenSslGroupNameEnum.brainpoolP256r1,
+    OpenSslGroupNameEnum.x25519,
+    OpenSslGroupNameEnum.x448,
 ]
 FS_EC_PHASE_OUT = [
-    OpenSslEcNidEnum.SECP224R1,
+    OpenSslGroupNameEnum.secp224r1,
 ]
 
 
