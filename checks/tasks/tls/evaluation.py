@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, cast
 
 from cryptography.hazmat._oid import AuthorityInformationAccessOID, ExtensionOID
@@ -22,6 +22,7 @@ from checks.models import (
     OcspStatus,
     TLSClientInitiatedRenegotiationStatus,
     TLSExtendedMasterSecretStatus,
+    PqKexSupportStatus,
 )
 from checks.scoring import TLS_EXTENDED_MASTER_SECRET_GOOD, TLS_EXTENDED_MASTER_SECRET_BAD
 from checks.tasks.tls.tls_constants import (
@@ -359,6 +360,17 @@ class TLSExtendedMasterSecretEvaluation:
         elif ems_support == ExtendedMasterSecretSupportEnum.NOT_USED_IN_CURRENT_SESSION:
             self.status = TLSExtendedMasterSecretStatus.not_supported
             self.score = TLS_EXTENDED_MASTER_SECRET_BAD
+
+
+@dataclass(frozen=True)
+class TLSPqKexEvaluation:
+    status: PqKexSupportStatus
+    supported_groups: list[str] = field(default_factory=list)
+
+    @property
+    def score(self) -> scoring.Score:
+        # No scoring impact yet (see scoring.WEB_TLS_PQ_KEX_*).
+        return scoring.WEB_TLS_PQ_KEX_GOOD
 
 
 def _unique_unhashable(items: list[Any]) -> list[Any]:

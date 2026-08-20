@@ -53,6 +53,7 @@ from sslyze.plugins.certificate_info._certificate_utils import (
 )
 from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import CipherSuiteAcceptedByServer
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import retrieve_all_available_cipher_suites
+from sslyze.scanner.models import PqKeyExchangeScanAttempt
 from sslyze.connection_helpers.tls_connection import OpenSslVersionEnum
 from sslyze.server_connectivity import ServerConnectivityInfo
 
@@ -63,6 +64,7 @@ from checks.models import (
     ZeroRttStatus,
     KexHashFuncStatus,
     CipherOrderStatus,
+    PqKexSupportStatus,
 )
 from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
 from checks.tasks.tls import TLSException
@@ -75,6 +77,7 @@ from checks.tasks.tls.evaluation import (
     TLSOCSPEvaluation,
     TLSRenegotiationEvaluation,
     TLSExtendedMasterSecretEvaluation,
+    TLSPqKexEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_SUFFICIENT,
@@ -114,9 +117,9 @@ SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
     ScanCommand.SESSION_RENEGOTIATION,
 }
-# TLS_1_3_EARLY_DATA only works for HTTPS - it sends an HTTP GET request
-# which breaks SMTP sessions. See #2055.
-SSLYZE_WEB_SCAN_COMMANDS = {ScanCommand.TLS_1_3_EARLY_DATA}
+# HTTPS-only. TLS_1_3_EARLY_DATA sends an HTTP GET that breaks SMTP (#2055).
+# PQ_KEY_EXCHANGE is web-only per #1640.
+SSLYZE_WEB_SCAN_COMMANDS = {ScanCommand.TLS_1_3_EARLY_DATA, ScanCommand.PQ_KEY_EXCHANGE}
 # Some servers ignore ciphers past the 64th in a ClientHello, others reject overly
 # large ClientHellos. nmap's ssl-enum-ciphers uses 64 too.
 CIPHER_PROBE_CHUNK_SIZE = 64
@@ -771,8 +774,12 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     if cert_info and cert_info.certificate_deployments:
         ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(cert_info.certificate_deployments[0])
     else:
-        log.error(f"OCSP check skipped for {result.server_location.hostname}: no certificate deployments")
+        log.error(
+            f"OCSP check skipped for {result.server_location.hostname}: no certificate scan result or deployments"
+        )
         ocsp_evaluation = TLSOCSPEvaluation(ocsp_in_cert=False, has_ocsp_response=False, ocsp_response_trusted=False)
+
+    pq_kex_evaluation = check_pq_kex_support(server_conn_info, result.scan_result.pq_key_exchange)
 
     probe_result = dict(
         tls_enabled=True,
@@ -826,6 +833,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
+        pq_kex_support=pq_kex_evaluation.status,
+        pq_kex_supported_groups=pq_kex_evaluation.supported_groups,
+        pq_kex_score=pq_kex_evaluation.score,
     )
     return probe_result
 
@@ -905,6 +915,31 @@ def test_key_exchange_hash(
         status=KexHashFuncStatus.good,
         score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
     )
+
+
+def check_pq_kex_support(
+    server_conn_info: ServerConnectivityInfo, pq_attempt: PqKeyExchangeScanAttempt
+) -> TLSPqKexEvaluation:
+    # A failure here must not break the rest of the TLS scan.
+    try:
+        result = pq_attempt.result
+        if result is None:
+            log.warning(
+                f"PQ key exchange scan for {server_conn_info.server_location.hostname} "
+                f"failed: {pq_attempt.error_reason}"
+            )
+            return TLSPqKexEvaluation(status=PqKexSupportStatus.unknown)
+        if result.supported_pq_groups is None:
+            return TLSPqKexEvaluation(status=PqKexSupportStatus.na_no_tls_1_3)
+        if result.supports_pq_key_exchange:
+            return TLSPqKexEvaluation(
+                status=PqKexSupportStatus.supported,
+                supported_groups=result.supported_pq_groups,
+            )
+        return TLSPqKexEvaluation(status=PqKexSupportStatus.not_supported)
+    except Exception:
+        log.error(f"PQ key exchange check failed for {server_conn_info.server_location.hostname}", exc_info=True)
+        return TLSPqKexEvaluation(status=PqKexSupportStatus.unknown)
 
 
 def _test_connection_with_limited_sigalgs(

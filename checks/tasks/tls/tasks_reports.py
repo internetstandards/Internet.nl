@@ -289,6 +289,9 @@ def save_results(model, results, addr, domain, category):
                     model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
+                    model.pq_kex_support = result.get("pq_kex_support")
+                    model.pq_kex_supported_groups = result.get("pq_kex_supported_groups", [])
+                    model.pq_kex_score = result.get("pq_kex_score")
 
             elif testname == "cert" and result.get("tls_cert"):
                 model.cert_chain = result.get("chain")
@@ -594,6 +597,7 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
 
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
+            category.subtests["pq_kex_support"].save_result(dttls.pq_kex_support, dttls.pq_kex_supported_groups)
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
