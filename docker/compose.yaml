@@ -162,7 +162,8 @@ services:
       test: ["CMD", "nc", "-z", "127.0.0.1", "8080"]
       interval: $HEALTHCHECK_INTERVAL
       start_interval: $HEALTHCHECK_START_INTERVAL
-      start_period: 1m
+      # prevent `make up --wait` from stalling
+      start_period: 3m
       retries: 10
 
     volumes:
