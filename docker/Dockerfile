@@ -15,8 +15,6 @@ FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 # hashes/log output prefix build command with: `DOCKER_BUILDKIT=0`
 
 # generic stage used by all build stages
-# explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
-# platform can probably be removed after #1218
 FROM debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
