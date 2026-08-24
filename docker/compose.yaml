@@ -6,7 +6,6 @@
 services:
   # nginx proxy container, also runs certbot
   webserver:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_WEBSERVER:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/webserver:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -68,7 +67,6 @@ services:
 
   # django container
   app:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -172,7 +170,6 @@ services:
 
   # django DB migrations, runs to completion and exits with 0
   db-migrate:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     networks:
       - internal
@@ -209,7 +206,6 @@ services:
       - WORKER_CONCURRENCY
 
   worker: &worker
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     deploy:
       replicas: $WORKER_REPLICAS
@@ -322,8 +318,6 @@ services:
       --queues nassl_worker,batch_nassl
     # set hostname for Sentry
     hostname: worker-nassl
-    # required because current version of nassl cannot be compile for ARM (eg: Apple Silicon)
-    platform: linux/amd64
 
   # worker for slow and long running tasks that could require a lot of memory (eg: hof update)
   worker-slow:
@@ -349,7 +343,6 @@ services:
 
   # celery task queue
   beat:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_APP:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/internet.nl:${RELEASE}}
     restart: unless-stopped
     logging:
@@ -538,7 +531,6 @@ services:
 
   # unbound DNS server used for connection test
   unbound:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
     depends_on:
       redis:
@@ -580,7 +572,6 @@ services:
 
   # unbound resolver used for ldns-dane that require DNSSEC validation
   resolver-validating:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_UNBOUND:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/unbound:${RELEASE}}
 
     entrypoint: /entrypoint-resolver.sh
@@ -611,7 +602,6 @@ services:
 
   # cron with periodic tasks
   cron:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7
     environment:
@@ -660,7 +650,6 @@ services:
 
   # cron daemon with access to Docker socket but no networking
   cron-docker:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_UTIL:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/util:${RELEASE}}
     command: crond -f -d7 -c /etc/crontabs-docker
     environment:
@@ -684,7 +673,6 @@ services:
       - $INTERNETNL_INSTALL_BASE:/opt/Internet.nl
 
   grafana:
-    platform: linux/amd64
     image: ${DOCKER_IMAGE_GRAFANA:-${DOCKER_REGISTRY:-ghcr.io/internetstandards}/grafana:${RELEASE}}
 
     environment:
