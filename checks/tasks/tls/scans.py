@@ -867,7 +867,7 @@ def test_key_exchange_hash(
     """
     Test key exchange hashes per NCSC 3.3.5.
     Note that this is not the certificate hash, or TLS cipher hash.
-    The initial test is phase_out+bad to keep happy path connections low.
+    The initial test is bad+phase_out to keep happy path connections low.
     """
     probe_bad_phase_out = _test_connection_with_limited_sigalgs(
         server_connectivity_info, SIGNATURE_ALGORITHMS_BAD_HASH + SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
