@@ -170,7 +170,7 @@ def do_mail_get_servers(self, url, *args, **kwargs):
                 spf_data = dns_resolve_spf(url)
                 if spf_data:
                     spf_parsed = spf_parse(spf_data)
-                    if spf_parsed.get("terms", []) == ["-all"]:
+                    if spf_parsed and spf_parsed.get("terms", []) == ["-all"]:
                         return [(None, MxStatus.no_null_mx)]
             except DNSException:
                 pass
