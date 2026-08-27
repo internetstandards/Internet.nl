@@ -3,7 +3,7 @@
 from django.conf import settings
 
 BATCH_API_MAJOR_VERSION = "2"
-BATCH_API_MINOR_VERSION = "7"
+BATCH_API_MINOR_VERSION = "8"
 BATCH_API_PATCH_VERSION = "0"
 BATCH_API_FULL_VERSION = f"{BATCH_API_MAJOR_VERSION}" f".{BATCH_API_MINOR_VERSION}" f".{BATCH_API_PATCH_VERSION}"
 
@@ -223,6 +223,12 @@ if settings.INTERNET_NL_CHECK_SUPPORT_TLS:
                             "name_on_report": "extended_master_secret",
                             "type": "test",
                             "translation_key": "web tls extended-master-secret",
+                        },
+                        {
+                            "name": "web_https_tls_pqkexsupport",
+                            "name_on_report": "pq_kex_support",
+                            "type": "test",
+                            "translation_key": "web tls pq-kex-support",
                         },
                         {
                             "name": "web_https_tls_0rtt",

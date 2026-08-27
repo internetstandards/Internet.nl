@@ -870,6 +870,7 @@ dependencies = [
     { name = "legacy-cgi" },
     { name = "libsass" },
     { name = "markdown" },
+    { name = "nassl" },
     { name = "pathlib2" },
     { name = "polib" },
     { name = "psycopg2-binary" },
@@ -947,6 +948,7 @@ requires-dist = [
     { name = "legacy-cgi" },
     { name = "libsass" },
     { name = "markdown" },
+    { name = "nassl", directory = "vendor/nassl6" },
     { name = "pathlib2" },
     { name = "polib" },
     { name = "psycopg2-binary", specifier = "<3" },
@@ -964,7 +966,7 @@ requires-dist = [
     { name = "service-identity" },
     { name = "setuptools-rust" },
     { name = "setuptools-scm" },
-    { name = "sslyze", specifier = ">=6.3.0,<7" },
+    { name = "sslyze", git = "https://github.com/nabla-c0d3/sslyze?rev=5b3f36b5e0b524915580232f463bd639eb30d447" },
     { name = "statshog" },
     { name = "uwsgi" },
     { name = "wheel" },
@@ -1167,22 +1169,8 @@ wheels = [
 
 [[package]]
 name = "nassl"
-version = "5.4.0"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/19/09c468129c725a8b872b2b2ef320418993f8c14276cc949efbd20b686aca/nassl-5.4.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:bc21baf2ee85e4804d6fed38bf71564f5074660bec21746b35244ecabfb5d750", size = 2038868, upload-time = "2025-12-29T18:20:11.618Z" },
-    { url = "https://files.pythonhosted.org/packages/ec/7d/0ebb2faaf579ffbd1737e6a745896a79fc5d51b0ba1c1496f0ac7f37527c/nassl-5.4.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:360d818604d48af37592eb1f7dcc335e863b752625be721b772fc5ae9d06c8f9", size = 2600827, upload-time = "2025-12-29T18:20:13.336Z" },
-    { url = "https://files.pythonhosted.org/packages/d2/e9/82501cc484bd60558932f3a2229b97eb747ae17fc14d15002a8e9f2481cc/nassl-5.4.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:439c1e76716fd10b3bb90b66509e1e045f56648482dbf0e5f93ce40336590a57", size = 2703634, upload-time = "2025-12-29T18:20:14.57Z" },
-    { url = "https://files.pythonhosted.org/packages/11/a0/5c6e70549927d0f44dbd8865798a4af53a6a95e41fefd9cebf0374137f50/nassl-5.4.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:5b48e9399ad2ab31529fa3c310765c65e7f8d3e47b04f345184c97f21456f40d", size = 2648245, upload-time = "2025-12-29T18:20:15.793Z" },
-    { url = "https://files.pythonhosted.org/packages/49/99/ef11ada846bfb2f2cd9795e75efb69172291ca52b3dfea7dbf6e38e647b6/nassl-5.4.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:ffaf60e0ee118c7992951d66f130062ce545a1d317cae8b16d467de6699b1264", size = 2752329, upload-time = "2025-12-29T18:20:17.133Z" },
-    { url = "https://files.pythonhosted.org/packages/66/49/d39150f9d1d9c04da7d8a1f8e7537623ed609a1adc6a9691c5da23b54227/nassl-5.4.0-cp313-cp313-win_amd64.whl", hash = "sha256:d8314da748b7088719d776d8818f82b8487cf98d39ffbaf12dbb90ea1c0388c5", size = 1629258, upload-time = "2025-12-29T18:20:18.396Z" },
-    { url = "https://files.pythonhosted.org/packages/43/85/c536499d17ae62a139c831e526404f9632e167579790c18a494cd085271d/nassl-5.4.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:d7ff3016a2ba16bbf82183220b3ad30e7812fb71170ab67e91b04d2705ee1926", size = 2038993, upload-time = "2025-12-29T18:20:19.639Z" },
-    { url = "https://files.pythonhosted.org/packages/19/a0/20633db2c3a9e2c4538d5e9adb7774ab29fda590d6ab38b8e9d8ba9a54ca/nassl-5.4.0-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:9d97c6a840d04e759e2684b979137ef7ca570b44bf3a045499969261547b2499", size = 2602975, upload-time = "2025-12-29T18:20:20.841Z" },
-    { url = "https://files.pythonhosted.org/packages/47/24/18b8ebfa446f4e1d99c4894ec2adbb380a56881ad94e60495321d2730a24/nassl-5.4.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:60ec703b9aee8d6ffb2fd25228124e3eb721a676cd23948d33ea86f20c2c44db", size = 2705401, upload-time = "2025-12-29T18:20:22.108Z" },
-    { url = "https://files.pythonhosted.org/packages/af/93/72ce6c219fb67fadd9e3fa5051d034c3b55fa34e1a5bc53817d8ebdd9f77/nassl-5.4.0-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:36c1c2c18aa5e75f7a3188a24089b4b49e582baf845050ca1819098a257fae2f", size = 2649195, upload-time = "2025-12-29T18:20:23.644Z" },
-    { url = "https://files.pythonhosted.org/packages/13/cb/c93715e5097137c3fab285b88f1115e737756701553cf4789eb9c1c94aa9/nassl-5.4.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:e62af0fb4fadadfaf6712bf2ae4ea9b90020de35612d50bcebf75a7528d54505", size = 2753132, upload-time = "2025-12-29T18:20:25.261Z" },
-    { url = "https://files.pythonhosted.org/packages/e6/9c/58106fb55132d17fe543422ada64b56482656b563fae6662bc39574a8838/nassl-5.4.0-cp314-cp314-win_amd64.whl", hash = "sha256:3ab02e4fc9b3a817decb3df2a2a21741368ab3f3ea53f6342b8ff36d276a50b2", size = 1677781, upload-time = "2025-12-29T18:20:26.618Z" },
-]
+version = "7.0.0"
+source = { directory = "vendor/nassl6" }
 
 [[package]]
 name = "nodejs-wheel-binaries"
@@ -2059,14 +2047,13 @@ wheels = [
 [[package]]
 name = "sslyze"
 version = "6.3.1"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/nabla-c0d3/sslyze?rev=5b3f36b5e0b524915580232f463bd639eb30d447#5b3f36b5e0b524915580232f463bd639eb30d447" }
 dependencies = [
     { name = "cryptography" },
     { name = "nassl" },
     { name = "pydantic" },
     { name = "tls-parser" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/15/07/8f5c92c149bfe9cb31619eb46d8ab055be670c6c16c740122afd6b496150/sslyze-6.3.1.tar.gz", hash = "sha256:2cd4062f82a3fa605dbd34e3b71f99961e4e7cf438879da1c52f619855ffbc1d", size = 1065768, upload-time = "2026-03-29T09:58:58.034Z" }
 
 [[package]]
 name = "statsd"
