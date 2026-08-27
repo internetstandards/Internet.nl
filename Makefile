@@ -13,7 +13,7 @@ SCM_VERSION ?= ${RELEASE}
 pysrcdirs = internetnl tests interface checks integration_tests docker
 
 # make sure these targets still run if a file with the same name exists
-.PHONY: translations translations_tar frontend update_cert_fingerprints update_container_documentation update_padded_macs venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests batch-tests
+.PHONY: translations translations_tar frontend update_cert_fingerprints update_container_documentation update_padded_macs venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check check_translations autofix integration-tests batch-tests
 
 # as this is the first command in the makefile it will show if no argument is specified or if 'help' is specified to explain the available targets
 help:           ## Show this help.
@@ -305,6 +305,9 @@ lint: ## run linter
 
 check: ## run checks (eg: package locks, migrations, document generation, etc)
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh
+
+check_translations: ## check the translations against the code
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm -e SKIP_SECRET_KEY_CHECK=1 -e CACHE_LOCATION= tools python3 manage.py check_translations
 
 fix: ## fix trivial linting error automatically
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/fix.sh ${pysrcdirs}

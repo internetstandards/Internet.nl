@@ -32,4 +32,9 @@ if [ $exit_code -ne 1 ];then
   fail=1
 fi
 
+# check the translations against the code, see #2145
+if ! SKIP_SECRET_KEY_CHECK=1 CACHE_LOCATION= python3 manage.py check_translations;then
+  fail=1
+fi
+
 exit "$fail"
