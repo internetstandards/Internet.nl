@@ -141,6 +141,10 @@ SIGNATURE_ALGORITHMS_PHASE_OUT_HASH = [
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.RSA),
     (OpenSslDigestNidEnum.SHA224, OpenSslEvpPkeyEnum.DSA),
 ]
+SIGNATURE_ALGORITHMS_BAD_HASH_NIDS = {sa[0] for sa in SIGNATURE_ALGORITHMS_BAD_HASH}
+assert not SIGNATURE_ALGORITHMS_BAD_HASH_NIDS & {
+    sa[0] for sa in SIGNATURE_ALGORITHMS_PHASE_OUT_HASH
+}, "no hash may be in both the bad and phase-out lists: test_key_exchange_hash tells them apart by hash alone"
 
 # Mail servers with an increased connection limit,
 # matched by substring matching on their hostname.
