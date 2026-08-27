@@ -71,12 +71,17 @@ def http_get(
     try:
         response = _do_request(args, headers, kwargs, session, url)
     except (requests.RequestException, ValueError):
-        # Retry, once, then log and raise the exception
+        # Retry once, then log and raise
         try:
             response = _do_request(args, headers, kwargs, session, url)
         except requests.RequestException as exc:
             log.debug(f"HTTP request raised exception: {url} (headers: {headers}): {exc}")
-            raise exc
+            raise
+        except ValueError as exc:
+            # A malformed upstream URL (e.g. a bad redirect Location) appears as a raw
+            # ValueError - we convert it so callers only need to catch RequestException #1993
+            log.debug(f"HTTP request raised exception: {url} (headers: {headers}): {exc}")
+            raise requests.exceptions.InvalidURL(str(exc)) from exc
 
     log.debug(f"HTTP request completed in {timer()-start_time:.06f}s: {url} (headers: {headers})")
     return response
