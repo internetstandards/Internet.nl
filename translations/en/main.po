@@ -1568,6 +1568,9 @@ msgstr "Your mail server has a valid, sufficiently protective CAA. "
 msgid "detail mail tls caa verdict insufficient"
 msgstr "Your mail server has a valid, but *unsufficiently* protective CAA."
 
+msgid "detail mail tls caa verdict recommendations"
+msgstr "Your mail server has a valid CAA, with recommendations for improvement."
+
 msgid "detail mail tls caa verdict syntax-error"
 msgstr "Your mail server has an *invalid* CAA."
 
@@ -3437,6 +3440,9 @@ msgstr "Your domain has a valid, sufficiently protective CAA. "
 
 msgid "detail web tls caa verdict insufficient"
 msgstr "Your domain has a valid, but *unsufficiently* protective CAA."
+
+msgid "detail web tls caa verdict recommendations"
+msgstr "Your domain has a valid CAA, with recommendations for improvement."
 
 msgid "detail web tls caa verdict syntax-error"
 msgstr "Your domain has an *invalid* CAA."
