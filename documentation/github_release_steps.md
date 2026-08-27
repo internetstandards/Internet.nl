@@ -22,6 +22,6 @@ code changes for the next release are already in the main branch.
    3. For the description use the contents of the Changelog.md for this release
 6. Inform prolocation that we are deploying, it may trigger their alerting.
 7. Deploy.
-7. Update the Changelog.md for the next release and commit with something like:
+8. Update the Changelog.md for the next release and commit with something like:
    "- Bump for next version.".
-8. Done.
+9. Done.
