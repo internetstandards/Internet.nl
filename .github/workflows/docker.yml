@@ -91,8 +91,9 @@ jobs:
           # release is the version used for the docker image tag
           # '+' and '/' is not supported in Docker Image tags, so replace those from the SCM version with '-'
           echo "release=$scm_version$branch_version_suffix" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
-          # scm_version is valid PEP 440 and used as SETUPTOOLS_SCM_PRETEND_VERSION in Docker builds
-          echo "scm_version=$scm_version$branch_version_suffix" | tee -a "$GITHUB_OUTPUT"
+          # scm_version is used as SETUPTOOLS_SCM_PRETEND_VERSION in Docker builds and must be valid PEP 440,
+          # so replace '/' (from branch names like dependabot/uv/x) which is not allowed, '+' and '-' are fine
+          echo "scm_version=$scm_version$branch_version_suffix" | tr '/' '-' | tee -a "$GITHUB_OUTPUT"
           # generate docker image tag used for PR specific caching and PR specific auto deploy
           echo "github_ref_name_slug=${{github.ref_name}}" | tr '+' '-'| tr '/' '-' | tee -a "$GITHUB_OUTPUT"
 
