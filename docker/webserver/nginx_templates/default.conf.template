@@ -48,9 +48,8 @@ server {
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
-        # basic auth should not apply to this path
+        # always allow unauthenticated access by disabling both basic authentication and any IP allow list
         auth_basic off;
-        # IP allowlist should also not apply
         allow all;
     }
 
@@ -86,9 +85,8 @@ server {
 
     # letsencrypt/ACME
     location /.well-known/acme-challenge/ {
-        # basic auth should not apply to this path
+        # always allow unauthenticated access by disabling both basic authentication and any IP allow list
         auth_basic off;
-        # IP allowlist should also not apply
         allow all;
     }
 
@@ -199,16 +197,9 @@ server {
         proxy_buffering off;
     }
 
-    # security.txt file
-    location /.well-known/ {
-        # basic auth should not apply to this path
-        auth_basic off;
-        # IP allowlist should also not apply
-        allow all;
-        alias /var/www/internet.nl/.well-known/;
-    }
     # Allow result URLs to be shared and always open access to the API docs
     location ~ ^(/api/batch/openapi.yaml|/change_language/|/(site|mail)/[^/]+/[0-9]+/)$ {
+        # always allow unauthenticated access by disabling both basic authentication and any IP allow list
         auth_basic off;
         allow all;
         # pass host for Django's allowed_hosts
@@ -229,15 +220,17 @@ server {
     if ($internetnl_branding != "True"){
         set $security_txt "/var/www/internet.nl/.well-known/security-custom.txt";
     }
+    # static files served from Nginx container
     location = /.well-known/security.txt {
-        # basic auth should not apply to this path
+        # always allow unauthenticated access by disabling both basic authentication and any IP allow list
         auth_basic off;
-        # IP allowlist should also not apply
+        allow all;
         alias $security_txt;
     }
-
-    # static files served from Nginx container
     location = /robots.txt {
+        # always allow unauthenticated access by disabling both basic authentication and any IP allow list
+        auth_basic off;
+        allow all;
         alias /var/www/internet.nl/robots.txt;
     }
     location = /favicon.ico {
@@ -246,7 +239,8 @@ server {
 
     # static files served from app
     location /static {
-        # these are unauthenticated as they are used for batch results as well
+        # static files are unauthenticated as they are used for batch results as well
+        # always allow unauthenticated access by disabling both basic authentication and any IP allow list
         auth_basic off;
         allow all;
 
