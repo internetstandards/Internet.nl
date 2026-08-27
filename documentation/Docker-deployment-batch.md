@@ -99,7 +99,7 @@ For example:
     ENABLE_BATCH=True
     ENABLE_HOF=False
     # user/password(s) for access to /grafana monitoring
-    MONITORING_AUTH_RAW=user:<htpasswd hash>
+    MONITORING_AUTH_RAW='user:<htpasswd hash>'
     # allowed IP's to visit web interface without password
     ALLOW_LIST=198.51.100.1,2001:db8:2::1
     EOF
