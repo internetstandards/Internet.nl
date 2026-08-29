@@ -3,29 +3,120 @@
 {% load i18n %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/card-list-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
-  <article class="block wide">
-    <section class="overview">
-        <h1>{% include "string.html" with name="{{pagetitle}}"%}</h1>
-      {% for article in articles %}
-      {% expand "article {{article}} title" as articletitle %}
-      {% expand "article {{article}} date" as articledate %}
-      {% expand "article {{article}} lead" as articlelead %}
-      {% expand "article {{article}} author" as articleauthor %}
-      {% trans articleauthor as author %}
-        <div>
-          <a href="/article/{{article}}">
-            {% if author != articleauthor %}
-              {% expand "author {{author}} name" as authorname %}
-              <h2>Blog {% include "string.html" with name=authorname %}: {% include "string.html" with name=articletitle %}</h2>
-              {% include "content.html" with name=articlelead %}
-            {% else %}
+  <section class="article-index-section bg-primary">
+    <div class="container">
+      <hgroup>
+        <h1 class="h1 color-secondary">{% include "string.html" with name="base news" %}</h1>
+        <p class="h5 color-secondary">{% include "string.html" with name="news subtitle" %}</p>
+      </hgroup>
+      <ul class="card-list">
+        {% for article in articles|slice:":2" %}
+          {% expand "article {{article}} title" as articletitle %}
+          {% expand "article {{article}} date" as articledate %}
+          {% expand "article {{article}} lead" as articlelead %}
+          <li class="card news-card large ellipse">
+            <a href="/article/{{article}}">
+            <hgroup>
+              <p class="card-date">{% include "string.html" with name=articledate %}</p>
               <h2>{% include "string.html" with name=articletitle %}</h2>
-              {% include "string_no_tags.html" with name=articlelead %}
-            {% endif %}
+              <p>{% include "string.html" with name=articlelead %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
           </a>
-        </div>
-      {% endfor %}
-    </section>
-  </article>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+  
+  <section class="card-section">
+    <div class="container">
+      <h2 class="h2 color-secondary">{% include "string.html" with name="news older" %}</h2>
+      <ul class="card-list">
+        {% for article in articles|slice:"2:" %}
+          {% expand "article {{article}} title" as articletitle %}
+          {% expand "article {{article}} date" as articledate %}
+          {% expand "article {{article}} lead" as articlelead %}
+          <li class="card news-card ellipse">
+            <a href="/article/{{article}}">
+            <hgroup class="flipped">
+              <h3>{% include "string.html" with name=articletitle %}</h3>
+              <p class="card-date">{% include "string.html" with name=articledate %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <button id="load-more" class="secondary-button icon" type="button">{% include "string.html" with name="news load" %}</button>
+    </div>
+  </section>
+
+  <section class="contact-section ellipse hidden-mobile">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-1" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-1" %}</p>
+      </details>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-2" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-2" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-3" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-3" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-4" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-4" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-5" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-5" %}</p>
+      </details>
+      <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
+      <article class="contact-card">
+        <hgroup>
+          <h3>{% include "string.html" with name="base contact" %}</h3>
+          <p>{% include "string.html" with name="contact section description" %}</p>
+        </hgroup>
+        <ul>
+          <li class="contact-card-small">
+            <a href="mailto:question@internet.nl">
+              <hgroup>
+                <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+                <p>{% include "string.html" with name="contact section mail-description" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+          <li class="contact-card-small">
+            <a href="https://github.com/internetstandards/Internet.nl">
+              <hgroup>
+                <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+                <p>{% include "string.html" with name="contact section issue-description" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
 {% endblock %}

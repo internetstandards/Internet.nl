@@ -2,11 +2,13 @@
 {% load translate %}
 
 {% block maincontent %}
-  <article class="block wide">
+<section class="article-content-section footer-page">
+  <div class="container">
     {% if "INTERNETNL_BRANDING"|get_settings_value %}
     {% include "content.html" with name="privacy content" %}
     {% else %}
     {% include "content.html" with name="privacy content custom" %}
     {% endif %}
-  </article>
+  </div>
+</section>
 {% endblock %}

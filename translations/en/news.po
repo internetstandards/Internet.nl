@@ -1308,6 +1308,9 @@ msgstr ""
 "New version Internet.nl: X-XSS-Protection removed and improvement for no MX "
 "domains"
 
+msgid "author gerben-klein-baltink role"
+msgstr "Chair of the Dutch Internet Standards Platform"
+
 #, md-format
 msgid "author olaf-kolkman bio"
 msgstr ""

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block maincontent %}
+
+  <section class="intro-section bg-primary ellipse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">{% include "string.html" with name="base contact" %}</h1>
+        <p class="h1 color-secondary">{% include "string.html" with name="contact teaser" %}</p>
+      </hgroup>
+    </div>
+  </section>
+
+  <section class="contact-section alt">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-1" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-1" %}</p>
+      </details>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-2" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-2" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-3" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-3" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-4" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-4" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-5" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-5" %}</p>
+      </details>
+      <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
+    </div>
+  </section>
+
+  <section class="faq-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h2 color-secondary">{% include "string.html" with name="contact get-in-touch" %}</h2>
+      <ul class="contact-card-list">
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+            <p>{% include "string.html" with name="contact mail-description" %}</p>
+          </hgroup>
+        </li>
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+            <p>{% include "string.html" with name="contact issue-description" %}</p>
+          </hgroup>
+        </li>
+        <li class="contact-card-small alt">
+          <hgroup>
+            <h4 class="visit icon">{% include "string.html" with name="contact post" %}</h4>
+            <p>{% include "string.html" with name="contact post-description" %}</p>
+          </hgroup>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+{% endblock %}

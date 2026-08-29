@@ -1,47 +1,149 @@
 {% extends "base.html" %}
-{%load translate %}
+{% load translate %}
 
 {% block maincontent %}
-<article class="block fullwidth">
-  <div class="intro">
-    <div class="flexblocks champions">
-      <div class="flexblock">
-        <h1>{% include "string.html" with name=hof_title %}</h1>
-          <ul class="hall-of-fame menu">
-            <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
-            <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
-            <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
-            {% for manual in manuals %}
-            <li><a href="/halloffame/{{manual.0}}/" {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a></li>
-            {% endfor %}
-          </ul>
-      </div>
-      <div class="flexblock">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% if cpage == 'champions' %}
-        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
-        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
-      {% elif cpage == 'web' %}
-        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
-      {% elif cpage == 'mail' %}
-        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
-      {% else %}
-        {% if manual_icon and manual_icon_alt %}
-        <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}">
-        {% endif %}
-      {% endif %}
-      {% endif %}
+
+<section class="intro-section bg-primary ellipse reverse">
+  <div class="container">
+    <hgroup class="center">
+      <h1 class="h5 color-secondary">{% include "string.html" with name="base halloffame" %}</h1>
+      <p class="h1 color-secondary">{% include "string.html" with name="halloffame description" %}</p>
+    </hgroup>
+  </div>
+</section>
+
+<search class="filter-section">
+  <div class="container">
+    <div class="filter-container">
+      <h2 class="h5 color-secondary">{% include "string.html" with name="halloffame filter" %}</h2>
+      <div class="button-container">
+        <a class="primary-button" href="#kampioenen">{% include "string.html" with name="halloffame champions title" %}</a>
+        <a class="secondary-button" href="/halloffame/hosters#hosters">{% include "string.html" with name="manual halloffame hosters title" %}</a>
       </div>
     </div>
-    <span class="hof-content">{% include "content.html" with name=hof_text %}</span>
   </div>
-  <div class="perfect-scores-list">
-    <h2>{% include "string.html" with name=hof_subtitle %}</h2>
-    <ul class="list-column column-3">
-    {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
-    {% endfor %}
+</search>
+
+<section class="hosters-section" id="kampioenen">
+  <div class="container">
+    <hgroup>
+      <h2 class="h2 color-secondary">{% include "string.html" with name="halloffame champions title" %}</h2>
+      <p class="body-xl">{% include "string.html" with name="halloffame champions text" %}</p>
+    </hgroup>
+    <div class="image-container">
+      <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
+    </div>
+    <ul class="hall-of-fame-list">
+      {% for member in halloffame|slice:"-20:" %}
+        <li>
+          <a href="{{member.permalink}}">{{member.domain|idna}}</a>
+        </li>
+      {% endfor %}
     </ul>
   </div>
-</article>
+</section>
+
+<section class="test-sub-section bg-primary">
+  <div class="container">
+    <h2 class="h3 color-secondary">{% include "string.html" with name="base test title" %}</h2>
+    <ul class="test-card-list hall-of-fame-variant">
+      <li class="test-card-small">
+        <a href="/test-site">
+          <div class="card-container icon domain">
+            <hgroup>
+              <h3>{% include "string.html" with name="base test website label" %}</h3>
+              <p>{% include "string.html" with name="base test website sublabel" %}</p>
+            </hgroup>
+          </div>
+          <div class="primary-button rounded icon"></div>
+        </a>
+      </li>
+      <li class="test-card-small">
+        <a href="/test-mail">
+          <div class="card-container mail icon">
+            <hgroup>
+              <h3>{% include "string.html" with name="base test mail label" %}</h3>
+              <p>{% include "string.html" with name="base test mail sublabel" %}</p>
+            </hgroup>
+          </div>
+          <div class="primary-button rounded icon"></div>
+        </a>
+      </li>
+      <li class="test-card-small">
+        <a href="/test-connection">
+          <div class="card-container connection icon">
+            <hgroup>
+              <h3>{% include "string.html" with name="base test connection label" %}</h3>
+              <p>{% include "string.html" with name="base test connection sublabel" %}</p>
+            </hgroup>
+          </div>
+          <div class="primary-button rounded icon"></div>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="contact-section ellipse hidden-mobile">
+  <div class="container">
+    <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
+    <details class="faq-item accordion" name="faq-item">
+      <summary class="icon">
+        {% include "string.html" with name="faqs section question-1" %}
+      </summary>
+      <p>{% include "string.html" with name="faqs section answer-1" %}</p>
+    </details>
+    <details class="faq-item accordion" name="faq-item">
+      <summary class="icon">
+        {% include "string.html" with name="faqs section question-2" %}
+      </summary>
+      <p>{% include "string.html" with name="faqs section answer-2" %}</p>
+    </details>      
+    <details class="faq-item accordion" name="faq-item">
+      <summary class="icon">
+        {% include "string.html" with name="faqs section question-3" %}
+      </summary>
+      <p>{% include "string.html" with name="faqs section answer-3" %}</p>
+    </details>      
+    <details class="faq-item accordion" name="faq-item">
+      <summary class="icon">
+        {% include "string.html" with name="faqs section question-4" %}
+      </summary>
+      <p>{% include "string.html" with name="faqs section answer-4" %}</p>
+    </details>      
+    <details class="faq-item accordion" name="faq-item">
+      <summary class="icon">
+        {% include "string.html" with name="faqs section question-5" %}
+      </summary>
+      <p>{% include "string.html" with name="faqs section answer-5" %}</p>
+    </details>
+    <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
+    <article class="contact-card">
+      <hgroup>
+        <h3>{% include "string.html" with name="base contact" %}</h3>
+        <p>{% include "string.html" with name="contact section description" %}</p>
+      </hgroup>
+      <ul>
+        <li class="contact-card-small">
+          <a href="mailto:question@internet.nl">
+            <hgroup>
+              <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+              <p>{% include "string.html" with name="contact section mail-description" %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
+          </a>
+        </li>
+        <li class="contact-card-small">
+          <a href="https://github.com/internetstandards/Internet.nl">
+            <hgroup>
+              <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+              <p>{% include "string.html" with name="contact section issue-description" %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
+          </a>
+        </li>
+      </ul>
+    </article>
+  </div>
+</section>
 {% endblock %}

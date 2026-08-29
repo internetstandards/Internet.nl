@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2026-07-14 09:10:52.892350\n"
+"PO-Revision-Date: 2026-08-20 22:50:23.766258\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -18,7 +18,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#, md-format
 msgid "about contact"
 msgstr ""
 "## Contact\n"
@@ -36,7 +35,6 @@ msgstr ""
 "Vingerafdruk: ACB7 8829 4C7E 12BA E922 8C60 D894 E15F 4502 8563  \n"
 "Vervaldatum: 28 maart 2028"
 
-#, md-format
 msgid "about content"
 msgstr ""
 "# Over Internet.nl\n"
@@ -84,6 +82,108 @@ msgstr ""
 "## Waarom gaan jullie niet direct in gesprek met de providers?\n"
 "Dat doen we ook. Tegelijkertijd helpt het enorm als internetgebruikers zelf ook meer bewust worden en signalen afgeven bij hun provider(s). Je zou het niet verwachten van een modern land als Nederland, maar we gebruiken nog veel verouderde standaarden waarvan de betrouwbaarheid te wensen overlaat. Help daarom mee het internet gezamenlijk te verbeteren en vraag om moderne Internetstandaarden."
 
+msgid "about link"
+msgstr "Lees hier meer over het platform"
+
+msgid "about mission"
+msgstr ""
+"Het doel van het platform is om het gebruik van moderne internetstandaarden "
+"verder te vergroten en voor iedereen toegankelijker, veiliger en "
+"betrouwbaarder te maken."
+
+msgid "about mission-title"
+msgstr "Onze missie"
+
+msgid "about platform"
+msgstr ""
+"De testtool Internet.nl is een initiatief van het Platform "
+"Internetstandaarden. Het is een samenwerkingsverband van de "
+"Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende "
+"partijen deel in het platform:"
+
+msgid "about quote"
+msgstr ""
+"\"Het internet is van ons allemaal, samen kunnen wij ervoor zorgen dat het "
+"open, veilig en betrouwbaar blijft.\""
+
+msgid "about_mission_description_newstring"
+msgstr ""
+"De testtool Internet.nl is een initiatief van het Platform "
+"Internetstandaarden. Het is een samenwerkingsverband van de "
+"Internetgemeenschap en de Nederlandse overheid. Momenteel nemen de volgende "
+"partijen deel in het platform:"
+
+msgid "about_mission_heading_newstring"
+msgstr ""
+"Het doel van het platform is om het gebruik van moderne internetstandaarden "
+"verder te vergroten en voor iedereen toegankelijker, veiliger en "
+"betrouwbaarder te maken."
+
+msgid "about_mission_title_newstring"
+msgstr "Onze missie"
+
+msgid "about_quote_author_newstring"
+msgstr "Coen Wesselman"
+
+msgid "about_quote_newstring"
+msgstr ""
+"\"Het doel van het platform is om het gebruik van moderne "
+"internetstandaarden verder te vergroten en voor iedereen toegankelijker, "
+"veiliger en betrouwbaarder te maken.\""
+
+msgid "about_quote_role_newstring"
+msgstr "Oprichter Internet.nl"
+
+msgid "about_reason_1_description_newstring"
+msgstr ""
+"Dit helpt bij het voorkomen van cyberaanvallen, hacking, en datalekken."
+
+msgid "about_reason_1_title_newstring"
+msgstr "Beveiligingslekken en kwetsbaarheid opzoeken"
+
+msgid "about_reason_2_description_newstring"
+msgstr ""
+"Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en "
+"optimale ervaring hebben."
+
+msgid "about_reason_2_title_newstring"
+msgstr "Garanderen van compatibiliteit"
+
+msgid "about_reason_3_description_newstring"
+msgstr ""
+"Testen helpt bij het identificeren van prestatieproblemen zoals trage "
+"laadtijden en serverfouten."
+
+msgid "about_reason_3_title_newstring"
+msgstr "Identificeren van prestatie problemen"
+
+msgid "about_section_intro_newstring"
+msgstr "Ik wil meer informatie over deze organisaties"
+
+msgid "about_section_page_intro_newstring"
+msgstr ""
+"Wij helpen jou testen en het identificeren van prestatieproblemen zoals "
+"trage laadtijden en serverfouten."
+
+msgid "about_section_title_newstring"
+msgstr "Over ons"
+
+msgid "about_successful_tests_newstring"
+msgstr "succesvolle testen!"
+
+msgid "about_test_button_newstring"
+msgstr "Ik wil graag testen"
+
+msgid "about_why_test_description_newstring"
+msgstr ""
+"De testtool Internet.nl is een initiatief van het Platform "
+"Internetstandaarden. Het doel van het platform is om gezamenlijk het gebruik"
+" van moderne internetstandaarden verder te vergroten om daarmee het internet"
+" voor iedereen toegankelijker, veiliger en betrouwbaarder te maken."
+
+msgid "about_why_test_title_newstring"
+msgstr "Waarom zou je jouw standaarden moeten testen?"
+
 msgid "accessibility content"
 msgstr ""
 "# Toegankelijkheid\n"
@@ -93,6 +193,32 @@ msgstr ""
 "## Rapport toegankelijkheidsonderzoek \n"
 "De website Internet.nl is eind 2018 onderzocht op toegankelijkheid door stichting Accessibility. De bevindingen zijn vastgelegd in het [rapport \"WCAG 2 onderzoek www.internet.nl - niveau AA\"](/static/accessibility/check_6967_auto_rapport.pdf) d.d. 14 november 2018. Platform Internetstandaarden heeft op basis van deze bevindingen een aantal verbeteringen doorgevoerd voor de toegankelijkheid van Internet.nl."
 
+msgid "action_card_description_newstring"
+msgstr ""
+"Het doorsturen van de testresultaten kan helpen bij het identificeren van de"
+" oorzaken en het bieden van oplossingen."
+
+msgid "article_read_more_button_newstring"
+msgstr "Lees meer artikelen"
+
+msgid "article_related_news_title_newstring"
+msgstr "Gerelateerd nieuws"
+
+msgid "articles_latest_news_title_home_newstring"
+msgstr "Laatste nieuws"
+
+msgid "articles_latest_news_title_newstring"
+msgstr "Onze laatste nieuws"
+
+msgid "articles_load_more_button_newstring"
+msgstr "Laad meer artikelen"
+
+msgid "articles_subtitle_newstring"
+msgstr "Bekijk ons nieuws met updates en handige informatie."
+
+msgid "articles_title_newstring"
+msgstr "Nieuws & Artikelen"
+
 msgid "base about"
 msgstr "Over Internet.nl"
 
@@ -101,6 +227,9 @@ msgstr "Toegankelijkheid"
 
 msgid "base blogs"
 msgstr "Blogs"
+
+msgid "base close"
+msgstr "Sluiten"
 
 msgid "base contact"
 msgstr "Contact"
@@ -120,13 +249,24 @@ msgstr "Hall of Fame"
 msgid "base halloffame champions"
 msgstr "Hall of Fame - Kampioenen!"
 
+msgid "base halloffame description"
+msgstr ""
+"Hieronder staan de 10 meest recente toevoegingen aan de Hall of Fame. Een "
+"domein wordt opgenomen wanneer deze 100% scoort in de website- en "
+"e-mailtest."
+
+msgid "base halloffame hosters description"
+msgstr ""
+"Onderstaande hosters zijn opgenomen in de Hall of Fame, omdat ze voldoen aan"
+" de criteria voor opname zoals een dubbele 100%-score voor hun eigen domein."
+
 msgid "base halloffame lead"
 msgstr ""
 "{{count}} domeinen met 2 x 100%  \n"
 "Laatste toevoeging: {{latest|date:'d-m-Y'}}"
 
 msgid "base halloffame link"
-msgstr "Naar Hall of Fame - Kampioenen!"
+msgstr "Bekijk de hele Hall of Fame"
 
 msgid "base halloffame mail"
 msgstr "Hall of Fame - E-mail"
@@ -141,6 +281,15 @@ msgid "base info"
 msgstr ""
 "Internet.nl is een initiatief van de internetgemeenschap en de Nederlandse \n"
 "overheid."
+
+msgid "base language"
+msgstr "Taal"
+
+msgid "base mastodon"
+msgstr "Bezoek ons Mastodon-profiel"
+
+msgid "base menu"
+msgstr "Menu"
 
 msgid "base news"
 msgstr "Nieuws"
@@ -169,6 +318,9 @@ msgstr ""
 
 msgid "base test connection label"
 msgstr "Test je verbinding"
+
+msgid "base test connection sublabel"
+msgstr "Direct inzicht in jouw internetverbinding!"
 
 msgid "base test connection text"
 msgstr ""
@@ -211,11 +363,26 @@ msgstr "Jouw e-mailadres:"
 msgid "base test mail label"
 msgstr "Test je e-mail"
 
+msgid "base test mail sublabel"
+msgstr "Hoe modern is jouw mailprovider?"
+
 msgid "base test mail text"
 msgstr "Modern adres? Anti-phishing? Beveiligd transport? Route-autorisatie?"
 
 msgid "base test mail title"
 msgstr "Over de e-mailtest"
+
+msgid "base test mail usp1"
+msgstr "Volledig inzicht in mailbeveiliging"
+
+msgid "base test mail usp2"
+msgstr "Voor alle domeinen, ook zonder mail"
+
+msgid "base test mail usp3"
+msgstr "Rapport met verbeterpunten"
+
+msgid "base test more"
+msgstr "Dit kun je nog meer testen"
 
 msgid "base test prechecks invalid domain"
 msgstr ""
@@ -223,7 +390,10 @@ msgstr ""
 "Toelichting: Een A- en/of AAAA-record is noodzakelijk voor de websitetest, en een SOA-record voor de e-mailtest."
 
 msgid "base test start"
-msgstr "Start test"
+msgstr "Start de test"
+
+msgid "base test title"
+msgstr "Wat wil je testen?"
 
 msgid "base test website explain"
 msgstr ""
@@ -254,6 +424,9 @@ msgstr "Jouw website-domeinnaam:"
 msgid "base test website label"
 msgstr "Test je website"
 
+msgid "base test website sublabel"
+msgstr "Is jouw website up-to-date?"
+
 msgid "base test website text"
 msgstr ""
 "Modern adres? Beveiligde verbinding? Beveiligingsopties? Route-autorisatie?"
@@ -261,17 +434,252 @@ msgstr ""
 msgid "base test website title"
 msgstr "Over de websitetest"
 
+msgid "base test website usp1"
+msgstr "Uitgebreide en volledige test"
+
+msgid "base test website usp2"
+msgstr "Controleert website, server en domein"
+
+msgid "base test website usp3"
+msgstr "Rapport met verbeterpunten"
+
+msgid "base tests"
+msgstr "Testen"
+
+msgid "base theme"
+msgstr "Thema"
+
+msgid "base theme dark"
+msgstr "Donker"
+
+msgid "base theme light"
+msgstr "Licht"
+
+msgid "base theme system"
+msgstr "Systeem"
+
 msgid "base widget mail"
 msgstr "E-mailtest widget"
 
 msgid "base widget site"
 msgstr "Websitetest widget"
 
+msgid "base_footer_about_us_newstring"
+msgstr "Over ons"
+
+msgid "base_footer_accessibility_newstring"
+msgstr "Toegankelijkheid"
+
+msgid "base_footer_copyright_newstring"
+msgstr "Auteursrecht"
+
+msgid "base_footer_goto_linkedin_newstring"
+msgstr "Ga naar onze LinkedIn profiel"
+
+msgid "base_footer_goto_mastodon_newstring"
+msgstr "Ga naar onze Mastodon profiel"
+
+msgid "base_footer_goto_x_newstring"
+msgstr "Ga naar onze X profiel"
+
+msgid "base_footer_hall_of_fame_newstring"
+msgstr "Hall of fame"
+
+msgid "base_footer_knowledge_base_newstring"
+msgstr "Kennisbank"
+
+msgid "base_footer_news_newstring"
+msgstr "Nieuws"
+
+msgid "base_footer_privacy_statement_newstring"
+msgstr "Privacyverklaring"
+
+msgid "base_footer_service_contact_newstring"
+msgstr "Service & contact"
+
+msgid "base_footer_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_footer_vulnerability_report_newstring"
+msgstr "Kwetsbaarheid melden"
+
+msgid "base_header_close_newstring"
+msgstr "Sluiten"
+
+msgid "base_header_contact_newstring"
+msgstr "Contact"
+
+msgid "base_header_homepage_label_newstring"
+msgstr "Internet.nl Homepagina"
+
+msgid "base_header_menu_newstring"
+msgstr "Menu"
+
+msgid "base_header_skip_to_main_newstring"
+msgstr "Ga naar hoofdinhoud"
+
+msgid "base_header_test_connection_newstring"
+msgstr "Test je verbinding"
+
+msgid "base_header_test_email_newstring"
+msgstr "Test je e-mail"
+
+msgid "base_header_test_tools_newstring"
+msgstr "Test tools"
+
+msgid "base_header_test_website_newstring"
+msgstr "Test je website"
+
+msgid "base_language_change_button_newstring"
+msgstr "Taal wijzigen"
+
+msgid "base_language_select_label_newstring"
+msgstr "Kies een taal"
+
+msgid "base_probe_score_loading_newstring"
+msgstr "Score laden voor:"
+
+msgid "base_results_next_actions_newstring"
+msgstr "Vervolg acties"
+
+msgid "base_results_repeat_test_newstring"
+msgstr "Herhaal de test"
+
+msgid "base_results_score_for_newstring"
+msgstr "Score voor:"
+
+msgid "base_results_share_results_clicked_newstring"
+msgstr "Gekopieerd naar klembord"
+
+msgid "base_results_share_results_newstring"
+msgstr "Deel uitslag met hoster"
+
+msgid "base_results_test_connection_newstring"
+msgstr "Test je verbinding"
+
+msgid "base_results_test_details_newstring"
+msgstr "Details over de test"
+
+msgid "base_results_test_email_domain_newstring"
+msgstr "Test je e-mail domein"
+
+msgid "base_results_test_explanation_newstring"
+msgstr "Toelichting op testrapport"
+
+msgid "base_results_test_website_domain_newstring"
+msgstr "Test je website"
+
+msgid "base_theme_change_button_newstring"
+msgstr "Thema wijziging"
+
+msgid "base_theme_dark_newstring"
+msgstr "Donker"
+
+msgid "base_theme_light_newstring"
+msgstr "Licht"
+
+msgid "base_theme_system_newstring"
+msgstr "Systeem"
+
+msgid "base_theme_toggle_mode_newstring"
+msgstr "Mode"
+
+msgid "base_theme_toggle_to_dark_newstring"
+msgstr "Schakel naar donkere thema"
+
+msgid "base_theme_toggle_to_light_newstring"
+msgstr "Schakel naar lichte thema"
+
 msgid "connection pagetitle"
 msgstr "Verbindingstest"
 
 msgid "connection title"
 msgstr "Verbindingstest"
+
+msgid "contact get-in-touch"
+msgstr "Neem contact op"
+
+msgid "contact issue-description"
+msgstr ""
+"Bekijk onze code of maak een issue aan op "
+"[GitHub](https://github.com/internetstandards/Internet.nl)"
+
+msgid "contact mail-description"
+msgstr ""
+"Stuur ons een e-mail met je vraag op "
+"[vraag@internet.nl](mailto:vraag@internet.nl)"
+
+msgid "contact post"
+msgstr "Postadres"
+
+msgid "contact post-description"
+msgstr ""
+"Platform Internetstandaarden\n"
+"Maanweg 174 (8e verdieping)\n"
+"2516 AB Den Haag"
+
+msgid "contact section description"
+msgstr "Heb je meer ondersteuning nodig? Weet ons te vinden!"
+
+msgid "contact section issue"
+msgstr "Issues"
+
+msgid "contact section issue-description"
+msgstr "Bekijk onze code of maak een issue"
+
+msgid "contact section mail"
+msgstr "E-mail"
+
+msgid "contact section mail-description"
+msgstr "Stuur ons een e-mail met je vraag"
+
+msgid "contact teaser"
+msgstr ""
+"Heb je nog vragen? Zoek direct naar je antwoord of neem contact met ons op."
+
+msgid "contact_card_subtitle_newstring"
+msgstr "Heeft u een vraag, opmerking of klacht?<br>Wij helpen u graag."
+
+msgid "contact_card_title_newstring"
+msgstr "Contact met ons"
+
+msgid "contact_email_description_newstring"
+msgstr "Contact wanneer het u uitkomt"
+
+msgid "contact_email_title_newstring"
+msgstr "Mailen"
+
+msgid "contact_get_in_touch_title_newstring"
+msgstr "Kom in contact met ons"
+
+msgid "contact_help_description_newstring"
+msgstr "We helpen u graag verder"
+
+msgid "contact_help_title_newstring"
+msgstr "Technische hulp"
+
+msgid "contact_intro_description_newstring"
+msgstr ""
+"Waar kunnen we je mee helpen? Zoek direct naar je antwoord of bekijk onze "
+"contactgegevens."
+
+msgid "contact_intro_title_newstring"
+msgstr "Service & Contact"
+
+msgid "contact_page_email_description_newstring"
+msgstr "Heeft u een vraag of een klacht?<br>U kunt ons mailen op"
+
+msgid "contact_page_help_description_newstring"
+msgstr "We helpen u graag verder met technische hulp op onze"
+
+msgid "contact_page_visit_description_newstring"
+msgstr "Maanweg 174 (8e verdieping)<br>2516 AB Den Haag"
+
+msgid "contact_visit_description_newstring"
+msgstr "Het adres van ons kantoor"
+
+msgid "contact_visit_title_newstring"
+msgstr "Bezoeken"
 
 msgid "copyright content"
 msgstr ""
@@ -643,6 +1051,12 @@ msgstr ""
 "Je SPF-policy is *niet* voldoende strikt. De 'redirect modifier' in je SPF-"
 "record verwijst naar een onvoldoende strikte SPF-policy of naar een niet-"
 "bestaand SPF-record."
+
+msgid "detail mail caa label"
+msgstr "CAA mail"
+
+msgid "detail mail caa tech table"
+msgstr "Mail server|Findings"
 
 msgid "detail mail dnssec exists exp"
 msgstr ""
@@ -2763,6 +3177,12 @@ msgstr ""
 "\n"
 "Je webserver biedt veilig ingestelde X-XSS-Protection aan."
 
+msgid "detail web caa label"
+msgstr "CAA web"
+
+msgid "detail web caa tech table"
+msgstr "Findings"
+
 msgid "detail web dnssec exists exp"
 msgstr ""
 "We testen of je domeinnaam, meer specifiek het SOA-record, ondertekend is met DNSSEC.\n"
@@ -4245,7 +4665,6 @@ msgstr ""
 msgid "domain pagetitle"
 msgstr "Websitetest:"
 
-#, md-format
 msgid "domain title"
 msgstr "Websitetest: {{prettyaddr}}  "
 
@@ -4253,7 +4672,35 @@ msgid "domain tweetmessage"
 msgstr ""
 "De%20website%20{{report.domain}}%20scoort%20{{score}}%25%20in%20de%20websitetest%20van%20%40Internet_nl%3A"
 
-#, md-format
+msgid "faq_categories_title_newstring"
+msgstr "Categorieën"
+
+msgid "faq_docker_title_newstring"
+msgstr "Internet.nl beschikbaar als 'kant-en-klaar' Docker-pakket"
+
+msgid "faq_knowledge_category_newstring"
+msgstr "Testen"
+
+msgid "faq_knowledge_description_long_newstring"
+msgstr ""
+"Vandaag lanceert Internet.nl een nieuwe versie van haar testtool in de vorm "
+"van een 'kant-en-klaar' pakket op basis van Docker..."
+
+msgid "faq_knowledge_description_newstring"
+msgstr "Bekijk hier onze kennisbank met allerlei handige informatie en tips."
+
+msgid "faq_knowledge_heading_newstring"
+msgstr "Aan de hand van wat wordt er getest op je domeinnamen"
+
+msgid "faq_knowledge_title_newstring"
+msgstr "Onze kennisbank"
+
+msgid "faq_title_newstring"
+msgstr "Veelgestelde vragen"
+
+msgid "faq_view_all_button_newstring"
+msgstr "Bekijk alle gestelde vragen"
+
 msgid "faqs appsecpriv content"
 msgstr ""
 "## HTTP security headers \n"
@@ -4291,7 +4738,6 @@ msgstr ""
 "- [\"Wat is security.txt?\"](https://www.digitaltrustcenter.nl/securitytxt) door Digital Trust Center\n"
 "- [\"Handreiking security.txt\"](https://www.ncsc.nl/documenten/publicaties/2023/maart/2/handreiking-security.txt) door NCSC-NL"
 
-#, md-format
 msgid "faqs appsecpriv title"
 msgstr "Beveiligingsopties"
 
@@ -4329,7 +4775,18 @@ msgstr ""
 msgid "faqs batch-and-dashboard title"
 msgstr "Batch API en webgebaseerd dashboard"
 
-#, md-format
+msgid "faqs category categories"
+msgstr "Categorieën"
+
+msgid "faqs category media"
+msgstr "Media"
+
+msgid "faqs category standards"
+msgstr "Standaarden"
+
+msgid "faqs category tests"
+msgstr "Testen"
+
 msgid "faqs content"
 msgstr ""
 "## Achtergrond\n"
@@ -4356,7 +4813,9 @@ msgstr ""
 "* [Batch API en webgebaseerd dashboard](/faqs/batch-and-dashboard/)\n"
 "* [Metingen met Internet.nl](/faqs/measurements/)"
 
-#, md-format
+msgid "faqs description"
+msgstr "Bekijk hier onze kennisbank met allerlei handige informatie en tips."
+
 msgid "faqs dnssec content"
 msgstr ""
 "## Waarom\n"
@@ -4392,7 +4851,6 @@ msgstr ""
 "* [RFC 8624: Algorithm Implementation Requirements and Usage Guidance for DNSSEC](https://www.rfc-editor.org/rfc/rfc8624)\n"
 "* [RFC 9276: Guidance for NSEC3 Parameter Settings](https://www.rfc-editor.org/rfc/rfc9276)"
 
-#, md-format
 msgid "faqs dnssec title"
 msgstr "Domeinnaamhandtekening (DNSSEC)"
 
@@ -4429,7 +4887,6 @@ msgstr ""
 msgid "faqs halloffame title"
 msgstr "Criteria voor 'Hall of Fame voor Hosters'"
 
-#, md-format
 msgid "faqs https content"
 msgstr ""
 "## Waarom\n"
@@ -4467,11 +4924,9 @@ msgstr ""
 "### DANE\n"
 "* [RFC 6698: The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA](https://www.rfc-editor.org/rfc/rfc6698)"
 
-#, md-format
 msgid "faqs https title"
 msgstr "Beveiligde websiteverbinding (HTTPS)"
 
-#, md-format
 msgid "faqs ipv6 content"
 msgstr ""
 "## Waarom\n"
@@ -4498,11 +4953,9 @@ msgstr ""
 "## Specificaties\n"
 "* [RFC 8200: Internet Protocol, Version 6 (IPv6) Specification](https://www.rfc-editor.org/rfc/rfc8200)"
 
-#, md-format
 msgid "faqs ipv6 title"
 msgstr "Modern adres (IPv6)"
 
-#, md-format
 msgid "faqs mailauth content"
 msgstr ""
 "## Waarom\n"
@@ -4527,7 +4980,6 @@ msgstr ""
 "* [RFC 6376: DomainKeys Identified Mail (DKIM) Signatures](https://www.rfc-editor.org/rfc/rfc6376)\n"
 "* [RFC 7208: Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1](https://www.rfc-editor.org/rfc/rfc7208)"
 
-#, md-format
 msgid "faqs mailauth title"
 msgstr "Protectie tegen e-mailphishing (DMARC, DKIM en SPF)"
 
@@ -4546,7 +4998,6 @@ msgstr ""
 msgid "faqs measurements title"
 msgstr "Metingen met Internet.nl"
 
-#, md-format
 msgid "faqs report score content"
 msgstr ""
 "### Welke norm hanteert Internet.nl?\n"
@@ -4583,25 +5034,20 @@ msgstr ""
 msgid "faqs report score title"
 msgstr "Norm en score"
 
-#, md-format
 msgid "faqs report subtest bad"
 msgstr "Slecht: gezakt voor VEREISTE subtest ⇒ nulscore"
 
-#, md-format
 msgid "faqs report subtest error"
 msgstr "Testfout: uitvoeringsfout tijdens testen ⇒ nulscore"
 
-#, md-format
 msgid "faqs report subtest good"
 msgstr ""
 "Goed: geslaagd voor VEREISTE, AANBEVOLEN of OPTIONELE subtest ⇒ eerste: "
 "volledige score / laatste twee: geen impact op score"
 
-#, md-format
 msgid "faqs report subtest info"
 msgstr "Ter informatie: gezakt voor OPTIONELE subtest ⇒ geen impact op score"
 
-#, md-format
 msgid "faqs report subtest not-tested"
 msgstr ""
 "Niet getest, want al gezakt voor gerelateerde bovenliggende subtest ⇒ \n"
@@ -4610,28 +5056,23 @@ msgstr ""
 msgid "faqs report subtest title"
 msgstr "Iconen per subtest"
 
-#, md-format
 msgid "faqs report subtest warning"
 msgstr "Waarschuwing: gezakt voor AANBEVOLEN subtest ⇒ geen impact op score"
 
-#, md-format
 msgid "faqs report test bad"
 msgstr ""
 "Slecht: gezakt voor tenminste één VEREISTE subtest ⇒ geen volledige score "
 "voor testcategorie"
 
-#, md-format
 msgid "faqs report test error"
 msgstr ""
 "Testfout: uitvoeringsfout voor tenminste één subtest ⇒ geen resultaat voor "
 "testcategorie"
 
-#, md-format
 msgid "faqs report test good"
 msgstr ""
 "Goed: geslaagd voor alle subtesten ⇒ volledige score voor testcategorie "
 
-#, md-format
 msgid "faqs report test info"
 msgstr ""
 "Ter informatie: gezakt voor tenminste één OPTIONELE subtest ⇒ volledige "
@@ -4640,7 +5081,6 @@ msgstr ""
 msgid "faqs report test title"
 msgstr "Iconen per testcategorie"
 
-#, md-format
 msgid "faqs report test warning"
 msgstr ""
 "Waarschuwing: gezakt voor tenminste één AANBEVOLEN subtest ⇒ volledige score"
@@ -4675,7 +5115,58 @@ msgstr ""
 msgid "faqs rpki title"
 msgstr "Autorisatie voor routering (RPKI)"
 
-#, md-format
+msgid "faqs section answer-1"
+msgstr ""
+"In de testrapportage staat bij iedere (deel)test een uitleg van onze bevindingen. Op basis hiervan kun je aanpassingen (laten) doen in de configuratie van je web- of mailserver of internetverbinding.\n"
+"\n"
+"Daarnaast vind je meer informatie in onze kennisbank en onze [Toolbox Wiki](https://toolbox.internet.nl/)."
+
+msgid "faqs section answer-2"
+msgstr ""
+"Internet.nl probeert altijd te testen volgens de nieuwste normen en richtlijnen. Daarnaast testen we zo volledig mogelijk. Hierdoor kunnen resultaten afwijken van andere veelgebruikte testtools.\n"
+"\n"
+"Een aantal van de normen die wij gebruiken, zijn opgesteld door de Nederlandse overheid. De normen zijn goed onderbouwd en in principe internationaal te implementeren, maar lokale regelgeving kan dus afwijken van de normen gebruikt in Internet.nl."
+
+msgid "faqs section answer-3"
+msgstr ""
+"De laatste ontwikkelingen rondom Internet.nl vind je altijd op onze website en onze sociale media. Bij nieuwe versies plaatsten we een nieuwsbericht waarin de belangrijkste wijzigingen staan genoemd. Je kan  ook meekijken in de [broncode](https://github.com/internetstandards/Internet.nl) van het project, uiteraard zijn nieuwe ideeën en bijdragen zeer welkom.\n"
+"\n"
+"Gebruikers van de API en het [dashboard](https://dashboard.internet.nl/signup) zijn automatisch onderdeel van een maillijst waarvoor we regulier bijeenkomsten organiseren en informatie delen."
+
+msgid "faqs section answer-4"
+msgstr ""
+"Dit wordt ondersteund door ons dashboard en de API. Je kan [hier](https://dashboard.internet.nl/signup) een account aanvragen als je binnen onze doelgroep valt. Uiteraard is ook het dashboard open source, waardoor je het ook binnen je eigen organisatie kan hosten.\n"
+"\n"
+"In het dashboard kunnen lijsten van domeinnamen worden ingevuld of geïmporteerd. Vervolgens kun je deze periodiek laten testen, waarbij je optioneel na iedere test een e-mail ontvangt met de uitslag."
+
+msgid "faqs section answer-5"
+msgstr ""
+"Wij maken graag kennis met organisaties die willen bijdragen aan de doelen "
+"van het Platform Internetstandaarden. Neem vooral contact met ons op via "
+"[vraag@internet.nl](mailto:vraag@internet.nl) zodat we een kennismaking in "
+"kunnen plannen."
+
+msgid "faqs section link"
+msgstr "Vind nog meer antwoorden"
+
+msgid "faqs section question-1"
+msgstr "Hoe kan ik de score van een test verbeteren?"
+
+msgid "faqs section question-2"
+msgstr "Waarom zie ik bij andere testtools een andere uitslag?"
+
+msgid "faqs section question-3"
+msgstr "Hoe blijf ik op de hoogte van nieuwe ontwikkelingen?"
+
+msgid "faqs section question-4"
+msgstr "Hoe kan ik (periodiek) al mijn domeinen meten?"
+
+msgid "faqs section question-5"
+msgstr "Kan ik lid worden van het Platform Internetstandaarden?"
+
+msgid "faqs section title"
+msgstr "Veelgestelde vragen"
+
 msgid "faqs starttls content"
 msgstr ""
 "## Waarom\n"
@@ -4701,11 +5192,9 @@ msgstr ""
 "* [RFC 7672: SMTP Security via Opportunistic DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS)](https://www.rfc-editor.org/rfc/rfc7672) \n"
 "* [RFC 7671: The DNS-Based Authentication of Named Entities (DANE) Protocol: Updates and Operational Guidance](https://www.rfc-editor.org/rfc/rfc7671)"
 
-#, md-format
 msgid "faqs starttls title"
 msgstr "Beveiligd e-mailtransport (STARTTLS en DANE)"
 
-#, md-format
 msgid "faqs title"
 msgstr "Kennisbank"
 
@@ -4733,7 +5222,15 @@ msgstr ""
 "gebruiken](/faqs/badges/)."
 
 msgid "halloffame champions title"
-msgstr "Hall of Fame - Kampioenen!"
+msgstr "Kampioenen"
+
+msgid "halloffame description"
+msgstr ""
+"Domeinen en hosters die 100% scoren op beide tests, worden opgenomen in de "
+"Hall of Fame"
+
+msgid "halloffame filter"
+msgstr "Filter op:"
 
 msgid "halloffame mail badge"
 msgstr "Badge met tekst: 100%-score in e-mailtest"
@@ -4771,6 +5268,51 @@ msgstr ""
 msgid "halloffame web title"
 msgstr "Hall of Fame - Websites"
 
+msgid "halloffame_champions_title_newstring"
+msgstr "Kampioenen"
+
+msgid "halloffame_filter_champions_newstring"
+msgstr "Kampioenen"
+
+msgid "halloffame_filter_hosters_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_filter_label_newstring"
+msgstr "Filter op:"
+
+msgid "halloffame_first_button_home_newstring"
+msgstr "Ik wil mijn domein testen"
+
+msgid "halloffame_hosters_description_newstring"
+msgstr ""
+"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, "
+"pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit "
+"convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt "
+"ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum "
+"molestie, laoreet libero. Cras quis augue eget risus porttitor finibus."
+
+msgid "halloffame_hosters_title_newstring"
+msgstr "Hosters"
+
+msgid "halloffame_intro_description_home_newstring"
+msgstr ""
+"Onderstaande hosters zijn opgenomen in de Hall of Fame, omdat ze voldoen aan"
+" de criteria voor opname zoals een dubbele 100%-score voor hun eigen domein."
+
+msgid "halloffame_intro_description_newstring"
+msgstr ""
+"Als jouw website of e-mail 100% scoort op Internet.nl, dan wordt je "
+"domeinnaam opgenomen in de relevante Hall of Fame"
+
+msgid "halloffame_intro_title_newstring"
+msgstr "Hall of fame"
+
+msgid "halloffame_second_button_home_newstring"
+msgstr "Ontdek de Hall of Fame"
+
+msgid "halloffame_what_test_title_newstring"
+msgstr "Wat wil je testen?"
+
 msgid "home pagetitle"
 msgstr ""
 "Test voor moderne Internetstandaarden zoals IPv6, DNSSEC, HTTPS, DMARC, \n"
@@ -4803,11 +5345,50 @@ msgstr "unieke web-domeinen"
 msgid "home stats website-items"
 msgstr ""
 
-#, md-format
 msgid "home teaser"
+msgstr "Moderne Internetstandaarden zorgen voor een betrouwbaarder Internet"
+
+msgid "home why button"
+msgstr "Ik wil graag testen"
+
+msgid "home why explain"
 msgstr ""
-"Moderne Internetstandaarden zorgen voor meer betrouwbaarheid en verdere groei van het Internet.  \n"
-"Gebruik jij ze al?"
+"Moderne internetstandaarden dragen bij aan de beveiliging van jouw website, "
+"e-mail en internetverbinding. Door te testen kun je snel nagaan of "
+"internetstandaarden goed en volledig zijn geconfigureerd."
+
+msgid "home why numbers"
+msgstr "Al {{number_of_tests}} testen succesvol uitgevoerd!"
+
+msgid "home why reason-1 text"
+msgstr ""
+"Verouderde standaarden kunnen wijzen op verouderde software. Tegelijkertijd "
+"dragen moderne internetstandaarden direct bij aan veiligheid."
+
+msgid "home why reason-1 title"
+msgstr "Beveiligingslekken en kwetsbaarheden detecteren"
+
+msgid "home why reason-2 text"
+msgstr ""
+"Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en "
+"optimale ervaring hebben."
+
+msgid "home why reason-2 title"
+msgstr "Garanderen van compatibiliteit"
+
+msgid "home why reason-3 text"
+msgstr ""
+"Testen helpt bij het identificeren van prestatieproblemen zoals trage "
+"laadtijden en serverfouten."
+
+msgid "home why reason-3 title"
+msgstr "Prestatieproblemen identificeren"
+
+msgid "home why title"
+msgstr "Waarom zou ik op standaarden testen?"
+
+msgid "load_more_button_newstring"
+msgstr "Laad meer artikelen"
 
 msgid "mail pagetitle"
 msgstr "E-mailtest:"
@@ -4819,6 +5400,21 @@ msgid "mail tweetmessage"
 msgstr ""
 "De%20mailserver%20op%20{{report.domain}}%20scoort%20{{score}}%25%20in%20de\n"
 "%20e-mailtest%20van%20%40Internet_nl%3A"
+
+msgid "news link"
+msgstr "Lees meer artikelen"
+
+msgid "news load"
+msgstr "Laad meer artikelen"
+
+msgid "news older"
+msgstr "Eerder nieuws"
+
+msgid "news other"
+msgstr "Ander nieuws"
+
+msgid "news subtitle"
+msgstr "Lees hier het laatste nieuws"
 
 msgid "page gotocontents"
 msgstr "Ga naar tekst-inhoud"
@@ -4849,6 +5445,12 @@ msgstr "Is jouw internet up-to-date?"
 
 msgid "page sitetitle"
 msgstr "Internet.nl"
+
+msgid "page404 button"
+msgstr "Terug naar de homepage"
+
+msgid "page404 contact"
+msgstr "We helpen je graag verder"
 
 msgid "page404 content"
 msgstr ""
@@ -4995,6 +5597,9 @@ msgstr "Test klaar! Resultaten beschikbaar..."
 msgid "probes test-running"
 msgstr "Bezig..."
 
+msgid "probes test-title"
+msgstr "Deze test wordt uitgevoerd:"
+
 msgid "probes tests-description"
 msgstr "De onderstaande onderdelen worden getest."
 
@@ -5006,6 +5611,9 @@ msgstr ""
 "Let op: in een nieuwe versie (juli 2026) zijn de TLS-tests bijgewerkt, "
 "testresultaten van voor deze release kunnen verouderd zijn. Zie [dit "
 "nieuwsbericht](https://internet.nl/article/release-1.11/) voor details."
+
+msgid "results copied"
+msgstr "Link gekopieërd!"
 
 msgid "results dated-presentation"
 msgstr "Oude resultaatpresentatie. Doe de test opnieuw."
@@ -5048,6 +5656,14 @@ msgstr "Geen"
 
 msgid "results explanation label"
 msgstr "Testuitleg:"
+
+msgid "results follow-up"
+msgstr "Vervolgacties"
+
+msgid "results follow-up-description"
+msgstr ""
+"Je kunt deze uitslag delen met anderen, zoals de beheerder van jouw website "
+"of e-mailserver."
 
 msgid "results further-testing connection content"
 msgstr ""
@@ -5186,6 +5802,12 @@ msgstr "Seconden tot hertest-mogelijkheid:"
 
 msgid "results score-description"
 msgstr "Het domein {{prettyaddr}} heeft een testscore van {{score}}%."
+
+msgid "results score-for"
+msgstr "Score voor:"
+
+msgid "results share"
+msgstr "Deel deze uitslag"
 
 msgid "results tech-details label"
 msgstr "Technische details:"
@@ -5979,6 +6601,63 @@ msgstr ""
 
 msgid "test sitetls warning summary"
 msgstr "Verbinding *niet* of onvoldoende beveiligd (HTTPS)"
+
+msgid "test_connection_paragraph_alt_newstring"
+msgstr "Binnen 30 seconden uitslag!"
+
+msgid "test_connection_protect_intro_newstring"
+msgstr "Bescherm uw verbinding door te testen."
+
+msgid "test_connection_stats_newstring"
+msgstr "testen met 100% score deze week!"
+
+msgid "test_connection_title_newstring"
+msgstr "Test je verbinding"
+
+msgid "test_email_domain_label_newstring"
+msgstr "Jouw e-mail-domein"
+
+msgid "test_email_paragraph_alt_newstring"
+msgstr "Binnen 30 seconden getest!"
+
+msgid "test_email_protect_intro_newstring"
+msgstr "Bescherm uw e-mail door te testen."
+
+msgid "test_email_stats_newstring"
+msgstr "testen met 100% score deze week!"
+
+msgid "test_email_title_newstring"
+msgstr "Test je e-mail"
+
+msgid "test_more_info_link_newstring"
+msgstr "Meer informatie over de test"
+
+msgid "test_more_tests_title_newstring"
+msgstr "Wat wil je nog meer testen?"
+
+msgid "test_start_button_newstring"
+msgstr "Start de test"
+
+msgid "test_usp_one_newstring"
+msgstr "USP 1 staat hier"
+
+msgid "test_usp_three_newstring"
+msgstr "USP 3 staat hier"
+
+msgid "test_usp_two_newstring"
+msgstr "USP 2 staat hier"
+
+msgid "test_website_domain_label_newstring"
+msgstr "Jouw website-domein"
+
+msgid "test_website_page_protect_intro_newstring"
+msgstr "Bescherm uw website door te testen."
+
+msgid "test_website_protect_intro_newstring"
+msgstr "Bescherm uw website en uw gebruikers door te testen."
+
+msgid "test_website_stats_newstring"
+msgstr "succesvolle testen uitgevoerd deze week!"
 
 msgid "widget content notes"
 msgstr ""
