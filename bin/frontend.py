@@ -1,12 +1,10 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from argparse import ArgumentParser
-import io
 import os
 from uuid import uuid4 as uuid
 
 import rjsmin
-import sass
 
 
 FRONTEND_FOLDER = "frontend"
@@ -15,7 +13,6 @@ FRONTEND_CSS_FOLDER = "frontend/css"
 
 DJANGO_STATIC_FOLDER = "static_frontend"
 DJANGO_STATIC_JS_FOLDER = DJANGO_STATIC_FOLDER + "/js"
-DJANGO_STATIC_CSS_FOLDER = DJANGO_STATIC_FOLDER + "/css"
 
 
 def build_js(args=None):
@@ -53,36 +50,6 @@ def build_js(args=None):
     print("Done!")
 
 
-def build_css(args=None):
-    """
-    Build/minify CSS and copy into Django's static folder.
-
-    """
-    print("-"*20)
-    print("Building CSS files.")
-    try:
-        os.mkdir(DJANGO_STATIC_CSS_FOLDER)
-    except FileExistsError:
-        pass
-    for root, dirs, files in os.walk(FRONTEND_CSS_FOLDER):
-        for filename in files:
-            if filename.endswith(".css"):
-                if filename == "style.css-notyet-scss":
-                    continue
-                print(f"Found {filename}...")
-                filepath = os.path.join(root, filename)
-                content_min = sass.compile(
-                    filename=filepath, output_style="compressed")
-                filename, _ = filename.rsplit(".", 1)
-                filepath = os.path.join(
-                    DJANGO_STATIC_CSS_FOLDER, filename + "-min.css")
-                print(f"... minifying to {filepath}")
-                with open(filepath, 'w', encoding="utf-8") as f:
-                    f.write(content_min)
-        break
-    print("Done!")
-
-
 def parse():
     """
     Parse the command line.
@@ -97,9 +64,6 @@ def parse():
         title='subcommands', description='valid subcommands')
 
     parser.set_defaults(func=lambda x: parser.print_help())
-
-    to_django = subparsers.add_parser('css')
-    to_django.set_defaults(func=build_css)
 
     to_tar = subparsers.add_parser('js')
     to_tar.set_defaults(func=build_js)
