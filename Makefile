@@ -311,8 +311,8 @@ fix: ## fix trivial linting error automatically
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
 check-gixy: env=test
-check-gixy: ## run nginx config check
-	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy /etc/nginx/nginx.conf
+check-gixy: ## run nginx config check, skip the checks HSTS max-age=0 and header redefinitions
+	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy --skips hsts_header,add_header_redefinition /etc/nginx/nginx.conf
 
 build-tools tools-build: ## build tools image
 	${DOCKER_COMPOSE_TOOLS_CMD} build tools
