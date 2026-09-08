@@ -12,6 +12,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 app = Celery("internetnl")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
+# Celery's loader reads override_backends before applying the Django namespace.
+app.loader.override_backends = app.conf.override_backends
 
 app.autodiscover_tasks()
 
