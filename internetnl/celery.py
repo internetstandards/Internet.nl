@@ -12,6 +12,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 app = Celery("internetnl")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
+# Override Redis result backend so gevent workers can release their result readers.
+# This solves issues with periodic test failing due to switching to Gevent.
+app.loader.override_backends = {
+    "redis": "internetnl.celery_backend.RedisResultCleanupRedisBackend",
+    "rediss": "internetnl.celery_backend.RedisResultCleanupRedisBackend",
+}
 
 app.autodiscover_tasks()
 
