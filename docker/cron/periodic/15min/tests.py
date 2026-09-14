@@ -6,13 +6,15 @@
 # docker run -ti -e INTERNETNL_DOMAINNAME=internet.nl -v $PWD/docker/cron/periodic/15min/tests.py:/tests.py \
 # ghcr.io/internetstandards/util:latest /tests.py --debug
 
-import sys
-import os
-import time
-from prometheus_client import REGISTRY, Gauge, generate_latest
-import prometheus_client
 import logging
+import os
+import signal
+import sys
+import time
+
+import prometheus_client
 import requests
+from prometheus_client import REGISTRY, Gauge, generate_latest
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ OUTPUT_TEXTFILE = "/prometheus-textfile-directory/tests.prom"
 
 DEFAULT_TEST_TIMEOUT = int(os.environ.get("INTERNETNL_CACHE_TTL", 200))
 TEST_TIMEOUT = int(os.environ.get("INTERNETNL_TEST_TIMEOUT", DEFAULT_TEST_TIMEOUT))
+PERIODIC_TEST_TIMEOUT = int(os.environ.get("INTERNETNL_PERIODIC_TEST_TIMEOUT", 14 * 60))
 REQUEST_TIMEOUT = 30
 
 INTERNETNL_DOMAINNAME = os.environ.get("INTERNETNL_DOMAINNAME")
@@ -53,6 +56,14 @@ METRIC_TEST_SUCCESS = Gauge("tests_test_success_total", "Test runs that succeede
 METRIC_TEST_TIMEOUT = Gauge("tests_test_timeout_total", "Test that ran into timeout.", ["test", "domain"])
 METRIC_TEST_RUNTIME = Gauge("tests_test_runtime_seconds", "Amount of time test ran before done.", ["test", "domain"])
 METRIC_TEST_SCORE = Gauge("tests_test_score", "Total score of all probes in the test.", ["test", "domain"])
+
+
+class PeriodicTestTimeout(Exception):
+    """The complete periodic test run exceeded its execution budget."""
+
+
+def _periodic_test_timeout(_signum, _frame):
+    raise PeriodicTestTimeout
 
 
 def run_tests_on_domain(test, domain):
@@ -136,6 +147,8 @@ def run_tests_on_domain(test, domain):
                     METRIC_PROBE_SCORE.labels(test, domain, probe_name).set(probe_result["totalscore"])
                     scores.append(probe_result["totalscore"])
                 METRIC_PROBE_PASSED.labels(test, domain, probe_name).set(probe_result["verdict"] == "passed")
+        except PeriodicTestTimeout:
+            raise
         except Exception:
             log.exception("failed to get probe score")
 
@@ -148,6 +161,7 @@ def run_tests_on_domain(test, domain):
 def run_tests():
     for test in TESTS:
         for domain in TEST_DOMAINS[test]:
+            test_start = int(time.time())
             log.info(f"testing: {test} {domain}")
             METRIC_TEST_RUN.labels(test, domain).set(1)
             METRIC_TEST_CACHE.labels(test, domain).set(0)
@@ -156,9 +170,38 @@ def run_tests():
             METRIC_TEST_SUCCESS.labels(test, domain).set(0)
             try:
                 run_tests_on_domain(test, domain)
+            except PeriodicTestTimeout:
+                METRIC_TEST_SUCCESS.labels(test, domain).set(0)
+                METRIC_TEST_TIMEOUT.labels(test, domain).set(1)
+                METRIC_TEST_RUNTIME.labels(test, domain).set(int(time.time()) - test_start)
+                raise
             except Exception:
                 log.exception("Error during test")
                 METRIC_TEST_FAILURE.labels(test, domain).set(1)
+
+
+def run_tests_with_timeout():
+    previous_handler = signal.signal(signal.SIGALRM, _periodic_test_timeout)
+    signal.alarm(PERIODIC_TEST_TIMEOUT)
+    try:
+        run_tests()
+    except PeriodicTestTimeout:
+        log.error("Periodic tests exceeded the %s second run timeout", PERIODIC_TEST_TIMEOUT)
+        return False
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous_handler)
+    return True
+
+
+def write_metrics():
+    """Publish the complete or partial metrics collected by this invocation."""
+    metrics = generate_latest(REGISTRY).decode()
+    if DEBUG:
+        print(metrics)
+    else:
+        with open(OUTPUT_TEXTFILE, "w") as f:
+            f.write(metrics)
 
 
 def main():
@@ -169,15 +212,11 @@ def main():
     REGISTRY.unregister(prometheus_client.PLATFORM_COLLECTOR)
     REGISTRY.unregister(prometheus_client.PROCESS_COLLECTOR)
 
-    # run test probes against domains and collect metrics
-    run_tests()
-
-    # write metrics to stdout or file in prometheus textfile format
-    if DEBUG:
-        print(generate_latest(REGISTRY).decode())
-    else:
-        with open(OUTPUT_TEXTFILE, "w") as f:
-            f.write(generate_latest(REGISTRY).decode())
+    # Run probes with enough time left to publish metrics before the next cron invocation.
+    completed = run_tests_with_timeout()
+    write_metrics()
+    if not completed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__" and os.environ.get("CRON_15MIN_RUN_TESTS", "False") == "True":
