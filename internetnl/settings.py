@@ -291,8 +291,9 @@ CELERY_BROKER_HEARTBEAT = 0  # Workaround for https://github.com/celery/celery/i
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
-# fix redis connection leaks
-CELERY_RESULT_BACKEND_THREAD_SAFE = True
+# setting to True fixes redis connection leaks
+# settings to False fixes concurrent access to redis connection
+CELERY_RESULT_BACKEND_THREAD_SAFE = False
 
 # used for celery-exporter
 CELERY_WORKER_SEND_TASK_EVENTS = True
