@@ -12,6 +12,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internetnl.settings")
 app = Celery("internetnl")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
+# Celery's loader reads override_backends before applying the Django namespace.
+app.loader.override_backends = app.conf.override_backends
 
 app.autodiscover_tasks()
 
@@ -40,6 +42,8 @@ if app.conf.ENABLE_BATCH:
     app.conf.beat_schedule["run_batch"] = {
         "task": "interface.batch.scheduler.run",
         "schedule": app.conf.BATCH_SCHEDULER_INTERVAL,
+        # batch scheduler run tasks are idempotent and more of a cron than a task queue, don't let the queue build up
+        "options": {"expires": app.conf.BATCH_SCHEDULER_INTERVAL * 2},
     }
 
 if app.conf.ENABLE_HOF:
