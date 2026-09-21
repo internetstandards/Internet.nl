@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.11.4
+
+- Fix CVE-2026-81642 in unbound (#2169)
+
 ## 1.11.3
 
 - Upgraded bundled routinator to 0.15.2 [to reduce disk use](https://github.com/internetstandards/Internet.nl/issues/2132).
