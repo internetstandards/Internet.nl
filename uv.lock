@@ -179,7 +179,7 @@ wheels = [
 [[package]]
 name = "celery"
 version = "5.6.2"
-source = { registry = "https://pypi.org/simple" }
+source = { url = "https://github.com/celery/celery/archive/d35acd7f5bda45325616cfabd7a4a7b9fbddaeb9.tar.gz" }
 dependencies = [
     { name = "billiard" },
     { name = "click" },
@@ -191,10 +191,66 @@ dependencies = [
     { name = "tzlocal" },
     { name = "vine" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8f/9d/3d13596519cfa7207a6f9834f4b082554845eb3cd2684b5f8535d50c7c44/celery-5.6.2.tar.gz", hash = "sha256:4a8921c3fcf2ad76317d3b29020772103581ed2454c4c042cc55dcc43585009b", size = 1718802, upload-time = "2026-01-04T12:35:58.012Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/bd/9ecd619e456ae4ba73b6583cc313f26152afae13e9a82ac4fe7f8856bfd1/celery-5.6.2-py3-none-any.whl", hash = "sha256:3ffafacbe056951b629c7abcf9064c4a2366de0bdfc9fdba421b97ebb68619a5", size = 445502, upload-time = "2026-01-04T12:35:55.894Z" },
+sdist = { hash = "sha256:c4380aee0d031070fdbaa3d424a85f538d19f3005a960852bfa4ddaac59b2a18" }
+
+[package.metadata]
+requires-dist = [
+    { name = "azure-identity", marker = "extra == 'azureblockblob'", specifier = ">=1.19.0" },
+    { name = "azure-storage-blob", marker = "extra == 'azureblockblob'", specifier = ">=12.15.0" },
+    { name = "billiard", specifier = ">=4.2.1,<5.0" },
+    { name = "boto3", marker = "extra == 'dynamodb'", specifier = ">=1.26.143" },
+    { name = "boto3", marker = "extra == 's3'", specifier = ">=1.26.143" },
+    { name = "boto3", marker = "extra == 'sqs'", specifier = ">=1.26.143" },
+    { name = "brotli", marker = "platform_python_implementation == 'CPython' and extra == 'brotli'", specifier = ">=1.0.0" },
+    { name = "brotlipy", marker = "platform_python_implementation == 'PyPy' and extra == 'brotli'", specifier = ">=0.7.0" },
+    { name = "cassandra-driver", marker = "extra == 'cassandra'", specifier = ">=3.25.0,<4" },
+    { name = "click", specifier = ">=8.1.2,<9.0" },
+    { name = "click-didyoumean", specifier = ">=0.3.0" },
+    { name = "click-plugins", specifier = ">=1.1.1" },
+    { name = "click-repl", specifier = ">=0.2.0" },
+    { name = "couchbase", marker = "(python_full_version < '3.10' and platform_python_implementation != 'PyPy' and extra == 'couchbase') or (platform_python_implementation != 'PyPy' and sys_platform != 'win32' and extra == 'couchbase')", specifier = ">=3.0.0" },
+    { name = "cryptography", marker = "extra == 'auth'", specifier = "==50.0.0" },
+    { name = "django", marker = "extra == 'django'", specifier = ">=2.2.28" },
+    { name = "elastic-transport", marker = "extra == 'elasticsearch'", specifier = "<=9.2.1" },
+    { name = "elasticsearch", marker = "extra == 'elasticsearch'", specifier = "<=9.3.0" },
+    { name = "ephem", marker = "platform_python_implementation != 'PyPy' and extra == 'solar'", specifier = "==4.2" },
+    { name = "eventlet", marker = "python_full_version < '3.10' and extra == 'eventlet'", specifier = ">=0.32.0" },
+    { name = "exceptiongroup", marker = "python_full_version < '3.11'", specifier = ">=1.3.0" },
+    { name = "gevent", marker = "extra == 'gevent'", specifier = ">=26.4.0" },
+    { name = "google-cloud-firestore", marker = "extra == 'gcs'", specifier = "==2.23.0" },
+    { name = "google-cloud-storage", marker = "extra == 'gcs'", specifier = ">=2.10.0" },
+    { name = "grpcio", marker = "extra == 'gcs'", specifier = "==1.78.0" },
+    { name = "kazoo", marker = "extra == 'zookeeper'", specifier = ">=1.3.1" },
+    { name = "kombu", specifier = ">=5.6.0" },
+    { name = "kombu", extras = ["gcpubsub"], marker = "extra == 'gcpubsub'", specifier = ">=5.5.0" },
+    { name = "kombu", extras = ["mongodb"], marker = "extra == 'mongodb'" },
+    { name = "kombu", extras = ["msgpack"], marker = "extra == 'msgpack'" },
+    { name = "kombu", extras = ["redis"], marker = "extra == 'redis'" },
+    { name = "kombu", extras = ["sqlalchemy"], marker = "extra == 'sqlalchemy'" },
+    { name = "kombu", extras = ["sqs"], marker = "extra == 'sqs'", specifier = ">=5.5.0" },
+    { name = "kombu", extras = ["yaml"], marker = "extra == 'yaml'" },
+    { name = "librabbitmq", marker = "python_full_version < '3.11' and extra == 'librabbitmq'", specifier = ">=2.0.0" },
+    { name = "pyarango", marker = "extra == 'arangodb'", specifier = ">=2.0.2" },
+    { name = "pycouchdb", marker = "extra == 'couchdb'", specifier = "==1.16.0" },
+    { name = "pycurl", marker = "python_full_version >= '3.9' and platform_python_implementation == 'CPython' and sys_platform != 'win32' and extra == 'sqs'", specifier = ">=7.45.4" },
+    { name = "pycurl", marker = "python_full_version < '3.9' and platform_python_implementation == 'CPython' and sys_platform != 'win32' and extra == 'sqs'", specifier = ">=7.43.0.5,<7.45.4" },
+    { name = "pydantic", marker = "python_full_version >= '3.14' and extra == 'pydantic'", specifier = ">=2.12.0a1" },
+    { name = "pydantic", marker = "python_full_version < '3.14' and extra == 'pydantic'", specifier = ">=2.4" },
+    { name = "pydocumentdb", marker = "extra == 'cosmosdbsql'", specifier = "==2.3.5" },
+    { name = "pylibmc", marker = "sys_platform != 'win32' and extra == 'memcache'", specifier = "==1.6.3" },
+    { name = "pyro4", marker = "python_full_version < '3.11' and extra == 'pyro'", specifier = "==4.82" },
+    { name = "pytest-celery", extras = ["all"], marker = "extra == 'pytest'", specifier = ">=1.3.0" },
+    { name = "python-consul2", marker = "extra == 'consul'", specifier = "==0.1.5" },
+    { name = "python-dateutil", specifier = ">=2.8.2" },
+    { name = "python-memcached", marker = "extra == 'pymemcache'", specifier = ">=1.62" },
+    { name = "softlayer-messaging", marker = "extra == 'slmq'", specifier = ">=1.0.3" },
+    { name = "tblib", marker = "extra == 'tblib'", specifier = "==3.2.2" },
+    { name = "tzlocal" },
+    { name = "urllib3", marker = "extra == 'sqs'", specifier = ">=1.26.16" },
+    { name = "vine", specifier = ">=5.1.0,<6.0" },
+    { name = "zstandard", marker = "extra == 'zstd'", specifier = "==0.23.0" },
 ]
+provides-extras = ["arangodb", "auth", "azureblockblob", "brotli", "cassandra", "consul", "cosmosdbsql", "couchbase", "couchdb", "django", "dynamodb", "elasticsearch", "eventlet", "gcpubsub", "gevent", "gcs", "librabbitmq", "memcache", "mongodb", "msgpack", "pymemcache", "pydantic", "pyro", "pytest", "redis", "s3", "slmq", "solar", "sqlalchemy", "sqs", "tblib", "yaml", "zookeeper", "zstd"]
 
 [[package]]
 name = "celery-statsd"
@@ -924,7 +980,7 @@ requires-dist = [
     { name = "argparse" },
     { name = "beautifulsoup4" },
     { name = "cached-property" },
-    { name = "celery", specifier = ">5.3" },
+    { name = "celery", url = "https://github.com/celery/celery/archive/d35acd7f5bda45325616cfabd7a4a7b9fbddaeb9.tar.gz" },
     { name = "celery-statsd" },
     { name = "chardet" },
     { name = "colorlog" },

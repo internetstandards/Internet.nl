@@ -112,6 +112,7 @@ filterwarnings = [
 # ]
 
 [tool.uv.sources]
+celery = { url = "https://github.com/celery/celery/archive/d35acd7f5bda45325616cfabd7a4a7b9fbddaeb9.tar.gz" }
 pythonwhois-internet-nl = { url = "https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz" }
 
 [dependency-groups]
