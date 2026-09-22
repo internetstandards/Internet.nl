@@ -2,23 +2,168 @@
 {% load static %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
-  <article class="block wide">
-    <section>
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about content" %}
-      {% else %}
-      {% include "content.html" with name="about content custom" %}
-      {% endif %}
-    </section>
-  </article>
-  <aside>
-    <section class="block">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about contact" %}
-      {% else %}
-      {% include "content.html" with name="about contact custom" %}
-      {% endif %}
-    </section>
+  <section class="intro-section bg-primary ellipse reverse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">{% include "string.html" with name="base about" %}</h1>
+        <p class="h1 color-secondary">{% include "string.html" with name="home teaser" %}</p>
+      </hgroup>
+    </div>
+  </section>
+
+  <section class="about-section home-variant">
+    <div class="container">
+      <h2 class="h5 color-accent">{% include "string.html" with name="about mission-title" %}</h2>
+      <p class="h4">{% include "string.html" with name="about mission" %}</p>
+      <p class="body-xl">{% include "string.html" with name="about platform" %}</p>
+      <ul class="logo-list">
+        <li>
+          <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
+            <img class="light-visible" src="/static/images/surf.png" alt="Surf logo" loading="lazy" width="100" height="52">
+            <img class="dark-visible" src="/static/images/surf-wit.png" alt="Surf logo" loading="lazy" width="100" height="52">
+          </a>
+        </li>
+        <li>
+          <a href="https://ncsc.nl" target="_blank" aria-label="NCSC website">
+            <img class="light-visible" src="/static/images/ncsc.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+            <img class="dark-visible" src="/static/images/ncsc-wit.png" alt="NCSC logo" loading="lazy" width="224" height="90">
+          </a>
+        </li>
+        <li>
+          <a href="https://nlnet.nl/" target="_blank" aria-label="NLnet website">
+            <img class="light-visible" src="/static/images/nlnet.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+            <img class="dark-visible" src="/static/images/nlnet-wit.png" alt="NLnet logo" loading="lazy" width="146" height="55">
+          </a>
+        </li>
+        <li>
+          <a href="https://ripe.net/" target="_blank" aria-label="Ripe NCC website">
+            <img class="light-visible" src="/static/images/ncc.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+            <img class="dark-visible" src="/static/images/ncc-wit.png" alt="Ripe NCC logo" loading="lazy" width="180" height="32">
+          </a>
+        </li>
+        <li>
+          <a href="https://verenigingvanregistrars.nl/" target="_blank" aria-label="VVR website">
+            <img class="light-visible" src="/static/images/vvr.png" alt="VVR logo" loading="lazy" width="200" height="46">
+            <img class="dark-visible" src="/static/images/vvr-wit.png" alt="VVR logo" loading="lazy" width="200" height="46">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <aside class="quote-section bg-primary ellipse reverse">
+    <div class="container">
+      <img src="/static/author/gerben-klein-baltink/picture.jpg" alt="Portret van Coen Wesselman, oprichter van Internet.nl" class="quote-image" loading="lazy" width="100" height="100">
+      <blockquote>
+        <p class="h4 color-secondary">{% include "string.html" with name="about quote" %}</p>
+        <cite class="body-m color-secondary"><strong>{% include "string.html" with name="author gerben-klein-baltink name" %}</strong> - {% include "string.html" with name="author gerben-klein-baltink role" %}</cite>
+      </blockquote>
+    </div>
   </aside>
+
+  <section class="knowledge-section">
+    <div class="container">
+      <hgroup>
+        <h2 class="h3 color-secondary">{% include "string.html" with name="home why title" %}</h2>
+        <p class="body-l">{% include "string.html" with name="home why explain" %}</p>
+      </hgroup>
+      <ul class="knowledge-list" id="card-carousel">
+        <li class="card home-variant knowledge-card ellipse">
+          <div class="card-container knowledge icon">
+            <h3 id="knowledge-dia-1">{% include "string.html" with name="home why reason-1 title" %}</h3>
+          </div>
+          <p>{% include "string.html" with name="home why reason-1 text" %}</p>
+        </li>
+        <li class="card home-variant knowledge-card ellipse">
+          <div class="card-container knowledge icon">
+            <h3 id="knowledge-dia-2">{% include "string.html" with name="home why reason-2 title" %}</h3>
+          </div>
+          <p>{% include "string.html" with name="home why reason-2 text" %}</p>
+        </li>
+        <li class="card home-variant knowledge-card ellipse">
+          <div class="card-container knowledge icon">
+            <h3 id="knowledge-dia-3">{% include "string.html" with name="home why reason-3 title" %}</h3>
+          </div>
+          <p>{% include "string.html" with name="home why reason-3 text" %}</p>
+        </li>
+      </ul>
+      <ul class="dots" aria-label="Scrollbare carousel navigatie" aria-controls="card-carousel">
+        <li class="dot active"><button type="button"></button></li>
+        <li class="dot"><button type="button"></button></li>
+        <li class="dot"><button type="button"></button></li>
+      </ul>
+      <div class="button-container">
+        <a class="secondary-button icon" href="/test-site">{% include "string.html" with name="home why button" %}</a>
+        <p class="body-m">{% include "string.html" with name="home why numbers" %}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section ellipse hidden-mobile">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-1" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-1" %}</p>
+      </details>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-2" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-2" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-3" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-3" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-4" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-4" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-5" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-5" %}</p>
+      </details>
+      <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
+      <article class="contact-card">
+        <hgroup>
+          <h3>{% include "string.html" with name="base contact" %}</h3>
+          <p>{% include "string.html" with name="contact section description" %}</p>
+        </hgroup>
+        <ul>
+          <li class="contact-card-small">
+            <a href="mailto:question@internet.nl">
+              <hgroup>
+                <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+                <p>{% include "string.html" with name="contact section mail-description" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+          <li class="contact-card-small">
+            <a href="https://github.com/internetstandards/Internet.nl">
+              <hgroup>
+                <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+                <p>{% include "string.html" with name="contact section issue-description" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
 {% endblock %}

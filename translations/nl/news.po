@@ -2583,6 +2583,9 @@ msgstr ""
 msgid "author gerben-klein-baltink name"
 msgstr "Gerben Klein Baltink"
 
+msgid "author gerben-klein-baltink role"
+msgstr "Voorzitter van het Platform Internetstandaarden"
+
 #, md-format
 msgid "author marco-davids bio"
 msgstr ""

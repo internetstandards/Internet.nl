@@ -1,10 +1,115 @@
 {% extends "base.html" %}
 
 {% block maincontent %}
-  <article class="block wide">
-    <section>
-      <h1>{% include "string.html" with name="faqs title" %}</h1>
-      {% include "content.html" with name="faqs content" %}
-    </section>
-  </article>
+
+  <section class="article-index-section bg-primary">
+    <div class="container">
+      <hgroup>
+        <h1 class="h1 color-secondary">{% include "string.html" with name="faqs title" %}</h1>
+        <p class="h5 color-secondary">{% include "string.html" with name="faqs description" %}</p>
+      </hgroup>
+      <ul class="card-list">
+        <li class="card knowledge-card ellipse large">
+          <a href="/faqs/report">
+            <hgroup>
+              <p class="card-category">{% include "string.html" with name="faqs category tests" %}</p>
+              <h2>{% include "string.html" with name="todo" %}</h2>
+              <p>{% include "string.html" with name="todo" %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
+          </a>
+        </li>
+        <li class="card knowledge-card ellipse large">
+          <a href="/">
+            <hgroup>
+              <p class="card-category">{% include "string.html" with name="faqs category standards" %}</p>
+              <h2>{% include "string.html" with name="todo" %}</h2>
+              <p>{% include "string.html" with name="todo" %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card-section">
+    <div class="container">
+      <h2 class="h2">{% include "string.html" with name="faqs category categories" %}</h2>
+      <ul class="card-list">
+        <li class="card knowledge-card ellipse">
+          <a href="">
+            <hgroup class="flipped">
+              <h3>{% include "string.html" with name="todo" %}</h3>
+              <p class="card-category">{% include "string.html" with name="faqs category media" %}</p>
+            </hgroup>
+            <div class="secondary-button rounded icon"></div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+ <section class="contact-section ellipse hidden-mobile">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-1" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-1" %}</p>
+      </details>
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-2" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-2" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-3" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-3" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-4" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-4" %}</p>
+      </details>      
+      <details class="faq-item accordion" name="faq-item">
+        <summary class="icon">
+          {% include "string.html" with name="faqs section question-5" %}
+        </summary>
+        <p>{% include "string.html" with name="faqs section answer-5" %}</p>
+      </details>
+      <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
+      <article class="contact-card">
+        <hgroup>
+          <h3>{% include "string.html" with name="base contact" %}</h3>
+          <p>{% include "string.html" with name="contact section description" %}</p>
+        </hgroup>
+        <ul>
+          <li class="contact-card-small">
+            <a href="mailto:question@internet.nl">
+              <hgroup>
+                <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
+                <p>{% include "string.html" with name="contact section mail-description" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+          <li class="contact-card-small">
+            <a href="https://github.com/internetstandards/Internet.nl">
+              <hgroup>
+                <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
+                <p>{% include "string.html" with name="contact section issue-description" %}</p>
+              </hgroup>
+              <div class="secondary-button rounded icon"></div>
+            </a>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
 {% endblock %}
