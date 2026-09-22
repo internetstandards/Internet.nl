@@ -1,7 +1,9 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from dateutil.parser import isoparse
+
 from django.conf import settings
-from django.urls import path, re_path
+from django.urls import path, re_path, register_converter
 from django.conf.urls.static import static
 
 from interface import views
@@ -9,12 +11,30 @@ from interface.batch import BATCH_API_MAJOR_VERSION
 from interface.batch import views as batch
 from interface.views import connection, domain, mail, stats
 
+
 regex_tld = r"(?:[a-zA-Z]{2,63}|xn--[a-zA-Z0-9]+)"
 regex_dname = r"(?P<dname>([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" + regex_tld + ")"
 regex_testid = r"(?P<request_id>[a-zA-Z0-9]{1,35})"
 regex_mailaddr = (
     r"(?P<mailaddr>([a-zA-Z0-9]{0,61}@)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+" r"" + regex_tld + ")"
 )
+
+
+class DateConverter:
+    # be as lenient as the isoparse library allows
+    regex = ".+"
+
+    def to_python(self, value):
+        # until python3.10 use dateutil.isoparser
+        # see: https://stackoverflow.com/questions/127803/how-do-i-parse-an-iso-8601-formatted-date-and-time
+        return isoparse(value)
+
+    def to_url(self, value):
+        return value
+
+
+register_converter(DateConverter, "isodatetime")
+
 
 urlpatterns = [
     path("", views.indexpage),
@@ -47,6 +67,7 @@ urlpatterns = [
     # these url()s should always be the last in the ^domain/ group
     re_path(r"^(domain|site)/(?P<dname>.*)/$", domain.validate_domain),
     re_path(r"^(domain|site)/(?P<dname>.*)/results$", domain.validate_domain),
+    path(r"archive/site/<str:domain_name>/<isodatetime:date>/", domain.resultsstored_historic),
     path("test-mail/", views.testmailpage),
     path("mail/", mail.index),
     re_path(rf"^mail/{regex_mailaddr}/$", mail.mailprocess),
@@ -58,6 +79,7 @@ urlpatterns = [
     # these url()s should always be the last in the ^mail/ group
     re_path(r"^mail/(?P<mailaddr>.*)/$", mail.validate_domain),
     re_path(r"^mail/(?P<mailaddr>.*)/results$", mail.validate_domain),
+    path(r"archive/mail/<str:domain_name>/<isodatetime:date>/", mail.resultsstored_historic),
     re_path(rf"^clear/{regex_dname}/$", views.clear),
     path("change_language/", views.change_language, name="change_language"),
     path("contact/", views.indexpage),
