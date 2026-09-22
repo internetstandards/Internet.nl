@@ -62,7 +62,7 @@ update_padded_macs: ## update padded MAC information
 	cd $(MACSDIR); ./update-macs.sh
 
 update_root_key_file: ## update root key file
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools /opt/unbound/sbin/unbound-anchor -a $(DNSDIR)/root.key
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_dnssec_root_key.sh $(DNSDIR)/root.key
 
 # create some shorthands
 env ?=
