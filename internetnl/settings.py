@@ -291,8 +291,10 @@ CELERY_BROKER_HEARTBEAT = 0  # Workaround for https://github.com/celery/celery/i
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
-# fix redis connection leaks
-CELERY_RESULT_BACKEND_THREAD_SAFE = True
+# Do not share the Redis result backend between gevent greenlets. Sharing the backend can make
+# multiple greenlets read from the same pubsub socket concurrently, causing gevent
+# ConcurrentObjectUseError and failed Celery chord/group tasks.
+CELERY_RESULT_BACKEND_THREAD_SAFE = False
 
 # used for celery-exporter
 CELERY_WORKER_SEND_TASK_EVENTS = True
