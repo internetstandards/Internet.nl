@@ -14,9 +14,8 @@ FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
 # build-unbound .`, to disable parallel builds and output intermediate image
 # hashes/log output prefix build command with: `DOCKER_BUILDKIT=0`
 
-# generic stage used by all build stages
-# explicitly amd64, as currently used (old) nassl version is not aarch64 compatible
-# platform can probably be removed after #1218
+# generic stage used by all build stages. Builds for the host architecture:
+# the vendored nassl now has aarch64 build targets, so amd64 is no longer forced.
 FROM debian:trixie-20260202-slim AS build-deps
 ARG PYTHON_VERSION
 
@@ -35,6 +34,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       swig \
       # nassl dependencies
       python3-setuptools \
+      # `invoke build.deps` fetches OpenSSL/zlib tarballs over HTTPS.
+      ca-certificates \
       # unbound dependencies
       ccache \
       flex \
@@ -62,11 +63,27 @@ RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
   make
 RUN make install
 
-# intermediate stage with apt and python dependencies
+# nassl (in vendor/nassl6/) has no PyPI wheel yet, so build its vendored C libraries
+# from source here. build.deps builds only OpenSSL/zlib, not nassl's C extension: uv sync
+# in build-app-deps builds that itself, so building it here too would just be redundant.
+FROM build-deps AS build-nassl
+
+COPY vendor/nassl6 /source/vendor/nassl6
+WORKDIR /source/vendor/nassl6
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+  uv tool run --from invoke --with setuptools inv build.deps
+
 FROM build-deps AS build-app-deps
+
+# git is needed by uv to fetch the sslyze git pin.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -yqq --no-install-recommends git
 
 COPY pyproject.toml /source/
 COPY uv.lock /source/
+COPY --from=build-nassl /source/vendor/nassl6 /source/vendor/nassl6
 
 WORKDIR /source
 
@@ -253,8 +270,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     bsdmainutils \
     vim
 
-# Install yq
-RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && chmod +x /usr/local/bin/yq
+# Install yq (TARGETARCH is amd64/arm64, matching yq's release asset names)
+ARG TARGETARCH
+RUN curl -sSfLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH} && chmod +x /usr/local/bin/yq
 
 # docker.io is not available in Debian Trixie, copy docker CLI binary from official image
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker

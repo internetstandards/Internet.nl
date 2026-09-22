@@ -123,6 +123,13 @@ class TLSExtendedMasterSecretStatus(Enum):
     unknown = 3
 
 
+class PqKexSupportStatus(Enum):
+    supported = 0
+    not_supported = 1
+    na_no_tls_1_3 = 2
+    unknown = 3
+
+
 def conn_test_id():
     num_tries = 0
     while num_tries <= 6:
@@ -547,6 +554,10 @@ class DomainTestTls(BaseTestModel):
     extended_master_secret = EnumField(TLSExtendedMasterSecretStatus, default=TLSExtendedMasterSecretStatus.unknown)
     extended_master_secret_score = models.IntegerField(null=True)
 
+    pq_kex_support = EnumField(PqKexSupportStatus, default=PqKexSupportStatus.unknown)
+    pq_kex_supported_groups = ListField(default=[])
+    pq_kex_score = models.IntegerField(null=True)
+
     forced_https = EnumField(ForcedHttpsStatus, default=ForcedHttpsStatus.bad)
     forced_https_score = models.IntegerField(null=True)
 
@@ -628,6 +639,9 @@ class DomainTestTls(BaseTestModel):
             "kex_hash_func_score",
             "extended_master_secret",
             "extended_master_secret_score",
+            "pq_kex_support",
+            "pq_kex_supported_groups",
+            "pq_kex_score",
             "forced_https",
             "forced_https_score",
             "http_compression_enabled",
@@ -675,6 +689,8 @@ class DomainTestTls(BaseTestModel):
             "ocsp_stapling": self.ocsp_stapling.name,
             "kex_hash_func": self.kex_hash_func.name,
             "extended_master_secret": self.extended_master_secret.name,
+            "pq_kex_support": self.pq_kex_support.name,
+            "pq_kex_supported_groups": self.pq_kex_supported_groups,
             "https_redirect": self.forced_https.name,
             "http_compression": self.http_compression_enabled,
             "hsts": self.hsts_enabled,

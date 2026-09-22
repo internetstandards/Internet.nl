@@ -3528,6 +3528,37 @@ msgstr ""
 "Geen resultaat beschikbaar. Op het moment dat de test werd uitgevoerd, "
 "maakte deze subtest nog geen deel uit van de test. "
 
+msgid "detail web tls pq-kex-support label"
+msgstr "Post-Quantum key exchange"
+
+msgid "detail web tls pq-kex-support exp"
+msgstr ""
+"We check if your web server supports a Post-Quantum Cryptography (PQC) "
+"hybrid key exchange algorithm on TLS 1.3 (X25519MLKEM768, SecP256r1MLKEM768 "
+"or SecP384r1MLKEM1024, as recommended by NCSC-NL 2025). Servers that "
+"advertise support for these algorithms give existing HTTPS connections "
+"forward secrecy against future quantum attackers ('harvest now, decrypt "
+"later')."
+
+msgid "detail web tls pq-kex-support tech table"
+msgstr "Web server IP address|Negotiated Post-Quantum groups"
+
+msgid "detail web tls pq-kex-support verdict supported"
+msgstr "Your web server supports Post-Quantum hybrid key exchange."
+
+msgid "detail web tls pq-kex-support verdict not-supported"
+msgstr "Your web server does not support Post-Quantum hybrid key exchange."
+
+msgid "detail web tls pq-kex-support verdict na-no-tls-1-3"
+msgstr ""
+"This subtest is not applicable as Post-Quantum hybrid key exchange requires "
+"TLS 1.3, which is not enabled on your web server."
+
+msgid "detail web tls pq-kex-support verdict unknown"
+msgstr ""
+"No result available. The test could not determine whether your web server "
+"supports Post-Quantum hybrid key exchange."
+
 msgid "detail web tls fs-params exp"
 msgstr ""
 "We testen of de publieke parameters, die in de Diffie-Hellman sleuteluitwisseling worden gebruikt door je webserver, veilig zijn. \n"
@@ -5030,6 +5061,9 @@ msgstr "HTTP"
 
 msgid "results domain tls tls label"
 msgstr "TLS"
+
+msgid "results domain tls pq-kex label"
+msgstr "Post-Quantum"
 
 msgid "results domain-mail ipv6 name-servers label"
 msgstr "Nameservers van domein"
