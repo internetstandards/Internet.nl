@@ -53,9 +53,15 @@ FS_EC_PHASE_OUT = [
     OpenSslGroupNameEnum.secp224r1,
 ]
 
+# NCSC-NL 2025, i.e. nassl's POST_QUANTUM_HYBRID minus curveSM2MLKEM768
+PQ_KEX_GROUPS_GOOD = [
+    OpenSslGroupNameEnum.SecP256r1MLKEM768,
+    OpenSslGroupNameEnum.SecP384r1MLKEM1024,
+    OpenSslGroupNameEnum.X25519MLKEM768,
+]
+
 
 # NCSC appendix B, derived from 3.3.3, 3.3.4
-# PQC not yet supported by us
 # Anything not in these lists is insufficient.
 CIPHERS_GOOD = [
     "TLS_AES_256_GCM_SHA384",
