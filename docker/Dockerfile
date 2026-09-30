@@ -63,9 +63,9 @@ RUN --mount=type=cache,target=/var/cache/ccache,sharing=locked \
   make
 RUN make install
 
-# nassl (in vendor/nassl6/) has no PyPI wheel yet, so build its vendored OpenSSL from
-# source here. build.deps builds only OpenSSL/zlib, not nassl's C extension: uv sync in
-# build-app-deps builds that itself, so building it here too would just be redundant.
+# nassl (in vendor/nassl6/) has no PyPI wheel yet, so build its vendored C libraries
+# from source here. build.deps builds only OpenSSL/zlib, not nassl's C extension: uv sync
+# in build-app-deps builds that itself, so building it here too would just be redundant.
 FROM build-deps AS build-nassl
 
 COPY vendor/nassl6 /source/vendor/nassl6
