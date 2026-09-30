@@ -661,6 +661,20 @@ components:
             * `not_supported` - EMS is not supported.
             * `na_no_tls_1_2` - EMS is not applicable, because the server does not support TLS 1.2.
             * `unknown` - support could not be determined or test ran before this feature was added.
+        pq_kex_support:
+          type: string
+          enumClass: PqKexSupportStatus
+          description: |
+            Server support for a Post-Quantum (ML-KEM hybrid) key exchange group on TLS 1.3:
+            * `supported` - a PQ hybrid key exchange group is supported.
+            * `not_supported` - no PQ hybrid key exchange group is supported.
+            * `na_no_tls_1_3` - not applicable, because the server does not support TLS 1.3.
+            * `unknown` - support could not be determined or test ran before this feature was added.
+        pq_kex_supported_groups:
+          type: array
+          description: List of supported Post-Quantum (ML-KEM hybrid) key exchange groups.
+          items:
+            type: string
         protocols_bad:
           type: array
           description: List of BAD protocols.

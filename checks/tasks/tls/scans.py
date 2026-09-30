@@ -53,6 +53,7 @@ from sslyze.plugins.certificate_info._certificate_utils import (
 )
 from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import CipherSuiteAcceptedByServer
 from sslyze.plugins.openssl_cipher_suites.cipher_suites import retrieve_all_available_cipher_suites
+from sslyze.plugins.supported_groups_plugin import _test_pq_or_ffdh_group
 from sslyze.connection_helpers.tls_connection import OpenSslVersionEnum
 from sslyze.server_connectivity import ServerConnectivityInfo
 
@@ -63,6 +64,7 @@ from checks.models import (
     ZeroRttStatus,
     KexHashFuncStatus,
     CipherOrderStatus,
+    PqKexSupportStatus,
 )
 from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
 from checks.tasks.tls import TLSException
@@ -75,6 +77,7 @@ from checks.tasks.tls.evaluation import (
     TLSOCSPEvaluation,
     TLSRenegotiationEvaluation,
     TLSExtendedMasterSecretEvaluation,
+    TLSPqKexEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_SUFFICIENT,
@@ -86,6 +89,7 @@ from checks.tasks.tls.tls_constants import (
     CERT_RSA_MIN_GOOD_KEY_SIZE,
     CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
+    PQ_KEX_GROUPS_GOOD,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
     TLS_1_3_PROBE_CIPHERS,
 )
@@ -113,8 +117,7 @@ SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
     ScanCommand.SESSION_RENEGOTIATION,
 }
-# TLS_1_3_EARLY_DATA only works for HTTPS - it sends an HTTP GET request
-# which breaks SMTP sessions. See #2055.
+# HTTPS-only. TLS_1_3_EARLY_DATA sends an HTTP GET that breaks SMTP (#2055).
 SSLYZE_WEB_SCAN_COMMANDS = {ScanCommand.TLS_1_3_EARLY_DATA}
 # Some servers ignore ciphers past the 64th in a ClientHello, others reject overly
 # large ClientHellos. nmap's ssl-enum-ciphers uses 64 too.
@@ -622,6 +625,9 @@ def check_mail_tls(
         renegotiation_evaluation = TLSRenegotiationEvaluation(
             supports_secure_renegotiation=False, client_renegotiations_success_count=0
         )
+
+    pq_kex_evaluation = check_pq_kex_support(server_conn_info, supported_tls_versions)
+
     cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
     # HACK for DANE-TA(2) and hostname mismatch!
@@ -670,6 +676,9 @@ def check_mail_tls(
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
+        pq_kex_support=pq_kex_evaluation.status,
+        pq_kex_supported_groups=pq_kex_evaluation.supported_groups,
+        pq_kex_score=pq_kex_evaluation.score,
     )
     results.update(cert_results)
     return results
@@ -770,8 +779,12 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     if cert_info and cert_info.certificate_deployments:
         ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(cert_info.certificate_deployments[0])
     else:
-        log.error(f"OCSP check skipped for {result.server_location.hostname}: no certificate deployments")
+        log.error(
+            f"OCSP check skipped for {result.server_location.hostname}: no certificate scan result or deployments"
+        )
         ocsp_evaluation = TLSOCSPEvaluation(ocsp_in_cert=False, has_ocsp_response=False, ocsp_response_trusted=False)
+
+    pq_kex_evaluation = check_pq_kex_support(server_conn_info, supported_tls_versions)
 
     probe_result = dict(
         tls_enabled=True,
@@ -825,6 +838,9 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
+        pq_kex_support=pq_kex_evaluation.status,
+        pq_kex_supported_groups=pq_kex_evaluation.supported_groups,
+        pq_kex_score=pq_kex_evaluation.score,
     )
     return probe_result
 
@@ -863,11 +879,11 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
     and if it does, raise a TLSException for them.
     """
     last_error_trace = None
-    for scan_result in vars(result.scan_result).values():
+    for name, scan_result in vars(result.scan_result).items():
         error_trace = getattr(scan_result, "error_trace")
         if error_trace:
+            log.info(f"TLS scan {name} on {result.server_location} failed: {''.join(error_trace.format())}")
             last_error_trace = error_trace
-            log.info(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
     if last_error_trace:
         raise TLSException(str(last_error_trace))
 
@@ -904,6 +920,33 @@ def test_key_exchange_hash(
         status=KexHashFuncStatus.good,
         score=scoring.WEB_TLS_KEX_HASH_FUNC_GOOD,
     )
+
+
+def check_pq_kex_support(
+    server_conn_info: ServerConnectivityInfo, supported_tls_versions: list[TlsVersionEnum]
+) -> TLSPqKexEvaluation:
+    """
+    Test support for post-quantum key exchange (#1640), one connection per group.
+    sslyze's supported_groups scan command probes every other group too, 46 connections
+    against a TLS 1.3 server instead of 3, so this calls its private per-group probe directly.
+    """
+    if TlsVersionEnum.TLS_1_3 not in supported_tls_versions:
+        return TLSPqKexEvaluation(status=PqKexSupportStatus.na_no_tls_1_3)
+
+    hostname = server_conn_info.server_location.hostname
+    supported_groups = []
+    for group in PQ_KEX_GROUPS_GOOD:
+        try:
+            group_result = _test_pq_or_ffdh_group(server_conn_info, TlsVersionEnum.TLS_1_3, group)
+        except Exception as exc:
+            log.warning(f"PQ key exchange probe for {group.value} on {hostname} failed: {exc}", exc_info=True)
+            return TLSPqKexEvaluation(status=PqKexSupportStatus.unknown)
+        if group_result.was_accepted_by_server:
+            supported_groups.append(group.value)
+
+    if supported_groups:
+        return TLSPqKexEvaluation(status=PqKexSupportStatus.supported, supported_groups=supported_groups)
+    return TLSPqKexEvaluation(status=PqKexSupportStatus.not_supported)
 
 
 def _test_connection_with_limited_sigalgs(

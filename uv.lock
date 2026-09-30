@@ -958,7 +958,7 @@ requires-dist = [
     { name = "legacy-cgi" },
     { name = "libsass" },
     { name = "markdown" },
-    { name = "nassl" },
+    { name = "nassl", specifier = ">=7,<8" },
     { name = "pathlib2" },
     { name = "polib" },
     { name = "psycopg2-binary", specifier = "<3" },
