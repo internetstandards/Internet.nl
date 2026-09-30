@@ -32,6 +32,7 @@ dependencies = [
     "legacy-cgi",
     "libsass",
     "markdown",
+    "nassl>=7,<8",
     "pathlib2",
     "polib",
     "psycopg2-binary<3",
@@ -113,6 +114,10 @@ filterwarnings = [
 
 [tool.uv.sources]
 pythonwhois-internet-nl = { url = "https://github.com/internetstandards/python-whois/releases/download/v1.0.0/pythonwhois-internet.nl-1.0.0.tar.gz" }
+# PQ scan support needs nassl 7 and an sslyze commit that is not on PyPI yet
+# (the pinned rev was 6.3.1). Remove these two entries once both are released.
+nassl = { path = "./vendor/nassl6" }
+sslyze = { git = "https://github.com/nabla-c0d3/sslyze", rev = "5b3f36b5e0b524915580232f463bd639eb30d447" }
 
 [dependency-groups]
 dev = [
