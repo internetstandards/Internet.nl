@@ -55,7 +55,6 @@ FS_EC_PHASE_OUT = [
 
 
 # NCSC appendix B, derived from 3.3.3, 3.3.4
-# PQC not yet supported by us
 # Anything not in these lists is insufficient.
 CIPHERS_GOOD = [
     "TLS_AES_256_GCM_SHA384",
