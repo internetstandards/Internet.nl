@@ -14,8 +14,7 @@ An OCI compatible container runtime (Docker) with a recent [Compose](https://git
 
 **notice**: your Docker runtime should be configured with enough memory and CPU, otherwise the environment will be unstable. Minimum is at least 4GB memory and 2 CPU cores, more is better for quicker rebuild/restart of images/containers.
 
-**for arm users (eg apple m1)**: nassl will not compile on x64 architectures, so use the option to start your container engine in x86 mode. For colima this can be done with `colima start --arch x86_64`. As per the system requirements noted above, the right way to start with colima would then be: `colima start --arch x86_64 --cpu 2 --memory 4`, but giving it some room would make that: `colima start --arch x86_64 --cpu 4 --memory 8`.
-For Orbstack enable `Rosetta` under `System` settings.
+**for arm users (eg apple m1)**: the vendored nassl builds natively for aarch64, so no x86 emulation is needed for the application stack. With colima, `colima start --cpu 2 --memory 4` is enough, or `colima start --cpu 4 --memory 8` to give it some room. A few third party images (the Playwright test runner, MailHog, the exporters) are still pinned to amd64 and run emulated. For Orbstack enable `Rosetta` under `System` settings.
 
 ## Building
 
