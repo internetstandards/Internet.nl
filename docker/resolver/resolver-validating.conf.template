@@ -1,5 +1,6 @@
 server:
   num-threads: 2
+  incoming-num-tcp: 128
   username: "unbound"
 
   interface: 0.0.0.0
