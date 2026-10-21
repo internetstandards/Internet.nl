@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.11.5
+
+- Switched the Celery worker executor pool from eventlet to gevent ([#2066](https://github.com/internetstandards/Internet.nl/issues/2066)).
+- Moved the batch scheduler to a separate `worker-scheduler` container using the prefork pool ([#2106](https://github.com/internetstandards/Internet.nl/issues/2106)).
+- Fixed Redis result backend cleanup under gevent ([#2163](https://github.com/internetstandards/Internet.nl/issues/2163)).
+- Updated certbot and added support for ACME ARI ([#2084](https://github.com/internetstandards/Internet.nl/issues/2084)).
+- Raised the connection limit for Google's `smtp.goog` mailservers ([#2117](https://github.com/internetstandards/Internet.nl/issues/2117)).
+- Fixed crash on SPF records with invalid terms ([#1992](https://github.com/internetstandards/Internet.nl/issues/1992)).
+- Fixed crash in the web test on an invalid HTTP redirect ([#1993](https://github.com/internetstandards/Internet.nl/issues/1993)).
+- Fixed robots.txt and security.txt not being accessible on batch instances ([#2115](https://github.com/internetstandards/Internet.nl/issues/2115)).
+
 ## 1.11.4
 
 - Fix CVE-2026-81642 in unbound (#2169)
