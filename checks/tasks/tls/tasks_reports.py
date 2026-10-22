@@ -693,45 +693,47 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
-            if dttls.caa_enabled:
-                caa_host_message = [
-                    TranslatableTechTableItem(msgid="found-host", context={"host": dttls.caa_found_on_domain}).to_dict()
-                ]
-            else:
-                caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
-            caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
-            for record in dttls.caa_records:
-                caa_tech_table.append(
-                    TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
-                )
-            if not dttls.caa_enabled:
-                category.subtests["mail_caa"].result_bad(caa_tech_table)
-            elif dttls.caa_errors:
-                if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
-                    category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
+                if dttls.caa_enabled:
+                    caa_host_message = [
+                        TranslatableTechTableItem(
+                            msgid="found-host", context={"host": dttls.caa_found_on_domain}
+                        ).to_dict()
+                    ]
                 else:
-                    category.subtests["mail_caa"].result_insufficient(caa_tech_table)
-            elif dttls.caa_recommendations:
-                category.subtests["mail_caa"].result_recommendations(caa_tech_table)
-            else:
-                category.subtests["mail_caa"].result_good(caa_tech_table)
-
-            if dttls.dane_status == DaneStatus.none:
-                category.subtests["dane_exists"].result_bad()
-            elif dttls.dane_status == DaneStatus.none_bogus:
-                category.subtests["dane_exists"].result_bogus()
-            else:
-                category.subtests["dane_exists"].result_good(dttls.dane_records)
-
-                if dttls.dane_status == DaneStatus.validated:
-                    category.subtests["dane_valid"].result_good()
-                elif dttls.dane_status == DaneStatus.failed:
-                    category.subtests["dane_valid"].result_bad()
-
-                if dttls.dane_rollover:
-                    category.subtests["dane_rollover"].result_good()
+                    caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
+                caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+                for record in dttls.caa_records:
+                    caa_tech_table.append(
+                        TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
+                    )
+                if not dttls.caa_enabled:
+                    category.subtests["mail_caa"].result_bad(caa_tech_table)
+                elif dttls.caa_errors:
+                    if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
+                        category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
+                    else:
+                        category.subtests["mail_caa"].result_insufficient(caa_tech_table)
+                elif dttls.caa_recommendations:
+                    category.subtests["mail_caa"].result_recommendations(caa_tech_table)
                 else:
-                    category.subtests["dane_rollover"].result_bad()
+                    category.subtests["mail_caa"].result_good(caa_tech_table)
+
+                if dttls.dane_status == DaneStatus.none:
+                    category.subtests["dane_exists"].result_bad()
+                elif dttls.dane_status == DaneStatus.none_bogus:
+                    category.subtests["dane_exists"].result_bogus()
+                else:
+                    category.subtests["dane_exists"].result_good(dttls.dane_records)
+
+                    if dttls.dane_status == DaneStatus.validated:
+                        category.subtests["dane_valid"].result_good()
+                    elif dttls.dane_status == DaneStatus.failed:
+                        category.subtests["dane_valid"].result_bad()
+
+                    if dttls.dane_rollover:
+                        category.subtests["dane_rollover"].result_good()
+                    else:
+                        category.subtests["dane_rollover"].result_bad()
 
             if dttls.zero_rtt == ZeroRttStatus.good:
                 category.subtests["zero_rtt"].result_good()
