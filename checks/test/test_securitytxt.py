@@ -1,11 +1,16 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 
+from unittest.mock import Mock, patch
+
+import pytest
+
 from checks import scoring
 from checks.tasks.securitytxt import (
     SecuritytxtRetrieveResult,
     _evaluate_securitytxt,
     _evaluate_response,
+    _retrieve_securitytxt,
     SECURITYTXT_EXPECTED_PATH,
     SECURITYTXT_LEGACY_PATH,
 )
@@ -230,3 +235,113 @@ def test_evaluate_securitytxt():
             {"msgid": "unknown_field", "context": {"line_no": 4}},
         ],
     }
+
+
+@pytest.mark.parametrize(
+    ("urls", "insecure"),
+    [
+        (["https://example.com/.well-known/security.txt"], False),
+        (
+            [
+                "https://example.com/.well-known/security.txt",
+                "https://cdn.example.com/.well-known/security.txt",
+            ],
+            False,
+        ),
+        (
+            [
+                "https://example.com/.well-known/security.txt",
+                "http://cdn.example.com/.well-known/security.txt",
+            ],
+            True,
+        ),
+        (
+            [
+                "https://example.com/.well-known/security.txt",
+                "http://redirect.example.com/security.txt",
+                "https://cdn.example.com/.well-known/security.txt",
+            ],
+            True,
+        ),
+        (
+            [
+                "https://example.com/.well-known/security.txt",
+                "https://first.example.com/redirect",
+                "http://second.example.com/redirect",
+                "https://cdn.example.com/.well-known/security.txt",
+            ],
+            True,
+        ),
+    ],
+)
+def test_retrieve_securitytxt_redirect_scheme(urls, insecure):
+    """A successful response must not hide insecure intermediate redirects."""
+    response = Mock(
+        status_code=200,
+        url=urls[-1],
+        headers={"Content-Type": "text/plain; charset=utf-8"},
+        history=[Mock(url=url) for url in urls[:-1]],
+    )
+    content = b"Expires: 2027-06-01T00:00:00Z\nContact: mailto:security@example.com\n"
+    with (
+        patch("checks.tasks.securitytxt.http_get_ip", return_value=response) as get,
+        patch("checks.tasks.securitytxt.response_content_chunk", return_value=content),
+    ):
+        result = _retrieve_securitytxt(("inet", "127.0.0.1"), "example.com")
+
+    assert get.call_count == 1
+    assert result.found
+    assert ({"msgid": "invalid_uri_scheme"} in result.errors) is insecure
+    evaluation = _evaluate_securitytxt(result)
+    assert evaluation["securitytxt_score"] == (
+        scoring.WEB_APPSECPRIV_SECURITYTXT_BAD if insecure else scoring.WEB_APPSECPRIV_SECURITYTXT_GOOD
+    )
+
+
+def test_retrieve_securitytxt_ignores_redirects_in_failed_first_location():
+    """If the well-known path fails, assess only the final legacy response."""
+    first_response = Mock(
+        status_code=404,
+        url="http://example.com/not-found",
+        headers={"Content-Type": "text/plain"},
+        history=[Mock(url="https://example.com/.well-known/security.txt")],
+    )
+    legacy_response = Mock(
+        status_code=200,
+        url="https://example.com/security.txt",
+        headers={"Content-Type": "text/plain"},
+        history=[],
+    )
+    with (
+        patch("checks.tasks.securitytxt.http_get_ip", side_effect=[first_response, legacy_response]) as get,
+        patch("checks.tasks.securitytxt.response_content_chunk", return_value=b"content"),
+    ):
+        result = _retrieve_securitytxt(("inet", "127.0.0.1"), "example.com")
+
+    assert get.call_count == 2
+    assert result.url == "https://example.com/security.txt"
+    assert result.errors == [{"msgid": "location"}]
+
+
+def test_retrieve_securitytxt_no_scheme_error_when_file_not_found():
+    """A missing file is already an error; it must not be reported as found."""
+    first_response = Mock(
+        status_code=404,
+        url="https://example.com/.well-known/security.txt",
+        headers={"Content-Type": "text/plain"},
+        history=[],
+    )
+    legacy_response = Mock(
+        status_code=404,
+        url="http://example.com/security.txt",
+        headers={"Content-Type": "text/plain"},
+        history=[Mock(url="https://example.com/security.txt")],
+    )
+    with (
+        patch("checks.tasks.securitytxt.http_get_ip", side_effect=[first_response, legacy_response]),
+        patch("checks.tasks.securitytxt.response_content_chunk", return_value=b""),
+    ):
+        result = _retrieve_securitytxt(("inet", "127.0.0.1"), "example.com")
+
+    assert result.found is False
+    assert result.errors == [{"msgid": "no_security_txt_404"}]
