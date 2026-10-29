@@ -55,7 +55,13 @@ def _accepted_weak_group(server_info: ServerConnectivityInfo, candidates: set[Op
         key = connection.ssl_client.get_ephemeral_key()
         if isinstance(key, EcDhEphemeralKeyInfo) and key.curve in available:
             return f"ECDH-{key.curve_name}"
-    except (ConnectionToServerFailed, ServerTlsConfigurationNotSupported, TlsHandshakeTimedOut, OpenSSLError, ValueError) as exc:
+    except (
+        ConnectionToServerFailed,
+        ServerTlsConfigurationNotSupported,
+        TlsHandshakeTimedOut,
+        OpenSSLError,
+        ValueError,
+    ) as exc:
         log.debug(f"TLS 1.2 weak-group probe on {server_info.server_location.hostname} failed: {exc}")
     finally:
         if connection is not None:
