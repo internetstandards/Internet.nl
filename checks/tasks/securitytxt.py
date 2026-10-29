@@ -55,7 +55,7 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str) -> SecuritytxtRetrieveResul
         return _evaluate_response(None, None, hostname, path, b"", hostname, None)
     except StopIteration:  # 200 response with empty content
         content = b""
-    return _evaluate_response(
+    result = _evaluate_response(
         response.status_code,
         response.headers.get("Content-Type", ""),
         hostname,
@@ -64,6 +64,14 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str) -> SecuritytxtRetrieveResul
         found_host,
         response.url,
     )
+    # requests follows redirects, but the security.txt parser only sees the final
+    # URL. Reject an HTTPS -> HTTP -> HTTPS chain as well as an HTTP final URL.
+    if result.found and any(
+        urlparse(redirect_response.url).scheme != "https"
+        for redirect_response in [*response.history, response]
+    ):
+        result.errors.append({"msgid": "invalid_uri_scheme"})
+    return result
 
 
 def _evaluate_response(
