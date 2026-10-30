@@ -48,6 +48,12 @@
     {% include "details-test-item.html" with testitem=details.zero_rtt %}
     {% include "details-test-item.html" with testitem=details.ocsp_stapling %}
     {% include "details-test-item.html" with testitem=details.extended_master_secret %}
+    {% if details.pq_kex_support %}
+      <div class="test-subsection">
+        {% include "string.html" with name="results domain-mail tls pq-kex label" %}
+      </div>
+      {% include "details-test-item.html" with testitem=details.pq_kex_support %}
+    {% endif %}
     <div class="test-subsection">
       {% include "string.html" with name="results domain-mail tls certificate label" %}
     </div>

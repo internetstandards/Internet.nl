@@ -1,7 +1,7 @@
 from cryptography.hazmat._oid import SignatureAlgorithmOID
 from cryptography.hazmat.primitives.asymmetric import ed25519, ed448, ec
 from nassl.ephemeral_key_info import OpenSslEcNidEnum, OpenSslEvpPkeyEnum
-from nassl.ssl_client import OpenSslDigestNidEnum
+from nassl.openssl_1_1_1.ssl_client import OpenSslDigestNidEnum
 from sslyze import TlsVersionEnum
 
 # NCSC 3.3.2 / 3.3.5
@@ -55,7 +55,6 @@ FS_EC_PHASE_OUT = [
 
 
 # NCSC appendix B, derived from 3.3.3, 3.3.4
-# PQC not yet supported by us
 # Anything not in these lists is insufficient.
 CIPHERS_GOOD = [
     "TLS_AES_256_GCM_SHA384",
