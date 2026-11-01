@@ -280,9 +280,9 @@ def test_retrieve_securitytxt_redirect_scheme(urls, insecure):
         status_code=200,
         url=urls[-1],
         headers={"Content-Type": "text/plain; charset=utf-8"},
-        history=[Mock(url=url) for url in urls[:-1]],
+        history=[Mock(url=start, next=Mock(url=end)) for start, end in zip(urls, urls[1:])],
     )
-    content = b"Expires: 2027-06-01T00:00:00Z\nContact: mailto:security@example.com\n"
+    content = b"Expires: 2050-09-01T00:00:00.000Z\nContact: mailto:security@example.com\n"
     with (
         patch("checks.tasks.securitytxt.http_get_ip", return_value=response) as get,
         patch("checks.tasks.securitytxt.response_content_chunk", return_value=content),
@@ -304,7 +304,7 @@ def test_retrieve_securitytxt_ignores_redirects_in_failed_first_location():
         status_code=404,
         url="http://example.com/not-found",
         headers={"Content-Type": "text/plain"},
-        history=[Mock(url="https://example.com/.well-known/security.txt")],
+        history=[Mock(url="https://example.com/.well-known/security.txt", next=Mock(url="http://example.com/not-found"))],
     )
     legacy_response = Mock(
         status_code=200,
@@ -335,7 +335,7 @@ def test_retrieve_securitytxt_no_scheme_error_when_file_not_found():
         status_code=404,
         url="http://example.com/security.txt",
         headers={"Content-Type": "text/plain"},
-        history=[Mock(url="https://example.com/security.txt")],
+        history=[Mock(url="https://example.com/security.txt", next=Mock(url="http://example.com/security.txt"))],
     )
     with (
         patch("checks.tasks.securitytxt.http_get_ip", side_effect=[first_response, legacy_response]),
