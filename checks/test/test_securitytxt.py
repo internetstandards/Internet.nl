@@ -304,7 +304,12 @@ def test_retrieve_securitytxt_ignores_redirects_in_failed_first_location():
         status_code=404,
         url="http://example.com/not-found",
         headers={"Content-Type": "text/plain"},
-        history=[Mock(url="https://example.com/.well-known/security.txt", next=Mock(url="http://example.com/not-found"))],
+        history=[
+            Mock(
+                url="https://example.com/.well-known/security.txt",
+                next=Mock(url="http://example.com/not-found"),
+            ),
+        ],
     )
     legacy_response = Mock(
         status_code=200,
