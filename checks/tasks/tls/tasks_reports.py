@@ -282,8 +282,6 @@ def save_results(model, results, addr, domain, category):
                     model.client_reneg_score = result.get("client_reneg_score")
                     model.zero_rtt = result.get("zero_rtt")
                     model.zero_rtt_score = result.get("zero_rtt_score")
-                    model.ocsp_stapling = result.get("ocsp_stapling")
-                    model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
                     model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
@@ -294,6 +292,8 @@ def save_results(model, results, addr, domain, category):
                     model.pq_kex_score = result.get("pq_kex_score")
 
             elif testname == "cert" and result.get("tls_cert"):
+                model.ocsp_stapling = result["ocsp_stapling"]
+                model.ocsp_stapling_score = result["ocsp_stapling_score"]
                 model.cert_chain = result.get("chain")
                 model.cert_trusted = result.get("trusted")
                 model.cert_trusted_score = result.get("trusted_score")
