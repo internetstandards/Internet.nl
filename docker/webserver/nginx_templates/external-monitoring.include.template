@@ -1,0 +1,106 @@
+# expose all metrics exporters, with authentication, for external monitoring
+set $enable_external_monitoring "${ENABLE_EXTERNAL_MONITORING}";
+location /node-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $node_exporter http://node-exporter:9100;
+    rewrite ^/node-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $node_exporter;
+}
+location /postgresql-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $postgresql_exporter http://postgresql-exporter:9187;
+    rewrite ^/postgresql-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $postgresql_exporter;
+}
+location /redis-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $redis_exporter http://redis-exporter:9121;
+    rewrite ^/redis-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $redis_exporter;
+}
+location /rabbitmq-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $rabbitmq_exporter http://rabbitmq:15692;
+    rewrite ^/rabbitmq-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $rabbitmq_exporter;
+}
+location /statsd-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $statsd_exporter http://statsd-exporter:9102;
+    rewrite ^/statsd-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $statsd_exporter;
+}
+location /celery-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $celery_exporter http://celery-exporter:9808;
+    rewrite ^/celery-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $celery_exporter;
+}
+location /docker-stats-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $docker_stats_exporter http://docker_stats_exporter:9338;
+    rewrite ^/docker-stats-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $docker_stats_exporter;
+}
+location /nginx-logs-exporter {
+    if ($enable_external_monitoring != "True") {
+        return 404;
+    }
+
+    include http.headers;
+    include hsts_h3.headers;
+    auth_basic "Please enter your monitoring username and password";
+    auth_basic_user_file /etc/nginx/htpasswd/monitoring.htpasswd;
+    set $nginx_logs_exporter http://nginx_logs_exporter:4040;
+    rewrite ^/nginx-logs-exporter(?:/(.*))?$ /$1 break;
+    proxy_pass $nginx_logs_exporter;
+}

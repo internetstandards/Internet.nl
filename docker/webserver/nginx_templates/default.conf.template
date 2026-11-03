@@ -315,6 +315,8 @@ server {
         proxy_pass $alertmanager;
     }
 
+    include /etc/nginx/conf.d/external-monitoring.include;
+
     # routinator proxy for internal use on multi instance setups
     location /routinator/ {
         include http.headers;

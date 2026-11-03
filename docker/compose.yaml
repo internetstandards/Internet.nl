@@ -32,6 +32,7 @@ services:
       - INTERNETNL_DOMAINNAME
       - IPV6_TEST_ADDR
       - MONITORING_AUTH_RAW
+      - ENABLE_EXTERNAL_MONITORING
       - AUTH_ALL_URLS
       - ALLOW_LIST
       - ROUTINATOR_ALLOW_LIST
@@ -808,6 +809,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
   redis-exporter:
     image: ${DOCKER_IMAGE_REDIS_EXPORTER}
@@ -828,6 +830,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
   statsd-exporter:
     image: ${DOCKER_IMAGE_STATSD_EXPORTER}
@@ -851,6 +854,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
     healthcheck:
       # container image includes the test command, setting interval and start_interval here
@@ -883,6 +887,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
   node-exporter:
     # https://github.com/prometheus/node_exporter#docker
@@ -916,6 +921,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
   docker_stats_exporter:
     # https://github.com/jan4843/docker_stats_exporter
@@ -939,6 +945,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
   nginx_logs_exporter:
     platform: linux/amd64
@@ -963,6 +970,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
   query-exporter:
     image: ${DOCKER_IMAGE_QUERY_EXPORTER}
@@ -987,6 +995,7 @@ services:
 
     profiles:
       - monitoring
+      - monitoring-exporters-only
 
 volumes:
   postgres: {}
@@ -1189,8 +1198,8 @@ configs:
       - name: End to end monitoring
         rules:
         - alert: HighTestRuntimeSite
-          # when site probes for 2 or more of the test domains take longer than 30 seconds something is wrong
-          expr: count(tests_test_runtime_seconds{test="site"} >= 30) >= 2
+          # alert when site tests for two or more domains reach the configured runtime limit
+          expr: count(tests_test_runtime_seconds{test="site"} >= ${TEST_RUNTIME_ALERT_SITE_SECONDS}) >= 2
           annotations:
             host: $INTERNETNL_DOMAINNAME
             summary: Two or more tests for web take longer to complete than expected
@@ -1203,8 +1212,8 @@ configs:
             summary: Two or more tests for web take longer to complete than expected
             dashboard: 'https://$INTERNETNL_DOMAINNAME/grafana/d/af7d1d82-c0f9-4d8d-bc03-542c4c4c75c0/periodic-tests'
         - alert: HighTestRuntimeMail
-          # when mail probes for 2 or more of the oltest domains take longer than 70 seconds something is wrong
-          expr: count(tests_test_runtime_seconds{test="site"} >= 70) >= 2
+          # alert when mail tests for two or more domains reach the configured runtime limit
+          expr: count(tests_test_runtime_seconds{test="mail"} >= ${TEST_RUNTIME_ALERT_MAIL_SECONDS}) >= 2
           annotations:
             host: $INTERNETNL_DOMAINNAME
             summary: Two or more tests for mail take longer to complete than expected
