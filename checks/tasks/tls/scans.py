@@ -321,7 +321,7 @@ def get_common_name(cert: Certificate) -> str:
 
 def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwargs):
     """
-    Perform certificate checks, such as trust, name match. Also scans the server.
+    Scan and evaluate the server certificate: trust, name match, DANE, CAA, OCSP stapling.
     """
     log.info(f"starting cert sslyze scan for {hostname} {af_ip_pair} {mode}")
     # cryptography's PolicyBuilder.build_server_verifier is called through sslyze cert chain analyser
@@ -370,8 +370,8 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         return dict(tls_cert=False)
     try:
         raise_sslyze_errors(result)
-    except TLSException:
-        log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: certificate parsing error")
+    except TLSException as exc:
+        log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: {exc}")
         return dict(tls_cert=False)
 
     if mode == ChecksMode.WEB:
@@ -391,6 +391,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         not result.scan_result.certificate_info.result
         or not result.scan_result.certificate_info.result.certificate_deployments
     ):
+        log.warning(f"no certificate deployments for {hostname} {af_ip_pair} {mode}, cert and OCSP not evaluated")
         return dict(tls_cert=False)
 
     cert_deployment = result.scan_result.certificate_info.result.certificate_deployments[0]
@@ -440,6 +441,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
     )
 
     caa_result = retrieve_parse_caa(hostname)
+    ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(cert_deployment)
 
     results = dict(
         tls_cert=True,
@@ -458,6 +460,8 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         hostmatch_bad=hostmatch_bad,
         hostmatch_score=hostmatch_score,
         caa_result=caa_result,
+        ocsp_stapling=ocsp_evaluation.status,
+        ocsp_stapling_score=ocsp_evaluation.score,
     )
     results.update(dane_results)
 
@@ -727,14 +731,13 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             tls_probing_result=FAKE_SERVER_TLS_PROBING_RESULT,
         )
     )
-    scan_commands = SSLYZE_SCAN_COMMANDS | SSLYZE_WEB_SCAN_COMMANDS | {ScanCommand.CERTIFICATE_INFO}
+    scan_commands = SSLYZE_SCAN_COMMANDS | SSLYZE_WEB_SCAN_COMMANDS
     log.info(f"precheck on {server_location} supports {supported_tls_versions} {scan_commands=}")
     scan = ServerScanRequest(
         server_location=server_location,
         network_configuration=network_configuration,
         scan_commands=scan_commands,
         scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
             session_renegotiation=SessionRenegotiationExtraArgument(
                 client_renegotiation_attempts=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT
             ),
@@ -774,15 +777,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
         renegotiation_evaluation = TLSRenegotiationEvaluation(
             supports_secure_renegotiation=False, client_renegotiations_success_count=0
         )
-
-    cert_info = result.scan_result.certificate_info.result
-    if cert_info and cert_info.certificate_deployments:
-        ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(cert_info.certificate_deployments[0])
-    else:
-        log.error(
-            f"OCSP check skipped for {result.server_location.hostname}: no certificate scan result or deployments"
-        )
-        ocsp_evaluation = TLSOCSPEvaluation(ocsp_in_cert=False, has_ocsp_response=False, ocsp_response_trusted=False)
 
     pq_kex_evaluation = check_pq_kex_support(server_conn_info, supported_tls_versions)
 
@@ -831,8 +825,6 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             and result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        ocsp_stapling=ocsp_evaluation.status,
-        ocsp_stapling_score=ocsp_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
