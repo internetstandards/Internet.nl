@@ -168,9 +168,8 @@ def _get_resolver(cd_flag: bool):
 def _create_resolver(cd_flag: bool) -> Resolver:
     resolver = Resolver(configure=False)
     resolver.nameservers = [socket.gethostbyname(settings.RESOLVER_INTERNAL_VALIDATING)]
-    resolver.edns = True
+    resolver.use_edns(edns=0, ednsflags=EDNSFlag.DO, payload=1232)
     if cd_flag:
         resolver.flags = Flag.CD
-    resolver.ednsflags = EDNSFlag.DO
     resolver.lifetime = DNS_TIMEOUT
     return resolver
