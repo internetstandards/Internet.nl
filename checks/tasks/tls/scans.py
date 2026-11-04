@@ -42,7 +42,6 @@ from sslyze import (
 )
 
 from sslyze.errors import (
-    TlsHandshakeTimedOut,
     ConnectionToServerFailed,
     ServerHostnameCouldNotBeResolved,
     ServerTlsConfigurationNotSupported,
@@ -573,13 +572,12 @@ def generate_mail_server_scan_request(
     if not supported_tls_versions:
         log.info(f"no TLS version support found for MX host {mx_hostname}, marking server unreachable")
         return None, extended_master_secret_evaluation, []
-    scan_commands = set(SSLYZE_SCAN_COMMANDS)
 
     return (
         ServerScanRequest(
             server_location=server_location,
             network_configuration=network_configuration,
-            scan_commands=scan_commands,
+            scan_commands=SSLYZE_SCAN_COMMANDS,
             scan_commands_extra_arguments=ScanCommandsExtraArguments(
                 session_renegotiation=SessionRenegotiationExtraArgument(
                     client_renegotiation_attempts=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT
@@ -872,7 +870,7 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
     """
     last_error_trace = None
     for name, scan_result in vars(result.scan_result).items():
-        error_trace = getattr(scan_result, "error_trace")
+        error_trace = scan_result.error_trace
         if error_trace:
             log.info(f"TLS scan {name} on {result.server_location} failed: {''.join(error_trace.format())}")
             last_error_trace = error_trace
@@ -1275,7 +1273,7 @@ def _attempt_connect_with_cipher_string(
             ephemeral_key = None
         return negotiated_name, ephemeral_key
 
-    except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut, ValueError):
+    except (ConnectionToServerFailed, OpenSSLError, ValueError):
         return None
 
     except Exception as exc:
@@ -1311,7 +1309,7 @@ def check_supported_tls_versions(
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
             ems_evaluation.update_for_connection(ssl_connection, tls_version)
-        except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut) as exc:
+        except (ConnectionToServerFailed, OpenSSLError) as exc:
             log.debug(
                 f"Server {server_connectivity_info.server_location.hostname}"
                 f"/{server_connectivity_info.server_location.ip_address}"
