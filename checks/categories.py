@@ -2,7 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from checks import scoring
-from checks.models import TLSClientInitiatedRenegotiationStatus, TLSExtendedMasterSecretStatus
+from checks.models import (
+    TLSClientInitiatedRenegotiationStatus,
+    TLSExtendedMasterSecretStatus,
+    PqKexSupportStatus,
+)
 from checks.scoring import (
     ORDERED_STATUSES,
     STATUS_ERROR,
@@ -185,6 +189,7 @@ class WebTls(Category):
             WebTlsOCSPStapling,
             WebTlsKexHashFunc,
             WebTLSExtendedMasterSecret,
+            WebTlsPqKexSupport,
             # WebTlsDaneRollover,
         ]
         super().__init__(name, subtests)
@@ -258,6 +263,7 @@ class MailTls(Category):
             MailTlsZeroRTT,
             MailTlsKexHashFunc,
             MailTLSExtendedMasterSecret,
+            MailTlsPqKexSupport,
             # MailTlsOCSPStapling,  # Disabled for mail.
         ]
         super().__init__(name, subtests)
@@ -1593,6 +1599,55 @@ class WebTLSExtendedMasterSecret(Subtest):
         self.tech_data = "detail tech data not-applicable"
 
 
+class TlsPqKexSupport(Subtest):
+    _label = None
+
+    def __init__(self):
+        super().__init__(
+            name="pq_kex_support",
+            label=f"detail {self._label} tls pq-kex-support label",
+            explanation=f"detail {self._label} tls pq-kex-support exp",
+            tech_string=f"detail {self._label} tls pq-kex-support tech table",
+            worst_status=scoring.TLS_PQ_KEX_WORST_STATUS,
+            full_score=scoring.TLS_PQ_KEX_GOOD,
+            model_score_field="pq_kex_score",
+        )
+
+    def save_result(self, status: PqKexSupportStatus, supported_groups: list[str]):
+        handlers = {
+            PqKexSupportStatus.supported: lambda: self.result_supported(supported_groups),
+            PqKexSupportStatus.not_supported: self.result_not_supported,
+            PqKexSupportStatus.na_no_tls_1_3: self.result_na_no_tls_1_3,
+            PqKexSupportStatus.unknown: self.result_unknown,
+        }
+        return handlers[status]()
+
+    def result_supported(self, supported_groups):
+        self._status(STATUS_SUCCESS)
+        self.verdict = f"detail {self._label} tls pq-kex-support verdict supported"
+        # A flat list: aggregate_subreports pairs it with the server IP
+        self.tech_data = supported_groups
+
+    def result_not_supported(self):
+        self._status(STATUS_NOTICE)
+        self.verdict = f"detail {self._label} tls pq-kex-support verdict not-supported"
+        self.tech_data = "detail tech data no"
+
+    def result_na_no_tls_1_3(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = f"detail {self._label} tls pq-kex-support verdict na-no-tls-1-3"
+        self.tech_data = "detail tech data not-applicable"
+
+    def result_unknown(self):
+        self._status(STATUS_NOT_TESTED)
+        self.verdict = f"detail {self._label} tls pq-kex-support verdict unknown"
+        self.tech_data = "detail tech data not-tested"
+
+
+class WebTlsPqKexSupport(TlsPqKexSupport):
+    _label = "web"
+
+
 class MailTlsStarttlsExists(Subtest):
     def __init__(self):
         super().__init__(
@@ -2235,6 +2290,10 @@ class MailTLSExtendedMasterSecret(Subtest):
         self._status(STATUS_NOT_TESTED)
         self.verdict = "detail mail tls extended-master-secret verdict na-no-tls-1-2"
         self.tech_data = "detail tech data not-applicable"
+
+
+class MailTlsPqKexSupport(TlsPqKexSupport):
+    _label = "mail"
 
 
 class MailTlsDaneExists(Subtest):

@@ -327,10 +327,8 @@ integration-tests-reset-and-against-develop: ## reset caches in development envi
 integration-tests-reset-and-against-develop: docker-compose-redis-clear-celery-results integration-tests-against-develop
 
 # Docker container runtime for MacOS
-# until nassl can be built for ARM: https://github.com/nabla-c0d3/nassl/issues/39
-# it is required to emulate x86_64 under Apple Silicon Macs
 docker-compose-runtime-start: ## start a Colima Docker runtime for development
-	colima start --cpu 4 --memory 8 --arch x86_64
+	colima start --cpu 4 --memory 8
 
 docker-compose-runtime-stop: ## stop Colima Docker runtime
 	colima stop

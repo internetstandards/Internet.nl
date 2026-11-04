@@ -1,5 +1,4 @@
 import binascii
-import functools
 import math
 from binascii import hexlify
 from enum import Enum
@@ -20,9 +19,10 @@ from cryptography.x509 import Certificate
 from django.conf import settings
 from dns.name import EmptyLabel
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, LifetimeTimeout
-from nassl._nassl import OpenSSLError
+from nassl.errors import OpenSSLError
 from nassl.ephemeral_key_info import OpenSslEvpPkeyEnum
-from nassl.ssl_client import ClientCertificateRequested, OpenSslDigestNidEnum
+from nassl.base_ssl_client import BaseSslClient, ClientCertificateRequested
+from nassl.openssl_1_1_1.ssl_client import OpenSslDigestNidEnum
 from sslyze import (
     ScanCommand,
     ServerScanRequest,
@@ -42,7 +42,6 @@ from sslyze import (
 )
 
 from sslyze.errors import (
-    TlsHandshakeTimedOut,
     ConnectionToServerFailed,
     ServerHostnameCouldNotBeResolved,
     ServerTlsConfigurationNotSupported,
@@ -51,12 +50,10 @@ from sslyze.plugins.certificate_info._certificate_utils import (
     parse_subject_alternative_name_extension,
     get_common_names,
 )
-from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import (
-    CipherSuiteAcceptedByServer,
-    _set_cipher_suite_string,
-)
-from sslyze.plugins.openssl_cipher_suites._tls12_workaround import WorkaroundForTls12ForCipherSuites
-from sslyze.plugins.openssl_cipher_suites.cipher_suites import CipherSuitesRepository
+from sslyze.plugins.openssl_cipher_suites._test_cipher_suite import CipherSuiteAcceptedByServer
+from sslyze.plugins.openssl_cipher_suites.cipher_suites import retrieve_all_available_cipher_suites
+from sslyze.plugins.supported_groups_plugin import _test_pq_or_ffdh_group
+from sslyze.connection_helpers.tls_connection import OpenSslVersionEnum
 from sslyze.server_connectivity import ServerConnectivityInfo
 
 from checks import scoring
@@ -66,6 +63,7 @@ from checks.models import (
     ZeroRttStatus,
     KexHashFuncStatus,
     CipherOrderStatus,
+    PqKexSupportStatus,
 )
 from checks.resolver import dns_resolve_tlsa, DNSSECStatus, dns_resolve_a
 from checks.tasks.tls import TLSException
@@ -78,6 +76,7 @@ from checks.tasks.tls.evaluation import (
     TLSOCSPEvaluation,
     TLSRenegotiationEvaluation,
     TLSExtendedMasterSecretEvaluation,
+    TLSPqKexEvaluation,
 )
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_SUFFICIENT,
@@ -89,10 +88,26 @@ from checks.tasks.tls.tls_constants import (
     CERT_RSA_MIN_GOOD_KEY_SIZE,
     CERT_RSA_MIN_PHASE_OUT_KEY_SIZE,
     SIGNATURE_ALGORITHMS_BAD_HASH,
+    PQ_KEX_GROUPS_GOOD,
     SIGNATURE_ALGORITHMS_PHASE_OUT_HASH,
     TLS_1_3_PROBE_CIPHERS,
 )
 from internetnl import log
+
+
+def _set_cipher_suite_string(tls_version: TlsVersionEnum, cipher_suite_str: str, ssl_client: BaseSslClient) -> None:
+    if tls_version == TlsVersionEnum.TLS_1_3:
+        ssl_client.set_ciphersuites(cipher_suite_str)
+    else:
+        ssl_client.set_cipher_list(cipher_suite_str)
+
+
+def _cipher_by_openssl_name(tls_version: TlsVersionEnum, openssl_name: str) -> CipherSuite:
+    for cipher in retrieve_all_available_cipher_suites(tls_version):
+        if cipher.openssl_name == openssl_name:
+            return cipher
+    raise ValueError(f"cipher suite {openssl_name} not in sslyze's repository for {tls_version.name}")
+
 
 SSLYZE_NETWORK_TIMEOUT = 10
 SSLYZE_NETWORK_MAX_RETRIES = 0
@@ -101,8 +116,7 @@ SSLYZE_SCAN_COMMANDS = {
     ScanCommand.TLS_COMPRESSION,
     ScanCommand.SESSION_RENEGOTIATION,
 }
-# TLS_1_3_EARLY_DATA only works for HTTPS - it sends an HTTP GET request
-# which breaks SMTP sessions. See #2055.
+# HTTPS-only. TLS_1_3_EARLY_DATA sends an HTTP GET that breaks SMTP (#2055).
 SSLYZE_WEB_SCAN_COMMANDS = {ScanCommand.TLS_1_3_EARLY_DATA}
 # Some servers ignore ciphers past the 64th in a ClientHello, others reject overly
 # large ClientHellos. nmap's ssl-enum-ciphers uses 64 too.
@@ -306,7 +320,7 @@ def get_common_name(cert: Certificate) -> str:
 
 def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwargs):
     """
-    Perform certificate checks, such as trust, name match. Also scans the server.
+    Scan and evaluate the server certificate: trust, name match, DANE, CAA, OCSP stapling.
     """
     log.info(f"starting cert sslyze scan for {hostname} {af_ip_pair} {mode}")
     # cryptography's PolicyBuilder.build_server_verifier is called through sslyze cert chain analyser
@@ -355,8 +369,8 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         return dict(tls_cert=False)
     try:
         raise_sslyze_errors(result)
-    except TLSException:
-        log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: certificate parsing error")
+    except TLSException as exc:
+        log.info(f"sslyze scan for cert on {hostname} {af_ip_pair} {mode} failed: {exc}")
         return dict(tls_cert=False)
 
     if mode == ChecksMode.WEB:
@@ -376,6 +390,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         not result.scan_result.certificate_info.result
         or not result.scan_result.certificate_info.result.certificate_deployments
     ):
+        log.warning(f"no certificate deployments for {hostname} {af_ip_pair} {mode}, cert and OCSP not evaluated")
         return dict(tls_cert=False)
 
     cert_deployment = result.scan_result.certificate_info.result.certificate_deployments[0]
@@ -425,6 +440,7 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
     )
 
     caa_result = retrieve_parse_caa(hostname)
+    ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(cert_deployment)
 
     results = dict(
         tls_cert=True,
@@ -443,6 +459,8 @@ def cert_checks(hostname: str, mode: ChecksMode, af_ip_pair=None, *args, **kwarg
         hostmatch_bad=hostmatch_bad,
         hostmatch_score=hostmatch_score,
         caa_result=caa_result,
+        ocsp_stapling=ocsp_evaluation.status,
+        ocsp_stapling_score=ocsp_evaluation.score,
     )
     results.update(dane_results)
 
@@ -554,13 +572,12 @@ def generate_mail_server_scan_request(
     if not supported_tls_versions:
         log.info(f"no TLS version support found for MX host {mx_hostname}, marking server unreachable")
         return None, extended_master_secret_evaluation, []
-    scan_commands = set(SSLYZE_SCAN_COMMANDS)
 
     return (
         ServerScanRequest(
             server_location=server_location,
             network_configuration=network_configuration,
-            scan_commands=scan_commands,
+            scan_commands=SSLYZE_SCAN_COMMANDS,
             scan_commands_extra_arguments=ScanCommandsExtraArguments(
                 session_renegotiation=SessionRenegotiationExtraArgument(
                     client_renegotiation_attempts=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT
@@ -610,6 +627,9 @@ def check_mail_tls(
         renegotiation_evaluation = TLSRenegotiationEvaluation(
             supports_secure_renegotiation=False, client_renegotiations_success_count=0
         )
+
+    pq_kex_evaluation = check_pq_kex_support(server_conn_info, supported_tls_versions)
+
     cert_results = cert_checks(result.server_location.hostname, ChecksMode.MAIL)
 
     # HACK for DANE-TA(2) and hostname mismatch!
@@ -658,6 +678,9 @@ def check_mail_tls(
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
+        pq_kex_support=pq_kex_evaluation.status,
+        pq_kex_supported_groups=pq_kex_evaluation.supported_groups,
+        pq_kex_score=pq_kex_evaluation.score,
     )
     results.update(cert_results)
     return results
@@ -706,14 +729,13 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             tls_probing_result=FAKE_SERVER_TLS_PROBING_RESULT,
         )
     )
-    scan_commands = SSLYZE_SCAN_COMMANDS | SSLYZE_WEB_SCAN_COMMANDS | {ScanCommand.CERTIFICATE_INFO}
+    scan_commands = SSLYZE_SCAN_COMMANDS | SSLYZE_WEB_SCAN_COMMANDS
     log.info(f"precheck on {server_location} supports {supported_tls_versions} {scan_commands=}")
     scan = ServerScanRequest(
         server_location=server_location,
         network_configuration=network_configuration,
         scan_commands=scan_commands,
         scan_commands_extra_arguments=ScanCommandsExtraArguments(
-            certificate_info=CertificateInfoExtraArgument(custom_ca_file=Path(settings.CA_CERTIFICATES)),
             session_renegotiation=SessionRenegotiationExtraArgument(
                 client_renegotiation_attempts=TLSRenegotiationEvaluation.SCAN_RENEGOTIATION_LIMIT
             ),
@@ -754,12 +776,7 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             supports_secure_renegotiation=False, client_renegotiations_success_count=0
         )
 
-    if result.scan_result.certificate_info.result:
-        ocsp_evaluation = TLSOCSPEvaluation.from_certificate_deployments(
-            result.scan_result.certificate_info.result.certificate_deployments[0]
-        )
-    else:
-        ocsp_evaluation = TLSOCSPEvaluation(ocsp_in_cert=False, has_ocsp_response=False, ocsp_response_trusted=False)
+    pq_kex_evaluation = check_pq_kex_support(server_conn_info, supported_tls_versions)
 
     probe_result = dict(
         tls_enabled=True,
@@ -806,13 +823,14 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
             and result.scan_result.tls_1_3_early_data.result.supports_early_data
             else scoring.WEB_TLS_ZERO_RTT_GOOD
         ),
-        ocsp_stapling=ocsp_evaluation.status,
-        ocsp_stapling_score=ocsp_evaluation.score,
         kex_hash_func=key_exchange_hash_evaluation.status,
         kex_hash_func_score=key_exchange_hash_evaluation.score,
         kex_hash_func_bad_hash=key_exchange_hash_evaluation.found_hash,
         extended_master_secret=extended_master_secret_evaluation.status,
         extended_master_secret_score=extended_master_secret_evaluation.score,
+        pq_kex_support=pq_kex_evaluation.status,
+        pq_kex_supported_groups=pq_kex_evaluation.supported_groups,
+        pq_kex_score=pq_kex_evaluation.score,
     )
     return probe_result
 
@@ -851,11 +869,11 @@ def raise_sslyze_errors(result: ServerScanResult) -> None:
     and if it does, raise a TLSException for them.
     """
     last_error_trace = None
-    for scan_result in vars(result.scan_result).values():
-        error_trace = getattr(scan_result, "error_trace")
+    for name, scan_result in vars(result.scan_result).items():
+        error_trace = scan_result.error_trace
         if error_trace:
+            log.info(f"TLS scan {name} on {result.server_location} failed: {''.join(error_trace.format())}")
             last_error_trace = error_trace
-            log.info(f"TLS scan on {result.server_location} failed: {error_trace}: {''.join(error_trace.format())}")
     if last_error_trace:
         raise TLSException(str(last_error_trace))
 
@@ -894,6 +912,33 @@ def test_key_exchange_hash(
     )
 
 
+def check_pq_kex_support(
+    server_conn_info: ServerConnectivityInfo, supported_tls_versions: list[TlsVersionEnum]
+) -> TLSPqKexEvaluation:
+    """
+    Test support for post-quantum key exchange (#1640), one connection per group.
+    sslyze's supported_groups scan command probes every other group too, 46 connections
+    against a TLS 1.3 server instead of 3, so this calls its private per-group probe directly.
+    """
+    if TlsVersionEnum.TLS_1_3 not in supported_tls_versions:
+        return TLSPqKexEvaluation(status=PqKexSupportStatus.na_no_tls_1_3)
+
+    hostname = server_conn_info.server_location.hostname
+    supported_groups = []
+    for group in PQ_KEX_GROUPS_GOOD:
+        try:
+            group_result = _test_pq_or_ffdh_group(server_conn_info, TlsVersionEnum.TLS_1_3, group)
+        except Exception as exc:
+            log.warning(f"PQ key exchange probe for {group.value} on {hostname} failed: {exc}", exc_info=True)
+            return TLSPqKexEvaluation(status=PqKexSupportStatus.unknown)
+        if group_result.was_accepted_by_server:
+            supported_groups.append(group.value)
+
+    if supported_groups:
+        return TLSPqKexEvaluation(status=PqKexSupportStatus.supported, supported_groups=supported_groups)
+    return TLSPqKexEvaluation(status=PqKexSupportStatus.not_supported)
+
+
 def _test_connection_with_limited_sigalgs(
     server_connectivity_info: ServerConnectivityInfo, sigalgs: list[tuple[OpenSslDigestNidEnum, OpenSslEvpPkeyEnum]]
 ) -> OpenSslDigestNidEnum | None:
@@ -906,7 +951,7 @@ def _test_connection_with_limited_sigalgs(
     if server_connectivity_info.tls_probing_result.highest_tls_version_supported == TlsVersionEnum.TLS_1_3:
         override_tls_version = TlsVersionEnum.TLS_1_2
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
-        override_tls_version=override_tls_version, should_use_legacy_openssl=False
+        override_tls_version=override_tls_version, openssl_version=OpenSslVersionEnum.OPENSSL_1_1_1
     )
     ssl_connection.ssl_client.set_signature_algorithms(sigalgs)
 
@@ -1010,11 +1055,12 @@ def find_most_preferred_cipher_suite(
 ) -> CipherSuite:
     suite_names = [suite.openssl_name for suite in cipher_suites]
 
-    # OpenSSL is fine with invalid cipher names, as long as there are some ciphers selected it does support.
-    # However, this may also happen in rare cases where parts of the suite are only supported in one OpenSSL
-    # version, and another part in another. This appears very rare, so we log it and continue.
-    # In theory, this can cause a small set of obscure cipher order violations to be undetected.
-    unavailable_suites = [c for c in cipher_suites if not _check_cipher_suite_available(tls_version, c)]
+    # The connection below uses the 1.1.1 build, which silently ignores cipher names it does not know.
+    # Suites only the 1.0.2 build offers (static DH/ECDH, single DES, EXPORT) are left out of the order test.
+    # This leaves a small set of obscure cipher order violations undetected.
+    unavailable_suites = [
+        c for c in cipher_suites if c.supported_by_openssl_version == OpenSslVersionEnum.OPENSSL_1_0_2
+    ]
     if unavailable_suites:
         log.warning(
             f"unable to include cipher suites {unavailable_suites} in cipher order testing for {tls_version.name} on"
@@ -1022,7 +1068,7 @@ def find_most_preferred_cipher_suite(
         )
 
     ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
-        override_tls_version=tls_version, should_use_legacy_openssl=False
+        override_tls_version=tls_version, openssl_version=OpenSslVersionEnum.OPENSSL_1_1_1
     )
     _set_cipher_suite_string(tls_version, ":".join(suite_names), ssl_connection.ssl_client)
 
@@ -1037,18 +1083,7 @@ def find_most_preferred_cipher_suite(
     finally:
         ssl_connection.close()
 
-    selected_cipher = CipherSuitesRepository.get_cipher_suite_with_openssl_name(
-        tls_version, ssl_connection.ssl_client.get_current_cipher_name()
-    )
-    return selected_cipher
-
-
-def _check_cipher_suite_available(tls_version: TlsVersionEnum, cipher_suite: CipherSuite) -> bool:
-    try:
-        CipherSuitesRepository.get_cipher_suite_with_openssl_name(tls_version, cipher_suite.openssl_name)
-        return True
-    except ValueError:
-        return False
+    return _cipher_by_openssl_name(tls_version, ssl_connection.ssl_client.get_current_cipher_name())
 
 
 def tls_versions_for_cipher_detection(supported_tls_versions: list[TlsVersionEnum]) -> list[TlsVersionEnum]:
@@ -1086,11 +1121,11 @@ def find_accepted_ciphers(
         accepted_for_version: list[CipherSuiteAcceptedByServer] = []
         candidate_count = 0
 
-        for use_legacy_openssl, candidates in _candidate_groups_for_version(tls_version):
+        for openssl_version, candidates in _cipher_candidates_by_openssl_version(tls_version):
             candidate_count += len(candidates)
             for chunk in _balanced_chunks(candidates, CIPHER_PROBE_CHUNK_SIZE):
                 accepted_for_version.extend(
-                    _test_accepted_ciphers(server_conn_info, tls_version, chunk, use_legacy_openssl)
+                    _test_accepted_ciphers(server_conn_info, tls_version, chunk, openssl_version)
                 )
 
         log.info(
@@ -1101,43 +1136,36 @@ def find_accepted_ciphers(
     return accepted
 
 
-# Cached wrapper: sslyze's requires_legacy_openssl instantiates a LegacySslClient on
-# every call, which is expensive when partitioning a full TLS 1.2 cipher list.
-@functools.cache
-def _requires_legacy_openssl(openssl_name: str) -> bool:
-    return WorkaroundForTls12ForCipherSuites.requires_legacy_openssl(openssl_name)
-
-
-def _candidate_groups_for_version(
+def _cipher_candidates_by_openssl_version(
     tls_version: TlsVersionEnum,
-) -> list[tuple[bool, list[CipherSuite]]]:
+) -> list[tuple[OpenSslVersionEnum, list[CipherSuite]]]:
     """
-    Cipher candidates to probe for a given TLS version, grouped by whether they need
-    nassl's legacy OpenSSL build. Returns [(use_legacy_openssl, candidates), ...].
+    Cipher candidates to probe for a given TLS version, grouped by the nassl OpenSSL
+    build to probe them with. sslyze labels each cipher with the newest build that has it.
 
-    TLS 1.3 narrows to TLS_1_3_PROBE_CIPHERS (every other TLS 1.3 cipher is
-    good/sufficient). TLS 1.2 has to be partitioned per-cipher because weak ciphers
-    (CBC-SHA, RC4, etc.) are only offered by the legacy build. Older versions go
-    through the legacy build entirely.
+    TLS 1.3 only looks at TLS_1_3_PROBE_CIPHERS, every other TLS 1.3 cipher is
+    good/sufficient. Below TLS 1.2 only the 1.0.2 build is used: the ciphers it misses
+    all need TLS 1.2.
     """
     if tls_version == TlsVersionEnum.TLS_1_3:
         candidates = []
         for name in TLS_1_3_PROBE_CIPHERS:
             try:
-                candidates.append(CipherSuitesRepository.get_cipher_suite_with_openssl_name(tls_version, name))
+                candidates.append(_cipher_by_openssl_name(tls_version, name))
             except ValueError:
                 log.critical(f"TLS 1.3 probe cipher {name!r} not found in sslyze's repository, skipping")
-        return [(False, candidates)]
+        return [(OpenSslVersionEnum.OPENSSL_1_1_1, candidates)]
 
-    all_candidates = list(CipherSuitesRepository.get_all_cipher_suites(tls_version))
+    all_candidates = list(retrieve_all_available_cipher_suites(tls_version))
 
     if tls_version == TlsVersionEnum.TLS_1_2:
-        legacy = [c for c in all_candidates if _requires_legacy_openssl(c.openssl_name)]
-        modern = [c for c in all_candidates if not _requires_legacy_openssl(c.openssl_name)]
-        return [(False, modern), (True, legacy)]
+        by_build: dict[OpenSslVersionEnum, list[CipherSuite]] = {}
+        for candidate in all_candidates:
+            by_build.setdefault(candidate.supported_by_openssl_version, []).append(candidate)
+        return list(by_build.items())
 
     # TLS versions below 1.2 always need the legacy build.
-    return [(True, all_candidates)]
+    return [(OpenSslVersionEnum.OPENSSL_1_0_2, all_candidates)]
 
 
 def _balanced_chunks(items: list[CipherSuite], max_chunk_size: int) -> list[list[CipherSuite]]:
@@ -1158,14 +1186,14 @@ def _test_accepted_ciphers(
     server_conn_info: ServerConnectivityInfo,
     tls_version: TlsVersionEnum,
     candidates: list[CipherSuite],
-    use_legacy_openssl: bool,
+    openssl_version: OpenSslVersionEnum,
 ) -> list[CipherSuiteAcceptedByServer]:
     accepted: list[CipherSuiteAcceptedByServer] = []
     remaining = {c.openssl_name: c for c in candidates}
 
     while remaining:
         result = _attempt_connect_with_cipher_string(
-            server_conn_info, tls_version, ":".join(remaining), use_legacy_openssl=use_legacy_openssl
+            server_conn_info, tls_version, ":".join(remaining), openssl_version=openssl_version
         )
         if result is None:
             break
@@ -1185,13 +1213,13 @@ def _test_accepted_ciphers(
 
 # adapted from sslyze.plugins.openssl_cipher_suites._test_cipher_suite.connect_with_cipher_suite,
 # but extended to offer multiple ciphers in one Hello (vs sslyze's per-cipher probes)
-# and to make should_use_legacy_openssl a caller decision (vs sslyze's per-cipher dispatch).
+# and to make the OpenSSL build a caller decision (vs sslyze's per-cipher dispatch).
 def _attempt_connect_with_cipher_string(
     server_conn_info: ServerConnectivityInfo,
     tls_version: TlsVersionEnum,
     cipher_suite_str: str,
     *,
-    use_legacy_openssl: bool,
+    openssl_version: OpenSslVersionEnum,
 ) -> tuple[str, Any] | None:
     """
     Try to connect with the cipher string (colon-joined). On success, return
@@ -1201,7 +1229,8 @@ def _attempt_connect_with_cipher_string(
     no cipher name).
     """
     ssl_connection = server_conn_info.get_preconfigured_tls_connection(
-        override_tls_version=tls_version, should_use_legacy_openssl=use_legacy_openssl
+        override_tls_version=tls_version,
+        openssl_version=openssl_version,
     )
 
     try:
@@ -1244,7 +1273,7 @@ def _attempt_connect_with_cipher_string(
             ephemeral_key = None
         return negotiated_name, ephemeral_key
 
-    except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut, ValueError):
+    except (ConnectionToServerFailed, OpenSSLError, ValueError):
         return None
 
     except Exception as exc:
@@ -1271,13 +1300,16 @@ def check_supported_tls_versions(
         requires_legacy_openssl = tls_version not in [TlsVersionEnum.TLS_1_2, TlsVersionEnum.TLS_1_3]
 
         ssl_connection = server_connectivity_info.get_preconfigured_tls_connection(
-            override_tls_version=tls_version, should_use_legacy_openssl=requires_legacy_openssl
+            override_tls_version=tls_version,
+            openssl_version=(
+                OpenSslVersionEnum.OPENSSL_1_0_2 if requires_legacy_openssl else OpenSslVersionEnum.OPENSSL_1_1_1
+            ),
         )
         try:
             ssl_connection.connect()
             supported_tls_versions.append(tls_version)
             ems_evaluation.update_for_connection(ssl_connection, tls_version)
-        except (ConnectionToServerFailed, OpenSSLError, TlsHandshakeTimedOut) as exc:
+        except (ConnectionToServerFailed, OpenSSLError) as exc:
             log.debug(
                 f"Server {server_connectivity_info.server_location.hostname}"
                 f"/{server_connectivity_info.server_location.ip_address}"
