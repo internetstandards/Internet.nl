@@ -9,78 +9,33 @@ const outputDir = process.env.OUTPUT_DIR ?? "dist";
 const cleanupOutputDir = () => ({
   name: "cleanup-output-dir",
   buildStart() {
-    // Only clean up if not in watch mode
+    // in watch mode only the changed bundle is rebuilt
     if (!this.meta.watchMode && fs.existsSync(outputDir)) {
       fs.rmSync(outputDir, { recursive: true, force: true });
     }
   },
 });
 
-const defaultPlugins = [
-  isProduction &&
-    terser({
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-      format: {
-        comments: false,
-      },
-    }),
-];
-
-// Define chunks configuration
-const chunks = {
-  base: [
-    "src/js/base/header.js",
-    "src/js/base/theme.js",
-    "src/js/base/print.js",
-    "src/js/lib/matomo.js",
-  ],
-  results: [
-    "src/js/pages/results/copy-link.js",
-    "src/js/pages/results/repeat-test-countdown.js",
-  ],
-  connection: ["src/js/pages/connection/connection.js"],
-  probe: ["src/js/pages/probe/probe.js"],
-  "components/card-list": ["src/js/components/card-list/load-more.js"],
-  "components/carousel": ["src/js/components/carousel/carrousel.js"],
-  "components/meter": ["src/js/components/meter/result-meter.js"],
-  "components/action-card": [
-    "src/js/components/action-card/action-card-fallback.js",
-  ],
+// One bundle per script tag. Static files are cached under fixed names, so a
+// bundle must not import from another one that may be an older cached version.
+const scripts = {
+  "theme-init": "src/js/theme-init.js",
+  base: "src/js/base.js",
+  results: "src/js/results.js",
+  connection: "src/js/pages/connection/connection.js",
+  probe: "src/js/pages/probe/probe.js",
+  "components/card-list": "src/js/components/card-list/load-more.js",
+  "components/carousel": "src/js/components/carousel/carrousel.js",
 };
 
-// Create config for each file
 const config = [
-  // Modern JavaScript bundle (ES modules)
-  {
-    input: "src/index.js",
-    output: {
-      format: "es",
-      sourcemap: !isProduction,
-      dir: `${outputDir}/js`,
-      manualChunks: chunks,
-      chunkFileNames: "[name]-min.js",
-    },
-    plugins: [cleanupOutputDir(), ...defaultPlugins],
-  },
-  // Theme from cookie, loaded synchronously before rendering
-  {
-    input: "src/js/theme-init.js",
-    output: {
-      format: "iife",
-      file: `${outputDir}/js/theme-init-min.js`,
-    },
-    plugins: defaultPlugins,
-  },
-  // CSS bundle
   {
     input: "src/index.css",
     output: {
       file: `${outputDir}/css/style-min.css`,
     },
     plugins: [
+      cleanupOutputDir(),
       postcss({
         extract: true,
         minimize: isProduction,
@@ -88,6 +43,16 @@ const config = [
       }),
     ],
   },
+  ...Object.entries(scripts).map(([name, input]) => ({
+    input,
+    output: {
+      // theme-init is a classic script, loaded synchronously before rendering
+      format: name === "theme-init" ? "iife" : "es",
+      sourcemap: !isProduction,
+      file: `${outputDir}/js/${name}-min.js`,
+    },
+    plugins: [isProduction && terser()],
+  })),
 ];
 
 export default defineConfig(config);
