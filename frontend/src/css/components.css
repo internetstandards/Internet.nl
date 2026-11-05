@@ -158,6 +158,12 @@
     font: inherit;
   }
 
+  .author-image {
+    border-radius: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
   a {
     display: inline;
     color: var(--body-link-color);

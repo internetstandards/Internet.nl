@@ -4,6 +4,7 @@ import logging
 import re
 
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.core.exceptions import DisallowedRedirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -228,6 +229,13 @@ def articlepage(request, article):
     date = "article " + article + " date"
     lead = "article " + article + " lead"
     body = "article " + article + " body"
+    author = _("article " + article + " author")
+    if author == "article " + article + " author":
+        author = ""
+    # author photos come from the content repository, and not every author has one
+    author_photo = f"author/{author}/picture.jpg"
+    if not author or not finders.find(author_photo):
+        author_photo = None
     return render(
         request,
         "article.html",
@@ -239,6 +247,8 @@ def articlepage(request, article):
             date=date,
             title=title,
             lead=lead,
+            author=author,
+            author_photo=author_photo,
             body=body,
         ),
     )

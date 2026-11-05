@@ -103,6 +103,8 @@
 
   .quote-image {
     border-radius: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
 
     @media (width >= 56.25rem) {
       grid-column: 2 / 3;
