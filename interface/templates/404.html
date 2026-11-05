@@ -1,19 +1,20 @@
 {% extends "base.html" %}
+{% load translate %}
 {% block maincontent %}
   <section class="intro-section bg-primary ellipse">
     <div class="container">
       <hgroup class="center">
         <h1 class="h5 color-secondary">404</h1>
-        <p class="h1 color-secondary">{% include "string.html" with name="page404 title" %}</p>
+        <p class="h1 color-secondary">{% translate "page404 title" %}</p>
       </hgroup>
       <div class="center">
-        <a class="primary-button icon" href="/">{% include "string.html" with name="page404 button" %}</a>
+        <a class="primary-button icon" href="/">{% translate "page404 button" %}</a>
       </div>
     </div>
   </section>
   <section class="faq-sub-section bg-primary">
     <div class="container">
-      <h2 class="h2 color-secondary">{% include "string.html" with name="page404 contact" %}</h2>
+      <h2 class="h2 color-secondary">{% translate "page404 contact" %}</h2>
       {% include "partials/contact-cards.html" %}
     </div>
   </section>

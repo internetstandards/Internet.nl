@@ -29,14 +29,14 @@
   <body class="{{ pageclass }}">
     <header>
       <a class="skip-link" href="#main-content">
-        {% include "string.html" with name="page gotocontents" %}
+        {% translate "page gotocontents" %}
       </a>
       <div class="container">
         <div class="header-logo-toggle-controls">
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
             <a class="header-logo"
                href="/"
-               aria-label="{% include "string.html" with name="base home" %}">
+               aria-label="{% translate_attr 'base home' %}">
               <picture class="light-visible">
                 <source srcset="{% static 'logos/logo.svg' %}" media="(width >= 900px)">
                 <img src="{% static 'logos/logo.svg' %}"
@@ -53,14 +53,14 @@
               </picture>
             </a>
           {% else %}
-            <a class="header-home" href="/">{% include "string.html" with name="base home" %}</a>
+            <a class="header-home" href="/">{% translate "base home" %}</a>
           {% endif %}
           <button class="toggle-menu icon large"
                   type="button"
                   aria-controls="nav-controls"
                   aria-expanded="false">
-            <span class="open">{% include "string.html" with name="base menu" %}</span>
-            <span class="close">{% include "string.html" with name="base close" %}</span>
+            <span class="open">{% translate "base menu" %}</span>
+            <span class="close">{% translate "base close" %}</span>
           </button>
         </div>
         <div id="nav-controls" class="nav-controls">
@@ -72,34 +72,34 @@
                         type="button"
                         aria-controls="nav-sublist"
                         aria-expanded="false">
-                  {% include "string.html" with name="base tests" %}
+                  {% translate "base tests" %}
                 </button>
                 <ul id="nav-sublist" class="nav-sublist">
                   <li class="nav-subitem">
-                    <a class="icon" href="/test-site/">{% include "string.html" with name="base test website label" %}</a>
+                    <a class="icon" href="/test-site/">{% translate "base test website label" %}</a>
                   </li>
                   <li class="nav-subitem">
-                    <a class="icon" href="/test-mail/">{% include "string.html" with name="base test mail label" %}</a>
+                    <a class="icon" href="/test-mail/">{% translate "base test mail label" %}</a>
                   </li>
                   <li class="nav-subitem">
-                    <a class="icon" href="/test-connection/">{% include "string.html" with name="base test connection label" %}</a>
+                    <a class="icon" href="/test-connection/">{% translate "base test connection label" %}</a>
                   </li>
                 </ul>
               </li>
               <li class="nav-item {% if pagemenu == 'faqs' %}current{% endif %}">
-                <a href="/faqs/">{% include "string.html" with name="base faqs" %}</a>
+                <a href="/faqs/">{% translate "base faqs" %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'halloffame' %}current{% endif %}">
-                <a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a>
+                <a href="/halloffame/">{% translate "base halloffame" %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'news' %}current{% endif %}">
-                <a href="/articles/">{% include "string.html" with name="base news" %}</a>
+                <a href="/articles/">{% translate "base news" %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'about' %}current{% endif %}">
-                <a href="/about/">{% if "INTERNETNL_BRANDING"|get_settings_value %}{% include "string.html" with name="base about" %}{% else %}{% include "string.html" with name="base about custom" %}{% endif %}</a>
+                <a href="/about/">{% if "INTERNETNL_BRANDING"|get_settings_value %}{% translate "base about" %}{% else %}{% translate "base about custom" %}{% endif %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'contact' %}current{% endif %}">
-                <a href="/contact/">{% include "string.html" with name="base contact" %}</a>
+                <a href="/contact/">{% translate "base contact" %}</a>
               </li>
             </ul>
             <ul class="nav-list nav-settings">
@@ -111,7 +111,7 @@
                         aria-expanded="false">
                   <span class="current-language-desktop">{{ request.current_language_code }}</span>
                   <span class="current-language-mobile">
-                    {% include "string.html" with name="base language" %}
+                    {% translate "base language" %}
                   </span>
                 </button>
                 <form id="language-form" action="/change_language/" method="post">
@@ -138,23 +138,23 @@
                         type="button"
                         aria-controls="nav-sublist-theme"
                         aria-expanded="false">
-                  <span class="current-theme-mobile">{% include "string.html" with name="base theme" %}</span>
-                  <span class="current-theme-desktop">{% include "string.html" with name="base theme system" %}</span>
+                  <span class="current-theme-mobile">{% translate "base theme" %}</span>
+                  <span class="current-theme-desktop">{% translate "base theme system" %}</span>
                 </button>
                 <ul id="nav-sublist-theme" class="nav-sublist">
                   <li class="nav-subitem">
                     <button class="icon system" id="theme-system" type="button">
-                      {% include "string.html" with name="base theme system" %}
+                      {% translate "base theme system" %}
                     </button>
                   </li>
                   <li class="nav-subitem">
                     <button class="icon sun" id="theme-light" type="button">
-                      {% include "string.html" with name="base theme light" %}
+                      {% translate "base theme light" %}
                     </button>
                   </li>
                   <li class="nav-subitem">
                     <button class="icon moon" id="theme-dark" type="button">
-                      {% include "string.html" with name="base theme dark" %}
+                      {% translate "base theme dark" %}
                     </button>
                   </li>
                 </ul>
@@ -174,7 +174,7 @@
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
             <a class="footer-logo"
                href="/"
-               aria-label="{% include "string.html" with name="base home" %}">
+               aria-label="{% translate_attr 'base home' %}">
               <img src="{% static 'logos/logo-white-2.svg' %}"
                    alt="Internet.nl Logo"
                    width="228"
@@ -182,26 +182,26 @@
                    loading="lazy">
             </a>
           {% else %}
-            <a class="footer-logo" href="/">{% include "string.html" with name="base home" %}</a>
+            <a class="footer-logo" href="/">{% translate "base home" %}</a>
           {% endif %}
           <ul class="nav-list">
             <li class="nav-item">
-              <a class="icon" href="/test-site/">{% include "string.html" with name="base tests" %}</a>
+              <a class="icon" href="/test-site/">{% translate "base tests" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/faqs/">{% include "string.html" with name="base faqs" %}</a>
+              <a class="icon" href="/faqs/">{% translate "base faqs" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a>
+              <a class="icon" href="/halloffame/">{% translate "base halloffame" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/articles/">{% include "string.html" with name="base news" %}</a>
+              <a class="icon" href="/articles/">{% translate "base news" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/about/">{% if "INTERNETNL_BRANDING"|get_settings_value %}{% include "string.html" with name="base about" %}{% else %}{% include "string.html" with name="base about custom" %}{% endif %}</a>
+              <a class="icon" href="/about/">{% if "INTERNETNL_BRANDING"|get_settings_value %}{% translate "base about" %}{% else %}{% translate "base about custom" %}{% endif %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/contact/">{% include "string.html" with name="base contact" %}</a>
+              <a class="icon" href="/contact/">{% translate "base contact" %}</a>
             </li>
           </ul>
         </div>
@@ -210,17 +210,17 @@
         <div class="container">
           <ul class="footer-links">
             <li class="footer-link">
-              <a href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a>
+              <a href="/disclosure/">{% translate "base disclosure" %}</a>
             </li>
             <li class="footer-link">
-              <a href="/privacy/">{% include "string.html" with name="base privacy" %}</a>
+              <a href="/privacy/">{% translate "base privacy" %}</a>
             </li>
             <li class="footer-link">
-              <a href="/copyright/">{% include "string.html" with name="base copyright" %}</a>
+              <a href="/copyright/">{% translate "base copyright" %}</a>
             </li>
             {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
               <li class="footer-link">
-                <a href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a>
+                <a href="/accessibility/">{% translate "base accessibility" %}</a>
               </li>
             {% endif %}
           </ul>
@@ -230,7 +230,7 @@
                 <a class="linkedin icon"
                    href="https://www.linkedin.com/company/internet-nl/"
                    target="_blank">
-                  <span class="visually-hidden">{% include "string.html" with name="base linkedin" %}</span>
+                  <span class="visually-hidden">{% translate "base linkedin" %}</span>
                 </a>
               </li>
               <li class="footer-social">
@@ -238,7 +238,7 @@
                    href="https://mastodon.nl/@internet_nl"
                    target="_blank"
                    rel="me">
-                  <span class="visually-hidden">{% include "string.html" with name="base mastodon" %}</span>
+                  <span class="visually-hidden">{% translate "base mastodon" %}</span>
                 </a>
               </li>
             </ul>

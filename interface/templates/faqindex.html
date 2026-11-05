@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load translate %}
 
 {% block maincontent %}
   <section class="intro-section bg-primary ellipse reverse">
     <div class="container">
       <hgroup class="center">
-        <h1 class="h5 color-secondary">{% include "string.html" with name="faqs title" %}</h1>
-        <p class="h1 color-secondary">{% include "string.html" with name="faqs description" %}</p>
+        <h1 class="h5 color-secondary">{% translate "faqs title" %}</h1>
+        <p class="h1 color-secondary">{% translate "faqs description" %}</p>
       </hgroup>
     </div>
   </section>
@@ -13,13 +14,13 @@
   {% for category, articles in categories %}
     <section class="card-section">
       <div class="container">
-        <h2 class="h2 color-secondary">{% include "string.html" with name=category %}</h2>
+        <h2 class="h2 color-secondary">{% translate category %}</h2>
         <ul class="card-list">
           {% for url, title in articles %}
             <li class="card knowledge-card ellipse">
               <a href="{{ url }}">
                 <hgroup>
-                  <h3>{% include "string.html" with name=title %}</h3>
+                  <h3>{% translate title %}</h3>
                 </hgroup>
                 <div class="secondary-button rounded icon"></div>
               </a>

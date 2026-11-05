@@ -5,14 +5,14 @@
 
   <section class="test-section bg-primary ellipse">
     <div class="container">
-      <h1 class="h1 color-secondary">{% include "string.html" with name="home teaser" %}</h1>
+      <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
       <article class="test-card-large connection-variant">
-        <h2 class="connection icon">{% include "string.html" with name="base test connection label" %}</h2>
+        <h2 class="connection icon">{% translate "base test connection label" %}</h2>
         <div class="button-container">
           <form action="/connection/" method="POST" id="form-connection-test">
-            <button class="primary-button icon connection-button" type="submit">{% include "string.html" with name="base test start" %}</button>
+            <button class="primary-button icon connection-button" type="submit">{% translate "base test start" %}</button>
           </form>
-          <a class="secondary-button icon" href="#about-the-test">{% include "string.html" with name="base test explain" %}</a>
+          <a class="secondary-button icon" href="#about-the-test">{% translate "base test explain" %}</a>
         </div>
       </article>
     </div>
@@ -20,13 +20,13 @@
 
   <section class="test-sub-section bg-primary">
     <div class="container">
-      <h2 class="h3 color-secondary">{% include "string.html" with name="base test more" %}</h2>
+      <h2 class="h3 color-secondary">{% translate "base test more" %}</h2>
       {% include "partials/test-cards.html" with exclude="connection" %}
     </div>
   </section>
   <section class="article-content-section" id="about-the-test">
     <div class="container">
-      <h2>{% include "string.html" with name="base test connection title" %}</h2>
+      <h2>{% translate "base test connection title" %}</h2>
       {% translate "base test connection explain" %}
     </div>
   </section>

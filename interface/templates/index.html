@@ -7,12 +7,12 @@
 {% block introcontent %}
   <section class="test-section home-variant bg-primary ellipse">
     <div class="container">
-      <h1 class="h1 color-secondary">{% include "string.html" with name="home teaser" %}</h1>
+      <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
       <article class="test-card-large home-variant">
-        <h2 class="domain icon">{% include "string.html" with name="base test website label" %}</h2>
+        <h2 class="domain icon">{% translate "base test website label" %}</h2>
         <form action="/site/" method="POST">
           <label>
-            <span>{% include "string.html" with name="base test website input" %}</span>
+            <span>{% translate "base test website input" %}</span>
             <input id="web-url"
                    name="url"
                    type="text"
@@ -22,10 +22,10 @@
                    required>
           </label>
           <button class="primary-button icon" type="submit">
-            {% include "string.html" with name="base test start" %}
+            {% translate "base test start" %}
           </button>
         </form>
-        <a class="icon" href="/test-site/">{% include "string.html" with name="base test website title" %}</a>
+        <a class="icon" href="/test-site/">{% translate "base test website title" %}</a>
       </article>
       {% include "partials/test-cards.html" with exclude="site" variant="home-variant" heading="h2" %}
     </div>
@@ -36,8 +36,8 @@
   <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
     <div class="container">
       <hgroup class="center">
-        <h2 class="h5 color-accent">{% include "string.html" with name="base halloffame" %}</h2>
-        <p class="h4">{% include "string.html" with name="base halloffame description" %}</p>
+        <h2 class="h5 color-accent">{% translate "base halloffame" %}</h2>
+        <p class="h4">{% translate "base halloffame description" %}</p>
       </hgroup>
       <ul class="hall-of-fame-list">
         {% for member in halloffame %}
@@ -48,10 +48,10 @@
       </ul>
       <div class="button-container">
         <a class="primary-button icon" href="/test-site/">
-          {% include "string.html" with name="home why button" %}
+          {% translate "home why button" %}
         </a>
         <a class="secondary-button icon" href="/halloffame/">
-          {% include "string.html" with name="base halloffame link" %}
+          {% translate "base halloffame link" %}
         </a>
       </div>
     </div>
@@ -59,10 +59,10 @@
   {% include "partials/about-platform.html" with link=True %}
   <section class="card-section">
     <div class="container">
-      <h2 class="h3 color-secondary">{% include "string.html" with name="base news" %}</h2>
+      <h2 class="h3 color-secondary">{% translate "base news" %}</h2>
       {% include "partials/news-cards.html" with articles=articles %}
       <a class="secondary-button icon" href="/articles/">
-        {% include "string.html" with name="news link" %}
+        {% translate "news link" %}
       </a>
     </div>
   </section>

@@ -2,28 +2,28 @@
 {% if "INTERNETNL_BRANDING"|get_settings_value %}
   <section class="contact-section {% if alt %}alt{% else %}ellipse hidden-mobile{% endif %}">
     <div class="container">
-      <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
+      <h2 class="h3 color-secondary">{% translate "faqs section title" %}</h2>
       {% for i in "12345" %}
         {% expand "faqs section question-{{ i }}" as question %}
         {% expand "faqs section answer-{{ i }}" as answer %}
         <details class="faq-item accordion" name="faq-item">
-          <summary class="icon">{% include "string.html" with name=question %}</summary>
+          <summary class="icon">{% translate question %}</summary>
           <div>{% translate answer %}</div>
         </details>
       {% endfor %}
-      <a class="secondary-button icon" href="/faqs/">{% include "string.html" with name="faqs section link" %}</a>
+      <a class="secondary-button icon" href="/faqs/">{% translate "faqs section link" %}</a>
       {% if not alt %}
         <article class="contact-card">
           <hgroup>
-            <h3>{% include "string.html" with name="base contact" %}</h3>
-            <p>{% include "string.html" with name="contact section description" %}</p>
+            <h3>{% translate "base contact" %}</h3>
+            <p>{% translate "contact section description" %}</p>
           </hgroup>
           <ul>
             <li class="contact-card-small">
               <a href="mailto:question@internet.nl">
                 <hgroup>
-                  <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
-                  <p>{% include "string.html" with name="contact section mail-description" %}</p>
+                  <h4 class="mail icon">{% translate "contact section mail" %}</h4>
+                  <p>{% translate "contact section mail-description" %}</p>
                 </hgroup>
                 <div class="secondary-button rounded icon"></div>
               </a>
@@ -31,8 +31,8 @@
             <li class="contact-card-small">
               <a href="https://github.com/internetstandards/Internet.nl">
                 <hgroup>
-                  <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
-                  <p>{% include "string.html" with name="contact section issue-description" %}</p>
+                  <h4 class="help icon">{% translate "contact section issue" %}</h4>
+                  <p>{% translate "contact section issue-description" %}</p>
                 </hgroup>
                 <div class="secondary-button rounded icon"></div>
               </a>

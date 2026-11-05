@@ -6,8 +6,8 @@
 <section class="intro-section bg-primary ellipse reverse">
   <div class="container">
     <hgroup class="flipped">
-      <h1 class="h1 color-secondary">{% include "string.html" with name=title %}</h1>
-      <p class="h5 color-secondary">{% include "string.html" with name="base news" %} | {% include "string.html" with name=date %} </p>
+      <h1 class="h1 color-secondary">{% translate title %}</h1>
+      <p class="h5 color-secondary">{% translate "base news" %} | {% translate date %} </p>
     </hgroup>
   </div>
 </section>
@@ -21,9 +21,9 @@
 
 <section class="card-section">
   <div class="container">
-    <h2 class="h2 color-secondary">{% include "string.html" with name="news other" %}</h2>
+    <h2 class="h2 color-secondary">{% translate "news other" %}</h2>
     {% include "partials/news-cards.html" with articles=articles %}
-    <a class="secondary-button icon" href="/articles/">{% include "string.html" with name="news link" %}</a>
+    <a class="secondary-button icon" href="/articles/">{% translate "news link" %}</a>
   </div>
 </section>
 

@@ -2,53 +2,53 @@
 {% load translate %}
 
 {% block testheadcontent %}
-  {% include "string.html" with name="mail title" %}
+  {% translate "mail title" %}
 {% endblock %}
 
 {% block testdetailitems%}
   {% if probe.name == 'mailipv6' %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results domain-mail ipv6 name-servers label" %}
+      {% translate "results domain-mail ipv6 name-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.ns_aaaa %}
     {% include "details-test-item.html" with testitem=details.ns_reach %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail ipv6 mail-servers label" %}
+      {% translate "results mail ipv6 mail-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.mx_aaaa %}
     {% include "details-test-item.html" with testitem=details.mx_reach %}
 
   {% elif probe.name == 'maildnssec' %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail dnssec domain label" %}
+      {% translate "results mail dnssec domain label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.dnssec_exists %}
     {% include "details-test-item.html" with testitem=details.dnssec_valid %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail dnssec mail-servers label" %}
+      {% translate "results mail dnssec mail-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.dnssec_mx_exists %}
     {% include "details-test-item.html" with testitem=details.dnssec_mx_valid %}
 
   {% elif probe.name == 'mailauth' %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail auth dmarc label" %}
+      {% translate "results mail auth dmarc label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.dmarc %}
     {% include "details-test-item.html" with testitem=details.dmarc_policy %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail auth dkim label" %}
+      {% translate "results mail auth dkim label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.dkim %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail auth spf label" %}
+      {% translate "results mail auth spf label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.spf %}
     {% include "details-test-item.html" with testitem=details.spf_policy %}
 
   {% elif probe.name == 'mailtls' %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail tls starttls label" %}
+      {% translate "results mail tls starttls label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.starttls_exists %}
     {% include "details-test-item.html" with testitem=details.tls_version %}
@@ -62,7 +62,7 @@
     {% include "details-test-item.html" with testitem=details.zero_rtt %}
     {% include "details-test-item.html" with testitem=details.extended_master_secret %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results domain-mail tls certificate label" %}
+      {% translate "results domain-mail tls certificate label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.cert_trust %}
     {% include "details-test-item.html" with testitem=details.cert_pubkey %}
@@ -70,7 +70,7 @@
     {% include "details-test-item.html" with testitem=details.cert_hostmatch %}
     {% include "details-test-item.html" with testitem=details.mail_caa %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results domain-mail tls dane label" %}
+      {% translate "results domain-mail tls dane label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.dane_exists %}
     {% include "details-test-item.html" with testitem=details.dane_valid %}
@@ -78,17 +78,17 @@
 
   {% elif probe.name == 'mailrpki' %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results domain-mail rpki name-servers label" %}
+      {% translate "results domain-mail rpki name-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.ns_rpki_exists %}
     {% include "details-test-item.html" with testitem=details.ns_rpki_valid %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail rpki mx-name-servers label" %}
+      {% translate "results mail rpki mx-name-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.mail_mx_ns_rpki_exists %}
     {% include "details-test-item.html" with testitem=details.mail_mx_ns_rpki_valid %}
     <h4 class="h7 color-secondary test-subsection">
-      {% include "string.html" with name="results mail rpki mail-servers label" %}
+      {% translate "results mail rpki mail-servers label" %}
     </h4>
     {% include "details-test-item.html" with testitem=details.mail_rpki_exists %}
     {% include "details-test-item.html" with testitem=details.mail_rpki_valid %}
