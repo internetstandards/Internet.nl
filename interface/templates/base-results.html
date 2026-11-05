@@ -7,7 +7,7 @@
 {% block maincontent %}
   <section class="result-section bg-primary">
     <div class="container">
-      <h1>
+      <h1 id="results-title">
         <span class="h5 color-secondary visually-hidden">
           {% translate "results score-for" %}
         </span>
@@ -31,7 +31,7 @@
       {% endif %}
       <div class="meter-container">
         <div class="meter">
-          <meter min="0" max="100" value="{{ score }}" id="testresults-percentage">{{ score }}%</meter>
+          <meter min="0" max="100" value="{{ score }}" id="testresults-percentage" aria-labelledby="results-title">{{ score }}%</meter>
         </div>
         <ul class="meter-numbers h7 color-secondary">
           <li class="meter-number">0</li>
