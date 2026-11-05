@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static %}
 {% block maincontent %}
   <section class="intro-section bg-primary ellipse">
     <div class="container">
@@ -15,30 +14,7 @@
   <section class="faq-sub-section bg-primary">
     <div class="container">
       <h2 class="h2 color-secondary">{% include "string.html" with name="page404 contact" %}</h2>
-      <ul class="contact-card-list">
-        <li class="contact-card-small alt">
-          <hgroup>
-            <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
-            <p>
-              {% include "string.html" with name="contact mail-description" %}
-            </p>
-          </hgroup>
-        </li>
-        <li class="contact-card-small alt">
-          <hgroup>
-            <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
-            <p>
-              {% include "string.html" with name="contact issue-description" %}
-            </p>
-          </hgroup>
-        </li>
-        <li class="contact-card-small alt">
-          <hgroup>
-            <h4 class="visit icon">{% include "string.html" with name="contact post" %}</h4>
-            <p>{% include "string.html" with name="contact post-description" %}</p>
-          </hgroup>
-        </li>
-      </ul>
+      {% include "partials/contact-cards.html" %}
     </div>
   </section>
 {% endblock %}

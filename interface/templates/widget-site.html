@@ -1,8 +1,10 @@
 {% extends "faqarticle.html" %}
 {% load translate %}
 
+{% block faqarticletitle %}{% include "string.html" with name="base widget site" %}{% endblock %}
+
 {% block faqarticlecontent %}
-    {% include "content.html" with name="widget site intro" %}
+    {% translate "widget site intro" %}
     <h2><label for="html-block">HTML</label></h2>
     <div>
     <textarea id="html-block" readonly>&lt;form action="https://internet.nl/site/" method="POST"&gt;
@@ -42,5 +44,5 @@ button.internetnl {
     border-radius: 18px;
     padding: .2em .5em;
 }</textarea>
-    {% include "content.html" with name="widget content notes" %}
+    {% translate "widget content notes" %}
 {% endblock %}

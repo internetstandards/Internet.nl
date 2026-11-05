@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load translate %}
 
 {% block maincontent %}
 
@@ -12,7 +13,7 @@
             <span>{% include "string.html" with name="base test mail input" %}</span>
             <div class="mail-input-container">
               <div class="mail-icon-container icon"></div>
-              <input class="mail-input" name="url" type="text" placeholder="{% include "string.html" with name="base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
+              <input id="mail-url" class="mail-input" name="url" type="text" placeholder="{% include "string.html" with name="base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
             </div>
           </label>
           {% if request.GET.invalid != None %}
@@ -36,6 +37,7 @@
             <span>{% include "string.html" with name="base test mail usp3" %}</span>
           </li>
         </ul>
+        <a class="icon" href="#about-the-test">{% include "string.html" with name="base test explain" %}</a>
       </article>
     </div>
   </section>
@@ -43,30 +45,13 @@
   <section class="test-sub-section bg-primary">
     <div class="container">
       <h2 class="h3 color-secondary">{% include "string.html" with name="base test more" %}</h2>
-      <ul class="test-card-list">
-        <li class="test-card-small">
-          <a href="/test-site">
-            <div class="card-container domain icon">
-              <hgroup>
-                <h3>{% include "string.html" with name="base test website label" %}</h3>
-                <p>{% include "string.html" with name="base test website sublabel" %}</p>
-              </hgroup>
-            </div>
-            <div class="primary-button rounded icon"></div>
-          </a>
-        </li>
-        <li class="test-card-small">
-          <a href="/test-connection">
-            <div class="card-container connection icon">
-              <hgroup>
-                <h3>{% include "string.html" with name="base test connection label" %}</h3>
-                <p>{% include "string.html" with name="base test connection sublabel" %}</p>
-              </hgroup>
-            </div>
-            <div class="primary-button rounded icon"></div>
-          </a>
-        </li>
-      </ul>
+      {% include "partials/test-cards.html" with exclude="mail" %}
+    </div>
+  </section>
+  <section class="article-content-section" id="about-the-test">
+    <div class="container">
+      <h2>{% include "string.html" with name="base test mail title" %}</h2>
+      {% translate "base test mail explain" %}
     </div>
   </section>
 {% endblock %}

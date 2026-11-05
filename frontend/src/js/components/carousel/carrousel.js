@@ -1,7 +1,5 @@
 import { validateElements } from "../../lib/utils.js";
 
-// TODO: add languages in aria-label
-
 const elements = {
   carousel: document.querySelector(".knowledge-list"),
   dots: document.querySelectorAll(".dot"),
@@ -25,12 +23,7 @@ function carousel() {
   );
 
   dots.forEach((dot, index) => {
-    const headerId = items[index].querySelector("h3").id;
-    const headerText = document.getElementById(headerId).textContent;
-    const button = dot.querySelector("button");
-
-    button.setAttribute("aria-label", `Scroll naar ${headerText}`);
-    button.addEventListener("click", () => {
+    dot.querySelector("button").addEventListener("click", () => {
       items[index].scrollIntoView({
         behavior: "smooth",
         inline: "center",

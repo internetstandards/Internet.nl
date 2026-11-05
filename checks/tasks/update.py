@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
@@ -19,7 +20,6 @@ class HOFEntry:
         self.web_permalink = None
         self.mail_timestamp = None
         self.mail_permalink = None
-        self.mail_nomx = None
 
     def __str__(self):
         return f"""------- {self.domain}
@@ -27,7 +27,6 @@ class HOFEntry:
         web_permalink: {self.web_permalink}
         mail_timestamp: {self.mail_timestamp}
         mail_permalink: {self.mail_permalink}
-        mail_nomx: {self.mail_nomx}
         """
 
 
@@ -60,11 +59,6 @@ def _update_mail_entry(hof, domain_name, report_id, timestamp):
     entry = _create_hof_entry(hof, domain_name)
     entry.mail_timestamp = timestamp
     entry.mail_permalink = f"/mail/{domain_name}/{report_id}/"
-    report = MailTestReport.objects.get(id=report_id)
-    ipv6_report = report.ipv6.report
-    if not isinstance(ipv6_report, dict):
-        return
-    entry.mail_nomx = ipv6_report["mx_aaaa"]["verdict"] == "detail mail ipv6 mx-AAAA verdict other"
 
 
 def _populate_HOF(hof, model, entry_creation):
@@ -102,7 +96,7 @@ def _populate_HOF(hof, model, entry_creation):
 def _update_hof():
     """
     Populate the Hall of Fame with domains that scored 100% in the website
-    and/or the mail test.
+    and the mail test.
 
     .. note:: Domains that are part of the HoF are domains that their *latest*
               test scored 100%.
@@ -113,18 +107,8 @@ def _update_hof():
         _populate_HOF(hof, model, entry_creation)
 
     champions = []
-    web = []
-    mail = []
     for entry in hof.values():
-        is_web = False
-        is_mail = False
-        if entry.web_permalink:
-            web.append({"permalink": entry.web_permalink, "domain": entry.domain, "timestamp": entry.web_timestamp})
-            is_web = True
-        if entry.mail_permalink:
-            mail.append({"permalink": entry.mail_permalink, "domain": entry.domain, "timestamp": entry.mail_timestamp})
-            is_mail = True
-        if is_web and is_mail:
+        if entry.web_permalink and entry.mail_permalink:
             timestamp = entry.mail_timestamp
             permalink = entry.mail_permalink
             if entry.web_timestamp > entry.mail_timestamp:
@@ -132,17 +116,13 @@ def _update_hof():
                 permalink = entry.web_permalink
             champions.append({"permalink": permalink, "domain": entry.domain, "timestamp": timestamp})
     champions = sorted(champions, key=lambda x: x["timestamp"], reverse=True)
-    web = sorted(web, key=lambda x: x["timestamp"], reverse=True)
-    mail = sorted(mail, key=lambda x: x["timestamp"], reverse=True)
 
-    for data, red_id in ((champions, redis_id.hof_champions), (web, redis_id.hof_web), (mail, redis_id.hof_mail)):
-        cached_data = {"date": None, "count": 0, "data": data}
-        if cached_data["data"]:
-            cached_data["date"] = cached_data["data"][0]["timestamp"]
-            cached_data["count"] = len(cached_data["data"])
-            cache_id = red_id.id
-            cache_ttl = red_id.ttl
-            cache.set(cache_id, cached_data, cache_ttl)
+    cached_data = {
+        "date": champions[0]["timestamp"] if champions else None,
+        "count": len(champions),
+        "data": champions[: settings.HOF_CHAMPIONS_LIMIT],
+    }
+    cache.set(redis_id.hof_champions.id, cached_data, redis_id.hof_champions.ttl)
 
 
 @shared_task

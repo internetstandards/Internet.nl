@@ -57,6 +57,7 @@ def index(request):
         "connection.html",
         dict(
             pageclass="test-in-progress",
+            pagemenu="test-tools",
             pagetitle=_("connection pagetitle"),
             probes=connectionprobes.getset(),
             ipv6_test_addr=settings.IPV6_TEST_ADDR,
@@ -95,8 +96,8 @@ def results(request, request_id):
         request,
         "connection-results.html",
         dict(
-            addr=request_id,
             pageclass="connectiontest",
+            pagemenu="test-tools",
             pagetitle=_("connection pagetitle"),
             probes=probereports,
             score=score,

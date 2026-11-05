@@ -114,8 +114,8 @@ def resultsrender(addr, report, request):
         "domain-results.html",
         dict(
             pageclass="websitetest",
+            pagemenu="test-tools",
             pagetitle="{} {}".format(_("domain pagetitle"), prettyaddr),
-            addr=addr,
             prettyaddr=prettyaddr,
             permalink=request.build_absolute_uri(f"/site/{addr}/{str(report.id)}/"),
             permadate=report.timestamp,
@@ -125,8 +125,6 @@ def resultsrender(addr, report, request):
             mailtest_direct=mailtest_direct,
             probes=probe_reports,
             score=report.score,
-            report=report,
-            registrar=report.registrar,
         ),
     )
 

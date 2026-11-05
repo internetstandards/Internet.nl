@@ -1,7 +1,7 @@
 import { validateElements } from "../../lib/utils.js";
 
 const elements = {
-  cards: document.querySelectorAll(".card:nth-child(n+6)"),
+  cards: document.querySelectorAll(".load-more > .card:nth-child(n+6)"),
   loadMoreBtn: document.getElementById("load-more"),
 };
 

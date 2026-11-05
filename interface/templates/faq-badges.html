@@ -1,0 +1,14 @@
+{% extends "faqarticle.html" %}
+{% load static %}
+{% load translate %}
+
+{% block faqarticletitle %}{% include "string.html" with name="faqs badges title" %}{% endblock %}
+
+{% block faqarticlecontent %}
+      {% translate "faqs badges pre-badge content" %}
+      <p>
+        <img src="{% static 'embed-badge-websitetest.svg' %}" alt="{% translate 'halloffame web badge' %}">
+        <img src="{% static 'embed-badge-emailtest.svg' %}" alt="{% translate 'halloffame mail badge' %}">
+      </p>
+      {% translate "faqs badges post-badge content" %}
+{% endblock %}

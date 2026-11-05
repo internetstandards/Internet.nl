@@ -48,7 +48,7 @@ def idna(value):
     """
     try:
         return IDNA.decode(value.encode("ascii"))
-    except IDNA.IDNAError:
+    except (IDNA.IDNAError, UnicodeError):
         return value
 
 

@@ -326,8 +326,6 @@ CELERY_TASK_ROUTES = {
     "checks.tasks.appsecpriv.web_callback": {"queue": "db_worker"},
     "checks.tasks.rpki.web_callback": {"queue": "db_worker"},
     "checks.tasks.rpki.mail_callback": {"queue": "db_worker"},
-    "interface.views.shared.run_stats_queries": {"queue": "slow_db_worker"},
-    "interface.views.shared.update_running_status": {"queue": "slow_db_worker"},
     "checks.tasks.update.update_hof": {"queue": "slow_db_worker"},
     "checks.tasks.tls.tasks_reports.web_cert": {"queue": "nassl_worker"},
     "checks.tasks.tls.tasks_reports.web_conn": {"queue": "nassl_worker"},
@@ -546,11 +544,11 @@ if "hosters" in MANUAL_HOF_PAGES:
     MANUAL_HOF["hosters"] = {
         "translate_key": "",
         "entries_file": os.path.join(BASE_DIR, "manual-hall-of-fame/hosters.yaml"),
-        "template_file": "halloffame-hosters.html",
         "icon_file": "embed-badge-hosters-v3.svg",
     }
 
 HOF_UPDATE_INTERVAL = 600  # seconds
+HOF_CHAMPIONS_LIMIT = 100
 
 color_formatter = {
     "()": "colorlog.ColoredFormatter",

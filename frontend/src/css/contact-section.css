@@ -69,10 +69,18 @@
     margin-bottom: 1rem;
   }
 
-  p {
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     padding: 0 1rem 1rem;
     font: var(--accordion-body);
     color: var(--accordion-body-color);
+
+    a {
+      display: inline;
+      text-decoration: underline;
+    }
   }
 
   summary {
@@ -190,6 +198,7 @@
     }
   }
 
+  h3,
   h4 {
     display: flex;
     gap: 0.5rem;
