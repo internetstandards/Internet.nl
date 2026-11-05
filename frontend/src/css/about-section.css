@@ -1,0 +1,126 @@
+.about-section {
+  h2 {
+    padding-bottom: 0.5rem;
+
+    @media (width >= 56.25rem) {
+      padding-bottom: 1.5rem;
+    }
+  }
+
+  p {
+    @media (width >= 56.25rem) {
+      grid-column: 1 / 7;
+    }
+
+    &:nth-of-type(2) {
+      padding-top: 1rem;
+
+      @media (width >= 56.25rem) {
+        grid-column: 8 / 13;
+        padding-top: 0;
+      }
+    }
+  }
+
+  .about-link {
+    justify-self: center;
+    margin-block: 3rem;
+
+    &::after {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: block;
+    }
+  }
+}
+
+.logo-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto;
+  padding-top: 2.5rem;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (width >= 56.25rem) {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6.25rem;
+    overflow-x: auto;
+    padding-top: 5rem;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-color: var(--green-500) var(--transparent-100);
+    scrollbar-width: thin;
+    padding-bottom: 1.25rem;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--green-500);
+      border-radius: 0.625rem;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: var(--transparent-100);
+    }
+  }
+
+  li {
+    grid-column: span 1;
+    display: flex;
+    justify-content: center;
+    scroll-snap-align: start;
+
+    &:last-child {
+      display: none;
+
+      @media (width >= 56.25rem) {
+        display: block;
+      }
+    }
+  }
+
+  img {
+    transition: 0.3s;
+
+    &:hover {
+      opacity: 0.6;
+    }
+  }
+}
+
+.quote-section {
+  .container {
+    padding-block: 2.75rem;
+    row-gap: 2.5rem;
+
+    @media (width >= 56.25rem) {
+      align-items: center;
+      gap: 0;
+    }
+  }
+
+  .quote-image {
+    border-radius: 100%;
+
+    @media (width >= 56.25rem) {
+      grid-column: 2 / 3;
+    }
+  }
+
+  blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    @media (width >= 56.25rem) {
+      grid-column: 4 / 12;
+      gap: 2.5rem;
+    }
+
+    cite {
+      font-style: normal;
+    }
+  }
+}

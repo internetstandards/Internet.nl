@@ -121,6 +121,10 @@ def aboutpage(request):
     return render(request, "about.html", dict(pagemenu="about", pageclass="contact", pagetitle=_("base about")))
 
 
+def contactpage(request):
+    return render(request, "contact.html", dict(pagemenu="contact", pageclass="contact", pagetitle=_("base contact")))
+
+
 def widgetsitepage(request):
     return render(request, "widget-site.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base widget site")))
 
