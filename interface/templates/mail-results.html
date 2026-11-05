@@ -2,10 +2,7 @@
 {% load translate %}
 
 {% block testheadcontent %}
-  <h1>
-    {% include "string.html" with name="mail title" %}
-  </h1>
-  {{block.super}}
+  {% include "string.html" with name="mail title" %}
 {% endblock %}
 
 {% block testdetailitems%}
@@ -98,9 +95,3 @@
   {% endif %}
 {% endblock %}
 
-{% block furthertesting %}
-{% endblock %}
-
-{% block testtailcontent %}
-{{block.super}}
-{% endblock %}

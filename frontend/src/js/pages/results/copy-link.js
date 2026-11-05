@@ -9,7 +9,7 @@ function copyLink() {
     const link = window.location.href;
 
     if (!window.isSecureContext) {
-      alert("Unable to share or copy link. Please copy manually: " + link);
+      alert(`${elements.shareBtn.dataset.copyFailed} ${link}`);
       return;
     }
 
@@ -32,7 +32,7 @@ function copyLink() {
         }, 5000);
       })
       .catch(() => {
-        alert('Unable to share or copy link. Please copy manually: ' + link);
+        alert(`${elements.shareBtn.dataset.copyFailed} ${link}`);
       });
       
   }  

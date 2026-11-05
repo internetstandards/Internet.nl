@@ -2,14 +2,7 @@
 {% load static %}
 
 {% block testheadcontent %}
-    {% include "string.html" with name="connection title" %}
-  {{block.super}}
-{% endblock %}
-
-{% block perfectscore %}
-{% endblock %}
-
-{% block testmiddlecontent %}
+  {% include "string.html" with name="connection title" %}
 {% endblock %}
 
 {% block testdetailitems%}
@@ -24,9 +17,3 @@
   {% endif %}
 {% endblock %}
 
-{% block furthertesting %}
-{% endblock %}
-
-{% block testtailcontent %}
-  {{block.super}}
-{% endblock %}

@@ -65,6 +65,15 @@ const config = [
     },
     plugins: [cleanupOutputDir(), ...defaultPlugins],
   },
+  // Theme from cookie, loaded synchronously before rendering
+  {
+    input: "src/js/theme-init.js",
+    output: {
+      format: "iife",
+      file: `${outputDir}/js/theme-init-min.js`,
+    },
+    plugins: defaultPlugins,
+  },
   // CSS bundle
   {
     input: "src/index.css",

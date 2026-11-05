@@ -285,6 +285,9 @@ msgstr ""
 msgid "base language"
 msgstr "Taal"
 
+msgid "base linkedin"
+msgstr "Bezoek onze LinkedIn-pagina"
+
 msgid "base mastodon"
 msgstr "Bezoek ons Mastodon-profiel"
 
@@ -5630,6 +5633,10 @@ msgstr ""
 
 msgid "results copied"
 msgstr "Link gekopieërd!"
+
+msgid "results copy-failed"
+msgstr ""
+"Delen of kopiëren van de link is niet gelukt. Kopieer de link handmatig:"
 
 msgid "results dated-presentation"
 msgstr "Oude resultaatpresentatie. Doe de test opnieuw."

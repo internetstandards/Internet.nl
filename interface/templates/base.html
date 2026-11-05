@@ -3,19 +3,22 @@
 {% load i18n %}
 {% load translate %}
 <html lang="{{ request.current_language_code }}"
-      data-theme="{{ request.COOKIES.theme }}">
+      data-cookie-domain="{{ "INTERNETNL_DOMAINNAME"|get_settings_value }}">
   <head>
     <meta charset="utf-8">
     <title>{{ pagetitle }}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta name="description" content="{{ _("page metadescription") }}">
     <meta name="keywords" content="{{ _("page metakeywords") }}">
-    <meta name="author"
-          content="Platform Internetstandaarden / Internet Standards Platform">
+    {% if "INTERNETNL_BRANDING"|get_settings_value %}
+      <meta name="author"
+            content="Platform Internetstandaarden / Internet Standards Platform">
+    {% endif %}
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml" />
     <link rel="icon" href="{% static 'favicon.png' %}" sizes="192x192" />
     <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
     <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
+    <script src="{% static 'js/theme-init-min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/style-min.css' %}" />
     <script type="module" src="{% static 'js/base-min.js' %}"></script>
     {% block scripting %}{% endblock %}
@@ -37,20 +40,22 @@
                href="/"
                aria-label="{% include "string.html" with name="base home" %}">
               <picture class="light-visible">
-                <source srcset="/static/logos/logo.svg" media="(width >= 900px)">
-                <img src="/static/logos/logo.svg"
+                <source srcset="{% static 'logos/logo.svg' %}" media="(width >= 900px)">
+                <img src="{% static 'logos/logo.svg' %}"
                      alt="Internet.nl Logo"
                      width="227.5"
                      height="50">
               </picture>
               <picture class="dark-visible">
-                <source srcset="/static/logos/logo-white-2.svg" media="(width >= 900px)">
-                <img src="/static/logos/logo-white-2.svg"
+                <source srcset="{% static 'logos/logo-white-2.svg' %}" media="(width >= 900px)">
+                <img src="{% static 'logos/logo-white-2.svg' %}"
                      alt="Internet.nl Logo"
                      width="227.5"
                      height="50">
               </picture>
             </a>
+          {% else %}
+            <a class="header-home" href="/">{% include "string.html" with name="base home" %}</a>
           {% endif %}
           <button class="toggle-menu icon large"
                   type="button"
@@ -73,30 +78,30 @@
                 </button>
                 <ul id="nav-sublist" class="nav-sublist">
                   <li class="nav-subitem">
-                    <a class="icon" href="/test-site">{% include "string.html" with name="base test website label" %}</a>
+                    <a class="icon" href="/test-site/">{% include "string.html" with name="base test website label" %}</a>
                   </li>
                   <li class="nav-subitem">
-                    <a class="icon" href="/test-mail">{% include "string.html" with name="base test mail label" %}</a>
+                    <a class="icon" href="/test-mail/">{% include "string.html" with name="base test mail label" %}</a>
                   </li>
                   <li class="nav-subitem">
-                    <a class="icon" href="/test-connection">{% include "string.html" with name="base test connection label" %}</a>
+                    <a class="icon" href="/test-connection/">{% include "string.html" with name="base test connection label" %}</a>
                   </li>
                 </ul>
               </li>
               <li class="nav-item {% if pagemenu == 'faqs' %}current{% endif %}">
-                <a href="/faqs">{% include "string.html" with name="base faqs" %}</a>
+                <a href="/faqs/">{% include "string.html" with name="base faqs" %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'halloffame' %}current{% endif %}">
-                <a href="/halloffame">{% include "string.html" with name="base halloffame" %}</a>
+                <a href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'news' %}current{% endif %}">
-                <a href="/articles">{% include "string.html" with name="base news" %}</a>
+                <a href="/articles/">{% include "string.html" with name="base news" %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'about' %}current{% endif %}">
-                <a href="/about">{% include "string.html" with name="base about" %}</a>
+                <a href="/about/">{% if "INTERNETNL_BRANDING"|get_settings_value %}{% include "string.html" with name="base about" %}{% else %}{% include "string.html" with name="base about custom" %}{% endif %}</a>
               </li>
               <li class="nav-item {% if pagemenu == 'contact' %}current{% endif %}">
-                <a href="/contact">{% include "string.html" with name="base contact" %}</a>
+                <a href="/contact/">{% include "string.html" with name="base contact" %}</a>
               </li>
             </ul>
             <ul class="nav-list nav-settings">
@@ -129,22 +134,14 @@
                   </ul>
                 </form>
               </li>
-              <li class="nav-item">
+              <li class="nav-item theme-item">
                 <button id="toggle-subnav-theme"
-                        class="settings-button icon {% if request.COOKIES.theme == 'light' %}sun{% elif request.COOKIES.theme == 'dark' %}moon{% else %}circle{% endif %}"
+                        class="settings-button icon system"
                         type="button"
                         aria-controls="nav-sublist-theme"
                         aria-expanded="false">
                   <span class="current-theme-mobile">{% include "string.html" with name="base theme" %}</span>
-                  <span class="current-theme-desktop">
-                    {% if request.COOKIES.theme == 'light' %}
-                      {% include "string.html" with name="base theme light" %}
-                    {% elif request.COOKIES.theme == 'dark' %}
-                      {% include "string.html" with name="base theme dark" %}
-                    {% elif request.COOKIES.theme == 'system' %}
-                      {% include "string.html" with name="base theme system" %}
-                    {% endif %}
-                  </span>
+                  <span class="current-theme-desktop">{% include "string.html" with name="base theme system" %}</span>
                 </button>
                 <ul id="nav-sublist-theme" class="nav-sublist">
                   <li class="nav-subitem">
@@ -176,33 +173,37 @@
     <footer>
       <div class="footer-nav">
         <div class="container">
-          <a class="footer-logo"
-             href="/"
-             aria-label="{% include "string.html" with name="base home" %}">
-            <img src="/static/logos/logo-white-2.svg"
-                 alt="Internet.nl Logo"
-                 width="227.5"
-                 height="50"
-                 loading="lazy">
-          </a>
+          {% if "INTERNETNL_BRANDING"|get_settings_value %}
+            <a class="footer-logo"
+               href="/"
+               aria-label="{% include "string.html" with name="base home" %}">
+              <img src="{% static 'logos/logo-white-2.svg' %}"
+                   alt="Internet.nl Logo"
+                   width="227.5"
+                   height="50"
+                   loading="lazy">
+            </a>
+          {% else %}
+            <a class="footer-logo" href="/">{% include "string.html" with name="base home" %}</a>
+          {% endif %}
           <ul class="nav-list">
             <li class="nav-item">
-              <a class="icon" href="/test">{% include "string.html" with name="base tests" %}</a>
+              <a class="icon" href="/test-site/">{% include "string.html" with name="base tests" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/faqs">{% include "string.html" with name="base faqs" %}</a>
+              <a class="icon" href="/faqs/">{% include "string.html" with name="base faqs" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/halloffame">{% include "string.html" with name="base halloffame" %}</a>
+              <a class="icon" href="/halloffame/">{% include "string.html" with name="base halloffame" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/articles">{% include "string.html" with name="base news" %}</a>
+              <a class="icon" href="/articles/">{% include "string.html" with name="base news" %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/about">{% include "string.html" with name="base about" %}</a>
+              <a class="icon" href="/about/">{% if "INTERNETNL_BRANDING"|get_settings_value %}{% include "string.html" with name="base about" %}{% else %}{% include "string.html" with name="base about custom" %}{% endif %}</a>
             </li>
             <li class="nav-item">
-              <a class="icon" href="/contact">{% include "string.html" with name="base contact" %}</a>
+              <a class="icon" href="/contact/">{% include "string.html" with name="base contact" %}</a>
             </li>
           </ul>
         </div>
@@ -211,26 +212,34 @@
         <div class="container">
           <ul class="footer-links">
             <li class="footer-link">
-              <a href="/disclosure">{% include "string.html" with name="base disclosure" %}</a>
+              <a href="/disclosure/">{% include "string.html" with name="base disclosure" %}</a>
             </li>
             <li class="footer-link">
-              <a href="/privacy">{% include "string.html" with name="base privacy" %}</a>
+              <a href="/privacy/">{% include "string.html" with name="base privacy" %}</a>
             </li>
             <li class="footer-link">
-              <a href="/copyright">{% include "string.html" with name="base copyright" %}</a>
+              <a href="/copyright/">{% include "string.html" with name="base copyright" %}</a>
             </li>
             {% if "HAS_ACCESSIBILITY_PAGE"|get_settings_value %}
               <li class="footer-link">
-                <a href="/accessibility">{% include "string.html" with name="base accessibility" %}</a>
+                <a href="/accessibility/">{% include "string.html" with name="base accessibility" %}</a>
               </li>
             {% endif %}
           </ul>
           {% if "INTERNETNL_BRANDING"|get_settings_value %}
             <ul class="footer-socials">
               <li class="footer-social">
+                <a class="linkedin icon"
+                   href="https://www.linkedin.com/company/internet-nl/"
+                   target="_blank">
+                  <span class="visually-hidden">{% include "string.html" with name="base linkedin" %}</span>
+                </a>
+              </li>
+              <li class="footer-social">
                 <a class="mastodon icon"
                    href="https://mastodon.nl/@internet_nl"
-                   target="_blank">
+                   target="_blank"
+                   rel="me">
                   <span class="visually-hidden">{% include "string.html" with name="base mastodon" %}</span>
                 </a>
               </li>
@@ -238,7 +247,14 @@
           {% endif %}
         </div>
       </div>
-      <p class="version">v{{ "VERSION"|get_settings_value }}</p>
+      <div class="footer-info">
+        {% if "INTERNETNL_BRANDING"|get_settings_value %}
+          {% include "content.html" with name="base info" %}
+        {% else %}
+          {% include "content.html" with name="base info custom" %}
+        {% endif %}
+        <p class="version">v{{ "VERSION"|get_settings_value }}</p>
+      </div>
     </footer>
   </body>
 </html>

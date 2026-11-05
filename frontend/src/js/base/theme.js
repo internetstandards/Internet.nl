@@ -9,63 +9,33 @@ const elements = {
 };
 
 /**
- * Get a cookie value by name
- * @param {string} name - Cookie name
- * @returns {string|null} Cookie value or null if not found
- */
-function getCookie(name) {
-  // Split all cookies into an array
-  const allCookies = document.cookie.split(";");
-
-  // Look for the cookie with the matching name
-  const matchingCookie = allCookies.find((cookie) =>
-    cookie.trim().startsWith(`${name}=`)
-  );
-
-  // Return the value if found, null if not found
-  if (!matchingCookie) {
-    return null;
-  }
-
-  return matchingCookie.split("=")[1];
-}
-
-/**
- * Set a cookie with specified parameters
- * @param {string} name - Cookie name
- * @param {string} value - Cookie value
- * @param {number} days - Cookie duration in days
- */
-function setCookie(name, value, days) {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-
-  const cookieValue = encodeURIComponent(value);
-  const expires = `expires=${date.toUTCString()}`;
-  const path = "path=/";
-
-  document.cookie = `${name}=${cookieValue};${expires};${path}`;
-}
-
-/**
- * Get the preferred theme based on cookie or system preference
- * @returns {string} Theme name
- */
-function getPreferredTheme() {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
-/**
- * Set the theme and save it to cookie
+ * Save the theme in a cookie, shared between the language subdomains
  * @param {string} theme - Theme name
  */
-function setTheme(theme) {
-  setCookie("theme", theme, 365);
+function saveTheme(theme) {
+  const domain = document.documentElement.dataset.cookieDomain;
+  let cookie = `theme=${theme};path=/;max-age=31536000;samesite=lax`;
+  if (domain && location.hostname.endsWith(domain)) {
+    cookie += `;domain=${domain}`;
+  }
+  if (location.protocol === "https:") {
+    cookie += ";secure";
+  }
+  document.cookie = cookie;
+}
 
-  document.documentElement.setAttribute("data-theme", theme);
+/**
+ * Apply the theme to the page and the theme selector
+ * @param {string} theme - Theme name: light, dark or system
+ */
+function showTheme(theme) {
   elements.themeSelector.classList.remove("moon", "system", "sun");
+
+  if (theme === "light" || theme === "dark") {
+    document.documentElement.dataset.theme = theme;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
 
   switch (theme) {
     case "light":
@@ -83,28 +53,17 @@ function setTheme(theme) {
   }
 }
 
-/**
- * Initialize theme switching functionality
- */
 function themeSwitch() {
-  // Set initial theme
-  setTheme(getCookie("theme"));
+  showTheme(document.documentElement.dataset.theme);
 
-  // Add click handler for theme buttons
-  elements.light.addEventListener("click", () => {
-    setTheme("light");
-  });
-
-  elements.dark.addEventListener("click", () => {
-    setTheme("dark");
-  });
-
-  elements.system.addEventListener("click", () => {
-    setTheme("system");
-  });
+  for (const theme of ["light", "dark", "system"]) {
+    elements[theme].addEventListener("click", () => {
+      saveTheme(theme);
+      showTheme(theme);
+    });
+  }
 }
 
-// Initialize theme switching if required elements are present
 if (validateElements(elements, "theme")) {
   themeSwitch();
 }

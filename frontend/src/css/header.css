@@ -67,6 +67,18 @@ header {
   }
 }
 
+.theme-item {
+  @media (scripting: none) {
+    display: none;
+  }
+}
+
+.header-home {
+  align-self: center;
+  font: var(--section-header-s);
+  color: var(--heading-color-primary);
+}
+
 .header-logo {
   transition: opacity 0.3s;
   width: 227.5px;

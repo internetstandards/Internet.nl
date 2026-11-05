@@ -283,6 +283,9 @@ msgstr ""
 msgid "base language"
 msgstr "Language"
 
+msgid "base linkedin"
+msgstr "Go to our LinkedIn page"
+
 msgid "base mastodon"
 msgstr "Go to our Mastodon profile"
 
@@ -5594,6 +5597,9 @@ msgstr ""
 
 msgid "results copied"
 msgstr "Link copied!"
+
+msgid "results copy-failed"
+msgstr "Unable to share or copy the link. Please copy it manually:"
 
 msgid "results dated-presentation"
 msgstr "Dated result presentation. Please rerun the test."

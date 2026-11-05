@@ -3,7 +3,6 @@
 
 {% block testheadcontent %}
   {% include "string.html" with name="domain title" %}
-  {{block.super}}
 {% endblock %}
 
 {% block testdetailitems %}
@@ -90,6 +89,3 @@
   {% endif %}
 {% endblock %}
 
-{% block testtailcontent %}
-{{block.super}}
-{% endblock %}
