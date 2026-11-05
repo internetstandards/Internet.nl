@@ -1,12 +1,16 @@
 # To export reports as Django fixtures and generate documentation urls
 
+> **Warning:** the first step deletes every report, batch request and batch user, and the dated
+> report thresholds, from the database of the server you run it on. Only use a server whose data
+> you can lose, never one that serves users. `internetnl-prod` below is the usual compose project
+> name on deployed servers, so it does not tell you whether a server is safe to use.
+
 # on server
-*DO NOT RUN ON PRODUCTION DB, WILL CAUSE DATA LOSS!*
 
 `ssh <server>`
 `docker compose --project-name=internetnl-prod exec postgres psql --username internetnl internetnl_db1`
 
-    # clear existing reports and related data
+    -- clear existing reports and related data
     delete from checks_asrecord;
     delete from checks_autoconf;
     delete from checks_batchdomain;
@@ -38,9 +42,8 @@
     delete from checks_webtestrpki;
     delete from checks_webtesttls;
 
-    # set starting index as a high number to avoid conflicts with existing reports on import
+    -- set starting index as a high number to avoid conflicts with existing reports on import
     alter sequence checks_asrecord_id_seq RESTART with 9000;
-    alter sequence checks_autoconf_id_seq RESTART with 9000;
     alter sequence checks_batchdomain_id_seq RESTART with 9000;
     alter sequence checks_batchmailtest_id_seq RESTART with 9000;
     alter sequence checks_batchrequest_id_seq RESTART with 9000;
@@ -93,4 +96,4 @@
         print(f"http://localhost:8080/mail/{d.domain}/{d.id}/")
 
     for d in ConnectionTest.objects.all():
-        print(f"http://localhost:8080/connection/{d.test_id}/")
+        print(f"http://localhost:8080/connection/{d.test_id}/results")

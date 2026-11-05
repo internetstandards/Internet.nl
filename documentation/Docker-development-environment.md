@@ -88,6 +88,16 @@ When only developing on frontend parts of the application (eg: `html`, `css`, `j
 
     make develop_frontend
 
+#### Example reports
+
+To work on the results pages without running tests, load a set of example reports:
+
+    docker exec -ti internetnl-develop-app-1 ./manage.py loaddata example_reports.json
+
+These are website reports, which show at `/site/<domain>/<id>/`, starting at `/site/internet.nl/9000/`, and two connection tests, which show at `/connection/<test id>/results`.
+
+To make new example reports, see [generate_example_reports.md](generate_example_reports.md).
+
 ### Running/debugging individual probes
 
 It is possible to run individual probes with debug logging using a manage command. This provides a quick way to iterate over changes regarding test/probe code without having to go through the web interface. For this run the following command:
