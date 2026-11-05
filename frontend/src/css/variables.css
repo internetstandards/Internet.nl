@@ -148,10 +148,10 @@
   /* MARK: COLOR VARIABLES
 */
 
-  /* COLORS */
+  /* light-dark() follows color-scheme, which [data-theme] overrides */
   color-scheme: light dark;
 
-  /* HEADER COLORS LIGHTMODE */
+  /* HEADER COLORS */
   --nav-bg-color: light-dark(var(--white-100), var(--black-200));
   --nav-sublist-border-color: light-dark(var(--green-400), var(--white-100));
   --nav-text-color: light-dark(var(--green-500), var(--white-100));
@@ -166,13 +166,13 @@
   --nav-theme-button-bg-color: light-dark(var(--orange-500), var(--green-500));
   --nav-theme-button-color: light-dark(var(--white-100), var(--white-100));
 
-  /* FOOTER COLORS LIGHTMODE */
+  /* FOOTER COLORS */
   --footer-bg-color: light-dark(var(--green-400), var(--green-600));
   --footer-text-color: light-dark(var(--white-100), var(--white-100));
   --footer-bar-bg-color: light-dark(var(--white-100), var(--green-500));
   --footer-bar-text-color: light-dark(var(--green-500), var(--white-100));
 
-  /* GENERAL COLORS LIGHTMODE */
+  /* GENERAL COLORS */
   --bg-color-body: light-dark(var(--white-100), var(--black-200));
   --bg-color-primary: light-dark(var(--green-200), var(--green-600));
   --bg-color-secondary: light-dark(var(--orange-100), var(--green-600));
@@ -184,7 +184,7 @@
   --body-color-secondary: light-dark(var(--green-500), var(--white-100));
   --body-link-color: light-dark(var(--green-400), var(--green-300));
 
-  /* BUTTON COLORS LIGHTMODE */
+  /* BUTTON COLORS */
   --button-bg-color-primary: light-dark(var(--orange-300), var(--orange-300));
   --button-bg-color-hover-primary: light-dark(var(--orange-200), var(--orange-200));
   --button-text-color-primary: light-dark(var(--black-200), var(--black-200));
@@ -196,7 +196,7 @@
   --button-bg-color-hoster: light-dark(var(--green-100), var(--black-200));
   --button-text-color-hoster: light-dark(var(--green-500), var(--white-100));
 
-  /* CARD COLORS LIGHTMODE */
+  /* CARD COLORS */
   --card-bg-color-test: light-dark(var(--white-100), var(--black-200));
   --card-heading-color-test: light-dark(var(--green-400), var(--white-100));
   --card-body-color-test: light-dark(var(--green-500), var(--white-100));
@@ -216,7 +216,7 @@
   --card-heading-color-action: var(--white-100);
   --card-body-color-action: var(--white-100);
 
-  /* ELLIPSES LIGHTMODE */
+  /* ELLIPSES */
   --ellipse-color-light: linear-gradient(0deg,light-dark(var(--white-100), var(--green-500)),light-dark(var(--transparent-200), var(--green-600)));
 
   @media (width >= 56.25rem) {
@@ -225,7 +225,7 @@
 
   --ellipse-color-dark: linear-gradient(135deg,light-dark(var(--orange-200), var(--green-600)),light-dark(var(--transparent-400), var(--green-500)));
 
-  /* ACCORDION COLORS LIGHTMODE */
+  /* ACCORDION COLORS */
   --accordion-bg-color: light-dark(var(--white-100), var(--black-200));
   --accordion-heading-color: light-dark(var(--black-200), var(--green-100));
   --accordion-body-color: light-dark(var(--black-200), var(--white-100));

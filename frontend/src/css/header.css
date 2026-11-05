@@ -128,9 +128,6 @@ header:has(.active) {
 }
 
 
-/* Navigation Button Base Styles */
-
-
 /* Icon Styles */
 .icon {
   &.globe::before {
