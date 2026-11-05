@@ -1,4 +1,4 @@
-import { validateElements, toggleElements } from "../../lib/utils.js";
+import { validateElements } from "../../lib/utils.js";
 
 const elements = {
   cards: document.querySelectorAll(".card:nth-child(n+6)"),
