@@ -685,11 +685,13 @@ RESOLVER_INTERNAL_VALIDATING = "resolver-validating"
 
 INTERNETNL_BRANDING = get_boolean_env("INTERNETNL_BRANDING", False)
 
+INTERNETNL_DOMAINNAME = getenv("INTERNETNL_DOMAINNAME", "")
+
 # 'common crawler format'
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent#crawler_and_bot_ua_strings)
 USER_AGENT_URL = getenv(
     "USER_AGENT_URL",
-    "https://internet.nl/about/" if INTERNETNL_BRANDING else f"https://{getenv('INTERNETNL_DOMAINNAME')}/",
+    "https://internet.nl/about/" if INTERNETNL_BRANDING else f"https://{INTERNETNL_DOMAINNAME}/",
 )
 
 USER_AGENT = f"Mozilla/5.0 (compatible; internetnl/{VERSION}; +{USER_AGENT_URL})"

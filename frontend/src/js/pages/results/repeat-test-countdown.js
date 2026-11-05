@@ -58,7 +58,8 @@ function countDownRetestTime(seconds) {
   }
 }
 
-if (validateElements(elements, "results")) {
+// connection test results have no retest
+if (elements.retestTime) {
   startCountDownRetestTime();
 }
 

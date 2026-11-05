@@ -21,6 +21,8 @@
   transition: opacity 0.3s;
   height: fit-content;
   width: fit-content;
+  color: var(--footer-text-color);
+  font: var(--section-header-s);
 
   &:hover {
     opacity: 0.8;
@@ -148,14 +150,13 @@ footer {
   }
 }
 
-.version {
-  text-align: left;
+.footer-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
   border-top: 1px solid var(--grey-300);
   padding: 1.25rem 1rem;
   max-width: 77.5rem;
   margin-inline: auto;
-
-  @media (width >= 56.25rem) {
-    text-align: right;
-  }
 }

@@ -278,12 +278,14 @@ body.connectiontest .action-card-item:has(.connection) {
       align-items: center;
     }
 
-    .domain::before {
+    .domain::before,
+    .direct-site::before {
       mask-image: url("/static/icons/globe.svg");
       display: block;
     }
 
-    .mail::before {
+    .mail::before,
+    .direct-mail::before {
       mask-image: url("/static/icons/envelope.svg");
       display: block;
     }
@@ -330,6 +332,10 @@ body.connectiontest .action-card-item:has(.connection) {
 }
 
 #copy-link {
+  @media (scripting: none) {
+    display: none;
+  }
+
   &:not(.copied) {
     .not-clicked {
       display: flex;
@@ -745,5 +751,16 @@ meter::-moz-meter-bar {
     &.countdown.hidden {
       display: none;
     }
+  }
+}
+
+.result-section .results-notice {
+  font: var(--card-body-m);
+  color: var(--heading-color-secondary);
+
+  a {
+    display: inline;
+    text-decoration: underline;
+    color: inherit;
   }
 }
