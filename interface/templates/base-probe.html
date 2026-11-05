@@ -6,22 +6,22 @@
 {% endblock %}
 {% block maincontent %}
   <div hidden>
-    <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
-    <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
+    <span id="probe-error-summary">{% translate "test error summary" %}</span>
+    <span id="probe-finished">{% translate "probes test-finished" %}</span>
   </div>
   <section class="result-section loading bg-primary ellipse reverse hidden-mobile">
     <div class="container">
       <hgroup>
         <h1>
-          <span class="h5 color-secondary">{% include "string.html" with name="probes test-title" %}</span>
+          <span class="h5 color-secondary">{% translate "probes test-title" %}</span>
           <span class="h1 color-secondary">
             {% block testtitle %}{% endblock %}
           </span>
         </h1>
         <p class="body-m">
-          {% include "string.html" with name="probes tests-duration" cache_ttl="CACHE_TTL"|get_settings_value %}
-          <span class="scripting-only">{% include "string.html" with name="probes auto-redirect" %}</span>
-          {% include "string.html" with name="probes tests-description" %}
+          {% with cache_ttl="CACHE_TTL"|get_settings_value %}{% translate "probes tests-duration" %}{% endwith %}
+          <span class="scripting-only">{% translate "probes auto-redirect" %}</span>
+          {% translate "probes tests-description" %}
         </p>
       </hgroup>
       <ul id="probes" data-url="{{ probes.0.probesurl }}{{ addr }}/" data-retries="{{ javascript_retries }}" data-timeout="{{ javascript_timeout }}">
@@ -29,16 +29,16 @@
           <li class="probing icon h7 color-secondary">
             {% translate probe.title %}
             <span id="{{ probe.name }}-summary" aria-live="polite" aria-busy="true">
-              {% include "string.html" with name="probes test-running" %}
+              {% translate "probes test-running" %}
             </span>
           </li>
         {% endfor %}
       </ul>
-      <p id="probes-no-redirection" hidden>{% include "string.html" with name="probes no-redirection" %}</p>
+      <p id="probes-no-redirection" hidden>{% translate "probes no-redirection" %}</p>
       {% block probesnojs %}
         <noscript>
           <p>
-            <a href="{{ no_javascript_redirect }}">{% include "string.html" with name="probes no-javascript" %}</a>
+            <a href="{{ no_javascript_redirect }}">{% translate "probes no-javascript" %}</a>
           </p>
         </noscript>
       {% endblock %}

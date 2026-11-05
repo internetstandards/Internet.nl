@@ -6,8 +6,8 @@
 <section class="intro-section bg-primary ellipse reverse">
   <div class="container">
     <hgroup class="center">
-      <h1 class="h5 color-secondary">{% include "string.html" with name="base halloffame" %}</h1>
-      <p class="h1 color-secondary">{% include "string.html" with name="halloffame description" %}</p>
+      <h1 class="h5 color-secondary">{% translate "base halloffame" %}</h1>
+      <p class="h1 color-secondary">{% translate "halloffame description" %}</p>
     </hgroup>
   </div>
 </section>
@@ -16,15 +16,15 @@
   <search class="filter-section">
     <div class="container">
       <div class="filter-container">
-        <h2 class="h5 color-secondary">{% include "string.html" with name="halloffame filter" %}</h2>
+        <h2 class="h5 color-secondary">{% translate "halloffame filter" %}</h2>
         <div class="button-container">
           <a class="{% if cpage == 'champions' %}primary-button{% else %}secondary-button{% endif %}"
              href="/halloffame/"
-             {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions title" %}</a>
+             {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% translate "halloffame champions title" %}</a>
           {% for manual in manuals %}
             <a class="{% if cpage == manual.0 %}primary-button{% else %}secondary-button{% endif %}"
                href="/halloffame/{{ manual.0 }}/"
-               {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a>
+               {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% translate manual.1 %}</a>
           {% endfor %}
         </div>
       </div>
@@ -35,7 +35,7 @@
 <section class="hosters-section">
   <div class="container">
     <div class="hof-intro">
-      <h2 class="h2 color-secondary">{% include "string.html" with name=hof_title %}</h2>
+      <h2 class="h2 color-secondary">{% translate hof_title %}</h2>
       <div class="body-xl">{% translate hof_text %}</div>
     </div>
     {% if "INTERNETNL_BRANDING"|get_settings_value %}
@@ -60,7 +60,7 @@
 
 <section class="test-sub-section bg-primary">
   <div class="container">
-    <h2 class="h3 color-secondary">{% include "string.html" with name="base test title" %}</h2>
+    <h2 class="h3 color-secondary">{% translate "base test title" %}</h2>
     {% include "partials/test-cards.html" with variant="hall-of-fame-variant" %}
   </div>
 </section>

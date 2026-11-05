@@ -1,8 +1,9 @@
 {% extends "base-results.html" %}
+{% load translate %}
 {% load static %}
 
 {% block testheadcontent %}
-  {% include "string.html" with name="connection title" %}
+  {% translate "connection title" %}
 {% endblock %}
 
 {% block testdetailitems%}

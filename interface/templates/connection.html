@@ -1,4 +1,5 @@
 {% extends "base-probe.html" %}
+{% load translate %}
 {% load static %}
 
 {% block scripting %}
@@ -6,7 +7,7 @@
 {% endblock %}
 
 {% block testtitle %}
-{% include "string.html" with name="connection title" %}
+{% translate "connection title" %}
 {% endblock %}
 
 {% block maincontent %}
@@ -19,6 +20,6 @@
 
 {% block probesnojs %}
 <noscript>
-  <p>{% include "string.html" with name="probes no-javascript-connection" %}</p>
+  <p>{% translate "probes no-javascript-connection" %}</p>
 </noscript>
 {% endblock %}

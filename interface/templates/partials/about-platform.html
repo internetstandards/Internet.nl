@@ -2,9 +2,9 @@
 {% if "INTERNETNL_BRANDING"|get_settings_value %}
   <section class="about-section {{ variant }}">
     <div class="container">
-      <h2 class="h5 color-accent">{% include "string.html" with name="about mission-title" %}</h2>
-      <p class="h4">{% include "string.html" with name="about mission" %}</p>
-      <p class="body-xl">{% include "string.html" with name="about platform" %}</p>
+      <h2 class="h5 color-accent">{% translate "about mission-title" %}</h2>
+      <p class="h4">{% translate "about mission" %}</p>
+      <p class="body-xl">{% translate "about platform" %}</p>
       <ul class="logo-list">
         <li>
           <a href="https://surf.nl/" target="_blank" aria-label="Surf website">
@@ -93,7 +93,7 @@
       </ul>
       {% if link %}
         <a class="about-link secondary-button icon" href="/about/">
-          {% include "string.html" with name="about link" %}
+          {% translate "about link" %}
         </a>
       {% endif %}
     </div>

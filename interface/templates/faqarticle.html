@@ -5,8 +5,8 @@
   <section class="intro-section bg-primary ellipse reverse">
     <div class="container">
       <hgroup class="flipped">
-        <h1 class="h1 color-secondary">{% block faqarticletitle %}{% include "string.html" with name=title %}{% endblock %}</h1>
-        <p class="h5 color-secondary"><a href="/faqs/">{% include "string.html" with name="faqs title" %}</a></p>
+        <h1 class="h1 color-secondary">{% block faqarticletitle %}{% translate title %}{% endblock %}</h1>
+        <p class="h5 color-secondary"><a href="/faqs/">{% translate "faqs title" %}</a></p>
       </hgroup>
     </div>
   </section>

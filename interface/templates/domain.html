@@ -1,5 +1,6 @@
 {% extends "base-probe.html" %}
+{% load translate %}
 
 {% block testtitle %}
-{% include "string.html" with name="domain title" %}
+{% translate "domain title" %}
 {% endblock %}

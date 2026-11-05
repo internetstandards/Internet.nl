@@ -1,61 +1,61 @@
 {% extends "faqarticle.html" %}
 {% load translate %}
 
-{% block faqarticletitle %}{% include "string.html" with name="faqs report title" %}{% endblock %}
+{% block faqarticletitle %}{% translate "faqs report title" %}{% endblock %}
 
 {% block faqarticlecontent %}
-      <h2>{% include "string.html" with name="faqs report score title" %}</h2>
+      <h2>{% translate "faqs report score title" %}</h2>
       {% translate "faqs report score content" %}
 
-      <h2>{% include "string.html" with name="faqs report test title" %}</h2>
+      <h2>{% translate "faqs report test title" %}</h2>
       <ul class="verdict-list">
         <li class="passed icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status passed" %}:</span>
-          {% include "string.html" with name="faqs report test good" %}
+          <span class="visually-hidden">{% translate "results no-icon-status passed" %}:</span>
+          {% translate "faqs report test good" %}
         </li>
         <li class="failed icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status failed" %}:</span>
-          {% include "string.html" with name="faqs report test bad" %}
+          <span class="visually-hidden">{% translate "results no-icon-status failed" %}:</span>
+          {% translate "faqs report test bad" %}
         </li>
         <li class="warning icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status warning" %}:</span>
-          {% include "string.html" with name="faqs report test warning" %}
+          <span class="visually-hidden">{% translate "results no-icon-status warning" %}:</span>
+          {% translate "faqs report test warning" %}
         </li>
         <li class="info icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status info" %}:</span>
-          {% include "string.html" with name="faqs report test info" %}
+          <span class="visually-hidden">{% translate "results no-icon-status info" %}:</span>
+          {% translate "faqs report test info" %}
         </li>
         <li class="error icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status error" %}:</span>
-          {% include "string.html" with name="faqs report test error" %}
+          <span class="visually-hidden">{% translate "results no-icon-status error" %}:</span>
+          {% translate "faqs report test error" %}
         </li>
       </ul>
 
-      <h2>{% include "string.html" with name="faqs report subtest title" %}</h2>
+      <h2>{% translate "faqs report subtest title" %}</h2>
       <ul class="verdict-list">
         <li class="passed icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status passed" %}:</span>
-          {% include "string.html" with name="faqs report subtest good" %}
+          <span class="visually-hidden">{% translate "results no-icon-status passed" %}:</span>
+          {% translate "faqs report subtest good" %}
         </li>
         <li class="failed icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status failed" %}:</span>
-          {% include "string.html" with name="faqs report subtest bad" %}
+          <span class="visually-hidden">{% translate "results no-icon-status failed" %}:</span>
+          {% translate "faqs report subtest bad" %}
         </li>
         <li class="warning icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status warning" %}:</span>
-          {% include "string.html" with name="faqs report subtest warning" %}
+          <span class="visually-hidden">{% translate "results no-icon-status warning" %}:</span>
+          {% translate "faqs report subtest warning" %}
         </li>
         <li class="info icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status info" %}:</span>
-          {% include "string.html" with name="faqs report subtest info" %}
+          <span class="visually-hidden">{% translate "results no-icon-status info" %}:</span>
+          {% translate "faqs report subtest info" %}
         </li>
         <li class="error icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status error" %}:</span>
-          {% include "string.html" with name="faqs report subtest error" %}
+          <span class="visually-hidden">{% translate "results no-icon-status error" %}:</span>
+          {% translate "faqs report subtest error" %}
         </li>
         <li class="not-tested icon">
-          <span class="visually-hidden">{% include "string.html" with name="results no-icon-status not-tested" %}:</span>
-          {% include "string.html" with name="faqs report subtest not-tested" %}
+          <span class="visually-hidden">{% translate "results no-icon-status not-tested" %}:</span>
+          {% translate "faqs report subtest not-tested" %}
         </li>
       </ul>
 {% endblock %}

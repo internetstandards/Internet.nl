@@ -5,12 +5,12 @@
 
   <section class="test-section bg-primary ellipse">
     <div class="container">
-      <h1 class="h1 color-secondary">{% include "string.html" with name="home teaser" %}</h1>
+      <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
       <article class="test-card-large mail-variant">
-        <h2 class="mail icon">{% include "string.html" with name="base test mail label" %}</h2>
+        <h2 class="mail icon">{% translate "base test mail label" %}</h2>
         <form action="/mail/" method="POST">
           <label class="mail-label">
-            <span>{% include "string.html" with name="base test mail input" %}</span>
+            <span>{% translate "base test mail input" %}</span>
             <span class="mail-input-container">
               <span class="mail-icon-container icon"></span>
               <input id="mail-url" class="mail-input" name="url" type="text" placeholder="{% translate_attr "base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
@@ -18,39 +18,39 @@
           </label>
           {% if request.GET.invalid != None %}
           <p class="invalid-domain">
-            {% include "string.html" with name="base test prechecks invalid domain" %}
+            {% translate "base test prechecks invalid domain" %}
           </p>
           {% endif %}
-          <button class="primary-button icon" type="submit">{% include "string.html" with name="base test start" %}</button>
+          <button class="primary-button icon" type="submit">{% translate "base test start" %}</button>
         </form>
         <ul>
           <li>
             <div class="icon"></div>
-            <span>{% include "string.html" with name="base test mail usp1" %}</span>
+            <span>{% translate "base test mail usp1" %}</span>
           </li>
           <li>
             <div class="icon"></div>
-            <span>{% include "string.html" with name="base test mail usp2" %}</span>
+            <span>{% translate "base test mail usp2" %}</span>
           </li>
           <li>
             <div class="icon"></div>
-            <span>{% include "string.html" with name="base test mail usp3" %}</span>
+            <span>{% translate "base test mail usp3" %}</span>
           </li>
         </ul>
-        <a class="icon" href="#about-the-test">{% include "string.html" with name="base test explain" %}</a>
+        <a class="icon" href="#about-the-test">{% translate "base test explain" %}</a>
       </article>
     </div>
   </section>
 
   <section class="test-sub-section bg-primary">
     <div class="container">
-      <h2 class="h3 color-secondary">{% include "string.html" with name="base test more" %}</h2>
+      <h2 class="h3 color-secondary">{% translate "base test more" %}</h2>
       {% include "partials/test-cards.html" with exclude="mail" %}
     </div>
   </section>
   <section class="article-content-section" id="about-the-test">
     <div class="container">
-      <h2>{% include "string.html" with name="base test mail title" %}</h2>
+      <h2>{% translate "base test mail title" %}</h2>
       {% translate "base test mail explain" %}
     </div>
   </section>

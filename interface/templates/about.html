@@ -11,8 +11,8 @@
     <section class="intro-section bg-primary ellipse reverse">
       <div class="container">
         <hgroup class="center">
-          <h1 class="h5 color-secondary">{% include "string.html" with name="base about" %}</h1>
-          <p class="h1 color-secondary">{% include "string.html" with name="home teaser" %}</p>
+          <h1 class="h5 color-secondary">{% translate "base about" %}</h1>
+          <p class="h1 color-secondary">{% translate "home teaser" %}</p>
         </hgroup>
       </div>
     </section>
@@ -23,8 +23,8 @@
       <div class="container">
         <img src="{% static 'author/gerben-klein-baltink/picture.jpg' %}" alt="" class="quote-image" loading="lazy" width="100" height="100">
         <blockquote>
-          <p class="h4 color-secondary">{% include "string.html" with name="about quote" %}</p>
-          <cite class="body-m color-secondary"><strong>{% include "string.html" with name="author gerben-klein-baltink name" %}</strong> - {% include "string.html" with name="author gerben-klein-baltink role" %}</cite>
+          <p class="h4 color-secondary">{% translate "about quote" %}</p>
+          <cite class="body-m color-secondary"><strong>{% translate "author gerben-klein-baltink name" %}</strong> - {% translate "author gerben-klein-baltink role" %}</cite>
         </blockquote>
       </div>
     </aside>
