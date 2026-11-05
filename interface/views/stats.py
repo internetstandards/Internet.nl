@@ -69,6 +69,7 @@ order by res asc
         request,
         "statistics.html",
         dict(
+            pagetitle="Database statistics",
             table_headers=["Date", "Website", "Mail", "Connection", "Total per day"],
             table_content=table_content,
             per_test=per_test,

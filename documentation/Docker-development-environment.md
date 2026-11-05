@@ -71,7 +71,7 @@ Using a Docker runtime with more memory and CPU cores improves rebuild/restart s
 Once the development environment is up and running it will autotically rebuild/restart/reload when certain parts of the source code change. Currently changes to the following files will be detected and acted upon:
 
 - Python sources in  `checks/`, `internetnl/`, `interface/`: will reload `app` and `worker*` using Django autoreload, when needed open browser sessions will reload.
-- CSS files in `frontend/css/`: will rebuild CSS files and open browser sessions will reload.
+- CSS and JavaScript files in `frontend/src/`: will rebuild CSS and JavaScript files and open browser sessions will reload.
 - Django template files (`.html`) in `interface/templates/`: open browser sessions will reload.
 
 ### Foreground development
