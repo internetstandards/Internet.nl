@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from django.conf import settings
 from django.urls import path, re_path
+from django.views.generic import RedirectView
 from django.conf.urls.static import static
 
 from interface import views
@@ -28,8 +29,8 @@ urlpatterns = [
     path("widget-site/", views.widgetsitepage),
     path("widget-mail/", views.widgetmailpage),
     path("halloffame/", views.hofchampionspage),
-    path("halloffame/web/", views.hofwebpage),
-    path("halloffame/mail/", views.hofmailpage),
+    path("halloffame/web/", RedirectView.as_view(url="/halloffame/", permanent=True)),
+    path("halloffame/mail/", RedirectView.as_view(url="/halloffame/", permanent=True)),
     path("test-connection/", views.testconnectionpage),
     path("connection/", connection.index),
     re_path(r"^(connection|conn)/gettestid/$", connection.gettestid),
@@ -62,7 +63,7 @@ urlpatterns = [
     path("change_language/", views.change_language, name="change_language"),
     path("contact/", views.contactpage),
     path("blogs/", views.blogindexpage),
-    re_path(r"^blogs/(?P<addr>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
+    re_path(r"^blogs/(?P<article>[a-zA-Z0-9\-]{1,40})/$", views.blogarticlepage),
     re_path(r"^blogs/(?P<author>[a-zA-Z0-9\-]{1,40})/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.blogarticlepage),
     path("news/", views.newsindexpage),
     re_path(r"^news/(?P<article>[a-zA-Z0-9\-]{1,80})/$", views.newsarticlepage),
@@ -72,7 +73,6 @@ urlpatterns = [
     path("about/", views.aboutpage),
     path("disclosure/", views.disclosurepage),
     path("privacy/", views.privacypage),
-    path("contact/", views.contactpage),
 ]
 
 # Host-urls that are accessible by host-only, which should be approachable by developers as well during

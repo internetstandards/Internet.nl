@@ -1,0 +1,42 @@
+{% firstof heading "h3" as tag %}
+<ul class="test-card-list {{ variant }}">
+  {% if exclude != "site" %}
+    <li class="test-card-small">
+      <a href="/test-site/">
+        <div class="card-container domain icon">
+          <hgroup>
+            <{{ tag }}>{% include "string.html" with name="base test website label" %}</{{ tag }}>
+            <p>{% include "string.html" with name="base test website sublabel" %}</p>
+          </hgroup>
+        </div>
+        <div class="primary-button rounded icon"></div>
+      </a>
+    </li>
+  {% endif %}
+  {% if exclude != "mail" %}
+    <li class="test-card-small">
+      <a href="/test-mail/">
+        <div class="card-container mail icon">
+          <hgroup>
+            <{{ tag }}>{% include "string.html" with name="base test mail label" %}</{{ tag }}>
+            <p>{% include "string.html" with name="base test mail sublabel" %}</p>
+          </hgroup>
+        </div>
+        <div class="primary-button rounded icon"></div>
+      </a>
+    </li>
+  {% endif %}
+  {% if exclude != "connection" %}
+    <li class="test-card-small">
+      <a href="/test-connection/">
+        <div class="card-container connection icon">
+          <hgroup>
+            <{{ tag }}>{% include "string.html" with name="base test connection label" %}</{{ tag }}>
+            <p>{% include "string.html" with name="base test connection sublabel" %}</p>
+          </hgroup>
+        </div>
+        <div class="primary-button rounded icon"></div>
+      </a>
+    </li>
+  {% endif %}
+</ul>

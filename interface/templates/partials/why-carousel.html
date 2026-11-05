@@ -1,0 +1,31 @@
+{% load translate %}
+<section class="knowledge-section">
+  <div class="container">
+    <hgroup>
+      <h2 class="h3 color-secondary">{% include "string.html" with name="home why title" %}</h2>
+      <p class="body-l">{% include "string.html" with name="home why explain" %}</p>
+    </hgroup>
+    <ul class="knowledge-list" id="card-carousel">
+      {% for i in "123" %}
+        {% expand "home why reason-{{ i }} title" as title %}
+        {% expand "home why reason-{{ i }} text" as text %}
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3>{% include "string.html" with name=title %}</h3>
+          <p>{% include "string.html" with name=text %}</p>
+        </li>
+      {% endfor %}
+    </ul>
+    <ul class="dots" aria-label="{% translate 'home why carousel' %}" aria-controls="card-carousel">
+      {% for i in "123" %}
+        {% expand "home why reason-{{ i }} title" as title %}
+        <li class="dot{% if forloop.first %} active{% endif %}">
+          <button type="button" aria-label="{% translate 'home why scroll-to' %} {% translate title %}"></button>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="button-container">
+      <a class="secondary-button icon" href="/test-site/">{% include "string.html" with name="home why button" %}</a>
+      <p class="body-m">{% include "string.html" with name="home why numbers" %}</p>
+    </div>
+  </div>
+</section>

@@ -74,13 +74,21 @@
     }
   }
   
-  hgroup { 
+  .hof-intro {
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
     text-align: center;
-    
+
     @media (width >= 56.25rem) {
       grid-column: 2 / 10;
       text-align: start;
+    }
+
+    a {
+      display: inline;
+      text-decoration: underline;
+      color: var(--body-link-color);
     }
   }
 

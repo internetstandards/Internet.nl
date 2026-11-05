@@ -97,6 +97,10 @@
     }
   }
 
+  hgroup p a {
+    color: inherit;
+  }
+
   hgroup {
     gap: 1.5rem;
 
@@ -158,6 +162,10 @@
     font: var(--section-body-xl);
   }
 
+  .article-lead p {
+    font: inherit;
+  }
+
   a {
     display: inline;
     color: var(--body-link-color);
@@ -180,6 +188,59 @@
     color: var(--body-color-primary);
     padding-block: 0.375rem;
     font-weight: 500;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 15rem;
+    padding: 1rem;
+    font-family: monospace;
+    border: var(--card-border);
+    border-radius: 0.5rem;
+  }
+
+  .verdict-list {
+    list-style: none;
+
+    li {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      &::before {
+        display: block;
+      }
+
+      &.passed::before {
+        mask-image: url("/static/icons/checkmark-circle.svg");
+        background-color: var(--success-color);
+      }
+
+      &.failed::before {
+        mask-image: url("/static/icons/error.svg");
+        background-color: var(--failed-color);
+      }
+
+      &.warning::before {
+        mask-image: url("/static/icons/exclamation-circle.svg");
+        background-color: var(--warning-color);
+      }
+
+      &.info::before {
+        mask-image: url("/static/icons/info.svg");
+        background-color: var(--info-color);
+      }
+
+      &.error::before {
+        mask-image: url("/static/icons/broken.svg");
+        background-color: var(--error-color);
+      }
+
+      &.not-tested::before {
+        mask-image: url("/static/icons/question.svg");
+        background-color: var(--not-tested-color);
+      }
+    }
   }
 
   &.footer-page .container {
@@ -331,7 +392,7 @@
     font: var(--card-body-l);
   }
 
-  &:nth-child(n+6) {
+  .load-more > &:nth-child(n+6) {
     @media (scripting: enabled) {
       display: none;
     }

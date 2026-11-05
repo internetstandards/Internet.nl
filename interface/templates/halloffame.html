@@ -1,8 +1,8 @@
 {% extends "base.html" %}
+{% load static %}
 {% load translate %}
 
 {% block maincontent %}
-
 <section class="intro-section bg-primary ellipse reverse">
   <div class="container">
     <hgroup class="center">
@@ -12,31 +12,46 @@
   </div>
 </section>
 
-<search class="filter-section">
-  <div class="container">
-    <div class="filter-container">
-      <h2 class="h5 color-secondary">{% include "string.html" with name="halloffame filter" %}</h2>
-      <div class="button-container">
-        <a class="primary-button" href="#kampioenen">{% include "string.html" with name="halloffame champions title" %}</a>
-        <a class="secondary-button" href="/halloffame/hosters#hosters">{% include "string.html" with name="manual halloffame hosters title" %}</a>
+{% if manuals %}
+  <search class="filter-section">
+    <div class="container">
+      <div class="filter-container">
+        <h2 class="h5 color-secondary">{% include "string.html" with name="halloffame filter" %}</h2>
+        <div class="button-container">
+          <a class="{% if cpage == 'champions' %}primary-button{% else %}secondary-button{% endif %}"
+             href="/halloffame/"
+             {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions title" %}</a>
+          {% for manual in manuals %}
+            <a class="{% if cpage == manual.0 %}primary-button{% else %}secondary-button{% endif %}"
+               href="/halloffame/{{ manual.0 }}/"
+               {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a>
+          {% endfor %}
+        </div>
       </div>
     </div>
-  </div>
-</search>
+  </search>
+{% endif %}
 
-<section class="hosters-section" id="kampioenen">
+<section class="hosters-section">
   <div class="container">
-    <hgroup>
-      <h2 class="h2 color-secondary">{% include "string.html" with name="halloffame champions title" %}</h2>
-      <p class="body-xl">{% include "string.html" with name="halloffame champions text" %}</p>
-    </hgroup>
-    <div class="image-container">
-      <img src="/static/images/hosters-badge.png" alt="Uitgelichte hosters badge" width="100" height="128" loading="lazy">
+    <div class="hof-intro">
+      <h2 class="h2 color-secondary">{% include "string.html" with name=hof_title %}</h2>
+      <div class="body-xl">{% translate hof_text %}</div>
     </div>
+    {% if "INTERNETNL_BRANDING"|get_settings_value %}
+      <div class="image-container">
+        {% if cpage == "champions" %}
+          <img src="{% static 'embed-badge-champions.svg' %}" alt="{% translate 'halloffame champions badge' %}" width="100" height="128" loading="lazy">
+        {% elif manual_icon %}
+          <img src="/static/{{ manual_icon }}" alt="{% translate manual_icon_alt %}" width="100" height="128" loading="lazy">
+        {% endif %}
+      </div>
+    {% endif %}
     <ul class="hall-of-fame-list">
-      {% for member in halloffame|slice:"-20:" %}
+      {% for member in halloffame %}
         <li>
-          <a href="{{member.permalink}}">{{member.domain|idna}}</a>
+          {# manual entries, such as hosters, are names rather than domains #}
+          <a href="{{ member.permalink }}">{% if cpage == "champions" %}{{ member.domain|idna }}{% else %}{{ member.domain }}{% endif %}</a>
         </li>
       {% endfor %}
     </ul>
@@ -46,104 +61,9 @@
 <section class="test-sub-section bg-primary">
   <div class="container">
     <h2 class="h3 color-secondary">{% include "string.html" with name="base test title" %}</h2>
-    <ul class="test-card-list hall-of-fame-variant">
-      <li class="test-card-small">
-        <a href="/test-site">
-          <div class="card-container icon domain">
-            <hgroup>
-              <h3>{% include "string.html" with name="base test website label" %}</h3>
-              <p>{% include "string.html" with name="base test website sublabel" %}</p>
-            </hgroup>
-          </div>
-          <div class="primary-button rounded icon"></div>
-        </a>
-      </li>
-      <li class="test-card-small">
-        <a href="/test-mail">
-          <div class="card-container mail icon">
-            <hgroup>
-              <h3>{% include "string.html" with name="base test mail label" %}</h3>
-              <p>{% include "string.html" with name="base test mail sublabel" %}</p>
-            </hgroup>
-          </div>
-          <div class="primary-button rounded icon"></div>
-        </a>
-      </li>
-      <li class="test-card-small">
-        <a href="/test-connection">
-          <div class="card-container connection icon">
-            <hgroup>
-              <h3>{% include "string.html" with name="base test connection label" %}</h3>
-              <p>{% include "string.html" with name="base test connection sublabel" %}</p>
-            </hgroup>
-          </div>
-          <div class="primary-button rounded icon"></div>
-        </a>
-      </li>
-    </ul>
+    {% include "partials/test-cards.html" with variant="hall-of-fame-variant" %}
   </div>
 </section>
 
-<section class="contact-section ellipse hidden-mobile">
-  <div class="container">
-    <h2 class="h3 color-secondary">{% include "string.html" with name="faqs section title" %}</h2>
-    <details class="faq-item accordion" name="faq-item">
-      <summary class="icon">
-        {% include "string.html" with name="faqs section question-1" %}
-      </summary>
-      <p>{% include "string.html" with name="faqs section answer-1" %}</p>
-    </details>
-    <details class="faq-item accordion" name="faq-item">
-      <summary class="icon">
-        {% include "string.html" with name="faqs section question-2" %}
-      </summary>
-      <p>{% include "string.html" with name="faqs section answer-2" %}</p>
-    </details>      
-    <details class="faq-item accordion" name="faq-item">
-      <summary class="icon">
-        {% include "string.html" with name="faqs section question-3" %}
-      </summary>
-      <p>{% include "string.html" with name="faqs section answer-3" %}</p>
-    </details>      
-    <details class="faq-item accordion" name="faq-item">
-      <summary class="icon">
-        {% include "string.html" with name="faqs section question-4" %}
-      </summary>
-      <p>{% include "string.html" with name="faqs section answer-4" %}</p>
-    </details>      
-    <details class="faq-item accordion" name="faq-item">
-      <summary class="icon">
-        {% include "string.html" with name="faqs section question-5" %}
-      </summary>
-      <p>{% include "string.html" with name="faqs section answer-5" %}</p>
-    </details>
-    <a class="secondary-button icon" href="/faqs">{% include "string.html" with name="faqs section link" %}</a>
-    <article class="contact-card">
-      <hgroup>
-        <h3>{% include "string.html" with name="base contact" %}</h3>
-        <p>{% include "string.html" with name="contact section description" %}</p>
-      </hgroup>
-      <ul>
-        <li class="contact-card-small">
-          <a href="mailto:question@internet.nl">
-            <hgroup>
-              <h4 class="mail icon">{% include "string.html" with name="contact section mail" %}</h4>
-              <p>{% include "string.html" with name="contact section mail-description" %}</p>
-            </hgroup>
-            <div class="secondary-button rounded icon"></div>
-          </a>
-        </li>
-        <li class="contact-card-small">
-          <a href="https://github.com/internetstandards/Internet.nl">
-            <hgroup>
-              <h4 class="help icon">{% include "string.html" with name="contact section issue" %}</h4>
-              <p>{% include "string.html" with name="contact section issue-description" %}</p>
-            </hgroup>
-            <div class="secondary-button rounded icon"></div>
-          </a>
-        </li>
-      </ul>
-    </article>
-  </div>
-</section>
+{% include "partials/faq-contact.html" %}
 {% endblock %}
