@@ -1,8 +1,4 @@
-import {
-  validateElements,
-  validateNumber,
-  toggleElements,
-} from "../../lib/utils.js";
+import { validateElements, validateNumber } from "../../lib/utils.js";
 
 const elements = {
   retestTime: document.querySelector(".countdown-time"),

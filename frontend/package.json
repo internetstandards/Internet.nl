@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "css:lint": "stylelint css/*.css",
+    "css:lint": "stylelint 'src/css/**/*.css'",
     "docker:build": "NODE_ENV=production OUTPUT_DIR=/app/static_frontend rollup -c",
     "docker:watch": "NODE_ENV=development OUTPUT_DIR=/app/static_frontend rollup -c -w",
     "build": "NODE_ENV=production rollup -c",

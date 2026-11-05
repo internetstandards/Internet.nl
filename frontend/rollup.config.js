@@ -65,16 +65,6 @@ const config = [
     },
     plugins: [cleanupOutputDir(), ...defaultPlugins],
   },
-  // Legacy JavaScript bundle (IIFE)
-  {
-    input: "src/index.js",
-    output: {
-      format: "iife",
-      sourcemap: !isProduction,
-      file: `${outputDir}/js/legacy-min.js`,
-    },
-    plugins: defaultPlugins,
-  },
   // CSS bundle
   {
     input: "src/index.css",

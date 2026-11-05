@@ -10,3 +10,5 @@ vendor/openssl-master/test/*
 vendor/openssl-master/doc/*
 unbound/testdata/*
 .venv/*
+frontend/node_modules
+frontend/dist

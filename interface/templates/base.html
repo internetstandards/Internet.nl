@@ -17,10 +17,8 @@
     <link rel="apple-touch-icon-precomposed" href="{% static 'favicon.png' %}" />
     <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
     <link rel="stylesheet" href="{% static 'css/style-min.css' %}" />
-    {% block scripting %}
-      <script type="module" src="{% static 'js/base-min.js' %}"></script>
-      <script nomodule src="{% static 'js/legacy-min.js' %}"></script>
-    {% endblock %}
+    <script type="module" src="{% static 'js/base-min.js' %}"></script>
+    {% block scripting %}{% endblock %}
   </head>
   <body class="{{ pageclass }}">
     <div class="matomo" hidden>

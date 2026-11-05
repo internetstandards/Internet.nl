@@ -134,16 +134,12 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-# build frontend image target
-FROM --platform=linux/amd64 debian:bullseye-20241111-slim AS frontend
-
-# install npm from official image
-COPY --from=node:22-slim /usr/local/bin/ /usr/local/bin/
-COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+# build frontend image target, the output does not depend on the platform so build natively
+FROM --platform=$BUILDPLATFORM node:22-slim AS frontend
 
 ADD frontend/ /app/frontend
 WORKDIR /app/frontend
-RUN npm install
+RUN npm ci
 RUN npm run docker:build
 
 # build main application image target
@@ -251,8 +247,8 @@ FROM app AS app-dev
 USER root
 
 # copy dependencies to rebuild CSS (postcss)
-COPY --from=frontend /usr/local/bin/ /usr/local/bin/
-COPY --from=frontend /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:22-slim /usr/local/bin/ /usr/local/bin/
+COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # copy browser reload module
 COPY --from=tools-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload /usr/local/lib/python${PYTHON_VERSION}/dist-packages/django_browser_reload
