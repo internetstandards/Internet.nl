@@ -361,6 +361,9 @@ msgstr "Your email address:"
 msgid "base test mail label"
 msgstr "Test your email"
 
+msgid "base test mail placeholder"
+msgstr "example.org"
+
 msgid "base test mail sublabel"
 msgstr "How modern is your mail provider?"
 
@@ -420,6 +423,9 @@ msgstr "Your website domain name:"
 
 msgid "base test website label"
 msgstr "Test your website"
+
+msgid "base test website placeholder"
+msgstr "www.example.org"
 
 msgid "base test website sublabel"
 msgstr "Is your website up to date?"
