@@ -20,7 +20,6 @@ def test_your_email_score(page, app_url, test_email):
     page.locator("#mail-url").fill(test_email)
     page.locator('form[action="/mail/"] button').click()
 
-    page.url == f"{app_url}/mail/{test_email}/"
     # make sure the test has been started
     page.get_by_text(f"Email test: {test_email}")
     # make sure the test is completed

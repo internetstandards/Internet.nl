@@ -47,10 +47,10 @@ def test_your_website_score(page, app_url, test_domain):
     expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
-def test_your_website_score_without_javascript(browser, browser_context_args, app_url, test_domain):
+def test_your_website_score_without_javascript(new_context, app_url, test_domain):
     """The website test should work without JavaScript, by following the link on the probe page."""
 
-    page = browser.new_context(**browser_context_args, java_script_enabled=False).new_page()
+    page = new_context(java_script_enabled=False).new_page()
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
