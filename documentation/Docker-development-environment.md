@@ -411,4 +411,4 @@ For the development environment the Routinator service/container is not started 
 
 ## Tools Shell
 
-If you need to interact with any of the tools included in this project (eg: ./manage.py, uv, Unbound, linters, postcss, etc) you can run the `make shell` command to enter the 'tools' container which includes all tools and applications. The project directory is mounted in the `/source` directory in the container so any changes made to the files will be made to the project as well.
+If you need to interact with any of the tools included in this project (eg: ./manage.py, uv, Unbound, linters, etc) you can run the `make shell` command to enter the 'tools' container which includes all tools and applications. The project directory is mounted in the `/source` directory in the container so any changes made to the files will be made to the project as well.
