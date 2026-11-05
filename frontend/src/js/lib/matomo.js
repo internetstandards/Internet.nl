@@ -1,4 +1,5 @@
-const _paq = window._paq || [];
+// piwik.js reads its command queue from the global _paq
+const _paq = (window._paq = window._paq || []);
 
 /**
  * Initialize Matomo tracking with optional cookie disabling
