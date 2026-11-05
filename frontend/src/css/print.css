@@ -1,4 +1,19 @@
 @media print {
+  /* the dark theme would print light text and logos */
+  :root {
+    color-scheme: light;
+    --light-visible: block;
+    --dark-visible: none;
+  }
+
+  /* icons are masks over a background colour, which browsers leave out when printing */
+  .icon::before,
+  .icon::after,
+  meter {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   header {
     position: static;
   }
@@ -11,6 +26,24 @@
     display: none;
   }
 
+  .print-only {
+    display: block;
+  }
+
+  details,
+  table,
+  h2,
+  h3,
+  h4 {
+    break-inside: avoid;
+  }
+
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+
   .meter-value {
     opacity: 1;
     animation: none;
@@ -21,7 +54,8 @@
     animation: none;
   }
 
-  .result-section .container > * {
+  .result-section .container > *,
+  .result-details-section .container > * {
     grid-column: span 12;
   }
 }

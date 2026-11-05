@@ -20,6 +20,9 @@
           <span class="h5 color-secondary">{{ permadate|date:'(Y-m-d H:i T)' }}</span>
         {% endif %}
       </h1>
+      {% if permalink %}
+        <p class="print-only">{{ permalink }}</p>
+      {% endif %}
       {% if "ENABLE_BATCH"|get_settings_value and pageclass != "connectiontest" %}
         <p class="results-notice" role="note">{% include "string.html" with name="results batch-tls-notice" %}</p>
       {% endif %}
