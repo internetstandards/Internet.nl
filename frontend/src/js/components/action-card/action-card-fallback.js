@@ -1,26 +1,8 @@
-import { validateElements } from "../../lib/utils.js";
-
-const elements = {
-  details: document.querySelector(".action-card details"),
-};
-
-function actionCardFallback() {
-  const toggleDetailsOpen = () => {
-    if (window.innerWidth > 900) {
-      elements.details.setAttribute("open", "");
-    } else {
-      elements.details.removeAttribute("open");
-    }
-  };
-
-  toggleDetailsOpen();
-  window.addEventListener("resize", toggleDetailsOpen, { passive: true });
-}
-
+// without ::details-content, CSS cannot keep the follow-up details open on wide screens
 if (!CSS.supports("selector(::details-content)")) {
-  if (validateElements(elements, "action-card-fallback")) {
-    actionCardFallback();
-  }
+  const details = document.querySelector(".action-card details");
+  const wide = window.matchMedia("(min-width: 56.25rem)");
+  const update = () => details.toggleAttribute("open", wide.matches);
+  update();
+  wide.addEventListener("change", update);
 }
-
-export default actionCardFallback;

@@ -1,202 +1,51 @@
-import {
-  validateElements,
-  validateNumber,
-  fetchJson,
-} from "../../lib/utils.js";
+import { fetchJson, showProbeFinished, showProbeError } from "../../lib/utils.js";
 
-// State management
-const state = {
-  probesRunning: 0,
-  javascriptRetries: 0,
-  javascriptTimeout: 0,
-  probesUrl: "",
-  failed: false,
-};
+const probes = document.getElementById("probes");
+let running = probes.children.length;
+let failed = false;
 
-/**
- * Show results for a specific category
- * @param {string} category - The category to show results for
- * @param {Object} results - The results object
- */
-function showResults(category, results) {
-  const elements = {
-    summary: document.querySelector(`#${category}-summary`),
-    probeFinished: document.querySelector("#probe-finished")?.textContent,
-  };
-
-  if (!validateElements(elements, category)) return;
-  if (elements.summary.getAttribute("aria-busy") === "false") return;
-
-  state.probesRunning--;
-  if (state.probesRunning <= 0 && !state.failed) {
+function finish(summary, success) {
+  if (success) {
+    showProbeFinished(summary);
+  } else {
+    failed = true;
+    showProbeError(summary);
+  }
+  running--;
+  if (running === 0 && !failed) {
     window.location = "results";
   }
-
-  if (!results) return;
-
-  elements.summary.setAttribute("aria-busy", "false");
-  elements.summary.textContent = elements.probeFinished;
-  elements.summary.classList.add("done");
 }
 
-/**
- * Show error for a specific category
- * @param {string} category - The category to show error for
- */
-function showError(category) {
-  const elements = {
-    errorSummary: document.querySelector("#probe-error-summary")?.innerHTML,
-    summary: document.querySelector(`#${category}-summary`),
-    noRedirection: document.querySelector("#probes-no-redirection"),
-  };
-
-  if (!validateElements(elements, category)) return;
-  if (elements.summary.getAttribute("aria-busy") === "false") return;
-
-  // stay on this page after an error, as the results would be incomplete
-  state.probesRunning--;
-  state.failed = true;
-  elements.noRedirection.hidden = false;
-
-  elements.summary.setAttribute("aria-busy", "false");
-  elements.summary.innerHTML = elements.errorSummary;
-  elements.summary.closest("li").classList.replace("probing", "error");
+function failRunning() {
+  probes.querySelectorAll("[aria-busy=true]").forEach((summary) => finish(summary, false));
 }
 
-/**
- * Show errors for all running probes
- */
-function showErrors() {
-  const elements = {
-    probes: document.querySelectorAll("#probes > div"),
-  };
-
-  if (!validateElements(elements)) return;
-
-  elements.probes.forEach((probe) => {
-    const nameElement = probe.querySelector(".probe-name");
-    if (!nameElement) {
-      console.error("Required element .probe-name not found in probe");
-      return;
-    }
-
-    const name = nameElement.textContent;
-    if (!name) {
-      console.error("Probe name is empty");
-      return;
-    }
-
-    const summaryElement = document.querySelector(`#${name}-summary`);
-    if (!summaryElement) {
-      console.error(`Required element #${name}-summary not found`);
-      return;
-    }
-
-    if (summaryElement.getAttribute("aria-busy") === "true") {
-      showError(name);
-    }
-  });
-}
-
-/**
- * Parse probe statuses and update UI accordingly
- * @param {Array} json - Array of probe status objects
- * @returns {boolean} Whether to retry polling
- */
-function parseStatuses(json) {
-  if (!Array.isArray(json)) {
-    console.error("Invalid response format: expected array, got", typeof json);
-    return false;
-  }
-
-  let retry = false;
-
-  json.forEach((obj) => {
-    if (!obj.name) {
-      console.error("Probe status object missing required 'name' property");
-      return;
-    }
-
-    if (obj.done) {
-      if (obj.success) {
-        showResults(obj.name, obj);
-      } else {
-        showError(obj.name);
-      }
-    } else {
-      retry = true;
-    }
-  });
-
-  return retry;
-}
-
-/**
- * Poll for probe status updates
- * @param {string} testurl - The URL to poll
- * @param {number} retryCount - Number of retries remaining
- */
-async function pollProbes(testurl, retryCount) {
-  if (typeof retryCount === "undefined") {
-    const retriesElement = document.querySelector("#javascript-retries");
-
-    if (!validateElements(retriesElement, "probe")) return;
-
-    retryCount = validateNumber(retriesElement.textContent, "retries");
-    if (retryCount === null) return;
-  }
-
-  if (retryCount < 0) {
-    showErrors();
+async function poll(retries) {
+  if (retries < 0) {
+    failRunning();
     return;
   }
 
   try {
     // unique url for each poll, so page caches do not return an earlier status
-    const json = await fetchJson(await fetch(`${testurl}?${Date.now()}`));
-
-    if (parseStatuses(json)) {
-      const timeoutElement = document.querySelector("#javascript-timeout");
-      if (!validateElements(timeoutElement, "probe")) return;
-
-      const timeout = validateNumber(timeoutElement.textContent, "timeout");
-      if (timeout === null) return;
-
-      setTimeout(() => {
-        pollProbes(testurl, retryCount - 1);
-      }, timeout);
+    const statuses = await fetchJson(`${probes.dataset.url}?${Date.now()}`);
+    let pending = false;
+    for (const { name, done, success } of statuses) {
+      const summary = document.getElementById(`${name}-summary`);
+      if (!done) {
+        pending = true;
+      } else if (summary.getAttribute("aria-busy") === "true") {
+        finish(summary, success);
+      }
+    }
+    if (pending) {
+      setTimeout(() => poll(retries - 1), Number(probes.dataset.timeout));
     }
   } catch (error) {
-    console.error("Error polling probes:", error);
-    showErrors();
+    console.error(error);
+    failRunning();
   }
 }
 
-function initializeProbe() {
-  // Validate numeric values
-  const retries = validateNumber(elements.retries.textContent, "retries");
-  const timeout = validateNumber(elements.timeout.textContent, "timeout");
-  if (retries === null || timeout === null) return;
-
-  // Initialize state
-  state.javascriptRetries = retries;
-  state.javascriptTimeout = timeout;
-  state.probesRunning = elements.probes.length;
-  state.probesUrl = elements.url.textContent;
-
-  // Start polling
-  pollProbes(state.probesUrl);
-}
-
-const elements = {
-  retries: document.querySelector("#javascript-retries"),
-  timeout: document.querySelector("#javascript-timeout"),
-  url: document.querySelector("#probes-url"),
-  probes: document.querySelectorAll("#probes > div"),
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (validateElements(elements, "probe")) {
-    initializeProbe();
-  }
-});
+poll(Number(probes.dataset.retries));

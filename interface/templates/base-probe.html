@@ -6,18 +6,8 @@
 {% endblock %}
 {% block maincontent %}
   <div hidden>
-    <span id="javascript-retries">{{ javascript_retries }}</span>
-    <span id="javascript-timeout">{{ javascript_timeout }}</span>
     <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
     <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
-    <span id="probes-url">{{ probes.0.probesurl }}{{ addr }}/</span>
-    <div id="probes">
-      {% for probe in probes %}
-        <div>
-          <span class="probe-name">{{ probe.name }}</span>
-        </div>
-      {% endfor %}
-    </div>
   </div>
   <section class="result-section loading bg-primary ellipse reverse hidden-mobile">
     <div class="container">
@@ -30,11 +20,11 @@
         </h1>
         <p class="body-m">
           {% include "string.html" with name="probes tests-duration" cache_ttl="CACHE_TTL"|get_settings_value %}
-          {% include "string.html" with name="probes auto-redirect" %}
+          <span class="scripting-only">{% include "string.html" with name="probes auto-redirect" %}</span>
           {% include "string.html" with name="probes tests-description" %}
         </p>
       </hgroup>
-      <ul class="probing-list">
+      <ul id="probes" data-url="{{ probes.0.probesurl }}{{ addr }}/" data-retries="{{ javascript_retries }}" data-timeout="{{ javascript_timeout }}">
         {% for probe in probes %}
           <li class="probing icon h7 color-secondary">
             {% translate probe.title %}

@@ -67,12 +67,6 @@ header {
   }
 }
 
-.theme-item {
-  @media (scripting: none) {
-    display: none;
-  }
-}
-
 .header-home {
   align-self: center;
   font: var(--section-header-s);
@@ -382,6 +376,11 @@ header nav {
       }
 
       &:focus-within .nav-sublist {
+        /* Bring focused dropdown to front */
+        @media (width >= 80rem) {
+          z-index: 20;
+        }
+
         @media (scripting: none) {
           display: flex;
         }
@@ -525,11 +524,6 @@ header nav {
         z-index: 2;
       }
 
-      /* Bring focused dropdown to front */
-      &:focus-within,
-      &.focused {
-        z-index: 20;
-      }
     }
 
     &.expanded {

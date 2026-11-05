@@ -61,12 +61,6 @@
   display: none;
 }
 
-#load-more {
-  @media (scripting: none) {
-    display: none;
-  }
-}
-
 .button-container {
   display: grid;
   align-items: center;
