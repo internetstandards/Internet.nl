@@ -12,7 +12,6 @@
 
     @media (width >= 56.25rem) {
       flex-direction: row;
-      padding-block: 2.5rem;
     }
   }
 }

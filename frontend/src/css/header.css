@@ -19,10 +19,6 @@ header {
   &.not-scrolling-up {
     @media (prefers-reduced-motion: no-preference) {
       translate: 0 -100%;
-
-      #nav-sublist.nav-sublist.expanded {
-        translate: -50% -100%;
-      }
     }
   }
 
@@ -195,7 +191,6 @@ header:has(.active) {
   }
 
   @media (width >= 80rem) {
-    width: 100%;
     flex-direction: row;
     position: initial;
     height: auto;
@@ -508,7 +503,6 @@ header nav {
 
     @media (width >= 80rem) {
       border: 1px solid var(--nav-sublist-border-color);
-      gap: 1rem;
       position: absolute;
       padding: 1.25rem 1.5rem;
       background-color: var(--nav-dropdown-bg-color);

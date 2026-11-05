@@ -10,10 +10,6 @@
   .container {
     padding-block: 2rem;
 
-    @media (width >= 56.25rem) {
-      padding-block: 2rem;
-    }
-
     h2 {
       padding-bottom: 1.5rem;
 
@@ -48,14 +44,6 @@
         }
       }
     }
-  }
-}
-
-[data-theme="light"] {
-  color-scheme: light;
-
-  .faq-item {
-    border: 1px solid var(--green-400);
   }
 }
 
@@ -137,7 +125,6 @@
     gap: 1rem;
 
     @media (width >= 56.25rem) {
-      padding-block: 2rem;
       gap: 3rem;
     }
   }
