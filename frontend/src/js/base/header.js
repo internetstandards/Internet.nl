@@ -72,6 +72,14 @@ function header() {
     }
   });
 
+  // close dropdowns when the header hides, as some would otherwise stay in view
+  const closeSubMenus = () => {
+    toggleSubMenus.forEach((toggleSubMenu) => {
+      toggleSubMenu.setAttribute("aria-expanded", "false");
+      toggleSubMenu.closest(".nav-item")?.querySelector(".nav-sublist")?.classList.remove("expanded");
+    });
+  };
+
   /* STICKY HEADER */
   const header = document.querySelector("header");
   const headerHeight = header.offsetHeight;
@@ -106,6 +114,7 @@ function header() {
             if (delta > 0) {
               // Scrolled down
               header.classList.add("not-scrolling-up");
+              closeSubMenus();
             } else {
               // Scrolled up
               header.classList.remove("not-scrolling-up");
