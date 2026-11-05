@@ -214,15 +214,11 @@ def update_report_with_registrar_and_score(report, probes):
     add_score_to_report(report, score)
 
 
-def get_hof_cache(cache_id, count):
-    cached_data = cache.get(cache_id, None)
-    if cached_data is None:
-        return "…", 0, []
-    return (cached_data["date"], cached_data["count"], cached_data["data"][:count])
-
-
 def get_hof_champions(count=None):
-    return get_hof_cache(redis_id.hof_champions.id, count)
+    cached_data = cache.get(redis_id.hof_champions.id)
+    if cached_data is None:
+        return 0, []
+    return cached_data["count"], cached_data["data"][:count]
 
 
 def get_hof_manual(manual):

@@ -57,14 +57,16 @@ def page404(request, exception):
     )
 
 
+def article_index():
+    if settings.INTERNETNL_BRANDING:
+        return _("article .index").split()
+    return _("article custom .index").split()
+
+
 @simple_cache_page
 def indexpage(request):
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    articles = articles[0:3]
-    hof_entries = get_hof_champions(10)[2]
+    articles = article_index()[0:3]
+    _count, hof_entries = get_hof_champions(10)
     return render(
         request,
         "index.html",
@@ -202,21 +204,13 @@ def newsarticlepage(request, article):
 
 
 def articlespage(request):
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
+    articles = article_index()
     article = articles[0]
     return redirect("/article/" + article)
 
 
 def articleindexpage(request):
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    if len(articles) < 1:
-        articles = []
+    articles = article_index()
     return render(
         request,
         "articles.html",
@@ -230,11 +224,7 @@ def articlepage(request, article):
     if _(title) == title:
         return page404(request, None)
 
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    articles = [other for other in articles if other != article][0:3]
+    articles = [other for other in article_index() if other != article][0:3]
     date = "article " + article + " date"
     lead = "article " + article + " lead"
     body = "article " + article + " body"
@@ -282,7 +272,7 @@ def _update_hof_with_manual(template_dict, current=None):
 
 @simple_cache_page
 def hofchampionspage(request):
-    hof_count, hof_entries = get_hof_champions()[1:]
+    hof_count, hof_entries = get_hof_champions()
     template_dict = dict(
         pageclass="hall-of-fame",
         pagetitle=_("base halloffame champions"),

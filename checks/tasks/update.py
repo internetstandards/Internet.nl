@@ -13,59 +13,13 @@ from interface.batch import util
 logger = get_task_logger(__name__)
 
 
-class HOFEntry:
-    def __init__(self, domain):
-        self.domain = domain
-        self.web_timestamp = None
-        self.web_permalink = None
-        self.mail_timestamp = None
-        self.mail_permalink = None
-
-    def __str__(self):
-        return f"""------- {self.domain}
-        web_timestamp: {self.web_timestamp}
-        web_permalink: {self.web_permalink}
-        mail_timestamp: {self.mail_timestamp}
-        mail_permalink: {self.mail_permalink}
-        """
-
-
-def _create_hof_entry(hof, domain_name):
+def _perfect_scores(model):
     """
-    Create an entry in the Hall of Fame.
+    Find the domains whose latest test scored 100%, as {domain: (timestamp, report id)},
+    with the time since when the domain has had that score.
 
     """
-    if domain_name in hof:
-        return hof[domain_name]
-    hof[domain_name] = HOFEntry(domain_name)
-    return hof[domain_name]
-
-
-def _update_web_entry(hof, domain_name, report_id, timestamp):
-    """
-    Update a web entry in the Hall of Fame.
-
-    """
-    entry = _create_hof_entry(hof, domain_name)
-    entry.web_timestamp = timestamp
-    entry.web_permalink = f"/site/{domain_name}/{report_id}/"
-
-
-def _update_mail_entry(hof, domain_name, report_id, timestamp):
-    """
-    Update a mail entry in the Hall of Fame.
-
-    """
-    entry = _create_hof_entry(hof, domain_name)
-    entry.mail_timestamp = timestamp
-    entry.mail_permalink = f"/mail/{domain_name}/{report_id}/"
-
-
-def _populate_HOF(hof, model, entry_creation):
-    """
-    Find entries that qualify for the Hall of Fame.
-
-    """
+    perfect = {}
     previousname = None
     previousscore = 0
     previoustimestamp = None
@@ -73,7 +27,7 @@ def _populate_HOF(hof, model, entry_creation):
     for report in model.objects.only("id", "domain", "timestamp", "score").order_by("domain", "timestamp").iterator():
         if previousname != report.domain and previousname is not None:
             if previousscore >= 100:
-                entry_creation(hof, previousname, previousreportid, previoustimestamp)
+                perfect[previousname] = (previoustimestamp, previousreportid)
             previousname = report.domain
             previousscore = report.score or 0
             previoustimestamp = report.timestamp
@@ -89,7 +43,8 @@ def _populate_HOF(hof, model, entry_creation):
 
     # Last domain name.
     if previousscore >= 100:
-        entry_creation(hof, previousname, previousreportid, previoustimestamp)
+        perfect[previousname] = (previoustimestamp, previousreportid)
+    return perfect
 
 
 @transaction.atomic
@@ -102,26 +57,20 @@ def _update_hof():
               test scored 100%.
 
     """
-    hof = dict()
-    for model, entry_creation in ((DomainTestReport, _update_web_entry), (MailTestReport, _update_mail_entry)):
-        _populate_HOF(hof, model, entry_creation)
-
+    web = _perfect_scores(DomainTestReport)
+    mail = _perfect_scores(MailTestReport)
     champions = []
-    for entry in hof.values():
-        if entry.web_permalink and entry.mail_permalink:
-            timestamp = entry.mail_timestamp
-            permalink = entry.mail_permalink
-            if entry.web_timestamp > entry.mail_timestamp:
-                timestamp = entry.web_timestamp
-                permalink = entry.web_permalink
-            champions.append({"permalink": permalink, "domain": entry.domain, "timestamp": timestamp})
+    for domain in web.keys() & mail.keys():
+        web_timestamp, web_report_id = web[domain]
+        mail_timestamp, mail_report_id = mail[domain]
+        if web_timestamp > mail_timestamp:
+            permalink, timestamp = f"/site/{domain}/{web_report_id}/", web_timestamp
+        else:
+            permalink, timestamp = f"/mail/{domain}/{mail_report_id}/", mail_timestamp
+        champions.append({"permalink": permalink, "domain": domain, "timestamp": timestamp})
     champions = sorted(champions, key=lambda x: x["timestamp"], reverse=True)
 
-    cached_data = {
-        "date": champions[0]["timestamp"] if champions else None,
-        "count": len(champions),
-        "data": champions[: settings.HOF_CHAMPIONS_LIMIT],
-    }
+    cached_data = {"count": len(champions), "data": champions[: settings.HOF_CHAMPIONS_LIMIT]}
     cache.set(redis_id.hof_champions.id, cached_data, redis_id.hof_champions.ttl)
 
 
