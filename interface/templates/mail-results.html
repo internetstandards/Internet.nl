@@ -95,3 +95,7 @@
   {% endif %}
 {% endblock %}
 
+{% block furthertesting %}
+  <h2>{% translate "results further-testing mail label" %}</h2>
+  {% include "content.html" with name="results further-testing mail content" %}
+{% endblock %}
