@@ -363,6 +363,9 @@ msgstr "Jouw e-mailadres:"
 msgid "base test mail label"
 msgstr "Test je e-mail"
 
+msgid "base test mail placeholder"
+msgstr "example.nl"
+
 msgid "base test mail sublabel"
 msgstr "Hoe modern is jouw mailprovider?"
 
@@ -423,6 +426,9 @@ msgstr "Jouw website-domeinnaam:"
 
 msgid "base test website label"
 msgstr "Test je website"
+
+msgid "base test website placeholder"
+msgstr "www.example.nl"
 
 msgid "base test website sublabel"
 msgstr "Is jouw website up-to-date?"

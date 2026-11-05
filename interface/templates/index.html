@@ -15,7 +15,7 @@
             <span>{% include "string.html" with name="base test website input" %}</span>
             <input name="url"
                    type="text"
-                   placeholder="www.example.nl"
+                   placeholder="{% include "string.html" with name="base test website placeholder" %}"
                    inputmode="url"
                    autocomplete="url"
                    required>

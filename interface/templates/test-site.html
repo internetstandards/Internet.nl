@@ -9,7 +9,7 @@
         <form action="/site/" method="POST">
           <label>
             <span>{% include "string.html" with name="base test website input" %}</span>
-            <input name="url" type="text" placeholder="www.example.nl" inputmode="url" autocomplete="url" required>
+            <input name="url" type="text" placeholder="{% include "string.html" with name="base test website placeholder" %}" inputmode="url" autocomplete="url" required>
           </label>
           {% if request.GET.invalid != None %}
           <p class="invalid-domain">

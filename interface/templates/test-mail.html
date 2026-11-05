@@ -12,7 +12,7 @@
             <span>{% include "string.html" with name="base test mail input" %}</span>
             <div class="mail-input-container">
               <div class="mail-icon-container icon"></div>
-              <input class="mail-input" name="url" type="text" placeholder="example.nl" inputmode="url" autocomplete="url" required>
+              <input class="mail-input" name="url" type="text" placeholder="{% include "string.html" with name="base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
             </div>
           </label>
           {% if request.GET.invalid != None %}
