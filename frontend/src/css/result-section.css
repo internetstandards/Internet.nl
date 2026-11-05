@@ -730,18 +730,6 @@ meter::-moz-meter-bar {
   }
 }
 
-.action-card-item {
-  .repeat-test {
-    &.link.hidden {
-      display: none;
-    }
-    
-    &.countdown.hidden {
-      display: none;
-    }
-  }
-}
-
 .result-section .results-notice {
   font: var(--card-body-m);
   color: var(--heading-color-secondary);

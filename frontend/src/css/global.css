@@ -94,11 +94,6 @@ main {
   flex-direction: column;
   gap: 2.5rem;
   margin-bottom: 2.5rem;
-
-  @media (width >= 56.25rem) {
-    gap: 2.5rem;
-    margin-bottom: 2.5rem;
-  }
 }
 
 ul {
@@ -189,7 +184,7 @@ body:has(.nav-controls.active) .skip-link {
 }
 
 body:has(.nav-controls.active) {
-  @media (width <= 56.25rem) {
+  @media (width < 80rem) {
     overflow: hidden;
   }
 }

@@ -118,10 +118,6 @@
 
   .container {
     padding-top: 3rem;
-
-    @media (width >= 56.25rem) {
-      padding-top: 3rem;
-    }
   }
 
   hgroup {
@@ -558,8 +554,6 @@
 
 /* Overwrites for light theme */
 [data-theme="light"] {
-  color-scheme: light;
-
   .card.large.knowledge-card {
     border: none;
   }
@@ -567,8 +561,6 @@
 
 /* Overwrites for dark theme */
 [data-theme="dark"] {
-  color-scheme: dark;
-  
   .card.large.knowledge-card {
     border: var(--card-border);
   }
