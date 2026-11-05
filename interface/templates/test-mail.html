@@ -13,7 +13,7 @@
             <span>{% translate "base test mail input" %}</span>
             <span class="mail-input-container">
               <span class="mail-icon-container icon"></span>
-              <input id="mail-url" class="mail-input" name="url" type="text" placeholder="{% translate_attr "base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
+              <input id="mail-url" class="mail-input" name="url" type="text" placeholder="{% translate_attr "base test mail placeholder" %}" inputmode="url" autocorrect="off" autocapitalize="none" spellcheck="false" required>
             </span>
           </label>
           {% if request.GET.invalid != None %}

@@ -100,7 +100,7 @@
             {% if retest_link %}
               <li class="action-card-item">
                 <a class="icon repeat-test link {% if retest_time > 0 %}hidden{% endif %}"
-                   href="{{ retest_link }}">
+                   href="{{ retest_link }}" rel="nofollow">
                   <span class="reset icon">{% translate "results rerun-test" %}</span>
                 </a>
                 <p class="icon repeat-test countdown {% if retest_time < 1 %}hidden{% endif %}">

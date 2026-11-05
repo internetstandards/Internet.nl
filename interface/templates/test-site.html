@@ -10,7 +10,7 @@
         <form action="/site/" method="POST">
           <label>
             <span>{% translate "base test website input" %}</span>
-            <input id="web-url" name="url" type="text" placeholder="{% translate_attr "base test website placeholder" %}" inputmode="url" autocomplete="url" required>
+            <input id="web-url" name="url" type="text" placeholder="{% translate_attr "base test website placeholder" %}" inputmode="url" autocomplete="url" autocorrect="off" autocapitalize="none" spellcheck="false" required>
           </label>
           {% if request.GET.invalid != None %}
           <p class="invalid-domain">
