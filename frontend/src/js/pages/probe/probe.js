@@ -1,7 +1,6 @@
 import {
   validateElements,
   validateNumber,
-  toggleElements,
   fetchJson,
 } from "../../lib/utils.js";
 
@@ -11,6 +10,7 @@ const state = {
   javascriptRetries: 0,
   javascriptTimeout: 0,
   probesUrl: "",
+  failed: false,
 };
 
 /**
@@ -28,7 +28,7 @@ function showResults(category, results) {
   if (elements.summary.getAttribute("aria-busy") === "false") return;
 
   state.probesRunning--;
-  if (state.probesRunning <= 0) {
+  if (state.probesRunning <= 0 && !state.failed) {
     window.location = "results";
   }
 
@@ -44,20 +44,23 @@ function showResults(category, results) {
  * @param {string} category - The category to show error for
  */
 function showError(category) {
-  state.probesRunning--;
-
   const elements = {
     errorSummary: document.querySelector("#probe-error-summary")?.innerHTML,
     summary: document.querySelector(`#${category}-summary`),
-    icon: document.querySelector(`#${category}-icon`),
+    noRedirection: document.querySelector("#probes-no-redirection"),
   };
 
   if (!validateElements(elements, category)) return;
+  if (elements.summary.getAttribute("aria-busy") === "false") return;
 
-  // Update probe status
+  // stay on this page after an error, as the results would be incomplete
+  state.probesRunning--;
+  state.failed = true;
+  elements.noRedirection.hidden = false;
+
   elements.summary.setAttribute("aria-busy", "false");
   elements.summary.innerHTML = elements.errorSummary;
-  elements.icon.setAttribute("src", "/static/probe-error.png");
+  elements.summary.closest("li").classList.replace("probing", "error");
 }
 
 /**
@@ -149,7 +152,8 @@ async function pollProbes(testurl, retryCount) {
   }
 
   try {
-    const json = await fetchJson(await fetch(testurl));
+    // unique url for each poll, so page caches do not return an earlier status
+    const json = await fetchJson(await fetch(`${testurl}?${Date.now()}`));
 
     if (parseStatuses(json)) {
       const timeoutElement = document.querySelector("#javascript-timeout");
@@ -179,9 +183,6 @@ function initializeProbe() {
   state.javascriptTimeout = timeout;
   state.probesRunning = elements.probes.length;
   state.probesUrl = elements.url.textContent;
-
-  // Show probing text
-  toggleElements(".probing-text", false);
 
   // Start polling
   pollProbes(state.probesUrl);
