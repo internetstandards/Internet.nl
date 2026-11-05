@@ -1,7 +1,7 @@
 import {
   validateElements,
-  toggleElements,
   fetchJson,
+  fetchWithTimeout,
 } from "../../lib/utils.js";
 
 // State management
@@ -12,15 +12,11 @@ const state = {
 };
 
 /**
- * Enable results and redirect to the results page
+ * Redirect to the results page
+ * @param {string} test_id - The test ID
  */
-function enableResults() {
-  const elements = {
-    continue: document.querySelector("#continue"),
-  };
-
-  if (!validateElements(elements)) return;
-  window.location = elements.continue.getAttribute("href");
+function enableResults(test_id) {
+  window.location = `/connection/${test_id}/results`;
 }
 
 /**
@@ -52,12 +48,12 @@ async function handleTestCompletion(test_id) {
   if (state.completedTests >= state.requiredTests) {
     try {
       const { connipv6, connresolver } = await fetchJson(
-        `/connection/finished/${test_id}`
+        await fetch(`/connection/finished/${test_id}`)
       );
 
       showResults("ipv6", connipv6);
       showResults("resolver", connresolver);
-      enableResults();
+      enableResults(test_id);
     } catch (error) {
       console.error("Error fetching test results:", error);
     }
@@ -71,28 +67,13 @@ async function handleTestCompletion(test_id) {
  */
 async function fetchTest(url, test_id) {
   try {
-    const controller = new AbortController();
-    const request = new Request(`http://${url}`, {
-      method: "get",
-      signal: controller.signal,
+    // only the request matters to the test, the test hosts do not send CORS headers
+    await fetchWithTimeout(`http://${url}`, state.timeout, {
+      mode: "no-cors",
+      cache: "no-store",
     });
-
-    await fetch(request);
   } catch (error) {
-    if (error.name === "TimeoutError") {
-      console.error(
-        `Timeout: It took more than ${
-          state.timeout / 1000
-        } seconds to get the result for ${test_id}!`
-      );
-    } else if (error.name === "AbortError") {
-      console.error("Fetch aborted by the user");
-    } else if (error.name === "TypeError") {
-      console.error("AbortSignal.timeout() method is not supported");
-    } else {
-      // A network error, or some other problem.
-      console.error(`Error: type: ${error.name}, message: ${error.message}`);
-    }
+    console.error(`Connection test request to ${url} failed: ${error.name}`);
   } finally {
     await handleTestCompletion(test_id);
   }
@@ -127,21 +108,10 @@ function startConnectionTest(test_id) {
 async function initializeConnectionTest() {
   state.completedTests = 0;
 
-  // Show probing text
-  toggleElements(".probing-text", false);
-
   try {
-    const { test_id } = await fetchJson("/connection/gettestid/");
+    const { test_id } = await fetchJson(await fetch("/connection/gettestid/"));
 
     startConnectionTest(test_id);
-
-    const elements = {
-      connForward: document.querySelector(".connforward"),
-    };
-
-    if (!validateElements(elements)) return;
-
-    elements.connForward.setAttribute("href", `/connection/${test_id}/results`);
   } catch (error) {
     console.error("Error initializing connection test:", error);
   }

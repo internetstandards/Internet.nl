@@ -5,12 +5,11 @@
   <script type="module" src="{% static 'js/probe-min.js' %}"></script>
 {% endblock %}
 {% block maincontent %}
-  <div class="hidethis">
+  <div hidden>
     <span id="javascript-retries">{{ javascript_retries }}</span>
     <span id="javascript-timeout">{{ javascript_timeout }}</span>
     <span id="probe-error-summary">{% include "string.html" with name="test error summary" %}</span>
     <span id="probe-finished">{% include "string.html" with name="probes test-finished" %}</span>
-    <span id="probes-no-redirection">{% include "string.html" with name="probes no-redirection" %}</span>
     <span id="probes-url">{{ probes.0.probesurl }}{{ addr }}/</span>
     <div id="probes">
       {% for probe in probes %}
@@ -39,21 +38,20 @@
         {% for probe in probes %}
           <li class="probing icon h7 color-secondary">
             {% translate probe.title %}
-            <span id="{{ probe.name }}-summary" aria-live="polite">
+            <span id="{{ probe.name }}-summary" aria-live="polite" aria-busy="true">
               {% include "string.html" with name="probes test-running" %}
             </span>
           </li>
         {% endfor %}
-        {% block probesnojs %}
-          <noscript>
-            <li>
-              <a href={{ no_javascript_redirect }} id="continue" class="connforward">
-                {% include "string.html" with name="probes no-javascript" %}
-              </a>
-            </li>
-          </noscript>
-        {% endblock %}
       </ul>
+      <p id="probes-no-redirection" hidden>{% include "string.html" with name="probes no-redirection" %}</p>
+      {% block probesnojs %}
+        <noscript>
+          <p>
+            <a href="{{ no_javascript_redirect }}">{% include "string.html" with name="probes no-javascript" %}</a>
+          </p>
+        </noscript>
+      {% endblock %}
     </div>
   </section>
 {% endblock %}
