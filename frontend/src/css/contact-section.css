@@ -57,13 +57,15 @@
     margin-bottom: 1rem;
   }
 
+  /* style the answer itself, because one-paragraph answers have no <p> */
   > div {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     padding: 0 1rem 1rem;
     font: var(--accordion-body);
     color: var(--accordion-body-color);
+
+    > * + * {
+      margin-top: 1rem;
+    }
 
     a {
       display: inline;

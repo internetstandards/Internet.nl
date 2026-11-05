@@ -744,4 +744,5 @@ meter::-moz-meter-bar {
 /* the outer list holds the headings, the inner lists the links */
 .further-testing .container > div > ul {
   list-style: none;
+  padding-inline-start: 0;
 }

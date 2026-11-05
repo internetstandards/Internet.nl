@@ -1,24 +1,12 @@
-{% extends "base.html" %}
+{% extends "textpage.html" %}
 {% load translate %}
 
-{% block maincontent %}
-<section class="article-content-section footer-page">
-  <div class="container">
-    {% if "INTERNETNL_BRANDING"|get_settings_value %}
-    {% include "content.html" with name="disclosure content" %}
-    {% else %}
-    {% include "content.html" with name="disclosure content custom" %}
-    {% endif %}
-    </div>
-</section>
-
-<section class="article-content-section footer-page">
-  <div class="container">
+{% block textcontent %}
   {% if "INTERNETNL_BRANDING"|get_settings_value %}
-  {% include "content.html" with name="about contact" %}
+    {% translate "disclosure content" %}
+    {% translate "about contact" %}
   {% else %}
-  {% include "content.html" with name="about contact custom" %}
+    {% translate "disclosure content custom" %}
+    {% translate "about contact custom" %}
   {% endif %}
-  </div>
-</section>
 {% endblock %}
