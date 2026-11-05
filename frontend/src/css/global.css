@@ -73,7 +73,11 @@
 }
 
 html {
-  scroll-padding-top: 3.125rem;
+  /* clear of the sticky header, which is up to 102px high */
+  scroll-padding-top: 7rem;
+  /* iOS enlarges some text when rotating to landscape, see #1522 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -282,6 +286,15 @@ hgroup {
   height: 1.5rem;
   min-width: 1.5rem;
   min-height: 1.5rem;
+}
+
+/* icons are masks over a background colour, which forced colours mode removes */
+@media (forced-colors: active) {
+  .icon:not(.ellipse)::after,
+  .icon::before {
+    forced-color-adjust: none;
+    background-color: CanvasText !important;
+  }
 }
 
 [class*="section"] {
