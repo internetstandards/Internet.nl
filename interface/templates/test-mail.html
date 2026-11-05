@@ -11,10 +11,10 @@
         <form action="/mail/" method="POST">
           <label class="mail-label">
             <span>{% include "string.html" with name="base test mail input" %}</span>
-            <div class="mail-input-container">
-              <div class="mail-icon-container icon"></div>
-              <input id="mail-url" class="mail-input" name="url" type="text" placeholder="{% include "string.html" with name="base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
-            </div>
+            <span class="mail-input-container">
+              <span class="mail-icon-container icon"></span>
+              <input id="mail-url" class="mail-input" name="url" type="text" placeholder="{% translate_attr "base test mail placeholder" %}" inputmode="url" autocomplete="url" required>
+            </span>
           </label>
           {% if request.GET.invalid != None %}
           <p class="invalid-domain">

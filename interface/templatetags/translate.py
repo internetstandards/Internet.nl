@@ -1,11 +1,13 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
+from html import unescape
 
 import idna as IDNA
 from django import template
 from django.conf import settings
 from django.template import Template
+from django.utils.html import escape, strip_tags
 from django.utils.translation import gettext as _
 
 from checks.scoring import (
@@ -26,6 +28,12 @@ register = template.Library()
 def translate(context, longname):
     contenttemplate = Template(_(longname))
     return contenttemplate.render(context)
+
+
+@register.simple_tag(takes_context=True)
+def translate_attr(context, longname):
+    """Translate as plain text, for use in an attribute value."""
+    return escape(unescape(strip_tags(translate(context, longname))))
 
 
 @register.simple_tag(takes_context=True)

@@ -9,19 +9,19 @@
         {% translate testitem.label %}
       </summary>
       <hgroup>
-        <h5>{% include "string.html" with name="results verdict label" %}</h5>
+        <h4>{% include "string.html" with name="results verdict label" %}</h4>
         <p>{% include "string.html" with name=testitem.verdict %}</p>
       </hgroup>
       {% if testitem.tech_type and testitem.tech_data %}
       <div>
-        <h5>{% include "string.html" with name="results tech-details label" %}</h5>
+        <h4>{% include "string.html" with name="results tech-details label" %}</h4>
         {% if testitem.tech_type == 'table' or testitem.tech_type == 'table_multi_col' or testitem.tech_type == 'table_translatable' %}
           {% render_details_table tech_type=testitem.tech_type table_headers=testitem.tech_string table_content=testitem.tech_data %}
         {% endif %}
       </div>
       {% endif %}
       <div>
-        <h5>{% include "string.html" with name="results explanation label" %}</h5>
+        <h4>{% include "string.html" with name="results explanation label" %}</h4>
         {% include "content.html" with name=testitem.exp %}
       </div>
     </details>
