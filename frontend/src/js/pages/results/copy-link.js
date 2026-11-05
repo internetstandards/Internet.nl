@@ -1,45 +1,28 @@
-import { validateElements } from "../../lib/utils.js";
+const button = document.getElementById("copy-link");
 
-const elements = {
-  shareBtn: document.getElementById("copy-link"),
-};
-
-function copyLink() {
-  elements.shareBtn.addEventListener('click', function() {
-    const link = window.location.href;
-
-    if (!window.isSecureContext) {
-      alert(`${elements.shareBtn.dataset.copyFailed} ${link}`);
-      return;
-    }
-
-    if (navigator.share) {
-      navigator.share({
-        url: link
-      })
-
-    } else {
-      fallbackCopy(link);
-    }
-  });
-
-  function fallbackCopy(link) {
-    navigator.clipboard.writeText(link)
-      .then(() => {
-        elements.shareBtn.classList.add('copied');
-        setTimeout(() => {
-          elements.shareBtn.classList.remove('copied');
-        }, 5000);
-      })
-      .catch(() => {
-        alert(`${elements.shareBtn.dataset.copyFailed} ${link}`);
-      });
-      
-  }  
+function showFailed(link) {
+  alert(`${button.dataset.copyFailed} ${link}`);
 }
 
-if (validateElements(elements, "copy-link")) {
-  copyLink();
+function copy(link) {
+  navigator.clipboard.writeText(link).then(() => {
+    button.classList.add("copied");
+    setTimeout(() => button.classList.remove("copied"), 5000);
+  }, () => showFailed(link));
 }
 
-export default copyLink;
+button.addEventListener("click", () => {
+  const link = window.location.href;
+  if (!window.isSecureContext) {
+    showFailed(link);
+  } else if (navigator.share) {
+    // AbortError is the user closing the share dialog
+    navigator.share({ url: link }).catch((error) => {
+      if (error.name !== "AbortError") {
+        copy(link);
+      }
+    });
+  } else {
+    copy(link);
+  }
+});

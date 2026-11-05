@@ -18,13 +18,18 @@
     </div>
   </section>
   
-  <section class="card-section">
-    <div class="container">
-      <h2 class="h2 color-secondary">{% include "string.html" with name="news older" %}</h2>
-      {% include "partials/news-cards.html" with articles=articles|slice:"2:" variant="load-more" %}
-      <button id="load-more" class="secondary-button icon" type="button">{% include "string.html" with name="news load" %}</button>
-    </div>
-  </section>
+  {% if articles|length > 2 %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h2 color-secondary">{% include "string.html" with name="news older" %}</h2>
+        {% include "partials/news-cards.html" with articles=articles|slice:"2:" variant="load-more" %}
+        {# two articles above, five shown here before load more #}
+        {% if articles|length > 7 %}
+          <button id="load-more" class="secondary-button icon scripting-only" type="button">{% include "string.html" with name="news load" %}</button>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
 
   {% include "partials/faq-contact.html" %}
 {% endblock %}

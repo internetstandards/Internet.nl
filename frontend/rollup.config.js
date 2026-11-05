@@ -25,7 +25,7 @@ const scripts = {
   connection: "src/js/pages/connection/connection.js",
   probe: "src/js/pages/probe/probe.js",
   "components/card-list": "src/js/components/card-list/load-more.js",
-  "components/carousel": "src/js/components/carousel/carrousel.js",
+  "components/carousel": "src/js/components/carousel/carousel.js",
 };
 
 const config = [

@@ -3,7 +3,10 @@
 {% load i18n %}
 {% load translate %}
 <html lang="{{ request.current_language_code }}"
-      data-cookie-domain="{{ "INTERNETNL_DOMAINNAME"|get_settings_value }}">
+      data-cookie-domain="{{ "INTERNETNL_DOMAINNAME"|get_settings_value }}"
+      data-matomo-url="{{ "MATOMO_URL"|get_settings_value }}"
+      data-matomo-site-id="{{ "MATOMO_SITEID"|get_settings_value }}"
+      data-matomo-cookie-domain="{{ "MATOMO_SUBDOMAIN_TRACKING"|get_settings_value }}">
   <head>
     <meta charset="utf-8">
     <title>{{ pagetitle }}</title>
@@ -24,11 +27,6 @@
     {% block scripting %}{% endblock %}
   </head>
   <body class="{{ pageclass }}">
-    <div class="matomo" hidden>
-      <span id="matomo-url">{{"MATOMO_URL"|get_settings_value}}</span>
-      <span id="matomo-siteid">{{"MATOMO_SITEID"|get_settings_value}}</span>
-      <span id="matomo-subdomain-tracking">{{"MATOMO_SUBDOMAIN_TRACKING"|get_settings_value}}</span>
-    </div>
     <header>
       <a class="skip-link" href="#main-content">
         {% include "string.html" with name="page gotocontents" %}
@@ -134,7 +132,7 @@
                   </ul>
                 </form>
               </li>
-              <li class="nav-item theme-item">
+              <li class="nav-item scripting-only">
                 <button id="toggle-subnav-theme"
                         class="settings-button icon system"
                         type="button"

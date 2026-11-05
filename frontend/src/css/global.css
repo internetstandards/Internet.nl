@@ -350,10 +350,9 @@ hgroup {
   }
 }
 
-.matomo {
-  display: none;
-}
-
-.hidethis {
-  display: none;
+/* !important, because display rules in later layers would win */
+.scripting-only {
+  @media (scripting: none) {
+    display: none !important;
+  }
 }

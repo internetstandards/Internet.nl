@@ -120,10 +120,6 @@
       mask-image: url("/static/icons/info.svg");
       background-color: var(--info-color);
     }
-
-    &.hidethis {
-      display: none;
-    }
   }
 }
 
@@ -332,10 +328,6 @@ body.connectiontest .action-card-item:has(.connection) {
 }
 
 #copy-link {
-  @media (scripting: none) {
-    display: none;
-  }
-
   &:not(.copied) {
     .not-clicked {
       display: flex;
@@ -358,10 +350,6 @@ body.connectiontest .action-card-item:has(.connection) {
     .clicked {
       display: flex;
     }
-  }
-
-  @media (scripting: none) {
-    cursor: default;
   }
 }
 
