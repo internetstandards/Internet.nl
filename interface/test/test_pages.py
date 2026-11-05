@@ -35,6 +35,8 @@ def test_page(db, client, settings, path, branding):
     cache.delete_pattern("cached_page:*")
     response = client.get(path)
     assert response.status_code == 200
-    if not branding:
-        html = response.content.decode()
+    html = response.content.decode()
+    if branding:
+        assert "logos/logo" in html
+    else:
         assert not [text for text in INTERNETNL_CONTENT if text in html]
