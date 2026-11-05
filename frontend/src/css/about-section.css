@@ -124,3 +124,8 @@
     }
   }
 }
+.about-organisation ul {
+  @media (width >= 56.25rem) {
+    columns: 2;
+  }
+}
