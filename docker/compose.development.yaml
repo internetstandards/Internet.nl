@@ -22,16 +22,13 @@ services:
       target: app-dev
     # use Django runserver for better debug abilities during development
     entrypoint: ["/bin/bash"]
-    # run CSS auto rebuild in the background and start devserver
+    # rebuild CSS and JS in the background and start devserver
     command:
       - "-c"
       - >
         if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
-          # install npm dependencies and watch CSS and JS files for rebuild
           cd /app/frontend;
-          # It's needed to install the rollup linux dependency
-          npm install;
-          npm run docker:watch &
+          npm run watch &
           cd /app;
           # start development server with auto reloading
           ./manage.py runserver 0.0.0.0:8080

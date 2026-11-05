@@ -1,20 +1,10 @@
 import terser from "@rollup/plugin-terser";
 import postcss from "rollup-plugin-postcss";
 import { defineConfig } from "rollup";
-import fs from "fs";
 
 const isProduction = process.env.NODE_ENV === "production";
-const outputDir = process.env.OUTPUT_DIR ?? "dist";
-
-const cleanupOutputDir = () => ({
-  name: "cleanup-output-dir",
-  buildStart() {
-    // in watch mode only the changed bundle is rebuilt
-    if (!this.meta.watchMode && fs.existsSync(outputDir)) {
-      fs.rmSync(outputDir, { recursive: true, force: true });
-    }
-  },
-});
+// a static files directory django knows, see STATICFILES_DIRS
+const outputDir = "../static_frontend";
 
 // One bundle per script tag. Static files are cached under fixed names, so a
 // bundle must not import from another one that may be an older cached version.
@@ -35,7 +25,6 @@ const config = [
       file: `${outputDir}/css/style-min.css`,
     },
     plugins: [
-      cleanupOutputDir(),
       postcss({
         extract: true,
         minimize: isProduction,
