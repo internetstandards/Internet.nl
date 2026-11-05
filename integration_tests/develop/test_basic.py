@@ -4,7 +4,7 @@ import re
 import requests
 from playwright.sync_api import expect
 
-FOOTER_TEXT = "Ga naar onze Mastodon profiel"
+FOOTER_TEXT = "Internet.nl is an initiative of the Internet community and the Dutch"
 
 SECURITY_TXT_TEXT = "Policy: https://internet.nl/disclosure/"
 
@@ -17,9 +17,9 @@ def test_index_http_ok(page, app_url):
 
 
 def test_index_footer_text_present(page, app_url):
-    """Branding is disabled on develop, so no footer text, only version"""
+    """Branding is disabled on develop, so the footer has no Internet.nl text"""
     page.goto(app_url)
-    footer = page.locator(".footer-bar")
+    footer = page.locator("footer")
 
     expect(footer).not_to_have_text(re.compile(FOOTER_TEXT))
 
@@ -41,14 +41,14 @@ def test_static_files(page, app_url):
 
 
 def test_generated_css_static_files(page, app_url):
-    response = requests.get(app_url + "/static/css/print.css", verify=False)
+    response = requests.get(app_url + "/static/css/style-min.css", verify=False)
     response.raise_for_status()
-    assert "#site-description" in response.text()
+    assert "@font-face" in response.text
     assert "expires" in response.headers
 
 
 def test_generated_js_static_files(page, app_url):
-    response = requests.get(app_url + "/static/js/theme-min.js", verify=False)
+    response = requests.get(app_url + "/static/js/theme-init-min.js", verify=False)
     response.raise_for_status()
-    assert "setTheme" in response.text()
+    assert "theme=" in response.text
     assert "expires" in response.headers
