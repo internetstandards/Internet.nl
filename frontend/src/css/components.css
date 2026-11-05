@@ -171,15 +171,26 @@
   }
 
   ul, ol {
-    list-style: initial;
-    list-style-position: inside;
+    padding-inline-start: 1.5rem;
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
   }
 
   li {
     font: var(--section-body-xl);
     color: var(--body-color-primary);
     padding-block: 0.375rem;
-    font-weight: 500;
+  }
+
+  blockquote {
+    border-inline-start: 0.25rem solid var(--green-400);
+    padding-inline-start: 1rem;
   }
 
   textarea {

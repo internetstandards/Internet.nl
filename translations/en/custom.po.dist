@@ -14,15 +14,10 @@ msgstr ""
 "custom@example.com\n"
 
 msgid "disclosure content custom"
-msgstr ""
-"# Responsible disclosure\n"
-"custom@example.com\n"
+msgstr "custom@example.com\n"
 
 msgid "privacy content custom"
-msgstr ""
-"# Privacy statement\n"
-"\n"
-"*Revised 24th of October 2023*\n"
+msgstr "*Revised 24th of October 2023*\n"
 
 msgid "article custom .index"
 msgstr ""

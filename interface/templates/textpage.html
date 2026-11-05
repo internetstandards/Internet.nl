@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block maincontent %}
+  <section class="intro-section bg-primary ellipse reverse">
+    <div class="container">
+      <hgroup class="flipped">
+        <h1 class="h1 color-secondary">{{ pagetitle }}</h1>
+      </hgroup>
+    </div>
+  </section>
+
+  <section class="article-content-section">
+    <div class="container">
+      {% block textcontent %}{% endblock %}
+    </div>
+  </section>
+{% endblock %}

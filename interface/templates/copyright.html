@@ -1,10 +1,6 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "textpage.html" %}
+{% load translate %}
 
-{% block maincontent %}
-<section class="article-content-section footer-page">
-  <div class="container">
-    {% include "content.html" with name="copyright content" %}
-  </div>
-</section>
+{% block textcontent %}
+  {% translate "copyright content" %}
 {% endblock %}
