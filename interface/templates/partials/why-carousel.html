@@ -2,10 +2,10 @@
 <section class="knowledge-section">
   <div class="container">
     <hgroup>
-      <h2 class="h3 color-secondary">{% include "string.html" with name="home why title" %}</h2>
+      <h2 class="h3 color-secondary" id="why-title">{% include "string.html" with name="home why title" %}</h2>
       <p class="body-l">{% include "string.html" with name="home why explain" %}</p>
     </hgroup>
-    <ul class="knowledge-list" id="card-carousel">
+    <ul class="knowledge-list" id="card-carousel" tabindex="0" aria-labelledby="why-title">
       {% for i in "123" %}
         {% expand "home why reason-{{ i }} title" as title %}
         {% expand "home why reason-{{ i }} text" as text %}
