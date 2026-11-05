@@ -20,7 +20,7 @@ def test_reject_invalid_domain(page, app_url):
     page.goto(app_url)
 
     page.locator("#web-url").fill(domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/test-site/?invalid"
 
@@ -31,17 +31,17 @@ def test_your_website_score(page, app_url, test_domain):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/site/{test_domain}/"
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
 @pytest.mark.parametrize("probe", ALL_PROBES)
@@ -90,14 +90,14 @@ def test_your_website_score_known_scores(page, app_url, test_domain, expected_sc
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/site/{test_domain}/"
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/", timeout=MAX_TIMEOUT)
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
 
-    assert score.get_attribute("data-resultscore") == str(expected_score)
+    assert score.get_attribute("value") == str(expected_score)

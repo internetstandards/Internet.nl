@@ -42,11 +42,19 @@ def browser_context_args(browser_context_args, register_test_user):
 
 @pytest.fixture
 def page(context):
-    """Overwrite default page to add logging of console messages and requests."""
+    """Overwrite default page to add logging of console messages and requests, and fail on CSP violations."""
     page = context.new_page()
     page.on("console", lambda msg: print(f"Console message: {msg.text}, type: {msg.type}"))
     page.on("requestfinished", lambda request: print(f"Request: {request.url}, status: {request.response().status}"))
+    csp_violations = []
+    page.expose_function("reportCspViolation", lambda violation: csp_violations.append(violation))
+    # only in HTML, because Chromium shows text files such as robots.txt with an inline style of its own
+    page.add_init_script(
+        "document.addEventListener('securitypolicyviolation', e => document.contentType == 'text/html'"
+        " && reportCspViolation(`${e.violatedDirective} ${e.blockedURI} ${document.location}`))"
+    )
     yield page
+    assert not csp_violations, f"Content Security Policy violations: {csp_violations}"
 
 
 @pytest.fixture(scope="session")
@@ -180,10 +188,8 @@ def print_details_test_results(page):
     """Print detail test results from the result page for debugging failed tests."""
     try:
         # for debugging failed tests
-        for section in page.locator("section.test-header").all():
-            section.get_by_role("button", name="Show details").click()
-        for section in page.locator("section.testresults").all():
-            print(section.inner_text())
+        for item in page.locator(".result-details-item").all():
+            print(item.inner_text())
     except Exception:
         # don't fail the test if we somehow failed to get the test result details debug information
         print("Failed to gather detailed test results.")

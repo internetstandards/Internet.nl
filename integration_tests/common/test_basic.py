@@ -7,8 +7,8 @@ from playwright.sync_api import expect
 import socket
 import os
 
-FOOTER_TEXT_EN = "Visit our Mastodon profile"
-FOOTER_TEXT_NL = "Ga naar onze Mastodon profiel"
+FOOTER_TEXT_EN = "Internet.nl is an initiative of the Internet community and the Dutch"
+FOOTER_TEXT_NL = "Internet.nl is een initiatief van de internetgemeenschap en de Nederlandse"
 
 LANGUAGE_CHANGE_TEXT_EN = "Test your website"
 LANGUAGE_CHANGE_TEXT_NL = "Test je website"
@@ -62,7 +62,7 @@ def test_index_http_ok(page, app_url_subdomain):
 )
 def test_index_footer_text_present(page, app_url, footer_text):
     page.goto(app_url)
-    footer = page.locator(".footer-bar")
+    footer = page.locator("footer")
 
     assert footer_text in footer.text_content()
 
@@ -91,16 +91,16 @@ def test_static_files(page, app_url_subdomain):
 
 
 def test_generated_css_static_files(page, app_url_subdomain):
-    response = page.request.get(app_url_subdomain + "/static/css/print.css")
+    response = page.request.get(app_url_subdomain + "/static/css/style-min.css")
     expect(response).to_be_ok()
-    assert "#site-description" in response.text()
+    assert "@font-face" in response.text()
     assert "expires" in response.headers
 
 
 def test_generated_js_static_files(page, app_url_subdomain):
-    response = page.request.get(app_url_subdomain + "/static/js/theme-min.js")
+    response = page.request.get(app_url_subdomain + "/static/js/theme-init-min.js")
     expect(response).to_be_ok()
-    assert "setTheme" in response.text()
+    assert "theme=" in response.text()
     assert "expires" in response.headers
 
 
@@ -189,10 +189,11 @@ def test_change_language(page, app_domain, from_language, button_text, to_langua
     """Test clicking the language change button."""
 
     page.goto(f"https://{from_language}.{app_domain}")
-    page.locator(f'#language-switch-header-container button:text("{button_text}")').click()
+    page.locator("#toggle-subnav-language").click()
+    page.locator(f'#nav-sublist-language button:text("{button_text}")').click()
     page.wait_for_url(f"https://{to_language}.internet.test/")
 
-    footer = page.locator("#content")
+    footer = page.locator("#main-content")
     assert footer_text in footer.text_content()
 
 
@@ -206,7 +207,7 @@ def test_accept_language_header(page, app_domain, language, footer_text):
     page.set_extra_http_headers({"Accept-Language": language})
     page.goto(f"https://{app_domain}")
 
-    footer = page.locator("#content")
+    footer = page.locator("#main-content")
     assert footer_text in footer.text_content()
 
 

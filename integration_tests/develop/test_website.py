@@ -19,8 +19,8 @@ def test_reject_invalid_domain(page, app_url):
 
     page.goto(app_url)
 
-    page.locator('input[name="url"]').fill(domain)
-    page.get_by_label("Start de domein test").click()
+    page.locator("#web-url").fill(domain)
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/test-site/?invalid"
 
@@ -32,17 +32,17 @@ def test_your_website_score_with_ipv6(page, app_url, test_domain):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/site/{test_domain}/"
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(
@@ -55,14 +55,14 @@ def test_your_website_score_no_ipv6(page, app_url, test_domain):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/site/{test_domain}/"
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/", timeout=LONG_TIMEOUT)
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE_NO_IPV6))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE_NO_IPV6))

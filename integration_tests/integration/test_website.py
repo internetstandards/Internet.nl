@@ -1,5 +1,6 @@
 """Basis functionality that should always be present."""
 
+import re
 import pytest
 from playwright.sync_api import expect
 from ..conftest import print_details_test_results
@@ -19,7 +20,7 @@ def test_reject_invalid_domain(page, app_url):
     page.goto(app_url)
 
     page.locator("#web-url").fill(domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     print_results_url(page)
 
@@ -32,18 +33,40 @@ def test_your_website_score(page, app_url, test_domain):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/site/{test_domain}/"
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
     print_results_url(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
+
+
+def test_your_website_score_without_javascript(browser, browser_context_args, app_url, test_domain):
+    """The website test should work without JavaScript, by following the link on the probe page."""
+
+    page = browser.new_context(**browser_context_args, java_script_enabled=False).new_page()
+    page.goto(app_url)
+
+    page.locator("#web-url").fill(test_domain)
+    page.locator('form[action="/site/"] button').click()
+
+    # the link points to the probe page itself until the results are ready, and if an earlier test
+    # checked this domain, they are ready at once
+    for _ in range(60):
+        if re.search(rf"/site/{test_domain}/[0-9]+/$", page.url):
+            break
+        page.wait_for_timeout(2000)
+        page.locator("main noscript a").click()
+
+    print_results_url(page)
+
+    expect(page.locator("meter#testresults-percentage")).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
@@ -53,7 +76,7 @@ def test_your_website_probe_success(page, app_url, probe, test_domain):
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
     probe_result = page.locator(f"#site{probe}-results")
-    expect(probe_result).to_have_class("passed")
+    expect(probe_result).to_have_class(re.compile(r"\bpassed\b"))
 
 
 def test_ipv6_ns_with_bad_connectivity(page, app_url, unique_id):
@@ -84,7 +107,7 @@ def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     rate_limit_redis_entry = docker_compose_exec("redis", "redis-cli keys dom:req_limit:*").decode("utf8").strip()
     assert rate_limit_redis_entry, "there should be a redis entry for rate limiting"
