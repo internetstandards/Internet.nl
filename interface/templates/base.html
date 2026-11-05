@@ -43,14 +43,14 @@
                 <source srcset="{% static 'logos/logo.svg' %}" media="(width >= 900px)">
                 <img src="{% static 'logos/logo.svg' %}"
                      alt="Internet.nl Logo"
-                     width="227.5"
+                     width="228"
                      height="50">
               </picture>
               <picture class="dark-visible">
                 <source srcset="{% static 'logos/logo-white-2.svg' %}" media="(width >= 900px)">
                 <img src="{% static 'logos/logo-white-2.svg' %}"
                      alt="Internet.nl Logo"
-                     width="227.5"
+                     width="228"
                      height="50">
               </picture>
             </a>
@@ -117,6 +117,7 @@
                   </span>
                 </button>
                 <form id="language-form" action="/change_language/" method="post">
+                  <input type="hidden" name="previous-page" value="{{ request.path }}" />
                   <ul id="nav-sublist-language" class="nav-sublist">
                     {% with user_language=request.current_language_code %}
                       {% for language in LANGUAGES %}
@@ -130,7 +131,6 @@
                         </li>
                       {% endfor %}
                     {% endwith %}
-                    <input type="hidden" name="previous-page" value="{{ request.path }}" />
                   </ul>
                 </form>
               </li>
@@ -179,7 +179,7 @@
                aria-label="{% include "string.html" with name="base home" %}">
               <img src="{% static 'logos/logo-white-2.svg' %}"
                    alt="Internet.nl Logo"
-                   width="227.5"
+                   width="228"
                    height="50"
                    loading="lazy">
             </a>

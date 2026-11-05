@@ -91,9 +91,11 @@
 .intro-section {
   .container {
     padding-block: 4rem;
+    row-gap: 1.5rem;
 
     @media (width >= 56.25rem) {
       padding-block: 4.875rem;
+      row-gap: 2.25rem;
     }
   }
 

@@ -15,11 +15,11 @@
         </li>
       {% endfor %}
     </ul>
-    <ul class="dots" aria-label="{% translate 'home why carousel' %}" aria-controls="card-carousel">
+    <ul class="dots" aria-label="{% translate_attr 'home why carousel' %}" aria-controls="card-carousel">
       {% for i in "123" %}
         {% expand "home why reason-{{ i }} title" as title %}
         <li class="dot{% if forloop.first %} active{% endif %}">
-          <button type="button" aria-label="{% translate 'home why scroll-to' %} {% translate title %}"></button>
+          <button type="button" aria-label="{% translate_attr 'home why scroll-to' %} {% translate_attr title %}"></button>
         </li>
       {% endfor %}
     </ul>

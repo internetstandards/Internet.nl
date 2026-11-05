@@ -120,7 +120,7 @@
           </ul>
             <p class="action-card-description">{% include "string.html" with name="results follow-up-description" %}</p>
           </details>
-          <button id="copy-link" class="primary-button icon" type="button" data-copy-failed="{% translate 'results copy-failed' %}">
+          <button id="copy-link" class="primary-button icon" type="button" data-copy-failed="{% translate_attr 'results copy-failed' %}">
             <span class="not-clicked">{% include "string.html" with name="results share" %}</span>
             <span class="clicked">{% include "string.html" with name="results copied" %}</span>
           </button>
