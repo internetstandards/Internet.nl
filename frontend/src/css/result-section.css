@@ -735,8 +735,6 @@ meter::-moz-meter-bar {
   color: var(--heading-color-secondary);
 
   a {
-    display: inline;
-    text-decoration: underline;
     color: inherit;
   }
 }

@@ -11,8 +11,8 @@
     <meta charset="utf-8">
     <title>{{ pagetitle }}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="{{ _("page metadescription") }}">
-    <meta name="keywords" content="{{ _("page metakeywords") }}">
+    <meta name="description" content="{% translate_attr "page metadescription" %}">
+    <meta name="keywords" content="{% translate_attr "page metakeywords" %}">
     {% if "INTERNETNL_BRANDING"|get_settings_value %}
       <meta name="author"
             content="Platform Internetstandaarden / Internet Standards Platform">
@@ -114,21 +114,19 @@
                     {% translate "base language" %}
                   </span>
                 </button>
-                <form id="language-form" action="/change_language/" method="post">
+                <form action="/change_language/" method="post">
                   <input type="hidden" name="previous-page" value="{{ request.path }}" />
                   <ul id="nav-sublist-language" class="nav-sublist">
-                    {% with user_language=request.current_language_code %}
-                      {% for language in LANGUAGES %}
-                        {% get_language_info for language.0 as lang %}
-                        <li class="nav-subitem">
-                          <button type="submit"
-                                  name="language"
-                                  value="{{ language.0 }}"
-                                  class="icon"
-                                  lang="{{ language.0 }}">{{ lang.name_local }}</button>
-                        </li>
-                      {% endfor %}
-                    {% endwith %}
+                    {% for language in LANGUAGES %}
+                      {% get_language_info for language.0 as lang %}
+                      <li class="nav-subitem">
+                        <button type="submit"
+                                name="language"
+                                value="{{ language.0 }}"
+                                class="icon"
+                                lang="{{ language.0 }}">{{ lang.name_local }}</button>
+                      </li>
+                    {% endfor %}
                   </ul>
                 </form>
               </li>
@@ -165,7 +163,6 @@
       </div>
     </header>
     <main id="main-content">
-      {% block introcontent %}{% endblock %}
       {% block maincontent %}{% endblock %}
     </main>
     <footer>

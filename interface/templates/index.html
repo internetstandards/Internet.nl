@@ -4,7 +4,7 @@
 {% block scripting %}
   <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
 {% endblock %}
-{% block introcontent %}
+{% block maincontent %}
   <section class="test-section home-variant bg-primary ellipse">
     <div class="container">
       <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
@@ -16,8 +16,6 @@
       {% include "partials/test-cards.html" with exclude="site" variant="home-variant" heading="h2" %}
     </div>
   </section>
-{% endblock %}
-{% block maincontent %}
   {% include "partials/why-carousel.html" %}
   <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
     <div class="container">
@@ -72,7 +70,7 @@
     <section class="card-section">
       <div class="container">
         <h2 class="h3 color-secondary">{% translate "base news" %}</h2>
-        {% include "partials/news-cards.html" with articles=articles %}
+        {% include "partials/news-cards.html" %}
         <a class="secondary-button icon" href="/articles/">
           {% translate "news link" %}
         </a>

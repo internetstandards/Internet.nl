@@ -43,7 +43,7 @@
         {% if cpage == "champions" %}
           <img src="{% static 'embed-badge-champions.svg' %}" alt="{% translate_attr 'halloffame champions badge' %}" width="100" height="128" loading="lazy">
         {% elif manual_icon %}
-          <img src="/static/{{ manual_icon }}" alt="{% translate_attr manual_icon_alt %}" width="100" height="128" loading="lazy">
+          <img src="{% static manual_icon %}" alt="{% translate_attr manual_icon_alt %}" width="100" height="128" loading="lazy">
         {% endif %}
       </div>
     {% endif %}
