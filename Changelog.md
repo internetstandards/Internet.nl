@@ -1,5 +1,18 @@
 # Change Log
 
+## Redesign (version pending)
+
+This has a completely new design for the whole website, with a light and a dark theme ([#1252](https://github.com/internetstandards/Internet.nl/issues/1252)). All pages work without JavaScript, except the connection test, and were checked with automated tests against WCAG 2.2 level AA. Many pages were restructured.
+
+Some highlights:
+
+- The Hall of Fame now only lists champions, domains with 100% in both the website and the email test, and shows the latest 100 ([#1824](https://github.com/internetstandards/Internet.nl/issues/1824)). `/halloffame/web/` and `/halloffame/mail/` redirect to `/halloffame/`.
+- The homepage shows the share of websites, mail domains and connection tests that score 100%.
+- Static file URLs include the release, so browsers load the new CSS and JavaScript after a release.
+- `make check` now runs a new `check_translations` command, which checks that every translation key the code uses exists, that English and Dutch have the same keys, and that every translation is a valid template ([#2145](https://github.com/internetstandards/Internet.nl/issues/2145)).
+
+There are no changes in the API. Any tooling that scraped internet.nl's frontend will need updates for the new HTML (and if you do this, speak to us about an API account). If you use a custom.po: text pages now show their own title, so remove the top heading from `about contact custom` and `privacy content custom`, as in `translations/en/custom.po.dist`.
+
 ## 1.11.6
 
 - Removes trust in eMudhra certificates, following Mozilla trust store.
