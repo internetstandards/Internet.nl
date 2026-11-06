@@ -5419,42 +5419,42 @@ msgstr "Carousel navigation"
 
 msgid "home why explain"
 msgstr ""
-"Modern internet standards contribute to the security of your website, email "
-"and internet connection. By testing, you can quickly see if internet "
-"standards are configured completely and correctly."
+"Modern Internet Standards contribute to the security of your website, email "
+"and internet connection. By testing, you can quickly see if Internet "
+"Standards are configured completely and correctly."
 
 msgid "home why numbers"
 msgstr "Already {{number_of_tests}} tests successfully completed!"
 
 msgid "home why reason-1 text"
 msgstr ""
-"Outdated standards can indicate outdated software. On the other hand, modern"
-" internet standards contribute to (defense-in-depth) security."
+"Missing or misconfigured standards make eavesdropping, email forgery and "
+"hijacked traffic easier. The test shows where to improve."
 
 msgid "home why reason-1 title"
-msgstr "Detect vulnerabilities and weaknesses"
+msgstr "Find weak spots"
 
 msgid "home why reason-2 text"
 msgstr ""
-"Testing ensures users have an accessible, consistent, and optimal "
-"experience."
+"Every subtest explains its result and what to change. Test again after a "
+"change to see the effect on your score."
 
 msgid "home why reason-2 title"
-msgstr "Ensure compatibility"
+msgstr "Improve step by step"
 
 msgid "home why reason-3 text"
 msgstr ""
-"Testing helps identify performance issues like slow loading times and server"
-" errors."
+"The tests are based on open standards and public security guidelines. The "
+"source code is public too, so anyone can see how they work."
 
 msgid "home why reason-3 title"
-msgstr "Identify performance issues"
+msgstr "Open and transparent"
 
 msgid "home why scroll-to"
 msgstr "Scroll to"
 
 msgid "home why title"
-msgstr "Why should I test on internet standards?"
+msgstr "Why test for modern Internet Standards?"
 
 msgid "load_more_button_newstring"
 msgstr "Load more"

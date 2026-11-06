@@ -5450,42 +5450,44 @@ msgstr "Carrouselnavigatie"
 
 msgid "home why explain"
 msgstr ""
-"Moderne internetstandaarden dragen bij aan de beveiliging van jouw website, "
+"Moderne Internetstandaarden dragen bij aan de beveiliging van jouw website, "
 "e-mail en internetverbinding. Door te testen kun je snel nagaan of "
-"internetstandaarden goed en volledig zijn geconfigureerd."
+"Internetstandaarden goed en volledig zijn geconfigureerd."
 
 msgid "home why numbers"
 msgstr "Al {{number_of_tests}} testen succesvol uitgevoerd!"
 
 msgid "home why reason-1 text"
 msgstr ""
-"Verouderde standaarden kunnen wijzen op verouderde software. Tegelijkertijd "
-"dragen moderne internetstandaarden direct bij aan veiligheid."
+"Ontbrekende of verkeerd ingestelde standaarden maken afluisteren, "
+"e-mailvervalsing en omgeleid verkeer makkelijker. De test laat zien waar het"
+" beter kan."
 
 msgid "home why reason-1 title"
-msgstr "Beveiligingslekken en kwetsbaarheden detecteren"
+msgstr "Zwakke plekken vinden"
 
 msgid "home why reason-2 text"
 msgstr ""
-"Testen zorgt ervoor dat gebruikers een toegankelijke, consistente en "
-"optimale ervaring hebben."
+"Elke subtest legt de uitslag uit en wat je kunt aanpassen. Test na een "
+"aanpassing opnieuw om het effect op je score te zien."
 
 msgid "home why reason-2 title"
-msgstr "Garanderen van compatibiliteit"
+msgstr "Stap voor stap verbeteren"
 
 msgid "home why reason-3 text"
 msgstr ""
-"Testen helpt bij het identificeren van prestatieproblemen zoals trage "
-"laadtijden en serverfouten."
+"De testen zijn gebaseerd op open standaarden en openbare "
+"beveiligingsrichtlijnen. Ook de broncode is openbaar, zodat iedereen kan "
+"zien hoe ze werken."
 
 msgid "home why reason-3 title"
-msgstr "Prestatieproblemen identificeren"
+msgstr "Open en transparant"
 
 msgid "home why scroll-to"
 msgstr "Scroll naar"
 
 msgid "home why title"
-msgstr "Waarom zou ik op standaarden testen?"
+msgstr "Waarom testen op moderne Internetstandaarden?"
 
 msgid "load_more_button_newstring"
 msgstr "Laad meer artikelen"
