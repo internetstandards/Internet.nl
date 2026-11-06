@@ -150,6 +150,11 @@
     font: var(--section-header-s);
   }
 
+  /* WCAG 1.4.8 (AAA) asks for lines of at most 80 characters, and 70ch is about 77 of Roboto */
+  p, li {
+    max-inline-size: 70ch;
+  }
+
   p {
     font: var(--section-body-xl);
   }
