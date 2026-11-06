@@ -50,8 +50,8 @@
   --body-font-xxs-bold: 700 0.875rem/1.5 'Roboto', sans-serif; /* 14px */
   --body-font-xs: 400 1rem/1.5 'Roboto', sans-serif; /* 16px */
   --body-font-xs-bold: 700 1rem/1.5 'Roboto', sans-serif; /* 16px */
-  --body-font-s: 400 1.125rem/1.75 'Roboto', sans-serif; /* 18px */
-  --body-font-s-bold: 700 1.125rem/1.75 'Roboto', sans-serif; /* 18px */
+  --body-font-s: 400 1.125rem/1.5 'Roboto', sans-serif; /* 18px */
+  --body-font-s-bold: 700 1.125rem/1.5 'Roboto', sans-serif; /* 18px */
 
   /* BUTTON FONTS */
   --button-link-font-xxs: 700 0.875rem/2 'Montserrat', sans-serif; /* 14px */
