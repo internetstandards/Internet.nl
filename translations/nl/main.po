@@ -5476,7 +5476,7 @@ msgstr ""
 "Internetstandaarden goed en volledig zijn geconfigureerd."
 
 msgid "home why numbers"
-msgstr "Al {{number_of_tests}} testen succesvol uitgevoerd!"
+msgstr "Al {{number_of_tests}} testen uitgevoerd!"
 
 msgid "home why reason-1 text"
 msgstr ""

@@ -5445,7 +5445,7 @@ msgstr ""
 "Standards are configured completely and correctly."
 
 msgid "home why numbers"
-msgstr "Already {{number_of_tests}} tests successfully completed!"
+msgstr "Already {{number_of_tests}} tests performed!"
 
 msgid "home why reason-1 text"
 msgstr ""
