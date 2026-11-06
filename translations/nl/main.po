@@ -5415,6 +5415,12 @@ msgstr ""
 msgid "home stats connection"
 msgstr "unieke verbindingen"
 
+msgid "home stats connection text"
+msgstr "van de {{tested}} verbindingstesten scoort 100%"
+
+msgid "home stats connection title"
+msgstr "Verbindingen"
+
 msgid "home stats connection-items"
 msgstr ""
 
@@ -5424,8 +5430,17 @@ msgstr "Tests in cijfers"
 msgid "home stats mail"
 msgstr "unieke mail-domeinen"
 
+msgid "home stats mail text"
+msgstr "van de {{tested}} geteste maildomeinen scoort 100%"
+
+msgid "home stats mail title"
+msgstr "E-mail"
+
 msgid "home stats mail-items"
 msgstr ""
+
+msgid "home stats note"
+msgstr "Bij websites en e-mail tellen we de laatste test van elke domeinnaam."
 
 msgid "home stats notpassed"
 msgstr "0-99%:"
@@ -5435,6 +5450,12 @@ msgstr "100%:"
 
 msgid "home stats website"
 msgstr "unieke web-domeinen"
+
+msgid "home stats website text"
+msgstr "van de {{tested}} geteste websites scoort 100%"
+
+msgid "home stats website title"
+msgstr "Websites"
 
 msgid "home stats website-items"
 msgstr ""

@@ -5384,6 +5384,12 @@ msgstr ""
 msgid "home stats connection"
 msgstr "unique connections"
 
+msgid "home stats connection text"
+msgstr "of the {{tested}} connection tests score 100%"
+
+msgid "home stats connection title"
+msgstr "Connections"
+
 msgid "home stats connection-items"
 msgstr ""
 
@@ -5393,8 +5399,17 @@ msgstr "Tests in numbers"
 msgid "home stats mail"
 msgstr "unique mail domains"
 
+msgid "home stats mail text"
+msgstr "of the {{tested}} mail domains tested score 100%"
+
+msgid "home stats mail title"
+msgstr "Email"
+
 msgid "home stats mail-items"
 msgstr ""
+
+msgid "home stats note"
+msgstr "For websites and email, we count the latest test of each domain name."
 
 msgid "home stats notpassed"
 msgstr "0-99%:"
@@ -5404,6 +5419,12 @@ msgstr "100%:"
 
 msgid "home stats website"
 msgstr "unique web domains"
+
+msgid "home stats website text"
+msgstr "of the {{tested}} websites tested score 100%"
+
+msgid "home stats website title"
+msgstr "Websites"
 
 msgid "home stats website-items"
 msgstr ""
