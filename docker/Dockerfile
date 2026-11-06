@@ -1,6 +1,7 @@
 ARG PYTHON_VERSION=3.13
 ARG YQ_VERSION=4.45.4
 ARG DOCKER_CLI_VERSION=29.2.1
+ARG NODE_VERSION=24.22.2
 
 # Named stage to allow ARG expansion in --from (BuildKit does not support variable expansion directly)
 FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
@@ -134,8 +135,11 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+# node and npm for the target platform, for the development image
+FROM node:${NODE_VERSION}-trixie-slim AS node
+
 # build frontend image target, the output does not depend on the platform so build natively
-FROM --platform=$BUILDPLATFORM node:22-slim AS frontend
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS frontend
 
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
@@ -239,8 +243,8 @@ CMD ["runserver", "0.0.0.0:8080"]
 FROM app AS app-dev
 
 # node and npm, to rebuild CSS and JS in development
-COPY --from=node:22-slim /usr/local/bin/ /usr/local/bin/
-COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node /usr/local/bin/ /usr/local/bin/
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --chown=nobody:nogroup frontend ./frontend
 # nobody has no home directory for the npm cache
 ENV npm_config_cache=/tmp/npm
