@@ -36,6 +36,7 @@ def test_page(db, client, settings, path, branding):
     response = client.get(path)
     assert response.status_code == 200
     html = response.content.decode()
+    assert "css/style-min.css?v=" in html, "static file URLs should carry the release"
     if branding:
         assert "logos/logo" in html
     else:

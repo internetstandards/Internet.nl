@@ -276,6 +276,10 @@ LANGUAGE_CODE = LANGUAGES[0][0]
 #     https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = "/static/"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "internetnl.storage.ReleaseStaticFilesStorage"},
+}
 STATIC_ROOT = os.getenv("STATIC_ROOT", os.path.join(BASE_DIR, "static"))
 STATICFILES_DIRS = [
     # include static assets stored outside of the source directories
