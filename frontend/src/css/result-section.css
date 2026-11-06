@@ -494,7 +494,24 @@ meter::-moz-meter-bar {
     border-bottom: 1px solid var(--grey-300);
   }
 
-  > hgroup {
+  .result-details-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+
+    @media (width >= 56.25rem) {
+      flex-wrap: nowrap;
+    }
+
+    .open-all {
+      flex-shrink: 0;
+    }
+  }
+
+  .result-details-heading > hgroup {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

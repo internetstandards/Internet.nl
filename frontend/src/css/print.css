@@ -22,7 +22,7 @@
     translate: unset;
   }
 
-  .toggle-menu, .nav-controls, .footer-nav, .footer-bar, .action-card {
+  .toggle-menu, .nav-controls, .footer-nav, .footer-bar, .action-card, .open-all {
     display: none;
   }
 
