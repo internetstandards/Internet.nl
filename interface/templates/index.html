@@ -10,24 +10,7 @@
       <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
       <article class="test-card-large home-variant">
         <h2 class="domain icon">{% translate "base test website label" %}</h2>
-        <form action="/site/" method="POST">
-          <label>
-            <span>{% translate "base test website input" %}</span>
-            <input id="web-url"
-                   name="url"
-                   type="text"
-                   placeholder="{% translate_attr "base test website placeholder" %}"
-                   inputmode="url"
-                   autocomplete="url"
-                   autocorrect="off"
-                   autocapitalize="none"
-                   spellcheck="false"
-                   required>
-          </label>
-          <button class="primary-button icon" type="submit">
-            {% translate "base test start" %}
-          </button>
-        </form>
+        {% include "partials/site-form.html" %}
         <a class="icon" href="/test-site/">{% translate "base test website title" %}</a>
       </article>
       {% include "partials/test-cards.html" with exclude="site" variant="home-variant" heading="h2" %}
