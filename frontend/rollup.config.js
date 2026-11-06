@@ -6,8 +6,8 @@ const isProduction = process.env.NODE_ENV === "production";
 // a static files directory django knows, see STATICFILES_DIRS
 const outputDir = "../static_frontend";
 
-// One bundle per script tag. Static files are cached under fixed names, so a
-// bundle must not import from another one that may be an older cached version.
+// One bundle per script tag. Imports between bundles would not carry the ?v= release
+// of static file URLs, so a bundle could import an older cached version of another.
 const scripts = {
   "theme-init": "src/js/theme-init.js",
   base: "src/js/base.js",
