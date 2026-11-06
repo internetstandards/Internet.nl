@@ -217,81 +217,6 @@ msgstr ""
 msgid "about standards title"
 msgstr "Internet Standards"
 
-msgid "about_mission_description_newstring"
-msgstr ""
-"The Internet.nl test tool is an initiative of the Platform Internet "
-"Standards. It is a collaboration between the Internet community and the "
-"Dutch government. Currently, the following parties participate in the "
-"platform:"
-
-msgid "about_mission_heading_newstring"
-msgstr ""
-"The goal of the platform is to further increase the use of modern internet "
-"standards and make it more accessible, secure, and reliable for everyone."
-
-msgid "about_mission_title_newstring"
-msgstr "Our mission"
-
-msgid "about_quote_author_newstring"
-msgstr "Coen Wesselman"
-
-msgid "about_quote_newstring"
-msgstr ""
-"\"The goal of the platform is to further increase the use of modern internet"
-" standards and make it more accessible, secure, and reliable for everyone.\""
-
-msgid "about_quote_role_newstring"
-msgstr "Founder Internet.nl"
-
-msgid "about_reason_1_description_newstring"
-msgstr "This helps prevent cyber attacks, hacking, and data breaches."
-
-msgid "about_reason_1_title_newstring"
-msgstr "Find security vulnerabilities and weaknesses"
-
-msgid "about_reason_2_description_newstring"
-msgstr ""
-"Testing ensures users have an accessible, consistent, and optimal "
-"experience."
-
-msgid "about_reason_2_title_newstring"
-msgstr "Ensure compatibility"
-
-msgid "about_reason_3_description_newstring"
-msgstr ""
-"Testing helps identify performance issues like slow loading times and server"
-" errors."
-
-msgid "about_reason_3_title_newstring"
-msgstr "Identify performance issues"
-
-msgid "about_section_intro_newstring"
-msgstr "I want more information about these organizations"
-
-msgid "about_section_page_intro_newstring"
-msgstr ""
-"We help you test and identify performance issues such as slow load times and"
-" server errors."
-
-msgid "about_section_title_newstring"
-msgstr "About us"
-
-msgid "about_successful_tests_newstring"
-msgstr "successful tests!"
-
-msgid "about_test_button_newstring"
-msgstr "I want to test"
-
-msgid "about_why_test_description_newstring"
-msgstr ""
-"The Internet.nl test tool is an initiative of the Platform Internet "
-"Standards. The goal of the platform is to jointly increase the use of modern"
-" internet standards to make the internet more accessible, safer and more "
-"reliable for everyone."
-
-msgid "about_why_test_title_newstring"
-msgstr "Why should you test your standards?"
-
 msgid "accessibility content"
 msgstr ""
 "The Dutch Internet Standards Platform pays a lot of attention to the accessibility of Internet.nl. We want to offer all information in such a way that everyone can view and use it.\n"
@@ -310,32 +235,6 @@ msgstr ""
 "\n"
 "## Feedback\n"
 "Is part of Internet.nl not accessible to you? Let us know at [question@internet.nl](mailto:question@internet.nl)."
-
-msgid "action_card_description_newstring"
-msgstr ""
-"Forwarding the test results can help identify the causes and provide "
-"solutions."
-
-msgid "article_read_more_button_newstring"
-msgstr "Read more articles"
-
-msgid "article_related_news_title_newstring"
-msgstr "Related news"
-
-msgid "articles_latest_news_title_home_newstring"
-msgstr "Latest news"
-
-msgid "articles_latest_news_title_newstring"
-msgstr "Our latest news"
-
-msgid "articles_load_more_button_newstring"
-msgstr "Load more articles"
-
-msgid "articles_subtitle_newstring"
-msgstr "View our news with updates and useful information."
-
-msgid "articles_title_newstring"
-msgstr "News & Articles"
 
 msgid "base about"
 msgstr "About Internet.nl"
@@ -584,132 +483,6 @@ msgstr "Email test widget"
 msgid "base widget site"
 msgstr "Website test widget"
 
-msgid "base_footer_about_us_newstring"
-msgstr "About us"
-
-msgid "base_footer_accessibility_newstring"
-msgstr "Accessibility"
-
-msgid "base_footer_copyright_newstring"
-msgstr "Copyright"
-
-msgid "base_footer_goto_linkedin_newstring"
-msgstr "Go to our LinkedIn profile"
-
-msgid "base_footer_goto_mastodon_newstring"
-msgstr "Go to our Mastodon profile"
-
-msgid "base_footer_goto_x_newstring"
-msgstr "Go to our X profile"
-
-msgid "base_footer_hall_of_fame_newstring"
-msgstr "Hall of fame"
-
-msgid "base_footer_knowledge_base_newstring"
-msgstr "Knowledge base"
-
-msgid "base_footer_news_newstring"
-msgstr "News"
-
-msgid "base_footer_privacy_statement_newstring"
-msgstr "Privacy statement"
-
-msgid "base_footer_service_contact_newstring"
-msgstr "Service & contact"
-
-msgid "base_footer_test_tools_newstring"
-msgstr "Test tools"
-
-msgid "base_footer_vulnerability_report_newstring"
-msgstr "Report vulnerability"
-
-msgid "base_header_close_newstring"
-msgstr "Close"
-
-msgid "base_header_contact_newstring"
-msgstr "Contact"
-
-msgid "base_header_homepage_label_newstring"
-msgstr "Internet.nl Homepage"
-
-msgid "base_header_menu_newstring"
-msgstr "Menu"
-
-msgid "base_header_skip_to_main_newstring"
-msgstr "Skip to main content"
-
-msgid "base_header_test_connection_newstring"
-msgstr "Test your connection"
-
-msgid "base_header_test_email_newstring"
-msgstr "Test your email"
-
-msgid "base_header_test_tools_newstring"
-msgstr "Test tools"
-
-msgid "base_header_test_website_newstring"
-msgstr "Test your website"
-
-msgid "base_language_change_button_newstring"
-msgstr "Change language"
-
-msgid "base_language_select_label_newstring"
-msgstr "Choose a language"
-
-msgid "base_probe_score_loading_newstring"
-msgstr "Loading score for:"
-
-msgid "base_results_next_actions_newstring"
-msgstr "Next actions"
-
-msgid "base_results_repeat_test_newstring"
-msgstr "Repeat the test"
-
-msgid "base_results_score_for_newstring"
-msgstr "Score for:"
-
-msgid "base_results_share_results_clicked_newstring"
-msgstr "Copied to clipboard"
-
-msgid "base_results_share_results_newstring"
-msgstr "Share results with hoster"
-
-msgid "base_results_test_connection_newstring"
-msgstr "Test your connection"
-
-msgid "base_results_test_details_newstring"
-msgstr "Test details"
-
-msgid "base_results_test_email_domain_newstring"
-msgstr "Test your email domain"
-
-msgid "base_results_test_explanation_newstring"
-msgstr "Explanation of test report"
-
-msgid "base_results_test_website_domain_newstring"
-msgstr "Test your website"
-
-msgid "base_theme_change_button_newstring"
-msgstr "Change theme"
-
-msgid "base_theme_dark_newstring"
-msgstr "Dark"
-
-msgid "base_theme_light_newstring"
-msgstr "Light"
-
-msgid "base_theme_system_newstring"
-msgstr "OS Default"
-
-msgid "base_theme_toggle_mode_newstring"
-msgstr "Mode"
-
-msgid "base_theme_toggle_to_dark_newstring"
-msgstr "Switch to dark theme"
-
-msgid "base_theme_toggle_to_light_newstring"
-msgstr "Switch to light theme"
-
 msgid "connection pagetitle"
 msgstr "Connection test"
 
@@ -760,51 +533,6 @@ msgstr "Send your question by e-mail"
 
 msgid "contact teaser"
 msgstr "Do you have questions? Find your answer below or reach out to us."
-
-msgid "contact_card_subtitle_newstring"
-msgstr ""
-"Do you have a question, comment or complaint?<br>We are happy to help."
-
-msgid "contact_card_title_newstring"
-msgstr "Contact us"
-
-msgid "contact_email_description_newstring"
-msgstr "Contact us whenever"
-
-msgid "contact_email_title_newstring"
-msgstr "Email"
-
-msgid "contact_get_in_touch_title_newstring"
-msgstr "Get in touch with us"
-
-msgid "contact_help_description_newstring"
-msgstr "We are happy to help you"
-
-msgid "contact_help_title_newstring"
-msgstr "Technical help"
-
-msgid "contact_intro_description_newstring"
-msgstr ""
-"How can we help you? Search directly for your answer or view our contact "
-"information."
-
-msgid "contact_intro_title_newstring"
-msgstr "Service & Contact"
-
-msgid "contact_page_email_description_newstring"
-msgstr "Question or complaint?<br>You can mail us at"
-
-msgid "contact_page_help_description_newstring"
-msgstr "We are happy to help you on our"
-
-msgid "contact_page_visit_description_newstring"
-msgstr "Maanweg 174 (8e verdieping)<br>2516 AB Den Haag"
-
-msgid "contact_visit_description_newstring"
-msgstr "Our office address"
-
-msgid "contact_visit_title_newstring"
-msgstr "Visit"
 
 msgid "copyright content"
 msgstr ""
@@ -4734,36 +4462,6 @@ msgid "domain tweetmessage"
 msgstr ""
 "The%20website%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20website%20test%20of%20%40Internet_nl%3A"
 
-msgid "faq_categories_title_newstring"
-msgstr "Categories"
-
-msgid "faq_docker_title_newstring"
-msgstr "Internet.nl available as 'ready-to-use' Docker package"
-
-msgid "faq_knowledge_category_newstring"
-msgstr "Testing"
-
-msgid "faq_knowledge_description_long_newstring"
-msgstr ""
-"Today Internet.nl launches a new version of its test tool in the form of a "
-"'ready-to-use' package based on Docker..."
-
-msgid "faq_knowledge_description_newstring"
-msgstr ""
-"Check out our knowledge base with all kinds of useful information and tips."
-
-msgid "faq_knowledge_heading_newstring"
-msgstr "Based on what are your domain names being tested"
-
-msgid "faq_knowledge_title_newstring"
-msgstr "Our knowledge base"
-
-msgid "faq_title_newstring"
-msgstr "Frequently asked questions"
-
-msgid "faq_view_all_button_newstring"
-msgstr "View all frequently asked questions"
-
 msgid "faqs appsecpriv content"
 msgstr ""
 "## HTTP security headers \n"
@@ -5330,52 +5028,6 @@ msgstr ""
 msgid "halloffame web title"
 msgstr "Hall of Fame - Websites"
 
-msgid "halloffame_champions_title_newstring"
-msgstr "Champions"
-
-msgid "halloffame_filter_champions_newstring"
-msgstr "Champions"
-
-msgid "halloffame_filter_hosters_newstring"
-msgstr "Hosters"
-
-msgid "halloffame_filter_label_newstring"
-msgstr "Filter by:"
-
-msgid "halloffame_first_button_home_newstring"
-msgstr "I want to test my domain"
-
-msgid "halloffame_hosters_description_newstring"
-msgstr ""
-"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus lorem, "
-"pulvinar et nulla elementum, interdum posuere mi. Etiam eu arcu ac velit "
-"convallis vestibulum sed ac purus. Suspendisse potenti. Aenean tincidunt "
-"ante a fringilla porttitor. In sit amet mi tincidunt, pulvinar ipsum "
-"molestie, laoreet libero. Cras quis augue eget risus porttitor finibus."
-
-msgid "halloffame_hosters_title_newstring"
-msgstr "Hosters"
-
-msgid "halloffame_intro_description_home_newstring"
-msgstr ""
-"The hosters listed below are included in the Hall of Fame because they meet "
-"the criteria for inclusion, such as achieving a double 100% score for their "
-"own domain."
-
-msgid "halloffame_intro_description_newstring"
-msgstr ""
-"If your website or email scores 100% on Internet.nl, your domain name will "
-"be included in the relevant Hall of Fame"
-
-msgid "halloffame_intro_title_newstring"
-msgstr "Hall of fame"
-
-msgid "halloffame_second_button_home_newstring"
-msgstr "Discover the Hall of Fame"
-
-msgid "halloffame_what_test_title_newstring"
-msgstr "What do you want to test?"
-
 msgid "home pagetitle"
 msgstr ""
 "Test for modern Internet Standards like IPv6, DNSSEC, HTTPS, DMARC, STARTTLS\n"
@@ -5476,9 +5128,6 @@ msgstr "Scroll to"
 
 msgid "home why title"
 msgstr "Why test for modern Internet Standards?"
-
-msgid "load_more_button_newstring"
-msgstr "Load more"
 
 msgid "mail pagetitle"
 msgstr "Email test:"
@@ -6661,63 +6310,6 @@ msgstr ""
 
 msgid "test sitetls warning summary"
 msgstr "Connection *not* or insufficiently secured (HTTPS)"
-
-msgid "test_connection_paragraph_alt_newstring"
-msgstr "Result within 30 seconds!"
-
-msgid "test_connection_protect_intro_newstring"
-msgstr "Protect your connection by testing."
-
-msgid "test_connection_stats_newstring"
-msgstr "tests with 100% score this week!"
-
-msgid "test_connection_title_newstring"
-msgstr "Test your connection"
-
-msgid "test_email_domain_label_newstring"
-msgstr "Your email domain"
-
-msgid "test_email_paragraph_alt_newstring"
-msgstr "Tested within 30 seconds!"
-
-msgid "test_email_protect_intro_newstring"
-msgstr "Protect your email by testing."
-
-msgid "test_email_stats_newstring"
-msgstr "tests with 100% score this week!"
-
-msgid "test_email_title_newstring"
-msgstr "Test your email"
-
-msgid "test_more_info_link_newstring"
-msgstr "More information about the test"
-
-msgid "test_more_tests_title_newstring"
-msgstr "What else do you want to test?"
-
-msgid "test_start_button_newstring"
-msgstr "Start the test"
-
-msgid "test_usp_one_newstring"
-msgstr "USP 1 stands here"
-
-msgid "test_usp_three_newstring"
-msgstr "USP 3 stands here"
-
-msgid "test_usp_two_newstring"
-msgstr "USP 2 stands here"
-
-msgid "test_website_domain_label_newstring"
-msgstr "Your website domain"
-
-msgid "test_website_page_protect_intro_newstring"
-msgstr "Protect your website by testing"
-
-msgid "test_website_protect_intro_newstring"
-msgstr "Protect your website and your users by testing."
-
-msgid "test_website_stats_newstring"
-msgstr "successful tests conducted this week!"
 
 msgid "widget content notes"
 msgstr ""
