@@ -1,5 +1,8 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from itertools import groupby
+from operator import attrgetter
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -16,38 +19,23 @@ logger = get_task_logger(__name__)
 
 def _perfect_scores(model):
     """
-    Return the domains whose latest test scored 100%, as {domain: (since when it scores 100%, latest report id)},
-    and the number of domains tested.
+    Return the domains whose latest test scored 100%, as
+    {domain: (start of its current run of 100% scores, latest report id)}, and the number of domains tested.
 
     """
     perfect = {}
     tested = 0
-    previousname = None
-    previousscore = 0
-    previoustimestamp = None
-    previousreportid = None
-    for report in model.objects.only("id", "domain", "timestamp", "score").order_by("domain", "timestamp").iterator():
-        if report.domain != previousname:
-            tested += 1
-        if previousname != report.domain and previousname is not None:
-            if previousscore >= 100:
-                perfect[previousname] = (previoustimestamp, previousreportid)
-            previousname = report.domain
-            previousscore = report.score or 0
-            previoustimestamp = report.timestamp
-            previousreportid = report.id
-
-        else:
-            report_score = report.score or 0
-            if report_score != previousscore:
-                previoustimestamp = report.timestamp
-            previousname = report.domain
-            previousreportid = report.id
-            previousscore = report_score
-
-    # Last domain name.
-    if previousscore >= 100:
-        perfect[previousname] = (previoustimestamp, previousreportid)
+    reports = model.objects.only("id", "domain", "timestamp", "score").order_by("domain", "timestamp")
+    for domain, domain_reports in groupby(reports.iterator(), key=attrgetter("domain")):
+        tested += 1
+        since = None
+        for report in domain_reports:
+            if (report.score or 0) < 100:
+                since = None
+            elif since is None:
+                since = report.timestamp
+        if since is not None:
+            perfect[domain] = (since, report.id)
     return perfect, tested
 
 
@@ -58,11 +46,8 @@ def _numbers(tested, perfect):
 @transaction.atomic
 def _update_hof():
     """
-    Populate the Hall of Fame with domains that scored 100% in the website
-    and the mail test, and count the tests for the homepage.
-
-    .. note:: Domains that are part of the HoF are domains that their *latest*
-              test scored 100%.
+    Cache the Hall of Fame champions, the domains whose latest website and mail tests both scored 100%,
+    and the numbers for the homepage.
 
     """
     web, web_tested = _perfect_scores(DomainTestReport)
