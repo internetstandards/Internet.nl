@@ -1,45 +1,38 @@
-{% extends "base.html" %}
+{% extends "textpage.html" %}
 
-{% block maincontent %}
-  <section class="article-content-section footer-page">
-    <div class="container">
-      <div>
-        <h1>Database statistics</h1>
-        <p>You can request different statistics by altering the url. The url uses the first date as the start and the second
-          date as the end of the range. The start is including, the end is excluding.</p>
-        <pre>Format: /statistics/YYYYMMDD/YYYYMMDD/</pre>
-        <pre>Example, January 2022: /statistics/20220101/20220201/</pre>
-        <h2>Completed tests</h2>
-        <table>
-          <thead>
-            <tr>
-              {% for header in table_headers %}
-                <th>{{header}}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_content %}
-              <tr>
-                {% for cell in row %}
-                  <td>{{cell}}</td>
-                {% endfor %}
-              </tr>
-            {% endfor %}
-          </tbody>
-          <tfoot>
-            <tr>
-              {% for cell in per_test %}
-                {% if forloop.first %}
-                  <th>{{cell}}</th>
-                {% else %}
-                  <td>{{cell}}</td>
-                {% endif %}
-              {% endfor %}
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-  </section>
+{% block textcontent %}
+  <p>You can request different statistics by altering the url. The url uses the first date as the start and the second
+    date as the end of the range. The start is including, the end is excluding.</p>
+  <pre>Format: /statistics/YYYYMMDD/YYYYMMDD/</pre>
+  <pre>Example, January 2022: /statistics/20220101/20220201/</pre>
+  <h2>Completed tests</h2>
+  <table>
+    <thead>
+      <tr>
+        {% for header in table_headers %}
+          <th>{{header}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table_content %}
+        <tr>
+          {% for cell in row %}
+            <td>{{cell}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        {% for cell in per_test %}
+          {% if forloop.first %}
+            <th>{{cell}}</th>
+          {% else %}
+            <td>{{cell}}</td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    </tfoot>
+  </table>
 {% endblock %}
