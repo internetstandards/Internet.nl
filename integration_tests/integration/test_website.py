@@ -85,18 +85,17 @@ def test_ipv6_ns_with_bad_connectivity(page, app_url, unique_id):
     test_domain = f"{unique_id}.bad-ipv6-ns.test"
 
     page.goto(f"{app_url}/site/{test_domain}/")
-    # make sure the test has been started
-    page.get_by_text(f"Website test: {test_domain}")
     # make sure the test is completed
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
     print_results_url(page)
 
+    # verdicts are in closed details, so attached rather than visible
     # test results should indicate ipv6 ns are found
-    expect(page.get_by_text("Two or more name servers of your domain have an IPv6 address."))
+    expect(page.get_by_text("Two or more name servers of your domain have an IPv6 address.")).to_be_attached()
 
     # but some of them are not resolvable
-    expect(page.get_by_text("Not all name servers that have an IPv6 address are reachable over IPv6."))
+    expect(page.get_by_text("Not all name servers that have an IPv6 address are reachable over IPv6.")).to_be_attached()
 
 
 def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
