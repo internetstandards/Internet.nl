@@ -42,7 +42,8 @@
     <section class="contact-section alt">
       <div class="container">
         <h2 class="h3 color-secondary">{% translate "about standards title" %}</h2>
-        {% for i in "12345" %}
+        {% numbered_keys "about standards question-{}" as numbers %}
+        {% for i in numbers %}
           {% expand "about standards question-{{ i }}" as question %}
           {% expand "about standards answer-{{ i }}" as answer %}
           <details class="faq-item accordion" name="about-standards">
