@@ -129,13 +129,19 @@
       <ul class="result-details-list">
         {% for probe in probes %}
           <li id="{{ probe.name }}" class="result-details-item">
-            <hgroup>
-              <h3 class="h5 color-secondary icon {{ probe.verdict }}">
-                <span class="visually-hidden">{% translate "results no-icon-status "|addstr:probe.verdict %}:</span>
-                {% translate "test "|addstr:probe.name|addstr:" label" %}
-              </h3>
-              <p class="body-s">{% translate probe.description %}</p>
-            </hgroup>
+            <div class="result-details-heading">
+              <hgroup>
+                <h3 class="h5 color-secondary icon {{ probe.verdict }}">
+                  <span class="visually-hidden">{% translate "results no-icon-status "|addstr:probe.verdict %}:</span>
+                  {% translate "test "|addstr:probe.name|addstr:" label" %}
+                </h3>
+                <p class="body-s">{% translate probe.description %}</p>
+              </hgroup>
+              <button class="open-all secondary-button scripting-only"
+                      type="button"
+                      data-show="{% translate_attr 'results panel-button show' %}"
+                      data-hide="{% translate_attr 'results panel-button hide' %}"></button>
+            </div>
             <div class="result-details-content">
               {% for domain_type, domain, details in probe.details_set %}
                 {% block testdetailitems %}{% endblock %}
