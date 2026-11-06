@@ -49,6 +49,15 @@ def lookup(context, pattern):
     return _(contenttemplate.render(context) + " .index").split()
 
 
+@register.simple_tag
+def numbered_keys(pattern):
+    """Return 1 to n, where the pattern with each of these numbers is a translated key."""
+    number = 1
+    while _(pattern.format(number)) != pattern.format(number):
+        number += 1
+    return range(1, number)
+
+
 @register.filter()
 def idna(value):
     """

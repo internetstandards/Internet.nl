@@ -3,7 +3,8 @@
   <section class="contact-section {% if alt %}alt{% else %}ellipse hidden-mobile{% endif %}">
     <div class="container">
       <h2 class="h3 color-secondary">{% translate "faqs section title" %}</h2>
-      {% for i in "12345" %}
+      {% numbered_keys "faqs section question-{}" as numbers %}
+      {% for i in numbers %}
         {% expand "faqs section question-{{ i }}" as question %}
         {% expand "faqs section answer-{{ i }}" as answer %}
         <details class="faq-item accordion" name="faq-item">

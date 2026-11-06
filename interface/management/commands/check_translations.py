@@ -5,6 +5,7 @@ Check the translations against the code (#2145):
   * missing - keys the code translates, but that are not in the .po files (fails)
   * parity  - keys that only English or only Dutch has (fails)
   * broken  - translations that the translate tag cannot render, as they are not valid templates (fails)
+  * gaps    - numbered keys that the numbered_keys tag counts, but that skip a number (fails)
   * unused  - keys that the code does not have in quotes anywhere (a warning, listed with -v 2)
 """
 
@@ -40,6 +41,8 @@ KEY = r"""["']([^"'\n]+)["']"""
 TRANSLATE_TAG = re.compile(r"{%\s*translate(?:_attr)?\s+" + KEY + r"\s*(?:%}|as\s)")
 # a quoted key given to _() in Python
 GETTEXT = re.compile(r"\b_\(\s*" + KEY + r"\s*\)")
+# a quoted pattern in the numbered_keys tag, which stops counting at the first number without a key
+NUMBERED_KEYS = re.compile(r"{%\s*numbered_keys\s+" + KEY)
 
 
 def msgids_from_po(locale, filename):
@@ -81,6 +84,13 @@ class Command(BaseCommand):
                     except TemplateSyntaxError as error:
                         broken.append(f"{locale}/{name} {entry.msgid}: {error}")
 
+        gaps = []
+        for pattern in sorted(set(NUMBERED_KEYS.findall(code))):
+            number = re.compile(re.escape(pattern).replace(r"\{\}", r"(\d+)"))
+            numbers = sorted(int(match[1]) for key in defined if (match := number.fullmatch(key)))
+            if numbers != list(range(1, len(numbers) + 1)):
+                gaps.append(f"{pattern}: {numbers}")
+
         # Many keys reach the translate tag through a variable, such as the name given to content.html in an
         # include, or hof_text in a view. So any key the code has in quotes counts as used.
         unused = sorted(
@@ -93,6 +103,7 @@ class Command(BaseCommand):
             ("Keys the code uses but that are missing from the .po files", missing),
             ("Keys that English and Dutch do not both have", parity),
             ("Translations that are not valid templates", broken),
+            ("Numbered keys that skip a number, so the page stops before the gap", gaps),
         ):
             if lines:
                 self.stdout.write(f"{title}:")
@@ -103,6 +114,6 @@ class Command(BaseCommand):
             if options["verbosity"] > 1:
                 for key in unused:
                     self.stdout.write(f"  {key}")
-        if missing or parity or broken:
+        if missing or parity or broken or gaps:
             raise CommandError("translation checks failed, see above")
         self.stdout.write("Translations are consistent with the code.")
