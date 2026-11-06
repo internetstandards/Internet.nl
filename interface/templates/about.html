@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "textpage.html" %}
 {% load static %}
 {% load translate %}
 
@@ -56,11 +56,11 @@
     {% include "partials/why-carousel.html" %}
     {% include "partials/faq-contact.html" %}
   {% else %}
-    <section class="article-content-section footer-page">
-      <div class="container">
-        {% include "content.html" with name="about content custom" %}
-        {% include "content.html" with name="about contact custom" %}
-      </div>
-    </section>
+    {{ block.super }}
   {% endif %}
+{% endblock %}
+
+{% block textcontent %}
+  {% include "content.html" with name="about content custom" %}
+  {% include "content.html" with name="about contact custom" %}
 {% endblock %}

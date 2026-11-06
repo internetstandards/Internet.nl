@@ -141,7 +141,7 @@ def aboutpage(request):
         dict(
             pagemenu="about",
             pageclass="contact",
-            pagetitle=_("base about"),
+            pagetitle=_("base about") if settings.INTERNETNL_BRANDING else _("base about custom"),
             number_of_tests=number_format(get_number_of_tests(), force_grouping=True),
         ),
     )
