@@ -59,6 +59,31 @@
       </div>
     </div>
   </section>
+  {% if stats.web.tested %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h3 color-secondary">{% translate "home stats header" %}</h2>
+        <ul class="card-list">
+          <li class="stats-card">
+            <h3 class="domain icon">{% translate "home stats website title" %}</h3>
+            <p class="h1 color-secondary">{{ stats.web.percent }}%</p>
+            <p>{% with tested=stats.web.tested|floatformat:"0g" %}{% translate "home stats website text" %}{% endwith %}</p>
+          </li>
+          <li class="stats-card">
+            <h3 class="mail icon">{% translate "home stats mail title" %}</h3>
+            <p class="h1 color-secondary">{{ stats.mail.percent }}%</p>
+            <p>{% with tested=stats.mail.tested|floatformat:"0g" %}{% translate "home stats mail text" %}{% endwith %}</p>
+          </li>
+          <li class="stats-card">
+            <h3 class="connection icon">{% translate "home stats connection title" %}</h3>
+            <p class="h1 color-secondary">{{ stats.connection.percent }}%</p>
+            <p>{% with tested=stats.connection.tested|floatformat:"0g" %}{% translate "home stats connection text" %}{% endwith %}</p>
+          </li>
+        </ul>
+        <p class="stats-note">{% translate "home stats note" %}</p>
+      </div>
+    </section>
+  {% endif %}
   {% include "partials/about-platform.html" with link=True %}
   {% if articles %}
     <section class="card-section">

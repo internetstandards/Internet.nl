@@ -300,6 +300,47 @@
   }
 }
 
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--card-bg-color-news);
+  color: var(--card-body-color-news);
+  font: var(--card-body-l);
+
+  h3 {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font: var(--card-header-l);
+
+    &::before {
+      display: block;
+    }
+
+    &.domain::before {
+      mask-image: url("/static/icons/globe.svg");
+    }
+
+    &.mail::before {
+      mask-image: url("/static/icons/envelope.svg");
+    }
+
+    &.connection::before {
+      mask-image: url("/static/icons/link.svg");
+    }
+  }
+}
+
+.stats-note {
+  justify-self: center;
+  text-align: center;
+  font: var(--card-body-m);
+  color: var(--body-color-secondary);
+}
+
 .card {
   border-radius: 0.5rem;
 

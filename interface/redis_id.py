@@ -35,6 +35,9 @@ hof_lock = REDIS_RECORD("hof:updater:lock", 60 * 5)
 # HoF data
 hof_champions = REDIS_RECORD("hof:champions", None)
 
+# Homepage numbers: domains tested and the share that scores 100%, set by the HoF update
+home_stats = REDIS_RECORD("home:stats", None)
+
 # Public suffix list data
 psl_data = REDIS_RECORD("public:suffix:list", settings.PUBLIC_SUFFIX_LIST_RENEWAL)
 

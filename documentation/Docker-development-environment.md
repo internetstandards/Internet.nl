@@ -11,7 +11,7 @@ As a developer you connect to the application through `http://localhost:8080/`. 
 There are 3 Python applications that share a codebase.
 
 - The `app` application runs the HTTP web interface and API. A user can start a test through the web interface, after which the `app` will do a verification of the domain and if valid puts the test on a queue on `RabbitMQ` to be executed by the `worker`. After a queued test has been executed the results are fetched back via `Redis` and stored in `PostgreSQL`.
-- The `beat` application is the scheduler for recurring tasks. It takes schedule configuration from `celery.py` and puts tasks on the `RabbitMQ` queue to be exectued by the `worker`. For 'normal' installation this is only to regenerate the Hall of Fame. For 'batch' installations this application is critical to start processing batch jobs.
+- The `beat` application is the scheduler for recurring tasks. It takes schedule configuration from `celery.py` and puts tasks on the `RabbitMQ` queue to be exectued by the `worker`. For 'normal' installation this is only to regenerate the Hall of Fame and the numbers on the homepage. For 'batch' installations this application is critical to start processing batch jobs.
 - The `worker` application consumes the `RabbitMQ` queues and performs the tasks and tests posted there. For tests it will either directly connect to endpoints to validate test criteria like TLS, uses an internal Unbound library for DNS or obtains information via `Routinator` for RPKI. After the test has run the result is put on `Redis` result queue.
 
 The metrics collection system is accessible via `http://localhost:8080/grafana/`, for more information see 'Metrics' below.

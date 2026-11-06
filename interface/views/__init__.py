@@ -80,6 +80,7 @@ def indexpage(request):
             pagemenu="home",
             pagetitle=_("home pagetitle"),
             halloffame=hof_entries,
+            stats=cache.get(redis_id.home_stats.id),
             articles=articles,
             number_of_tests=number_format(get_number_of_tests(), force_grouping=True),
         ),
