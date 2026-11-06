@@ -3,6 +3,7 @@
 import re
 import pytest
 from playwright.sync_api import expect
+from redis import Redis
 from ..conftest import print_details_test_results
 from ..conftest import print_results_url
 
@@ -98,7 +99,7 @@ def test_ipv6_ns_with_bad_connectivity(page, app_url, unique_id):
     expect(page.get_by_text("Not all name servers that have an IPv6 address are reachable over IPv6.")).to_be_attached()
 
 
-def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
+def test_rate_limit(page, app_url, test_domain):
     """Test if correct rate limit keys are created when starting a test."""
 
     test_domain = "www." + test_domain
@@ -107,9 +108,9 @@ def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
 
     page.locator("#web-url").fill(test_domain)
     page.locator('form[action="/site/"] button').click()
+    page.wait_for_url(f"{app_url}/site/{test_domain}/", wait_until="commit")
 
-    rate_limit_redis_entry = docker_compose_exec("redis", "redis-cli keys dom:req_limit:*").decode("utf8").strip()
-    assert rate_limit_redis_entry, "there should be a redis entry for rate limiting"
-    assert not rate_limit_redis_entry.endswith(
-        "None"
-    ), "there should be no rate limit key created with `None` as IP address"
+    # the key only exists while the test runs, about a second here, too short for docker compose exec
+    keys = Redis(host="redis").keys("dom:req_limit:*")
+    assert keys, "there should be a redis entry for rate limiting"
+    assert b"dom:req_limit:None" not in keys, "there should be no rate limit key created with `None` as IP address"
