@@ -40,3 +40,5 @@ def test_page(db, client, settings, path, branding):
         assert "logos/logo" in html
     else:
         assert not [text for text in INTERNETNL_CONTENT if text in html]
+        # the test settings have no custom.po, so no news
+        assert 'href="/article/' not in html

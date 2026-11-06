@@ -61,7 +61,11 @@ def page404(request, exception):
 def article_index():
     if settings.INTERNETNL_BRANDING:
         return _("article .index").split()
-    return _("article custom .index").split()
+    index = _("article custom .index")
+    # without news in a custom.po, gettext returns the msgid itself
+    if index == "article custom .index":
+        return []
+    return index.split()
 
 
 @simple_cache_page
@@ -206,8 +210,9 @@ def newsarticlepage(request, article):
 
 def articlespage(request):
     articles = article_index()
-    article = articles[0]
-    return redirect("/article/" + article)
+    if not articles:
+        return redirect("/articles/")
+    return redirect("/article/" + articles[0])
 
 
 def articleindexpage(request):
