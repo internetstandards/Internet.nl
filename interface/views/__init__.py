@@ -185,7 +185,7 @@ def faqarticlepage(request, subject):
     return render(
         request,
         "faqarticle.html",
-        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_(title), title=title, content=content),
+        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_(title), content=content),
     )
 
 
@@ -251,7 +251,6 @@ def articlepage(request, article):
             pagemenu="news",
             articles=articles,
             date=date,
-            title=title,
             lead=lead,
             author=author,
             author_photo=author_photo,

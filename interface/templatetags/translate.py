@@ -33,6 +33,7 @@ def translate(context, longname):
 @register.simple_tag(takes_context=True)
 def translate_attr(context, longname):
     """Translate as plain text, for use in an attribute value."""
+    # strip_tags and unescape can return the rendered translation unchanged, still marked safe
     return escape(unescape(strip_tags(translate(context, longname))))
 
 
@@ -56,7 +57,7 @@ def idna(value):
     """
     try:
         return IDNA.decode(value.encode("ascii"))
-    except (IDNA.IDNAError, UnicodeError):
+    except UnicodeError:
         return value
 
 

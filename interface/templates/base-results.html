@@ -50,11 +50,8 @@
           <li class="main-item {{ probe.verdict }} icon"
               id="{{ probe.name }}-results">
             <a class="h7 color-secondary" href="#{{ probe.name }}">
-              <span class="visually-hidden">
-                {% translate "results no-icon-status "|addstr:probe.verdict %}
-                :
-              </span>
-              {% translate probe.summary|safe %}
+              <span class="visually-hidden">{% translate "results no-icon-status "|addstr:probe.verdict %}:</span>
+              {% translate probe.summary %}
             </a>
           </li>
         {% endfor %}
@@ -119,43 +116,40 @@
               </a>
             </li>
           </ul>
-            <p class="action-card-description">{% translate "results follow-up-description" %}</p>
-          </details>
-          <button id="copy-link" class="primary-button icon scripting-only" type="button" data-copy-failed="{% translate_attr 'results copy-failed' %}">
-            <span class="not-clicked">{% translate "results share" %}</span>
-            <span class="clicked">{% translate "results copied" %}</span>
-          </button>
-        </aside>
-        <h2 class="h3 color-secondary visually-hidden">
-          {% translate "results explanation label" %}
-        </h2>
-        <ul class="result-details-list">
-          {% for probe in probes %}
-            <li id="{{ probe.name }}" class="result-details-item">
-              <hgroup>
-                <h3 class="h5 color-secondary icon {{ probe.verdict }}">
-                  <span class="visually-hidden">
-                    {% translate "results no-icon-status "|addstr:probe.verdict %}
-                    :
-                  </span>
-                  {% translate "test "|addstr:probe.name|addstr:" label" %}
-                </h3>
-                <p class="body-s">{% translate probe.description|safe %}</p>
-              </hgroup>
-              <div class="result-details-content">
-                {% for domain_type, domain, details in probe.details_set %}
-                  {% block testdetailitems %}{% endblock %}
-                {% endfor %}
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </section>
+          <p class="action-card-description">{% translate "results follow-up-description" %}</p>
+        </details>
+        <button id="copy-link" class="primary-button icon scripting-only" type="button" data-copy-failed="{% translate_attr 'results copy-failed' %}">
+          <span class="not-clicked">{% translate "results share" %}</span>
+          <span class="clicked">{% translate "results copied" %}</span>
+        </button>
+      </aside>
+      <h2 class="h3 color-secondary visually-hidden">
+        {% translate "results explanation label" %}
+      </h2>
+      <ul class="result-details-list">
+        {% for probe in probes %}
+          <li id="{{ probe.name }}" class="result-details-item">
+            <hgroup>
+              <h3 class="h5 color-secondary icon {{ probe.verdict }}">
+                <span class="visually-hidden">{% translate "results no-icon-status "|addstr:probe.verdict %}:</span>
+                {% translate "test "|addstr:probe.name|addstr:" label" %}
+              </h3>
+              <p class="body-s">{% translate probe.description %}</p>
+            </hgroup>
+            <div class="result-details-content">
+              {% for domain_type, domain, details in probe.details_set %}
+                {% block testdetailitems %}{% endblock %}
+              {% endfor %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
 
-    <section class="article-content-section further-testing">
-      <div class="container">
-        {% block furthertesting %}{% endblock %}
-      </div>
-    </section>
-  {% endblock %}
+  <section class="article-content-section further-testing">
+    <div class="container">
+      {% block furthertesting %}{% endblock %}
+    </div>
+  </section>
+{% endblock %}
