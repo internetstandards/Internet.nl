@@ -124,7 +124,8 @@
                                 name="language"
                                 value="{{ language.0 }}"
                                 class="icon"
-                                lang="{{ language.0 }}">{{ lang.name_local }}</button>
+                                lang="{{ language.0 }}"
+                                {% if language.0 == request.current_language_code %}aria-current="true"{% endif %}>{{ lang.name_local }}</button>
                       </li>
                     {% endfor %}
                   </ul>
