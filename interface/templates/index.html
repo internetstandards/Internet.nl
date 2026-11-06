@@ -60,13 +60,15 @@
     </div>
   </section>
   {% include "partials/about-platform.html" with link=True %}
-  <section class="card-section">
-    <div class="container">
-      <h2 class="h3 color-secondary">{% translate "base news" %}</h2>
-      {% include "partials/news-cards.html" with articles=articles %}
-      <a class="secondary-button icon" href="/articles/">
-        {% translate "news link" %}
-      </a>
-    </div>
-  </section>
+  {% if articles %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h3 color-secondary">{% translate "base news" %}</h2>
+        {% include "partials/news-cards.html" with articles=articles %}
+        <a class="secondary-button icon" href="/articles/">
+          {% translate "news link" %}
+        </a>
+      </div>
+    </section>
+  {% endif %}
 {% endblock %}
