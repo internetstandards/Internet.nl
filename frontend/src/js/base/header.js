@@ -20,6 +20,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// wide screens show the menu inline, without the toggle to close it
+window.matchMedia("(min-width: 80rem)").addEventListener("change", (event) => {
+  if (event.matches) {
+    setMenuOpen(false);
+  }
+});
+
 /* TOGGLE DROPDOWN MENU */
 const toggleSubMenus = document.querySelectorAll('[id^="toggle-subnav"]');
 
