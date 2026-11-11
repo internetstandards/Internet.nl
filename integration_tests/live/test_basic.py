@@ -18,7 +18,7 @@ def test_index_http_ok(page, app_url):
 
 def test_index_footer_text_present(page, app_url):
     page.goto(app_url)
-    footer = page.locator("#footer")
+    footer = page.locator("footer")
 
     expect(footer).to_have_text(re.compile(FOOTER_TEXT))
 
@@ -53,9 +53,9 @@ def test_generated_css_static_files(page, app_url):
 
 
 def test_generated_js_static_files(page, app_url):
-    response = requests.get(app_url + "/static/js/menu-min.js")
+    response = requests.get(app_url + "/static/js/theme-init-min.js")
     response.raise_for_status()
-    assert "hideMenuButton" in response.text
+    assert "theme=" in response.text
     assert "expires" in response.headers
 
 

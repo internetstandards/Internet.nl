@@ -1,7 +1,9 @@
 """Basis functionality that should always be present."""
 
+import re
 import pytest
 from playwright.sync_api import expect
+from redis import Redis
 from ..conftest import print_details_test_results
 from ..conftest import print_results_url
 
@@ -19,7 +21,7 @@ def test_reject_invalid_domain(page, app_url):
     page.goto(app_url)
 
     page.locator("#web-url").fill(domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     print_results_url(page)
 
@@ -32,18 +34,40 @@ def test_your_website_score(page, app_url, test_domain):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
 
     assert page.url == f"{app_url}/site/{test_domain}/"
 
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
     print_results_url(page)
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_DOMAIN_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
+
+
+def test_your_website_score_without_javascript(new_context, app_url, test_domain):
+    """The website test should work without JavaScript, by following the link on the probe page."""
+
+    page = new_context(java_script_enabled=False).new_page()
+    page.goto(app_url)
+
+    page.locator("#web-url").fill(test_domain)
+    page.locator('form[action="/site/"] button').click()
+
+    # the link points to the probe page itself until the results are ready, and if an earlier test
+    # checked this domain, they are ready at once
+    for _ in range(60):
+        if re.search(rf"/site/{test_domain}/[0-9]+/$", page.url):
+            break
+        page.wait_for_timeout(2000)
+        page.locator("main noscript a").click()
+
+    print_results_url(page)
+
+    expect(page.locator("meter#testresults-percentage")).to_have_attribute("value", str(TEST_DOMAIN_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
@@ -53,7 +77,7 @@ def test_your_website_probe_success(page, app_url, probe, test_domain):
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
     probe_result = page.locator(f"#site{probe}-results")
-    expect(probe_result).to_have_class("passed")
+    expect(probe_result).to_have_class(re.compile(r"\bpassed\b"))
 
 
 def test_ipv6_ns_with_bad_connectivity(page, app_url, unique_id):
@@ -62,21 +86,20 @@ def test_ipv6_ns_with_bad_connectivity(page, app_url, unique_id):
     test_domain = f"{unique_id}.bad-ipv6-ns.test"
 
     page.goto(f"{app_url}/site/{test_domain}/")
-    # make sure the test has been started
-    page.get_by_text(f"Website test: {test_domain}")
     # make sure the test is completed
     page.wait_for_url(f"{app_url}/site/{test_domain}/*/")
 
     print_results_url(page)
 
+    # verdicts are in closed details, so attached rather than visible
     # test results should indicate ipv6 ns are found
-    expect(page.get_by_text("Two or more name servers of your domain have an IPv6 address."))
+    expect(page.get_by_text("Two or more name servers of your domain have an IPv6 address.")).to_be_attached()
 
     # but some of them are not resolvable
-    expect(page.get_by_text("Not all name servers that have an IPv6 address are reachable over IPv6."))
+    expect(page.get_by_text("Not all name servers that have an IPv6 address are reachable over IPv6.")).to_be_attached()
 
 
-def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
+def test_rate_limit(page, app_url, test_domain):
     """Test if correct rate limit keys are created when starting a test."""
 
     test_domain = "www." + test_domain
@@ -84,10 +107,10 @@ def test_rate_limit(page, app_url, test_domain, docker_compose_exec):
     page.goto(app_url)
 
     page.locator("#web-url").fill(test_domain)
-    page.locator("section.websitetest button").click()
+    page.locator('form[action="/site/"] button').click()
+    page.wait_for_url(f"{app_url}/site/{test_domain}/", wait_until="commit")
 
-    rate_limit_redis_entry = docker_compose_exec("redis", "redis-cli keys dom:req_limit:*").decode("utf8").strip()
-    assert rate_limit_redis_entry, "there should be a redis entry for rate limiting"
-    assert not rate_limit_redis_entry.endswith(
-        "None"
-    ), "there should be no rate limit key created with `None` as IP address"
+    # the key only exists while the test runs, about a second here, too short for docker compose exec
+    keys = Redis(host="redis").keys("dom:req_limit:*")
+    assert keys, "there should be a redis entry for rate limiting"
+    assert b"dom:req_limit:None" not in keys, "there should be no rate limit key created with `None` as IP address"

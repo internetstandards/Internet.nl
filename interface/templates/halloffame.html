@@ -1,47 +1,69 @@
 {% extends "base.html" %}
-{%load translate %}
+{% load static %}
+{% load translate %}
 
 {% block maincontent %}
-<article class="block fullwidth">
-  <div class="intro">
-    <div class="flexblocks champions">
-      <div class="flexblock">
-        <h1>{% include "string.html" with name=hof_title %}</h1>
-          <ul class="hall-of-fame menu">
-            <li><a href="/halloffame/" {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame champions menu" %}</a></li>
-            <li><a href="/halloffame/web/" {% if cpage == 'web' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame web menu" %}</a></li>
-            <li><a href="/halloffame/mail/" {% if cpage == 'mail' %}aria-current="page"{% endif %}>{% include "string.html" with name="halloffame mail menu" %}</a></li>
-            {% for manual in manuals %}
-            <li><a href="/halloffame/{{manual.0}}/" {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% include "string.html" with name=manual.1 %}</a></li>
-            {% endfor %}
-          </ul>
-      </div>
-      <div class="flexblock">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% if cpage == 'champions' %}
-        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
-        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
-      {% elif cpage == 'web' %}
-        <img src="/static/embed-badge-websitetest.svg" alt="{% include "string.html" with name="halloffame web badge" %}">
-      {% elif cpage == 'mail' %}
-        <img src="/static/embed-badge-emailtest.svg" alt="{% include "string.html" with name="halloffame mail badge" %}">
-      {% else %}
-        {% if manual_icon and manual_icon_alt %}
-        <img src="/static/{{manual_icon}}" alt="{% include "string.html" with name=manual_icon_alt %}">
-        {% endif %}
-      {% endif %}
-      {% endif %}
+<section class="intro-section bg-primary ellipse reverse">
+  <div class="container">
+    <hgroup class="center">
+      <h1 class="h5 color-secondary">{% translate "base halloffame" %}</h1>
+      <p class="h1 color-secondary">{% translate "halloffame description" %}</p>
+    </hgroup>
+  </div>
+</section>
+
+{% if manuals %}
+  <search class="filter-section">
+    <div class="container">
+      <div class="filter-container">
+        <h2 class="h5 color-secondary">{% translate "halloffame filter" %}</h2>
+        <div class="button-container">
+          <a class="{% if cpage == 'champions' %}primary-button{% else %}secondary-button{% endif %}"
+             href="/halloffame/"
+             {% if cpage == 'champions' %}aria-current="page"{% endif %}>{% translate "halloffame champions title" %}</a>
+          {% for manual in manuals %}
+            <a class="{% if cpage == manual.0 %}primary-button{% else %}secondary-button{% endif %}"
+               href="/halloffame/{{ manual.0 }}/"
+               {% if cpage == manual.0 %}aria-current="page"{% endif %}>{% translate manual.1 %}</a>
+          {% endfor %}
+        </div>
       </div>
     </div>
-    <span class="hof-content">{% include "content.html" with name=hof_text %}</span>
-  </div>
-  <div class="perfect-scores-list">
-    <h2>{% include "string.html" with name=hof_subtitle %}</h2>
-    <ul class="list-column column-3">
-    {% for member in halloffame %}
-      <li><a href="{{member.permalink}}">{{member.domain|idna|truncatechars:36}}</a></li>
-    {% endfor %}
+  </search>
+{% endif %}
+
+<section class="hosters-section">
+  <div class="container">
+    <div class="hof-intro">
+      <h2 class="h2 color-secondary">{% translate hof_title %}</h2>
+      <div class="body-xl">{% translate hof_text %}</div>
+    </div>
+    {% if "INTERNETNL_BRANDING"|get_settings_value %}
+      <div class="image-container">
+        {% if cpage == "champions" %}
+          <img src="{% static 'embed-badge-champions.svg' %}" alt="{% translate_attr 'halloffame champions badge' %}" width="100" height="128" loading="lazy">
+        {% elif manual_icon %}
+          <img src="{% static manual_icon %}" alt="{% translate_attr manual_icon_alt %}" width="100" height="128" loading="lazy">
+        {% endif %}
+      </div>
+    {% endif %}
+    <ul class="hall-of-fame-list">
+      {% for member in halloffame %}
+        <li>
+          {# manual entries, such as hosters, are names rather than domains #}
+          <a href="{{ member.permalink }}">{% if cpage == "champions" %}{{ member.domain|idna }}{% else %}{{ member.domain }}{% endif %}</a>
+        </li>
+      {% endfor %}
     </ul>
   </div>
-</article>
+</section>
+
+<section class="test-sub-section bg-primary">
+  <div class="container">
+    <h2 class="h3 color-secondary">{% translate "base test title" %}</h2>
+    {% include "partials/test-cards.html" with variant="hall-of-fame-variant" %}
+  </div>
+</section>
+
+{% include "partials/faq-contact.html" %}
 {% endblock %}

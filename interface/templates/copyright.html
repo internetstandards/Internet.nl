@@ -1,8 +1,6 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "textpage.html" %}
+{% load translate %}
 
-{% block maincontent %}
-  <article class="block wide">
-    {% include "content.html" with name="copyright content" %}
-  </article>
+{% block textcontent %}
+  {% translate "copyright content" %}
 {% endblock %}

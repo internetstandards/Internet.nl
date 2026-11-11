@@ -20,9 +20,9 @@ def test_your_connection_score(page, app_url, app_domain):
     # print failed requests
     page.on("requestfailed", lambda request: print_red("Request failed:", request.url, request.failure))
 
-    page.goto(app_url)
+    page.goto(f"{app_url}/test-connection/")
 
-    page.locator("section.connectiontest button").click()
+    page.locator("#form-connection-test button").click()
 
     # expect to navigate to http url to start test, should be server over http
     page.wait_for_url(f"http://conn.{app_domain}/connection/")
@@ -30,7 +30,7 @@ def test_your_connection_score(page, app_url, app_domain):
     # wait for results, should be server over https
     page.wait_for_url(f"https://{app_domain}/connection/*/results")
 
-    score = page.locator("div.testresults-percentage")
+    score = page.locator("meter#testresults-percentage")
 
     print_details_test_results(page)
     print_results_url(page)
@@ -40,7 +40,7 @@ def test_your_connection_score(page, app_url, app_domain):
         "https://trace.playwright.dev for viewing."
     )
 
-    expect(score).to_have_attribute("data-resultscore", str(TEST_CONNECTION_EXPECTED_SCORE))
+    expect(score).to_have_attribute("value", str(TEST_CONNECTION_EXPECTED_SCORE))
 
 
 @pytest.mark.skip(reason="test environment not complete enough to allow all tests to pass")
@@ -50,7 +50,7 @@ def test_your_connection_probe_success(page, app_url, probe):
     page.wait_for_url(f"{app_url}/connection/*/results")
 
     probe_result = page.locator(f"#conn{probe}-results")
-    expect(probe_result).to_have_class("passed")
+    expect(probe_result).to_have_class(re.compile(r"\bpassed\b"))
 
 
 def test_connection_redirect(page, app_domain):

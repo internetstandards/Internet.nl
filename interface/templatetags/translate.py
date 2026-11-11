@@ -1,11 +1,13 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 from collections import deque
+from html import unescape
 
 import idna as IDNA
 from django import template
 from django.conf import settings
 from django.template import Template
+from django.utils.html import escape, strip_tags
 from django.utils.translation import gettext as _
 
 from checks.scoring import (
@@ -29,6 +31,13 @@ def translate(context, longname):
 
 
 @register.simple_tag(takes_context=True)
+def translate_attr(context, longname):
+    """Translate as plain text, for use in an attribute value."""
+    # strip_tags and unescape can return the rendered translation unchanged, still marked safe
+    return escape(unescape(strip_tags(translate(context, longname))))
+
+
+@register.simple_tag(takes_context=True)
 def expand(context, pattern):
     contenttemplate = Template(pattern)
     return contenttemplate.render(context)
@@ -40,6 +49,15 @@ def lookup(context, pattern):
     return _(contenttemplate.render(context) + " .index").split()
 
 
+@register.simple_tag
+def numbered_keys(pattern):
+    """Return 1 to n, where the pattern with each of these numbers is a translated key."""
+    number = 1
+    while _(pattern.format(number)) != pattern.format(number):
+        number += 1
+    return range(1, number)
+
+
 @register.filter()
 def idna(value):
     """
@@ -48,7 +66,7 @@ def idna(value):
     """
     try:
         return IDNA.decode(value.encode("ascii"))
-    except IDNA.IDNAError:
+    except UnicodeError:
         return value
 
 

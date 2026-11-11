@@ -1,31 +1,34 @@
 {% extends "base.html" %}
 {% load static %}
-{% load i18n %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/card-list-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
-  <article class="block wide">
-    <section class="overview">
-        <h1>{% include "string.html" with name="{{pagetitle}}"%}</h1>
-      {% for article in articles %}
-      {% expand "article {{article}} title" as articletitle %}
-      {% expand "article {{article}} date" as articledate %}
-      {% expand "article {{article}} lead" as articlelead %}
-      {% expand "article {{article}} author" as articleauthor %}
-      {% trans articleauthor as author %}
-        <div>
-          <a href="/article/{{article}}">
-            {% if author != articleauthor %}
-              {% expand "author {{author}} name" as authorname %}
-              <h2>Blog {% include "string.html" with name=authorname %}: {% include "string.html" with name=articletitle %}</h2>
-              {% include "content.html" with name=articlelead %}
-            {% else %}
-              <h2>{% include "string.html" with name=articletitle %}</h2>
-              {% include "string_no_tags.html" with name=articlelead %}
-            {% endif %}
-          </a>
-        </div>
-      {% endfor %}
+  <section class="article-index-section bg-primary">
+    <div class="container">
+      <hgroup>
+        <h1 class="h1 color-secondary">{% translate "base news" %}</h1>
+        <p class="h5 color-secondary">{% translate "news subtitle" %}</p>
+      </hgroup>
+      {% include "partials/news-cards.html" with articles=articles|slice:":2" large=True %}
+    </div>
+  </section>
+  
+  {% if articles|length > 2 %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h2 color-secondary">{% translate "news older" %}</h2>
+        {% include "partials/news-cards.html" with articles=articles|slice:"2:" variant="load-more" %}
+        {# two articles above, five shown here before load more #}
+        {% if articles|length > 7 %}
+          <button id="load-more" class="secondary-button icon scripting-only" type="button">{% translate "news load" %}</button>
+        {% endif %}
+      </div>
     </section>
-  </article>
+  {% endif %}
+
+  {% include "partials/faq-contact.html" %}
 {% endblock %}

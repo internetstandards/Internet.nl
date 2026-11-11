@@ -22,4 +22,4 @@ msgstr ""
 "---"
 
 msgid "manual halloffame hosters title"
-msgstr "Hall of Fame - Hosters"
+msgstr "Hosters"

@@ -1,6 +1,7 @@
 ARG PYTHON_VERSION=3.13
 ARG YQ_VERSION=4.45.4
 ARG DOCKER_CLI_VERSION=29.2.1
+ARG NODE_VERSION=24.22.2
 
 # Named stage to allow ARG expansion in --from (BuildKit does not support variable expansion directly)
 FROM docker:${DOCKER_CLI_VERSION}-cli AS docker-cli
@@ -134,6 +135,18 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+# node and npm for the target platform, for the development image
+FROM node:${NODE_VERSION}-trixie-slim AS node
+
+# build frontend image target, the output does not depend on the platform so build natively
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS frontend
+
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
 # build main application image target
 FROM debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
@@ -183,7 +196,6 @@ COPY --chown=nobody:nogroup pyproject.toml ./pyproject.toml
 COPY --chown=nobody:nogroup bin ./bin
 COPY --chown=nobody:nogroup manage.py ./
 COPY --chown=nobody:nogroup checks ./checks
-COPY --chown=nobody:nogroup frontend ./frontend
 COPY --chown=nobody:nogroup interface ./interface
 COPY --chown=nobody:nogroup internetnl ./internetnl
 COPY --chown=nobody:nogroup translations ./translations
@@ -197,11 +209,8 @@ ENV STATIC_ROOT=/app/static
 VOLUME /app/batch_results
 RUN install -d -m 0755 -o nobody -g nogroup /app/batch_results
 
-# some js/css files use a separate script to generate minimized versions
-# storage these in a place for django to find
-RUN mkdir -p /app/static_frontend
-RUN python3 bin/frontend.py js
-RUN python3 bin/frontend.py css
+# CSS and JS from the frontend stage, in a static files directory django knows
+COPY --from=frontend --chown=nobody:nogroup /app/static_frontend/ /app/static_frontend/
 
 # generate language files
 RUN python3 bin/pofiles.py to_django
@@ -229,6 +238,18 @@ ENV PYTHONWARNINGS="ignore:invalid escape sequence:SyntaxWarning"
 # define default entrypoint and command
 ENTRYPOINT [ "python3","./manage.py"]
 CMD ["runserver", "0.0.0.0:8080"]
+
+# app image with development tools for better live reloading
+FROM app AS app-dev
+
+# node and npm, to rebuild CSS and JS in development
+COPY --from=node /usr/local/bin/ /usr/local/bin/
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --chown=nobody:nogroup frontend ./frontend
+# nobody has no home directory for the npm cache
+ENV npm_config_cache=/tmp/npm
+# install the frontend build tools once, rather than on every start
+RUN cd frontend && npm ci
 
 # supplement application with unittest, lint dependencies
 FROM build-app AS tools

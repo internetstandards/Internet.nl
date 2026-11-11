@@ -4,22 +4,52 @@ import logging
 import re
 
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.core.exceptions import DisallowedRedirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils import translation
+from django.utils.formats import number_format
 from django.utils.translation import gettext as _
 
 from interface import redis_id, simple_cache_page
 from interface.views.shared import (
     get_hof_champions,
-    get_hof_mail,
     get_hof_manual,
-    get_hof_web,
-    update_base_stats,
+    get_number_of_tests,
     SafeHttpResponseRedirect,
 )
+
+# Knowledge base index: (category msgid, [(url, title msgid), ...])
+FAQ_CATEGORIES = [
+    (
+        "faqs category tests",
+        [
+            ("/test-site/", "base test website title"),
+            ("/test-mail/", "base test mail title"),
+            ("/test-connection/", "base test connection title"),
+            ("/faqs/report/", "faqs report title"),
+            ("/faqs/badges/", "faqs badges title"),
+            ("/faqs/halloffame/", "faqs halloffame title"),
+            ("/faqs/batch-and-dashboard/", "faqs batch-and-dashboard title"),
+            ("/faqs/measurements/", "faqs measurements title"),
+        ],
+    ),
+    (
+        "faqs category standards",
+        [
+            ("/faqs/ipv6/", "faqs ipv6 title"),
+            ("/faqs/dnssec/", "faqs dnssec title"),
+            ("/faqs/https/", "faqs https title"),
+            ("/faqs/appsecpriv/", "faqs appsecpriv title"),
+            ("/faqs/mailauth/", "faqs mailauth title"),
+            ("/faqs/starttls/", "faqs starttls title"),
+            ("/faqs/rpki/", "faqs rpki title"),
+        ],
+    ),
+    ("faqs category media", [("/faqs/video/", "faqs video title")]),
+]
 
 
 def page404(request, exception):
@@ -28,26 +58,20 @@ def page404(request, exception):
     )
 
 
+def article_index():
+    if settings.INTERNETNL_BRANDING:
+        return _("article .index").split()
+    index = _("article custom .index")
+    # without news in a custom.po, gettext returns the msgid itself
+    if index == "article custom .index":
+        return []
+    return index.split()
+
+
 @simple_cache_page
 def indexpage(request):
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    articles = articles[0:6]
-    cache_id = redis_id.home_stats_data.id
-    novalue = "…"
-    statswebsite = cache.get(cache_id.format("statswebsite"), novalue)
-    statswebsitegood = cache.get(cache_id.format("statswebsitegood"), novalue)
-    statswebsitebad = cache.get(cache_id.format("statswebsitebad"), novalue)
-    statsmail = cache.get(cache_id.format("statsmail"), novalue)
-    statsmailgood = cache.get(cache_id.format("statsmailgood"), novalue)
-    statsmailbad = cache.get(cache_id.format("statsmailbad"), novalue)
-    statsconnection = cache.get(cache_id.format("statsconnection"), novalue)
-    statsconnectiongood = cache.get(cache_id.format("statsconnectiongood"), novalue)
-    statsconnectionbad = cache.get(cache_id.format("statsconnectionbad"), novalue)
-    update_base_stats()
-    hof_date, hof_count, hof_entries = get_hof_champions(10)
+    articles = article_index()[0:3]
+    _count, hof_entries = get_hof_champions(10)
     return render(
         request,
         "index.html",
@@ -56,18 +80,9 @@ def indexpage(request):
             pagemenu="home",
             pagetitle=_("home pagetitle"),
             halloffame=hof_entries,
-            count=hof_count,
-            statswebsite=statswebsite,
-            statswebsitegood=statswebsitegood,
-            statswebsitebad=statswebsitebad,
-            statsconnection=statsconnection,
-            statsconnectiongood=statsconnectiongood,
-            statsconnectionbad=statsconnectionbad,
-            statsmail=statsmail,
-            statsmailgood=statsmailgood,
-            statsmailbad=statsmailbad,
-            latest=hof_date,
+            stats=cache.get(redis_id.home_stats.id),
             articles=articles,
+            number_of_tests=number_format(get_number_of_tests(), force_grouping=True),
         ),
     )
 
@@ -94,15 +109,17 @@ def clear(request, dname):
 
 
 def testconnectionpage(request):
-    return render(request, "test-connection.html", dict(pagemenu="faqs", pagetitle=_("base test connection title")))
+    return render(
+        request, "test-connection.html", dict(pagemenu="test-tools", pagetitle=_("base test connection title"))
+    )
 
 
 def testsitepage(request):
-    return render(request, "test-site.html", dict(pagemenu="faqs", pagetitle=_("base test website title")))
+    return render(request, "test-site.html", dict(pagemenu="test-tools", pagetitle=_("base test website title")))
 
 
 def testmailpage(request):
-    return render(request, "test-mail.html", dict(pagemenu="faqs", pagetitle=_("base test mail title")))
+    return render(request, "test-mail.html", dict(pagemenu="test-tools", pagetitle=_("base test mail title")))
 
 
 def disclosurepage(request):
@@ -118,7 +135,20 @@ def privacypage(request):
 
 
 def aboutpage(request):
-    return render(request, "about.html", dict(pagemenu="about", pageclass="contact", pagetitle=_("base about")))
+    return render(
+        request,
+        "about.html",
+        dict(
+            pagemenu="about",
+            pageclass="contact",
+            pagetitle=_("base about") if settings.INTERNETNL_BRANDING else _("base about custom"),
+            number_of_tests=number_format(get_number_of_tests(), force_grouping=True),
+        ),
+    )
+
+
+def contactpage(request):
+    return render(request, "contact.html", dict(pagemenu="contact", pageclass="contact", pagetitle=_("base contact")))
 
 
 def widgetsitepage(request):
@@ -130,7 +160,11 @@ def widgetmailpage(request):
 
 
 def faqindexpage(request):
-    return render(request, "faqindex.html", dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base faqs")))
+    return render(
+        request,
+        "faqindex.html",
+        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_("base faqs"), categories=FAQ_CATEGORIES),
+    )
 
 
 def faqreport(request):
@@ -143,15 +177,15 @@ def faqbadges(request):
 
 def faqarticlepage(request, subject):
     title = "faqs " + subject + " title"
+    content = "faqs " + subject + " content"
     # If there is no such translated article give a 404.
-    if _(title) == title:
+    if _(title) == title or _(content) == content:
         return page404(request, None)
 
-    content = "faqs " + subject + " content"
     return render(
         request,
         "faqarticle.html",
-        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_(title), title=title, content=content),
+        dict(pagemenu="faqs", pageclass="faqs", pagetitle=_(title), content=content),
     )
 
 
@@ -163,12 +197,12 @@ def blogindexpage(request):
     return redirect("/articles/")
 
 
-def blogarticlepage(request, author, article):
+def blogarticlepage(request, article, author=None):
     return redirect("/article/" + article)
 
 
 def newsindexpage(request):
-    return redirect("/article/")
+    return redirect("/articles/")
 
 
 def newsarticlepage(request, article):
@@ -176,21 +210,14 @@ def newsarticlepage(request, article):
 
 
 def articlespage(request):
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    article = articles[0]
-    return redirect("/article/" + article)
+    articles = article_index()
+    if not articles:
+        return redirect("/articles/")
+    return redirect("/article/" + articles[0])
 
 
 def articleindexpage(request):
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    if len(articles) < 1:
-        articles = []
+    articles = article_index()
     return render(
         request,
         "articles.html",
@@ -204,17 +231,17 @@ def articlepage(request, article):
     if _(title) == title:
         return page404(request, None)
 
-    if settings.INTERNETNL_BRANDING:
-        articles = _("article .index").split()
-    else:
-        articles = _("article custom .index").split()
-    articles = articles[0:6]
+    articles = [other for other in article_index() if other != article][0:3]
     date = "article " + article + " date"
     lead = "article " + article + " lead"
     body = "article " + article + " body"
     author = _("article " + article + " author")
     if author == "article " + article + " author":
         author = ""
+    # author photos come from the content repository, and not every author has one
+    author_photo = f"author/{author}/picture.jpg"
+    if not author or not finders.find(author_photo):
+        author_photo = None
     return render(
         request,
         "article.html",
@@ -222,12 +249,11 @@ def articlepage(request, article):
             pageclass="newsitem",
             pagetitle=_(title),
             pagemenu="news",
-            article=article,
             articles=articles,
             date=date,
-            title=title,
             lead=lead,
             author=author,
+            author_photo=author_photo,
             body=body,
         ),
     )
@@ -261,7 +287,7 @@ def _update_hof_with_manual(template_dict, current=None):
 
 @simple_cache_page
 def hofchampionspage(request):
-    hof_date, hof_count, hof_entries = get_hof_champions()
+    hof_count, hof_entries = get_hof_champions()
     template_dict = dict(
         pageclass="hall-of-fame",
         pagetitle=_("base halloffame champions"),
@@ -269,46 +295,6 @@ def hofchampionspage(request):
         hof_title="halloffame champions title",
         cpage="champions",
         hof_text="halloffame champions text",
-        hof_subtitle="halloffame champions subtitle",
-        latest=hof_date,
-        count=hof_count,
-        halloffame=hof_entries,
-    )
-    _update_hof_with_manual(template_dict)
-    return render(request, "halloffame.html", template_dict)
-
-
-@simple_cache_page
-def hofwebpage(request):
-    hof_date, hof_count, hof_entries = get_hof_web()
-    template_dict = dict(
-        pageclass="hall-of-fame",
-        pagetitle=_("base halloffame web"),
-        pagemenu="halloffame",
-        hof_title="halloffame web title",
-        cpage="web",
-        hof_text="halloffame web text",
-        hof_subtitle="halloffame web subtitle",
-        latest=hof_date,
-        count=hof_count,
-        halloffame=hof_entries,
-    )
-    _update_hof_with_manual(template_dict)
-    return render(request, "halloffame.html", template_dict)
-
-
-@simple_cache_page
-def hofmailpage(request):
-    hof_date, hof_count, hof_entries = get_hof_mail()
-    template_dict = dict(
-        pageclass="hall-of-fame",
-        pagetitle=_("base halloffame mail"),
-        pagemenu="halloffame",
-        hof_title="halloffame mail title",
-        cpage="mail",
-        hof_text="halloffame mail text",
-        hof_subtitle="halloffame mail subtitle",
-        latest=hof_date,
         count=hof_count,
         halloffame=hof_entries,
     )
@@ -332,7 +318,6 @@ def hofmanualpage(request, manual_url):
         hof_title=f"manual halloffame {translate_key} title",
         cpage=manual_url,
         hof_text=f"manual halloffame {translate_key} text",
-        hof_subtitle=f"manual halloffame {translate_key} subtitle",
         count=hof_count,
         halloffame=hof_entries,
     )

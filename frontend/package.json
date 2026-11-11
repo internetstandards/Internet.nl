@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "NODE_ENV=production rollup -c",
+    "watch": "rollup -c -w"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^1.0.2",
+    "postcss": "^8.5.5",
+    "postcss-import": "^16.1.0",
+    "postcss-preset-env": "^10.1.4",
+    "rollup": "^4.40.2",
+    "rollup-plugin-postcss": "^4.0.2"
+  },
+  "browserslist": [
+    "defaults"
+  ]
+}

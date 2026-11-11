@@ -1,142 +1,80 @@
 {% extends "base.html" %}
+{% load static %}
 {% load translate %}
-
-{% block introcontent %}
-      <div class="introwrap">
-        <section class="wrap">
-          <h1 class="hidethis">
-            {% include "string.html" with name='base home' %}
-          </h1>
-          <p>
-            <span>{% include "string.html" with name='home teaser' %}</span>
-          </p>
-        </section>
-      </div>
-      <div class="wrap">
-        <section class="block websitetest">
-          <div class="wrapper">
-            <div class="title-and-explanation">
-              <h2>{% include "string.html" with name="base test website label" %}</h2>
-              {% include "content.html" with name="base test website text" %}
-              <p class="read-more">
-                <a href="/test-site/">{% include "string.html" with name="base test explain" %}</a>
-              </p>
-            </div>
-            <form action="/site/" method="POST">
-              <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-              <input id="web-url" type="text" inputmode="url" name="url" placeholder="{% include "string.html" with name="base test website placeholder" %}" autocorrect="off" autocapitalize="none" spellcheck="false">
-              </label>
-              <div class="contains-button">
-                <button>{% include "string.html" with name="base test start" %}</button>
-              </div>
-            </form>
-          </div>
-        </section>
-        <section class="block emailtest">
-          <div class="wrapper">
-            <div class="title-and-explanation">
-              <h2>{% include "string.html" with name="base test mail label" %}</h2>
-              {% include "content.html" with name="base test mail text" %}
-              <p class="read-more">
-                <a href="/test-mail/">{% include "string.html" with name="base test explain" %}</a>
-              </p>
-            </div>
-            <form action="/mail/" method="POST">
-              <label class="text-input" for="mail-url">{% include "string.html" with name="base test mail input" %}
-                <span class="emailfield before">
-                <input id="mail-url" class="email" type="text" inputmode="url" name="url" placeholder="{% include "string.html" with name="base test mail placeholder" %}" autocorrect="off" autocapitalize="none" spellcheck="false">
-                </span>
-              </label>
-              <div class="contains-button">
-                <button>{% include "string.html" with name="base test start" %}</button>
-              </div>
-            </form>
-          </div>
-        </section>
-        <section class="block connectiontest">
-          <div class="wrapper">
-            <div class="title-and-explanation">
-              <h2>{% include "string.html" with name="base test connection label" %}</h2>
-              {% include "content.html" with name="base test connection text" %}
-              <p class="read-more">
-                <a href="/test-connection/">{% include "string.html" with name="base test explain" %}</a>
-              </p>
-            </div>
-            <form action="/connection/" method="POST" id="form-connection-test">
-              <div class="contains-button">
-                <button>{% include "string.html" with name="base test start" %}</button>
-              </div>
-            </form>
-          </div>
-        </section>
-      </div>
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
 {% endblock %}
-
 {% block maincontent %}
-      <section class="block news">
-        <h2>{% include "string.html" with name="base news" %}</h2>
-        <ul>
-        {% for article in articles %}
-          {% expand "article {{article}} title" as articletitle %}
-          {% expand "article {{article}} date" as articledate %}
-          {% expand "article {{article}} lead" as articlelead %}
-          <li><a href="/article/{{article}}">{% include "string.html" with name=articletitle %}</a></li>
-        {% endfor %}
-        </ul>
-        <p class="read-more"><a href="/articles/">{% include "string.html" with name="base newslink" %}</a></p>
-      </section>
-      <section class="block hall-of-fame">
-        <h2>{% include "string.html" with name="base halloffame" %}</h2>
-        <p>
-          {% include "string.html" with name="base halloffame lead" %}
-        </p>
-        <ol>
+  <section class="test-section home-variant bg-primary ellipse">
+    <div class="container">
+      <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
+      <article class="test-card-large home-variant">
+        <h2 class="domain icon">{% translate "base test website label" %}</h2>
+        {% include "partials/site-form.html" %}
+        <a class="icon" href="/test-site/">{% translate "base test website title" %}</a>
+      </article>
+      {% include "partials/test-cards.html" with exclude="site" variant="home-variant" heading="h2" %}
+    </div>
+  </section>
+  {% include "partials/why-carousel.html" %}
+  <section class="hall-of-fame-section bg-primary ellipse reverse hidden-mobile">
+    <div class="container">
+      <hgroup class="center">
+        <h2 class="h5 color-accent">{% translate "base halloffame" %}</h2>
+        <p class="h4">{% translate "base halloffame description" %}</p>
+      </hgroup>
+      <ul class="hall-of-fame-list">
         {% for member in halloffame %}
-          <li><a href="{{member.permalink}}">{{member.domain|idna}}</a></li>
+          <li>
+            <a href="{{member.permalink}}">{{member.domain|idna}}</a>
+          </li>
         {% endfor %}
-        </ol>
-        <p class="read-more"><a href="/halloffame/">{% include "string.html" with name="base halloffame link" %}</a></p>
-      </section>
-      <section class="block dark stats">
-        <h2>{% include "string.html" with name="home stats header" %}</h2>
-        <h3>{{statswebsite}} {% include "string.html" with name="home stats website" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statswebsitegood}} {% include "string.html" with name="home stats website-items" %}</span>
+      </ul>
+      <div class="button-container">
+        <a class="primary-button icon" href="/test-site/">
+          {% translate "home why button" %}
+        </a>
+        <a class="secondary-button icon" href="/halloffame/">
+          {% translate "base halloffame link" %}
+        </a>
+      </div>
+    </div>
+  </section>
+  {% if stats.web.tested %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h3 color-secondary">{% translate "home stats header" %}</h2>
+        <ul class="card-list">
+          <li class="stats-card">
+            <h3 class="domain icon">{% translate "home stats website title" %}</h3>
+            <p class="h1 color-secondary">{{ stats.web.percent }}%</p>
+            <p>{% with tested=stats.web.tested|floatformat:"0g" %}{% translate "home stats website text" %}{% endwith %}</p>
           </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statswebsitebad}} {% include "string.html" with name="home stats website-items" %}</span>
+          <li class="stats-card">
+            <h3 class="mail icon">{% translate "home stats mail title" %}</h3>
+            <p class="h1 color-secondary">{{ stats.mail.percent }}%</p>
+            <p>{% with tested=stats.mail.tested|floatformat:"0g" %}{% translate "home stats mail text" %}{% endwith %}</p>
           </li>
-        </ol>
-        <h3>{{statsmail}} {% include "string.html" with name="home stats mail" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statsmailgood}} {% include "string.html" with name="home stats mail-items" %}</span>
+          <li class="stats-card">
+            <h3 class="connection icon">{% translate "home stats connection title" %}</h3>
+            <p class="h1 color-secondary">{{ stats.connection.percent }}%</p>
+            <p>{% with tested=stats.connection.tested|floatformat:"0g" %}{% translate "home stats connection text" %}{% endwith %}</p>
           </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statsmailbad}} {% include "string.html" with name="home stats mail-items" %}</span>
-          </li>
-        </ol>
-        <h3>{{statsconnection}} {% include "string.html" with name="home stats connection" %}</h3>
-        <ol>
-          <li class="passed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status passed" %}</span>
-            {% include "string.html" with name="home stats passed" %}
-            <span>{{statsconnectiongood}} {% include "string.html" with name="home stats connection-items" %}</span>
-          </li>
-          <li class="notpassed">
-            <span class="visuallyhidden">{% include "string.html" with name="results no-icon-status failed" %}</span>
-            {% include "string.html" with name="home stats notpassed" %}
-            <span>{{statsconnectionbad}} {% include "string.html" with name="home stats connection-items" %}</span>
-          </li>
-        </ol>
-      </section>
+        </ul>
+        <p class="stats-note">{% translate "home stats note" %}</p>
+      </div>
+    </section>
+  {% endif %}
+  {% include "partials/about-platform.html" with link=True %}
+  {% if articles %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h3 color-secondary">{% translate "base news" %}</h2>
+        {% include "partials/news-cards.html" %}
+        <a class="secondary-button icon" href="/articles/">
+          {% translate "news link" %}
+        </a>
+      </div>
+    </section>
+  {% endif %}
 {% endblock %}

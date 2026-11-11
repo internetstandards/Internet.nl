@@ -1,148 +1,80 @@
 # Copyright: 2022, ECP, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
+from itertools import groupby
+from operator import attrgetter
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import Count, Q
 
-from checks.models import DomainTestReport, MailTestReport
+from checks.models import ConnectionTest, DomainTestReport, MailTestReport
 from interface import redis_id
 from interface.batch import util
 
 logger = get_task_logger(__name__)
 
 
-class HOFEntry:
-    def __init__(self, domain):
-        self.domain = domain
-        self.web_timestamp = None
-        self.web_permalink = None
-        self.mail_timestamp = None
-        self.mail_permalink = None
-        self.mail_nomx = None
-
-    def __str__(self):
-        return f"""------- {self.domain}
-        web_timestamp: {self.web_timestamp}
-        web_permalink: {self.web_permalink}
-        mail_timestamp: {self.mail_timestamp}
-        mail_permalink: {self.mail_permalink}
-        mail_nomx: {self.mail_nomx}
-        """
-
-
-def _create_hof_entry(hof, domain_name):
+def _perfect_scores(model):
     """
-    Create an entry in the Hall of Fame.
+    Return the domains whose latest test scored 100%, as
+    {domain: (start of its current run of 100% scores, latest report id)}, and the number of domains tested.
 
     """
-    if domain_name in hof:
-        return hof[domain_name]
-    hof[domain_name] = HOFEntry(domain_name)
-    return hof[domain_name]
+    perfect = {}
+    tested = 0
+    reports = model.objects.only("id", "domain", "timestamp", "score").order_by("domain", "timestamp")
+    for domain, domain_reports in groupby(reports.iterator(), key=attrgetter("domain")):
+        tested += 1
+        since = None
+        for report in domain_reports:
+            if (report.score or 0) < 100:
+                since = None
+            elif since is None:
+                since = report.timestamp
+        if since is not None:
+            perfect[domain] = (since, report.id)
+    return perfect, tested
 
 
-def _update_web_entry(hof, domain_name, report_id, timestamp):
-    """
-    Update a web entry in the Hall of Fame.
-
-    """
-    entry = _create_hof_entry(hof, domain_name)
-    entry.web_timestamp = timestamp
-    entry.web_permalink = f"/site/{domain_name}/{report_id}/"
-
-
-def _update_mail_entry(hof, domain_name, report_id, timestamp):
-    """
-    Update a mail entry in the Hall of Fame.
-
-    """
-    entry = _create_hof_entry(hof, domain_name)
-    entry.mail_timestamp = timestamp
-    entry.mail_permalink = f"/mail/{domain_name}/{report_id}/"
-    report = MailTestReport.objects.get(id=report_id)
-    ipv6_report = report.ipv6.report
-    if not isinstance(ipv6_report, dict):
-        return
-    entry.mail_nomx = ipv6_report["mx_aaaa"]["verdict"] == "detail mail ipv6 mx-AAAA verdict other"
-
-
-def _populate_HOF(hof, model, entry_creation):
-    """
-    Find entries that qualify for the Hall of Fame.
-
-    """
-    previousname = None
-    previousscore = 0
-    previoustimestamp = None
-    previousreportid = None
-    for report in model.objects.only("id", "domain", "timestamp", "score").order_by("domain", "timestamp").iterator():
-        if previousname != report.domain and previousname is not None:
-            if previousscore >= 100:
-                entry_creation(hof, previousname, previousreportid, previoustimestamp)
-            previousname = report.domain
-            previousscore = report.score or 0
-            previoustimestamp = report.timestamp
-            previousreportid = report.id
-
-        else:
-            report_score = report.score or 0
-            if report_score != previousscore:
-                previoustimestamp = report.timestamp
-            previousname = report.domain
-            previousreportid = report.id
-            previousscore = report_score
-
-    # Last domain name.
-    if previousscore >= 100:
-        entry_creation(hof, previousname, previousreportid, previoustimestamp)
+def _numbers(tested, perfect):
+    return {"tested": tested, "percent": round(100 * perfect / tested) if tested else 0}
 
 
 @transaction.atomic
 def _update_hof():
     """
-    Populate the Hall of Fame with domains that scored 100% in the website
-    and/or the mail test.
-
-    .. note:: Domains that are part of the HoF are domains that their *latest*
-              test scored 100%.
+    Cache the Hall of Fame champions, the domains whose latest website and mail tests both scored 100%,
+    and the numbers for the homepage.
 
     """
-    hof = dict()
-    for model, entry_creation in ((DomainTestReport, _update_web_entry), (MailTestReport, _update_mail_entry)):
-        _populate_HOF(hof, model, entry_creation)
-
+    web, web_tested = _perfect_scores(DomainTestReport)
+    mail, mail_tested = _perfect_scores(MailTestReport)
     champions = []
-    web = []
-    mail = []
-    for entry in hof.values():
-        is_web = False
-        is_mail = False
-        if entry.web_permalink:
-            web.append({"permalink": entry.web_permalink, "domain": entry.domain, "timestamp": entry.web_timestamp})
-            is_web = True
-        if entry.mail_permalink:
-            mail.append({"permalink": entry.mail_permalink, "domain": entry.domain, "timestamp": entry.mail_timestamp})
-            is_mail = True
-        if is_web and is_mail:
-            timestamp = entry.mail_timestamp
-            permalink = entry.mail_permalink
-            if entry.web_timestamp > entry.mail_timestamp:
-                timestamp = entry.web_timestamp
-                permalink = entry.web_permalink
-            champions.append({"permalink": permalink, "domain": entry.domain, "timestamp": timestamp})
+    for domain in web.keys() & mail.keys():
+        web_timestamp, web_report_id = web[domain]
+        mail_timestamp, mail_report_id = mail[domain]
+        if web_timestamp > mail_timestamp:
+            permalink, timestamp = f"/site/{domain}/{web_report_id}/", web_timestamp
+        else:
+            permalink, timestamp = f"/mail/{domain}/{mail_report_id}/", mail_timestamp
+        champions.append({"permalink": permalink, "domain": domain, "timestamp": timestamp})
     champions = sorted(champions, key=lambda x: x["timestamp"], reverse=True)
-    web = sorted(web, key=lambda x: x["timestamp"], reverse=True)
-    mail = sorted(mail, key=lambda x: x["timestamp"], reverse=True)
 
-    for data, red_id in ((champions, redis_id.hof_champions), (web, redis_id.hof_web), (mail, redis_id.hof_mail)):
-        cached_data = {"date": None, "count": 0, "data": data}
-        if cached_data["data"]:
-            cached_data["date"] = cached_data["data"][0]["timestamp"]
-            cached_data["count"] = len(cached_data["data"])
-            cache_id = red_id.id
-            cache_ttl = red_id.ttl
-            cache.set(cache_id, cached_data, cache_ttl)
+    cached_data = {"count": len(champions), "data": champions[: settings.HOF_CHAMPIONS_LIMIT]}
+    cache.set(redis_id.hof_champions.id, cached_data, redis_id.hof_champions.ttl)
+
+    connection = ConnectionTest.objects.filter(finished=True).aggregate(
+        tested=Count("id"), perfect=Count("id", filter=Q(score_ipv6=100, score_dnssec=100))
+    )
+    numbers = {
+        "web": _numbers(web_tested, len(web)),
+        "mail": _numbers(mail_tested, len(mail)),
+        "connection": _numbers(connection["tested"], connection["perfect"]),
+    }
+    cache.set(redis_id.home_stats.id, numbers, redis_id.home_stats.ttl)
 
 
 @shared_task

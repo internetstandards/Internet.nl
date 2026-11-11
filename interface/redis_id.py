@@ -34,20 +34,15 @@ hof_lock = REDIS_RECORD("hof:updater:lock", 60 * 5)
 
 # HoF data
 hof_champions = REDIS_RECORD("hof:champions", None)
-hof_web = REDIS_RECORD("hof:web", None)
-hof_mail = REDIS_RECORD("hof:mail", None)
+
+# Homepage numbers: domains tested and the share that scores 100%, set by the HoF update
+home_stats = REDIS_RECORD("home:stats", None)
 
 # Public suffix list data
 psl_data = REDIS_RECORD("public:suffix:list", settings.PUBLIC_SUFFIX_LIST_RENEWAL)
 
 # Public suffix list loading flag
 psl_loading = REDIS_RECORD("public:suffix:list:loading", 60)
-
-# Home page stats data
-home_stats_data = REDIS_RECORD("home:stats:{}", None)
-
-# Home page stats lock
-home_stats_lock = REDIS_RECORD("home:stats:lock", 60 * 2)
 
 # Started connection test
 conn_test = REDIS_RECORD("conn:{}", settings.CACHE_TTL)

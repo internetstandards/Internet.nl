@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y \
   iputils-ping \
   && rm -rf /var/lib/apt/lists/*
 
+# apart from the pip install above, so CI reuses the cached layers before this one from main
+RUN python3 -m pip install redis==5.2.1
+
 RUN mkdir -p /source
 VOLUME /source
 

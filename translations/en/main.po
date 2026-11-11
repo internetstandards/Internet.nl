@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-02-16 23:27+0100\n"
-"PO-Revision-Date: 2026-10-05 11:05:55.172760\n"
+"PO-Revision-Date: 2026-08-20 22:50:23.727501\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: \n"
@@ -18,7 +18,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#, md-format
 msgid "about contact"
 msgstr ""
 "## Contact\n"
@@ -35,9 +34,8 @@ msgstr ""
 "\n"
 "[PGP public key](/static/question@internet.nl_0x45028563.asc)  \n"
 "Fingerprint: ACB7 8829 4C7E 12BA E922 8C60 D894 E15F 4502 8563  \n"
-"Expiration date: 28th of March 2028"
+"Expiration date: 22nd of March 2028"
 
-#, md-format
 msgid "about content"
 msgstr ""
 "# About Internet.nl\n"
@@ -86,14 +84,157 @@ msgstr ""
 "## Why don’t you address the access, hosting and email providers directly?\n"
 "We do. Still it is important that internet users are aware themselves and send out signals to their provider(s) as well. This may come as a surprise, but in a modern country like the Netherlands we still use many standards that are outdated and lack reliability. Therefore please help us to improve the internet together, and demand modern Internet Standards."
 
+msgid "about intro"
+msgstr ""
+"Internet.nl helps you to check whether your internet is up to date. Do your "
+"[website](/test-site/), [email](/test-mail/) and [internet "
+"connection](/test-connection/) use **modern and reliable Internet "
+"Standards**? And if they don't, what can you do about it?"
+
+msgid "about link"
+msgstr "Read on about the platform here"
+
+msgid "about mission"
+msgstr ""
+"The goal of the platform is to further increase the use of modern internet "
+"standards and make it more accessible, secure, and reliable for everyone."
+
+msgid "about mission-title"
+msgstr "Our mission"
+
+msgid "about organisation"
+msgstr ""
+"The platform is a collaboration between parties from the Internet community and the Dutch government. The following parties are currently participating in the platform:\n"
+"\n"
+"- [Dutch Cloud Community](https://dutchcloudcommunity.nl)\n"
+"- [Dutch Authority for Digital Infrastructure](https://rdi.nl/)\n"
+"- [ECP](https://ecp.nl/)\n"
+"- [Internet Society international](https://www.internetsociety.org/)\n"
+"- [Internet Society Netherlands chapter](https://isoc.nl/)\n"
+"- [Ministry of Economic Affairs and Climate Policy](https://www.government.nl/ministries/ministry-of-economic-affairs-and-climate-policy)\n"
+"- [NCSC-NL](https://ncsc.nl/)\n"
+"- [Netherlands Standardisation Forum](https://forumstandaardisatie.nl/)\n"
+"- [NLnet](https://nlnet.nl/)\n"
+"- [NLnet Labs](https://nlnetlabs.nl/)\n"
+"- [RIPE NCC](https://ripe.net/)\n"
+"- [SIDN](https://sidn.nl/)\n"
+"- [SURF](https://surf.nl/)\n"
+"- [VvR](https://www.verenigingvanregistrars.nl/)\n"
+"\n"
+"ECP provides for the administrative home of the platform. The domain name Internet.nl is provided to the platform by the Netherlands chapter of the Internet Society. NLnet Labs laid the foundation for Internet.nl and the underlying tooling. From 1 April 2021 onwards, maintenance and further development is carried out by the project team of the Internet Standards Platform.\n"
+"\n"
+"In 2023, [SIDN Fund](https://www.sidnfonds.nl/) financially supported the project to containerise the Internet.nl application in order to simplify its installation and facilitate further growth of the number of tests."
+
+msgid "about organisation title"
+msgstr "Who is behind Internet.nl?"
+
+msgid "about platform"
+msgstr ""
+"The Internet.nl test tool is an initiative of the Internet Standards "
+"Platform. The goal of the platform is to jointly increase the use of modern "
+"internet standards to make the internet more accessible, safer and more "
+"reliable for everyone."
+
+msgid "about practice"
+msgstr ""
+"We periodically test the domain names of members of the Internet Standards "
+"Platform. The [test reports](https://dashboard.internet.nl/published/103/) "
+"are publicly available."
+
+msgid "about practice title"
+msgstr "Practice what you preach?"
+
+msgid "about quote"
+msgstr ""
+"\"The Internet belongs to us all, together we can ensure it remains open, "
+"secure and reliable.\""
+
+msgid "about standards answer-1"
+msgstr ""
+"In order to exchange data between computers around the world, we need "
+"international agreements on how computers talk to one another. The digital "
+"\"plugs and sockets\" that link everything together, so to speak. These "
+"agreements are called Internet Standards or internet protocols. An example "
+"is SMTP, a well-known protocol for sending email. This technical core of the"
+" internet is invisible and unknown to most users. However it is crucial for "
+"a working internet today and in the future."
+
+msgid "about standards answer-2"
+msgstr ""
+"The original internet standards date from the 70s and 80s, when the number "
+"of internet users was small. Nowadays, there are about six billion users "
+"worldwide! And these people use the internet more and more for transactions "
+"that are privacy-sensitive and costly. The old standards cannot meet this "
+"scale nor the modern safety requirements. For instance, criminals are "
+"abusing the SMTP standard to spoof the sender address of an email. This "
+"means that we have to start using new, smarter standards that keep our "
+"internet reliable. The good news is that these modern Internet Standards are"
+" available."
+
+msgid "about standards answer-3"
+msgstr ""
+"Unfortunately, that is not the case. Even in a modern country like the "
+"Netherlands (that became the first internet connected European country in "
+"1988) we use too many outdated standards that fall short of reliability. Not"
+" using these modern standards is a risk for the individual internet user, "
+"but also for the Dutch economy and for the world at large. Therefore, please"
+" help improving the internet and make sure that you use modern Internet "
+"Standards."
+
+msgid "about standards answer-4"
+msgstr ""
+"Our access, hosting and email providers should take care of implementing "
+"modern internet standards and setting them correctly. Do the test results "
+"show any shortcomings? Then please send a message about this to your "
+"provider(s). If you use your own connection, web server or mail server, you "
+"have to take care of the correct settings yourself."
+
+msgid "about standards answer-5"
+msgstr ""
+"We do. Still it is important that internet users are aware themselves and "
+"send out signals to their provider(s) as well. This may come as a surprise, "
+"but in a modern country like the Netherlands we still use many standards "
+"that are outdated and lack reliability. Therefore please help us to improve "
+"the internet together, and demand modern Internet Standards."
+
+msgid "about standards question-1"
+msgstr "What are Internet Standards?"
+
+msgid "about standards question-2"
+msgstr "Why is it important to be up to date?"
+
+msgid "about standards question-3"
+msgstr ""
+"Are the Netherlands taking the lead in using modern Internet Standards?"
+
+msgid "about standards question-4"
+msgstr "Who should act on modern Internet Standards?"
+
+msgid "about standards question-5"
+msgstr ""
+"Why don’t you address the access, hosting and email providers directly?"
+
+msgid "about standards title"
+msgstr "Internet Standards"
+
 msgid "accessibility content"
 msgstr ""
-"# Accessibility\n"
-"\n"
 "The Dutch Internet Standards Platform pays a lot of attention to the accessibility of Internet.nl. We want to offer all information in such a way that everyone can view and use it.\n"
 "\n"
-"## Report accessibility audit\n"
-"The website Internet.nl was audited for accessibility by the Dutch Accessibility Foundation at the end of 2018. The findings are included in the [report \"WCAG 2 study www.internet.nl - level AA\"](/static/accessibility/check_6967_auto_rapport.pdf) (in Dutch) d.d. 14 November 2018. Based on these findings, the Internet Standards Platform has implemented a number of improvements for the accessibility of Internet.nl.  "
+"## Current status\n"
+"Internet.nl has a new design. In November 2026 all types of pages of the new design were checked against WCAG 2.2 level AA with automated tests, which also covered keyboard use, light and dark mode and high contrast mode. The issues these tests found have been fixed. This was automated testing only, not an audit by an independent party.\n"
+"\n"
+"The website also works without JavaScript, except for the connection test, which needs JavaScript to run.\n"
+"\n"
+"## Known limitations\n"
+"* Some colours do not meet the stricter contrast requirement of level AAA.\n"
+"* When a test is finished, the page automatically continues to the test report.\n"
+"\n"
+"## Previous audit\n"
+"The previous design of Internet.nl was audited for accessibility by the Dutch Accessibility Foundation at the end of 2018. The findings are included in the [report \"WCAG 2 study www.internet.nl - level AA\"](/static/accessibility/check_6967_auto_rapport.pdf) (in Dutch) of 14 November 2018.\n"
+"\n"
+"## Feedback\n"
+"Is part of Internet.nl not accessible to you? Let us know at [question@internet.nl](mailto:question@internet.nl)."
 
 msgid "base about"
 msgstr "About Internet.nl"
@@ -103,6 +244,9 @@ msgstr "Accessibility"
 
 msgid "base blogs"
 msgstr "Blogs"
+
+msgid "base close"
+msgstr "Close"
 
 msgid "base contact"
 msgstr "Contact"
@@ -122,13 +266,24 @@ msgstr "Hall of Fame"
 msgid "base halloffame champions"
 msgstr "Hall of Fame - Champions!"
 
+msgid "base halloffame description"
+msgstr ""
+"The latest 10 additions to our Hall of Fame are listed here. You enter the "
+"Hall of Fame when a domain scores 100% in the website and email test."
+
+msgid "base halloffame hosters description"
+msgstr ""
+"The hosters listed below are included in the Hall of Fame because they meet "
+"the criteria for inclusion, such as achieving a double 100% score for their "
+"own domain."
+
 msgid "base halloffame lead"
 msgstr ""
 "{{count}} domains with 2 x 100%  \n"
 "Latest entry: {{latest|date:'d-m-Y'}}"
 
 msgid "base halloffame link"
-msgstr "To Hall of Fame - Champions!"
+msgstr "Explore the entire Hall of Fame"
 
 msgid "base halloffame mail"
 msgstr "Hall of Fame - Email"
@@ -143,6 +298,18 @@ msgid "base info"
 msgstr ""
 "Internet.nl is an initiative of the Internet community and the Dutch \n"
 "government."
+
+msgid "base language"
+msgstr "Language"
+
+msgid "base linkedin"
+msgstr "Go to our LinkedIn page"
+
+msgid "base mastodon"
+msgstr "Go to our Mastodon profile"
+
+msgid "base menu"
+msgstr "Menu"
 
 msgid "base news"
 msgstr "News"
@@ -165,12 +332,13 @@ msgstr ""
 "After the test is finished, you are directed to a test report. The report contains an overall percentage score and results per test section and per subtest. For more information see [\"Explanation of test report\"](/faqs/report/).\n"
 "\n"
 "## How to improve?\n"
-"You can use this test report to improve your internet connection. Usually contacting your internet provider on this will be the best next step. In the communication with your internet provider you can use the permalink (i.e. the URL) of the test report.\n"
-"\n"
-"## Test your connection"
+"You can use this test report to improve your internet connection. Usually contacting your internet provider on this will be the best next step. In the communication with your internet provider you can use the permalink (i.e. the URL) of the test report."
 
 msgid "base test connection label"
 msgstr "Test your connection"
+
+msgid "base test connection sublabel"
+msgstr "Direct results on your connectivity!"
 
 msgid "base test connection text"
 msgstr ""
@@ -191,7 +359,7 @@ msgstr ""
 "* [IPv6](/faqs/ipv6/): reachable via modern internet address?\n"
 "* [DNSSEC](/faqs/dnssec/): domain names signed?\n"
 "* [DMARC, DKIM and SPF](/faqs/mailauth/): authenticity marks against email phishing?\n"
-"* [STARTTLS and DANE](/faqs/starttls): secure mail server connection?\n"
+"* [STARTTLS and DANE](/faqs/starttls/): secure mail server connection?\n"
 "* [RPKI](/faqs/rpki/): route authorisation?\n"
 "\n"
 "Note: some standards are even relevant if there are no mail servers configured for your domain.\n"
@@ -203,9 +371,7 @@ msgstr ""
 "You can use this test report to improve your mail service. Usually contacting your mail hoster on this will be the best next step. In the communication with your mail hoster you can use the permalink (i.e. the URL) of the test report.\n"
 "\n"
 "## Widget\n"
-"You can integrate the email test into your own website using our [widget code](/widget-mail/).\n"
-"\n"
-"## Test your email"
+"You can integrate the email test into your own website using our [widget code](/widget-mail/)."
 
 msgid "base test mail input"
 msgstr "Your email address:"
@@ -213,11 +379,29 @@ msgstr "Your email address:"
 msgid "base test mail label"
 msgstr "Test your email"
 
+msgid "base test mail placeholder"
+msgstr "example.org"
+
+msgid "base test mail sublabel"
+msgstr "How modern is your mail provider?"
+
 msgid "base test mail text"
 msgstr "Modern address? Anti-phishing? Secure transport? Route authorisation?"
 
 msgid "base test mail title"
 msgstr "About the email test"
+
+msgid "base test mail usp1"
+msgstr "Complete insight in mail security"
+
+msgid "base test mail usp2"
+msgstr "For all domains, also without e-mail"
+
+msgid "base test mail usp3"
+msgstr "Report with tips for improvement"
+
+msgid "base test more"
+msgstr "Here you find more tests"
 
 msgid "base test prechecks invalid domain"
 msgstr ""
@@ -225,7 +409,10 @@ msgstr ""
 "Explanation: An A and/or AAAA record is necessary for the website test, and a SOA record for the email test."
 
 msgid "base test start"
-msgstr "Start test"
+msgstr "Start the test"
+
+msgid "base test title"
+msgstr "What do you want to test?"
 
 msgid "base test website explain"
 msgstr ""
@@ -245,9 +432,7 @@ msgstr ""
 "You can use this test report to improve your website. Usually contacting your web hoster on this will be the best next step. In the communication with your web hoster you can use the permalink (i.e. the URL) of the test report.\n"
 "\n"
 "## Widget\n"
-"You can integrate the website test into your own website using our [widget code](/widget-site/).\n"
-"\n"
-"## Test your website"
+"You can integrate the website test into your own website using our [widget code](/widget-site/)."
 
 msgid "base test website input"
 msgstr "Your website domain name:"
@@ -255,12 +440,42 @@ msgstr "Your website domain name:"
 msgid "base test website label"
 msgstr "Test your website"
 
+msgid "base test website placeholder"
+msgstr "www.example.org"
+
+msgid "base test website sublabel"
+msgstr "Is your website up to date?"
+
 msgid "base test website text"
 msgstr ""
 "Modern address? Signed domain? Secure connection? Route authorisation?"
 
 msgid "base test website title"
 msgstr "About the website test"
+
+msgid "base test website usp1"
+msgstr "Extensive and complete test"
+
+msgid "base test website usp2"
+msgstr "Checks website, server and domain"
+
+msgid "base test website usp3"
+msgstr "Report with tips for improvement"
+
+msgid "base tests"
+msgstr "Tests"
+
+msgid "base theme"
+msgstr "Theme"
+
+msgid "base theme dark"
+msgstr "Dark"
+
+msgid "base theme light"
+msgstr "Light"
+
+msgid "base theme system"
+msgstr "System"
 
 msgid "base widget mail"
 msgstr "Email test widget"
@@ -274,10 +489,53 @@ msgstr "Connection test"
 msgid "connection title"
 msgstr "Connection test"
 
+msgid "contact get-in-touch"
+msgstr "Get in touch"
+
+msgid "contact issue-description"
+msgstr ""
+"View our code or create an issue on "
+"[GitHub](https://github.com/internetstandards/Internet.nl)"
+
+msgid "contact mail-description"
+msgstr ""
+"Send your question by e-mail at [question@internet.nl](mailto:question@internet.nl)  \n"
+"[PGP public key](/static/question@internet.nl_0x45028563.asc)  \n"
+"Fingerprint: ACB7 8829 4C7E 12BA E922 8C60 D894 E15F 4502 8563  \n"
+"Expiration date: 22nd of March 2028"
+
+msgid "contact post"
+msgstr "Postal address"
+
+msgid "contact post-description"
+msgstr ""
+"Internet Standards Platform  \n"
+"c/o ECP  \n"
+"Maanweg 174 (8th floor)  \n"
+"2516 AB The Hague  \n"
+"The Netherlands  \n"
+"CoC number: 27169301"
+
+msgid "contact section description"
+msgstr "Do you need more help? Reach out!"
+
+msgid "contact section issue"
+msgstr "Issues"
+
+msgid "contact section issue-description"
+msgstr "View our code or create an issue"
+
+msgid "contact section mail"
+msgstr "Mail"
+
+msgid "contact section mail-description"
+msgstr "Send your question by e-mail"
+
+msgid "contact teaser"
+msgstr "Do you have questions? Find your answer below or reach out to us."
+
 msgid "copyright content"
 msgstr ""
-"# Copyright\n"
-"\n"
 "## Content\n"
 "Except where otherwise noted, content on this website is licensed under a [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/).\n"
 "\n"
@@ -482,7 +740,7 @@ msgstr ""
 "Additional notes: \n"
 "\n"
 "* Some mail systems modify email in transit, potentially invalidating a DKIM signature. In many cases these modifications are harmless. Examples are whitespace replacement and header field line rewrapping. If you are a DKIM signing sender then you can choose whether or not to tolerate these types of changes, both for the header and the body of emails. The `simple` setting tolerates almost no modifications, and `relaxed` tolerates common modifications. If no setting is specified it defaults to `simple` for both header and body. In particular, header modifications are a common cause of a DKIM signature unintentionally becoming invalid, thus hindering deliverability. Using `relaxed` for the header while keeping `simple` for the body (`c=relaxed/simple`), can mitigate these kind of issues.\n"
-"* For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
+"* For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#mailauth-dmarc_policy)."
 
 msgid "detail mail auth dkim label"
 msgstr "DKIM existence"
@@ -534,7 +792,7 @@ msgstr ""
 "*Good practice for domains without mail*:\n"
 "\n"
 "* Non-sending: Use the most strict DMARC policy (`p=reject`) and SPF policy (`-all`) for your domain that you do not use for sending mail in order to prevent abuse ('spoofing'). Note that DKIM is not necessary in this case.\n"
-"* Non-receiving: For more information on \"Null MX\" and \"No MX\" see the [explanation of the \"STARTTLS available\" subtest](#control-panel-13). \n"
+"* Non-receiving: For more information on \"Null MX\" and \"No MX\" see the [explanation of the \"STARTTLS available\" subtest](#mailtls-starttls_exists). \n"
 "\n"
 "Below you will find two basic example DNS configurations for domain names that are not used to send and receive mail. \n"
 " \n"
@@ -578,7 +836,7 @@ msgid "detail mail auth spf exp"
 msgstr ""
 "We check if your domain has an SPF record. A receiving mail server can use the IP addresses in your SPF record to authenticate the sending mail server of a received email with your domain as sender. The accompanying policy can be used to take appropriate action if authentication fails. Having more than one SPF record in the same domain is not valid and will lead to a test failure.\n"
 "\n"
-"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
+"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#mailauth-dmarc_policy)."
 
 msgid "detail mail auth spf label"
 msgstr "SPF existence"
@@ -602,7 +860,7 @@ msgstr ""
 "\n"
 "For sending domains, using `~all` (softfail) instead of `-all` (fail) is usually preferred. This is because when SPF authentication fails with an SPF fail, a receiving mail server may already block the connection without evaluating the DKIM signature and DMARC policy. This can lead to falsely blocked mails (e.g. when mails are automatically forwarded by the receiving mail server to another receiving mail server). Note that a triggered SPF softfail still ensures that a strict DMARC policy protects your domain if DKIM authentication also fails.\n"
 "\n"
-"For no-mail domains see the good practice on [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
+"For no-mail domains see the good practice on [explanation of the \"DMARC policy\" subtest](#mailauth-dmarc_policy)."
 
 msgid "detail mail auth spf-policy label"
 msgstr "SPF policy"
@@ -637,6 +895,12 @@ msgstr ""
 "Your SPF policy is *not* sufficiently strict. The 'redirect' modifier in "
 "your SPF record points to an insufficiently strict SPF policy or a non-"
 "existing SPF record."
+
+msgid "detail mail caa label"
+msgstr "CAA mail"
+
+msgid "detail mail caa tech table"
+msgstr "Mail server|Findings"
 
 msgid "detail mail dnssec exists exp"
 msgstr ""
@@ -1151,6 +1415,10 @@ msgstr "Your mail server has a valid, sufficiently protective CAA. "
 msgid "detail mail tls caa verdict insufficient"
 msgstr "Your mail server has a valid, but *unsufficiently* protective CAA."
 
+msgid "detail mail tls caa verdict recommendations"
+msgstr ""
+"Your mail server has a valid CAA, with recommendations for improvement."
+
 msgid "detail mail tls caa verdict syntax-error"
 msgstr "Your mail server has an *invalid* CAA."
 
@@ -1380,9 +1648,8 @@ msgstr ""
 
 msgid "detail mail tls cipher-order verdict warning"
 msgstr ""
-"OUTDATED TEXT; VERDICT NOT USED\n"
-"\n"
-"At least one of your mail servers does *not* offer ciphers in accordance with the prescribed ordering within a particular security level ('II-B')."
+"At least one of your mail servers does *not* offer ciphers in accordance "
+"with the prescribed ordering within a particular security level ('II-B')."
 
 msgid "detail mail tls ciphers exp"
 msgstr ""
@@ -1799,7 +2066,6 @@ msgstr ""
 
 msgid "detail mail tls ocsp-stapling exp"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED   \n"
 "We check if your receiving mail server supports the [TLS Certificate Status extension](https://www.rfc-editor.org/rfc/rfc6961) \n"
 "aka OCSP stapling. With OCSP stapling your mail server can provide OCSP \n"
 "responses itself which removes the need for the TLS client to verify the \n"
@@ -1815,32 +2081,24 @@ msgstr ""
 "data is signed by a known certificate authority."
 
 msgid "detail mail tls ocsp-stapling label"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED   \n"
-"OCSP stapling"
+msgstr "OCSP stapling"
 
 msgid "detail mail tls ocsp-stapling tech table"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED  \n"
-"Mail server (MX)|OCSP stapling"
+msgstr "Mail server (MX)|OCSP stapling"
 
 msgid "detail mail tls ocsp-stapling verdict bad"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED  \n"
-"At least one of your mail servers supports OCSP stapling but responds with invalid data"
+"At least one of your mail servers supports OCSP stapling but responds with "
+"invalid data"
 
 msgid "detail mail tls ocsp-stapling verdict good"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED  \n"
-"Your mail servers support OCSP stapling."
+msgstr "Your mail servers support OCSP stapling."
 
 msgid "detail mail tls ocsp-stapling verdict not-in-cert"
 msgstr ""
 
 msgid "detail mail tls ocsp-stapling verdict ok"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED  \n"
-"At least one of your mail servers does not support OCSP stapling."
+msgstr "At least one of your mail servers does not support OCSP stapling."
 
 msgid "detail mail tls renegotiation-client exp"
 msgstr ""
@@ -1940,7 +2198,7 @@ msgstr ""
 "* If we detect any of the above two cases, the subtests in the STARTTLS and DANE category are not applicable. This also goes for the mail server specific subtests in the categories for IPv6 and DNSSEC. Other subtests of the email test (e.g. for DMARC) are still applicable. \n"
 "* Note that having a \"Null MX\" record or no MX record could also impact sending mail, because receiving servers may reject email that has an invalid return address.\n"
 "\n"
-"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#control-panel-9)."
+"For a \"good practice on domains without mail\" see the [explanation of the \"DMARC policy\" subtest](#mailauth-dmarc_policy)."
 
 msgid "detail mail tls starttls-exists label"
 msgstr "STARTTLS available"
@@ -2683,7 +2941,7 @@ msgstr ""
 "\n"
 "Although the value `ALLOW-FROM` (only allow specific websites to frame your website) is part of the `X-Frame-Options` specification ([RFC 7034](https://www.rfc-editor.org/rfc/rfc7034)), it is *not* supported by most modern web browsers. Therefore we do *not* consider this value as sufficiently secure.\n"
 "\n"
-"Note that `Content-Security-Policy` ([CSP](#control-panel-29)) offers similar protection through `frame-ancestors` and besides much more for visitors with modern web browsers. However `X-Frame-Options` could still protect visitors of older web browsers that do not support CSP. Furthermore `X-Frame-Options` could offer valuable protection for all visitors when CSP is not (properly) configured for the website concerned.\n"
+"Note that `Content-Security-Policy` ([CSP](#siteappsecpriv-http_csp)) offers similar protection through `frame-ancestors` and besides much more for visitors with modern web browsers. However `X-Frame-Options` could still protect visitors of older web browsers that do not support CSP. Furthermore `X-Frame-Options` could offer valuable protection for all visitors when CSP is not (properly) configured for the website concerned.\n"
 "\n"
 "Also see ['Web application guidelines from NCSC-NL'](https://www.ncsc.nl/documenten/publicaties/2019/mei/01/ict-beveiligingsrichtlijnen-voor-webapplicaties), guideline U/PW.03 (in Dutch).\n"
 "\n"
@@ -2705,8 +2963,6 @@ msgstr "Your web server offers securely configured X-Frame-Options."
 
 msgid "detail web appsecpriv http-x-xss exp"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
 "We check if your web server provides an HTTP header for `X-XSS-Protection` that has a sufficiently secure value (i.e. `1` or `1; mode=block`). This HTTP header can be used to activate the protection filter of browsers against reflective cross-site scripting (XSS) attacks. Valid values for the `X-XSS-Protection` header are:\n"
 "\n"
 "* `0` disables the XSS filter. This value should NOT be used.\n"
@@ -2718,28 +2974,23 @@ msgstr ""
 "*Requirement level: Recommended*"
 
 msgid "detail web appsecpriv http-x-xss label"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
-"X-XSS-Protection"
+msgstr "X-XSS-Protection"
 
 msgid "detail web appsecpriv http-x-xss tech table"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
-"Web server IP address|X-XSS-Protection value"
+msgstr "Web server IP address|X-XSS-Protection value"
 
 msgid "detail web appsecpriv http-x-xss verdict bad"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
 "Your web server does *not* offer securely configured X-XSS-Protection."
 
 msgid "detail web appsecpriv http-x-xss verdict good"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
-"Your web server offers securely configured X-XSS-Protection."
+msgstr "Your web server offers securely configured X-XSS-Protection."
+
+msgid "detail web caa label"
+msgstr "CAA web"
+
+msgid "detail web caa tech table"
+msgstr "Findings"
 
 msgid "detail web dnssec exists exp"
 msgstr ""
@@ -3015,6 +3266,9 @@ msgstr "Your domain has a valid, sufficiently protective CAA. "
 msgid "detail web tls caa verdict insufficient"
 msgstr "Your domain has a valid, but *unsufficiently* protective CAA."
 
+msgid "detail web tls caa verdict recommendations"
+msgstr "Your domain has a valid CAA, with recommendations for improvement."
+
 msgid "detail web tls caa verdict syntax-error"
 msgstr "Your domain has an *invalid* CAA."
 
@@ -3236,9 +3490,8 @@ msgstr ""
 
 msgid "detail web tls cipher-order verdict warning"
 msgstr ""
-"OUTDATED TEXT; VERDICT NOT USED\n"
-"\n"
-"Your web server does *not* offer ciphers in accordance with the prescribed ordering within a particular security level ('II-B')."
+"Your web server does *not* offer ciphers in accordance with the prescribed "
+"ordering within a particular security level ('II-B')."
 
 msgid "detail web tls ciphers exp"
 msgstr ""
@@ -3395,8 +3648,6 @@ msgstr "Your website domain contains a TLSA record for DANE."
 
 msgid "detail web tls dane-rollover exp"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
 "We check if your website domain has a proper DANE rollover\n"
 "scheme to handle DANE certificate rollovers. Having a DANE rollover scheme\n"
 "in place is not required. It will be proven useful when there is a need to\n"
@@ -3409,28 +3660,18 @@ msgstr ""
 "- record type 3 1 1 (current key) + record type 2 1 1 (trusted CA)."
 
 msgid "detail web tls dane-rollover label"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
-"DANE rollover scheme"
+msgstr "DANE rollover scheme"
 
 msgid "detail web tls dane-rollover tech table"
-msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
-"Web server IP address|DANE rollover scheme"
+msgstr "Web server IP address|DANE rollover scheme"
 
 msgid "detail web tls dane-rollover verdict bad"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
 "Your website domain does *not* have a proper scheme for\n"
 "rolling DANE certificates."
 
 msgid "detail web tls dane-rollover verdict good"
 msgstr ""
-"OUTDATED TEXT; TEST NOT USED\n"
-"\n"
 "Your website domain has a proper scheme for rolling DANE\n"
 "certificates."
 
@@ -4139,7 +4380,6 @@ msgstr ""
 
 msgid "disclosure content"
 msgstr ""
-"# Report vulnerability\n"
 "*Revised 28th of March 2022*\n"
 "\n"
 "The Internet Standards Platform thinks the security of the Internet.nl website is\n"
@@ -4215,7 +4455,6 @@ msgstr ""
 msgid "domain pagetitle"
 msgstr "Website test:"
 
-#, md-format
 msgid "domain title"
 msgstr "Website test: {{prettyaddr}}"
 
@@ -4223,7 +4462,6 @@ msgid "domain tweetmessage"
 msgstr ""
 "The%20website%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20website%20test%20of%20%40Internet_nl%3A"
 
-#, md-format
 msgid "faqs appsecpriv content"
 msgstr ""
 "## HTTP security headers \n"
@@ -4261,7 +4499,6 @@ msgstr ""
 "- [\"Wat is security.txt?\"](https://www.digitaltrustcenter.nl/securitytxt) (in Dutch) by Digital Trust Center\n"
 "- [\"Handreiking security.txt\"](https://www.ncsc.nl/documenten/publicaties/2023/maart/2/handreiking-security.txt) (in Dutch) by NCSC-NL"
 
-#, md-format
 msgid "faqs appsecpriv title"
 msgstr "Security options"
 
@@ -4277,7 +4514,7 @@ msgstr ""
 msgid "faqs badges pre-badge content"
 msgstr ""
 "## Badges for domain owners\n"
-"If your website or email scores 100% on Internet.nl, your domain is included in the relevant [Hall of Fame](/halloffame/). In that case you are allowed to use the corresponding 100% badges in your communications, as long as you keep your 100% score."
+"If your website or email scores 100% on Internet.nl, you are allowed to use the corresponding 100% badge in your communications, as long as you keep your 100% score. With 100% for both, your domain is also included in the [Hall of Fame](/halloffame/)."
 
 msgid "faqs badges title"
 msgstr "Using the 100% badges"
@@ -4298,7 +4535,18 @@ msgstr ""
 msgid "faqs batch-and-dashboard title"
 msgstr "Batch API and web-based dashboard"
 
-#, md-format
+msgid "faqs category categories"
+msgstr "Categories"
+
+msgid "faqs category media"
+msgstr "Media"
+
+msgid "faqs category standards"
+msgstr "Standards"
+
+msgid "faqs category tests"
+msgstr "Tests"
+
 msgid "faqs content"
 msgstr ""
 "## Background\n"
@@ -4325,7 +4573,9 @@ msgstr ""
 "* [Batch API and web-based dashboard](/faqs/batch-and-dashboard/)\n"
 "* [Measurements using Internet.nl](/faqs/measurements/)"
 
-#, md-format
+msgid "faqs description"
+msgstr "In our knowledge base you will find useful information and tips."
+
 msgid "faqs dnssec content"
 msgstr ""
 "## Why\n"
@@ -4361,7 +4611,6 @@ msgstr ""
 "* [RFC 8624: Algorithm Implementation Requirements and Usage Guidance for DNSSEC](https://www.rfc-editor.org/rfc/rfc8624)\n"
 "* [RFC 9276: Guidance for NSEC3 Parameter Settings](https://www.rfc-editor.org/rfc/rfc9276)"
 
-#, md-format
 msgid "faqs dnssec title"
 msgstr "Domain signature (DNSSEC)"
 
@@ -4398,7 +4647,6 @@ msgstr ""
 msgid "faqs halloffame title"
 msgstr "Criteria for 'Hall of Fame for Hosters'"
 
-#, md-format
 msgid "faqs https content"
 msgstr ""
 "## Why\n"
@@ -4436,11 +4684,9 @@ msgstr ""
 "### DANE\n"
 "* [RFC 6698: The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA](https://www.rfc-editor.org/rfc/rfc6698)"
 
-#, md-format
 msgid "faqs https title"
 msgstr "Secure website connection (HTTPS)"
 
-#, md-format
 msgid "faqs ipv6 content"
 msgstr ""
 "## Why\n"
@@ -4467,11 +4713,9 @@ msgstr ""
 "## Specifications\n"
 "* [RFC 8200: Internet Protocol, Version 6 (IPv6) Specification](https://www.rfc-editor.org/rfc/rfc8200)"
 
-#, md-format
 msgid "faqs ipv6 title"
 msgstr "Modern address (IPv6)"
 
-#, md-format
 msgid "faqs mailauth content"
 msgstr ""
 "## Why\n"
@@ -4496,7 +4740,6 @@ msgstr ""
 "* [RFC 6376: DomainKeys Identified Mail (DKIM) Signatures](https://www.rfc-editor.org/rfc/rfc6376)\n"
 "* [RFC 7208: Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1](https://www.rfc-editor.org/rfc/rfc7208)"
 
-#, md-format
 msgid "faqs mailauth title"
 msgstr "Protection against email phishing (DMARC, DKIM and SPF)"
 
@@ -4515,7 +4758,6 @@ msgstr ""
 msgid "faqs measurements title"
 msgstr "Measurements using Internet.nl"
 
-#, md-format
 msgid "faqs report score content"
 msgstr ""
 "### What norm is Internet.nl using?\n"
@@ -4546,32 +4788,27 @@ msgstr ""
 "- Each main test is resulting in an overall percentage score.\n"
 "- Every test category of a main test weighs evenly in the overall percentage score. So if a main test consists of five test categories, the maximum score for every test category is 20%.\n"
 "- Only the subtests with the status 'REQUIRED' weigh in the score of a test category and in the overall percentage score.\n"
-"- Websites with a perfect score of 100% will be added to the [Hall of Fame](/halloffame/).\n"
+"- Domains with 100% in both the website and the email test will be added to the [Hall of Fame](/halloffame/).\n"
 "\n"
 "See Internet.nl's [documentation on scoring](https://github.com/internetstandards/Internet.nl/blob/main/documentation/scoring.md) for more details."
 
 msgid "faqs report score title"
 msgstr "Norm and score"
 
-#, md-format
 msgid "faqs report subtest bad"
 msgstr "Bad: fail on REQUIRED subtest ⇒ null score"
 
-#, md-format
 msgid "faqs report subtest error"
 msgstr "Test error: error encountered during testing ⇒ null score"
 
-#, md-format
 msgid "faqs report subtest good"
 msgstr ""
 "Good: pass on REQUIRED, RECOMMENDED or OPTIONAL subtest ⇒ first: full score "
 "/ latter two: no score impact"
 
-#, md-format
 msgid "faqs report subtest info"
 msgstr "Informational: fail on OPTIONAL subtest ⇒ no score impact"
 
-#, md-format
 msgid "faqs report subtest not-tested"
 msgstr ""
 "Not tested, because already failed related parent subtest ⇒ null score"
@@ -4579,26 +4816,21 @@ msgstr ""
 msgid "faqs report subtest title"
 msgstr "Icons per subtest"
 
-#, md-format
 msgid "faqs report subtest warning"
 msgstr "Warning: fail on RECOMMENDED subtest ⇒ no score impact"
 
-#, md-format
 msgid "faqs report test bad"
 msgstr ""
 "Bad: failed at least one REQUIRED subtest ⇒ no full score in test category"
 
-#, md-format
 msgid "faqs report test error"
 msgstr ""
 "Test error: execution error for at least one subtest ⇒ no result in test "
 "category"
 
-#, md-format
 msgid "faqs report test good"
 msgstr "Good: passed all subtests ⇒ full score in test category"
 
-#, md-format
 msgid "faqs report test info"
 msgstr ""
 "Informational: failed at least one OPTIONAL subtest ⇒ full score in test "
@@ -4607,7 +4839,6 @@ msgstr ""
 msgid "faqs report test title"
 msgstr "Icons per test category"
 
-#, md-format
 msgid "faqs report test warning"
 msgstr ""
 "Warning: failed at least one RECOMMENDED subtest ⇒ full score in test "
@@ -4642,7 +4873,58 @@ msgstr ""
 msgid "faqs rpki title"
 msgstr "Authorisation for routing (RPKI)"
 
-#, md-format
+msgid "faqs section answer-1"
+msgstr ""
+"In the test results, you will find an explanation of our findings for all the (sub)tests. Based on this, you could (let someone) make changes to your web or mailserver or connection.\n"
+"\n"
+"Additional information can be found in our Knowledge base or our [Toolbox Wiki](https://toolbox.internet.nl/)."
+
+msgid "faqs section answer-2"
+msgstr ""
+"Internet.nl attempts to always test against the most recent norms and standards. Additionally, we test as thoroughly as we can realise. This is why our results can differ from other (commonly-used) testing tools.\n"
+"\n"
+"Some of the norms used in Internet.nl are set by the Dutch government. These can be implemented world-wide (and we recommend it!), but be aware that local regulations may differ from the norms used in Internet.nl."
+
+msgid "faqs section answer-3"
+msgstr ""
+"News about Internet.nl is always shared on our website and social media. New versions are announced in a news post with the most important changes. You can also follow our work on the [source code](https://github.com/internetstandards/Internet.nl), new ideas and contributions are very welcome as well!\n"
+"\n"
+"Users of our API and [dashboard](https://dashboard.internet.nl/signup) are automatically signed up to a mailing list in which we share updates and organise virtual meetings."
+
+msgid "faqs section answer-4"
+msgstr ""
+"This is supported by our dashboard and API. You can request an account [here](https://dashboard.internet.nl/signup) if your organisation fits in the target audience. The dashboard is also open source, so you could host this yourself as well.\n"
+"\n"
+"In the dashboard, it is possible to enter lists of domain names, which then can be automatically tested on a specified interval. You can opt-in to receive an e-mail for every test result."
+
+msgid "faqs section answer-5"
+msgstr ""
+"Where our Platform is focused on Dutch organisations, we are facilitating "
+"the Global Internet Standards Testing Community (GISTC) to connect "
+"international users of the test tool. You can register yourself for the "
+"community via [international@internet.nl](mailto:international@internet.nl)."
+
+msgid "faqs section link"
+msgstr "Find more answers"
+
+msgid "faqs section question-1"
+msgstr "How can I improve the score of a test?"
+
+msgid "faqs section question-2"
+msgstr "Why do other test tools show different results?"
+
+msgid "faqs section question-3"
+msgstr "How can I keep up to date with new developments?"
+
+msgid "faqs section question-4"
+msgstr "How can I (regularly) test multiple domain names?"
+
+msgid "faqs section question-5"
+msgstr "Can I join the Dutch Internet Standards Platform?"
+
+msgid "faqs section title"
+msgstr "Frequently asked questions"
+
 msgid "faqs starttls content"
 msgstr ""
 "## Why\n"
@@ -4668,11 +4950,9 @@ msgstr ""
 "* [RFC 7672: SMTP Security via Opportunistic DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS)](https://www.rfc-editor.org/rfc/rfc7672) \n"
 "* [RFC 7671: The DNS-Based Authentication of Named Entities (DANE) Protocol: Updates and Operational Guidance](https://www.rfc-editor.org/rfc/rfc7671)"
 
-#, md-format
 msgid "faqs starttls title"
 msgstr "Secure email transport (STARTTLS and DANE)"
 
-#, md-format
 msgid "faqs title"
 msgstr "Knowledge base"
 
@@ -4685,67 +4965,66 @@ msgstr ""
 "* [Benjamin @ RIPE86](https://ripe86.ripe.net/archives/video/1028/) (2023-05-24)"
 
 msgid "faqs video title"
-msgstr "## Video recordings of presentations"
+msgstr "Video recordings of presentations"
 
-#, md-format
+msgid "halloffame champions badge"
+msgstr "Badge with text: 100% score in website test and email test"
+
 msgid "halloffame champions menu"
 msgstr "Champions!"
 
-#, md-format
 msgid "halloffame champions subtitle"
 msgstr "100% in website *and* email test"
 
-#, md-format
 msgid "halloffame champions text"
 msgstr ""
-"The {{count}} domains below score 100% in both the website test and the "
-"email test. Inductees of this Hall of Fame are allowed to [use both 100% "
-"badges](/faqs/badges/)."
+"{{count}} domains score 100% in both the website test and the email test. "
+"The latest additions are listed below. Inductees of this Hall of Fame are "
+"allowed to [use both 100% badges](/faqs/badges/)."
 
-#, md-format
 msgid "halloffame champions title"
-msgstr "Hall of Fame - Champions!"
+msgstr "Champions"
+
+msgid "halloffame description"
+msgstr ""
+"Domains and hosters that score 100% on both tests, are listed in the Hall of"
+" Fame"
+
+msgid "halloffame filter"
+msgstr "Filter on:"
 
 msgid "halloffame mail badge"
 msgstr "Badge with text: 100% score in email test"
 
-#, md-format
 msgid "halloffame mail menu"
 msgstr "Email"
 
-#, md-format
 msgid "halloffame mail subtitle"
 msgstr "100% in email test"
 
-#, md-format
 msgid "halloffame mail text"
 msgstr ""
 "The {{count}} domains below score 100% in the email test. Inductees of this "
 "Hall of Fame are allowed to [use the 100% mail badge](/faqs/badges/)."
 
-#, md-format
 msgid "halloffame mail title"
 msgstr "Hall of Fame - Email"
 
 msgid "halloffame web badge"
 msgstr "Badge with text: 100% score in website test"
 
-#, md-format
 msgid "halloffame web menu"
 msgstr "Websites"
 
-#, md-format
 msgid "halloffame web subtitle"
 msgstr "100% in website test"
 
-#, md-format
 msgid "halloffame web text"
 msgstr ""
 "The {{count}} domains below score 100% in the website test. Inductees of "
 "this Hall of Fame are allowed to [use the 100% website "
 "badge](/faqs/badges/)."
 
-#, md-format
 msgid "halloffame web title"
 msgstr "Hall of Fame - Websites"
 
@@ -4757,6 +5036,12 @@ msgstr ""
 msgid "home stats connection"
 msgstr "unique connections"
 
+msgid "home stats connection text"
+msgstr "of the {{tested}} connection tests score 100%"
+
+msgid "home stats connection title"
+msgstr "Connections"
+
 msgid "home stats connection-items"
 msgstr ""
 
@@ -4766,8 +5051,17 @@ msgstr "Tests in numbers"
 msgid "home stats mail"
 msgstr "unique mail domains"
 
+msgid "home stats mail text"
+msgstr "of the {{tested}} mail domains tested score 100%"
+
+msgid "home stats mail title"
+msgstr "Email"
+
 msgid "home stats mail-items"
 msgstr ""
+
+msgid "home stats note"
+msgstr "For websites and email, we count the latest test of each domain name."
 
 msgid "home stats notpassed"
 msgstr "0-99%:"
@@ -4778,14 +5072,62 @@ msgstr "100%:"
 msgid "home stats website"
 msgstr "unique web domains"
 
+msgid "home stats website text"
+msgstr "of the {{tested}} websites tested score 100%"
+
+msgid "home stats website title"
+msgstr "Websites"
+
 msgid "home stats website-items"
 msgstr ""
 
-#, md-format
 msgid "home teaser"
+msgstr "Internet Standards provide for a more reliable Internet"
+
+msgid "home why button"
+msgstr "I want to test"
+
+msgid "home why carousel"
+msgstr "Carousel navigation"
+
+msgid "home why explain"
 msgstr ""
-"Modern Internet Standards provide for more reliability and further growth of the Internet.   \n"
-"Are you using them?"
+"Modern Internet Standards contribute to the security of your website, email "
+"and internet connection. By testing, you can quickly see if Internet "
+"Standards are configured completely and correctly."
+
+msgid "home why numbers"
+msgstr "Already {{number_of_tests}} tests performed!"
+
+msgid "home why reason-1 text"
+msgstr ""
+"Missing or misconfigured standards make eavesdropping, email forgery and "
+"hijacked traffic easier. The test shows where to improve."
+
+msgid "home why reason-1 title"
+msgstr "Find weak spots"
+
+msgid "home why reason-2 text"
+msgstr ""
+"Every subtest explains its result and what to change. Test again after a "
+"change to see the effect on your score."
+
+msgid "home why reason-2 title"
+msgstr "Improve step by step"
+
+msgid "home why reason-3 text"
+msgstr ""
+"The tests are based on open standards and public security guidelines. The "
+"source code is public too, so anyone can see how they work."
+
+msgid "home why reason-3 title"
+msgstr "Open and transparent"
+
+msgid "home why scroll-to"
+msgstr "Scroll to"
+
+msgid "home why title"
+msgstr "Why test for modern Internet Standards?"
 
 msgid "mail pagetitle"
 msgstr "Email test:"
@@ -4796,6 +5138,21 @@ msgstr "Email test: {{prettyaddr}}"
 msgid "mail tweetmessage"
 msgstr ""
 "The%20mail%20server%20at%20{{report.domain}}%20scores%20{{score}}%25%20in%20the%20email%20test%20of%20%40Internet_nl%3A"
+
+msgid "news link"
+msgstr "Read more articles"
+
+msgid "news load"
+msgstr "Load more news"
+
+msgid "news older"
+msgstr "Older news"
+
+msgid "news other"
+msgstr "Other news"
+
+msgid "news subtitle"
+msgstr "Read our latest news"
 
 msgid "page gotocontents"
 msgstr "Go to the content"
@@ -4827,6 +5184,12 @@ msgstr "Is your Internet up-to-date?"
 msgid "page sitetitle"
 msgstr "Internet.nl"
 
+msgid "page404 button"
+msgstr "Back to the homepage"
+
+msgid "page404 contact"
+msgstr "We are happy to help you"
+
 msgid "page404 content"
 msgstr ""
 "The page you are looking for is not on this server.  \n"
@@ -4837,8 +5200,6 @@ msgstr "Page not found!"
 
 msgid "privacy content"
 msgstr ""
-"# Privacy statement\n"
-"\n"
 "*Revised 25th of March 2025*\n"
 "\n"
 "The Dutch Internet Standards Platform respects your privacy and strives to minimize the collection and processing of your personal data. With this privacy statement, we would like to inform you about what personal data we collect when you use our website and other services on Internet.nl and how we process this data. Your rights are covered by the applicable laws, mainly the [European General Data Protection Regulation (GDPR)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679) and the [Dutch Telecommunications Act](https://wetten.overheid.nl/BWBR0009950/).\n"
@@ -4869,6 +5230,9 @@ msgstr ""
 "- Status code that the server sends back to your client;\n"
 "- Size of the object returned to your client;\n"
 "- Error message with regard to processing the request.\n"
+"\n"
+"#### Theme\n"
+"If you choose a light or dark theme, we store that choice in a cookie on your device, only to show the website in that theme.\n"
 "\n"
 "#### User analytics\n"
 "We put analytical cookies on your device to analyse the use of our website. We run Matomo (formerly Piwik) on our own web server. Matomo is one of the most privacy-friendly analytical tools currently available. The statistics generated with these cookies are used only to improve our website.\n"
@@ -4972,6 +5336,9 @@ msgstr "Test finished! Results available..."
 msgid "probes test-running"
 msgstr "Running..."
 
+msgid "probes test-title"
+msgstr "The following test is running:"
+
 msgid "probes tests-description"
 msgstr "The items below are being tested."
 
@@ -4983,6 +5350,12 @@ msgstr ""
 "Note: a recent release (July 2026) made changes to the TLS tests, test "
 "results prior to this release may be outdated. See [this news "
 "post](https://internet.nl/article/release-1.11/) for details."
+
+msgid "results copied"
+msgstr "Link copied!"
+
+msgid "results copy-failed"
+msgstr "Unable to share or copy the link. Please copy it manually:"
 
 msgid "results dated-presentation"
 msgstr "Dated result presentation. Please rerun the test."
@@ -5025,6 +5398,14 @@ msgstr "None"
 
 msgid "results explanation label"
 msgstr "Test explanation:"
+
+msgid "results follow-up"
+msgstr "Follow-ups"
+
+msgid "results follow-up-description"
+msgstr ""
+"You can share this result, for instance with your hoster or internet "
+"provider."
 
 msgid "results further-testing connection content"
 msgstr ""
@@ -5150,7 +5531,8 @@ msgstr "Show details"
 
 msgid "results perfect-score"
 msgstr ""
-"Congratulations, your domain will be added to the **Hall of Fame** soon!"
+"Congratulations! With 100% in both the website and the email test, your "
+"domain will be added to the **Hall of Fame** soon."
 
 msgid "results permalink"
 msgstr "Permalink test result {{permadate|date:'(Y-m-d H:i T)'}}"
@@ -5163,6 +5545,12 @@ msgstr "Seconds until retest option:"
 
 msgid "results score-description"
 msgstr "The domain {{prettyaddr}} has a test score of {{score}}%."
+
+msgid "results score-for"
+msgstr "Score for:"
+
+msgid "results share"
+msgstr "Share this result"
 
 msgid "results tech-details label"
 msgstr "Technical details:"
@@ -5935,7 +6323,6 @@ msgstr "**Test your email**"
 
 msgid "widget mail intro"
 msgstr ""
-"# Email test widget\n"
 "Would you like visitors of your website to be able to directly start an email test?  \n"
 "Copy the HTML and CSS code from the text fields below into the source code of your website."
 
@@ -5944,6 +6331,5 @@ msgstr "**Test your website**"
 
 msgid "widget site intro"
 msgstr ""
-"# Website test widget\n"
 "Would you like visitors of your website to be able to directly start a website test?  \n"
 "Copy the HTML and CSS code from the text fields below into the source code of your website."

@@ -1,16 +1,21 @@
 {% extends "base.html" %}
-{% load static %}
-
+{% load translate %}
 {% block maincontent %}
-   <article class="block fullwidth center">
-     <section>
-       <div class="wrap">
-         <div class="inner">
-           <h1>404 {{pagetitle}}</h1>
-           <img src="{% static '404-cat-not-found.png' %}" alt="" width="600" height="293">
-         </div>
-         {% include "content.html" with name="page404 content" %}
-       </div>
-     </section>
-   </article>
+  <section class="intro-section bg-primary ellipse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">404</h1>
+        <p class="h1 color-secondary">{% translate "page404 title" %}</p>
+      </hgroup>
+      <div class="center">
+        <a class="primary-button icon" href="/">{% translate "page404 button" %}</a>
+      </div>
+    </div>
+  </section>
+  <section class="faq-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h2 color-secondary">{% translate "page404 contact" %}</h2>
+      {% include "partials/contact-cards.html" %}
+    </div>
+  </section>
 {% endblock %}

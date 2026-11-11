@@ -13,7 +13,7 @@ SCM_VERSION ?= ${RELEASE}
 pysrcdirs = internetnl tests interface checks integration_tests docker
 
 # make sure these targets still run if a file with the same name exists
-.PHONY: translations translations_tar frontend update_cert_fingerprints update_container_documentation update_padded_macs venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check autofix integration-tests batch-tests
+.PHONY: translations translations_tar frontend update_cert_fingerprints update_container_documentation update_padded_macs venv frontend clean clen_venv pip-compile pip-upgrade pip-upgrade-package pip-install run run-worker run-worker-batch-callback run-worker-batch-main run-worker-batch-scheduler run-heartbeat run-broker run-rabbit manage run-test-worker version unbound-3.10-github unbound-3.7-github nassl test check check_translations npm_update autofix integration-tests batch-tests
 
 # as this is the first command in the makefile it will show if no argument is specified or if 'help' is specified to explain the available targets
 help:           ## Show this help.
@@ -306,6 +306,9 @@ lint: ## run linter
 check: ## run checks (eg: package locks, migrations, document generation, etc)
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/check.sh
 
+check_translations: ## check the translations against the code
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm -e SKIP_SECRET_KEY_CHECK=1 -e CACHE_LOCATION= tools python3 manage.py check_translations
+
 fix: ## fix trivial linting error automatically
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/fix.sh ${pysrcdirs}
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
@@ -397,3 +400,10 @@ develop_frontend: ## same as develop, but focus on frontend only
 
 uv_lock uv.lock: ## update the uv.lock file after changing pyproject.toml
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools uv lock
+
+# only versions released at least two weeks ago, as compromised releases are usually found within days
+npm_update: ## update frontend/package-lock.json to the newest versions that frontend/package.json allows
+	docker run --rm --user $(shell id -u):$(shell id -g) --env npm_config_cache=/tmp/npm \
+		--volume ${PWD}/frontend:/frontend --workdir /frontend \
+		node:$(shell sed -n 's/^ARG NODE_VERSION=//p' docker/Dockerfile)-trixie-slim \
+		sh -c 'npm update --package-lock-only --before "$$(date -d "14 days ago" +%F)"'
