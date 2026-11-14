@@ -13,6 +13,7 @@ from django.db import transaction
 
 from checks import categories, scoring
 from checks.caa.retrieval import CAA_MSGID_INSUFFICIENT_POLICY
+from checks.hsts.evaluation import HSTSEvaluation, HSTS_PRELOAD
 from checks.models import (
     CipherOrderStatus,
     DaneStatus,
@@ -319,9 +320,27 @@ def save_results(model, results, addr, domain, category):
                 model.forced_https_score = result.get("forced_https_score")
                 model.http_compression_enabled = result.get("http_compression_enabled")
                 model.http_compression_score = result.get("http_compression_score")
-                model.hsts_enabled = result.get("hsts_enabled")
-                model.hsts_policies = result.get("hsts_policies")
-                model.hsts_score = result.get("hsts_score")
+                hsts_result = result.get("hsts_result")
+                model.hsts_enabled = hsts_result.hsts_enabled
+                model.hsts_policies = hsts_result.hsts_policies
+                model.hsts_errors = [ttti.to_dict() for ttti in hsts_result.errors]
+                model.hsts_recommendations = [ttti.to_dict() for ttti in hsts_result.recommendations]
+                if hsts_result.directives.get(HSTS_PRELOAD) is True:
+                    if model.forced_https not in (ForcedHttpsStatus.good, ForcedHttpsStatus.no_http):
+                        model.hsts_recommendations.append(
+                            TranslatableTechTableItem(
+                                msgid="ineffective-preload-no-redirect",
+                                context={},
+                            ).to_dict()
+                        )
+                    if model.cert_trusted != 0:
+                        model.hsts_recommendations.append(
+                            TranslatableTechTableItem(
+                                msgid="ineffective-preload-no-valid-certificate",
+                                context={},
+                            ).to_dict()
+                        )
+                model.hsts_score = hsts_result.score
 
     elif isinstance(category, categories.MailTls):
         for testname, result in results:
@@ -428,13 +447,33 @@ def build_report(dttls, category):
             elif dttls.forced_https == ForcedHttpsStatus.bad:
                 category.subtests["https_forced"].result_bad()
 
-            if dttls.hsts_enabled:
-                if dttls.hsts_score == scoring.WEB_TLS_HSTS_GOOD:
-                    category.subtests["https_hsts"].result_good(dttls.hsts_policies)
-                else:
-                    category.subtests["https_hsts"].result_bad_max_age(dttls.hsts_policies)
+            hsts_tech_table = []
+            if not dttls.hsts_policies:
+                hsts_tech_table.append(
+                    TranslatableTechTableItem(
+                        msgid="not-found",
+                        context={},
+                    ).to_dict()
+                )
             else:
-                category.subtests["https_hsts"].result_bad()
+                for header in dttls.hsts_policies:
+                    hsts_tech_table.append(
+                        TranslatableTechTableItem(
+                            msgid="header",
+                            context={"header": header},
+                        ).to_dict()
+                    )
+            hsts_tech_table.extend(dttls.hsts_errors + dttls.hsts_recommendations)
+            if not dttls.hsts_policies:
+                category.subtests["https_hsts"].result_bad(hsts_tech_table)
+            elif dttls.hsts_errors:
+                category.subtests["https_hsts"].result_syntax_error(hsts_tech_table)
+            elif dttls.hsts_score == scoring.WEB_TLS_HSTS_PARTIAL:
+                category.subtests["https_hsts"].result_insufficient(hsts_tech_table)
+            elif dttls.hsts_recommendations:
+                category.subtests["https_hsts"].result_recommendations(hsts_tech_table)
+            else:
+                category.subtests["https_hsts"].result_good(hsts_tech_table)
 
             if dttls.http_compression_enabled:
                 category.subtests["http_compression"].result_bad()
@@ -922,9 +961,7 @@ def do_web_http(af_ip_pairs, url, *args, **kwargs):
                     forced_https_score=scoring.WEB_TLS_FORCED_HTTPS_BAD,
                     http_compression_enabled=True,
                     http_compression_score=scoring.WEB_TLS_HTTP_COMPRESSION_BAD,
-                    hsts_enabled=False,
-                    hsts_policies=[],
-                    hsts_score=scoring.WEB_TLS_HSTS_BAD,
+                    hsts_result=HSTSEvaluation(),
                 )
 
     return ("http_checks", results)

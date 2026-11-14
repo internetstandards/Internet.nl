@@ -969,22 +969,36 @@ class WebTlsHttpsHsts(Subtest):
             worst_status=scoring.WEB_TLS_HSTS_WORST_STATUS,
             full_score=scoring.WEB_TLS_HSTS_GOOD,
             model_score_field="hsts_score",
+            init_tech_type="table_translatable",
+            tech_data_translation_root="detail tech data hsts",
         )
+        # Fix for one line, one value data (not-tested case)
+        self.tech_data = [[self.tech_data]]
 
-    def result_good(self, tech_data):
+    def result_good(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls https-hsts verdict good"
-        self.tech_data = tech_data
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
-    def result_bad_max_age(self, tech_data):
-        self._status(STATUS_FAIL)
-        self.verdict = "detail web tls https-hsts verdict other"
-        self.tech_data = tech_data
+    def result_recommendations(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_INFO)
+        self.verdict = "detail web tls https-hsts verdict recommendations"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
-    def result_bad(self):
+    def result_bad(self, tech_data: list[dict[str, str]]):
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls https-hsts verdict bad"
-        self.tech_data = ""
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
+    def result_syntax_error(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls https-hsts verdict syntax-error"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
+
+    def result_insufficient(self, tech_data: list[dict[str, str]]):
+        self._status(STATUS_FAIL)
+        self.verdict = "detail web tls https-hsts verdict insufficient"
+        self.tech_data = self.add_tech_data_translation_root(tech_data) or ""
 
 
 class WebTlsHttpCompression(Subtest):

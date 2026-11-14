@@ -555,6 +555,8 @@ class DomainTestTls(BaseTestModel):
     http_compression_score = models.IntegerField(null=True)
 
     hsts_enabled = models.BooleanField(null=True, default=False)
+    hsts_errors = ListField(default=[])
+    hsts_recommendations = ListField(default=[])
     hsts_policies = ListField(default=[])
     hsts_score = models.IntegerField(null=True)
 
