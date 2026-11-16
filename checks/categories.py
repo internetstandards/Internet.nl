@@ -1402,12 +1402,17 @@ class WebTlsDaneValid(Subtest):
             model_score_field="dane_score",
         )
 
+    def was_tested(self):
+        self.worst_status = STATUS_FAIL
+
     def result_good(self):
+        self.was_tested()
         self._status(STATUS_SUCCESS)
         self.verdict = "detail web tls dane-valid verdict good"
         self.tech_data = "detail tech data yes"
 
     def result_bad(self):
+        self.was_tested()
         self._status(STATUS_FAIL)
         self.verdict = "detail web tls dane-valid verdict bad"
         self.tech_data = "detail tech data no"
