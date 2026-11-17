@@ -88,8 +88,7 @@
     display: grid;
 
     @media (width >= 56.25rem) {
-      column-gap: 1.5rem;
-      row-gap: 0.5rem;
+      gap: 0.5rem 1.5rem;
       grid-template-columns: repeat(2, 1fr);
     }
   }

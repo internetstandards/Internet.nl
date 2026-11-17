@@ -17,6 +17,10 @@ if ! black --line-length 120 --check ${@}; then
     echo -e "\e[31mSome files are not formatted correctly. Run \`make fix\` to fix.\e[0m"
     fail=1
 fi
+if ! /opt/frontend/node_modules/.bin/stylelint --config-basedir /opt/frontend "frontend/src/**/*.css"; then
+    echo -e "\e[31mSome CSS checks failed. Run \`make fix\` to fix what can be fixed automatically.\e[0m"
+    fail=1
+fi
 if ! shellcheck -e SC1071 docker/cron/periodic/*/*; then
     echo -e "\e[31mSome shell scripts have issues.\e[0m"
     fail=1

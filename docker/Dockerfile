@@ -139,7 +139,7 @@ USER unbound
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-# node and npm for the target platform, for the development image
+# node and npm for the target platform, for the development and tools images
 FROM node:${NODE_VERSION}-trixie-slim AS node
 
 # build frontend image target, the output does not depend on the platform so build natively
@@ -288,6 +288,13 @@ COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 # copy application dependencies into image
 COPY --from=tools-deps /usr/local/lib/python${PYTHON_VERSION}/dist-packages/ /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
 COPY --from=tools-deps /usr/local/bin/* /usr/local/bin/
+
+# node and the frontend tools, to lint CSS; outside /source, which compose mounts over
+COPY --from=node /usr/local/bin/ /usr/local/bin/
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY frontend/package.json frontend/package-lock.json /opt/frontend/
+RUN --mount=type=cache,target=/root/.npm \
+  cd /opt/frontend && npm ci
 
 RUN mkdir /source
 WORKDIR /source

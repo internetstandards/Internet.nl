@@ -75,8 +75,8 @@
 html {
   /* clear of the sticky header, which is up to 102px high */
   scroll-padding-top: 7rem;
+
   /* iOS enlarges some text when rotating to landscape, see #1522 */
-  -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
@@ -168,7 +168,6 @@ video {
 
 .visually-hidden {
   border: 0;
-  clip: rect(1px, 1px, 1px, 1px);
   clip-path: inset(50%);
   height: 1px;
   margin: -1px;

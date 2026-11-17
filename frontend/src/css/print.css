@@ -2,6 +2,7 @@
   /* the dark theme would print light text and logos */
   :root {
     color-scheme: light;
+
     --light-visible: block;
     --dark-visible: none;
   }

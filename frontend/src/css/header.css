@@ -266,7 +266,6 @@ header nav {
   /* Navigation Items */
   .nav-item {
     white-space: nowrap;
-
     border-bottom: var(--nav-mobile-border);
 
     @media (width < 80rem) {
