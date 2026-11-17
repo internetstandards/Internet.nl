@@ -63,6 +63,7 @@ def _retrieve_securitytxt(af_ip_pair, hostname: str) -> SecuritytxtRetrieveResul
         content,
         found_host,
         response.url,
+        response.history,
     )
 
 
@@ -74,6 +75,7 @@ def _evaluate_response(
     content: bytes,
     found_host: str,
     found_url: str | None,
+    redirects: list[requests.Response] | None = None,
 ) -> SecuritytxtRetrieveResult:
     errors = []
     media_type, charset = None, None
@@ -109,6 +111,10 @@ def _evaluate_response(
 
     if status == 200 and path != SECURITYTXT_EXPECTED_PATH:
         errors.append({"msgid": "location"})
+    if status == 200 and redirects and any(
+        urlparse(redirect.next.url).scheme != "https" for redirect in redirects
+    ):
+        errors.append({"msgid": "invalid_uri_scheme"})
 
     return SecuritytxtRetrieveResult(
         found=status == 200,
