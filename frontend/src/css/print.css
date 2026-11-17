@@ -9,6 +9,7 @@
   /* icons are masks over a background colour, which browsers leave out when printing */
   .icon::before,
   .icon::after,
+  .further-testing li li a::before,
   meter {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;

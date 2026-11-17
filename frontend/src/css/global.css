@@ -275,7 +275,8 @@ hgroup {
 }
 
 .icon:not(.ellipse)::after, 
-.icon::before {
+.icon::before,
+.further-testing li li a::before {
   content: "";
   background-color: currentcolor;
   mask-repeat: no-repeat;
@@ -285,12 +286,9 @@ hgroup {
   height: 1.5rem;
   min-width: 1.5rem;
   min-height: 1.5rem;
-}
 
-/* icons are masks over a background colour, which forced colours mode removes */
-@media (forced-colors: active) {
-  .icon:not(.ellipse)::after,
-  .icon::before {
+  /* icons are masks over a background colour, which forced colours mode removes */
+  @media (forced-colors: active) {
     forced-color-adjust: none;
     background-color: CanvasText !important;
   }

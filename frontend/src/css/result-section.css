@@ -756,8 +756,54 @@ meter::-moz-meter-bar {
   }
 }
 
-/* the outer list holds the headings, the inner lists the links */
-.further-testing .container > div > ul {
-  list-style: none;
-  padding-inline-start: 0;
+/* the outer list holds the headings, the inner lists the links, styled like the footer navigation */
+.further-testing .container > div {
+  ul {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  > ul {
+    display: grid;
+    gap: 1.5rem;
+
+    @media (width >= 56.25rem) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* a hanging indent, so wrapped lines line up with the link text after the arrow */
+  li li {
+    padding-inline-start: 2.5rem;
+    text-indent: -2.5rem;
+
+    @media (width >= 56.25rem) {
+      padding-inline-start: 3rem;
+      text-indent: -3rem;
+    }
+  }
+
+  li li a {
+    font: var(--footer-link);
+    text-decoration-color: var(--transparent-100);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.625rem;
+    transition: text-decoration-color 0.3s;
+
+    &:hover {
+      text-decoration-color: currentcolor;
+    }
+
+    &::before {
+      mask-image: url("/static/icons/arrow-right.svg");
+      display: inline-block;
+      vertical-align: middle;
+      margin-inline-end: 1rem;
+
+      @media (width >= 56.25rem) {
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
 }
