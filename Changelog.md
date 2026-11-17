@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.11.7
+
+- Add articles about recent meetings.
+
 ## 1.11.6
 
 - Removes trust in eMudhra certificates, following Mozilla trust store.
