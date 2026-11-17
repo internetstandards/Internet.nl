@@ -222,37 +222,9 @@
       align-items: center;
 
       &::before {
+        mask-image: var(--verdict-icon);
+        background-color: var(--verdict-color);
         display: block;
-      }
-
-      &.passed::before {
-        mask-image: url("/static/icons/checkmark-circle.svg");
-        background-color: var(--success-color);
-      }
-
-      &.failed::before {
-        mask-image: url("/static/icons/error.svg");
-        background-color: var(--failed-color);
-      }
-
-      &.warning::before {
-        mask-image: url("/static/icons/exclamation-circle.svg");
-        background-color: var(--warning-color);
-      }
-
-      &.info::before {
-        mask-image: url("/static/icons/info.svg");
-        background-color: var(--info-color);
-      }
-
-      &.error::before {
-        mask-image: url("/static/icons/broken.svg");
-        background-color: var(--error-color);
-      }
-
-      &.not-tested::before {
-        mask-image: url("/static/icons/question.svg");
-        background-color: var(--not-tested-color);
       }
     }
   }

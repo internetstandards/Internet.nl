@@ -294,6 +294,37 @@ hgroup {
   }
 }
 
+/* the icon and colour of each verdict, for the icons of the elements with a verdict class */
+.passed {
+  --verdict-icon: url("/static/icons/checkmark-circle.svg");
+  --verdict-color: var(--success-color);
+}
+
+.warning {
+  --verdict-icon: url("/static/icons/exclamation-circle.svg");
+  --verdict-color: var(--warning-color);
+}
+
+.failed {
+  --verdict-icon: url("/static/icons/error.svg");
+  --verdict-color: var(--failed-color);
+}
+
+.info {
+  --verdict-icon: url("/static/icons/info.svg");
+  --verdict-color: var(--info-color);
+}
+
+.error {
+  --verdict-icon: url("/static/icons/broken.svg");
+  --verdict-color: var(--error-color);
+}
+
+.not-tested {
+  --verdict-icon: url("/static/icons/question.svg");
+  --verdict-color: var(--not-tested-color);
+}
+
 [class*="section"] {
   &.bg-primary {
     background-color: var(--bg-color-primary);
