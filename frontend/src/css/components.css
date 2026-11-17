@@ -12,7 +12,7 @@
   transition: border 0.3s, background-color 0.3s;
   width: 100%;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     width: auto;
   }
 
@@ -67,7 +67,7 @@
   gap: 0.5rem;
   width: 100%;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     width: fit-content;
@@ -87,7 +87,7 @@
     padding-block: 4rem;
     row-gap: 1.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-block: 4.875rem;
       row-gap: 2.25rem;
     }
@@ -100,7 +100,7 @@
   hgroup {
     gap: 1.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 2.25rem;
       grid-column: 2 / 12;
     }
@@ -123,7 +123,7 @@
   hgroup {
     gap: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 1.5rem;
     }
   }
@@ -135,12 +135,12 @@
     border-bottom: 0.0313rem solid var(--green-400);
     padding-bottom: 1.25rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-bottom: 2.5rem;
     }
 
     > * {
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: 2 / 12;
       }
     }
@@ -232,7 +232,7 @@
   &.footer-page .container {
     padding-block: 1.25rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-block: 2.5rem;
     }
 
@@ -252,7 +252,7 @@
   .container {
     row-gap: 1.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       row-gap: 3rem;
     }
 
@@ -272,7 +272,7 @@
   grid-template-columns: repeat(auto-fit, minmax(min(18.75rem, 100%), 1fr));
   gap: 1.5rem;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     gap: 2rem;
   }
 }
@@ -382,7 +382,7 @@
 
     translate: 0 3rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       translate: 0 4rem;
 
       a {
@@ -476,7 +476,7 @@
   &.hidden-mobile::after {
     display: none;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       display: block;
     }
   }
@@ -489,7 +489,7 @@
       mask-size: 62.5rem;
       border-radius: 1rem;
   
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         mask-size: cover;
         transform: scaleY(1);
       }
@@ -498,7 +498,7 @@
     &.reverse::after {
       transform: scale(-1);
   
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         transform: scaleX(-1);
       }
     }

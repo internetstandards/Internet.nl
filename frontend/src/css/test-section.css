@@ -3,7 +3,7 @@
     row-gap: 0.5rem;
     padding-block: 2.5rem;
     
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 2rem;
       padding-block: 3.25rem;
     }
@@ -12,7 +12,7 @@
   h1 {
     padding-bottom: 0.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 2 / 12;
       padding-bottom: 1rem;
     }
@@ -30,7 +30,7 @@
     row-gap: 1.5rem;
     padding-block: 2rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       row-gap: 2rem;
     }
   }
@@ -38,7 +38,7 @@
   h2 {
     text-align: center;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 2 / 12;
     }
   }
@@ -52,7 +52,7 @@
   flex-direction: column;
   justify-content: space-between;  
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     padding: 3rem;
     grid-column: 2 / 12;
   }
@@ -87,7 +87,7 @@
   form {
     display: grid;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 0.5rem 1.5rem;
       grid-template-columns: repeat(2, 1fr);
     }
@@ -101,7 +101,7 @@
     font: var(--card-header-xs);
     padding-bottom: 1rem;
     
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-bottom: 0;
       grid-column: 1 / 2;
     }
@@ -125,7 +125,7 @@
   button {
     padding: 0.625rem 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       align-self: end;
       grid-column: 2 / 3;
       grid-row: 1 / 2;
@@ -137,7 +137,7 @@
     font: var(--card-body-m);
     padding-bottom: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-block: 0.5rem 0;
     }
   }
@@ -163,14 +163,14 @@
   }
 
   &.home-variant {
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: span 8;
     }
 
     > a {
       display: none;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         display: flex;
       }
     }
@@ -183,7 +183,7 @@
       gap: 3rem;
       padding-top: 1.5rem;;
   
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         display: flex;
       }
     }
@@ -263,7 +263,7 @@
   gap: 0.5rem;
   flex-direction: column;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     gap: 1.5rem;
     align-items: center;
     grid-column: 2 / 12;
@@ -271,14 +271,14 @@
   }
 
   &.home-variant {
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       flex-direction: column;
       grid-column: span 4;
     }
   }
 
   &.hall-of-fame-variant {
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: span 12;
     }
   }
@@ -298,7 +298,7 @@
     justify-content: space-between;
     height: 100%;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding: 2.25rem 1.5rem;
     }
   }
@@ -326,7 +326,7 @@
   }
 
   hgroup {
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 0.5rem;
     }
 

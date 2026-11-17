@@ -10,7 +10,7 @@
     gap: 2.5rem;
     width: 100%;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       flex-direction: row;
     }
   }
@@ -35,7 +35,7 @@ footer {
     grid-template-rows: auto;
     gap: 1.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-template-columns: repeat(3, 1fr);
     }
   }
@@ -61,7 +61,7 @@ footer {
       mask-image: url("/static/icons/arrow-right.svg");
       display: block;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         width: 2rem;
         height: 2rem;
       }
@@ -79,7 +79,7 @@ footer {
     padding-block: 2rem;
     width: 100%;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
@@ -93,7 +93,7 @@ footer {
   gap: 1.25rem;
   flex-direction: column;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     flex-direction: row;
   }
 

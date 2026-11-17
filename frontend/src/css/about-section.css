@@ -2,20 +2,20 @@
   h2 {
     padding-bottom: 0.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-bottom: 1.5rem;
     }
   }
 
   p {
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 1 / 7;
     }
 
     &:nth-of-type(2) {
       padding-top: 1rem;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: 8 / 13;
         padding-top: 0;
       }
@@ -41,7 +41,7 @@
   justify-content: space-between;
   align-items: center;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     grid-template-columns: repeat(5, 1fr);
     gap: 6.25rem;
     overflow-x: auto;
@@ -75,7 +75,7 @@
     &:last-child {
       display: none;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         display: block;
       }
     }
@@ -95,7 +95,7 @@
     padding-block: 2.75rem;
     row-gap: 2.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       align-items: center;
       gap: 0;
     }
@@ -106,7 +106,7 @@
     aspect-ratio: 1;
     object-fit: cover;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 2 / 3;
     }
   }
@@ -116,7 +116,7 @@
     flex-direction: column;
     gap: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 4 / 12;
       gap: 2.5rem;
     }
@@ -128,7 +128,7 @@
 }
 
 .about-organisation ul {
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     columns: 2;
   }
 }

@@ -3,7 +3,7 @@
     row-gap: 1.5rem;
     padding-block: 2rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       row-gap: 3rem;
     }
   }
@@ -11,7 +11,7 @@
   hgroup {
     gap: 0.5rem;
     
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 3 / 11;
       gap: 1rem;
     }
@@ -21,7 +21,7 @@
     place-self: center;
   }
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     .hall-of-fame-list {
       grid-column: span 12;
     }
@@ -33,7 +33,7 @@
   margin: 0 1rem -4.0625rem;
   z-index: 1;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     translate: 0 -4.6875rem;
     margin: 0 0 -4.6875rem;
   }
@@ -49,7 +49,7 @@
     flex-direction: column;
     gap: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 3 / 11;
       width: 100%;
       gap: 3rem;
@@ -68,7 +68,7 @@
   .container {
     gap: 2rem 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 4rem 2rem;
     }
   }
@@ -79,7 +79,7 @@
     gap: 1rem;
     text-align: center;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 2 / 10;
       text-align: start;
     }
@@ -98,7 +98,7 @@
     place-self: center;
     order: -1;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-column: 10 / 12;
       order: unset;
     }
@@ -111,7 +111,7 @@
   grid-auto-flow: dense;
   gap: 1.5rem;
   
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     grid-column: 2 / 12;
   }
 

@@ -3,7 +3,7 @@
     padding-block: 2rem;
     row-gap: 1.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-block: 2.25rem;
       row-gap: 3rem;
 
@@ -15,7 +15,7 @@
 
   &.loading {
     .container > * {
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: 3 / 11;
         row-gap: 2.5rem;
       }
@@ -31,7 +31,7 @@
   hgroup {
     gap: 0.75rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 1.5rem;
     }
   }
@@ -112,7 +112,7 @@ body.connectiontest .action-card-item:has(.connection) {
   max-height: 80vh;
   overflow-y: auto;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     grid-column: 9 / 13;
     grid-row: 1 / 2;
     bottom: unset;
@@ -131,12 +131,12 @@ body.connectiontest .action-card-item:has(.connection) {
     overflow: clip;
     padding-bottom: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-bottom: 1.5rem;
     }
 
     &::details-content {
-      @media (prefers-reduced-motion: no-preference) and (width < 56.25rem) {
+      @media (prefers-reduced-motion: no-preference) and (--narrow) {
         @supports (transition-behavior: allow-discrete) {
           transition: height 0.3s, opacity 0.3s, content-visibility 0.3s;
           transition-behavior: allow-discrete;
@@ -145,7 +145,7 @@ body.connectiontest .action-card-item:has(.connection) {
         }
       }
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         content-visibility: visible;
       }
     }
@@ -178,7 +178,7 @@ body.connectiontest .action-card-item:has(.connection) {
   h2 {
     display: none;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       display: flex;
       padding-bottom: 0.5rem;
     }
@@ -197,12 +197,12 @@ body.connectiontest .action-card-item:has(.connection) {
       display: block;
       transition: transform 0.3s;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         display: none;
       }
     }
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       display: none;
     }
   }
@@ -426,12 +426,12 @@ meter::-moz-meter-bar {
   .container {
     row-gap: 2rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 2rem;
     }
 
     & > *:not(.action-card) {
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: 1 / 9;
       }
     }
@@ -444,7 +444,7 @@ meter::-moz-meter-bar {
   gap: 1.5rem;
   z-index: 0;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     gap: 2.125rem;
   }
 }
@@ -455,7 +455,7 @@ meter::-moz-meter-bar {
   gap: 1.5rem;
   padding-bottom: 1.5rem;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     padding-bottom: 2.125rem;
   }
 
@@ -470,7 +470,7 @@ meter::-moz-meter-bar {
     align-items: flex-start;
     gap: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       flex-wrap: nowrap;
     }
 
@@ -531,7 +531,7 @@ meter::-moz-meter-bar {
       background: var(--accordion-bg-color);
       border-radius: 0.5rem;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: span 7;
         margin-bottom: 1rem;
       }
@@ -675,7 +675,7 @@ meter::-moz-meter-bar {
     display: grid;
     gap: 1.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       grid-template-columns: repeat(3, 1fr);
     }
   }
@@ -685,7 +685,7 @@ meter::-moz-meter-bar {
     padding-inline-start: 2.5rem;
     text-indent: -2.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding-inline-start: 3rem;
       text-indent: -3rem;
     }
@@ -708,7 +708,7 @@ meter::-moz-meter-bar {
       vertical-align: middle;
       margin-inline-end: 1rem;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         width: 2rem;
         height: 2rem;
       }

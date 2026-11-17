@@ -1,3 +1,10 @@
+/* the breakpoints: wider layouts, and the full navigation bar instead of the menu button;
+   action-card-fallback.js and the header logo in base.html repeat --wide, header.js repeats --nav-bar */
+@custom-media --narrow (width < 56.25rem);
+@custom-media --wide (width >= 56.25rem);
+@custom-media --nav-bar (width >= 80rem);
+@custom-media --nav-menu (width < 80rem);
+
 :root {
   /* MARK: THEME PROPERTIES 
   */
@@ -103,7 +110,7 @@
   --accordion-body: var(--body-font-xxs);
   --accordion-body-semibold: var(--body-font-xxs-semibold);
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     /* NAV FONTS DESKTOP */
     --nav-link: var(--button-link-font-xs);
     --nav-button: var(--button-link-font-xs);
@@ -219,7 +226,7 @@
   /* ELLIPSES */
   --ellipse-color-light: linear-gradient(0deg,light-dark(var(--white-100), var(--green-500)),light-dark(var(--transparent-200), var(--green-600)));
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     --ellipse-color-light: linear-gradient(45deg,light-dark(var(--white-100), var(--green-500)),light-dark(var(--transparent-200), var(--green-600)));
   }
 

@@ -1,7 +1,7 @@
 .contact-section {
   background: linear-gradient(to bottom, var(--bg-color-primary) 65%, transparent 65%);
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     background: linear-gradient(to right, var(--bg-color-primary) 100%, transparent 100%);
     background-size: calc((100vw - 77.5rem) / 2 + 77.5rem - 12.5rem) 100%;
     background-repeat: no-repeat;
@@ -13,7 +13,7 @@
     h2 {
       padding-bottom: 1.5rem;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: span 7;
         padding-bottom: 2.5rem;
       }
@@ -23,7 +23,7 @@
       margin-block: 1rem 2rem;
       justify-self: center;
 
-      @media (width >= 56.25rem) {
+      @media (--wide) {
         grid-column: span 7;
         justify-self: start;
         margin-block: 1.5rem 0;
@@ -39,7 +39,7 @@
       border-radius: 0.5rem;
 
       > *, .secondary-button:not(.rounded) {
-        @media (width >= 56.25rem) {
+        @media (--wide) {
           grid-column: 3 / 11;
         }
       }
@@ -52,7 +52,7 @@
   background: var(--accordion-bg-color);
   border-radius: 0.5rem;
   
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     grid-column: span 7;
     margin-bottom: 1rem;
   }
@@ -89,7 +89,7 @@
   flex-direction: column;
   gap: 1rem;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     grid-column: 9 / 13;
     grid-row: 1 / 8;  
     padding: 2rem;  
@@ -99,7 +99,7 @@
   > hgroup {
     gap: 0.5rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 1rem;
     }
 
@@ -126,7 +126,7 @@
     padding-block: 2rem;
     gap: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       gap: 3rem;
     }
   }
@@ -141,7 +141,7 @@
   gap: 0.5rem;
   flex-direction: column;
 
-  @media (width >= 56.25rem) {
+  @media (--wide) {
     gap: 2rem;
     flex-direction: row;
   }
@@ -159,7 +159,7 @@
   &.alt {
     padding: 1rem;
 
-    @media (width >= 56.25rem) {
+    @media (--wide) {
       padding: 2rem;
     }
   }
