@@ -138,6 +138,9 @@ ENTRYPOINT ["/entrypoint.sh"]
 FROM debian:trixie-20260202-slim AS build-app
 ARG PYTHON_VERSION
 
+# suppress pythonwhois invalid escape sequence warnings in app, tools, and build commands
+ENV PYTHONWARNINGS="ignore:invalid escape sequence:SyntaxWarning"
+
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && apt install -yqq --no-install-recommends \
@@ -222,9 +225,6 @@ ARG RELEASE
 # we need to convert back the '-' to a '+' for the version as otherwise setuptools_scm won't accept the pretend version
 ARG SCM_VERSION
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SCM_VERSION}
-
-# suppress pythonwhois deprecation warnings as it will be removed in the near future
-ENV PYTHONWARNINGS="ignore:invalid escape sequence:SyntaxWarning"
 
 # define default entrypoint and command
 ENTRYPOINT [ "python3","./manage.py"]
