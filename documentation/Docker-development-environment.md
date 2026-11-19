@@ -11,7 +11,7 @@ As a developer you connect to the application through `http://localhost:8080/`. 
 There are 3 Python applications that share a codebase.
 
 - The `app` application runs the HTTP web interface and API. A user can start a test through the web interface, after which the `app` will do a verification of the domain and if valid puts the test on a queue on `RabbitMQ` to be executed by the `worker`. After a queued test has been executed the results are fetched back via `Redis` and stored in `PostgreSQL`.
-- The `beat` application is the scheduler for recurring tasks. It takes schedule configuration from `celery.py` and puts tasks on the `RabbitMQ` queue to be exectued by the `worker`. For 'normal' installation this is only to regenerate the Hall of Fame. For 'batch' installations this application is critical to start processing batch jobs.
+- The `beat` application is the scheduler for recurring tasks. It takes schedule configuration from `celery.py` and puts tasks on the `RabbitMQ` queue to be exectued by the `worker`. For 'normal' installation this is only to regenerate the Hall of Fame and the numbers on the homepage. For 'batch' installations this application is critical to start processing batch jobs.
 - The `worker` application consumes the `RabbitMQ` queues and performs the tasks and tests posted there. For tests it will either directly connect to endpoints to validate test criteria like TLS, uses an internal Unbound library for DNS or obtains information via `Routinator` for RPKI. After the test has run the result is put on `Redis` result queue.
 
 The metrics collection system is accessible via `http://localhost:8080/grafana/`, for more information see 'Metrics' below.
@@ -71,7 +71,7 @@ Using a Docker runtime with more memory and CPU cores improves rebuild/restart s
 Once the development environment is up and running it will autotically rebuild/restart/reload when certain parts of the source code change. Currently changes to the following files will be detected and acted upon:
 
 - Python sources in  `checks/`, `internetnl/`, `interface/`: will reload `app` and `worker*` using Django autoreload, when needed open browser sessions will reload.
-- CSS files in `frontend/css/`: will rebuild CSS files and open browser sessions will reload.
+- CSS and JavaScript files in `frontend/src/`: will rebuild CSS and JavaScript files and open browser sessions will reload.
 - Django template files (`.html`) in `interface/templates/`: open browser sessions will reload.
 
 ### Foreground development
@@ -87,6 +87,16 @@ This convenience command will build all relevant services, start the entire stac
 When only developing on frontend parts of the application (eg: `html`, `css`, `javascript`, Django templates/views), a smaller subset of the application can be started using:
 
     make develop_frontend
+
+#### Example reports
+
+To work on the results pages without running tests, load a set of example reports:
+
+    docker exec -ti internetnl-develop-app-1 ./manage.py loaddata example_reports.json
+
+These are website reports, which show at `/site/<domain>/<id>/`, starting at `/site/internet.nl/9000/`, and two connection tests, which show at `/connection/<test id>/results`.
+
+To make new example reports, see [generate_example_reports.md](generate_example_reports.md).
 
 ### Running/debugging individual probes
 
@@ -411,4 +421,4 @@ For the development environment the Routinator service/container is not started 
 
 ## Tools Shell
 
-If you need to interact with any of the tools included in this project (eg: ./manage.py, uv, Unbound, linters, postcss, etc) you can run the `make shell` command to enter the 'tools' container which includes all tools and applications. The project directory is mounted in the `/source` directory in the container so any changes made to the files will be made to the project as well.
+If you need to interact with any of the tools included in this project (eg: ./manage.py, uv, Unbound, linters, etc) you can run the `make shell` command to enter the 'tools' container which includes all tools and applications. The project directory is mounted in the `/source` directory in the container so any changes made to the files will be made to the project as well.

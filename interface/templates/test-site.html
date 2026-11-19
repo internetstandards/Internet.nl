@@ -1,21 +1,42 @@
-{% extends "faqarticle.html" %}
+{% extends "base.html" %}
+{% load translate %}
 
-{% block faqarticlecontent %}
-    <div class="title-and-explanation">
-      <h1>{% include "string.html" with name="base test website title" %}</h1>
-      {% include "content.html" with name="base test website explain" %}
+{% block maincontent %}
+  <section class="test-section bg-primary ellipse">
+    <div class="container">
+      <h1 class="h1 color-secondary">{% translate "home teaser" %}</h1>
+      <article class="test-card-large domain-variant">
+        <h2 class="domain icon">{% translate "base test website label" %}</h2>
+        {% include "partials/site-form.html" %}
+        <ul>
+          <li>
+            <div class="icon"></div>
+            <span>{% translate "base test website usp1" %}</span>
+          </li>
+          <li>
+            <div class="icon"></div>
+            <span>{% translate "base test website usp2" %}</span>
+          </li>
+          <li>
+            <div class="icon"></div>
+            <span>{% translate "base test website usp3" %}</span>
+          </li>
+        </ul>
+        <a class="icon" href="#about-the-test">{% translate "base test explain" %}</a>
+      </article>
     </div>
-    <form action="/site/" method="POST">
-      <label class="text-input" for="web-url">{% include "string.html" with name="base test website input" %}
-        <input id="web-url" type="text" inputmode="url" name="url" placeholder="{% include "string.html" with name="base test website placeholder" %}" autocorrect="off" autocapitalize="none" spellcheck="false">
-      </label>
-      {% if request.GET.invalid != None %}
-      <div class="invalid-domain">
-        {% include "string.html" with name="base test prechecks invalid domain" %}
-      </div>
-      {% endif %}
-      <div class="contains-button">
-        <button>{% include "string.html" with name="base test start" %}</button>
-      </div>
-    </form>
+  </section>
+
+  <section class="test-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h3 color-secondary">{% translate "base test more" %}</h2>
+      {% include "partials/test-cards.html" with exclude="site" %}
+    </div>
+  </section>
+  <section class="article-content-section" id="about-the-test">
+    <div class="container">
+      <h2>{% translate "base test website title" %}</h2>
+      {% translate "base test website explain" %}
+    </div>
+  </section>
 {% endblock %}

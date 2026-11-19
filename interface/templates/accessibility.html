@@ -1,7 +1,6 @@
-{% extends "base.html" %}
+{% extends "textpage.html" %}
+{% load translate %}
 
-{% block maincontent %}
-  <article class="block wide">
-    {% include "content.html" with name="accessibility content" %}
-  </article>
+{% block textcontent %}
+  {% translate "accessibility content" %}
 {% endblock %}

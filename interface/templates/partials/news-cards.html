@@ -1,0 +1,25 @@
+{% load translate %}
+<ul class="card-list {{ variant }}">
+  {% for article in articles %}
+    {% expand "article {{ article }} title" as articletitle %}
+    {% expand "article {{ article }} date" as articledate %}
+    <li class="card news-card {% if large %}large {% endif %}ellipse">
+      <a href="/article/{{ article }}/">
+        {% if large %}
+          {% expand "article {{ article }} lead" as articlelead %}
+          <hgroup>
+            <p class="card-date">{% translate articledate %}</p>
+            <h2>{% translate articletitle %}</h2>
+            <p>{% translate articlelead %}</p>
+          </hgroup>
+        {% else %}
+          <hgroup class="flipped">
+            <h3>{% translate articletitle %}</h3>
+            <p class="card-date">{% translate articledate %}</p>
+          </hgroup>
+        {% endif %}
+        <div class="secondary-button rounded icon"></div>
+      </a>
+    </li>
+  {% endfor %}
+</ul>

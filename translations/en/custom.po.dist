@@ -9,15 +9,14 @@ msgstr "Some about content"
 
 msgid "about contact custom"
 msgstr ""
-"# About custom\n"
 "## Email\n"
 "custom@example.com\n"
 
+msgid "disclosure content custom"
+msgstr "custom@example.com\n"
+
 msgid "privacy content custom"
-msgstr ""
-"# Privacy statement\n"
-"\n"
-"*Revised 24th of October 2023*\n"
+msgstr "*Revised 24th of October 2023*\n"
 
 msgid "article custom .index"
 msgstr ""

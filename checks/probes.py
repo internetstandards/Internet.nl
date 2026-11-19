@@ -115,6 +115,11 @@ class ProbeSet:
         return max(min(int(sum(scores) / len(scores)), 100), 0)
 
 
+def with_subtest_names(details):
+    """Add the name of each subtest, which reports from before release 1.10 and connection tests do not store."""
+    return {name: item | {"name": name} for name, item in (details or {}).items()}
+
+
 class Probe:
     def __init__(
         self,
@@ -276,7 +281,10 @@ class Probe:
             done=True,
             name=f"{self.prefix}{self.name}",
             title=self.title,
-            details_set=modelobj.details_set(self),
+            details_set=[
+                (domain_type, domain, with_subtest_names(details))
+                for domain_type, domain, details in modelobj.details_set(self)
+            ],
             totalscore=total_score,
             maxscore=max_score,
             verdict=verdict,

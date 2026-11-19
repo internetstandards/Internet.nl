@@ -28,21 +28,21 @@ services:
           action: rebuild
 
   app:
-    develop:
-      watch:
-        # auto rebuild/reload when CSS/JS changes
-        - path: ../frontend/
-          action: sync+exec
-          target: /app/frontend
-          exec:
-            command: /bin/sh -c "python3 bin/frontend.py js;python3 bin/frontend.py css;"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app-dev
     # use Django runserver for better debug abilities during development
     entrypoint: ["/bin/bash"]
-    # run CSS auto rebuild in the background and start devserver
+    # rebuild CSS and JS in the background and start devserver
     command:
       - "-c"
       - >
         if [ "$INTERNETNL_AUTORELOAD" = "True" ]; then
+          cd /app/frontend;
+          npm run watch &
+          cd /app;
+          # start development server with auto reloading
           ./manage.py runserver 0.0.0.0:8080
         else
           ./manage.py runserver 0.0.0.0:8080 --noreload
@@ -55,6 +55,8 @@ services:
       - ../checks:/app/checks
       - ../interface:/app/interface
       - ../internetnl:/app/internetnl
+      # mount frontend files so build tools can detect changes and rebuild
+      - ../frontend/src:/app/frontend/src
 
   worker:
     volumes:

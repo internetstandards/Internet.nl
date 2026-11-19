@@ -1,17 +1,21 @@
 {% extends "base.html" %}
+{% load translate %}
 
 {% block maincontent %}
-  <article class="block wide">
-    <section>
-    {% block faqarticlecontent %}
-      <h1>{% include "string.html" with name=title %}</h1>
-      {% include "content.html" with name=content %}
-    {% endblock %}
-    </section>
-  </article>
-  <aside>
-    <section class="block news">
-      {% include "content.html" with name="faqs content" %}
-    </section>
-  </aside>
+  <section class="intro-section bg-primary ellipse reverse">
+    <div class="container">
+      <hgroup class="flipped">
+        <h1 class="h1 color-secondary">{{ pagetitle }}</h1>
+        <p class="h5 color-secondary"><a href="/faqs/">{% translate "faqs title" %}</a></p>
+      </hgroup>
+    </div>
+  </section>
+
+  <section class="article-content-section">
+    <div class="container">
+      {% block faqarticlecontent %}{% translate content %}{% endblock %}
+    </div>
+  </section>
+
+  {% include "partials/faq-contact.html" %}
 {% endblock %}

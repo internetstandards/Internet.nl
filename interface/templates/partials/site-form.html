@@ -1,0 +1,20 @@
+{% load translate %}
+<form action="/site/" method="POST">
+  <label>
+    <span>{% translate "base test website input" %}</span>
+    <input id="web-url"
+           name="url"
+           type="text"
+           placeholder="{% translate_attr "base test website placeholder" %}"
+           inputmode="url"
+           autocomplete="url"
+           autocorrect="off"
+           autocapitalize="none"
+           spellcheck="false"
+           required>
+  </label>
+  {% if request.GET.invalid != None %}
+    <p class="invalid-domain">{% translate "base test prechecks invalid domain" %}</p>
+  {% endif %}
+  <button class="primary-button icon" type="submit">{% translate "base test start" %}</button>
+</form>

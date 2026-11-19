@@ -1,0 +1,32 @@
+{% load translate %}
+<section class="knowledge-section">
+  <div class="container">
+    <hgroup>
+      <h2 class="h3 color-secondary" id="why-title">{% translate "home why title" %}</h2>
+      <p class="body-l">{% translate "home why explain" %}</p>
+    </hgroup>
+    {% numbered_keys "home why reason-{} title" as numbers %}
+    <ul class="knowledge-list" id="card-carousel" tabindex="0" aria-labelledby="why-title">
+      {% for i in numbers %}
+        {% expand "home why reason-{{ i }} title" as title %}
+        {% expand "home why reason-{{ i }} text" as text %}
+        <li class="card home-variant knowledge-card ellipse icon">
+          <h3>{% translate title %}</h3>
+          <p>{% translate text %}</p>
+        </li>
+      {% endfor %}
+    </ul>
+    <ul class="dots" aria-label="{% translate_attr 'home why carousel' %}" aria-controls="card-carousel">
+      {% for i in numbers %}
+        {% expand "home why reason-{{ i }} title" as title %}
+        <li class="dot{% if forloop.first %} active{% endif %}">
+          <button type="button" aria-label="{% translate_attr 'home why scroll-to' %} {% translate_attr title %}"></button>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="button-container">
+      <a class="secondary-button icon" href="/test-site/">{% translate "home why button" %}</a>
+      <p class="body-m">{% translate "home why numbers" %}</p>
+    </div>
+  </div>
+</section>
