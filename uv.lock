@@ -4,11 +4,11 @@ requires-python = ">=3.13"
 
 [[package]]
 name = "abnf"
-version = "2.4.1"
+version = "2.9.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e2/ad/65071d3abe27e29347e8e4cd9ba3f8c5df096ac486d4afb7ab17b29f36ad/abnf-2.4.1.tar.gz", hash = "sha256:cde0674eabdf782c0bd3a8abae625f42c80650d65be5bfd76939ba9efc3c8122", size = 322627, upload-time = "2025-12-01T00:35:36.292Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/27/09d5b2e8e0a83a1bb169e4b4382261f4dcf1d0cccaef6306d9962944223a/abnf-2.9.1.tar.gz", hash = "sha256:58dfcbec5362fbc25d210ff916c014bc75a5a89e274318c7e9b47c1e8c379c06", size = 1010171, upload-time = "2026-10-21T19:34:54.472Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/2e/815384e25cdade147af784ad5a0f71fe10602c5e0a1d35a9c9040a72248b/abnf-2.4.1-py3-none-any.whl", hash = "sha256:c9918b6aa9fe93c531ab245d99b47fc2ccf56407e005a598b279f384397d1df1", size = 50039, upload-time = "2025-12-01T00:35:35.118Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/8f/bc07d154a9aee9181922d73a5be0c7854bd6e30c932ecc33e95af1ad960e/abnf-2.9.1-py3-none-any.whl", hash = "sha256:cdcac127b3693ded2b00565878d8ed2b96d34b29f0ee199c06d7b40baaf60917", size = 78103, upload-time = "2026-10-21T19:34:52.901Z" },
 ]
 
 [[package]]

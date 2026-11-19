@@ -7,6 +7,7 @@ import requests
 
 from checks import scoring
 from checks.http_client import http_get_ip
+from checks.hsts.evaluation import HSTSEvaluation
 
 
 def get_multiple_values_from_header(header):
@@ -528,44 +529,23 @@ class HeaderCheckerStrictTransportSecurity:
 
     def __init__(self):
         self.name = "Strict-Transport-Security"
-        self.first_time_seen = True
-        self.min_allowed = 31536000  # 1 year
 
     def check(self, value, results, domain):
-        """
-        Check if the *first* HSTS header value is more than 6 months.
+        if not value:
+            results.update(self.get_negative_values())
+            return
 
-        """
-        if self.first_time_seen and not value:
-            results["hsts_enabled"] = False
-            results["hsts_score"] = scoring.WEB_TLS_HSTS_BAD
-            self.first_time_seen = False
-        elif value:
-            header_values = get_multiple_values_from_header(value)
-            try:
-                max_age = header_values[0].lower().split("max-age=")[1].split(";")[0]
-                if self.first_time_seen and int(max_age) < self.min_allowed:
-                    results["hsts_score"] = scoring.WEB_TLS_HSTS_PARTIAL
-                    self.first_time_seen = False
-            except (ValueError, IndexError):
-                if self.first_time_seen:
-                    results["hsts_score"] = scoring.WEB_TLS_HSTS_BAD
-                    results["hsts_enabled"] = False
-                    self.first_time_seen = False
-            results["hsts_policies"].extend(header_values)
+        results["hsts_result"] = HSTSEvaluation(
+            domain=domain,
+            hsts_policies=get_multiple_values_from_header(value),
+        )
 
     def get_positive_values(self):
-        return {
-            "hsts_enabled": True,
-            "hsts_policies": [],
-            "hsts_score": scoring.WEB_TLS_HSTS_GOOD,
-        }
+        return self.get_negative_values()
 
     def get_negative_values(self):
         return {
-            "hsts_enabled": False,
-            "hsts_policies": [],
-            "hsts_score": scoring.WEB_TLS_HSTS_BAD,
+            "hsts_result": HSTSEvaluation(),
         }
 
 
