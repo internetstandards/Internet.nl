@@ -1,6 +1,6 @@
 ARG CERTBOT_VERSION=5.6.0
 
-FROM nginx:1.31.2-alpine3.23
+FROM nginx:1.31.9-alpine3.23
 
 RUN apk upgrade --no-cache \
   # upgrade libexpat to match python3's pyexpat native module
