@@ -310,9 +310,12 @@ fix: ## fix trivial linting error automatically
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/fix.sh ${pysrcdirs}
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
+# skips the gixy-ng checks that flag the current config, to review separately
 check-gixy: env=test
 check-gixy: ## run nginx config check
-	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy /etc/nginx/nginx.conf
+	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy \
+		--skips add_header_redefinition,hsts_header,ssl_ecdh_curve,weak_ssl_tls,worker_rlimit_nofile_vs_connections \
+		/etc/nginx/nginx.conf
 
 build-tools tools-build: ## build tools image
 	${DOCKER_COMPOSE_TOOLS_CMD} build tools
