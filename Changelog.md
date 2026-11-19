@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.11.8
+
+- Update nginx to 1.31.9
+- 
 ## 1.11.7
 
 - Add articles about recent meetings.
