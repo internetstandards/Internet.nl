@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./mk-ca-bundle.pl -t -s SHA1 -d release -f
+./mk-ca-bundle.pl -t -s SHA1 -d beta -f
 perl -i'' -pe 's/[^[:ascii:]]//g' ca-bundle.crt
 
 echo "Extract SHA1 fingerprints"

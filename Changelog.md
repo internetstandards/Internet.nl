@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.11.8
+
+- Update nginx to 1.31.9
+- 
+## 1.11.7
+
+- Add articles about recent meetings.
+
+## 1.11.6
+
+- Removes trust in eMudhra certificates, following Mozilla trust store.
+
 ## 1.11.5
 
 - Switched the Celery worker executor pool from eventlet to gevent ([#2066](https://github.com/internetstandards/Internet.nl/issues/2066)).

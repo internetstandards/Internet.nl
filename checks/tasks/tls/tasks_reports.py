@@ -282,15 +282,18 @@ def save_results(model, results, addr, domain, category):
                     model.client_reneg_score = result.get("client_reneg_score")
                     model.zero_rtt = result.get("zero_rtt")
                     model.zero_rtt_score = result.get("zero_rtt_score")
-                    model.ocsp_stapling = result.get("ocsp_stapling")
-                    model.ocsp_stapling_score = result.get("ocsp_stapling_score")
                     model.kex_hash_func = result.get("kex_hash_func")
                     model.kex_hash_func_score = result.get("kex_hash_func_score")
                     model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
+                    model.pq_kex_support = result.get("pq_kex_support")
+                    model.pq_kex_supported_groups = result["pq_kex_supported_groups"]
+                    model.pq_kex_score = result.get("pq_kex_score")
 
             elif testname == "cert" and result.get("tls_cert"):
+                model.ocsp_stapling = result["ocsp_stapling"]
+                model.ocsp_stapling_score = result["ocsp_stapling_score"]
                 model.cert_chain = result.get("chain")
                 model.cert_trusted = result.get("trusted")
                 model.cert_trusted_score = result.get("trusted_score")
@@ -368,6 +371,9 @@ def save_results(model, results, addr, domain, category):
                     model.kex_hash_func_bad_hash = result.get("kex_hash_func_bad_hash")
                     model.extended_master_secret = result.get("extended_master_secret")
                     model.extended_master_secret_score = result.get("extended_master_secret_score")
+                    model.pq_kex_support = result.get("pq_kex_support")
+                    model.pq_kex_supported_groups = result["pq_kex_supported_groups"]
+                    model.pq_kex_score = result.get("pq_kex_score")
                 if result.get("tls_cert"):
                     model.cert_chain = result.get("chain")
                     model.cert_trusted = result.get("trusted")
@@ -594,6 +600,7 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
 
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
+            category.subtests["pq_kex_support"].save_result(dttls.pq_kex_support, dttls.pq_kex_supported_groups)
 
     elif isinstance(category, categories.MailTls):
         if dttls.could_not_test_smtp_starttls:
@@ -693,45 +700,47 @@ def build_report(dttls, category):
                 else:
                     category.subtests["cert_hostmatch"].result_good()
 
-            if dttls.caa_enabled:
-                caa_host_message = [
-                    TranslatableTechTableItem(msgid="found-host", context={"host": dttls.caa_found_on_domain}).to_dict()
-                ]
-            else:
-                caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
-            caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
-            for record in dttls.caa_records:
-                caa_tech_table.append(
-                    TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
-                )
-            if not dttls.caa_enabled:
-                category.subtests["mail_caa"].result_bad(caa_tech_table)
-            elif dttls.caa_errors:
-                if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
-                    category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
+                if dttls.caa_enabled:
+                    caa_host_message = [
+                        TranslatableTechTableItem(
+                            msgid="found-host", context={"host": dttls.caa_found_on_domain}
+                        ).to_dict()
+                    ]
                 else:
-                    category.subtests["mail_caa"].result_insufficient(caa_tech_table)
-            elif dttls.caa_recommendations:
-                category.subtests["mail_caa"].result_recommendations(caa_tech_table)
-            else:
-                category.subtests["mail_caa"].result_good(caa_tech_table)
-
-            if dttls.dane_status == DaneStatus.none:
-                category.subtests["dane_exists"].result_bad()
-            elif dttls.dane_status == DaneStatus.none_bogus:
-                category.subtests["dane_exists"].result_bogus()
-            else:
-                category.subtests["dane_exists"].result_good(dttls.dane_records)
-
-                if dttls.dane_status == DaneStatus.validated:
-                    category.subtests["dane_valid"].result_good()
-                elif dttls.dane_status == DaneStatus.failed:
-                    category.subtests["dane_valid"].result_bad()
-
-                if dttls.dane_rollover:
-                    category.subtests["dane_rollover"].result_good()
+                    caa_host_message = [TranslatableTechTableItem(msgid="not-found").to_dict()]
+                caa_tech_table = caa_host_message + dttls.caa_errors + dttls.caa_recommendations
+                for record in dttls.caa_records:
+                    caa_tech_table.append(
+                        TranslatableTechTableItem(msgid="caa-record", context={"record": record}).to_dict()
+                    )
+                if not dttls.caa_enabled:
+                    category.subtests["mail_caa"].result_bad(caa_tech_table)
+                elif dttls.caa_errors:
+                    if all([error["msgid"] != CAA_MSGID_INSUFFICIENT_POLICY for error in dttls.caa_errors]):
+                        category.subtests["mail_caa"].result_syntax_error(caa_tech_table)
+                    else:
+                        category.subtests["mail_caa"].result_insufficient(caa_tech_table)
+                elif dttls.caa_recommendations:
+                    category.subtests["mail_caa"].result_recommendations(caa_tech_table)
                 else:
-                    category.subtests["dane_rollover"].result_bad()
+                    category.subtests["mail_caa"].result_good(caa_tech_table)
+
+                if dttls.dane_status == DaneStatus.none:
+                    category.subtests["dane_exists"].result_bad()
+                elif dttls.dane_status == DaneStatus.none_bogus:
+                    category.subtests["dane_exists"].result_bogus()
+                else:
+                    category.subtests["dane_exists"].result_good(dttls.dane_records)
+
+                    if dttls.dane_status == DaneStatus.validated:
+                        category.subtests["dane_valid"].result_good()
+                    elif dttls.dane_status == DaneStatus.failed:
+                        category.subtests["dane_valid"].result_bad()
+
+                    if dttls.dane_rollover:
+                        category.subtests["dane_rollover"].result_good()
+                    else:
+                        category.subtests["dane_rollover"].result_bad()
 
             if dttls.zero_rtt == ZeroRttStatus.good:
                 category.subtests["zero_rtt"].result_good()
@@ -758,6 +767,7 @@ def build_report(dttls, category):
                 category.subtests["kex_hash_func"].result_phase_out(dttls.kex_hash_func_bad_hash)
 
             category.subtests["extended_master_secret"].save_result(dttls.extended_master_secret)
+            category.subtests["pq_kex_support"].save_result(dttls.pq_kex_support, dttls.pq_kex_supported_groups)
 
     dttls.report = category.gen_report()
 

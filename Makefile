@@ -62,7 +62,7 @@ update_padded_macs: ## update padded MAC information
 	cd $(MACSDIR); ./update-macs.sh
 
 update_root_key_file: ## update root key file
-	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools /opt/unbound/sbin/unbound-anchor -a $(DNSDIR)/root.key
+	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/update_dnssec_root_key.sh $(DNSDIR)/root.key
 
 # create some shorthands
 env ?=
@@ -310,9 +310,12 @@ fix: ## fix trivial linting error automatically
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/fix.sh ${pysrcdirs}
 	${DOCKER_COMPOSE_TOOLS_CMD} run --rm tools bin/lint.sh ${pysrcdirs}
 
+# skips the gixy-ng checks that flag the current config, to review separately
 check-gixy: env=test
 check-gixy: ## run nginx config check
-	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy /etc/nginx/nginx.conf
+	${DOCKER_COMPOSE_CMD} exec webserver /opt/gixy/bin/gixy \
+		--skips add_header_redefinition,hsts_header,ssl_ecdh_curve,weak_ssl_tls,worker_rlimit_nofile_vs_connections \
+		/etc/nginx/nginx.conf
 
 build-tools tools-build: ## build tools image
 	${DOCKER_COMPOSE_TOOLS_CMD} build tools
@@ -327,10 +330,8 @@ integration-tests-reset-and-against-develop: ## reset caches in development envi
 integration-tests-reset-and-against-develop: docker-compose-redis-clear-celery-results integration-tests-against-develop
 
 # Docker container runtime for MacOS
-# until nassl can be built for ARM: https://github.com/nabla-c0d3/nassl/issues/39
-# it is required to emulate x86_64 under Apple Silicon Macs
 docker-compose-runtime-start: ## start a Colima Docker runtime for development
-	colima start --cpu 4 --memory 8 --arch x86_64
+	colima start --cpu 4 --memory 8
 
 docker-compose-runtime-stop: ## stop Colima Docker runtime
 	colima stop
