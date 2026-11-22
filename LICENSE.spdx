@@ -40,3 +40,52 @@ FileType: TEXT
 LicenseConcluded: CC-BY-4.0
 LicenseInfoInFile: LICENSE-CC-BY-4.0.txt
 FileCopyrightText: <text>2022, ECP, NLnet Labs and the Internet.nl contributors</text>
+
+FileName: ./interface/static/fonts/montserrat-400.woff2
+SPDXID: SPDXRef-FontMontserrat400
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Montserrat Project Authors</text>
+
+FileName: ./interface/static/fonts/montserrat-500.woff2
+SPDXID: SPDXRef-FontMontserrat500
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Montserrat Project Authors</text>
+
+FileName: ./interface/static/fonts/montserrat-600.woff2
+SPDXID: SPDXRef-FontMontserrat600
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Montserrat Project Authors</text>
+
+FileName: ./interface/static/fonts/montserrat-700.woff2
+SPDXID: SPDXRef-FontMontserrat700
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Montserrat Project Authors</text>
+
+FileName: ./interface/static/fonts/roboto-400.woff2
+SPDXID: SPDXRef-FontRoboto400
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Roboto Project Authors</text>
+
+FileName: ./interface/static/fonts/roboto-500.woff2
+SPDXID: SPDXRef-FontRoboto500
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Roboto Project Authors</text>
+
+FileName: ./interface/static/fonts/roboto-700.woff2
+SPDXID: SPDXRef-FontRoboto700
+FileType: BINARY
+LicenseConcluded: OFL-1.1
+LicenseInfoInFile: interface/static/fonts/OFL.txt
+FileCopyrightText: <text>2011, The Roboto Project Authors</text>

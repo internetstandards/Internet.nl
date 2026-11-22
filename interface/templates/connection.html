@@ -1,26 +1,25 @@
 {% extends "base-probe.html" %}
+{% load translate %}
 {% load static %}
 
 {% block scripting %}
-  <script type="text/javascript" src="{% static 'js/internetnl.connection-min.js' %}"></script>
+  <script type="module" src="{% static 'js/connection-min.js' %}"></script>
 {% endblock %}
 
 {% block testtitle %}
-{% include "string.html" with name="connection title" %}
+{% translate "connection title" %}
 {% endblock %}
 
 {% block maincontent %}
-<div class="hidethis" aria-hidden="true">
-  <span id="conn-test-domain">{{conn_test_domain|safe}}</span>
-  <span id="ipv6-test-addr">{{ipv6_test_addr}}</span>
+<div hidden>
+  <span id="conn-test-domain">{{ conn_test_domain }}</span>
+  <span id="ipv6-test-addr">{{ ipv6_test_addr }}</span>
 </div>
 {{block.super}}
 {% endblock %}
 
 {% block probesnojs %}
-<li class="jsless">
-  <a href="/" id="continue" class="connforward">
-    {% include "string.html" with name="probes no-javascript-connection" %}
-  </a>
-</li>
+<noscript>
+  <p>{% translate "probes no-javascript-connection" %}</p>
+</noscript>
 {% endblock %}

@@ -1,24 +1,67 @@
-{% extends "base.html" %}
+{% extends "textpage.html" %}
 {% load static %}
 {% load translate %}
 
+{% block scripting %}
+  <script type="module" src="{% static 'js/components/carousel-min.js' %}"></script>
+{% endblock %}
+
 {% block maincontent %}
-  <article class="block wide">
-    <section>
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about content" %}
-      {% else %}
-      {% include "content.html" with name="about content custom" %}
-      {% endif %}
+  {% if "INTERNETNL_BRANDING"|get_settings_value %}
+    <section class="intro-section bg-primary ellipse reverse">
+      <div class="container">
+        <hgroup class="center">
+          <h1 class="h5 color-secondary">{% translate "base about" %}</h1>
+          <p class="h1 color-secondary">{% translate "home teaser" %}</p>
+          <p class="body-xl color-secondary">{% translate "about intro" %}</p>
+        </hgroup>
+      </div>
     </section>
-  </article>
-  <aside>
-    <section class="block">
-      {% if "INTERNETNL_BRANDING"|get_settings_value %}
-      {% include "content.html" with name="about contact" %}
-      {% else %}
-      {% include "content.html" with name="about contact custom" %}
-      {% endif %}
+
+    {% include "partials/about-platform.html" with variant="home-variant" %}
+
+    <section class="article-content-section about-organisation">
+      <div class="container">
+        <h2 class="h3 color-secondary">{% translate "about organisation title" %}</h2>
+        {% translate "about organisation" %}
+        <h3 class="h4 color-secondary">{% translate "about practice title" %}</h3>
+        <p>{% translate "about practice" %}</p>
+      </div>
     </section>
-  </aside>
+
+    <aside class="quote-section bg-primary ellipse reverse">
+      <div class="container">
+        <img src="{% static 'author/gerben-klein-baltink/picture.jpg' %}" alt="" class="quote-image" loading="lazy" width="100" height="100">
+        <blockquote>
+          <p class="h4 color-secondary">{% translate "about quote" %}</p>
+          <cite class="body-m color-secondary"><strong>{% translate "author gerben-klein-baltink name" %}</strong> - {% translate "author gerben-klein-baltink role" %}</cite>
+        </blockquote>
+      </div>
+    </aside>
+
+    <section class="contact-section alt">
+      <div class="container">
+        <h2 class="h3 color-secondary">{% translate "about standards title" %}</h2>
+        {% numbered_keys "about standards question-{}" as numbers %}
+        {% for i in numbers %}
+          {% expand "about standards question-{{ i }}" as question %}
+          {% expand "about standards answer-{{ i }}" as answer %}
+          <details class="faq-item accordion" name="about-standards">
+            <summary class="icon">{% translate question %}</summary>
+            <div>{% translate answer %}</div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% include "partials/why-carousel.html" %}
+    {% include "partials/faq-contact.html" %}
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
+{% block textcontent %}
+  {% include "content.html" with name="about content custom" %}
+  {% include "content.html" with name="about contact custom" %}
 {% endblock %}

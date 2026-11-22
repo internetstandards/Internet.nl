@@ -1,10 +1,35 @@
 {% extends "base.html" %}
+{% load translate %}
 
 {% block maincontent %}
-  <article class="block wide">
-    <section>
-      <h1>{% include "string.html" with name="faqs title" %}</h1>
-      {% include "content.html" with name="faqs content" %}
+  <section class="intro-section bg-primary ellipse reverse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">{% translate "faqs title" %}</h1>
+        <p class="h1 color-secondary">{% translate "faqs description" %}</p>
+      </hgroup>
+    </div>
+  </section>
+
+  {% for category, articles in categories %}
+    <section class="card-section">
+      <div class="container">
+        <h2 class="h2 color-secondary">{% translate category %}</h2>
+        <ul class="card-list">
+          {% for url, title in articles %}
+            <li class="card knowledge-card ellipse">
+              <a href="{{ url }}">
+                <hgroup>
+                  <h3>{% translate title %}</h3>
+                </hgroup>
+                <div class="secondary-button rounded icon"></div>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     </section>
-  </article>
+  {% endfor %}
+
+  {% include "partials/faq-contact.html" %}
 {% endblock %}

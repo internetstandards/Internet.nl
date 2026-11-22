@@ -2,5 +2,6 @@ User-agent: *
 Disallow: /domain/
 Disallow: /site/
 Disallow: /mail/
+Disallow: /connection/
 Disallow: /statistics/
 Disallow: /stats/

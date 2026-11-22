@@ -62,7 +62,7 @@ def test_index_http_ok(page, app_url_subdomain):
 )
 def test_index_footer_text_present(page, app_url, footer_text):
     page.goto(app_url)
-    footer = page.locator("#footer")
+    footer = page.locator("footer")
 
     assert footer_text in footer.text_content()
 
@@ -98,9 +98,9 @@ def test_generated_css_static_files(page, app_url_subdomain):
 
 
 def test_generated_js_static_files(page, app_url_subdomain):
-    response = page.request.get(app_url_subdomain + "/static/js/menu-min.js")
+    response = page.request.get(app_url_subdomain + "/static/js/theme-init-min.js")
     expect(response).to_be_ok()
-    assert "hideMenuButton" in response.text()
+    assert "theme=" in response.text()
     assert "expires" in response.headers
 
 
@@ -182,32 +182,31 @@ def test_conn_over_https_no_hsts(app_domain):
 
 
 @pytest.mark.parametrize(
-    ("from_language", "button_text", "to_language", "footer_text"),
+    ("from_language", "button_text", "to_language", "text"),
     [("nl", "English", "en", LANGUAGE_CHANGE_TEXT_EN), ("en", "Nederlands", "nl", LANGUAGE_CHANGE_TEXT_NL)],
 )
-def test_change_language(page, app_domain, from_language, button_text, to_language, footer_text):
+def test_change_language(page, app_domain, from_language, button_text, to_language, text):
     """Test clicking the language change button."""
 
     page.goto(f"https://{from_language}.{app_domain}")
-    page.locator(f'#language-switch-header-container button:text("{button_text}")').click()
+    page.locator("#toggle-subnav-language").click()
+    page.locator(f'#nav-sublist-language button:text("{button_text}")').click()
     page.wait_for_url(f"https://{to_language}.internet.test/")
 
-    footer = page.locator("#content")
-    assert footer_text in footer.text_content()
+    assert text in page.locator("#main-content").text_content()
 
 
 @pytest.mark.parametrize(
-    ("language", "footer_text"),
+    ("language", "text"),
     [("en", LANGUAGE_CHANGE_TEXT_EN), ("nl", LANGUAGE_CHANGE_TEXT_NL)],
 )
-def test_accept_language_header(page, app_domain, language, footer_text):
+def test_accept_language_header(page, app_domain, language, text):
     """Browser preferred language should be respected."""
 
     page.set_extra_http_headers({"Accept-Language": language})
     page.goto(f"https://{app_domain}")
 
-    footer = page.locator("#content")
-    assert footer_text in footer.text_content()
+    assert text in page.locator("#main-content").text_content()
 
 
 def test_cron_postgres_backups(trigger_cron, docker_compose_exec):

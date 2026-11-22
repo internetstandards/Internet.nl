@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load translate %}
+
+{% block maincontent %}
+  <section class="intro-section bg-primary ellipse">
+    <div class="container">
+      <hgroup class="center">
+        <h1 class="h5 color-secondary">{% translate "base contact" %}</h1>
+        <p class="h1 color-secondary">{% translate "contact teaser" %}</p>
+      </hgroup>
+    </div>
+  </section>
+
+  {% include "partials/faq-contact.html" with alt=True %}
+
+  <section class="faq-sub-section bg-primary">
+    <div class="container">
+      <h2 class="h2 color-secondary">{% translate "contact get-in-touch" %}</h2>
+      {% include "partials/contact-cards.html" %}
+    </div>
+  </section>
+{% endblock %}

@@ -65,13 +65,8 @@ the effects of your edits.
 
 ## CSS
 
-CSS customization is not there yet. The logic is there but we still need to
-export all the used styles for easier configuration.
+Colours, fonts and other design tokens are CSS variables in
+`frontend/src/css/variables.css`, the other styles are in `frontend/src/css/`.
 
-For now you can change the CSS files under `frontend/css/`.
-
-Make sure that you run
-```
-make frontend css
-```
-to generate minified versions ready for deployment.
+The Docker image build compiles and minifies the CSS and JavaScript, and in
+`make develop` they are rebuilt when files under `frontend/src/` change.
