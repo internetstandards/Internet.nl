@@ -111,10 +111,12 @@ def _evaluate_response(
 
     if status == 200 and path != SECURITYTXT_EXPECTED_PATH:
         errors.append({"msgid": "location"})
-    if status == 200 and redirects and any(
-        urlparse(redirect.next.url).scheme != "https" for redirect in redirects
-    ):
-        errors.append({"msgid": "invalid_uri_scheme"})
+    if status == 200 and redirects:
+        urls = [redirect.url for redirect in redirects[1:]]
+        if found_url:
+            urls.append(found_url)
+        if any(urlparse(url).scheme != "https" for url in urls):
+            errors.append({"msgid": "invalid_uri_scheme"})
 
     return SecuritytxtRetrieveResult(
         found=status == 200,
