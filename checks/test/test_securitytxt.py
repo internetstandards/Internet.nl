@@ -245,8 +245,13 @@ def test_evaluate_redirect_scheme():
     ]
     for history, final_url, status, insecure in cases:
         result = _evaluate_response(
-            status, "text/plain", "example.com", SECURITYTXT_EXPECTED_PATH,
-            b"content", "example.net", final_url,
+            status,
+            "text/plain",
+            "example.com",
+            SECURITYTXT_EXPECTED_PATH,
+            b"content",
+            "example.net",
+            final_url,
             [SimpleNamespace(url=url) for url in history],
         )
         assert ({"msgid": "invalid_uri_scheme"} in result.errors) == insecure
