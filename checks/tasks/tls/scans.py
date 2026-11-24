@@ -78,6 +78,7 @@ from checks.tasks.tls.evaluation import (
     TLSExtendedMasterSecretEvaluation,
     TLSPqKexEvaluation,
 )
+from checks.tasks.tls.group_probe import include_weak_tls12_groups
 from checks.tasks.tls.tls_constants import (
     CERT_SIGALG_SUFFICIENT,
     CERT_SIGALG_PHASE_OUT,
@@ -608,7 +609,11 @@ def check_mail_tls(
     ciphers_accepted = find_accepted_ciphers(server_conn_info, supported_tls_versions)
 
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
-    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
+    fs_evaluation = include_weak_tls12_groups(
+        TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted),
+        server_conn_info,
+        supported_tls_versions,
+    )
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
 
     cipher_order_evaluation = test_cipher_order(
@@ -758,7 +763,11 @@ def check_web_tls(url, af_ip_pair=None, *args, **kwargs):
     ciphers_accepted = find_accepted_ciphers(server_conn_info, supported_tls_versions)
 
     protocol_evaluation = TLSProtocolEvaluation.from_protocols_accepted(supported_tls_versions)
-    fs_evaluation = TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted)
+    fs_evaluation = include_weak_tls12_groups(
+        TLSForwardSecrecyParameterEvaluation.from_ciphers_accepted(ciphers_accepted),
+        server_conn_info,
+        supported_tls_versions,
+    )
     cipher_evaluation = TLSCipherEvaluation.from_ciphers_accepted(ciphers_accepted)
     cipher_order_evaluation = test_cipher_order(
         server_conn_info,
