@@ -1,6 +1,8 @@
 # Copyright: 2019, NLnet Labs and the Internet.nl contributors
 # SPDX-License-Identifier: Apache-2.0
 
+from types import SimpleNamespace
+
 from checks import scoring
 from checks.tasks.securitytxt import (
     SecuritytxtRetrieveResult,
@@ -230,3 +232,26 @@ def test_evaluate_securitytxt():
             {"msgid": "unknown_field", "context": {"line_no": 4}},
         ],
     }
+
+
+def test_evaluate_redirect_scheme():
+    requested = "https://example.com/.well-known/security.txt"
+    cases = [
+        ([requested], "https://example.net/security.txt", 200, False),
+        ([requested], "http://example.net/security.txt", 200, True),
+        ([requested, "https://example.net/redirect"], "https://example.net/security.txt", 200, False),
+        ([requested, "http://example.net/redirect"], "https://example.net/security.txt", 200, True),
+        ([requested, "http://example.net/redirect"], "https://example.net/security.txt", 404, False),
+    ]
+    for history, final_url, status, insecure in cases:
+        result = _evaluate_response(
+            status,
+            "text/plain",
+            "example.com",
+            SECURITYTXT_EXPECTED_PATH,
+            b"content",
+            "example.net",
+            final_url,
+            [SimpleNamespace(url=url) for url in history],
+        )
+        assert ({"msgid": "invalid_uri_scheme"} in result.errors) == insecure
