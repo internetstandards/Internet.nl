@@ -1,9 +1,13 @@
 # Change Log
 
+## 1.11.9
+
+- Replace Cymru with RISwhois for IP->ASN in RPKI test ([#1941](https://github.com/internetstandards/Internet.nl/issues/1941)).
+
 ## 1.11.8
 
 - Update nginx to 1.31.9
-- 
+
 ## 1.11.7
 
 - Add articles about recent meetings.
