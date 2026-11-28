@@ -1,0 +1,13 @@
+server_name ${SMTP_EHLO_DOMAIN};
+auth_http http://${SMTP_AUTH_HTTP_ENDPOINT}/;
+
+starttls only;
+
+include conf.d/tls.conf;
+
+server {
+    listen        25;
+    listen   [::]:25;
+    protocol smtp;
+    smtp_capabilities "SIZE 1099511627776" ENHANCEDSTATUSCODES 8BITMIME DSN SMTPUTF8 REQUIRETLS;
+}
